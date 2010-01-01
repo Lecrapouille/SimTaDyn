@@ -1,0 +1,4 @@
+Install Ubuntu libraries needed for compiling SimTaDyn:
+
+sudo apt-get install freeglut3 freeglut3-dev mesa-common-dev libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev libglu1-mesa-dev
+
