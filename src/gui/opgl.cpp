@@ -45,7 +45,7 @@ void GlDrawingArea::on_realize()
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
 
-add_events(Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
+  add_events(Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
 
   windowGL->gl_begin(get_gl_context());
 
@@ -63,7 +63,10 @@ add_events(Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_
 
   windowGL->gl_end();
 
-  getCamera2D().moveAt(300, 300);
+  loader.loadShapefile("../data/3dpoints.shp", graph);
+  std::cout << std::endl << "Il y a " << SimTaDynNode::howMany() << " nodes" << std::endl;
+  Position3D& p = graph.getNode(1)->getPosition();
+  getCamera2D().moveAt(p.x, p.y);
 
   // Draw regurlary
   Glib::signal_idle().connect(sigc::mem_fun(*this, &GlDrawingArea::onIdle));
@@ -113,20 +116,14 @@ bool GlDrawingArea::onIdle()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
 
-  glPushMatrix();
-  glTranslated(300.0f, 300.0f, 0.0f);
-  glRecti(5.0f, -5.0f, -5.0f, 5.0f);
-  glPopMatrix();
-
-  glPushMatrix();
-  glTranslated(10.0f, 10.0f, 0.0f);
-  glRecti(5.0f, -5.0f, -5.0f, 5.0f);
-  glPopMatrix();
-
-  glPushMatrix();
-  glTranslated(1.0f, 1.0f, 0.0f);
-  glRecti(5.0f, -5.0f, -5.0f, 5.0f);
-  glPopMatrix();
+  for (Key i = 1; i <= (Key) SimTaDynNode::howMany(); ++i)
+    {
+      Position3D& p = graph.getNode(i)->getPosition();
+      glPushMatrix();
+      glTranslated(p.x, p.y, 0.0f);
+      glRecti(1.0f, -1.0f, -1.0f, 1.0f);
+      glPopMatrix();
+    }
 
   windowGL->gl_end();
   windowGL->swap_buffers();
@@ -169,42 +166,24 @@ bool GlDrawingArea::onTimeout()
   return true;
 }
 
-#define                 MIN_SCALE                       0.05
-
 // Mouse wheel event detected : update scale
 bool GlDrawingArea::on_scroll_event(GdkEventScroll *event)
 {
-  double delta_y;
+  float32_t delta_scroll;
 
-  // Compute the new scale according to mouse scroll
+#if 1 // gtkmm-2.4
   if (GDK_SCROLL_UP == event->direction)
-    delta_y = -0.1;
+    delta_scroll = -0.1;
   else if (GDK_SCROLL_DOWN == event->direction)
-    delta_y = 0.1;
+    delta_scroll = 0.1;
   else
     return false;
+#else // gtkmm-3.0
+  delta_scroll = event->delta_y;
+#endif
 
-  // gtkmm-3.0 double newScale = scale * (1 - event-/delta_y / 20);
-  double newScale = scale * (1 - delta_y);
-  if (newScale < MIN_SCALE)
-    newScale = MIN_SCALE;
-
-  std::cout << "Zoom scrolling: " << delta_y << " " << newScale << std::endl;
-
-  // Update the center of the image
-  double DeltaX = event->x - getScreenWidth() / 2.0;
-  double DeltaY = event->y - getScreenHeight() / 2.0;
-  imgFocusX = imgFocusX + DeltaX / scale - DeltaX / newScale;
-  imgFocusY = imgFocusY + DeltaY / scale - DeltaY / newScale;
-
-  // Update scale and redraw the widget
-  scale = newScale;
-
-  // Event has been handled
-  Camera2D& camera = getCamera2D();
-  //camera.moveAt(imgFocusX, imgFocusY);
-  camera.setZoom(newScale);
-  applyViewport(camera);
-
+  getCamera2D().zoomScrollAt(event->x, event->y, delta_scroll,
+                             getScreenWidth(), getScreenHeight());
+  applyViewport();
   return true;
 }

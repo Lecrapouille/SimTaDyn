@@ -1,5 +1,22 @@
 #include "camera2D.hpp"
 
+void Camera2D::fitImage(float32_t window_width, float32_t window_height, float32_t image_width, float32_t image_height)
+{
+  // Compute ratio of the window and the image
+  float32_t winRatio = (float32_t) window_width / window_height;
+  float32_t imgRatio = (float32_t) image_width / image_height;
+  float32_t zoom;
+
+  // Check what is the best fit for the image according to the ratio
+  if (imgRatio < winRatio)
+    zoom = (float32_t) window_height / image_height;
+  else
+    zoom = (float32_t) window_width / image_width;
+
+  // The focus is on the center of the image
+  zoomAt(image_width / 2.0, image_height / 2.0, zoom);
+}
+
 const float32_t* Camera2D::getTransform()
 {
   // Rotation components

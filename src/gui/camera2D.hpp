@@ -3,6 +3,8 @@
 
 #  include "../simtypes.hpp"
 
+#  define MIN_ZOOM (0.05f)
+
 class Camera2D
 {
 public:
@@ -90,18 +92,47 @@ public:
   }
   void setZoom(float32_t factor)
   {
-    zoom_ = factor;
+    if (factor < MIN_ZOOM)
+      {
+        zoom_ = MIN_ZOOM;
+      }
+    else
+      {
+        zoom_ = factor;
+      }
     look_at_width_ = look_at_orig_width_ * zoom_;
     look_at_height_ = look_at_orig_height_ * zoom_;
+  }
+  void zoomScrollAt(float32_t x, float32_t y, float32_t delta_scroll, float32_t width, float32_t height)
+  {
+    float32_t new_zoom = zoom_ * (1.0f - delta_scroll);
+    if (new_zoom < MIN_ZOOM)  new_zoom = MIN_ZOOM;
+    std::cout << "New Zoom " << new_zoom << std::endl;
+
+    float32_t delta_x = x - (width / 2.0f);
+    look_at_x_ = look_at_x_ + (delta_x / zoom_) - (delta_x / new_zoom);
+
+    float32_t delta_y = y - (height / 2.0f);
+    look_at_y_ = look_at_y_ + (delta_y / zoom_) - (delta_y / new_zoom);
+
+    zoom_ = new_zoom;
+    look_at_width_ = look_at_orig_width_ * zoom_;
+    look_at_height_ = look_at_orig_height_ * zoom_;
+  }
+  void zoomAt(float32_t x, float32_t y, float32_t factor)
+  {
+    moveAt(x, y);
+    setZoom(zoom_ + factor);
   }
   void zoom(float32_t factor)
   {
     setZoom(zoom_ + factor);
   }
-  void getZoom(float32_t& factor)
+  float32_t getZoom()
   {
-    factor = zoom_;
+    return zoom_;
   }
+  void fitImage(float32_t window_width, float32_t window_height, float32_t image_width, float32_t image_height);
   const float32_t* getTransform();
 
   //private:

@@ -12,8 +12,8 @@
 #  include <exception>
 #  include <iostream>
 
-# include "renderer.hpp"
-# include "mouse.hpp"
+#  include "renderer.hpp"
+#  include <shapefile.hpp>
 
 // *************************************************************************************************
 // Exception
@@ -34,11 +34,14 @@ public:
 // *************************************************************************************************
 class GlDrawingArea: public Gtk::DrawingArea,
                      public Gtk::GL::Widget<GlDrawingArea>,
-                     public Renderer, public Mouse
+                     public Renderer
 {
 public:
   GlDrawingArea();
   virtual ~GlDrawingArea() {};
+
+  ShapefileLoader loader;
+  SimTaDynGraph graph;
 
   // Movement in the world
   enum Direction { Forward, Backward, Up, Down, Right, Left, no_};
