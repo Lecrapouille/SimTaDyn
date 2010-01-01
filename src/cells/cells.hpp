@@ -165,6 +165,7 @@ public:
   virtual void removeExplicitNeighbor(SimTaDynCell *c) { explicit_neighbors.insert(c); }
   //virtual void addImplicitNeighbor(SimTaDynCell *c) { implicit_neighbors.insert(c); }
   virtual void moveToPosition(const Position3D& p) = 0;
+  virtual Position3D& getPosition() = 0;
 
   /*
    * Debug
@@ -242,10 +243,15 @@ public:
       }
   }
 
+  Position3D& getPosition() // FIXME: const
+  {
+    return position_;
+  }
+
   /*
    * Debug
    */
-  uint32_t whoAmI()
+  Key whoAmI()
   {
     cout << "I am the SimTaDynNode #" << id_ << " named \"" << name << "\":" << endl;
     return id_;
@@ -328,7 +334,7 @@ public:
       }
   }
 
-  uint32_t WhoAmI()
+  Key WhoAmI()
   {
     cout << "I am the SimTaDynArc #" << id << " Named " << Name << endl;
     return id;
@@ -375,6 +381,7 @@ public:
   string getName() { return name_; }
   void setName(string name) { name_ = name; }
   SimTaDynGraph(string name) { name_ = name; }
+  SimTaDynGraph() { name_ = ""; }
   ~SimTaDynGraph() { }
 
   void addNode(string name, const Position3D& position, string code_forth)
@@ -395,14 +402,14 @@ public:
     nodes_.insert(make_pair(node->privateId(), node));
   }
 
-  SimTaDynCell* getNode(const Key& id)
+  SimTaDynCell* getNode(const Key& id) // FIXME &
   {
     //std::set<SimTaDynCell*>::iterator it;
 
     auto it = nodes_.find(id);
     if (it == nodes_.end())
       {
-        throw std::out_of_range("getNode(const Key& id): SimTaDynNode not found in the graph");
+        throw std::out_of_range("getNode(const Key& id): SimTaDynNode " + to_string(id) + " not found in the graph");
       }
     return it->second;
   }

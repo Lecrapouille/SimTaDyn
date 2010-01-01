@@ -2,6 +2,7 @@
 #  define TYPES_HPP_
 
 #  include "handler.hpp"
+#  include "../simtypes.hpp"
 
 using namespace std;
 

@@ -21,11 +21,14 @@ int32_t ShapefileLoader::readLittleEndianInt()
 
 float64_t ShapefileLoader::readDouble()
 {
-  char buf[8];
+  union {
+    char buf[8];
+    float64_t value;
+  } u;
   float64_t convert;
 
-  infile_.read(buf, 8);
-  convert = *reinterpret_cast<double * const>(buf);
+  infile_.read(u.buf, 8);
+  convert = u.value;
   return convert;
 }
 
