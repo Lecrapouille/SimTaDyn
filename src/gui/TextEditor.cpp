@@ -513,7 +513,9 @@ void TextEditor::newLoadedDocument(std::string const& filename)
   m_notebook.append_page(*doc, doc->m_button);
   m_notebook.show_all();
   m_notebook.set_current_page(-1);
+  // FIXME: mettre en gris le fond si le document est en read-only
 }
+
 // *************************************************************************************************
 //
 // *************************************************************************************************
@@ -523,7 +525,7 @@ void TextEditor::saveCurrentDocument()
 
   if (nullptr != doc)
     {
-      if (0 == doc->m_filename.compare(""))
+      if (0 == doc->m_filename.compare("")) // FIXME || read-only(file)
         {
           TextEditor::saveAs(doc);
         }

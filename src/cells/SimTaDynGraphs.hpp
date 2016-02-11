@@ -4,9 +4,12 @@
 #  include "SimTaDynCells.hpp"
 #  include "RTree.hpp"
 
+// FIXME: changer nom ou alors SimTaDynMap = { SimTaDynGraph + RTree + Forth }
 class SimTaDynGraph: private ClassCounter<SimTaDynGraph>
 {
 public:
+// FIXME: SimForth m_forth;
+
   /*
    * Give a name to the element which will be displayed in the GUI.
    * Contrary to id_ several cells can have the same name. By default

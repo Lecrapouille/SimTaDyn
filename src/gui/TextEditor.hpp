@@ -77,6 +77,7 @@ protected:
   Gtk::TextView m_textview;
   CloseLabel m_button;
   std::string m_filename;
+  // FIXME: mode interactif ==> ne pas sauvegarder
 };
 
 // *************************************************************************************************

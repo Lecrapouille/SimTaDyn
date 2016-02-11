@@ -6,9 +6,11 @@
 // *************************************************************************************************
 GlDrawingArea::GlDrawingArea(): Gtk::DrawingArea()
 {
-  std::cout << "GlDrawingArea::GlDrawingArea()\n";
   // No movement
-  for (size_t i = 0; i < no_; ++i) direction_[i] = false;
+  for (size_t i = 0; i < no_; ++i)
+    {
+      direction_[i] = false;
+    }
 
   // OpenGL Configuration
   Glib::RefPtr<Gdk::GL::Config> configuration;
@@ -41,14 +43,14 @@ GlDrawingArea::GlDrawingArea(): Gtk::DrawingArea()
 // *************************************************************************************************
 void GlDrawingArea::on_realize()
 {
-  std::cout << "GlDrawingArea::on_realize()\n";
   Gtk::Widget::on_realize();
   if (!create_gl_context()) throw ErrorGlDrawingArea();
 
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
 
-  add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
+  add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK |
+             Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
 
   windowGL->gl_begin(get_gl_context());
 
@@ -72,7 +74,6 @@ void GlDrawingArea::on_realize()
 // *************************************************************************************************
 bool GlDrawingArea::on_expose_event(GdkEventExpose* event)
 {
-  std::cout << "GlDrawingArea::on_expose_event()\n";
   const SimTaDynContext& simtadyn = SIMTADYN();
   Renderer::zoomFitPage(simtadyn.m_graph);
   Renderer::applyViewport();
@@ -170,7 +171,6 @@ bool GlDrawingArea::on_scroll_event(GdkEventScroll *event)
   else
     return false;
 #endif
-
 
   Renderer::getCamera2D().zoomAt(event->x, event->y, delta_scroll);
   Renderer::applyViewport();

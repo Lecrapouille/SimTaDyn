@@ -18,7 +18,7 @@ class ErrorGlDrawingArea: public std::exception
 public:
   ErrorGlDrawingArea() throw () {}
   ~ErrorGlDrawingArea() throw () {}
-  virtual const char* what () const throw ()
+  virtual const char* what() const throw ()
   {
     return "Error from OpenGL during the config or context";
   }
