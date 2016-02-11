@@ -14,17 +14,11 @@ bool SimTaDynWindow::quitting()
 // SimTaDyn main window
 // *************************************************************************************************
 SimTaDynWindow::SimTaDynWindow(const std::string& title)
-  : Gtk::Window(),
-    m_fortheditor(m_textview[0], m_statusbar[0], m_textview[1], false)
+  : Gtk::Window()
 {
-#warning "Bug: constructor tres tres lent"
-  std::cout << "SimTaDynWindow::SimTaDynWindow\n";
   set_title(title);
   set_default_size(1024, 800);
   set_position(Gtk::WIN_POS_CENTER);
-
-  // FIXME: m_simForth qui contient un bout de fenetre menu/notebook/statusbar ...
-  // comme ca on pourra detacher et ajouter de nouvelles fenetres ?
 
   // Menus:
   // * _Map: Import/export/save/load/... geographic maps.
@@ -38,7 +32,17 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Help", m_menu[3]));
   }
 
-  // Submenus 'Forth'
+  // Submenus '_Map'
+  {
+  }
+
+  // Map toolbar:
+  {
+    //m_toolbar[MapToolbar].append(m_toolbutton[0]);
+    //m_toolbar[MapToolbar].append(m_separator[0]);
+  }
+
+  // Submenus '_Forth'
   {
     Gtk::Menu::MenuList& menulist = m_menu[1].items();
 
@@ -75,12 +79,6 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
        m_menuimage[5], sigc::mem_fun(m_fortheditor, &ForthEditor::find)));
   }
 
-  // Map toolbar
-  {
-    //m_toolbar[0].append(m_toolbutton[0]);
-    //m_toolbar[0].append(m_separator[0]);
-  }
-
   // Forth toolbar
   {
     m_toolbutton[0].set_label("New");
@@ -89,63 +87,44 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     m_toolbutton[1].set_label("Exec");
     m_toolbutton[1].set_stock_id(Gtk::Stock::EXECUTE);
 
-    m_toolbar[1].append(m_toolbutton[0], sigc::mem_fun(m_fortheditor, &ForthEditor::newDocument));
-    m_toolbar[1].append(m_separator[1]);
-    m_toolbar[1].append(m_toolbutton[1], sigc::mem_fun(m_fortheditor, &ForthEditor::execForth));
+    m_toolbar[ForthToolbar].append(m_toolbutton[0], sigc::mem_fun(m_fortheditor, &ForthEditor::newDocument));
+    m_toolbar[ForthToolbar].append(m_separator[1]);
+    m_toolbar[ForthToolbar].append(m_toolbutton[1], sigc::mem_fun(m_fortheditor, &ForthEditor::execForth));
   }
 
-  // Horizontal split
+  // Split horizontaly the main window
   {
     add(m_hpaned[0]);
     m_hpaned[0].set_position(800);
-    m_hpaned[0].pack1(m_drawing_area); // FIXME ajouter l'editeur de proprietes des cellules sous la map
+    m_hpaned[0].pack1(m_drawing_area);
     m_hpaned[0].pack2(m_hbox[0]);
   }
 
-  // Rigth side
+  // Left side of the main window: OpenGL area
   {
-    m_hbox[0].pack_start(m_toolbar[0], Gtk::PACK_SHRINK);
-    m_hbox[0].pack_start(m_vpaned[0]);
-    m_vpaned[0].set_position(350);
-
-    m_vpaned[0].pack1(m_vbox[0]);
-    m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
-    m_vbox[0].pack_start(m_fortheditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
-
-    m_vpaned[0].pack2(m_vbox[1]);
-    m_vbox[1].pack_start(m_toolbar[1], Gtk::PACK_SHRINK);
-    m_vbox[1].pack_start(m_notebook[0], Gtk::PACK_EXPAND_WIDGET);
-    m_vbox[1].pack_start(m_statusbar[0], Gtk::PACK_SHRINK);
-
-    m_scrolledwindow[0].add(m_textview[0]);
-    m_scrolledwindow[0].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[1].add(m_textview[1]);
-    m_scrolledwindow[1].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[2].add(m_textview[2]);
-    m_scrolledwindow[2].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[3].add(m_textview[3]);
-    m_scrolledwindow[3].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  }
-
-  // Forth notebooks
-  {
-    m_notebook[0].append_page(m_scrolledwindow[0], "Result");
-    m_notebook[0].append_page(m_scrolledwindow[1], "Historic");
-    m_notebook[0].append_page(m_scrolledwindow[2], "Debug");
-    m_notebook[0].append_page(m_scrolledwindow[3], "Dico");
-  }
-
-  // Statusbar
-  {
-    m_statusbar[0].push("Welcome to SimTaDyn !");
-  }
-
-  // OpenGL area
-  {
+    // FIXME ajouter l'editeur de proprietes des cellules sous la map
     add_events(Gdk::KEY_RELEASE_MASK);
     signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
     signal_key_release_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyReleased));
     //signal_scroll_event().connect(sigc::mem_fun(*this, &SimTaDynWindow::on_scroll_event));
+  }
+
+  // Rigth side of the main window: Forth editor
+  {
+    //
+    m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
+    m_vbox[0].pack_start(m_fortheditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
+
+    //
+    m_vbox[1].pack_start(m_toolbar[ForthToolbar], Gtk::PACK_SHRINK);
+    m_vbox[1].pack_start(m_fortheditor.m_res_notebooks, Gtk::PACK_EXPAND_WIDGET);
+    m_vbox[1].pack_start(m_fortheditor.m_statusbar, Gtk::PACK_SHRINK);
+
+    m_hbox[0].pack_start(m_toolbar[MapToolbar], Gtk::PACK_SHRINK);
+    m_hbox[0].pack_start(m_vpaned[0]);
+    m_vpaned[0].pack1(m_vbox[0]);
+    m_vpaned[0].pack2(m_vbox[1]);
+    m_vpaned[0].set_position(350);
   }
 
   // When terminating the SimTaDyn application

@@ -35,7 +35,7 @@ void SimForth::addForthButon(const Gtk::BuiltinStockID icon,
   // FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
   win->m_toolbutton[2 + i].set_label(word); // FIXME: remplacer tableau par vector
   win->m_toolbutton[2 + i].set_stock_id(icon);
-  win->m_toolbar[1].append(win->m_toolbutton[2 + i],
+  win->m_toolbar[1/*FIXME: ForthToolbar*/].append(win->m_toolbutton[2 + i],
     sigc::bind<const std::string>(sigc::mem_fun(*this, &SimForth::interprete), word)); // FIXME: interprete pas bon: eatString oui // FIXME ne pas autoriser a compiler
     //sigc::bind<const Cell16>(sigc::mem_fun(*this, &SimForth::execToken),
     // ForthToken));

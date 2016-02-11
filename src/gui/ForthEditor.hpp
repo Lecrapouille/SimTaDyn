@@ -7,30 +7,22 @@
 // *************************************************************************************************
 //
 // *************************************************************************************************
-//A bouger ailleurs
 class ForthEditor : public TextEditor
 {
 public:
-  ForthEditor(Gtk::TextView& output, Gtk::Statusbar& msg, Gtk::TextView& historic, bool interactive = false)
-    : m_output(output),
-      m_statusbar(msg),
-      m_historic(historic),
-      m_interactive(interactive)
-  {
-  }
 
-  ~ForthEditor()
-  {
-    // TODO: save the historic buffer
-  }
-
+  ForthEditor();
+  ~ForthEditor();
   void execForth();
 
-protected:
-  Gtk::TextView& m_output;
-  Gtk::Statusbar&  m_statusbar;
-  Gtk::TextView& m_historic;
-  bool m_interactive;
+  Gtk::Notebook       m_res_notebooks; // FIXME: attention collision de noms TextEditor::m_notebook
+  Gtk::ScrolledWindow m_scrolledwindow[4];
+  Gtk::TextView       m_result;
+  Gtk::TextView       m_historic;
+  Gtk::TextView       m_debug;
+  Gtk::TextView       m_dico;
+  Gtk::Statusbar      m_statusbar;
+  //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
 };
 
 #endif /* FORTHEDITOR_HPP_ */

@@ -23,6 +23,8 @@ public:
   }
 
 protected:
+  enum ToolBarNames { MapToolbar, ForthToolbar };
+
   bool quitting();
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
@@ -42,11 +44,8 @@ protected:
   Gtk::Menu m_menu[32];
   Gtk::Image m_menuimage[32];
   ForthEditor m_fortheditor;
-  Gtk::Notebook m_notebook[1];
+
   Gtk::SeparatorToolItem m_separator[2];
-  Gtk::Statusbar m_statusbar[1];
-  Gtk::ScrolledWindow m_scrolledwindow[4];
-  Gtk::TextView m_textview[4];
   Gtk::SeparatorMenuItem separator[2];
   FindWindow *m_findwin;
 
