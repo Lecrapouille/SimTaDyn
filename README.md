@@ -1,6 +1,8 @@
 # SimTaDyn
 SIMulateur TAbleur DYNamique
 
+![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.jpg)
+
 ## English
 
 SimTaDyn is a geographic information system (GIS) allowing to draw
