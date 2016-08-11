@@ -1,7 +1,32 @@
-#include "cells.hpp"
+#include "shapefile.hpp"
 
 int main(void)
 {
+  SimTaDynCell* c1;
+  SimTaDynGraph graph("Graph1");
+  ShapefileLoader loader;
+
+  cout << "Graph Name: " << graph.getName() << endl;
+  loader.loadShapefile("3dpoints.shp", graph);
+  cout << endl;
+  cout << endl;
+  cout << "Graph Name: " << graph.getName() << endl;
+  loader.loadShapefile("3dpoints.shp", graph);
+  cout << endl;
+  cout << endl;
+  cout << "Graph Name: " << graph.getName() << endl;
+
+  cout << endl;
+  cout << "Il y a " << SimTaDynCell::howMany() << " SimTaDynCell" << endl;
+  cout << "Il y a " << SimTaDynNode::howMany() << " SimTaDynNode" << endl;
+  c1 = graph.getNode(1);
+  c1->showExplicitNeighbor();
+  c1->addExplicitNeighbor(graph.getNode(2));
+  c1->addExplicitNeighbor(graph.getNode(3));
+
+  c1->showExplicitNeighbor();
+  c1->moveToPosition(Position3D(0.0f, 0.0f, 0.0f));
+
 #if 0
   Position3D p1(1.0f, 1.0f, 1.0f);
   Position3D p2(2.0f, 2.0f, 2.0f);
@@ -42,6 +67,7 @@ int main(void)
   delete S4;
 #endif
 
+#if 0
   SimTaDynGraph G("Graph1");
   SimTaDynCell* c1;
 
@@ -58,8 +84,7 @@ int main(void)
 
   c1->showExplicitNeighbor();
   c1->moveToPosition(Position3D(0.0f, 0.0f, 0.0f));
-
-
+#endif
 
   return 0;
 }

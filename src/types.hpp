@@ -7,6 +7,10 @@
 #  include <list>
 #  include <map>
 #  include <cmath>
+#  include <iostream>
+#  include <fstream>
+#  include <cerrno>
+#  include <cstring>
 #  include "handler.hpp"
 
 using namespace std;
@@ -15,6 +19,7 @@ using namespace std;
 // Redifine types
 // *************************************************************************************************
 
+typedef double float64_t;
 typedef unsigned int uint32_t;
 typedef float float32_t;
 typedef size_t Key;

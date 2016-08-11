@@ -369,6 +369,8 @@ typedef map<Key, SimTaDynCell*> listNodes;
 class SimTaDynGraph: private ClassCounter<SimTaDynGraph>
 {
 public:
+  Position3D bbox_min; // Bounding box min position
+  Position3D bbox_max; // Bounding box max position
 
   string getName() { return name_; }
   void setName(string name) { name_ = name; }

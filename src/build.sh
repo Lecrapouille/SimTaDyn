@@ -1,7 +1,5 @@
 #! /bin/bash
 
-rm -fr *~ prog observer_example
+rm -fr *~ prog
 
-g++ -W -Wall main.cpp -o prog -std=c++11
-
-#g++ -W -Wall observer_example.cpp -o observer_example -std=c++11
+g++ -W -Wall  shapefile.cpp main.cpp -o prog -std=c++11
