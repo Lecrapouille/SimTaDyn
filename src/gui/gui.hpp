@@ -1,15 +1,19 @@
 #ifndef GUI_HPP_
 #  define GUI_HPP_
 
-#  ifdef __cplusplus
-extern "C"
+#  include "opgl.hpp"
+
+class SimTaDynWindow: public Gtk::Window
 {
-#  endif
+public:
+  SimTaDynWindow(const std::string& title);
+  virtual ~SimTaDynWindow() {};
 
-#  include "gui.h"
+protected:
+  void onKeyPressed(GdkEventKey* evenement);
+  void onKeyReleased(GdkEventKey* evenement);
 
-#  ifdef __cplusplus
-}
-#  endif
+  GlDrawingArea drawing_area_;
+};
 
 #endif /* GUI_HPP_ */
