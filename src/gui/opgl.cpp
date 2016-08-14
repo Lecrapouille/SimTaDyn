@@ -1,17 +1,4 @@
 #include "opgl.hpp"
-//#include "draw.hpp"
-
-/**************************************************************************
- *
- **************************************************************************/
-static void opgl_2d_mode(GLsizei width, GLsizei height)
-{
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0.0f, width, 0.0f, height, -1.0f, DISTANCE_CLIPPING);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
 
 // *************************************************************************************************
 // Class for OpenGl renderer area
@@ -20,7 +7,6 @@ GlDrawingArea::GlDrawingArea(): Gtk::DrawingArea()
 {
   // No movement
   for (size_t i = 0; i < no_; ++i) direction_[i] = false;
-  x = y = z = 0.0f;
 
   // OpenGL Configuration
   Glib::RefPtr<Gdk::GL::Config> configuration;
@@ -61,7 +47,10 @@ void GlDrawingArea::on_realize()
 
   windowGL->gl_begin(get_gl_context());
 
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  // FIXME: on_realize() appelle je ne sais pas pourquoi on_configure_event puis Renderer::initialize
+  // ca fait beaucoup d'appel pour rien
+  Renderer::initialize();
+  Renderer::clearScreen(Color::Black);
   glClearDepth(1.0f);
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_BLEND);
@@ -72,10 +61,12 @@ void GlDrawingArea::on_realize()
 
   windowGL->gl_end();
 
+  getCamera2D().moveAt(300, 300);
+
   // Draw regurlary
-  Glib::signal_idle().connect(sigc::mem_fun(*this, &GlDrawingArea::on_idle));
+  Glib::signal_idle().connect(sigc::mem_fun(*this, &GlDrawingArea::onIdle));
   // Reset keyboard states every 10 ms
-  Glib::signal_timeout().connect(sigc::mem_fun(*this, &GlDrawingArea::on_timeout), 10);
+  Glib::signal_timeout().connect(sigc::mem_fun(*this, &GlDrawingArea::onTimeout), 10);
 }
 
 // *************************************************************************************************
@@ -83,7 +74,7 @@ void GlDrawingArea::on_realize()
 // *************************************************************************************************
 bool GlDrawingArea::on_expose_event(GdkEventExpose* event)
 {
-  on_idle();
+  onIdle();
   return Gtk::Widget::on_expose_event(event);
 }
 
@@ -95,12 +86,12 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
 
-  const GLsizei width = static_cast<GLsizei>(get_width());
-  const GLsizei height = static_cast<GLsizei>(get_height());
-
   windowGL->gl_begin(get_gl_context());
-  glViewport(0.0f, 0.0f, width, height);
-  opgl_2d_mode(width, height);
+
+  Camera2D& camera = getCamera2D();
+  camera.setSize(getScreenWidth(), getScreenHeight());
+  applyViewport(camera);
+
   windowGL->gl_end();
   return Gtk::Widget::on_configure_event(event);
 }
@@ -108,7 +99,7 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
 // *************************************************************************************************
 // Draw the scene
 // *************************************************************************************************
-bool GlDrawingArea::on_idle()
+bool GlDrawingArea::onIdle()
 {
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
@@ -118,12 +109,19 @@ bool GlDrawingArea::on_idle()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
 
-  glTranslatef(x, y, z);
-  //drawMap();
-
   glPushMatrix();
   glTranslated(300.0f, 300.0f, 0.0f);
-  glRecti(THICKNESS, -THICKNESS, -THICKNESS, THICKNESS);
+  glRecti(5.0f, -5.0f, -5.0f, 5.0f);
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslated(10.0f, 10.0f, 0.0f);
+  glRecti(5.0f, -5.0f, -5.0f, 5.0f);
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslated(1.0f, 1.0f, 0.0f);
+  glRecti(5.0f, -5.0f, -5.0f, 5.0f);
   glPopMatrix();
 
   windowGL->gl_end();
@@ -134,13 +132,35 @@ bool GlDrawingArea::on_idle()
 // *************************************************************************************************
 // Keybord reset
 // *************************************************************************************************
-bool GlDrawingArea::on_timeout()
+bool GlDrawingArea::onTimeout()
 {
-  if (direction_[Forward]) z = 0.0f;
-  if (direction_[Backward]) z = 0.0f;
-  if (direction_[Up]) y += 1.0f;
-  if (direction_[Down]) y -= 1.0f;
-  if (direction_[Right]) x += 1.0f;
-  if (direction_[Left]) x -= 1.0f;
+  Camera2D& camera = getCamera2D();
+
+  if (direction_[Forward])
+    {
+      camera.zoom(0.01f); // Bug suite geometrique au lieu de zoomer sut taille d'oritgine
+    }
+  if (direction_[Backward])
+    {
+      camera.zoom(-0.01f);
+    }
+  if (direction_[Up])
+    {
+      camera.moveOffset(0.0f, 1.0f);
+    }
+  if (direction_[Down])
+    {
+      camera.moveOffset(0.0f, -1.0f);
+    }
+  if (direction_[Right])
+    {
+      camera.moveOffset(-1.0f, 0.0f);
+    }
+  if (direction_[Left])
+    {
+      camera.moveOffset(1.0f, 0.0f);
+    }
+
+  applyViewport(camera);
   return true;
 }

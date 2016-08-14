@@ -11,18 +11,7 @@
 #  include <exception>
 #  include <iostream>
 
-#  ifdef __APPLE__
-#    include <GLUT/glut.h>
-#    include <OpenGL/gl.h>
-#    include <OpenGL/glu.h>
-#  else
-#    include <GL/glut.h>
-#    include <GL/gl.h>
-#    include <GL/glu.h>
-#  endif
-
-#  define DISTANCE_CLIPPING 100000.0f
-#  define THICKNESS 5.0f
+# include "renderer.hpp"
 
 // *************************************************************************************************
 // Exception
@@ -41,24 +30,30 @@ public:
 // *************************************************************************************************
 // Class for OpenGl renderer area
 // *************************************************************************************************
-class GlDrawingArea: public Gtk::DrawingArea, public Gtk::GL::Widget<GlDrawingArea>
+class GlDrawingArea: public Gtk::DrawingArea,
+                     public Gtk::GL::Widget<GlDrawingArea>,
+                     public Renderer
 {
 public:
   GlDrawingArea();
   virtual ~GlDrawingArea() {};
-  GLfloat x, y, z;
 
   // Movement in the world
   enum Direction { Forward, Backward, Up, Down, Right, Left, no_};
   void keyPressed(Direction d) { direction_[d] = true; }
   void keyReleased(Direction d) { direction_[d] = false; }
 
+  uint32_t getScreenWidth() const { return get_width(); }
+  uint32_t getScreenHeight() const { return get_height(); }
+
 protected:
   virtual void on_realize();
   virtual bool on_expose_event(GdkEventExpose* event);
   virtual bool on_configure_event(GdkEventConfigure* event);
-  bool on_idle();
-  bool on_timeout();
+  bool onIdle();
+  bool onTimeout();
+  void mode2D(GLfloat width, GLfloat height);
+  //virtual void drawScene() = 0;
 
 private:
   bool direction_[no_];

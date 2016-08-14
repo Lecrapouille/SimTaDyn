@@ -30,7 +30,7 @@ VPATH=.:$(DEST):gui:cells
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = gui.o opgl.o main.o
+OBJECTS = color.o camera2D.o renderer.o opgl.o gui.o main.o
 TARGET = SimTaDyn
 
 ###################################################
@@ -58,6 +58,10 @@ $(TARGET): $(OBJECTS)
 	@$(call print-link,"Linking","$(TARGET)","$(DEST)/$@","")
 	@cd $(DEST) && $(CC) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
+%.o: %.cpp %.hpp
+	@$(call print-comp,"Compiling C","$(TARGET)","$<")
+	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
+
 %.o: %.cpp
 	@$(call print-comp,"Compiling C","$(TARGET)","$<")
 	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
@@ -66,7 +70,7 @@ $(TARGET): $(OBJECTS)
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~  $(DEST) 2> /dev/null
+	@rm -fr *~ gui/*~ cells/*~ $(DEST) 2> /dev/null
 
 ###################################################
 # Create a temporary folder to store *.o
