@@ -30,7 +30,7 @@ VPATH=.:$(DEST):gui:cells
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = color.o camera2D.o renderer.o opgl.o gui.o main.o
+OBJECTS = color.o camera2D.o mouse.o renderer.o opgl.o gui.o main.o
 TARGET = SimTaDyn
 
 ###################################################

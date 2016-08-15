@@ -1,6 +1,7 @@
 #ifndef OPGL_HPP_
 #  define OPGL_HPP_
 
+#  include <gtkmm/widget.h>
 #  include <gtkmm/window.h>
 #  include <gtkmm/drawingarea.h>
 #  include <gdk/gdkkeysyms.h>
@@ -12,6 +13,7 @@
 #  include <iostream>
 
 # include "renderer.hpp"
+# include "mouse.hpp"
 
 // *************************************************************************************************
 // Exception
@@ -32,7 +34,7 @@ public:
 // *************************************************************************************************
 class GlDrawingArea: public Gtk::DrawingArea,
                      public Gtk::GL::Widget<GlDrawingArea>,
-                     public Renderer
+                     public Renderer, public Mouse
 {
 public:
   GlDrawingArea();
@@ -45,6 +47,7 @@ public:
 
   uint32_t getScreenWidth() const { return get_width(); }
   uint32_t getScreenHeight() const { return get_height(); }
+  bool on_scroll_event(GdkEventScroll *event);
 
 protected:
   virtual void on_realize();

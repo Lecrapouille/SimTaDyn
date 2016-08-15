@@ -45,6 +45,8 @@ void GlDrawingArea::on_realize()
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
 
+add_events(Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
+
   windowGL->gl_begin(get_gl_context());
 
   // FIXME: on_realize() appelle je ne sais pas pourquoi on_configure_event puis Renderer::initialize
@@ -67,6 +69,8 @@ void GlDrawingArea::on_realize()
   Glib::signal_idle().connect(sigc::mem_fun(*this, &GlDrawingArea::onIdle));
   // Reset keyboard states every 10 ms
   Glib::signal_timeout().connect(sigc::mem_fun(*this, &GlDrawingArea::onTimeout), 10);
+
+  signal_scroll_event().connect(sigc::mem_fun(*this, &GlDrawingArea::on_scroll_event));
 }
 
 // *************************************************************************************************
@@ -162,5 +166,45 @@ bool GlDrawingArea::onTimeout()
     }
 
   applyViewport(camera);
+  return true;
+}
+
+#define                 MIN_SCALE                       0.05
+
+// Mouse wheel event detected : update scale
+bool GlDrawingArea::on_scroll_event(GdkEventScroll *event)
+{
+  double delta_y;
+
+  // Compute the new scale according to mouse scroll
+  if (GDK_SCROLL_UP == event->direction)
+    delta_y = -0.1;
+  else if (GDK_SCROLL_DOWN == event->direction)
+    delta_y = 0.1;
+  else
+    return false;
+
+  // gtkmm-3.0 double newScale = scale * (1 - event-/delta_y / 20);
+  double newScale = scale * (1 - delta_y);
+  if (newScale < MIN_SCALE)
+    newScale = MIN_SCALE;
+
+  std::cout << "Zoom scrolling: " << delta_y << " " << newScale << std::endl;
+
+  // Update the center of the image
+  double DeltaX = event->x - getScreenWidth() / 2.0;
+  double DeltaY = event->y - getScreenHeight() / 2.0;
+  imgFocusX = imgFocusX + DeltaX / scale - DeltaX / newScale;
+  imgFocusY = imgFocusY + DeltaY / scale - DeltaY / newScale;
+
+  // Update scale and redraw the widget
+  scale = newScale;
+
+  // Event has been handled
+  Camera2D& camera = getCamera2D();
+  //camera.moveAt(imgFocusX, imgFocusY);
+  camera.setZoom(newScale);
+  applyViewport(camera);
+
   return true;
 }
