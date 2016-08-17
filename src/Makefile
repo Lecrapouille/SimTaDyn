@@ -41,7 +41,7 @@ TARGET = SimTaDyn
 #CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 #LDFLAGS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 CC=g++
-CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
+CFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
 LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
 DEFINES =
 
