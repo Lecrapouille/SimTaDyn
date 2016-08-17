@@ -1,7 +1,7 @@
 #ifndef SHAPEFILE_HPP_
 #  define SHAPEFILE_HPP_
 
-#  include "cells.hpp"
+#  include "graph.hpp"
 
 class ShapefileLoaderException { };
 class ShapefileLoaderOpenFailed : public ShapefileLoaderException

@@ -15,6 +15,9 @@
 typedef double float64_t;
 typedef unsigned int uint32_t;
 typedef float float32_t;
-typedef size_t Key;
+typedef std::size_t Key;
+
+class   SimTaDynCell;
+class   SimTaDynNode;
 
 #endif /* SIMTYPES_HPP_ */

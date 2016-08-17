@@ -2,9 +2,9 @@
 
 void Renderer::initialize()
 {
-  default_camera_.lookAt(0.0f, 0.0f,
-                         static_cast<float32_t>(getScreenWidth()),
-                         static_cast<float32_t>(getScreenHeight()));
+  default_camera_.cameraFitScreen(0.0f, 0.0f,
+                                  static_cast<float32_t>(getScreenWidth()),
+                                  static_cast<float32_t>(getScreenHeight()));
   current_camera_ = default_camera_;
 }
 

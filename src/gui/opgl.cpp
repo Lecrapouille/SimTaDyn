@@ -65,6 +65,9 @@ void GlDrawingArea::on_realize()
 
   loader.loadShapefile("../data/3dpoints.shp", graph);
   std::cout << std::endl << "Il y a " << SimTaDynNode::howMany() << " nodes" << std::endl;
+  graph.addArc(1, 2, "AAA", 0, 42);
+  std::cout << std::endl << "Il y a " << SimTaDynArc::howMany() << " arcs: " << graph.getArc(SimTaDynCell::howMany())->name << std::endl;
+
   Position3D& p = graph.getNode(1)->getPosition();
   getCamera2D().moveAt(p.x, p.y);
 
@@ -96,7 +99,7 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
   windowGL->gl_begin(get_gl_context());
 
   Camera2D& camera = getCamera2D();
-  camera.setSize(getScreenWidth(), getScreenHeight());
+  camera.setCameraSize(getScreenWidth(), getScreenHeight());
   applyViewport(camera);
 
   windowGL->gl_end();
@@ -116,13 +119,30 @@ bool GlDrawingArea::onIdle()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
 
-  for (Key i = 1; i <= (Key) SimTaDynNode::howMany(); ++i)
+  for (Key i = 1; i <= (Key) SimTaDynNode::howMany(); ++i) // FIXME Key+1 idiot: commencer a 0
     {
       Position3D& p = graph.getNode(i)->getPosition();
       glPushMatrix();
       glTranslated(p.x, p.y, 0.0f);
       glRecti(1.0f, -1.0f, -1.0f, 1.0f);
       glPopMatrix();
+    }
+
+  //for (Key i = SimTaDynCell::howMany(); i <= (Key) SimTaDynCell::howMany() + SimTaDynArc::howMany(); ++i) // FIXME Key+1 idiot: commencer a 0
+  Key i = (Key) SimTaDynCell::howMany();
+  {
+      SimTaDynCell* c = graph.getArc(i);
+      SimTaDynArc* a = dynamic_cast<SimTaDynArc*>(c);
+      SimTaDynCell* n1, *n2;
+      n1 = dynamic_cast<SimTaDynNode*>(a->node_tail_);
+      n2 = dynamic_cast<SimTaDynNode*>(a->node_head_);
+      Position3D& p1 = n1->getPosition();
+      Position3D& p2 = n2->getPosition();
+
+      glBegin(GL_LINES);
+      glVertex3f(p1.x, p1.y, 0.0f);
+      glVertex3f(p2.x, p2.y, 0.0f);
+      glEnd();
     }
 
   windowGL->gl_end();
@@ -139,11 +159,11 @@ bool GlDrawingArea::onTimeout()
 
   if (direction_[Forward])
     {
-      camera.zoom(0.01f); // Bug suite geometrique au lieu de zoomer sut taille d'oritgine
+      camera.setZoom(camera.getZoom() * (1.0 + 0.01f));
     }
   if (direction_[Backward])
     {
-      camera.zoom(-0.01f);
+      camera.setZoom(camera.getZoom() * (1.0 - 0.01f));
     }
   if (direction_[Up])
     {

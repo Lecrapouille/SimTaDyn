@@ -31,7 +31,7 @@ VPATH=.:$(DEST):gui:cells
 ###################################################
 # Set objects architecture specific
 OBJECTS_GUI = color.o camera2D.o renderer.o opgl.o gui.o
-OBJECTS_CELLS = shapefile.o
+OBJECTS_CELLS = position.o nodes.o arcs.o shapefile.o
 OBJECTS = $(OBJECTS_GUI) $(OBJECTS_CELLS) main.o
 TARGET = SimTaDyn
 
