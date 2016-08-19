@@ -11,9 +11,11 @@
 #  include <fstream>
 #  include <cerrno>
 #  include <cstring>
+#  include <stdexcept>
 
 typedef double float64_t;
 typedef unsigned int uint32_t;
+typedef int int32_t;
 typedef float float32_t;
 typedef std::size_t Key;
 

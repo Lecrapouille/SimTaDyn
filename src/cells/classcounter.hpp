@@ -1,7 +1,7 @@
 #ifndef CLASSCOUNTER_HPP_
 #  define CLASSCOUNTER_HPP_
 
-#  include <simtypes.hpp>
+#  include "simtypes.hpp"
 
 // *************************************************************************************************
 // Inspired from: http://www.drdobbs.com/cpp/counting-objects-in-c/

@@ -1,7 +1,7 @@
 #ifndef COLOR_HPP_
 #  define COLOR_HPP_
 
-#  include "../simtypes.hpp"
+#  include "simtypes.hpp"
 
 class Color
 {

@@ -179,6 +179,17 @@ void ShapefileLoader::getBoundingBox(Position3D& bbox_min, Position3D& bbox_max)
   bbox_max.z = readDouble();
 }
 
+void ShapefileLoader::getBoundingBox(AABB& bbox)
+{
+  goToByte(36U);
+  bbox.bbmin.x = readDouble();
+  bbox.bbmin.y = readDouble();
+  bbox.bbmax.x = readDouble();
+  bbox.bbmax.y = readDouble();
+  bbox.bbmin.z = readDouble();
+  bbox.bbmax.z = readDouble();
+}
+
 uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offset)
 {
   uint32_t record_number, content_length, shape_type;
@@ -244,14 +255,8 @@ void ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
       value32b = getShapeType();
       cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << endl;
 
-      getBoundingBox(graph.bbox_min, graph.bbox_max);
-      cout << "Map Bounding Box:" << endl;
-      cout << " Xmin: " << graph.bbox_min.x;
-      cout << " Ymin: " << graph.bbox_min.y;
-      cout << " Zmin: " << graph.bbox_min.z << endl;
-      cout << " Xmax: " << graph.bbox_max.x;
-      cout << " Ymax: " << graph.bbox_max.y;
-      cout << " Zmax: " << graph.bbox_max.z << endl;
+      getBoundingBox(graph.bbox);
+      cout << "Map Bounding Box: " << graph.bbox << endl;
 
       getAllRecords(graph);
       graph.setName(graph.getName() + '_' + filename);

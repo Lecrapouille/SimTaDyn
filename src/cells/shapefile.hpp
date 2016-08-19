@@ -2,6 +2,7 @@
 #  define SHAPEFILE_HPP_
 
 #  include "graph.hpp"
+#  include "boundingbox.hpp"
 
 class ShapefileLoaderException { };
 class ShapefileLoaderOpenFailed : public ShapefileLoaderException
@@ -59,6 +60,7 @@ public:
   uint32_t     getShapeVersion();
   uint32_t     getShapeType();
   void         getBoundingBox(Position3D& bbox_min, Position3D& bbox_max);
+  void         getBoundingBox(AABB& bbox);
   uint32_t     getRecordAt(SimTaDynGraph& graph, const uint32_t offset);
   void         getAllRecords(SimTaDynGraph& graph);
   void         loadShapefile(const string& filename, SimTaDynGraph& graph);

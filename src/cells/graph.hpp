@@ -3,6 +3,7 @@
 
 #  include "nodes.hpp"
 #  include "arcs.hpp"
+#  include "boundingbox.hpp"
 
 // *************************************************************************************************
 // Define a SimTaDyn graph
@@ -15,8 +16,9 @@ typedef map<Key, SimTaDynCell*> listArcs;
 class SimTaDynGraph: private ClassCounter<SimTaDynGraph>
 {
 public:
-  Position3D bbox_min; // Bounding box min position
-  Position3D bbox_max; // Bounding box max position
+  //Position3D bbox_min; // Bounding box min position
+  //Position3D bbox_max; // Bounding box max position
+  AABB bbox;
 
   string getName() { return name_; }
   void setName(string name) { name_ = name; }

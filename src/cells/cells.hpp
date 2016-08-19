@@ -92,7 +92,7 @@ public:
   /*
    * Creator
    */
-  SimTaDynCell() { id_ = howMany(); name = "Cell_" + to_string(id_); }
+  SimTaDynCell() { id_ = howMany(); name = "Cell_" + std::to_string(id_); }
   SimTaDynCell(string new_name, string new_code_forth = "1 1 + .")
   {
     id_ = howMany();

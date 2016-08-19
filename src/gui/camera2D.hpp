@@ -1,7 +1,7 @@
 #ifndef CAMERA_HPP_
 #  define CAMERA_HPP_
 
-#  include "../simtypes.hpp"
+#  include "simtypes.hpp"
 
 #  define MIN_ZOOM (0.05f)
 

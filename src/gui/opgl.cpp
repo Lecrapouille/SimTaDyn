@@ -58,18 +58,24 @@ void GlDrawingArea::on_realize()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-  glLineWidth(1.5f);
+  glLineWidth(10);
   glEnable(GL_ALPHA_TEST);
 
   windowGL->gl_end();
 
   loader.loadShapefile("../data/3dpoints.shp", graph);
   std::cout << std::endl << "Il y a " << SimTaDynNode::howMany() << " nodes" << std::endl;
-  graph.addArc(1, 2, "AAA", 0, 42);
+  graph.addArc(1, 20, "AAA", 0, 42);
+  graph.addArc(1, 10, "AAA", 0, 42);
+  graph.addArc(10, 11, "AAA", 0, 42);
+  graph.addArc(10, 4, "AAA", 0, 42);
   std::cout << std::endl << "Il y a " << SimTaDynArc::howMany() << " arcs: " << graph.getArc(SimTaDynCell::howMany())->name << std::endl;
 
   Position3D& p = graph.getNode(1)->getPosition();
-  getCamera2D().moveAt(p.x, p.y);
+  //getCamera2D().zoomfitImage(getScreenWidth(), getScreenHeight(),
+  //                           graph.bbox.bbmax.x - graph.bbox.bbmin.x,
+  //                          graph.bbox.bbmax.y - graph.bbox.bbmin.y);
+                             //moveAt(p.x, p.y);
 
   // Draw regurlary
   Glib::signal_idle().connect(sigc::mem_fun(*this, &GlDrawingArea::onIdle));
