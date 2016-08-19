@@ -147,7 +147,7 @@ public:
 
   inline float32_t length() const
   {
-    return sqrt(x * x + y * y + z * z);
+    return std::sqrt(x * x + y * y + z * z);
   }
 
   inline float32_t squaredLength() const
@@ -179,7 +179,7 @@ public:
 
   inline bool normalise()
   {
-    float32_t length = sqrt(x * x + y * y + z * z);
+    float32_t length = std::sqrt(x * x + y * y + z * z);
     if (length > 0.0f)
       {
         float32_t invlength = 1.0f / length;
@@ -206,15 +206,6 @@ inline std::ostream& operator<<(std::ostream& os, const Vector3D& p)
   os << "Vector3D(" << p.x << ", " << p.y << ", " << p.z << ")";
   return os;
 }
-
-const Vector3D Vector3D::ZERO(0, 0, 0);
-const Vector3D Vector3D::UNIT_X(1, 0, 0);
-const Vector3D Vector3D::UNIT_Y(0, 1, 0);
-const Vector3D Vector3D::UNIT_Z(0, 0, 1);
-const Vector3D Vector3D::NEGATIVE_UNIT_X(-1, 0, 0);
-const Vector3D Vector3D::NEGATIVE_UNIT_Y(0, -1, 0);
-const Vector3D Vector3D::NEGATIVE_UNIT_Z(0, 0, -1);
-const Vector3D Vector3D::UNIT_SCALE(1, 1, 1);
 
 #define Position3D Vector3D
 
