@@ -1,7 +1,7 @@
 #ifndef BOUNDINGBOX_HPP_
 #  define BOUNDINGBOX_HPP_
 
-#  include "vector3D.hpp"
+#  include "Vector3D.hpp"
 
 // Axis Aligned Bounding Box
 class AABB
@@ -78,6 +78,12 @@ public:
         res = false;
       }
     return res;
+  }
+
+  inline void swap(AABB& other)
+  {
+    bbmin.swap(other.bbmin);
+    bbmax.swap(other.bbmax);
   }
 
   inline bool operator==(const AABB& other) const
@@ -216,7 +222,9 @@ public:
   }
   inline AABB intersection(const AABB& other) const
   {
-    return AABB(bbmin.max(other.bbmin), bbmax.min(other.bbmax));
+    if (collides(other))
+      return AABB(bbmin.max(other.bbmin), bbmax.min(other.bbmax));
+    return AABB::AABB_ZERO;
   }
 
   inline friend std::ostream& operator<<(std::ostream& os, const AABB& other)
@@ -230,12 +238,8 @@ public:
   static const AABB AABB_UNIT_SCALE;
 
 protected:
-  Position3D bbmin;
-  Position3D bbmax;
+  Vector3D bbmin;
+  Vector3D bbmax;
 };
-
-const AABB AABB::AABB_ZERO(Vector3D::ZERO, Vector3D::ZERO);
-const AABB AABB::AABB_UNIT_SCALE(Vector3D::ZERO, Vector3D::UNIT_SCALE);
-
 
 #endif /* BOUNDINGBOX_HPP_ */

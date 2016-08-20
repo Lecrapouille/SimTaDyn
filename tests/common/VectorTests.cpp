@@ -13,9 +13,9 @@ static Vector3D v5(1, 2, 3);
 
 static inline void checkVector(const Vector3D& v, const float32_t x, const float32_t y, const float32_t z)
 {
-  CPPUNIT_ASSERT_EQUAL(v.x, x);
-  CPPUNIT_ASSERT_EQUAL(v.y, y);
-  CPPUNIT_ASSERT_EQUAL(v.z, z);
+  CPPUNIT_ASSERT_EQUAL(x, v.x);
+  CPPUNIT_ASSERT_EQUAL(y, v.y);
+  CPPUNIT_ASSERT_EQUAL(z, v.z);
 }
 
 //--------------------------------------------------------------------------
@@ -31,13 +31,13 @@ void VectorTests::tearDown()
 //--------------------------------------------------------------------------
 void VectorTests::testCreator()
 {
-  CPPUNIT_ASSERT_EQUAL(sizeof (Vector3D), 12U);
+  CPPUNIT_ASSERT_EQUAL(12U, sizeof (Vector3D));
   checkVector(v2, 1.0f, 2.0f, 3.0f);
   checkVector(v3, 1.0f, 2.0f, 0.0f);
   checkVector(v4, 4.0f, 5.0f, 6.0f);
   checkVector(v5, 1.0f, 2.0f, 3.0f);
 
-  std::cout << v2 << ", " << v3 << ", " << v4 << ", " << v5 << std::endl;
+  //std::cout << v2 << ", " << v3 << ", " << v4 << ", " << v5 << std::endl;
 }
 
 //--------------------------------------------------------------------------
@@ -56,10 +56,10 @@ void VectorTests::testSwap()
 //--------------------------------------------------------------------------
 void VectorTests::testEquality()
 {
-  CPPUNIT_ASSERT_EQUAL((v2 == v5), true);
-  CPPUNIT_ASSERT_EQUAL((v3 == v2), false);
-  CPPUNIT_ASSERT_EQUAL((v2 != v5), false);
-  CPPUNIT_ASSERT_EQUAL((v3 != v2), true);
+  CPPUNIT_ASSERT_EQUAL(true, (v2 == v5));
+  CPPUNIT_ASSERT_EQUAL(false, (v3 == v2));
+  CPPUNIT_ASSERT_EQUAL(false, (v2 != v5));
+  CPPUNIT_ASSERT_EQUAL(false, (v3 != v2));
 }
 
 //--------------------------------------------------------------------------

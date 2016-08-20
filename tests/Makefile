@@ -30,7 +30,7 @@ VPATH=.:$(DEST):common:../src/common
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = Vector3D.o VectorTests.o main.o
+OBJECTS = Vector3D.o VectorTests.o BoundingBox.o BoundingBoxTests.o main.o
 TARGET = UnitTest
 
 ###################################################

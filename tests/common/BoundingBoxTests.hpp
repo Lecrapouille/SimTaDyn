@@ -1,5 +1,5 @@
-#ifndef VECTORTESTS_HPP_
-#  define VECTORTESTS_HPP_
+#ifndef BOUNDINGBOXTESTS_HPP_
+#  define BOUNDINGBOXTESTS_HPP_
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestResult.h>
@@ -7,14 +7,14 @@
 
 #define protected public
 #define private public
-#include "Vector3D.hpp"
+#include "BoundingBox.hpp"
 #undef protected
 #undef private
 
-class VectorTests : public CppUnit::TestFixture
+class BoundingBoxTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(VectorTests);
+  CPPUNIT_TEST_SUITE(BoundingBoxTests);
   CPPUNIT_TEST(testCreator);
   CPPUNIT_TEST(testSwap);
   CPPUNIT_TEST(testEquality);
@@ -34,4 +34,4 @@ public:
   void testOperations();
 };
 
-#endif /* VECTORTESTS_HPP_ */
+#endif /* BOUNDINGBOXTESTS_HPP_ */
