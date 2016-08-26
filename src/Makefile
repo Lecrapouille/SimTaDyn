@@ -30,9 +30,9 @@ VPATH=.:$(DEST):gui:cells:common
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_COMMON = color.o vector3D.o boundingbox.o
-OBJECTS_GUI = camera2D.o renderer.o opgl.o gui.o
-OBJECTS_CELLS = nodes.o arcs.o shapefile.o
+OBJECTS_COMMON = color.o Vector3D.o BoundingBox.o
+OBJECTS_GUI = #camera2D.o renderer.o opgl.o gui.o
+OBJECTS_CELLS = #nodes.o arcs.o shapefile.o
 OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_GUI) $(OBJECTS_CELLS) main.o
 TARGET = SimTaDyn
 
