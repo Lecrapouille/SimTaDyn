@@ -31,7 +31,8 @@ void VectorTests::tearDown()
 //--------------------------------------------------------------------------
 void VectorTests::testCreator()
 {
-  CPPUNIT_ASSERT_EQUAL(12U, sizeof (Vector3D));
+  uint32_t size = (uint32_t) sizeof (Vector3D);
+  CPPUNIT_ASSERT_EQUAL(12U, size);
   checkVector(v2, 1.0f, 2.0f, 3.0f);
   checkVector(v3, 1.0f, 2.0f, 0.0f);
   checkVector(v4, 4.0f, 5.0f, 6.0f);
@@ -59,7 +60,7 @@ void VectorTests::testEquality()
   CPPUNIT_ASSERT_EQUAL(true, (v2 == v5));
   CPPUNIT_ASSERT_EQUAL(false, (v3 == v2));
   CPPUNIT_ASSERT_EQUAL(false, (v2 != v5));
-  CPPUNIT_ASSERT_EQUAL(false, (v3 != v2));
+  CPPUNIT_ASSERT_EQUAL(true, (v3 != v2));
 }
 
 //--------------------------------------------------------------------------
@@ -120,5 +121,8 @@ void VectorTests::testOperations()
   CPPUNIT_ASSERT_EQUAL(true, v1.normalise());
   CPPUNIT_ASSERT_EQUAL(Vector3D::UNIT_SCALE * 1.0f/std::sqrt(3.0f), v1);
 
-  CPPUNIT_ASSERT_EQUAL(1.0f, v1.distance(Vector3D::ZERO));
+  v1 = Vector3D::UNIT_SCALE * 2.0f;
+  CPPUNIT_ASSERT_EQUAL(std::sqrt(12.0f), v1.distance(Vector3D::ZERO));
+  v1 = Vector3D::ZERO;
+  CPPUNIT_ASSERT_EQUAL(0.0f, v1.distance(Vector3D::ZERO));
 }
