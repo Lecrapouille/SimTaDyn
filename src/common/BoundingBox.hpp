@@ -236,6 +236,7 @@ public:
   // special values
   static const AABB AABB_ZERO;
   static const AABB AABB_UNIT_SCALE;
+  static const AABB AABB_INFINITE;
 
 protected:
   Vector3D bbmin;

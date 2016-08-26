@@ -22,15 +22,18 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -Icommon -I../src/common
+INCLUDES = -I. -Icommon -I../src/common -Icells -I../src/cells
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(DEST):common:../src/common
+VPATH=.:$(DEST):common:../src/common:cells:../src/cells
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = Vector3D.o VectorTests.o BoundingBox.o BoundingBoxTests.o main.o
+OBJECTS = Vector3D.o VectorTests.o \
+	BoundingBox.o BoundingBoxTests.o \
+	SimTaDynCellsTests.o \
+	main.o
 TARGET = UnitTest
 
 ###################################################
@@ -59,6 +62,10 @@ $(TARGET): $(OBJECTS)
 	@cd $(DEST) && $(CC) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 %.o: %.cpp %.hpp
+	@$(call print-comp,"Compiling C","$(TARGET)","$<")
+	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
+
+%.o: %.cpp
 	@$(call print-comp,"Compiling C","$(TARGET)","$<")
 	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
 

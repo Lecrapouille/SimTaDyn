@@ -12,12 +12,14 @@
 #  include <cerrno>
 #  include <cstring>
 #  include <stdexcept>
+#  include <limits>
 
 typedef double float64_t;
 typedef unsigned int uint32_t;
 typedef int int32_t;
 typedef float float32_t;
-typedef std::size_t Key;
+//typedef std::size_t Key;
+typedef unsigned int Key;
 
 class   SimTaDynCell;
 class   SimTaDynNode;
