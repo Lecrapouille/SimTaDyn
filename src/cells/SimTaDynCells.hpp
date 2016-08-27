@@ -6,6 +6,7 @@
 #  include "BoundingBox.hpp"
 #include <forward_list>
 #include <algorithm>
+#  include "Observer.hpp"
 
 class EventMoved : public Event
 {
@@ -20,7 +21,11 @@ class EventDeleted : public Event {};
 // This class is the basic ancestor class for SimTaDyn cells: Vertices (aka Nodes), Edges (aka Arcs)
 // and Zones (aka Areas).
 // *************************************************************************************************
-class SimTaDynCell: private ClassCounter<SimTaDynCell>, public EventHandler
+class SimTaDynCell
+  : private ClassCounter<SimTaDynCell>,
+    public EventHandler,
+    public Observer<SimTaDynCell, int>,
+    public Observable<SimTaDynCell, int>
 {
 public:
   /*
@@ -66,14 +71,16 @@ protected:
   /*
    * A string for storing Forth code
    */
-  string code_forth; // TODO: string& pour se referer au dictionnaire (au lieu de copier)
+  string code_forth_; // TODO: string& pour se referer au dictionnaire (au lieu de copier)
+
+  int32_t value_;
 
   /*
    * A list of cells in direct relation (explicitly set in the graph editor.
    * For example: a node is connected to other nodes by a graph. Here we are
    * generic to use polymorphism.
    */
-  std::forward_list<SimTaDynCell*> explicit_neighbors;
+  std::forward_list<SimTaDynCell*> neighbors_;
 
 public:
   /*
@@ -84,9 +91,10 @@ public:
   {
     id_ = howMany() - 1U;
     name = "Cell_" + std::to_string(id_);
-    code_forth = "";
+    code_forth_ = "";
     data = NULL;
     selected = visited = false;
+    value_ = 0;
   }
 
    /*
@@ -97,9 +105,10 @@ public:
   {
     id_ = howMany() - 1U;
     name = new_name;
-    code_forth = new_code_forth;
+    code_forth_ = new_code_forth;
     data = new_data;
     selected = visited = false;
+    value_ = 0;
   }
 
   /*
@@ -108,15 +117,19 @@ public:
    */
   virtual ~SimTaDynCell()
   {
+  }
+#if 0
+  virtual ~SimTaDynCell()
+  {
     std::forward_list<SimTaDynCell*>::iterator neighbor;
 
     whoAmI();
     cout << "  I'm on destruction. I'll remove myself from my neighbors list: {" << endl;
-    for (neighbor  = explicit_neighbors.begin();
-         neighbor != explicit_neighbors.end();
+    for (neighbor  = neighbors_.begin(); // non observers
+         neighbor != neighbors_.end();
          ++neighbor)
       {
-        cout << "  Please neighor " << (*neighbor)->name << " remove me (" << this << ")" << endl;
+        cout << "  Please neighor " << (*neighbor_)->name << " remove me (" << this << ")" << endl;
         (*neighbor)->removeExplicitNeighbor(this);
       }
     cout << "}" << endl;
@@ -133,8 +146,8 @@ public:
       {
         whoAmI();
         cout << "  I notify all my neighbors from the event " << event->getName() << " : {" << endl;
-        for (neighbor  = explicit_neighbors.begin();
-             neighbor != explicit_neighbors.end();
+        for (neighbor  = neighbors_.begin();
+             neighbor != neighbors_.end();
              ++neighbor)
           {
             cout << "  Please neighor " << (*neighbor)->name << " do your action:" << endl;
@@ -172,6 +185,7 @@ public:
     cout << "      My neighbor the cell #" << movement->cell_->privateId() << " nammed \"" << movement->cell_->name
          << "\" moved to position " << movement->cell_->position_ << endl;
   }
+#endif
 
   /*
    * Accessor. Return the unique identifier
@@ -206,6 +220,68 @@ public:
   }
 
   /*
+   * Accessor
+   */
+  const string& getCodeForth() const
+  {
+    return code_forth_;
+  }
+
+  /*
+   * Accessor
+   */
+  void setCodeForth(const string& code_forth)
+  {
+    code_forth_ = code_forth;
+  }
+
+  /*
+   * Accessor
+   */
+  int32_t getValue() const
+  {
+    return value_;
+  }
+
+  void setValue(int32_t value)
+  {
+    value_ = value;
+    //setChanged();
+    notifyObservers(value);
+  }
+
+  void setValue()
+  {
+    if ((code_forth_ != std::string("")) && (0 != nbNeighbors()))
+      {
+        setValue(forth_eval());
+      }
+  }
+
+  /*
+   * Observer pattern
+   */
+  void update(SimTaDynCell& subject, int arg) override
+  {
+    (void) subject;
+    (void) arg;
+    setValue();
+  }
+
+  virtual void notifyObservers(int arg)
+  {
+    typename std::vector<Observer<SimTaDynCell, int> *>::const_iterator it;
+
+    std::cerr << "The Cell #" << this->name << " notifyObservers:" << std::endl;;
+    for (it = observers_.begin(); it != observers_.end(); it++)
+      {
+        std::cerr << "  " << (static_cast<SimTaDynCell *>(*it))->name << std::endl;
+        (*it)->update(*(static_cast<SimTaDynCell *>(this)), arg);
+      }
+  }
+
+
+  /*
    * Static member returning the number of SimTaDynCell instances created
    */
   using ClassCounter<SimTaDynCell>::howMany;
@@ -228,25 +304,27 @@ public:
   inline friend bool operator==(const SimTaDynCell& a, const Key b);
   inline friend bool operator!=(const SimTaDynCell& a, const Key b);
 
-  virtual inline void addExplicitNeighbor(SimTaDynCell* const c)
+  virtual inline void addCell(SimTaDynCell* const cell)
   {
-    if (false == IsExplicitNeighborOf(c))
+    cell->attachObserver(*this);
+    //if (false == IsNeighborOf(cell))
       {
-        explicit_neighbors.push_front(c);
+        neighbors_.push_front(cell);
       }
   }
   virtual inline void removeExplicitNeighbor(SimTaDynCell* const c)
   {
     cout << "removeExplicitNeighbor " << c << std::endl;
-    explicit_neighbors.remove(c);
+    neighbors_.remove(c);
+    c->neighbors_.remove(this);
     cout << "removeED" << std::endl;
   }
-  virtual inline uint32_t nbExplicitNeighbors()
+  virtual inline uint32_t nbNeighbors()
   {
     uint32_t count = 0U;
     std::forward_list<SimTaDynCell*>::iterator neighbor;
-    for (neighbor = explicit_neighbors.begin();
-         neighbor != explicit_neighbors.end(); ++neighbor)
+    for (neighbor = neighbors_.begin();
+         neighbor != neighbors_.end(); ++neighbor)
       {
         count++;
       }
@@ -254,18 +332,43 @@ public:
   }
   virtual inline bool IsExplicitNeighborOf(SimTaDynCell* const c) const
   {
-    return (std::find(explicit_neighbors.begin(), explicit_neighbors.end(), c) != explicit_neighbors.end());
+    return (std::find(neighbors_.begin(), neighbors_.end(), c) != neighbors_.end());
   }
   virtual inline bool IsExplicitNeighborOf(const Key c)
   {
     std::forward_list<SimTaDynCell*>::iterator neighbor;
-    for (neighbor = explicit_neighbors.begin();
-         neighbor != explicit_neighbors.end(); ++neighbor)
+    for (neighbor = neighbors_.begin();
+         neighbor != neighbors_.end(); ++neighbor)
       {
         if ((*neighbor)->id_ == c)
           return true;
       }
     return false;
+  }
+
+  int32_t forth_eval()
+  {
+    int32_t eval = getValue();
+    std::cerr << "eval = " << getValue() << std::endl;
+    size_t last = 0;
+    size_t next = 0;
+    std::string delimiter = " ";
+
+    while ((next = code_forth_.find(delimiter, last)) != string::npos)
+      {
+        std::cerr << code_forth_.substr(last, next - last) << std::endl;
+        last = next + 1;
+      }
+    std::cerr << code_forth_.substr(last) << std::endl;
+
+    std::forward_list<SimTaDynCell*>::iterator neighbor;
+    for (neighbor = neighbors_.begin();
+         neighbor != neighbors_.end(); ++neighbor)
+      {
+        std::cerr << "eval += " << (*neighbor)->getValue() << std::endl;
+        eval += (*neighbor)->getValue();
+      }
+    return eval;
   }
 
   /*
@@ -277,8 +380,8 @@ public:
 
     whoAmI();
     cout << "  My explicit neighbors are: {" << endl;
-    for (neighbor = explicit_neighbors.begin();
-         neighbor != explicit_neighbors.end(); ++neighbor)
+    for (neighbor = neighbors_.begin();
+         neighbor != neighbors_.end(); ++neighbor)
       {
         cout << "  \"" << (*neighbor)->name << "\"" << endl;
       }

@@ -10,7 +10,7 @@
 // using directly a memeber 'static size_t count;' when a failure occured in creator member and also
 // easier for heritage.
 // *************************************************************************************************
-template<typename T> class ClassCounter
+template<class T> class ClassCounter
 {
 public:
   ClassCounter() { ++count_; }
@@ -22,6 +22,6 @@ private:
   static size_t count_;
 };
 
-template<typename T> size_t ClassCounter<T>::count_ = 0;
+template<class T> size_t ClassCounter<T>::count_ = 0;
 
 #endif /* CLASSCOUNTER_HPP_ */

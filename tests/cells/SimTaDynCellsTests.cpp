@@ -69,6 +69,19 @@ void SimTaDynCellsTests::testID()
 //--------------------------------------------------------------------------
 void SimTaDynCellsTests::testNeighbors()
 {
+  std::cerr << "Before GetValue " << c1->getValue() << " " << c2->getValue() << std::endl;
+  c1->setCodeForth("c1 c2 +");
+  c1->addCell(c2);
+
+  std::cerr << "--------------------\n";
+  c1->setValue(55);
+  std::cerr << "--------------------\n";
+  c2->setValue(11);
+  std::cerr << "--------------------\n";
+  std::cerr << "After GetValue " << c1->getValue() << " " << c2->getValue() << std::endl;
+  std::cerr << "Eval " << c1->forth_eval() << std::endl;
+
+  #if 0
   CPPUNIT_ASSERT_EQUAL(0U, c1->nbExplicitNeighbors());
   c1->addExplicitNeighbor(c3);
   c1->addExplicitNeighbor(c2);
@@ -96,6 +109,7 @@ void SimTaDynCellsTests::testNeighbors()
   CPPUNIT_ASSERT_EQUAL(1U, c1->nbExplicitNeighbors());
   CPPUNIT_ASSERT_EQUAL(false, c1->IsExplicitNeighborOf(c3->privateId()));
   CPPUNIT_ASSERT_EQUAL(true, c3->IsExplicitNeighborOf(c1));
+  #endif
 
   std::cerr << "FINI\n";
 }
