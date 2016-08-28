@@ -2,6 +2,7 @@
 #include "VectorTests.hpp"
 #include "BoundingBoxTests.hpp"
 #include "SimTaDynCellsTests.hpp"
+#include "ColorTests.hpp"
 
 int main(void)
 {
@@ -13,7 +14,15 @@ int main(void)
   suite1->addTest(new CppUnit::TestCaller<VectorTests>("testCopy", &VectorTests::testCopy));
   suite1->addTest(new CppUnit::TestCaller<VectorTests>("testOperations", &VectorTests::testOperations));
 
-  CppUnit::TestSuite* suite2 = new CppUnit::TestSuite("BoundingBoxTests");
+  CppUnit::TestSuite* suite2 = new CppUnit::TestSuite("ColorTests");
+  suite1->addTest(new CppUnit::TestCaller<ColorTests>("testCreator", &ColorTests::testCreator));
+  suite1->addTest(new CppUnit::TestCaller<ColorTests>("testSwap", &ColorTests::testSwap));
+  suite1->addTest(new CppUnit::TestCaller<ColorTests>("testEquality", &ColorTests::testEquality));
+  suite1->addTest(new CppUnit::TestCaller<ColorTests>("testArithmetic", &ColorTests::testArithmetic));
+  suite1->addTest(new CppUnit::TestCaller<ColorTests>("testCopy", &ColorTests::testCopy));
+  suite1->addTest(new CppUnit::TestCaller<ColorTests>("testOperations", &ColorTests::testOperations));
+
+  CppUnit::TestSuite* suite3 = new CppUnit::TestSuite("BoundingBoxTests");
   suite2->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testCreator", &BoundingBoxTests::testCreator));
   suite2->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testSwap", &BoundingBoxTests::testSwap));
   suite2->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testEquality", &BoundingBoxTests::testEquality));
@@ -21,7 +30,7 @@ int main(void)
   suite2->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testCopy", &BoundingBoxTests::testCopy));
   suite2->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testOperations", &BoundingBoxTests::testOperations));
 
-  CppUnit::TestSuite* suite3 = new CppUnit::TestSuite("SimTaDynCellsTests");
+  CppUnit::TestSuite* suite4 = new CppUnit::TestSuite("SimTaDynCellsTests");
   suite2->addTest(new CppUnit::TestCaller<SimTaDynCellsTests>("testCreator", &SimTaDynCellsTests::testCreator));
   suite2->addTest(new CppUnit::TestCaller<SimTaDynCellsTests>("testID", &SimTaDynCellsTests::testID));
   suite2->addTest(new CppUnit::TestCaller<SimTaDynCellsTests>("testNeighbors", &SimTaDynCellsTests::testNeighbors));
@@ -30,6 +39,7 @@ int main(void)
   runner.addTest(suite1);
   runner.addTest(suite2);
   runner.addTest(suite3);
+  runner.addTest(suite4);
   runner.run();
 
   return 0;

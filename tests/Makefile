@@ -31,6 +31,7 @@ VPATH=.:$(DEST):common:../src/common:cells:../src/cells
 ###################################################
 # Set objects architecture specific
 OBJECTS = Vector3D.o VectorTests.o \
+	Color.o ColorTests.o \
 	BoundingBox.o BoundingBoxTests.o \
 	SimTaDynCellsTests.o \
 	main.o
