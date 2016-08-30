@@ -1,8 +1,7 @@
 #ifndef SHAPEFILE_HPP_
 #  define SHAPEFILE_HPP_
 
-#  include "graph.hpp"
-#  include "boundingbox.hpp"
+#  include "SimTaDynGraphs.hpp"
 
 class ShapefileLoaderException { };
 class ShapefileLoaderOpenFailed : public ShapefileLoaderException

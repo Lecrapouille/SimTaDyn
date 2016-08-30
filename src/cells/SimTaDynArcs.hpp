@@ -1,7 +1,7 @@
 #ifndef ARCS_HPP_
 #  define ARCS_HPP_
 
-#include "nodes.hpp"
+#include "SimTaDynNodes.hpp"
 
 // *************************************************************************************************
 // Define an Arc (aka Edge)

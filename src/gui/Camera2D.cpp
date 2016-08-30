@@ -1,4 +1,4 @@
-#include "camera2D.hpp"
+#include "Camera2D.hpp"
 
 void Camera2D::zoomfitImage(float32_t window_width, float32_t window_height, float32_t image_width, float32_t image_height)
 {

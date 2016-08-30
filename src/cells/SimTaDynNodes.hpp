@@ -1,7 +1,7 @@
 #ifndef NODES_HPP_
 #  define NODES_HPP_
 
-#  include "cells.hpp"
+#  include "SimTaDynCells.hpp"
 
 // *************************************************************************************************
 // Define a Node (aka Vertex)

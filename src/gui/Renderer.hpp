@@ -11,8 +11,8 @@
 #    include <GL/glu.h>
 #  endif
 
-#  include "color.hpp"
-#  include "camera2D.hpp"
+#  include "Color.hpp"
+#  include "Camera2D.hpp"
 
 class Renderer
 {

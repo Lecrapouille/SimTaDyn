@@ -1,7 +1,7 @@
 #ifndef SIMTADYNCELLS_HPP_
 #  define SIMTADYNCELLS_HPP_
 
-#  include "classcounter.hpp"
+#  include "ClassCounter.hpp"
 #  include "handler.hpp"
 #  include "BoundingBox.hpp"
 #include <forward_list>

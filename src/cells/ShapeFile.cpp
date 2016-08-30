@@ -1,4 +1,4 @@
-#include "shapefile.hpp"
+#include "ShapeFile.hpp"
 
 // ESRI Shapefile Technical Description:
 // https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf

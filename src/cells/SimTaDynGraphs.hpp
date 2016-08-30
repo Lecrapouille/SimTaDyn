@@ -1,9 +1,8 @@
 #ifndef GRAPH_HPP_
 #  define GRAPH_HPP_
 
-#  include "nodes.hpp"
-#  include "arcs.hpp"
-#  include "boundingbox.hpp"
+#  include "SimTaDynNodes.hpp"
+#  include "SimTaDynArcs.hpp"
 
 // *************************************************************************************************
 // Define a SimTaDyn graph

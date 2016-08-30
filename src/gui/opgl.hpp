@@ -12,8 +12,8 @@
 #  include <exception>
 #  include <iostream>
 
-#  include "renderer.hpp"
-#  include "shapefile.hpp"
+#  include "Renderer.hpp"
+#  include "ShapeFile.hpp"
 
 // *************************************************************************************************
 // Exception
