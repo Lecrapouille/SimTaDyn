@@ -25,7 +25,6 @@ public:
   void execPrimitive(const Cell token);
   int32_t dstackSize();
   bool createDicoEntry(const Cell token, const std::string& word, const bool immediate);
-  bool searchDicoEntry(const std::string& word, uint32_t& ptr);
   void dumpDico();
   void displayDico();
 
@@ -35,7 +34,7 @@ protected:
   Cell *return_stack[STACK_SIZE];
 
   // Registers
-  Cell  tos;   // Top of (data) Stack
+  Cell  tos, tos1, tos2, tos3, tos4;   // Top of (data) Stack
   Cell *dsp;   // Data stack pointer
   Cell **rsp;  // Return stack pointer
   Cell *ip;    // Instruction pointer (CFA of the next word to be executed)

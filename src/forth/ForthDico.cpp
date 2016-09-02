@@ -6,12 +6,13 @@
 #define NEXT_MULTIPLE_OF_4(x) (((x) + 3) & ~0x03)
 #define NEXT_MULTIPLE_OF_2(x) (((x) + 1) & ~0x01)
 
-bool Forth::searchDicoEntry(const std::string& word, uint32_t& ptr)
+// Convert a string into a token
+bool Forth::toToken(const std::string& word, Cell& token)
 {
   uint32_t next = 1;
   uint32_t length;
+  uint32_t ptr = last;
 
-  ptr = last;
   while (0 != next)
   {
       length = dictionary[ptr] & 0x1f;
@@ -19,17 +20,27 @@ bool Forth::searchDicoEntry(const std::string& word, uint32_t& ptr)
         {
           if (0 == std::strncmp(word.c_str(), (char*) &dictionary[ptr + 1U], word.size()))
             {
+              token = dictionary[ptr + length + 2U] * 256U + dictionary[ptr + length + 3U];
+              //std::cerr << "Found word token: " << token << std::endl;
               return true;
             }
         }
 
       next = dictionary[ptr + length] * 256U + dictionary[ptr + length + 1U];
       ptr = ptr - next;
-    }
+  }
 
+  std::cerr << "Unknow word '" << word << "'" << std::endl;
   return false;
 }
 
+// Create a new forth definition (aka entry) at the 1st empty location of the dictionary.
+// The 1st empty location in the dictionnary is given by the variable 'here'.
+// The last inserted entry is given by the variable 'last'.
+// An entry is stored as:
+// byte -1 ||       byte0         | byte1 .. byteN |     byteN+1 byteN+2       | byteN+3 .. byteM || byteM+1 ..
+//  ..     || flags + word length | the word name  | Realtive @ Previous entry | word deffinition ||   ..
+// All entries are consecutive.
 bool Forth::createDicoEntry(const Cell token, const std::string& word, const bool immediate)
 {
   uint32_t length = word.size();
@@ -65,7 +76,7 @@ bool Forth::createDicoEntry(const Cell token, const std::string& word, const boo
   // Padding
   for (; i < reserved - 1U; ++i)
     {
-      dictionary[ptr++] = 0x00;
+      dictionary[ptr++] = 0xFF;
     }
 
   // Store the NFA of the preceding word
@@ -114,7 +125,7 @@ void Forth::displayDico()
       std::cout << "'";
       for (i = 0; i < length; ++i)
         {
-          if (0 == dictionary[ptr + i + 1U])
+          if (0xFF == dictionary[ptr + i + 1U])
             break;
           std::cout << dictionary[ptr + i + 1U];
         }
