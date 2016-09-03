@@ -1,96 +1,53 @@
 #include "Forth.hpp"
 
-#define FLAG_IMMED           0x01
-#define FLAG_HIDDEN          0x20
-#define FLAG_NODISASM        0x40
-#define FLAG_LENMASK         0x1f
-#define FLAG_MARKER          0x80
-#define FLAG_FLAGSMASK       0x7f
-
-// Data stack
-#define DPUSH(t) (*(dsp++) = CELL(t))
-#define DDROP()  (*(--dsp))
-#define DPOP(t)  (t = DDROP())
-#define DPICK(n) (*(dsp - n - 1))
-
-// Return stack
-#define RPUSH(t) (*(rsp++) = CADDR(t))
-#define RPOP(t)  (t = *(--rsp))
-
-//
-#define BINARY_OP(op) { tos = DDROP() op tos; }
-
-//
-#define SWAP(x, y) { x = x ^ y; y = x ^ y; x = x ^ y; }
-
-enum ForthPrimitive
-  {
-    FORTH_PRIMITIVE_NOP = 0,
-    FORTH_PRIMITIVE_EXIT,
-
-    FORTH_PRIMITIVE_1MINUS,
-    FORTH_PRIMITIVE_1PLUS,
-    FORTH_PRIMITIVE_2MINUS,
-    FORTH_PRIMITIVE_2PLUS,
-
-    FORTH_PRIMITIVE_NIP,
-    FORTH_PRIMITIVE_DUP,
-    FORTH_PRIMITIVE_DROP,
-    FORTH_PRIMITIVE_SWAP,
-    FORTH_PRIMITIVE_OVER,
-    FORTH_PRIMITIVE_ROT,
-    FORTH_PRIMITIVE_TUK,
-
-    FORTH_PRIMITIVE_2DUP,
-    FORTH_PRIMITIVE_2OVER,
-    FORTH_PRIMITIVE_2SWAP,
-    FORTH_PRIMITIVE_2DROP,
-
-    FORTH_PRIMITIVE_PLUS,
-    FORTH_PRIMITIVE_MINUS,
-    FORTH_PRIMITIVE_DIV,
-    FORTH_PRIMITIVE_TIMES,
-    FORTH_PRIMITIVE_RSHIFT,
-    FORTH_PRIMITIVE_LSHIFT,
-    FORTH_PRIMITIVE_GREATER_EQUAL,
-    FORTH_PRIMITIVE_LOWER_EQUAL,
-    FORTH_PRIMITIVE_GREATER,
-    FORTH_PRIMITIVE_LOWER,
-    FORTH_PRIMITIVE_EQUAL,
-    FORTH_PRIMITIVE_AND,
-    FORTH_PRIMITIVE_OR,
-    FORTH_PRIMITIVE_XOR,
-    FORTH_PRIMITIVE_DISP,
-    NUM_PRIMITIVES
-  };
-
-#define CELL(x)  reinterpret_cast<Cell>(x)
-#define CADDR(x) reinterpret_cast<Cell*>(x)
-
+// **************************************************************
+// Constructor: initialize the context but do not boot
+// **************************************************************
 Forth::Forth()
 {
   dsp = data_stack;
   rsp = return_stack;
   here = 0U;
   last = 0U;
-  changeBase(10);
-  //doForth();
+  changeDisplayBase(10);
 }
 
-inline int32_t Forth::dstackSize()
+// **************************************************************
+// When displaying numbers on screen, display them on the
+// selected base.
+// **************************************************************
+inline void Forth::changeDisplayBase(const uint8_t newbase)
 {
-  return return_stack - rsp;
+  base = newbase;
 }
 
-void Forth::execPrimitive(const Cell token)
+// **************************************************************
+//
+// **************************************************************
+inline bool Forth::isPrimitive(const Cell16 id) const
 {
-  switch (token)
+  return /*(id >= 0) &&*/ (id < NUM_PRIMITIVES);
+}
+
+// **************************************************************
+//
+// **************************************************************
+void Forth::execPrimitive(const Cell16 idPrimitive)
+{
+  switch (idPrimitive)
     {
     case FORTH_PRIMITIVE_NOP:
       break;
+
+    case FORTH_PRIMITIVE_COLON:
+      //getNextWord(word);
+      //createDicoEntry(FORTH_PRIMITIVE_PLUS, word, 0);
+      break;
+
     case FORTH_PRIMITIVE_EXIT:
       RPOP(ip);
       break;
+
     case FORTH_PRIMITIVE_1MINUS:
       tos--;
       break;
@@ -222,49 +179,74 @@ void Forth::execPrimitive(const Cell token)
       BINARY_OP(^);
       break;
     case FORTH_PRIMITIVE_DISP:
-      std::cout << std::setbase(base) << tos << std::endl;
+      std::cout << std::setbase(base) << tos << " ";//std::endl;
       DPOP(tos);
       break;
     default:
-      std::cerr << "Unrecognised token = " << token << std::endl;
+      ForthUnknownPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;
       break;
     }
 }
 
-inline bool Forth::isPrimitive(const Cell token)
+// **************************************************************
+// Return the number of element in the return stack
+// **************************************************************
+inline int32_t Forth::RStackSize() const
 {
-  return /*(token >= 0) &&*/ (token < NUM_PRIMITIVES);
+  int32_t size = return_stack - rsp;
+  if (size < 0)
+    {
+      ForthRStackOV e; throw e;
+    }
+  return size;
 }
 
-inline void Forth::changeBase(const uint32_t newbase)
+// **************************************************************
+//
+// **************************************************************
+void Forth::execToken(const Cell16 tx)
 {
-  base = newbase;
-}
+  Cell16 token = tx;
+  ip = NULL;
 
-void Forth::eval(const Cell tx)
-{
-  Cell token = tx;
-
+  // Always eat the top of the stack and store the value in a
+  // working register.
   DPOP(tos);
+
+  // Traverse the word definition like a tree
   do
     {
-      /* while (!isPrimitive(token))
+      // A non primitive word is a consecutive set of primitive
+      // identifier
+      while (!isPrimitive(token))
         {
           RPUSH(ip);
-          ip = dictionary + token;
+          ip = (Cell16*) (dictionary + token);
+          //checkDicoBoundaries(ip, "execToken");
           token = *(ip++);
-          }*/
+        }
+
+      //
       execPrimitive(token);
-      if (ip)
+
+      // Do not forget than non-primitive words have the
+      // token EXIT to pop the return stack to get back
+      // IP value.
+      if (NULL != ip)
         {
           token = *ip++;
         }
-    } while ((return_stack - rsp) > 0);
+    } while (RStackSize() > 0);
+
+  // Store the working register
   DPUSH(tos);
 }
 
-// Convert a string into a number
-bool Forth::toInt(const std::string& word, Cell& number)
+// **************************************************************
+// Convert a string to a number.
+// Return false if an error occured
+// **************************************************************
+bool Forth::toNumber(const std::string& word, Cell32& number)
 {
   int base = 10;
 
@@ -298,113 +280,139 @@ bool Forth::toInt(const std::string& word, Cell& number)
     }
 }
 
-bool Forth::interprete(const std::string& word)
+// **************************************************************
+//
+// **************************************************************
+void Forth::eat(std::string const& word)
 {
-  Cell number, token;
+  Cell32 number;
+  Cell16 token;
 
-  //std::cout << "Interprete: " << word << std::endl;
-  if (toInt(word, number))
+  if (toToken(word, token))
+    {
+      execToken(token);
+    }
+  else if (toNumber(word, number))
     {
       DPUSH(number);
     }
-  else if (toToken(word, token))
-    {
-      eval(token);
-    }
   else
-    return false;
-  return true;
+    {
+      ForthUnknownWord e(word); throw e;
+    }
 }
 
-bool Forth::readString(const std::string& code_forth)
-{
-  std::string delimiter = " ";
-  std::string word;
-  size_t last = 0;
-  size_t next = 0;
 
-  while ((next = code_forth.find(delimiter, last)) != std::string::npos)
+// **************************************************************
+//
+// **************************************************************
+bool Forth::eatString(std::string const& code_forth)
+{
+  std::string word;
+
+  try
     {
-      word = code_forth.substr(last, next - last);
-      last = next + 1;
-      if (false == interprete(word))
-        return false;
+      reader.useForthString(code_forth);
+      while (reader.getNextWord(word))
+        {
+          eat(word);
+        }
+      std::cout << "ok" << std::endl;
+      return true;
     }
-  word = code_forth.substr(last);
-  if (false == interprete(word))
-    return false;
-  return true;
+  catch(std::exception const& e)
+    {
+      std::cerr << "[ERROR]: " << e.what() << std::endl;
+      // TODO: restore Forth context
+      return false;
+    }
+}
+
+// **************************************************************
+//
+// **************************************************************
+bool Forth::eatFile(std::string const& filename)
+{
+  std::string word;
+  bool res;
+
+  try
+    {
+      res = reader.openForthFile(filename);
+      if (res)
+        {
+          while (reader.getNextWord(word))
+            {
+              eat(word);
+            }
+          std::cout << "ok" << std::endl;
+          return true;
+        }
+      return false;
+    }
+  catch(std::exception const& e)
+    {
+      std::cerr << "[ERROR]: " << e.what() << std::endl;
+      // TODO: restore Forth context
+      return false;
+    }
+}
+
+
+// **************************************************************
+//
+// **************************************************************
+void Forth::boot()
+{
+  // Les ranger par ordre lexico ?
+  createDicoEntry(FORTH_PRIMITIVE_NOP, "NOP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
+  createDicoEntry(FORTH_PRIMITIVE_1MINUS, "1-", 0);
+  createDicoEntry(FORTH_PRIMITIVE_1PLUS, "1+", 0);
+  createDicoEntry(FORTH_PRIMITIVE_2MINUS, "2-", 0);
+  createDicoEntry(FORTH_PRIMITIVE_2PLUS, "2+", 0);
+
+  createDicoEntry(FORTH_PRIMITIVE_NIP, "NIP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_DUP, "DUP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_DROP, "DROP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_SWAP, "SWAP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_OVER, "OVER", 0);
+  createDicoEntry(FORTH_PRIMITIVE_ROT, "ROT", 0);
+  createDicoEntry(FORTH_PRIMITIVE_TUK, "TUK", 0);
+  createDicoEntry(FORTH_PRIMITIVE_2DUP, "2DUP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_2DROP, "2DROP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_2SWAP, "2SWAP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_2OVER, "2OVER", 0);
+
+  createDicoEntry(FORTH_PRIMITIVE_PLUS, "+", 0);
+  createDicoEntry(FORTH_PRIMITIVE_MINUS, "-", 0);
+  createDicoEntry(FORTH_PRIMITIVE_DIV, "/", 0);
+  createDicoEntry(FORTH_PRIMITIVE_TIMES, "*", 0);
+  createDicoEntry(FORTH_PRIMITIVE_RSHIFT, ">>", 0);
+  createDicoEntry(FORTH_PRIMITIVE_LSHIFT, "<<", 0);
+  createDicoEntry(FORTH_PRIMITIVE_GREATER_EQUAL, ">=", 0);
+  createDicoEntry(FORTH_PRIMITIVE_LOWER_EQUAL, "<=", 0);
+  createDicoEntry(FORTH_PRIMITIVE_GREATER, ">", 0);
+  createDicoEntry(FORTH_PRIMITIVE_LOWER, "<", 0);
+  createDicoEntry(FORTH_PRIMITIVE_EQUAL, "==", 0);
+  createDicoEntry(FORTH_PRIMITIVE_AND, "AND", 0);
+  createDicoEntry(FORTH_PRIMITIVE_OR, "OR", 0);
+  createDicoEntry(FORTH_PRIMITIVE_XOR, "XOR", 0);
+  createDicoEntry(FORTH_PRIMITIVE_DISP, ".", 0);
 }
 
 Forth forth;
 
-// Debug
-static void lookup(const std::string& word)
-{
-  bool res;
-  uint32_t ptr;
-
-  std::cout << "-------------------------------------\n";
-  std::cout << "Looking for " << word << std::endl;
-  res = forth.toToken(word, ptr);
-  if (res)
-    {
-      std::cout << "Found " << ptr << std::endl;
-    }
-  else
-    {
-      std::cout << "Not found" << std::endl;
-    }
-}
-
 int main()
 {
-  // Les ranger par ordre lexico ?
-  forth.createDicoEntry(FORTH_PRIMITIVE_NOP, "NOP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_1MINUS, "1-", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_1PLUS, "1+", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_2MINUS, "2-", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_2PLUS, "2+", 0);
-
-  forth.createDicoEntry(FORTH_PRIMITIVE_NIP, "NIP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_DUP, "DUP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_DROP, "DROP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_SWAP, "SWAP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_OVER, "OVER", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_ROT, "ROT", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_TUK, "TUK", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_2DUP, "2DUP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_2DROP, "2DROP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_2SWAP, "2SWAP", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_2OVER, "2OVER", 0);
-
-  forth.createDicoEntry(FORTH_PRIMITIVE_PLUS, "+", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_MINUS, "-", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_DIV, "/", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_TIMES, "*", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_RSHIFT, ">>", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_LSHIFT, "<<", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_GREATER_EQUAL, ">=", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_LOWER_EQUAL, "<=", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_GREATER, ">", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_LOWER, "<", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_EQUAL, "==", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_AND, "AND", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_OR, "OR", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_XOR, "XOR", 0);
-  forth.createDicoEntry(FORTH_PRIMITIVE_DISP, ".", 0);
-  forth.dumpDico();
+  forth.boot();
+  forth.dumpDico("Dico.fbin");
   forth.displayDico();
 
-  lookup(".");
-  lookup("1+");
-  lookup("PLUS");
-  lookup("DUP");
-  std::cout << "-------------------------------------\n";
-
   std::string txt = "1 2 3 4 2OVER . . . . . .";
-  forth.readString(txt);
+  //forth.eatString(txt);
+
+  forth.eatFile("hello.simforth");
 
   return 0;
 }

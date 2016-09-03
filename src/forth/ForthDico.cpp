@@ -1,39 +1,55 @@
 #include "Forth.hpp"
-#include <fstream>
 
-#define CELL(x)  reinterpret_cast<Cell>(x)
-#define CADDR(x) reinterpret_cast<Cell*>(x)
-#define NEXT_MULTIPLE_OF_4(x) (((x) + 3) & ~0x03)
-#define NEXT_MULTIPLE_OF_2(x) (((x) + 1) & ~0x01)
-
-// Convert a string into a token
-bool Forth::toToken(const std::string& word, Cell& token)
+// **************************************************************
+//
+// **************************************************************
+/*inline void Forth::checkDicoBoundaries(const Cell16* const ip, std::string const& funcName) const
 {
-  uint32_t next = 1;
-  uint32_t length;
-  uint32_t ptr = last;
+  if ((ip <  CADDR(dictionary)) || (ip > CADDR(&dictionary[DATASPACE_SIZE])))
+    {
+      ForthDicoOOB e(ip, funcName); throw e;
+    }
+    }*/
 
-  while (0 != next)
-  {
-      length = dictionary[ptr] & 0x1f;
+// **************************************************************
+// Convert a string into a token
+// **************************************************************
+bool Forth::toToken(const std::string& word, Cell16& token)
+{
+  Cell32 prev = 1; // Previous forth word
+  Cell32 length;
+
+  // last is a Cell16 but for computation with minus operator we need 32bits
+  Cell32 ptr = last;
+
+  // 0 (aka NULL) meaning the last dictionary entry.  Because we are
+  // using relative addresses as uint16_t to save space we cannot use
+  // NULL
+  while (0 != prev)
+    {
+      // Compare name lengths before comparing strings
+      length = dictionary[ptr] & MASK_FORTH_NAME_SIZE;
       if (length == NEXT_MULTIPLE_OF_2(word.size() + 1U))
         {
+          // Same length, check if names mismatch
           if (0 == std::strncmp(word.c_str(), (char*) &dictionary[ptr + 1U], word.size()))
             {
+              // word found in dictionnary
               token = dictionary[ptr + length + 2U] * 256U + dictionary[ptr + length + 3U];
-              //std::cerr << "Found word token: " << token << std::endl;
               return true;
             }
         }
 
-      next = dictionary[ptr + length] * 256U + dictionary[ptr + length + 1U];
-      ptr = ptr - next;
-  }
+      // Not found: go to the previous word
+      prev = dictionary[ptr + length] * 256U + dictionary[ptr + length + 1U];
+      ptr = ptr - prev;
+    }
 
-  std::cerr << "Unknow word '" << word << "'" << std::endl;
+  // std::cerr << "Unknow word '" << word << "'" << std::endl;
   return false;
 }
 
+// **************************************************************
 // Create a new forth definition (aka entry) at the 1st empty location of the dictionary.
 // The 1st empty location in the dictionnary is given by the variable 'here'.
 // The last inserted entry is given by the variable 'last'.
@@ -41,10 +57,11 @@ bool Forth::toToken(const std::string& word, Cell& token)
 // byte -1 ||       byte0         | byte1 .. byteN |     byteN+1 byteN+2       | byteN+3 .. byteM || byteM+1 ..
 //  ..     || flags + word length | the word name  | Realtive @ Previous entry | word deffinition ||   ..
 // All entries are consecutive.
-bool Forth::createDicoEntry(const Cell token, const std::string& word, const bool immediate)
+// **************************************************************
+bool Forth::createDicoEntry(const Cell16 token, const std::string& word, const bool immediate)
 {
-  uint32_t length = word.size();
-  uint32_t ptr = here;
+  Cell32 length = word.size();
+  Cell32 ptr = here;
 
   // Forth words are max 30 bytes long
   if (length > 31U)
@@ -93,24 +110,37 @@ bool Forth::createDicoEntry(const Cell token, const std::string& word, const boo
   dictionary[ptr++] = token / 256U;
   dictionary[ptr++] = token & 255U;
 
-  // Update the last entry
+  // Update the last entry and be sure to have aligned addresses
   last = here;
-  here = ptr;
+  here = NEXT_MULTIPLE_OF_2(ptr);
 
   return true;
 }
 
-void Forth::dumpDico()
+// **************************************************************
+// Save the dictionnary in a binary file.
+// Use the commande hexdump -C filename for debugging it
+// **************************************************************
+bool Forth::dumpDico(std::string const& filename)
 {
-  std::ofstream out = std::ofstream("file.binary", std::ios::binary | std::ios::trunc);
+  std::ofstream out = std::ofstream(filename, std::ios::binary | std::ios::trunc);
 
   if (out.is_open())
     {
       out.write((char*) dictionary, here * sizeof (char));
+      out.close();
+      return true;
     }
-  out.close();
+  else
+    {
+      std::cerr << "Cannot dump the dico. Reason was xxx" << std::endl;
+      return false;
+    }
 }
 
+// **************************************************************
+// Uggly print of the dictionary
+// **************************************************************
 void Forth::displayDico()
 {
   uint32_t next = 1;
@@ -120,7 +150,7 @@ void Forth::displayDico()
             << "\n------------------------------------\n";
   ptr = last;
   while (0 != next)
-  {
+    {
       length = dictionary[ptr] & 0x1f;
       std::cout << "'";
       for (i = 0; i < length; ++i)
