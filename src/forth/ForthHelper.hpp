@@ -21,6 +21,9 @@ typedef uint16_t       Cell16;
 typedef uint8_t        Cell8;
 
 // Memory cast
+#define ADDR8(x)       (reinterpret_cast<Cell8*>(x))
+#define CELL8(x)       (reinterpret_cast<Cell8>(x))
+#define CELL16(x)      (reinterpret_cast<Cell16>(x))
 #define CELL32(x)      (reinterpret_cast<Cell32>(x))
 #define CADDR(x)       (reinterpret_cast<Cell16*>(x))
 
@@ -32,11 +35,18 @@ typedef uint8_t        Cell8;
 // FIXME: Maybe we can divide / 2 addresses because they are aligned.
 #define DATASPACE_SIZE (64U * 1024U) // of bytes
 
+//
+#define CELL16_MAX_VALUE (65535U)
+// FIXME: COMPIL_ASSERT_TIME((DATASPACE_SIZE - 1U) <= CELL16_MAX_VALUE)
+
 // Used for aligning 32-bits addresses
 #define NEXT_MULTIPLE_OF_4(x) (((x) + 3) & ~0x03)
 
 // Used for aligning 16-bits addresses
 #define NEXT_MULTIPLE_OF_2(x) (((x) + 1) & ~0x01)
+
+// Spare byte
+#define SPARE_VALUE   (0xFF)
 
 // **************************************************************
 //

@@ -17,16 +17,20 @@ public:
   bool dumpDico(std::string const& filename);
   void displayDico();
 
+  void dicoAppendCell16(Cell16 value);
+  Cell16 readCell16at(const Cell8 *addr);
+  void writeCell16at(Cell8 *addr, Cell16 data);
+    bool toToken(std::string const& wordName, Cell16& token);
 protected:
   inline int32_t RStackSize() const;
   inline bool isPrimitive(const Cell16 id) const;
   void execPrimitive(const Cell16 idPrimitive);
   void execToken(const Cell16 tx);
-  //inline void checkDicoBoundaries(const Cell16* const ip, std::string const& funcName) const;
-  bool toToken(const std::string& wordName, Cell16& token);
-  bool toNumber(const std::string& word, Cell32& number);
+  void checkDicoBoundaries(Cell16* const ip, std::string const& funcName) const;
+  bool toNumber(std::string const& word, Cell32& number);
   void eat(std::string const& word);
-  bool createDicoEntry(const Cell16 token, const std::string& word, const bool immediate);
+  bool createDicoEntry(const Cell16 token, std::string const& word, const bool immediate);
+
 
 protected:
   Cell8   dictionary[DATASPACE_SIZE];
@@ -45,6 +49,8 @@ protected:
 
   // Base (octal, decimal, hexa) when displaying numbers
   int32_t  base;
+
+  uint32_t  mode; // compile/execution
 
   // Eat ascii code
   ForthTxtReader reader;

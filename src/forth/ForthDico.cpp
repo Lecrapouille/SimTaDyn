@@ -3,18 +3,46 @@
 // **************************************************************
 //
 // **************************************************************
-/*inline void Forth::checkDicoBoundaries(const Cell16* const ip, std::string const& funcName) const
+void Forth::checkDicoBoundaries(Cell16* const ip, std::string const& funcName) const
 {
-  if ((ip <  CADDR(dictionary)) || (ip > CADDR(&dictionary[DATASPACE_SIZE])))
+  Cell8* ip8 = reinterpret_cast<Cell8*>(ip);
+
+  if ((ip8 < dictionary) || (ip8 > &dictionary[DATASPACE_SIZE]))
     {
       ForthDicoOOB e(ip, funcName); throw e;
     }
-    }*/
+}
+
+// **************************************************************
+//
+// **************************************************************
+void Forth::dicoAppendCell16(Cell16 value)
+{
+  dictionary[here++] = value / 256U;
+  dictionary[here++] = value & 255U;
+}
+
+// **************************************************************
+//
+// **************************************************************
+void Forth::writeCell16at(Cell8 *addr, Cell16 data)
+{
+  *addr++ = data >> 8;
+  *addr = data;
+}
+
+// **************************************************************
+//
+// **************************************************************
+Cell16 Forth::readCell16at(const Cell8 *addr)
+{
+  return (addr[0] << 8) | addr[1];
+}
 
 // **************************************************************
 // Convert a string into a token
 // **************************************************************
-bool Forth::toToken(const std::string& word, Cell16& token)
+bool Forth::toToken(std::string const& word, Cell16& token)
 {
   Cell32 prev = 1; // Previous forth word
   Cell32 length;
@@ -27,21 +55,25 @@ bool Forth::toToken(const std::string& word, Cell16& token)
   // NULL
   while (0 != prev)
     {
-      // Compare name lengths before comparing strings
-      length = dictionary[ptr] & MASK_FORTH_NAME_SIZE;
-      if (length == NEXT_MULTIPLE_OF_2(word.size() + 1U))
+      // Ignore words with the SMUDGE bit */
+      if (!(dictionary[ptr] & FLAG_SMUDGE))
         {
-          // Same length, check if names mismatch
-          if (0 == std::strncmp(word.c_str(), (char*) &dictionary[ptr + 1U], word.size()))
+          // Compare name lengths before comparing strings
+          length = dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+          if ((length + 1U) == NEXT_MULTIPLE_OF_2(word.size() + 1U))
             {
-              // word found in dictionnary
-              token = dictionary[ptr + length + 2U] * 256U + dictionary[ptr + length + 3U];
-              return true;
+              // Same length, check if names mismatch
+              if (0 == std::strncmp(word.c_str(), (char*) &dictionary[ptr + 1U], word.size()))
+                {
+                  // Word found in dictionnary
+                  token = dictionary[ptr + length + 3U] * 256U + dictionary[ptr + length + 4U];
+                  return true;
+                }
             }
         }
 
       // Not found: go to the previous word
-      prev = dictionary[ptr + length] * 256U + dictionary[ptr + length + 1U];
+      prev = dictionary[ptr + length + 1U] * 256U + dictionary[ptr + length + 2U];
       ptr = ptr - prev;
     }
 
@@ -58,7 +90,7 @@ bool Forth::toToken(const std::string& word, Cell16& token)
 //  ..     || flags + word length | the word name  | Realtive @ Previous entry | word deffinition ||   ..
 // All entries are consecutive.
 // **************************************************************
-bool Forth::createDicoEntry(const Cell16 token, const std::string& word, const bool immediate)
+bool Forth::createDicoEntry(const Cell16 token, std::string const& word, const bool immediate)
 {
   Cell32 length = word.size();
   Cell32 ptr = here;
@@ -81,7 +113,7 @@ bool Forth::createDicoEntry(const Cell16 token, const std::string& word, const b
     }
 
   // Store the word header
-  dictionary[ptr++] = (1U << 7U) | (immediate << 6U) | ((uint8_t) reserved);
+  dictionary[ptr++] = (1U << 7U) | (immediate << 6U) | ((uint8_t) reserved - 1U);
 
   // Store the word name
   uint32_t i;
@@ -93,12 +125,12 @@ bool Forth::createDicoEntry(const Cell16 token, const std::string& word, const b
   // Padding
   for (; i < reserved - 1U; ++i)
     {
-      dictionary[ptr++] = 0xFF;
+      dictionary[ptr++] = SPARE_VALUE;
     }
 
   // Store the NFA of the preceding word
   uint32_t relative_address = here - last;
-  if (relative_address > 66535U)
+  if (relative_address > CELL16_MAX_VALUE)
     {
       std::cerr << "[ERR] I cannot create a new word containing more than 2^16 words." << std::endl;
     }
@@ -143,28 +175,52 @@ bool Forth::dumpDico(std::string const& filename)
 // **************************************************************
 void Forth::displayDico()
 {
+  uint32_t cphere = here;
   uint32_t next = 1;
-  uint32_t length, token, ptr, i;
+  uint32_t def_length, length, token, ptr, i;
+  bool smudge, immediate;
 
-  std::cout << "Display Dico: " << last
+  std::cout << "Display Dico (LAST: " << last << ", HERE: " << here << ")"
             << "\n------------------------------------\n";
+
+  // Iterate all words from the last entry
   ptr = last;
   while (0 != next)
     {
-      length = dictionary[ptr] & 0x1f;
-      std::cout << "'";
+      // Get word name and length name
+      length = dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+      std::cout << "At " << ptr << " (" << (uint32_t*) &dictionary[ptr] << "): ";
       for (i = 0; i < length; ++i)
         {
-          if (0xFF == dictionary[ptr + i + 1U])
+          // Ignore spared length used for address alignement
+          if (SPARE_VALUE == dictionary[ptr + i + 1U])
             break;
           std::cout << dictionary[ptr + i + 1U];
         }
-      std::cout  << "' ";
-      next = dictionary[ptr + length] * 256U + dictionary[ptr + length + 1U];
-      std::cout << "NFA: " << next;
-      token = dictionary[ptr + length + 2U] * 256U + dictionary[ptr + length + 3U];
-      std::cout << " Token: " << token << std::endl;
+      std::cout  << " ";
 
+      // Display flags
+      smudge = dictionary[ptr] & FLAG_SMUDGE;
+      immediate = dictionary[ptr] & FLAG_IMMEDIATE;
+      if (immediate) std::cout  << "I ";
+      if (smudge) std::cout  << "S ";
+
+      // NFA of the previous word
+      next = dictionary[ptr + length + 1U] * 256U + dictionary[ptr + length + 2U];
+      std::cout << "(NFA: " << next << ") ";
+
+      // Tokens
+      def_length = cphere - ptr - length - 3U;
+      std::cout << (def_length / 2U) << " token(s):";
+      for (i = 0; i < def_length; i += 2)
+        {
+          token = dictionary[ptr + length + 3U + i] * 256U + dictionary[ptr + length + 4U + i];
+          std::cout << " #" << token;
+        }
+      std::cout << std::endl;
+
+      // Go to the previous entry
+      cphere = ptr;
       ptr = ptr - next;
     }
 }

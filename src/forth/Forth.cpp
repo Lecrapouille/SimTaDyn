@@ -26,166 +26,8 @@ inline void Forth::changeDisplayBase(const uint8_t newbase)
 // **************************************************************
 inline bool Forth::isPrimitive(const Cell16 id) const
 {
+  //std::cout << "isPrimitive " << (uint32_t) id << " " << (id < NUM_PRIMITIVES) << std::endl;
   return /*(id >= 0) &&*/ (id < NUM_PRIMITIVES);
-}
-
-// **************************************************************
-//
-// **************************************************************
-void Forth::execPrimitive(const Cell16 idPrimitive)
-{
-  switch (idPrimitive)
-    {
-    case FORTH_PRIMITIVE_NOP:
-      break;
-
-    case FORTH_PRIMITIVE_COLON:
-      //getNextWord(word);
-      //createDicoEntry(FORTH_PRIMITIVE_PLUS, word, 0);
-      break;
-
-    case FORTH_PRIMITIVE_EXIT:
-      RPOP(ip);
-      break;
-
-    case FORTH_PRIMITIVE_1MINUS:
-      tos--;
-      break;
-    case FORTH_PRIMITIVE_1PLUS:
-      tos++;
-      break;
-    case FORTH_PRIMITIVE_2MINUS:
-      tos -= 2;
-      break;
-    case FORTH_PRIMITIVE_2PLUS:
-      tos += 2;
-      break;
-
-      // drop ( a -- )
-    case FORTH_PRIMITIVE_DROP:
-      DPOP(tos);
-      break;
-
-      // nip ( a b -- b ) swap drop ;
-    case FORTH_PRIMITIVE_NIP:
-      DDROP();
-      break;
-
-      // dup ( a -- a a )
-    case FORTH_PRIMITIVE_DUP:
-      DPUSH(tos);
-      break;
-
-      // swap ( a b -- b a )
-    case FORTH_PRIMITIVE_SWAP:
-      tos2 = tos;
-      DPOP(tos);
-      DPUSH(tos2);
-      break;
-
-      // over ( a b -- a b a )
-    case FORTH_PRIMITIVE_OVER:
-      DPUSH(tos);
-      tos = DPICK(1);
-      break;
-
-      // rot ( a b c -- b c a )
-    case FORTH_PRIMITIVE_ROT:
-      DPOP(tos2);
-      DPOP(tos3);
-      DPUSH(tos2);
-      DPUSH(tos);
-      tos = tos3;
-      break;
-
-      // tuck ( a b -- b a b ) swap over ;
-    case FORTH_PRIMITIVE_TUK:
-      DPOP(tos2);
-      DPUSH(tos);
-      DPUSH(tos2);
-      break;
-
-      // 2dup ( a b -- a b a b ) over over ;
-    case FORTH_PRIMITIVE_2DUP:
-      DPUSH(tos);
-      tos2 = DPICK(1);
-      DPUSH(tos2);
-      break;
-
-      // 2over ( a b c d -- a b c d a b )
-    case FORTH_PRIMITIVE_2OVER:
-      DPUSH(tos);
-      tos2 = DPICK(3);
-      DPUSH(tos2);
-      tos = DPICK(3);
-      break;
-
-      // 2swap ( a b c d -- c d a b )
-    case FORTH_PRIMITIVE_2SWAP:
-      DPOP(tos2);
-      DPOP(tos3);
-      DPOP(tos4);
-      DPUSH(tos3);
-      DPUSH(tos4);
-      DPUSH(tos2);
-      break;
-
-      // 2drop ( a b -- ) drop drop ;
-    case FORTH_PRIMITIVE_2DROP:
-      DDROP();
-      DPOP(tos);
-      break;
-
-    case FORTH_PRIMITIVE_PLUS:
-      BINARY_OP(+);
-      break;
-    case FORTH_PRIMITIVE_MINUS:
-      BINARY_OP(-);
-      break;
-    case FORTH_PRIMITIVE_DIV:
-      BINARY_OP(/);
-      break;
-    case FORTH_PRIMITIVE_TIMES:
-      BINARY_OP(*);
-      break;
-    case FORTH_PRIMITIVE_RSHIFT:
-      BINARY_OP(>>);
-      break;
-    case FORTH_PRIMITIVE_LSHIFT:
-      BINARY_OP(<<);
-      break;
-    case FORTH_PRIMITIVE_GREATER_EQUAL:
-      BINARY_OP(>=);
-      break;
-    case FORTH_PRIMITIVE_LOWER_EQUAL:
-      BINARY_OP(<=);
-      break;
-    case FORTH_PRIMITIVE_GREATER:
-      BINARY_OP(>);
-      break;
-    case FORTH_PRIMITIVE_LOWER:
-      BINARY_OP(<);
-      break;
-    case FORTH_PRIMITIVE_EQUAL:
-      BINARY_OP(==);
-      break;
-    case FORTH_PRIMITIVE_AND:
-      BINARY_OP(&);
-      break;
-    case FORTH_PRIMITIVE_OR:
-      BINARY_OP(|);
-      break;
-    case FORTH_PRIMITIVE_XOR:
-      BINARY_OP(^);
-      break;
-    case FORTH_PRIMITIVE_DISP:
-      std::cout << std::setbase(base) << tos << " ";//std::endl;
-      DPOP(tos);
-      break;
-    default:
-      ForthUnknownPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;
-      break;
-    }
 }
 
 // **************************************************************
@@ -193,7 +35,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 // **************************************************************
 inline int32_t Forth::RStackSize() const
 {
-  int32_t size = return_stack - rsp;
+  int32_t size = rsp - return_stack;
+  //std::cout << "RSTACK SIZE " << size << std::endl;
   if (size < 0)
     {
       ForthRStackOV e; throw e;
@@ -204,26 +47,35 @@ inline int32_t Forth::RStackSize() const
 // **************************************************************
 //
 // **************************************************************
+#define TOKEN2ADDR(a) (CADDR(a + dictionary))
+
+//((cell_t *) ( ((cell_t) a) + CodeBase) )
+
+
 void Forth::execToken(const Cell16 tx)
 {
   Cell16 token = tx;
   ip = NULL;
 
-  // Always eat the top of the stack and store the value in a
-  // working register.
+  //std::cout << "EXEC Token " << tx << std::endl;
+
+  // Always eat the top of the stack and store the value in a working register.
   DPOP(tos);
 
   // Traverse the word definition like a tree
   do
     {
-      // A non primitive word is a consecutive set of primitive
-      // identifier
+      // A non primitive word is a consecutive set of primitive identifier
       while (!isPrimitive(token))
         {
+          //std::cout << "RPUSH(ip) " << (uint32_t*) ip << std::endl;
           RPUSH(ip);
-          ip = (Cell16*) (dictionary + token);
+
+          ip = TOKEN2ADDR(token);
           //checkDicoBoundaries(ip, "execToken");
-          token = *(ip++);
+          ip++;
+          token = readCell16at(ADDR8(ip));
+          //std::cout << "New token: " << token << std::endl;
         }
 
       //
@@ -234,7 +86,10 @@ void Forth::execToken(const Cell16 tx)
       // IP value.
       if (NULL != ip)
         {
-          token = *ip++;
+          //std::cout << "IP != NULL " << ip << std::endl;
+          ip++;
+          token = readCell16at(ADDR8(ip));
+          //std::cout << "New token " << token << std::endl;
         }
     } while (RStackSize() > 0);
 
@@ -246,7 +101,7 @@ void Forth::execToken(const Cell16 tx)
 // Convert a string to a number.
 // Return false if an error occured
 // **************************************************************
-bool Forth::toNumber(const std::string& word, Cell32& number)
+bool Forth::toNumber(std::string const& word, Cell32& number)
 {
   int base = 10;
 
@@ -366,6 +221,7 @@ void Forth::boot()
 {
   // Les ranger par ordre lexico ?
   createDicoEntry(FORTH_PRIMITIVE_NOP, "NOP", 0);
+  createDicoEntry(FORTH_PRIMITIVE_COLON, ":", 0);
   createDicoEntry(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
   createDicoEntry(FORTH_PRIMITIVE_1MINUS, "1-", 0);
   createDicoEntry(FORTH_PRIMITIVE_1PLUS, "1+", 0);
@@ -406,13 +262,25 @@ Forth forth;
 int main()
 {
   forth.boot();
-  forth.dumpDico("Dico.fbin");
+
+  forth.eatString(": DOUBLE");
+  forth.dicoAppendCell16(FORTH_PRIMITIVE_DUP);
+  forth.dicoAppendCell16(FORTH_PRIMITIVE_PLUS);
+  forth.dicoAppendCell16(FORTH_PRIMITIVE_EXIT);
   forth.displayDico();
 
-  std::string txt = "1 2 3 4 2OVER . . . . . .";
-  //forth.eatString(txt);
+  Cell16 tok;
+  forth.toToken("DOUBLE", tok);
+  forth.eatString(": QUADRUPLE");
+  forth.dicoAppendCell16(tok);
+  forth.dicoAppendCell16(tok);
+  forth.dicoAppendCell16(FORTH_PRIMITIVE_DUP);
+  forth.dicoAppendCell16(FORTH_PRIMITIVE_DISP);
+  forth.dicoAppendCell16(FORTH_PRIMITIVE_EXIT);
+  forth.displayDico();
 
-  forth.eatFile("hello.simforth");
+  forth.eatString("1 2 QUADRUPLE + .");
+  forth.dumpDico("Dico.fbin");
 
   return 0;
 }
