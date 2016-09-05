@@ -2,6 +2,8 @@
 #  define FORTHEXCEPTIONS_HPP_
 
 #  include "ForthIncludes.hpp"
+#  include <sstream> //for std::stringstream
+#  include <string>  //for std::string
 
 class ForthException: public std::exception
 {
@@ -12,6 +14,13 @@ public:
   {
     return "Exception from SimTaDynForth";
   }
+  std::string convertPointerToStringAddress(const Cell16* const ad)
+  {
+    const void* address = static_cast<const void*>(ad);
+    std::stringstream stream;
+    stream << address;
+    return stream.str();
+  }
 };
 
 class ForthDicoOOB: public ForthException
@@ -19,8 +28,8 @@ class ForthDicoOOB: public ForthException
 public:
   ForthDicoOOB(const Cell16* const ip, std::string const& funcName) throw ()
     : wrong_ip(ip),
-      error_msg("Exception from SimTaDynForth: attempt to leave the dictionary bounds"
-                + std::to_string((uint32_t) ip) + " in " + funcName)
+      error_msg("Exception from SimTaDynForth: attempt to leave the dictionary bounds 0x"
+                + convertPointerToStringAddress(ip) + " in " + funcName)
   {
     func_name = funcName;
   }
@@ -85,7 +94,7 @@ class ForthUnknownWord: public ForthException
 {
 public:
   ForthUnknownWord(std::string const& word)
-    : error_msg("Exception from SimTaDynForth: unrocgnize word " + word)
+    : error_msg("Exception from SimTaDynForth: unrecognized word " + word)
   {
     unknown_word = word;
   }

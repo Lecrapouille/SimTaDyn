@@ -18,6 +18,7 @@ void Forth::checkDicoBoundaries(Cell16* const ip, std::string const& funcName) c
 // **************************************************************
 void Forth::dicoAppendCell16(Cell16 value)
 {
+  //std::cout << "dicoAppendCell16 " << value << "\n";
   dictionary[here++] = value / 256U;
   dictionary[here++] = value & 255U;
 }
@@ -36,13 +37,24 @@ void Forth::writeCell16at(Cell8 *addr, Cell16 data)
 // **************************************************************
 Cell16 Forth::readCell16at(const Cell8 *addr)
 {
-  return (addr[0] << 8) | addr[1];
+  Cell16 val = (addr[0] << 8) | addr[1];
+  //std::cout << "readCell16at " << val << std::endl;
+  return val;
 }
+
+// **************************************************************
+//
+// **************************************************************
+Cell16 Forth::readCell16at(const Cell16 *addr)
+{
+  return readCell16at(reinterpret_cast<const Cell8*>(addr));
+}
+
 
 // **************************************************************
 // Convert a string into a token
 // **************************************************************
-bool Forth::toToken(std::string const& word, Cell16& token)
+bool Forth::toToken(std::string const& word, Cell16& token, Cell16& immediate)
 {
   Cell32 prev = 1; // Previous forth word
   Cell32 length;
@@ -67,6 +79,9 @@ bool Forth::toToken(std::string const& word, Cell16& token)
                 {
                   // Word found in dictionnary
                   token = dictionary[ptr + length + 3U] * 256U + dictionary[ptr + length + 4U];
+
+                  // Set the param if the word is immediate
+                  immediate = (dictionary[ptr] & FLAG_IMMEDIATE);
                   return true;
                 }
             }
@@ -199,15 +214,15 @@ void Forth::displayDico()
         }
       std::cout  << " ";
 
+      // NFA of the previous word
+      next = dictionary[ptr + length + 1U] * 256U + dictionary[ptr + length + 2U];
+      std::cout << "(LFA: " << next << ") ";
+
       // Display flags
       smudge = dictionary[ptr] & FLAG_SMUDGE;
       immediate = dictionary[ptr] & FLAG_IMMEDIATE;
-      if (immediate) std::cout  << "I ";
-      if (smudge) std::cout  << "S ";
-
-      // NFA of the previous word
-      next = dictionary[ptr + length + 1U] * 256U + dictionary[ptr + length + 2U];
-      std::cout << "(NFA: " << next << ") ";
+      if (immediate) std::cout  << "<I> ";
+      if (smudge) std::cout  << "<S> ";
 
       // Tokens
       def_length = cphere - ptr - length - 3U;

@@ -19,8 +19,9 @@ public:
 
   void dicoAppendCell16(Cell16 value);
   Cell16 readCell16at(const Cell8 *addr);
+  Cell16 readCell16at(const Cell16 *addr);
   void writeCell16at(Cell8 *addr, Cell16 data);
-    bool toToken(std::string const& wordName, Cell16& token);
+  bool toToken(std::string const& wordName, Cell16& token, Cell16& immediate);
 protected:
   inline int32_t RStackSize() const;
   inline bool isPrimitive(const Cell16 id) const;
@@ -50,7 +51,8 @@ protected:
   // Base (octal, decimal, hexa) when displaying numbers
   int32_t  base;
 
-  uint32_t  mode; // compile/execution
+  Cell32  state; // compile/execution
+  //Cell32  mode;  // deep compile/execution
 
   // Eat ascii code
   ForthTxtReader reader;

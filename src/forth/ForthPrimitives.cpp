@@ -15,7 +15,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_COLON:
       {
         DPUSH(tos);
-        mode++;
+        state = COMPILATION_STATE;
+        //mode++;
 
         // FIXME: afficher redifined
         std::string word;
@@ -30,6 +31,23 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_EXIT:
       RPOP(ip);
+      break;
+
+    case FORTH_PRIMITIVE_SEMICOLON:
+      DPUSH(tos);
+      dicoAppendCell16(FORTH_PRIMITIVE_EXIT);
+      // TODO clear FLAG_SMUDGE
+      state = EXECUTION_STATE;
+      //mode--;
+      break;
+
+    case FORTH_PRIMITIVE_LITERAL:
+      DPUSH(tos);
+      //std::cout << "------------\n";
+      ip++; tos1 = readCell16at(ip);
+      ip++; tos2 = readCell16at(ip);
+      tos = tos1 * 65536U + tos2;
+      //std::cout << tos << "\n------------\n";
       break;
 
     case FORTH_PRIMITIVE_1MINUS:

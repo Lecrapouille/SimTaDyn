@@ -5,6 +5,7 @@
 // **************************************************************
 Forth::Forth()
 {
+  state = EXECUTION_STATE;
   dsp = data_stack;
   rsp = return_stack;
   here = 0U;
@@ -136,24 +137,56 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
 }
 
 // **************************************************************
-//
+//COMPILATION_STATE
 // **************************************************************
 void Forth::eat(std::string const& word)
 {
   Cell32 number;
   Cell16 token;
+  Cell16 immediate;
 
-  if (toToken(word, token))
+  if (EXECUTION_STATE == state)
     {
-      execToken(token);
+      if (toToken(word, token, immediate))
+        {
+          execToken(token);
+        }
+      else if (toNumber(word, number))
+        {
+          DPUSH(number);
+        }
+      else
+        {
+          ForthUnknownWord e(word); throw e;
+        }
     }
-  else if (toNumber(word, number))
+  else // COMPILATION_STATE
     {
-      DPUSH(number);
-    }
-  else
-    {
-      ForthUnknownWord e(word); throw e;
+      if (toToken(word, token, immediate))
+        {
+          if (immediate)
+            {
+              execToken(token);
+            }
+          else
+            {
+              dicoAppendCell16(token);
+            }
+        }
+      else if (toNumber(word, number))
+        {;
+          // Optim si number < 65536 alors
+          // dicoAppendCell16(FORTH_PRIMITIVE_LITERAL16)
+          // dicoAppendCell16(number);
+          dicoAppendCell16(FORTH_PRIMITIVE_LITERAL); // _LITERAL32
+          // align @32 ?
+          dicoAppendCell16(number / 65536U);
+          dicoAppendCell16(number & 65535U);
+        }
+      else
+        {
+          ForthUnknownWord e(word); throw e;
+        }
     }
 }
 
@@ -172,6 +205,7 @@ bool Forth::eatString(std::string const& code_forth)
         {
           eat(word);
         }
+      // TODO: (peut etre pas EOL) or EOF && toujours en mode compilation
       std::cout << "ok" << std::endl;
       return true;
     }
@@ -200,6 +234,7 @@ bool Forth::eatFile(std::string const& filename)
             {
               eat(word);
             }
+          // TODO: (peut etre pas EOL) or EOF && toujours en mode compilation
           std::cout << "ok" << std::endl;
           return true;
         }
@@ -223,6 +258,8 @@ void Forth::boot()
   createDicoEntry(FORTH_PRIMITIVE_NOP, "NOP", 0);
   createDicoEntry(FORTH_PRIMITIVE_COLON, ":", 0);
   createDicoEntry(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
+  createDicoEntry(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
+  createDicoEntry(FORTH_PRIMITIVE_LITERAL, "LITERAL", 0);
   createDicoEntry(FORTH_PRIMITIVE_1MINUS, "1-", 0);
   createDicoEntry(FORTH_PRIMITIVE_1PLUS, "1+", 0);
   createDicoEntry(FORTH_PRIMITIVE_2MINUS, "2-", 0);
@@ -263,20 +300,9 @@ int main()
 {
   forth.boot();
 
-  forth.eatString(": DOUBLE");
-  forth.dicoAppendCell16(FORTH_PRIMITIVE_DUP);
-  forth.dicoAppendCell16(FORTH_PRIMITIVE_PLUS);
-  forth.dicoAppendCell16(FORTH_PRIMITIVE_EXIT);
-  forth.displayDico();
-
-  Cell16 tok;
-  forth.toToken("DOUBLE", tok);
-  forth.eatString(": QUADRUPLE");
-  forth.dicoAppendCell16(tok);
-  forth.dicoAppendCell16(tok);
-  forth.dicoAppendCell16(FORTH_PRIMITIVE_DUP);
-  forth.dicoAppendCell16(FORTH_PRIMITIVE_DISP);
-  forth.dicoAppendCell16(FORTH_PRIMITIVE_EXIT);
+  forth.eatString(": DOUBLE DUP + ;");
+  forth.eatString(": NUM 42 ;");
+  forth.eatString(": QUADRUPLE DOUBLE DOUBLE DUP . NUM . ;");
   forth.displayDico();
 
   forth.eatString("1 2 QUADRUPLE + .");
