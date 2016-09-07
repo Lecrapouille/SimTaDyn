@@ -1,5 +1,5 @@
-#ifndef HANDLER_HPP_
-#  define HANDLER_HPP_
+#ifndef SIMTADYNHANDLER_HPP_
+#  define SIMTADYNHANDLER_HPP_
 
 #  include <typeinfo>
 #  include <map>
@@ -8,15 +8,21 @@ using namespace std;
 
 // http://www.gamedev.net/page/resources/_/technical/game-programming/effective-event-handling-in-c-r2459
 
+// **************************************************************
+//
+// **************************************************************
 class Event
 {
 public:
   const string getName() const { return name_; }
 protected:
   virtual ~Event() { name_ = "Event"; };
-  string name_;
+string name_;
 };
 
+// **************************************************************
+//
+// **************************************************************
 class TypeInfo
 {
 public:
@@ -31,8 +37,14 @@ private:
   const type_info& _typeInfo;
 };
 
+// **************************************************************
+//
+// **************************************************************
 enum class NotifyAction { Done, Failed, Ignored };
 
+// **************************************************************
+//
+// **************************************************************
 class HandlerFunctionBase
 {
 public:
@@ -45,7 +57,9 @@ private:
   //virtual NotifyAction call(const Event*) = 0;
 };
 
-
+// **************************************************************
+//
+// **************************************************************
 template <class T, class EventT>
 class MemberFunctionHandler : public HandlerFunctionBase
 {
@@ -64,6 +78,9 @@ private:
   MemberFunc _function;
 };
 
+// **************************************************************
+//
+// **************************************************************
 class EventHandler
 {
 public:
@@ -74,7 +91,11 @@ public:
       {
         it->second->exec(event);
       }
-    //return NotifyAction::Ignored;
+    else
+      {
+        std::cerr << "handleEvent(): Event not registered" << std::endl;
+        //return NotifyAction::Ignored;
+      }
   }
 
   ~EventHandler()
@@ -91,7 +112,7 @@ public:
   template <class T, class EventT>
   void registerEventFunc(T* obj, void (T::*memFn)(EventT*))
   {
-    _handlers[TypeInfo(typeid(EventT))]= new MemberFunctionHandler<T, EventT>(obj, memFn);
+    _handlers[TypeInfo(typeid(EventT))] = new MemberFunctionHandler<T, EventT>(obj, memFn);
   }
 
 private:
@@ -99,4 +120,4 @@ private:
   Handlers _handlers;
 };
 
-#endif /* HANDLER_HPP_ */
+#endif /* SIMTADYNHANDLER_HPP_ */

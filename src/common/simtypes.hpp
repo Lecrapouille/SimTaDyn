@@ -13,6 +13,8 @@
 #  include <cstring>
 #  include <stdexcept>
 #  include <limits>
+#include <forward_list>
+#include <algorithm>
 
 typedef double float64_t;
 typedef unsigned int uint32_t;
