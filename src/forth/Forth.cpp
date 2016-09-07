@@ -294,6 +294,7 @@ void Forth::boot()
   createDicoEntry(FORTH_PRIMITIVE_DISP, ".", 0);
 }
 
+/*
 Forth forth;
 
 int main()
@@ -310,3 +311,4 @@ int main()
 
   return 0;
 }
+*/

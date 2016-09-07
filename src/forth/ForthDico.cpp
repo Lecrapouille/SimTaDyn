@@ -67,11 +67,13 @@ bool Forth::toToken(std::string const& word, Cell16& token, Cell16& immediate)
   // NULL
   while (0 != prev)
     {
+      // Get the length of the forth name
+      length = dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+
       // Ignore words with the SMUDGE bit */
       if (!(dictionary[ptr] & FLAG_SMUDGE))
         {
           // Compare name lengths before comparing strings
-          length = dictionary[ptr] & MASK_FORTH_NAME_SIZE;
           if ((length + 1U) == NEXT_MULTIPLE_OF_2(word.size() + 1U))
             {
               // Same length, check if names mismatch
