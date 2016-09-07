@@ -116,7 +116,7 @@ protected:
   /*
    * Observables
    */
-  std::vector<SimTaDynCell*> subjects_; // FIXME: trouver meilleur container
+  //std::vector<SimTaDynCell*> subjects_; // FIXME: trouver meilleur container
 
 public:
   /*
@@ -160,19 +160,20 @@ public:
    */
   virtual ~SimTaDynCell()
   {
+    std::cout << "Destroying\n";
     EventDestroyed m(this);
     notifyObservers(&m);
-    //detachAllObservers();
-    subjects_.clear();
   }
 
   virtual void onDestruction(const EventDestroyed* destruction)
   {
-    std::cout << "onDestruction: " << std::endl;
+    std::cout << "\nonDestruction: " << std::endl;
     whoAmI();
     std::cout << "My neighbor the cell #" << destruction->cell_->privateId() << " nammed \"" << destruction->cell_->name
-              << "\" is destroying" << std::endl;
-    detachObserver(*(destruction->cell_));
+              << "\" (" << destruction->cell_ << ") is destroying" << std::endl;
+    //detachObserver(*(destruction->cell_));
+    //removeImplicitRelation(*(destruction->cell_));
+    destruction->cell_->removeImplicitRelation(*this);
   }
 
   /*
@@ -180,17 +181,33 @@ public:
    */
   void debugDisplayAllObservers()
   {
-    std::cout << "-------------\n";
+    std::cout << "--- debugDisplayAllObservers-------------\n";
     whoAmI();
     typename std::vector<Observer<SimTaDynCell, const Event*> *>::const_iterator it;
-    std::cout << "Relations:" << std::endl;
+    std::cout << "Observers list:" << std::endl;
     for (it = observers_.begin(); it != observers_.end(); it++)
       {
-        std::cout << "  " << (static_cast<SimTaDynCell *>(*it))->name << std::endl;
+        SimTaDynCell *cell = static_cast<SimTaDynCell *>(*it);
+        std::cout << "  " << cell->name << std::endl;
+
+        typename std::vector<Observable<SimTaDynCell, const Event*> *>::const_iterator it3;
+        std::cout << "     Observables list:" << std::endl;
+        for (it3 = cell->observed_.begin(); it3 != cell->observed_.end(); it3++)
+          {
+            std::cout << "       " << (static_cast<SimTaDynCell *>(*it3))->name << std::endl;
+          }
       }
 
-    /*typename std::vector<SimTaDynCell*>::const_iterator it2;
-    std::cout << "Observers:" << std::endl;
+    typename std::vector<Observable<SimTaDynCell, const Event*> *>::const_iterator it4;
+    std::cout << "Observables list:" << std::endl;
+    for (it4 = observed_.begin(); it4 != observed_.end(); it4++)
+      {
+        std::cout << "  " << (static_cast<SimTaDynCell *>(*it4))->name << std::endl;
+      }
+
+    /*
+    typename std::vector<SimTaDynCell*>::const_iterator it2;
+    std::cout << "Adjacence list:" << std::endl;
     for (it2 = subjects_.begin(); it2 != subjects_.end(); it2++)
       {
         std::cout << "  " << (*it2)->name << std::endl;
@@ -226,7 +243,7 @@ public:
    */
   virtual void onMoved(const EventMoved* movement)
   {
-    std::cout << "onMoved: " << std::endl;
+    std::cout << "\nonMoved: " << std::endl;
     whoAmI();
     std::cout << "My neighbor the cell #" << movement->cell_->privateId() << " nammed \"" << movement->cell_->name
               << "\" moved to position " << movement->cell_->position_ << std::endl;
@@ -283,7 +300,7 @@ public:
    */
   virtual void onFormulaChanged(const EventChanged* changement)
   {
-    std::cout << "onFormulaChanged: " << std::endl;
+    std::cout << "\nonFormulaChanged: " << std::endl;
     whoAmI();
     cout << " My neighbor the cell #" << changement->cell_->privateId() << " nammed \"" << changement->cell_->name
          << "\" Changed value " << changement->cell_->getFormulaValue() << endl;
@@ -306,46 +323,49 @@ public:
     //evalFormula();
   }
 
-  virtual inline void addExplicitRelation(SimTaDynCell& cell)
+  virtual inline void addImplicitRelation(SimTaDynCell& cell)
   {
     // Observable add Observer
     this->attachObserver(cell);
 
     // Observer add Observable
-    cell.subjects_.push_back(this);
+    //cell.subjects_.push_back(this);
   }
 
-  virtual inline void removeExplicitRelation(SimTaDynCell& cell)
+  virtual inline void removeImplicitRelation(SimTaDynCell& cell)
   {
+    std::cout << "removeImplicitRelation " << this << " --> " << &cell << std::endl;
     this->detachObserver(cell);
 
-    typename std::vector<SimTaDynCell*>::const_iterator it;
+    /*typename std::vector<SimTaDynCell*>::const_iterator it;
     it = std::find(cell.subjects_.begin(), cell.subjects_.end(), this);
     if (it != cell.subjects_.end())
       {
+        std::cout << "Remove Implicit relation (subject list) " << (*it)->name << std::endl;
         cell.subjects_.erase(it);
-      }
+        }*/
   }
 
-  virtual inline void addImplicitRelation(SimTaDynCell& cell)
+  virtual inline void addExplicitRelation(SimTaDynCell& cell)
   {
     // Observable add Observer
     cell.attachObserver(*this);
 
     // Observer add Observable
-    subjects_.push_back(&cell);
+    //subjects_.push_back(&cell);
   }
 
-  virtual inline void RemoveImplicitRelation(SimTaDynCell& cell)
+  virtual inline void removeExplicitRelation(SimTaDynCell& cell)
   {
     cell.detachObserver(*this);
 
-    typename std::vector<SimTaDynCell*>::const_iterator it;
+    /*typename std::vector<SimTaDynCell*>::const_iterator it;
     it = std::find(subjects_.begin(), subjects_.end(), &cell);
     if (it != subjects_.end())
       {
+        std::cout << "Remove Explicit relation (subject list) " << (*it)->name << std::endl;
         subjects_.erase(it);
-      }
+        }*/
   }
 
   /*
@@ -390,7 +410,7 @@ public:
    */
   virtual Key whoAmI()
   {
-    std::cout << "I am the SimTaDynCell #" << id_ << " nammed \"" << name << "\":" << std::endl;
+    std::cout << "I am the SimTaDynCell #" << id_ << " nammed \"" << name << " (" << this << ")\":" << std::endl;
     return id_;
   }
 };

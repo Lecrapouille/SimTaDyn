@@ -9,44 +9,37 @@ template <typename T, class A> class Observable;
 template <class T, class A> class Observer
 {
 public:
-  Observer() { observed = NULL; }
+  Observer() { }
   virtual ~Observer() {}
   virtual void update(T& subject, A arg) = 0;
 
-  Observable<T, A>*attached() const
-  {
-    return observed;
-  }
-
   void attach(Observable<T, A> *new_observed)
   {
-    if (new_observed != observed)
+    typename std::vector<Observable<T, A> *>::const_iterator it;
+    it = std::find(observed_.begin(), observed_.end(), new_observed);
+    if (it == observed_.end())
       {
-        detach();
-
-        if (new_observed)
-          {
-            std::cout << "Observer::attach\n";
-            observed = new_observed;
-            observed->attachObserver(*this);
-          }
+        observed_.push_back(new_observed);
+        new_observed->attachObserver(*this);
       }
   }
 
-  void detach()
+  void detach(Observable<T, A> *old_observed)
   {
-    if (observed)
+    //std::cout << "    Observer " << this << " detaching observable " << static_cast<T *>(old_observed) << std::endl;
+
+    typename std::vector<Observable<T, A> *>::const_iterator it;
+    it = std::find(observed_.begin(), observed_.end(), old_observed);
+    if (it != observed_.end())
       {
-        std::cout << "Observer::detach\n";
-        Observable<T, A> *old_observed = observed;
-        observed = NULL;
+        //std::cout << "    Observer detached observable\n";
+        observed_.erase(it);
         old_observed->detachObserver(*this);
       }
   }
 
-protected:
-  // http://hillside.net/europlop/HillsideEurope/Papers/EuroPLoP1999/1999_Henney_MutualRegistration.pdf
-  Observable<T, A>* observed;
+  //protected:
+  std::vector<Observable<T, A>*> observed_;
 };
 
 // *************************************************************************************************
@@ -57,6 +50,7 @@ template <typename T, class A> class Observable
 public:
   Observable()
   {
+    erased = false;
   }
 
   virtual ~Observable()
@@ -65,40 +59,30 @@ public:
 
   void attachObserver(Observer<T, A> &observer)
   {
-    std::cout << "attachObserver " << &observer << "\n";
-
-    if (observer.attached() == this)
+    typename std::vector<Observer<T, A> *>::const_iterator it;
+    it = std::find(observers_.begin(), observers_.end(), &observer);
+    if (it == observers_.end())
       {
-        // Ensure no duplication.
-        typename std::vector<Observer<T, A> *>::const_iterator it;
-        it = std::find(observers_.begin(), observers_.end(), &observer);
-        if (it == observers_.end())
-          {
-            observers_.push_back(&observer);
-          }
-      }
-    else
-      {
-        std::cout << "Observable::attach\n";
+        observers_.push_back(&observer);
         observer.attach(this);
       }
   }
 
   void detachObserver(Observer<T, A> &observer)
   {
-    if (observer.attached() == this)
+    //std::cout << "detachObserver " << this << " --> " << &observer << std::endl;
+    typename std::vector<Observer<T, A> *>::const_iterator it;
+    it = std::find(observers_.begin(), observers_.end(), &observer);
+    if (it != observers_.end())
       {
-        std::cout << "Observable::detach\n";
-        observer.detach();
+        //std::cout << "  Observable " << this << " detaching observer " << static_cast<T *>(*it) << std::endl;
+        it_erased = observers_.erase(it);
+        erased = true;
+        observer.detach(this);
       }
     else
       {
-        typename std::vector<Observer<T, A> *>::const_iterator it;
-        it = std::find(observers_.begin(), observers_.end(), &observer);
-        if (it != observers_.end())
-          {
-            observers_.erase(it);
-          }
+        std::cout << "Not found\n";
       }
   }
 
@@ -112,14 +96,27 @@ public:
   {
     typename std::vector<Observer<T, A> *>::const_iterator it;
 
-    for (it = observers_.begin(); it != observers_.end(); it++)
+    for (it = observers_.begin(); it != observers_.end(); )
       {
         (*it)->update(*(static_cast<T *>(this)), arg);
+
+        // FIXME ugly patch to avoid segfault loop iterator + erase
+        if (erased)
+          {
+            erased = false;
+            it = it_erased;
+          }
+        else
+          {
+            ++it;
+          }
       }
   }
 
 protected:
   std::vector<Observer<T, A> *> observers_; // FIXME containers
+  bool erased;
+  typename std::vector<Observer<T, A> *>::const_iterator it_erased;
 };
 
 #endif /* OBSERVER_HPP_ */
