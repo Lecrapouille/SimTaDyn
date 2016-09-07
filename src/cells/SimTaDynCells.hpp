@@ -2,32 +2,64 @@
 #  define SIMTADYNCELLS_HPP_
 
 #  include "ClassCounter.hpp"
-#  include "handler.hpp"
+#  include "SimTaDynHandlers.hpp"
 #  include "BoundingBox.hpp"
-#include <forward_list>
-#include <algorithm>
 #  include "Observer.hpp"
 
 class EventMoved : public Event
 {
 public:
-  EventMoved(SimTaDynCell* cell) { cell_ = cell; name_ = "EventMoved"; }
+  EventMoved(SimTaDynCell* cell)
+  {
+    cell_ = cell;
+    name_ = "EventMoved";
+  }
   SimTaDynCell* cell_;
 };
 
-class EventDeleted : public Event {};
+class EventChanged : public Event
+{
+public:
+  EventChanged(SimTaDynCell* cell)
+  {
+    cell_ = cell;
+    name_ = "EventChanged";
+  }
+  SimTaDynCell* cell_;
+};
+
+class EventDestroyed : public Event
+{
+public:
+  EventDestroyed(SimTaDynCell* cell)
+  {
+    cell_ = cell;
+    name_ = "EventDestroyed";
+  }
+  SimTaDynCell* cell_;
+};
 
 // *************************************************************************************************
 // This class is the basic ancestor class for SimTaDyn cells: Vertices (aka Nodes), Edges (aka Arcs)
 // and Zones (aka Areas).
+//
+// Design pattern: SimTaDynCell is both time an observer and
+// observable (it notifies when the formula changed) and is prevent
+// when the result of another cell is changed. Inspiration from:
+// http://www.cs.sjsu.edu/~pearce/modules/cases/ss/ss.htm
 // *************************************************************************************************
 class SimTaDynCell
   : private ClassCounter<SimTaDynCell>,
-    public EventHandler,
-    public Observer<SimTaDynCell, int>,
-    public Observable<SimTaDynCell, int>
+    public Observer<SimTaDynCell, const Event*>,
+    public Observable<SimTaDynCell, const Event*>,
+    public EventHandler
 {
 public:
+  /*
+   * Idee: liste chainee de SimTaDynCell ? avec next ?
+   */
+  //SimTaDynCell* next;
+
   /*
    * Give a name to the element which will be displayed in the GUI.
    * Contrary to id_ several cells can have the same name. By default
@@ -54,12 +86,14 @@ protected:
   Key id_;
 
   /*
-   * Position in the map/view (pixel)
+   * Position in the map/view (pixel). Set as protected to be sure to
+   * use accessors which can prevent other cells that this cell moved.
    */
   Position3D position_;
 
   /*
-   * Spatialise
+   * Bounding box for spatialization. Set as protected to be sure to
+   * use accessors which can prevent other cells that this cell changed.
    */
   AABB box_;
 
@@ -71,16 +105,18 @@ protected:
   /*
    * A string for storing Forth code
    */
-  string code_forth_; // TODO: string& pour se referer au dictionnaire (au lieu de copier)
-
-  int32_t value_;
+  std::string code_forth_;
 
   /*
-   * A list of cells in direct relation (explicitly set in the graph editor.
-   * For example: a node is connected to other nodes by a graph. Here we are
-   * generic to use polymorphism.
+   * Pour le moment resultat d'une operation facon Excel
    */
-  std::forward_list<SimTaDynCell*> neighbors_;
+  int32_t value_;
+  // bool used_formula;ou empty_formula // si true: affiche la valeur dans la gui sinon affiche rien
+
+  /*
+   * Observables
+   */
+  std::vector<SimTaDynCell*> subjects_; // FIXME: trouver meilleur container
 
 public:
   /*
@@ -92,15 +128,19 @@ public:
     id_ = howMany() - 1U;
     name = "Cell_" + std::to_string(id_);
     code_forth_ = "";
+
     data = NULL;
     selected = visited = false;
     value_ = 0;
+    registerEventFunc(this, &SimTaDynCell::onMoved);
+    registerEventFunc(this, &SimTaDynCell::onFormulaChanged);
+    registerEventFunc(this, &SimTaDynCell::onDestruction);
   }
 
    /*
    * Creator
    */
-  SimTaDynCell(string new_name, const string& new_code_forth, void *const new_data)
+  SimTaDynCell(string new_name, const string& new_code_forth = "", void *const new_data = NULL)
     : box_(AABB::AABB_ZERO)
   {
     id_ = howMany() - 1U;
@@ -109,6 +149,9 @@ public:
     data = new_data;
     selected = visited = false;
     value_ = 0;
+    registerEventFunc(this, &SimTaDynCell::onMoved);
+    registerEventFunc(this, &SimTaDynCell::onFormulaChanged);
+    registerEventFunc(this, &SimTaDynCell::onDestruction);
   }
 
   /*
@@ -117,49 +160,50 @@ public:
    */
   virtual ~SimTaDynCell()
   {
+    EventDestroyed m(this);
+    notifyObservers(&m);
+    //detachAllObservers();
+    subjects_.clear();
   }
-#if 0
-  virtual ~SimTaDynCell()
-  {
-    std::forward_list<SimTaDynCell*>::iterator neighbor;
 
+  virtual void onDestruction(const EventDestroyed* destruction)
+  {
+    std::cout << "onDestruction: " << std::endl;
     whoAmI();
-    cout << "  I'm on destruction. I'll remove myself from my neighbors list: {" << endl;
-    for (neighbor  = neighbors_.begin(); // non observers
-         neighbor != neighbors_.end();
-         ++neighbor)
-      {
-        cout << "  Please neighor " << (*neighbor_)->name << " remove me (" << this << ")" << endl;
-        (*neighbor)->removeExplicitNeighbor(this);
-      }
-    cout << "}" << endl;
+    std::cout << "My neighbor the cell #" << destruction->cell_->privateId() << " nammed \"" << destruction->cell_->name
+              << "\" is destroying" << std::endl;
+    detachObserver(*(destruction->cell_));
   }
 
   /*
-   * Observable design pattern: a cell notify all its neighbor from an event
+   * Observer pattern
    */
-  virtual void notifyNeighbors(Event const* event)
+  void debugDisplayAllObservers()
   {
-    std::forward_list<SimTaDynCell*>::iterator neighbor;
+    std::cout << "-------------\n";
+    whoAmI();
+    typename std::vector<Observer<SimTaDynCell, const Event*> *>::const_iterator it;
+    std::cout << "Relations:" << std::endl;
+    for (it = observers_.begin(); it != observers_.end(); it++)
+      {
+        std::cout << "  " << (static_cast<SimTaDynCell *>(*it))->name << std::endl;
+      }
 
-    try
+    /*typename std::vector<SimTaDynCell*>::const_iterator it2;
+    std::cout << "Observers:" << std::endl;
+    for (it2 = subjects_.begin(); it2 != subjects_.end(); it2++)
       {
-        whoAmI();
-        cout << "  I notify all my neighbors from the event " << event->getName() << " : {" << endl;
-        for (neighbor  = neighbors_.begin();
-             neighbor != neighbors_.end();
-             ++neighbor)
-          {
-            cout << "  Please neighor " << (*neighbor)->name << " do your action:" << endl;
-            (*neighbor)->handleEvent(event);
-          }
-        cout << "}" << endl;
-      }
-    catch (const std::out_of_range& oor)
-      {
-        cerr << "Error: no callback have been linked with this event" << endl;
-        return ;
-      }
+        std::cout << "  " << (*it2)->name << std::endl;
+        }*/
+  }
+
+  /*
+   * Observer pattern
+   */
+  void update(SimTaDynCell& neighbor, const Event* event) override
+  {
+    (void) neighbor;
+    handleEvent(event);
   }
 
   /*
@@ -168,12 +212,13 @@ public:
    */
   virtual void moveToPosition(const Position3D& p)
   {
+    std::cout << "MoveTo\n";
     if (position_ != p)
       {
         position_ = p;
         EventMoved m(this);
-        notifyNeighbors(&m);
-    }
+        notifyObservers(&m);
+      }
   }
 
   /*
@@ -181,18 +226,10 @@ public:
    */
   virtual void onMoved(const EventMoved* movement)
   {
-    cout << "    * "; whoAmI();
-    cout << "      My neighbor the cell #" << movement->cell_->privateId() << " nammed \"" << movement->cell_->name
-         << "\" moved to position " << movement->cell_->position_ << endl;
-  }
-#endif
-
-  /*
-   * Accessor. Return the unique identifier
-   */
-  inline Key privateId() const
-  {
-    return id_;
+    std::cout << "onMoved: " << std::endl;
+    whoAmI();
+    std::cout << "My neighbor the cell #" << movement->cell_->privateId() << " nammed \"" << movement->cell_->name
+              << "\" moved to position " << movement->cell_->position_ << std::endl;
   }
 
   /*
@@ -204,19 +241,52 @@ public:
   }
 
   /*
-   * Accessor. Return the current boundingbox
+   * Accessor: return the result of the code Forth
    */
-  const AABB& getBoundingBox() const
+  int32_t getFormulaValue() const
   {
-    return box_;
+    return value_;
   }
 
   /*
-   * For graph traversal to avoid iterating on the same visited cell
+   * Accessor: set a value instead of the code forth result.  FIXME:
+   * ok pour le moment mais idealement il faudrait code_forth =
+   * tostring(value) car si on a un code forth "42" et value_ 3 on a
+   * conflit ??
    */
-  inline void setVisited(bool value)
+  void setFormulaValue(int32_t value)
   {
-    visited = value;
+    if (value_ != value)
+      {
+        value_ = value;
+        EventChanged m(this);
+        notifyObservers(&m);
+      }
+  }
+
+  /*
+   * Accessor
+   */
+  /*void evalFormula(CellForth& forth)
+  {
+    if (code_forth_ != std::string(""))
+      {
+        if (forth.eatString(code_forth_))
+          {
+            setFormulaValue(forth.result);
+          }
+      }
+      }*/
+
+  /*
+   * Callback when a neighbor changed its value
+   */
+  virtual void onFormulaChanged(const EventChanged* changement)
+  {
+    std::cout << "onFormulaChanged: " << std::endl;
+    whoAmI();
+    cout << " My neighbor the cell #" << changement->cell_->privateId() << " nammed \"" << changement->cell_->name
+         << "\" Changed value " << changement->cell_->getFormulaValue() << endl;
   }
 
   /*
@@ -233,159 +303,86 @@ public:
   void setCodeForth(const string& code_forth)
   {
     code_forth_ = code_forth;
+    //evalFormula();
   }
 
-  /*
-   * Accessor
-   */
-  int32_t getValue() const
+  virtual inline void addExplicitRelation(SimTaDynCell& cell)
   {
-    return value_;
+    // Observable add Observer
+    this->attachObserver(cell);
+
+    // Observer add Observable
+    cell.subjects_.push_back(this);
   }
 
-  void setValue(int32_t value)
+  virtual inline void removeExplicitRelation(SimTaDynCell& cell)
   {
-    value_ = value;
-    //setChanged();
-    notifyObservers(value);
-  }
+    this->detachObserver(cell);
 
-  void setValue()
-  {
-    if ((code_forth_ != std::string("")) && (0 != nbNeighbors()))
+    typename std::vector<SimTaDynCell*>::const_iterator it;
+    it = std::find(cell.subjects_.begin(), cell.subjects_.end(), this);
+    if (it != cell.subjects_.end())
       {
-        setValue(forth_eval());
+        cell.subjects_.erase(it);
+      }
+  }
+
+  virtual inline void addImplicitRelation(SimTaDynCell& cell)
+  {
+    // Observable add Observer
+    cell.attachObserver(*this);
+
+    // Observer add Observable
+    subjects_.push_back(&cell);
+  }
+
+  virtual inline void RemoveImplicitRelation(SimTaDynCell& cell)
+  {
+    cell.detachObserver(*this);
+
+    typename std::vector<SimTaDynCell*>::const_iterator it;
+    it = std::find(subjects_.begin(), subjects_.end(), &cell);
+    if (it != subjects_.end())
+      {
+        subjects_.erase(it);
       }
   }
 
   /*
-   * Observer pattern
+   * Accessor. Return the current boundingbox
    */
-  void update(SimTaDynCell& subject, int arg) override
+  const AABB& getBoundingBox() const
   {
-    (void) subject;
-    (void) arg;
-    setValue();
+    return box_;
   }
-
-  virtual void notifyObservers(int arg)
-  {
-    typename std::vector<Observer<SimTaDynCell, int> *>::const_iterator it;
-
-    std::cerr << "The Cell #" << this->name << " notifyObservers:" << std::endl;;
-    for (it = observers_.begin(); it != observers_.end(); it++)
-      {
-        std::cerr << "  " << (static_cast<SimTaDynCell *>(*it))->name << std::endl;
-        (*it)->update(*(static_cast<SimTaDynCell *>(this)), arg);
-      }
-  }
-
 
   /*
-   * Static member returning the number of SimTaDynCell instances created
+   * Accessor. Return the unique identifier
    */
-  using ClassCounter<SimTaDynCell>::howMany;
+  inline Key privateId() const
+  {
+    return id_;
+  }
+
+  /*
+   * For graph traversal to avoid iterating on the same visited cell
+   */
+  inline void setVisited(bool value)
+  {
+    visited = value;
+  }
+
+  inline bool getVisited() const
+  {
+    return visited;
+  }
+
+  /*
+   * Instances counter
+   */
   static Key howMany()
   {
     return ClassCounter<SimTaDynCell>::howMany();
-  }
-
-  inline friend bool operator<(const SimTaDynCell& a, const SimTaDynCell& b);
-  inline friend bool operator<=(const SimTaDynCell& a, const SimTaDynCell& b);
-  inline friend bool operator>(const SimTaDynCell& a, const SimTaDynCell& b);
-  inline friend bool operator>=(const SimTaDynCell& a, const SimTaDynCell& b);
-  inline friend bool operator==(const SimTaDynCell& a, const SimTaDynCell& b);
-  inline friend bool operator!=(const SimTaDynCell& a, const SimTaDynCell& b);
-
-  inline friend bool operator<(const SimTaDynCell& a, const Key b);
-  inline friend bool operator<=(const SimTaDynCell& a, const Key b);
-  inline friend bool operator>(const SimTaDynCell& a, const Key b);
-  inline friend bool operator>=(const SimTaDynCell& a, const Key b);
-  inline friend bool operator==(const SimTaDynCell& a, const Key b);
-  inline friend bool operator!=(const SimTaDynCell& a, const Key b);
-
-  virtual inline void addCell(SimTaDynCell* const cell)
-  {
-    cell->attachObserver(*this);
-    //if (false == IsNeighborOf(cell))
-      {
-        neighbors_.push_front(cell);
-      }
-  }
-  virtual inline void removeExplicitNeighbor(SimTaDynCell* const c)
-  {
-    cout << "removeExplicitNeighbor " << c << std::endl;
-    neighbors_.remove(c);
-    c->neighbors_.remove(this);
-    cout << "removeED" << std::endl;
-  }
-  virtual inline uint32_t nbNeighbors()
-  {
-    uint32_t count = 0U;
-    std::forward_list<SimTaDynCell*>::iterator neighbor;
-    for (neighbor = neighbors_.begin();
-         neighbor != neighbors_.end(); ++neighbor)
-      {
-        count++;
-      }
-    return count;
-  }
-  virtual inline bool IsExplicitNeighborOf(SimTaDynCell* const c) const
-  {
-    return (std::find(neighbors_.begin(), neighbors_.end(), c) != neighbors_.end());
-  }
-  virtual inline bool IsExplicitNeighborOf(const Key c)
-  {
-    std::forward_list<SimTaDynCell*>::iterator neighbor;
-    for (neighbor = neighbors_.begin();
-         neighbor != neighbors_.end(); ++neighbor)
-      {
-        if ((*neighbor)->id_ == c)
-          return true;
-      }
-    return false;
-  }
-
-  int32_t forth_eval()
-  {
-    int32_t eval = getValue();
-    std::cerr << "eval = " << getValue() << std::endl;
-    size_t last = 0;
-    size_t next = 0;
-    std::string delimiter = " ";
-
-    while ((next = code_forth_.find(delimiter, last)) != string::npos)
-      {
-        std::cerr << code_forth_.substr(last, next - last) << std::endl;
-        last = next + 1;
-      }
-    std::cerr << code_forth_.substr(last) << std::endl;
-
-    std::forward_list<SimTaDynCell*>::iterator neighbor;
-    for (neighbor = neighbors_.begin();
-         neighbor != neighbors_.end(); ++neighbor)
-      {
-        std::cerr << "eval += " << (*neighbor)->getValue() << std::endl;
-        eval += (*neighbor)->getValue();
-      }
-    return eval;
-  }
-
-  /*
-   * Debug
-   */
-  virtual void showExplicitNeighbor()
-  {
-    std::forward_list<SimTaDynCell*>::iterator neighbor;
-
-    whoAmI();
-    cout << "  My explicit neighbors are: {" << endl;
-    for (neighbor = neighbors_.begin();
-         neighbor != neighbors_.end(); ++neighbor)
-      {
-        cout << "  \"" << (*neighbor)->name << "\"" << endl;
-      }
-    cout << "}" << endl;
   }
 
   /*
@@ -393,69 +390,9 @@ public:
    */
   virtual Key whoAmI()
   {
-    cout << "I am the SimTaDynCell #" << id_ << " nammed \"" << name << "\":" << endl;
+    std::cout << "I am the SimTaDynCell #" << id_ << " nammed \"" << name << "\":" << std::endl;
     return id_;
   }
 };
-
-inline bool operator<(const SimTaDynCell& a, const SimTaDynCell& b)
-{
-  return a.id_ < b.id_;
-}
-
-inline bool operator<=(const SimTaDynCell& a, const SimTaDynCell& b)
-{
-  return a.id_ <= b.id_;
-}
-
-inline bool operator>(const SimTaDynCell& a, const SimTaDynCell& b)
-{
-  return a.id_ > b.id_;
-}
-
-inline bool operator>=(const SimTaDynCell& a, const SimTaDynCell& b)
-{
-  return a.id_ >= b.id_;
-}
-
-inline bool operator==(const SimTaDynCell& a, const SimTaDynCell& b)
-{
-  return a.id_ == b.id_;
-}
-
-inline bool operator!=(const SimTaDynCell& a, const SimTaDynCell& b)
-{
-  return a.id_ != b.id_;
-}
-
-inline bool operator<(const SimTaDynCell& a, const Key b)
-{
-  return a.id_ < b;
-}
-
-inline bool operator<=(const SimTaDynCell& a, const Key b)
-{
-  return a.id_ <= b;
-}
-
-inline bool operator>(const SimTaDynCell& a, const Key b)
-{
-  return a.id_ > b;
-}
-
-inline bool operator>=(const SimTaDynCell& a, const Key b)
-{
-  return a.id_ >= b;
-}
-
-inline bool operator==(const SimTaDynCell& a, const Key b)
-{
-  return a.id_ == b;
-}
-
-inline bool operator!=(const SimTaDynCell& a, const Key b)
-{
-  return a.id_ != b;
-}
 
 #endif /* CELLS_HPP_ */

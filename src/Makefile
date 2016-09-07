@@ -22,18 +22,21 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -Igui -Icells -Icommon -I/usr/include/mysql
+INCLUDES = -I. -Igui -Icells -Iforth -Icommon -I/usr/include/mysql
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(DEST):gui:cells:common
+VPATH=.:$(DEST):gui:cells:forth:common
 
 ###################################################
 # Set objects architecture specific
 OBJECTS_COMMON = Color.o Vector3D.o BoundingBox.o
-OBJECTS_CELLS = SimTaDynNodes.o SimTaDynArcs.o ShapeFile.o
-OBJECTS_GUI = Camera2D.o Renderer.o opgl.o gui.o
-OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_CELLS) $(OBJECTS_GUI) main.o
+OBJECTS_FORTH = Forth.o ForthDico.o ForthPrimitives.o
+OBJECTS_CELLS =
+ # SimTaDynNodes.o SimTaDynArcs.o ShapeFile.o
+OBJECTS_GUI =
+# Camera2D.o Renderer.o opgl.o gui.o
+OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_GUI) main.o
 TARGET = SimTaDyn
 
 ###################################################
