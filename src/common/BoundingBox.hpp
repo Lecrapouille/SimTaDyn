@@ -106,6 +106,11 @@ public:
     return AABB(bbmin + scalar, bbmax + scalar);
   }
 
+  inline AABB operator+(const Vector3D vector) const
+  {
+    return AABB(bbmin + vector, bbmax + vector);
+  }
+
   inline const AABB operator*(const float32_t scalar) const
   {
     return AABB(bbmin * scalar, bbmax * scalar);
@@ -124,6 +129,11 @@ public:
   inline AABB operator-(const float32_t scalar) const
   {
     return AABB(bbmin - scalar, bbmax - scalar);
+  }
+
+  inline AABB operator-(const Vector3D vector) const
+  {
+    return AABB(bbmin - vector, bbmax - vector);
   }
 
   inline const AABB operator/(const float32_t scalar) const
@@ -149,6 +159,12 @@ public:
   inline Vector3D centerPoint() const
   {
     return Vector3D((bbmax + bbmin) * 0.5f);
+  }
+
+  inline AABB scaleFromCenter(const float32_t scalar) const
+  {
+    const Vector3D c = centerPoint();
+    return AABB((bbmin - c) * scalar, (bbmax - c) * scalar) + c;
   }
 
   inline Vector3D dimension() const
@@ -229,7 +245,7 @@ public:
 
   inline friend std::ostream& operator<<(std::ostream& os, const AABB& other)
   {
-    os << "AABB(" << other.bbmin << ", " << other.bbmax << ") ";
+    os << "AABB(min: " << other.bbmin << ", max: " << other.bbmax << ", center: " << other.centerPoint() << ") ";
     return os;
   }
 
