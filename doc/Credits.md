@@ -4,11 +4,23 @@ SimTaDyn got inspiration from the following documents:
 
 ## Forth
 
+* reforth:
+Lot of good ideas for Forth syntax
+(https://github.com/seanpringle/reforth)
+
+* JonesForth:
+The best Forth implementation tutorial I read
+(http://git.annexia.org/?p=jonesforth.git;a=blob;f=jonesforth.S;h=45e6e854a5d2a4c3f26af264dfce56379d401425;hb=HEAD)
+
 * pforth:
 (https://github.com/philburk/pforth)
 
 * cxxforth:
 (https://github.com/kristopherjohnson/cxxforth)
+
+* Book:
+Forth, 1984, Walid P. Salman, Olivier Tisserand, Bruno Toulout.
+Editions Eyrolles (french), Macmillan (english)
 
 ## Graph
 
