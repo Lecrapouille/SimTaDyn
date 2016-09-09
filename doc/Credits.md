@@ -63,10 +63,21 @@ Editions Eyrolles (french), Macmillan (english)
 * DrDobb's:
 (http://www.drdobbs.com/cpp/counting-objects-in-c/)
 
+## RTree
+
+* Inventor's page:
+(http://web.archive.org/web/20030625161805/http:/www.es.ucsc.edu/~tonig/)
+
+* PostGIS:
+(http://www.postgis.fr/chrome/site/docs/workshop-foss4g/doc/introduction.html)
+
 ## Core
 
 * OpenStreetMap:
 (https://github.com/openstreetmap/iD/blob/master/ARCHITECTURE.md)
+
+* PostGIS:
+(http://www.postgis.fr/chrome/site/docs/workshop-foss4g/doc/introduction.html)
 
 ## OpenGL
 

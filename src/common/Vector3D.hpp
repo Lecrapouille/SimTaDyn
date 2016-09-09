@@ -3,6 +3,7 @@
 
 #  include "simtypes.hpp"
 #  include <ostream>
+#  include <math.h>
 
 // *************************************************************************************************
 // Position in space (needed by nodes for example)
@@ -14,6 +15,7 @@ public:
   float32_t x, y, z;
 
   inline Vector3D()
+    : x(NAN), y(NAN), z(NAN)
   {
   }
 
@@ -132,12 +134,12 @@ public:
 
   inline Vector3D min(const Vector3D& p) const
   {
-    return Vector3D(std::min(x, p.x), std::min(y, p.y), std::min(z, p.z));
+    return Vector3D(min_(x, p.x), min_(y, p.y), min_(z, p.z));
   }
 
   inline Vector3D max(const Vector3D& p) const
   {
-    return Vector3D(std::max(x, p.x),std:: max(y, p.y), std::max(z, p.z));
+    return Vector3D(max_(x, p.x), max_(y, p.y), max_(z, p.z));
   }
 
   inline Vector3D midPoint(const Vector3D& p) const
@@ -191,6 +193,7 @@ public:
     return false;
   }
 
+  static const Vector3D DUMMY;
   static const Vector3D ZERO;
   static const Vector3D UNIT_X;
   static const Vector3D UNIT_Y;
@@ -199,6 +202,27 @@ public:
   static const Vector3D NEGATIVE_UNIT_Y;
   static const Vector3D NEGATIVE_UNIT_Z;
   static const Vector3D UNIT_SCALE;
+  static const Vector3D NEGATIVE_UNIT_SCALE;
+
+protected:
+  float32_t min_(const float32_t a, const float32_t b) const
+  {
+    if (std::isnan(a))
+      return b;
+    if (std::isnan(b))
+      return a;
+    else
+      return std::min(a, b);
+  }
+  float32_t max_(const float32_t a, const float32_t b) const
+  {
+    if (std::isnan(a))
+      return b;
+    if (std::isnan(b))
+      return a;
+    else
+      return std::max(a, b);
+  }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Vector3D& p)
@@ -209,4 +233,4 @@ inline std::ostream& operator<<(std::ostream& os, const Vector3D& p)
 
 #define Position3D Vector3D
 
-#endif /* POSITION_HPP_ */
+#endif /* VECTOR3D_HPP_ */

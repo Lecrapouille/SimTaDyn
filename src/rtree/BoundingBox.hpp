@@ -8,7 +8,7 @@ class AABB
 {
 public:
   inline AABB()
-    : bbmin(Vector3D::ZERO), bbmax(Vector3D::UNIT_SCALE)
+    : bbmin(Vector3D::DUMMY), bbmax(Vector3D::DUMMY)
   {
   }
 
@@ -209,6 +209,16 @@ public:
       (other.z <= bbmax.z);
   }
 
+  inline bool contains(const AABB& other) const
+  {
+    return (bbmin.x <= other.bbmin.x) &&
+      (bbmin.y <= other.bbmin.y) &&
+      (bbmin.z <= other.bbmin.z) &&
+      (other.bbmax.x <= bbmax.x) &&
+      (other.bbmax.y <= bbmax.y) &&
+      (other.bbmax.z <= bbmax.z);
+  }
+
   inline bool collides(const Vector3D& other) const
   {
     return
@@ -220,6 +230,7 @@ public:
       (other.z <= bbmax.z);
   }
 
+  // Alias for overlapes
   inline bool collides(const AABB& other) const
   {
     return
@@ -231,7 +242,8 @@ public:
        (bbmin.z <= other.bbmax.z));
   }
 
-  // alias for union but union is a C/C++ keyword so cannot be used
+  // Alias for combineRect
+  // Alias for union but union is a C/C++ keyword so cannot be used
   inline AABB merge(const AABB& other) const
   {
     return AABB(bbmin.min(other.bbmin), bbmax.max(other.bbmax));
@@ -240,19 +252,19 @@ public:
   {
     if (collides(other))
       return AABB(bbmin.max(other.bbmin), bbmax.min(other.bbmax));
-    return AABB::AABB_ZERO;
+    return AABB::ZERO;
   }
 
   inline friend std::ostream& operator<<(std::ostream& os, const AABB& other)
   {
-    os << "AABB(min: " << other.bbmin << ", max: " << other.bbmax << ", center: " << other.centerPoint() << ") ";
-    return os;
+    return os << "AABB(min: " << other.bbmin << ", max: " << other.bbmax << ", center: " << other.centerPoint() << ") ";
   }
 
   // special values
-  static const AABB AABB_ZERO;
-  static const AABB AABB_UNIT_SCALE;
-  static const AABB AABB_INFINITE;
+  static const AABB DUMMY;
+  static const AABB ZERO;
+  static const AABB UNIT_SCALE;
+  static const AABB INFINITE;
 
 protected:
   Vector3D bbmin;

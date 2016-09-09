@@ -1,10 +1,19 @@
 #if 1
 
-#include "SimTaDynCells.hpp"
+//#include "SimTaDynCells.hpp"
+#include "BoundingBox.hpp"
 
 int main (int argc, char** argv)
 {
+  //Vector3D v(1.5f, 1.5f, 1.5f);
+  //AABB aabb(Vector3D(1.0f, 1.0f, 1.0f), Vector3D(2.0f, 2.0f, 2.0f));
+  AABB aabb(Vector3D(-1.0f, -1.0f, -1.0f), Vector3D(1.0f, 1.0f, 1.0f));
+  std::cout << aabb << " " << aabb.volume() << std::endl;
+  aabb = aabb * 2.0f;
+  std::cout << aabb << " " << aabb.volume() << std::endl;
+  return 0;
 
+  #if 0
   SimTaDynCell *g1 = new SimTaDynCell("g1");
   SimTaDynCell *g2 = new SimTaDynCell("g2");
   SimTaDynCell *d1 = new SimTaDynCell("d1");
@@ -29,7 +38,7 @@ int main (int argc, char** argv)
   std::cout << "---------------------\n";
   delete g2;
   return 0;
-
+#endif
 
   #if 0
   SimTaDynCell *g1 = new SimTaDynCell("g1");
