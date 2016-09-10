@@ -23,10 +23,38 @@ const AABB AABB::INFINITE(std::numeric_limits<float32_t>::lowest(),
 
 int main(void)
 {
+  uint32_t tid = 1;
+
+  AABB b1 = AABB::UNIT_SCALE;
+  AABB b2 = AABB::UNIT_SCALE * 4.0f;
+  AABB b3 = AABB(Vector3D(2.0f, 2.0f, 2.0f), Vector3D(3.0f, 3.0f, 3.0f));
+
   RTreeNode* root = new RTreeNode(RTREE_LEAF);
-  root = root->insert(AABB::UNIT_SCALE, 0);
-  root = root->insert(AABB::UNIT_SCALE * 4.0f, 0);
+  root = root->insert(++tid, b1, 0);
+  root = root->insert(++tid, b2, 0);
+  root = root->insert(++tid, b3, 0);
+  root = root->insert(++tid, b3+1.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE * 6.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE / 6.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 6.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 6.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 15.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 10.0f, 0);
+
+  root = root->insert(++tid, AABB::UNIT_SCALE * 6.0f+1.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE / 6.0f+1.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 6.0f+1.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 6.0f+1.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 15.0f+1.0f, 0);
+  root = root->insert(++tid, AABB::UNIT_SCALE + 10.0f+1.0f, 0);
+
   std::cout << *root << std::endl;
+
+  std::cout << root->search(AABB::UNIT_SCALE + 10.0f) << std::endl;
+
+  /*std::cout << "REMOVING\n";
+  root = root->remove(tid, b3+1.0f);
+  std::cout << *root << std::endl;*/
 
   #if 0
 

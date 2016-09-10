@@ -42,6 +42,10 @@ RTreeNode::~RTreeNode()
 
 void RTreeNode::debugNode(std::ostream& os) const
 {
+  for (uint32_t i = 0; i < level; ++i)
+    {
+      os << "      ";
+    }
   os << "RTreeNode(";
   if (IS_A_RTREE_LEAF(level))
     {
@@ -57,10 +61,16 @@ void RTreeNode::debugNode(std::ostream& os) const
 
   for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
     {
-      os << "\n  branch " << i;
+      os << "\n";
+      for (uint32_t i = 0; i < level; ++i)
+      {
+         os << "      ";
+      }
+      os << "    branch " << i;
       os << ": child " << branch[i].child;
       os << ", " << branch[i].box;
     }
+  os << std::endl;
 }
 
 /*
@@ -112,10 +122,9 @@ uint32_t RTreeNode::pickBranch(AABB const& bbox) const
         {
           volume = branch[i].box.volume();
           increase = (bbox.merge(branch[i].box)).volume() - volume;
-          std::cout << "Branch " << i << " " << volume << " " << increase << std::endl;
+
           if ((increase < bestIncr) || (flag))
             {
-              std::cout << "   case 1: best " << i << std::endl;
               best = i;
               bestVolume = volume;
               bestIncr = increase;
@@ -123,7 +132,6 @@ uint32_t RTreeNode::pickBranch(AABB const& bbox) const
             }
           else if ((increase == bestIncr) && (volume < bestVolume))
             {
-              std::cout << "    case 2: best " << i << std::endl;
               best = i;
               bestVolume = volume;
               bestIncr = increase;
@@ -140,13 +148,10 @@ uint32_t RTreeNode::pickBranch(AABB const& bbox) const
  */
 bool RTreeNode::disconnectBranch(const uint32_t b)
 {
-  if ((b < RTREE_MAX_NODES) && (branch[b].child))
+  if ((b < RTREE_MAX_NODES) && (NULL != branch[b].child))
     {
-      for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
-        {
-          branch[i].child = NULL;
-          branch[i].box = RTREE_DUMMY_BBOX;
-        }
+      branch[b].child = NULL;
+      branch[b].box = RTREE_DUMMY_BBOX;
       count--;
       return true;
     }
@@ -168,17 +173,17 @@ RTreeNode* RTreeNode::addBranch(RTreeBranch const& b)
         {
           if (NULL == branch[i].child)
             {
-              std::cout << "Ici " << i << "\n";
               branch[i] = b;
               count++;
               break;
             }
         }
-      return NULL;
+      return NULL;//this;
     }
   else
     {
-      newNode = splitNode(b);
+      RTreeSpliter s;
+      newNode = splitNodeQuadratic(b, s);
       /*if (IS_LEAF(level))
         {
           LeafCount++;
@@ -189,11 +194,4 @@ RTreeNode* RTreeNode::addBranch(RTreeBranch const& b)
         }*/
       return newNode;
     }
-}
-
-RTreeNode* RTreeNode::splitNode(RTreeBranch const& b)
-{
-  (void) b;
-  std::cerr << "RTreeNode::splitNode not yet implemented" << std::endl;
-  return NULL;
 }

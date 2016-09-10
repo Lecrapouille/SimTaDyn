@@ -27,16 +27,23 @@
  */
 #define RTREE_DUMMY_BBOX    AABB::DUMMY
 #define RTREE_LEAF          (0U)
-#define RTREE_INTERNAL_NODE (RTREE_LEAF > RTREE_LEAF)
+//#define RTREE_INTERNAL_NODE (RTREE_LEAF > RTREE_LEAF)
+
 /*
  * Retun true for a leaf, else (for internal node) return false
  */
 #define IS_A_RTREE_LEAF(level) (RTREE_LEAF == level)
 
-
 #  ifndef RTREE_MAX_NODES
 #    define RTREE_MAX_NODES  4U
 #  endif /* RTREE_MAX_NODES */
+
+/*
+ * Balance criterion for node splitting
+ */
+#  ifndef RTREE_MIN_FILL
+#    define RTREE_MIN_FILL (RTREE_MAX_NODES / 3U)
+#  endif /* RTREE_MIN_FILL */
 
 class RTreeNode;
 
@@ -59,7 +66,7 @@ public:
 
   /*inline friend std::ostream& operator<<(std::ostream& os, const RTreeBranch& b)
   {
-    b.debugIndex(os);
+    os << "RTreeBranch(" << b.box << ", " << *(b.child) << "\n";
     return os;
     }*/
 
@@ -83,7 +90,8 @@ public:
   void debugData(std::ostream& out) const;
 
   uint32_t search(AABB const& bbox) const;
-  RTreeNode* insert(AABB const& bbox, uint32_t level);
+  RTreeNode* insert(const uint32_t tid, AABB const& bbox, uint32_t level);
+  RTreeNode* remove(const uint32_t tid, AABB const& bbox);
 
   static size_t howMany()
   {
@@ -92,23 +100,81 @@ public:
 
   inline friend std::ostream& operator<<(std::ostream& os, const RTreeNode& n)
   {
-    //n.debugData(os);
-    n.debugNode(os);
+    n.debugIndex(os);
     return os;
   }
 
 protected:
+
+  enum rtree_partion_id
+    {
+      RTREE_PARTITION_0,
+      RTREE_PARTITION_1,
+      RTREE_UNDEF_PARTITION,
+    };
+
+  class RTreeSpliter
+  {
+  public:
+    RTreeBranch BranchBuf[RTREE_MAX_NODES + 1U];
+    AABB CoverSplit;
+    float32_t CoverSplitVolume;
+    //PartitionVars Partitions;
+  };
+
+  class PartitionVars
+  {
+  public:
+    void init()
+    {
+      count[RTREE_PARTITION_0] = count[RTREE_PARTITION_1] = 0;
+      cover[RTREE_PARTITION_0] = cover[RTREE_PARTITION_1] = AABB::DUMMY;
+      volume[RTREE_PARTITION_0] = volume[RTREE_PARTITION_1] = 0.0f;
+      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; i++)
+        {
+          taken[i] = false;
+          partition[i] = RTREE_UNDEF_PARTITION;
+        }
+    }
+    uint32_t partition[RTREE_MAX_NODES + 1U];
+    uint32_t taken[RTREE_MAX_NODES + 1U];
+    uint32_t count[2];
+    AABB cover[2];
+    float32_t volume[2];
+
+    void methodZero(RTreeSpliter& s);
+    void classify(const uint32_t i, const uint32_t group, RTreeSpliter& s);
+    void pickSeeds(RTreeSpliter& s);
+  };
+
+
+  class RTreeNodeList
+  {
+  public:
+    RTreeNodeList(RTreeNode* node, RTreeNodeList* next)
+    {
+      this->next = next;
+      this->node = node;
+    }
+
+    RTreeNodeList *next;
+    RTreeNode *node;
+  };
+
   void initNode();
   AABB cover() const;
   uint32_t pickBranch(AABB const& bbox) const;
   bool disconnectBranch(const uint32_t b);
   RTreeNode* addBranch(RTreeBranch const& b);
-  RTreeNode* splitNode(RTreeBranch const& b);
-  RTreeNode* insert2(AABB const& bbox, uint32_t level);
+  RTreeNode* insert_aux(const uint32_t tid, AABB const& bbox, uint32_t level);
+  bool remove_aux(const uint32_t tid, AABB const& bbox, RTreeNodeList* list);
+  RTreeNode* splitNodeQuadratic(RTreeBranch const& b, RTreeSpliter& s);
+  bool getBranches(RTreeBranch const& b, RTreeSpliter& s);
+  uint32_t search_aux(AABB const& bbox) const;
 
   // 0 is leaf, others positive
   uint32_t level;
-  // ???
+  // Number of branches used
   uint32_t count;
   RTreeBranch branch[RTREE_MAX_NODES];
 };
