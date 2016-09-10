@@ -266,7 +266,7 @@ public:
   static const AABB UNIT_SCALE;
   static const AABB INFINITE;
 
-protected:
+  //protected:
   Vector3D bbmin;
   Vector3D bbmax;
 };

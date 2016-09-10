@@ -123,7 +123,7 @@ public:
    * Creator
    */
   SimTaDynCell()
-    : box_(AABB::AABB_ZERO)
+    : box_(AABB::DUMMY)
   {
     id_ = howMany() - 1U;
     name = "Cell_" + std::to_string(id_);
@@ -141,7 +141,7 @@ public:
    * Creator
    */
   SimTaDynCell(string new_name, const string& new_code_forth = "", void *const new_data = NULL)
-    : box_(AABB::AABB_ZERO)
+    : box_(AABB::DUMMY)
   {
     id_ = howMany() - 1U;
     name = new_name;
@@ -160,7 +160,7 @@ public:
    */
   virtual ~SimTaDynCell()
   {
-    std::cout << "Destroying\n";
+    //std::cout << "Destroying\n";
     EventDestroyed m(this);
     notifyObservers(&m);
   }
@@ -406,11 +406,11 @@ public:
   }
 
   /*
-   * Debug
+   * For debug
    */
   virtual Key whoAmI()
   {
-    std::cout << "I am the SimTaDynCell #" << id_ << " nammed \"" << name << " (" << this << ")\":" << std::endl;
+    std::cout << "I am the SimTaDynCell #" << id_ << " nammed \"" << name << "\" (" << this << "):" << std::endl;
     return id_;
   }
 };

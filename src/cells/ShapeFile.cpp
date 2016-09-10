@@ -236,7 +236,7 @@ void ShapefileLoader::getAllRecords(SimTaDynGraph& graph)
     }
 }
 
-void ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph) // new graph ?
+bool ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph) // new graph ?
 {
   uint32_t value32b;
 
@@ -249,7 +249,7 @@ void ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
       if (1000 != value32b)
         {
           cerr << "Warning. Expected shapefile version 1000 not found. The file '" << filename << "' may be not fully interpreted" << endl;
-          return ;
+          return false;
         }
 
       value32b = getShapeType();
@@ -259,8 +259,9 @@ void ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
       cout << "Map Bounding Box: " << graph.bbox << endl;
 
       getAllRecords(graph);
-      graph.setName(graph.getName() + '_' + filename);
+      graph.name += '_' + filename;
       infile_.close();
+      return true;
     }
   catch (const ShapefileLoaderBadLength& e)
     {
@@ -268,6 +269,7 @@ void ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
       cerr << "  The real file size is " << e.real_size << " ko but the extracted size information is "
            << e.expected_size << " ko" << endl;
       infile_.close();
+      return false;
     }
   catch (const ShapefileLoaderBadId& e)
     {
@@ -275,11 +277,13 @@ void ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
       cerr << "  The expected file identifier is " << e.expected_id << " but the identifier read is " << e.bad_id
            << ". The file '" << filename_ << "' seems not to be a proper .shp file." << endl;
       infile_.close();
+      return false;
     }
   catch (const ShapefileLoaderOpenFailed& e)
     {
       cerr << "Failed opening the shapefile " << filename << ":" << endl;
       cerr << "  Reason is '" << strerror(e.error) << "'." << endl;
+      return false;
     }
 }
 

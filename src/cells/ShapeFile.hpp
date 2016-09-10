@@ -62,7 +62,7 @@ public:
   void         getBoundingBox(AABB& bbox);
   uint32_t     getRecordAt(SimTaDynGraph& graph, const uint32_t offset);
   void         getAllRecords(SimTaDynGraph& graph);
-  void         loadShapefile(const string& filename, SimTaDynGraph& graph);
+  bool         loadShapefile(const string& filename, SimTaDynGraph& graph);
 
 private:
   ifstream     infile_;

@@ -31,12 +31,11 @@ VPATH=.:$(DEST):gui:cells:forth:rtree:common
 ###################################################
 # Set objects architecture specific
 OBJECTS_COMMON = Color.o Vector3D.o
-OBJECTS_RTREE = BoundingBox.o RTreeNode.o RTreeIndex.o
+OBJECTS_RTREE = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_FORTH = Forth.o ForthDico.o ForthPrimitives.o
-OBJECTS_CELLS =
+OBJECTS_CELLS = SimTaDynCells.o SimTaDynGraphs.o ShapeFile.o
  # SimTaDynNodes.o SimTaDynArcs.o ShapeFile.o
-OBJECTS_GUI =
-# Camera2D.o Renderer.o opgl.o gui.o
+OBJECTS_GUI = Camera2D.o Renderer.o opgl.o gui.o
 OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_RTREE) $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_GUI) main.o
 TARGET = SimTaDyn
 

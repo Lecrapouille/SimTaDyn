@@ -1,89 +1,118 @@
 #ifndef GRAPH_HPP_
 #  define GRAPH_HPP_
 
-#  include "SimTaDynNodes.hpp"
-#  include "SimTaDynArcs.hpp"
-
-// *************************************************************************************************
-// Define a SimTaDyn graph
-// ************************************************************************************************
-// http://mooreccac.com/kcppdoc/Dijkstra.htm
-// https://www.cs.cmu.edu/~pavlo/courses/fall2013/static/papers/osdi2012-graphchi.pdf
-typedef map<Key, SimTaDynCell*> listNodes;
-typedef map<Key, SimTaDynCell*> listArcs;
+#  include "SimTaDynCells.hpp"
+//#  include "ShapeFile.hpp"
+#  include "Renderer.hpp"
 
 class SimTaDynGraph: private ClassCounter<SimTaDynGraph>
 {
 public:
-  //Position3D bbox_min; // Bounding box min position
-  //Position3D bbox_max; // Bounding box max position
-  AABB bbox;
-
-  string getName() { return name_; }
-  void setName(string name) { name_ = name; }
-  SimTaDynGraph(string name) { name_ = name; }
-  SimTaDynGraph() { name_ = ""; }
-  ~SimTaDynGraph() { }
-
-  void addNode(string name, const Position3D& position, string code_forth)
-  {
-    SimTaDynCell* node = new SimTaDynNode(name, position, code_forth);
-    nodes_.insert(make_pair(node->privateId(), node));
-  }
-
-  void addNode(string name, const Position3D& position)
-  {
-    SimTaDynCell* node = new SimTaDynNode(name, position);
-    nodes_.insert(make_pair(node->privateId(), node));
-  }
-
-  void addNode(const Position3D& position)
-  {
-    SimTaDynCell* node = new SimTaDynNode(position);
-    nodes_.insert(make_pair(node->privateId(), node));
-  }
-
-  void addArc(Key k1, Key k2, string name, bool oriented = false, int cost = 0)
-  {
-    SimTaDynCell* n1 = getNode(k1);
-    SimTaDynCell* n2 = getNode(k2);
-    SimTaDynCell* arc = new SimTaDynArc(n1, n2, name, oriented, cost);
-    arcs_.insert(make_pair(arc->privateId(), arc));
-  }
-
-  SimTaDynCell* getNode(const Key& id) // FIXME &
-  {
-    //std::set<SimTaDynCell*>::iterator it;
-
-    auto it = nodes_.find(id);
-    if (it == nodes_.end())
-      {
-        throw std::out_of_range("getNode(const Key& id): SimTaDynNode " + to_string(id) + " not found in the graph");
-      }
-    return it->second;
-  }
-
-  SimTaDynCell* getArc(const Key& id) // FIXME &
-  {
-    //std::set<SimTaDynCell*>::iterator it;
-
-    auto it = arcs_.find(id);
-    if (it == arcs_.end())
-      {
-        throw std::out_of_range("getArc(const Key& id): SimTaDynArc " + to_string(id) + " not found in the graph");
-      }
-    return it->second;
-  }
-
-protected:
   /*
    * Give a name to the element which will be displayed in the GUI.
    * Contrary to id_ several cells can have the same name. By default
    * the name is unique.
    */
-  string name_;
-  listNodes nodes_;
-  listArcs arcs_;
+  string name;
+
+  /*
+   * Axis Align Bounding box of the map
+   */
+  AABB bbox;
+
+  SimTaDynGraph()
+  {
+    id_ = howMany() - 1U;
+    name = "Graph_" + std::to_string(id_);
+  }
+
+  SimTaDynGraph(std::string const& name)
+  {
+    this->name = name;
+  }
+
+  ~SimTaDynGraph()
+  {
+    std::map<Key, SimTaDynCell*>::iterator it;
+    for (it = nodes_.begin(); it != nodes_.end(); ++it)
+      {
+        delete it->second;
+      }
+  }
+
+  //bool loadShapefile(ShapefileLoader& loader, std::string const& filename)
+  //{
+  //  return loader.loadShapefile(filename, *this);
+  //}
+
+  SimTaDynCell* addNode(Position3D const& p)
+  {
+    SimTaDynCell* node = new SimTaDynCell();// FIXMEnew SimTaDynNode();
+    node->moveToPosition(p);
+
+    nodes_[node->privateId()] = node;
+    return node;
+  }
+
+  SimTaDynCell* addNode(Position3D const& position, string name, const string& code_forth = "", void *const data = NULL)
+  {
+    SimTaDynCell* node = new SimTaDynCell(name, code_forth, data);// FIXMEnew SimTaDynNode();
+    node->moveToPosition(position);
+
+    nodes_[node->privateId()] = node;
+    return node;
+  }
+
+  void removeNode(const Key id)
+  {
+    delete nodes_[id];
+    nodes_.erase(id);
+  }
+
+  void draw()
+  {
+    // Draw all zones
+    // Draw all arcs
+    // Draw all nodes
+    std::map<Key, SimTaDynCell*>::iterator it;
+    for (it = nodes_.begin(); it != nodes_.end(); ++it)
+      {
+        Position3D p = it->second->getPosition();
+        glPushMatrix();
+        glTranslated(p.x, p.y, 0.0f);
+        glRecti(1.0f, -1.0f, -1.0f, 1.0f);
+        glPopMatrix();
+      }
+  }
+
+  /*
+   * Instances counter
+   */
+  static Key howMany()
+  {
+    return ClassCounter<SimTaDynCell>::howMany();
+  }
+
+  /*
+   * For debug
+   */
+  virtual Key whoAmI()
+  {
+    std::cout << "I am the SimTaDynCell #" << id_ << " nammed \"" << name << "\" (" << this << "):" << std::endl;
+    return id_;
+  }
+
+protected:
+  /*
+   * Make this instance unique with this identifier.
+   * Used it for comparing element in a container.
+   */
+  Key id_;
+
+  /*
+   * List of nodes
+   */
+  std::map<Key, SimTaDynCell*> nodes_;
 };
 
 #endif /* GRAPH_HPP_ */
