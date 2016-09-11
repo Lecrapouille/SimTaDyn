@@ -1,16 +1,7 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
-#  ifdef __APPLE__
-#    include <GLUT/glut.h>
-#    include <OpenGL/gl.h>
-#    include <OpenGL/glu.h>
-#  else
-#    include <GL/glut.h>
-#    include <GL/gl.h>
-#    include <GL/glu.h>
-#  endif
-
+#  include "opgl_ext.hpp"
 #  include "Color.hpp"
 #  include "Camera2D.hpp"
 
