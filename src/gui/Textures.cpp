@@ -1,4 +1,4 @@
-#include "Texture.hpp"
+#include "Textures.hpp"
 
 bool Texture::LoadTGA(std::string const& filename)
 {
@@ -22,6 +22,7 @@ bool Texture::LoadTGA(std::string const& filename)
       (0 != memcmp(TGAheader, TGAcompare, sizeof (TGAheader))) ||
       (fread(header, 1, sizeof (header), file) != sizeof (header)))
     {
+      std::cerr << "Texture::LoadTGA(): Failed loading texture " << filename << std::endl;
       if (file != NULL)
         fclose(file);
       return false;
@@ -32,6 +33,7 @@ bool Texture::LoadTGA(std::string const& filename)
 
   if ((width <= 0) || (height <= 0) || (header[4] != 24 && header[4] != 32))
     {
+      std::cerr << "Texture::LoadTGA(): Inccorect size or wrong header" << std::endl;
       fclose(file);
       return false;
     }
@@ -50,6 +52,7 @@ bool Texture::LoadTGA(std::string const& filename)
         }
 
       fclose(file);
+      std::cerr << "Texture::LoadTGA(): Failed when doing malloc" << std::endl;
       return false;
     }
 
@@ -62,22 +65,18 @@ bool Texture::LoadTGA(std::string const& filename)
 
   fclose(file);
 
-  glGenTextures(1, &id_);
-  check_gl_error();
-  glBindTexture(GL_TEXTURE_2D, id_);
-  check_gl_error();
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  check_gl_error();
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  check_gl_error();
+  glCheck(glGenTextures(1, &id_));
+  glCheck(glBindTexture(GL_TEXTURE_2D, id_));
+  glCheck(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+  glCheck(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
   if (24 == bpp)
     type = GL_RGB;
   else
     type = GL_RGBA;
 
-  glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, imageData);
-  check_gl_error();
+  glCheck(glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, imageData));
 
+  std::cerr << "Load TGA ok\n";
   return true;
 }

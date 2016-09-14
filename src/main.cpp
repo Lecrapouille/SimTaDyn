@@ -1,4 +1,4 @@
-#include "gui/gui.hpp"
+#include "gui/SimTaDynWindow.hpp"
 #include <gtkmm/main.h>
 
 int main (int argc, char** argv)

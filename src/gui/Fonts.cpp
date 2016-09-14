@@ -1,81 +1,60 @@
 #include "Fonts.hpp"
+#include <stdarg.h>
 
 void Font::buildFont()
 {
-  base_ = glGenLists(95);
+  std::cout << "Loading Font" << std::endl;
+  base_ = glCheck(glGenLists(95));
+  if (0 == base_)
+    {
+       std::cerr << "Font::buildFont(): Failed when creating a display list" << std::endl;
+    }
 
-  glBindTexture(GL_TEXTURE_2D, id_);
+  glCheck(glBindTexture(GL_TEXTURE_2D, id_));
   for (uint32_t loop = 0; loop < 95; loop++)
      {
        float32_t cx = (float32_t) (loop % 16) / 16.0f;
        float32_t cy = (float32_t) (loop / 16) / 8.0f;
 
-       glNewList(base_ + loop,GL_COMPILE);
-       glBegin(GL_QUADS);
-       glTexCoord2f(cx,           1.0f - cy - 0.120f); glVertex2i(0,  0);
-       glTexCoord2f(cx + 0.0625f, 1.0f - cy - 0.120f); glVertex2i(16, 0);
-       glTexCoord2f(cx + 0.0625f, 1.0f - cy);          glVertex2i(16,16);
-       glTexCoord2f(cx,           1.0f - cy);          glVertex2i(0, 16);
-       glEnd();
-       glTranslated(10,0,0);
-       glEndList();
+       glCheck(glNewList(base_ + loop, GL_COMPILE));
+       glCheck(glBegin(GL_QUADS));
+       glCheck(glTexCoord2f(cx,           1.0f - cy - 0.120f)); glCheck(glVertex2i(0,  0));
+       glCheck(glTexCoord2f(cx + 0.0625f, 1.0f - cy - 0.120f)); glCheck(glVertex2i(16, 0));
+                                                                glCheck(glTexCoord2f(cx + 0.0625f, 1.0f - cy));          glCheck(glVertex2i(16,16));
+                                                                glCheck(glTexCoord2f(cx,           1.0f - cy));          glCheck(glVertex2i(0, 16));
+       glCheck(glEnd());
+       glCheck(glTranslated(10,0,0));
+       glCheck(glEndList());
      }
 }
-/*
-void Font::print2D(const GLint x, const GLint y, const GLfloat scale, const char *txt, ...)
+
+void Font::setText(const char *txt, ...)
 {
-  char    text[256];
   va_list ap;
-
-  if ((NULL == txt) || (!loaded_))
-    return ;
-
   va_start(ap, txt);
-  vsprintf(text, txt, ap);
+  vsprintf(text_, txt, ap);
   va_end(ap);
+  length_ = strlen(text_);
+}
 
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(0, guts.width, 0, guts.height, -1, 1);
-  glMatrixMode(GL_MODELVIEW);
-
-  glBindTexture(GL_TEXTURE_2D, id_);
-  glPushMatrix();
-  glLoadIdentity();
-  glTranslated(x, y, 0);
-  glScaled(scale, scale, scale);
-  glListBase(base_ - 32);
-  glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);
-  glPopMatrix();
-
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  }*/
-
-void Font::print3D(const GLfloat x, const GLfloat y, const GLfloat z, const GLfloat scale, const char *txt, ...)
+void Font::draw() const //Render& target) const
 {
-  char    text[256];
-  va_list ap;
+  if ((0 == length_) || (!loaded_) || (0 == base_))
+    {
+      //std::cout << "Font not loaded" << std::endl;
+      return ;
+    }
 
-  if ((NULL == txt) || (!loaded_))
-    return ;
-
-  va_start(ap, txt);
-  vsprintf(text, txt, ap);
-  va_end(ap);
-
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_BLEND);
-  glBindTexture(GL_TEXTURE_2D, id_);
-  glPushMatrix();
-  glLoadIdentity();
-  glTranslatef(x, y, z);
-  glScaled(scale, scale, scale);
-  glListBase(base_ - 32);
-  glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);
-  glPopMatrix();
-  glDisable(GL_BLEND);
-  glDisable(GL_TEXTURE_2D);
+  glCheck(glEnable(GL_TEXTURE_2D));
+  glCheck(glEnable(GL_BLEND));
+  glCheck(glBindTexture(GL_TEXTURE_2D, id_));
+  //glCheck(glPushMatrix());
+  //glCheck(glLoadIdentity());
+  //glCheck(glTranslatef(x, y, z));
+  //glCheck(glScaled(scale, scale, scale));
+  glCheck(glListBase(base_ - 32));
+  glCheck(glCallLists(length_, GL_UNSIGNED_BYTE, text_));
+  //glCheck(glPopMatrix());
+  glCheck(glDisable(GL_BLEND));
+  glCheck(glDisable(GL_TEXTURE_2D));
 }

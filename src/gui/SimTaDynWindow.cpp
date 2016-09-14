@@ -1,4 +1,4 @@
-#include "gui.hpp"
+#include "SimTaDynWindow.hpp"
 
 // *************************************************************************************************
 // SimTaDyn main window
@@ -13,7 +13,6 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title): Gtk::Window()
   add_events(Gdk::KEY_RELEASE_MASK);
   signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
   signal_key_release_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyReleased));
-
   //signal_scroll_event().connect(sigc::mem_fun(*this, &SimTaDynWindow::on_scroll_event));
 
   show_all_children();

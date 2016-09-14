@@ -8,10 +8,8 @@
 // ************************************************************************************************
 class SimTaDynArc: public SimTaDynCell, private ClassCounter<SimTaDynArc>
 {
-  // FIXME: risque de bug:
-  // SimTaDynCell* N1 = new SimTaDynNode();
-  // N2.addExplicitNeighbor(N1) --> ne sera pas connu du graphe
 public:
+
   SimTaDynCell* node_head_;
   SimTaDynCell* node_tail_;
   bool oriented_;

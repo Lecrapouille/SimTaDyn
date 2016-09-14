@@ -1,4 +1,4 @@
-#include "opgl.hpp"
+#include "DrawingArea.hpp"
 
 // *************************************************************************************************
 // Class for OpenGl renderer area
@@ -53,16 +53,17 @@ void GlDrawingArea::on_realize()
   // ca fait beaucoup d'appel pour rien
   Renderer::initialize();
   Renderer::clearScreen(Color::Black);
-  glClearDepth(1.0f);
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-  glLineWidth(10);
-  glEnable(GL_ALPHA_TEST);
+  glCheck(glClearDepth(1.0f));
+  glCheck(glEnable(GL_LINE_SMOOTH));
+  glCheck(glEnable(GL_BLEND));
+  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+  glCheck(glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE));
+  glCheck(glLineWidth(10));
+  glCheck(glEnable(GL_ALPHA_TEST));
 
   windowGL->gl_end();
 
+  drawer_ = new DrawGraph;
   loader.loadShapefile("../data/3dpoints.shp", graph);
   std::cout << graph.name << std::endl;
 
@@ -125,10 +126,10 @@ bool GlDrawingArea::onIdle()
 
   windowGL->gl_begin(get_gl_context());
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
+  glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+  glCheck(glLoadIdentity());
 
-  graph.draw();
+  drawer_->draw(graph);
 
   windowGL->gl_end();
   windowGL->swap_buffers();

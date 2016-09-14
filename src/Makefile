@@ -30,12 +30,12 @@ VPATH=.:$(DEST):gui:cells:forth:rtree:common
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_COMMON = Color.o Vector3D.o
+OBJECTS_COMMON = Color.o Vector3D.o Camera2D.o
 OBJECTS_RTREE = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_FORTH = Forth.o ForthDico.o ForthPrimitives.o
 OBJECTS_CELLS = SimTaDynCells.o SimTaDynGraphs.o ShapeFile.o
  # SimTaDynNodes.o SimTaDynArcs.o ShapeFile.o
-OBJECTS_GUI = opgl_ext.o Camera2D.o Renderer.o Texture.o Fonts.o opgl.o gui.o
+OBJECTS_GUI = OpenGL.o Textures.o Fonts.o DrawGraph.o Renderer.o DrawingArea.o SimTaDynWindow.o
 OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_RTREE) $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_GUI) main.o
 TARGET = SimTaDyn
 
@@ -47,7 +47,7 @@ TARGET = SimTaDyn
 CC=g++
 CFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
 LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
-DEFINES =
+DEFINES = -DCHECK_OPENGL
 
 ###################################################
 # Set Libraries
@@ -76,7 +76,7 @@ $(TARGET): $(OBJECTS)
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~ gui/*~ cells/*~ $(DEST) 2> /dev/null
+	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(DEST) 2> /dev/null
 
 ###################################################
 # Create a temporary folder to store *.o

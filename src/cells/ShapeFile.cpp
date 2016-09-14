@@ -122,7 +122,7 @@ void ShapefileLoader::checkFileSize()
   // Expect to have same values
   if (value32b == file_length_)
     {
-      cout << "File Length: " << file_length_ << endl;
+      //cout << "File Length: " << file_length_ << endl;
     }
   else
     {
@@ -200,8 +200,8 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offse
   content_length = readBigEndianInt() * sizeof (uint16_t);
   shape_type = readLittleEndianInt();
 
-  cout << "Record Number: " << record_number << ", Content Length: " << content_length << ":" << endl;
-  cout << "  Shape " << record_number - 1U << " (" << shapeTypes(shape_type) << "): ";
+  //cout << "Record Number: " << record_number << ", Content Length: " << content_length << ":" << endl;
+  //cout << "  Shape " << record_number - 1U << " (" << shapeTypes(shape_type) << "): ";
 
   switch (shape_type)
     {
@@ -232,7 +232,7 @@ void ShapefileLoader::getAllRecords(SimTaDynGraph& graph)
 
       content_length = getRecordAt(graph, offset);
       offset += content_length;
-      cout << "Total bytes read: " << offset << endl;
+      //cout << "Total bytes read: " << offset << endl;
     }
 }
 
@@ -245,7 +245,7 @@ bool ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
       openShapeFile(filename);
 
       value32b = getShapeVersion();
-      cout << "Shapefile Version: " << value32b << endl;
+      //cout << "Shapefile Version: " << value32b << endl;
       if (1000 != value32b)
         {
           cerr << "Warning. Expected shapefile version 1000 not found. The file '" << filename << "' may be not fully interpreted" << endl;
@@ -253,10 +253,10 @@ bool ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
         }
 
       value32b = getShapeType();
-      cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << endl;
+      //cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << endl;
 
       getBoundingBox(graph.bbox);
-      cout << "Map Bounding Box: " << graph.bbox << endl;
+      //cout << "Map Bounding Box: " << graph.bbox << endl;
 
       getAllRecords(graph);
       graph.name += '_' + filename;

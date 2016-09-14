@@ -1,5 +1,5 @@
-#ifndef OPGL_HPP_
-#  define OPGL_HPP_
+#ifndef DRAWINGAREA_HPP_
+#  define DRAWINGAREA_HPP_
 
 #  include <gtkmm/widget.h>
 #  include <gtkmm/window.h>
@@ -7,12 +7,9 @@
 #  include <gdk/gdkkeysyms.h>
 #  include <gtkglmm.h>
 #  include <glibmm/error.h>
-#  include <string>
-#  include <cstddef>
-#  include <exception>
-#  include <iostream>
-
 #  include "Renderer.hpp"
+#  include "DrawGraph.hpp"
+#  include "SimTaDynGraphs.hpp"
 #  include "ShapeFile.hpp"
 
 // *************************************************************************************************
@@ -63,6 +60,7 @@ protected:
 
 private:
   bool direction_[no_];
+  DrawGraph* drawer_;
 };
 
-#endif /* OPGL_HPP_ */
+#endif /* DRAWINGAREA_HPP_ */

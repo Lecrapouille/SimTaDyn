@@ -125,7 +125,7 @@ public:
   SimTaDynCell()
     : box_(AABB::DUMMY)
   {
-    id_ = howMany() - 1U;
+    id_ = howMany();
     name = "Cell_" + std::to_string(id_);
     code_forth_ = "";
 

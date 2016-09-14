@@ -2,8 +2,6 @@
 #  define GRAPH_HPP_
 
 #  include "SimTaDynCells.hpp"
-//#  include "ShapeFile.hpp"
-#  include "Renderer.hpp"
 
 class SimTaDynGraph: private ClassCounter<SimTaDynGraph>
 {
@@ -22,7 +20,7 @@ public:
 
   SimTaDynGraph()
   {
-    id_ = howMany() - 1U;
+    id_ = howMany();
     name = "Graph_" + std::to_string(id_);
   }
 
@@ -69,22 +67,6 @@ public:
     nodes_.erase(id);
   }
 
-  void draw()
-  {
-    // Draw all zones
-    // Draw all arcs
-    // Draw all nodes
-    std::map<Key, SimTaDynCell*>::iterator it;
-    for (it = nodes_.begin(); it != nodes_.end(); ++it)
-      {
-        Position3D p = it->second->getPosition();
-        glPushMatrix();
-        glTranslated(p.x, p.y, 0.0f);
-        glRecti(1.0f, -1.0f, -1.0f, 1.0f);
-        glPopMatrix();
-      }
-  }
-
   /*
    * Instances counter
    */
@@ -103,6 +85,11 @@ public:
   }
 
 protected:
+  /*
+   * For rendering the graph scene
+   */
+  friend class DrawGraph;
+
   /*
    * Make this instance unique with this identifier.
    * Used it for comparing element in a container.

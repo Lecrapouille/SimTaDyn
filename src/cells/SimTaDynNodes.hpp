@@ -6,37 +6,57 @@
 // *************************************************************************************************
 // Define a Node (aka Vertex)
 // *************************************************************************************************
-class SimTaDynNode: public SimTaDynCell, private ClassCounter<SimTaDynNode>
+class SimTaDynNode
+  : public SimTaDynCell,
+    private ClassCounter<SimTaDynNode>
 {
 public:
-  //protected:
-  /*
-   * Position in space
-   */
-
-  // MovedEvent --> register
-
-public:
 
   /*
-   * Constructor: give a name (else use a generic one) and a position in space.
+   * Constructors
    */
-  SimTaDynNode(string pname, const Position3D& p, string pcode_forth)
-  { name = pname; code_forth = pcode_forth; registerEventFunc(this, &SimTaDynNode::onMoved); position_ = p; }
-  SimTaDynNode(string pname, const Position3D& p)
-  { name = pname; registerEventFunc(this, &SimTaDynNode::onMoved); position_ = p; }
-  SimTaDynNode(const Position3D& p)
-  { name = "Node_" + to_string(id_); registerEventFunc(this, &SimTaDynNode::onMoved); position_ = p; }
-  ~SimTaDynNode() { }
+  SimTaDynNode(Position3D const& position)
+    : SimTaDynCell(),
+      Position3D(position),
+  {
+    id_ = howMany() - 1U;
+    name = "Node_" + std::to_string(id_);
+  }
+
+  /*
+   * Constructors
+   */
+  SimTaDynNode(Position3D const& position,
+               string const& new_name,
+               string const& new_code_forth = "",
+               void *const new_data = NULL)
+    : SimTaDynCell(new_name, new_code_forth, new_data),
+      Position3D(position),
+      AABB(position, position)
+  {
+    box_.scale(1.5f);
+  }
+
+  ~SimTaDynNode()
+  {
+  }
 
   /*
    * Static member returning the number of SimTaDynNode instances created
    */
-  static size_t howMany() { return ClassCounter<SimTaDynNode>::howMany(); }
+  static size_t howMany()
+  {
+    return ClassCounter<SimTaDynNode>::howMany();
+  }
 
-  Key whoAmI();
-  Position3D& getPosition(); // FIXME: const
-  void moveToPosition(const Position3D& p);
+  /*
+   * For debug
+   */
+  Key whoAmI()
+   {
+     std::cout << "I am the SimTaDynNode #" << id_ << " named \"" << name << "\":" << endl;
+     return id_;
+   }
 
 protected:
   void onMoved(const EventMoved* movement);

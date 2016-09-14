@@ -19,10 +19,10 @@ void Renderer::applyViewport(Camera2D& camera)
   rect[2] = static_cast<int>(0.5f + width  * camera.display_at_width_);
   rect[3] = static_cast<int>(0.5f + height * camera.display_at_height_);
 
-  glViewport(rect[0], rect[1], rect[2], rect[3]);
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrixf(camera.getTransform());
-  glMatrixMode(GL_MODELVIEW);
+  glCheck(glViewport(rect[0], rect[1], rect[2], rect[3]));
+  glCheck(glMatrixMode(GL_PROJECTION));
+  glCheck(glLoadMatrixf(camera.getTransform()));
+  glCheck(glMatrixMode(GL_MODELVIEW));
 }
 
 void Renderer::applyViewport()
@@ -32,8 +32,8 @@ void Renderer::applyViewport()
 
 void Renderer::clearScreen(const Color& color)
 {
-  glClearColor(color.r, color.g, color.b, color.a);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glCheck(glClearColor(color.r, color.g, color.b, color.a));
+  glCheck(glClear(GL_COLOR_BUFFER_BIT));
 }
 
 void Renderer::changeCamera2D(const Camera2D& camera)
@@ -50,5 +50,11 @@ void Renderer::resetCamera2D()
 {
   current_camera_ = default_camera_;
 }
+
+/*void Renderer::draw(const Drawable& drawable)
+{
+  drawable.draw(*this);
+}
+*/
 
 //void viewPort();
