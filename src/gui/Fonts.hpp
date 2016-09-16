@@ -1,7 +1,6 @@
 #ifndef FONTS_HPP_
 #  define FONTS_HPP_
 
-#  include "Renderer.hpp"
 #  include "Color.hpp"
 #  include "Textures.hpp"
 
@@ -36,7 +35,7 @@ public:
   }
 
   void setText(const char *txt, ...);
-  void draw() const; //Render& target) const;
+  void draw() const;
 
 protected:
   void buildFont();

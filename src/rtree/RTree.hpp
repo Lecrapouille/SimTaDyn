@@ -104,6 +104,11 @@ public:
     return os;
   }
 
+  /*
+   * For drawing the graph scene
+   */
+  friend class Renderer;
+
 protected:
 
   enum rtree_partion_id

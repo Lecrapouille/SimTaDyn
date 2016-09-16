@@ -32,6 +32,12 @@ float64_t ShapefileLoader::readDouble()
   return convert;
 }
 
+float32_t ShapefileLoader::readDoubleCastedFloat()
+{
+  float64_t val = readDouble();
+  return static_cast<float32_t>(val);
+}
+
 void ShapefileLoader::goToByte(const uint32_t offset)
 {
   infile_.seekg(offset, ios::beg);
@@ -171,23 +177,23 @@ uint32_t ShapefileLoader::getShapeType()
 void ShapefileLoader::getBoundingBox(Position3D& bbox_min, Position3D& bbox_max)
 {
   goToByte(36U);
-  bbox_min.x = readDouble();
-  bbox_min.y = readDouble();
-  bbox_max.x = readDouble();
-  bbox_max.y = readDouble();
-  bbox_min.z = readDouble();
-  bbox_max.z = readDouble();
+  bbox_min.x = readDoubleCastedFloat();
+  bbox_min.y = readDoubleCastedFloat();
+  bbox_max.x = readDoubleCastedFloat();
+  bbox_max.y = readDoubleCastedFloat();
+  bbox_min.z = readDoubleCastedFloat();
+  bbox_max.z = readDoubleCastedFloat();
 }
 
 void ShapefileLoader::getBoundingBox(AABB& bbox)
 {
   goToByte(36U);
-  bbox.bbmin.x = readDouble();
-  bbox.bbmin.y = readDouble();
-  bbox.bbmax.x = readDouble();
-  bbox.bbmax.y = readDouble();
-  bbox.bbmin.z = readDouble();
-  bbox.bbmax.z = readDouble();
+  bbox.bbmin.x = readDoubleCastedFloat();
+  bbox.bbmin.y = readDoubleCastedFloat();
+  bbox.bbmax.x = readDoubleCastedFloat();
+  bbox.bbmax.y = readDoubleCastedFloat();
+  bbox.bbmin.z = readDoubleCastedFloat();
+  bbox.bbmax.z = readDoubleCastedFloat();
 }
 
 uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offset)
@@ -202,14 +208,22 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offse
 
   //cout << "Record Number: " << record_number << ", Content Length: " << content_length << ":" << endl;
   //cout << "  Shape " << record_number - 1U << " (" << shapeTypes(shape_type) << "): ";
+  (void) record_number;
 
   switch (shape_type)
     {
+    case 1: // Point
+      p.x = readDoubleCastedFloat();
+      p.y = readDoubleCastedFloat();
+      p.z = 0.0f;
+      //cout << p.x << " " << p.y << " " << p.z << " " << endl;
+      graph.addNode(p);
+      break;
     case 11: // PointZ
-      p.x = readDouble();
-      p.y = readDouble();
-      p.z = readDouble();
-      cout << p.x << " " << p.y << " " << p.z << " " << endl;
+      p.x = readDoubleCastedFloat();
+      p.y = readDoubleCastedFloat();
+      p.z = readDoubleCastedFloat();
+      //cout << p.x << " " << p.y << " " << p.z << " " << endl;
       graph.addNode(p);
       break;
     default:
@@ -256,7 +270,7 @@ bool ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
       //cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << endl;
 
       getBoundingBox(graph.bbox);
-      //cout << "Map Bounding Box: " << graph.bbox << endl;
+      cout << "Map Bounding Box: " << graph.bbox << endl;
 
       getAllRecords(graph);
       graph.name += '_' + filename;

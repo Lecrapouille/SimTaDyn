@@ -1,6 +1,7 @@
 #ifndef DRAWINGAREA_HPP_
 #  define DRAWINGAREA_HPP_
 
+#  include <gtkmm/main.h>
 #  include <gtkmm/widget.h>
 #  include <gtkmm/window.h>
 #  include <gtkmm/drawingarea.h>
@@ -8,9 +9,6 @@
 #  include <gtkglmm.h>
 #  include <glibmm/error.h>
 #  include "Renderer.hpp"
-#  include "DrawGraph.hpp"
-#  include "SimTaDynGraphs.hpp"
-#  include "ShapeFile.hpp"
 
 // *************************************************************************************************
 // Exception
@@ -37,9 +35,6 @@ public:
   GlDrawingArea();
   virtual ~GlDrawingArea() {};
 
-  ShapefileLoader loader;
-  SimTaDynGraph graph;
-
   // Movement in the world
   enum Direction { Forward, Backward, Up, Down, Right, Left, no_};
   void keyPressed(Direction d) { direction_[d] = true; }
@@ -56,11 +51,9 @@ protected:
   bool onIdle();
   bool onTimeout();
   void mode2D(GLfloat width, GLfloat height);
-  //virtual void drawScene() = 0;
 
 private:
   bool direction_[no_];
-  DrawGraph* drawer_;
 };
 
 #endif /* DRAWINGAREA_HPP_ */

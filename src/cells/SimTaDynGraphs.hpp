@@ -86,9 +86,9 @@ public:
 
 protected:
   /*
-   * For rendering the graph scene
+   * For drawing the graph scene
    */
-  friend class DrawGraph;
+  friend class Renderer;
 
   /*
    * Make this instance unique with this identifier.

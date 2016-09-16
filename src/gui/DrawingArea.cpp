@@ -1,4 +1,5 @@
 #include "DrawingArea.hpp"
+#include "SimTaDynContext.hpp"
 
 // *************************************************************************************************
 // Class for OpenGl renderer area
@@ -52,40 +53,15 @@ void GlDrawingArea::on_realize()
   // FIXME: on_realize() appelle je ne sais pas pourquoi on_configure_event puis Renderer::initialize
   // ca fait beaucoup d'appel pour rien
   Renderer::initialize();
-  Renderer::clearScreen(Color::Black);
-  glCheck(glClearDepth(1.0f));
-  glCheck(glEnable(GL_LINE_SMOOTH));
-  glCheck(glEnable(GL_BLEND));
-  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-  glCheck(glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE));
-  glCheck(glLineWidth(10));
-  glCheck(glEnable(GL_ALPHA_TEST));
+  Renderer::clearScreen();
 
   windowGL->gl_end();
-
-  drawer_ = new DrawGraph;
-  loader.loadShapefile("../data/3dpoints.shp", graph);
-  std::cout << graph.name << std::endl;
-
-  /*  loader.loadShapefile("../data/3dpoints.shp", graph);
-  std::cout << std::endl << "Il y a " << SimTaDynNode::howMany() << " nodes" << std::endl;
-  graph.addArc(1, 20, "AAA", 0, 42);
-  graph.addArc(1, 10, "AAA", 0, 42);
-  graph.addArc(10, 11, "AAA", 0, 42);
-  graph.addArc(10, 4, "AAA", 0, 42);
-  std::cout << std::endl << "Il y a " << SimTaDynArc::howMany() << " arcs: " << graph.getArc(SimTaDynCell::howMany())->name << std::endl;
-  */
-  //Position3D& p = graph.getNode(1)->getPosition();
-  //getCamera2D().zoomfitImage(getScreenWidth(), getScreenHeight(),
-  //                           graph.bbox.bbmax.x - graph.bbox.bbmin.x,
-  //                          graph.bbox.bbmax.y - graph.bbox.bbmin.y);
-                             //moveAt(p.x, p.y);
 
   // Draw regurlary
   Glib::signal_idle().connect(sigc::mem_fun(*this, &GlDrawingArea::onIdle));
   // Reset keyboard states every 10 ms
   Glib::signal_timeout().connect(sigc::mem_fun(*this, &GlDrawingArea::onTimeout), 10);
-
+  // Use the mouse scroll for zooming on the opengl window
   signal_scroll_event().connect(sigc::mem_fun(*this, &GlDrawingArea::on_scroll_event));
 }
 
@@ -108,9 +84,9 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
 
   windowGL->gl_begin(get_gl_context());
 
-  Camera2D& camera = getCamera2D();
+  Camera2D& camera = Renderer::getCamera2D();
   camera.setCameraSize(getScreenWidth(), getScreenHeight());
-  applyViewport(camera);
+  Renderer::applyViewport(camera);
 
   windowGL->gl_end();
   return Gtk::Widget::on_configure_event(event);
@@ -121,15 +97,15 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
 // *************************************************************************************************
 bool GlDrawingArea::onIdle()
 {
+  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
 
   windowGL->gl_begin(get_gl_context());
 
-  glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+  Renderer::clearScreen();
   glCheck(glLoadIdentity());
-
-  drawer_->draw(graph);
+  Renderer::draw(simtadyn.graph);
 
   windowGL->gl_end();
   windowGL->swap_buffers();
@@ -141,7 +117,7 @@ bool GlDrawingArea::onIdle()
 // *************************************************************************************************
 bool GlDrawingArea::onTimeout()
 {
-  Camera2D& camera = getCamera2D();
+  Camera2D& camera = Renderer::getCamera2D();
 
   if (direction_[Forward])
     {
@@ -168,7 +144,7 @@ bool GlDrawingArea::onTimeout()
       camera.moveOffset(1.0f, 0.0f);
     }
 
-  applyViewport(camera);
+  Renderer::applyViewport(camera);
   return true;
 }
 
@@ -177,19 +153,19 @@ bool GlDrawingArea::on_scroll_event(GdkEventScroll *event)
 {
   float32_t delta_scroll;
 
-#if 1 // gtkmm-2.4
+#if GTKMM_MAJOR_VERSION >= 3
+  delta_scroll = event->delta_y;
+#else // gtkmm-2.4
   if (GDK_SCROLL_UP == event->direction)
     delta_scroll = -0.1;
   else if (GDK_SCROLL_DOWN == event->direction)
     delta_scroll = 0.1;
   else
     return false;
-#else // gtkmm-3.0
-  delta_scroll = event->delta_y;
 #endif
 
-  getCamera2D().zoomScrollAt(event->x, event->y, delta_scroll,
-                             getScreenWidth(), getScreenHeight());
-  applyViewport();
+  Renderer::getCamera2D().zoomScrollAt(event->x, event->y, delta_scroll,
+                                       getScreenWidth(), getScreenHeight());
+  Renderer::applyViewport();
   return true;
 }

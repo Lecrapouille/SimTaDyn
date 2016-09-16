@@ -51,6 +51,7 @@ public:
   int32_t      readBigEndianInt();
   int32_t      readLittleEndianInt();
   float64_t    readDouble();
+  float32_t    readDoubleCastedFloat();
   void         goToByte(const uint32_t offset);
   void         skypeNBytes(const uint32_t offset);
   const string shapeTypes(const int id);

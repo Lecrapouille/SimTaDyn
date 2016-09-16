@@ -229,7 +229,6 @@ public:
    */
   virtual void moveToPosition(const Position3D& p)
   {
-    std::cout << "MoveTo\n";
     if (position_ != p)
       {
         position_ = p;
