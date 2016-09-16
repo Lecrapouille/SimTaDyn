@@ -16,8 +16,8 @@ print-link= \
 
 ###################################################
 # Path where to store *.o files. Default: ./build/
-ifeq ($(DEST),)
-DEST = build
+ifeq ($(BUILD),)
+BUILD = build
 endif
 
 ###################################################
@@ -26,7 +26,7 @@ INCLUDES = -I. -Igui -Icells -Iforth -Irtree -Icommon -I/usr/include/mysql
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(DEST):gui:cells:forth:rtree:common
+VPATH=.:$(BUILD):gui:cells:forth:rtree:common
 
 ###################################################
 # Set objects architecture specific
@@ -35,7 +35,7 @@ OBJECTS_RTREE = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_FORTH = Forth.o ForthDico.o ForthPrimitives.o
 OBJECTS_CELLS = SimTaDynCells.o SimTaDynGraphs.o ShapeFile.o
  # SimTaDynNodes.o SimTaDynArcs.o ShapeFile.o
-OBJECTS_GUI = OpenGL.o Textures.o Fonts.o DrawGraph.o Renderer.o DrawingArea.o SimTaDynWindow.o
+OBJECTS_GUI = OpenGL.o Textures.o Fonts.o Renderer.o DrawingArea.o SimTaDynWindow.o
 OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_RTREE) $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_GUI) main.o
 TARGET = SimTaDyn
 
@@ -44,8 +44,8 @@ TARGET = SimTaDyn
 #CC = gcc
 #CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 #LDFLAGS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
-CC=g++
-CFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
+CXX=g++
+CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
 LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
 DEFINES = -DCHECK_OPENGL
 
@@ -57,29 +57,38 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -lcairo
 
 ###################################################
+# Files dependencies
+DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
+POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
+
+###################################################
 # Main entry
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@$(call print-link,"Linking","$(TARGET)","$(DEST)/$@","")
-	@cd $(DEST) && $(CC) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
-
-%.o: %.cpp %.hpp
-	@$(call print-comp,"Compiling C","$(TARGET)","$<")
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
+	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 %.o: %.cpp
+%.o: %.cpp $(BUILD)/%.d
 	@$(call print-comp,"Compiling C","$(TARGET)","$<")
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(POSTCOMPILE)
 
 ###################################################
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(DEST) 2> /dev/null
+	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(BUILD) 2> /dev/null
 
 ###################################################
 # Create a temporary folder to store *.o
-$(OBJECTS): | $(DEST)
-$(DEST):
-	@mkdir -p $(DEST)
+$(DEPFILES): | $(BUILD)
+$(OBJECTS): | $(BUILD)
+$(BUILD):
+	@mkdir -p $(BUILD)
+
+$(BUILD)/%.d: ;
+.PRECIOUS: $(BUILD)/%.d
+
+-include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJECTS)))
