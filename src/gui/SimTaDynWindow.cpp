@@ -1,10 +1,12 @@
 #include "SimTaDynWindow.hpp"
+#include "SimTaDynContext.hpp"
 
 // *************************************************************************************************
 // SimTaDyn main window
 // *************************************************************************************************
 SimTaDynWindow::SimTaDynWindow(const std::string& title): Gtk::Window()
 {
+  std::cout << "SimTaDynWindow::SimTaDynWindow\n";
   set_title(title);
   set_default_size(800, 600);
   set_position(Gtk::WIN_POS_CENTER);
@@ -101,6 +103,14 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
 {
   switch (evenement->keyval)
     {
+    case GDK_KEY_Escape:
+      break;
+    case GDK_KEY_F1:
+      {
+        SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+        drawing_area_.zoomFitPage(simtadyn.graph);
+      }
+      break;
     case GDK_KEY_Page_Up:
       drawing_area_.keyPressed(GlDrawingArea::Forward);
       break;

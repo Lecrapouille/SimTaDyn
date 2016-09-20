@@ -8,46 +8,35 @@
 class Camera2D
 {
 public:
-
   // *************************************************************************************************
-  // Construct a camera with parameters defining the zone of the world we want to observe.
-  // By default the view is displayed on full range on the
+  // Construct a camera with parameters the zone of the world we want to observe: x, y is the center
+  // of view and width, height the view dimension. By default the view is displayed on full range on
+  // the screen region (window).
   // *************************************************************************************************
-  Camera2D(float32_t x, float32_t y, float32_t width, float32_t height)
+ Camera2D(const float32_t x, const float32_t y, const float32_t width, const float32_t height)
   {
-    // look at in the world
-    cameraFitScreen(x, y, width, height);
-    // Display at on the screen
-    displayAt(0.0f, 0.0f, 1.0f, 1.0f);
-    rotation_ = 0.0f;
+    // World observation
+    lookAt(x, y, width, height);
     zoom_ = 1.0f;
+
+    // Screen ratio
+    displayAt(0.0f, 0.0f, 1.0f, 1.0f);
   }
-  // *************************************************************************************************
-  // Construct a camera with default parameters defining the zone of the world to display
-  // *************************************************************************************************
+
   Camera2D()
   {
-    cameraFitScreen(0U, 0U, 800U, 600U);
-    displayAt(0.0f, 0.0f, 1.0f, 1.0f);
-    rotation_ = 0.0f;
+    // World observation
+    lookAt(400, 300, 800, 600);
     zoom_ = 1.0f;
+
+    // Screen ratio
+    displayAt(0.0f, 0.0f, 1.0f, 1.0f);
   }
 
   // *************************************************************************************************
-  // (x, y) is the top left position of the screen
+  // Change the position on the window screen (values are ratio of the screen size)
   // *************************************************************************************************
-  void cameraFitScreen(float32_t x, float32_t y, float32_t width, float32_t height)
-  {
-    look_at_x_ = x + width / 2.0f;
-    look_at_y_ = y + height / 2.0f;
-    look_at_width_ = width;
-    look_at_height_ = height;
-  }
-
-  // *************************************************************************************************
-  // Change the display zone.
-  // *************************************************************************************************
-  void displayAt(float32_t x, float32_t y, float32_t width, float32_t height)
+  void displayAt(const float32_t x, const float32_t y, const float32_t width, const float32_t height)
   {
     if ((x > 1.0f) || (y > 1.0f) || (width > 1.0f) || (height > 1.0f))
       {
@@ -61,30 +50,49 @@ public:
         display_at_height_ = height;
       }
   }
-  void lookAt(float32_t x, float32_t y)
+
+  // *************************************************************************************************
+  // Change the world observation: x, y is the center of view and width, height the view dimension.
+  // *************************************************************************************************
+  void lookAt(const float32_t x, const float32_t y, const float32_t width, const float32_t height)
+  {
+    look_at_x_ = x;
+    look_at_y_ = y;
+    look_at_width_ = width;
+    look_at_height_ = height;
+  }
+
+  // *************************************************************************************************
+  // Change the world observation: x, y is the center of view.
+  // *************************************************************************************************
+  void lookAt(const float32_t x, const float32_t y)
   {
     look_at_x_ = x;
     look_at_y_ = y;
   }
-  void moveAt(float32_t x, float32_t y)
+
+  // *************************************************************************************************
+  // Deplace the word observation from an offset
+  // *************************************************************************************************
+  void moveOffset(const float32_t offsetX, const float32_t offsetY)
   {
-    look_at_x_ = x;
-    look_at_y_ = y;
+    look_at_x_ += offsetX;
+    look_at_y_ += offsetY;
   }
-  void lookAtOffset(float32_t offsetX, float32_t offsetY)
-  {
-    lookAt(look_at_x_ + offsetX, look_at_y_ + offsetY);
-  }
-  void moveOffset(float32_t offsetX, float32_t offsetY)
-  {
-    moveAt(look_at_x_ + offsetX, look_at_y_ + offsetY);
-  }
-  void setCameraSize(float32_t width, float32_t height)
+
+  // *************************************************************************************************
+  // Change dimension of the observed world
+  // *************************************************************************************************
+  void setDimension(const float32_t width, const float32_t height)
   {
     look_at_width_ = width;
     look_at_height_ = height;
   }
-  void setZoom(float32_t factor)
+
+  // *************************************************************************************************
+  // Zoom on the observed world
+  // *************************************************************************************************
+  void zoom(const float32_t factor)
   {
     if (factor < MIN_ZOOM)
       {
@@ -94,26 +102,55 @@ public:
       {
         zoom_ = factor;
       }
+    std::cout << "New zoom " << zoom_ << "\n";
   }
-  void zoomAt(float32_t x, float32_t y, float32_t factor)
+
+  // *************************************************************************************************
+  // Zoom on the observed world
+  // *************************************************************************************************
+  void zoomOffset(const float32_t factor)
+  {
+    zoom_ = zoom_ * (1.0 + factor);
+  }
+
+  // *************************************************************************************************
+  // Look at given location and zoom
+  // *************************************************************************************************
+  void zoomAt(const float32_t x, const float32_t y, const float32_t factor)
   {
     lookAt(x, y);
-    setZoom(factor);
+    zoomOffset(factor);
   }
-  void zoomScrollAt(float32_t x, float32_t y, float32_t delta_scroll, float32_t width, float32_t height)
+
+  // *************************************************************************************************
+  //
+  // *************************************************************************************************
+  void zoomFit(const float32_t window_width, const float32_t window_height,
+               const float32_t image_width, const float32_t image_height)
   {
-    setZoom(zoom_ * (1.0f - delta_scroll));
-    lookAt((width / 2.0f - x) / zoom_, (height / 2.0f - y) / zoom_);
+    lookAt(window_width / 2.0f, window_height / 2.0f);
+    std::cout << window_width << "/" << image_width << ", "
+              << window_height << "/" << image_height << "==> min("
+              << window_width / image_width << ", " << window_height / image_height
+              << ")\n";
+
+    zoom(std::min(window_width / image_width, window_height / image_height));
   }
-  void zoomfitImage(float32_t window_width, float32_t window_height, float32_t image_width, float32_t image_height);
-  float32_t getZoom()
+
+  // *************************************************************************************************
+  //
+  // *************************************************************************************************
+  float32_t getZoom() const
   {
     return zoom_;
   }
+
+  // *************************************************************************************************
+  //
+  // *************************************************************************************************
   const float32_t* getTransform();
 
   //private:
-  float32_t rotation_;
   float32_t zoom_;
   float32_t look_at_x_;          // in pixel
   float32_t look_at_y_;          // in pixel

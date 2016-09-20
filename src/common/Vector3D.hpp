@@ -92,10 +92,23 @@ public:
     return Vector3D(x * scalar, y * scalar, z * scalar);
   }
 
+  inline Vector3D operator*(const Vector3D& p) const
+  {
+    return Vector3D(x * p.x, y * p.y, z * p.z);
+  }
+
   inline const Vector3D operator/(const float32_t scalar) const
   {
-    if (0.0f == scalar) std::overflow_error("Divide by zero exception in " + std::string(__PRETTY_FUNCTION__));
+    if (0.0f == scalar)
+      std::overflow_error("Divide by zero exception in " + std::string(__PRETTY_FUNCTION__));
     return Vector3D(x / scalar, y / scalar, z / scalar);
+  }
+
+  inline Vector3D operator/(const Vector3D& p) const
+  {
+    if ((0.0f == p.x) || (0.0f == p.y) || (0.0f == p.z))
+      std::overflow_error("Divide by zero exception in " + std::string(__PRETTY_FUNCTION__));
+    return Vector3D(x / p.x, y / p.y, z / p.z);
   }
 
   inline Vector3D operator-(const Vector3D& p) const

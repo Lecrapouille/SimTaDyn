@@ -6,6 +6,7 @@
 // *************************************************************************************************
 GlDrawingArea::GlDrawingArea(): Gtk::DrawingArea()
 {
+  std::cout << "GlDrawingArea::GlDrawingArea()\n";
   // No movement
   for (size_t i = 0; i < no_; ++i) direction_[i] = false;
 
@@ -40,13 +41,14 @@ GlDrawingArea::GlDrawingArea(): Gtk::DrawingArea()
 // *************************************************************************************************
 void GlDrawingArea::on_realize()
 {
+  std::cout << "GlDrawingArea::on_realize()\n";
   Gtk::Widget::on_realize();
   if (!create_gl_context()) throw ErrorGlDrawingArea();
 
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
 
-  add_events(Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
+  add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
 
   windowGL->gl_begin(get_gl_context());
 
@@ -57,7 +59,7 @@ void GlDrawingArea::on_realize()
 
   windowGL->gl_end();
 
-  // Draw regurlary
+  // Draw regularly
   Glib::signal_idle().connect(sigc::mem_fun(*this, &GlDrawingArea::onIdle));
   // Reset keyboard states every 10 ms
   Glib::signal_timeout().connect(sigc::mem_fun(*this, &GlDrawingArea::onTimeout), 10);
@@ -70,6 +72,11 @@ void GlDrawingArea::on_realize()
 // *************************************************************************************************
 bool GlDrawingArea::on_expose_event(GdkEventExpose* event)
 {
+  std::cout << "GlDrawingArea::on_expose_event()\n";
+  const SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+  Renderer::zoomFitPage(simtadyn.graph);
+  Renderer::applyViewport();
+
   onIdle();
   return Gtk::Widget::on_expose_event(event);
 }
@@ -84,9 +91,9 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
 
   windowGL->gl_begin(get_gl_context());
 
-  Camera2D& camera = Renderer::getCamera2D();
-  camera.setCameraSize(getScreenWidth(), getScreenHeight());
-  Renderer::applyViewport(camera);
+  const SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+  Renderer::zoomFitPage(simtadyn.graph);
+  Renderer::applyViewport();
 
   windowGL->gl_end();
   return Gtk::Widget::on_configure_event(event);
@@ -121,27 +128,27 @@ bool GlDrawingArea::onTimeout()
 
   if (direction_[Forward])
     {
-      camera.setZoom(camera.getZoom() * (1.0 + 0.01f));
+      camera.zoomOffset(0.01f);
     }
   if (direction_[Backward])
     {
-      camera.setZoom(camera.getZoom() * (1.0 - 0.01f));
+      camera.zoomOffset(-0.01f);
     }
   if (direction_[Up])
     {
-      camera.moveOffset(0.0f, 1.0f);
+      camera.moveOffset(0.0f, -10.0f);
     }
   if (direction_[Down])
     {
-      camera.moveOffset(0.0f, -1.0f);
+      camera.moveOffset(0.0f, 10.0f);
     }
   if (direction_[Right])
     {
-      camera.moveOffset(-1.0f, 0.0f);
+      camera.moveOffset(10.0f, 0.0f);
     }
   if (direction_[Left])
     {
-      camera.moveOffset(1.0f, 0.0f);
+      camera.moveOffset(-10.0f, 0.0f);
     }
 
   Renderer::applyViewport(camera);
@@ -164,8 +171,8 @@ bool GlDrawingArea::on_scroll_event(GdkEventScroll *event)
     return false;
 #endif
 
-  Renderer::getCamera2D().zoomScrollAt(event->x, event->y, delta_scroll,
-                                       getScreenWidth(), getScreenHeight());
+
+  Renderer::getCamera2D().zoomAt(event->x, event->y, delta_scroll);
   Renderer::applyViewport();
   return true;
 }

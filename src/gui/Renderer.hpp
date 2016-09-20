@@ -84,6 +84,7 @@ public:
    */
   void draw(const SimTaDynGraph& graph) const;
   void draw(const RTreeNode& root) const;
+  void zoomFitPage(const SimTaDynGraph& graph);
 
   /*
    * Number of pixels of the opengl window

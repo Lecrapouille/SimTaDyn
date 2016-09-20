@@ -3,9 +3,10 @@
 void Renderer::initialize()
 {
   // Camera
-  default_camera_.cameraFitScreen(0.0f, 0.0f,
-                                  static_cast<float32_t>(getScreenWidth()),
-                                  static_cast<float32_t>(getScreenHeight()));
+  default_camera_.lookAt(static_cast<float32_t>(getScreenWidth()) / 2.0f,
+                         static_cast<float32_t>(getScreenHeight()) / 2.0f,
+                         static_cast<float32_t>(getScreenWidth()),
+                         static_cast<float32_t>(getScreenHeight()));
   current_camera_ = default_camera_;
 
   // Configure OpenGL
@@ -29,18 +30,18 @@ Renderer::~Renderer()
 
 void Renderer::applyViewport(Camera2D& camera)
 {
-  float32_t width  = static_cast<float32_t>(getScreenWidth());
-  float32_t height = static_cast<float32_t>(getScreenHeight());
-  uint32_t rect[4];
+  const float32_t width  = static_cast<float32_t>(getScreenWidth());
+  const float32_t height = static_cast<float32_t>(getScreenHeight());
 
-  rect[0] = static_cast<int>(0.5f + width  * camera.display_at_x_);
-  rect[1] = static_cast<int>(0.5f + height * camera.display_at_y_);
-  rect[2] = static_cast<int>(0.5f + width  * camera.display_at_width_);
-  rect[3] = static_cast<int>(0.5f + height * camera.display_at_height_);
+  glCheck(glViewport(static_cast<int>(0.5f + width  * camera.display_at_x_),
+                     static_cast<int>(0.5f + height * camera.display_at_y_),
+                     static_cast<int>(0.5f + width  * camera.display_at_width_),
+                     static_cast<int>(0.5f + height * camera.display_at_height_)));
 
-  glCheck(glViewport(rect[0], rect[1], rect[2], rect[3]));
   glCheck(glMatrixMode(GL_PROJECTION));
-  glCheck(glLoadMatrixf(camera.getTransform()));
+  //glCheck(glLoadMatrixf(camera.getTransform()));
+  glCheck(glLoadIdentity());
+  glCheck(glOrtho(0.0f, width, 0.0f, height, -1.0f, 1.0f));
   glCheck(glMatrixMode(GL_MODELVIEW));
 }
 
@@ -107,6 +108,18 @@ GLuint Renderer::create3DModelNode(void) const
   return index;
 }
 
+void Renderer::zoomFitPage(const SimTaDynGraph& graph)
+{
+  const Vector3D graph_dim = graph.bbox.dimension();
+
+  std::cout << "Renderer::zoomFitPage\n";
+  current_camera_.zoomFit(static_cast<float32_t>(getScreenWidth()),
+                          static_cast<float32_t>(getScreenHeight()),
+                          graph_dim.x, graph_dim.y);
+  //current_camera_.lookAt(static_cast<float32_t>(getScreenWidth()) / 2.0f,
+  //                       static_cast<float32_t>(getScreenHeight()) / 2.0f);
+}
+
 void Renderer::draw(const RTreeNode& root) const
 {
 
@@ -115,51 +128,41 @@ void Renderer::draw(const RTreeNode& root) const
 void Renderer::draw(const SimTaDynGraph& graph) const
 {
   std::map<Key, SimTaDynCell*>::const_iterator it;
-  Position3D p;
-  Vector3D dim = graph.bbox.dimension();
-  float32_t scale = std::min(getScreenWidth() / dim.x, getScreenHeight() / dim.y);
-  std::cout << "scale " << scale << std::endl;
 
+  const Vector3D screen(getScreenWidth() / 2.0f, getScreenHeight() / 2.0f);
+  const Vector3D mouse(current_camera_.look_at_x_ / 2.0f, current_camera_.look_at_y_ / 2.0f);
+  const Vector3D center = graph.bbox.centerPoint();
+  Position3D position;
+  AABB bbox = graph.bbox;
+
+  // bbox
   glPushMatrix();
-  glTranslated(getScreenWidth() / 2, getScreenHeight() / 2, 0.0f);
-  glScaled(scale, scale, 0);
-  switch (style_)
-    {
-    case Medium2D:
-    case Fast2D:
-      // Draw all zones
-      // Draw all arcs
-      // Draw all nodes
-      for (it = graph.nodes_.begin(); it != graph.nodes_.end(); ++it)
-        {
-          //font_list[0].setText(it->second->name.c_str());
-          p = it->second->getPosition();
-
-          glPushMatrix();
-          glTranslated(p.x, p.y, 0.0f);
-          //font_list[0].draw();
-          glRecti(1.0f, -1.0f, -1.0f, 1.0f);
-          glPopMatrix();
-        }
-      break;
-    case Low2D:
-      for (it = graph.nodes_.begin(); it != graph.nodes_.end(); ++it)
-        {
-          //font_list[0].setText(it->second->name.c_str());
-          p = it->second->getPosition();
-
-          glPushMatrix();
-          glTranslated(p.x, p.y, 0.0f);
-          //font_list[0].draw();
-          glCallList(display_list_[0]);
-          glPopMatrix();
-        }
-      break;
-    default:
-      break;
-    }
-
+  bbox.bbmin = screen + (bbox.bbmin - center) * current_camera_.getZoom();
+  bbox.bbmax = screen + (bbox.bbmax - center) * current_camera_.getZoom();
+  glColor3f(0.1f, 0.0f, 0.0f);
+  glRectf(bbox.bbmin.x, bbox.bbmin.y, bbox.bbmax.x, bbox.bbmax.y);
   glPopMatrix();
-}
 
-//void viewPort();
+  // Draw all zones
+  // Draw all arcs
+  // Draw all nodes
+  glColor3f(0.0f, 0.0f, 1.0f);
+  for (it = graph.nodes_.begin(); it != graph.nodes_.end(); ++it)
+    {
+      //font_list[0].setText(it->second->name.c_str());
+      position = screen + (it->second->getPosition() - center) * current_camera_.getZoom();
+
+      glPushMatrix();
+      glTranslated(position.x, position.y, 0.0f);
+      switch (style_)
+        {
+        case Low2D:
+          glCallList(display_list_[0]);
+          break;
+        default:
+          glRectf(1.0f, -1.0f, -1.0f, 1.0f);
+          break;
+        }
+      glPopMatrix();
+    }
+}
