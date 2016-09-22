@@ -65,8 +65,8 @@ bool Texture::LoadTGA(std::string const& filename)
 
   fclose(file);
 
-  glCheck(glGenTextures(1, &id_));
-  glCheck(glBindTexture(GL_TEXTURE_2D, id_));
+  glCheck(glGenTextures(1, &texture_id_));
+  glCheck(glBindTexture(GL_TEXTURE_2D, texture_id_));
   glCheck(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   glCheck(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 

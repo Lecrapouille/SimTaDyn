@@ -3,46 +3,130 @@
 
 #  include "Color.hpp"
 #  include "Textures.hpp"
+#  include "Vector3D.hpp"
 
-class Font: public Texture//, public Drawable
+class SimTaDynFont: public Texture
 {
 public:
-  Font(std::string const& filename)
-    : Texture(filename)
+
+  // *************************************************************************************************
+  // How to load a font (from a texture, system)
+  // *************************************************************************************************
+  enum LoadMode { MappedTexture, SystemFont };
+
+  // *************************************************************************************************
+  // Constructor
+  // *************************************************************************************************
+  SimTaDynFont(const LoadMode mode, std::string const& name)
+    : nb_fonts_(0), base_(0)
   {
-    length_ = 0;
-    if (loaded_)
+    open(mode, name);
+  }
+
+  // *************************************************************************************************
+  // Constructor
+  // *************************************************************************************************
+  SimTaDynFont()
+    : nb_fonts_(0), base_(0)
+  {
+  }
+
+  // *************************************************************************************************
+  // Destructor
+  // *************************************************************************************************
+  ~SimTaDynFont()
+  {
+    dropFont();
+  }
+
+  // *************************************************************************************************
+  // Load a font (from a texture, system)
+  // @param name if load from system then give the font name else the texture name.
+  // type `xlsfonts` command in a bash to find a suitable font.
+  // *************************************************************************************************
+  virtual bool open(const LoadMode mode, std::string const& name)
+  {
+    bool res;
+
+    dropFont();
+    switch (mode)
       {
-        buildFont();
+      case MappedTexture:
+        res = loadMappedTexture(name);
+        break;
+      case SystemFont:
+        std::cout << "openXfont ";
+        res = loadXFont(name);
+        break;
+      default:
+        break;
       }
+    std::cout << res << "\n\n";
+    return res;
   }
 
-  Font()
+  // *************************************************************************************************
+  // Return if a font has been succesfully loaded
+  // *************************************************************************************************
+  virtual inline bool isLoaded() const
   {
-    base_ = 0;
-    length_ = 0;
-    loaded_ = false;
+    return 0 != base_;
   }
 
-  bool loadTexture(std::string const& filename)
+  // *************************************************************************************************
+  //
+  // *************************************************************************************************
+  void draw(std::string const& text);// const;
+
+  // *************************************************************************************************
+  //
+  // *************************************************************************************************
+  inline Vector3D centerPoint() const;
+
+  //protected:
+
+  // *************************************************************************************************
+  // Delete OpenGL display lists
+  // *************************************************************************************************
+  inline void dropFont()
   {
-    loaded_ = loadFromFile(filename);
-    if (loaded_)
+    dropTexture();
+    if (base_)
       {
-        buildFont();
+        glDeleteLists(base_, nb_fonts_);
+        base_ = 0;
       }
-    return loaded_;
+    nb_fonts_ = 0;
   }
 
-  void setText(const char *txt, ...);
-  void draw() const;
+  // *************************************************************************************************
+  // Open a Unix/X system font. Routine only available on Unix/X systems.
+  // @param fontname: the name of the font
+  // @return if font has been succesfully loaded.
+  // *************************************************************************************************
+  bool loadXFont(std::string const& fontname);
 
-protected:
-  void buildFont();
+  // *************************************************************************************************
+  // Open a Texture Mapped Text
+  // @param filenmae: the texture file name (path).
+  // @return if font has been succesfully loaded.
+  // *************************************************************************************************
+  bool loadMappedTexture(std::string const& filename)
+  {
+    dropFont();
+    Texture::open(filename);
+    if (Texture::texture_loaded_)
+      {
+        buildMappedTexture();
+      }
+    return (Texture::isLoaded()) && (SimTaDynFont::isLoaded());
+  }
 
-  GLuint base_;
-  char   text_[256];
+  void buildMappedTexture();
+
   uint32_t length_;
+  GLsizei nb_fonts_;
+  GLuint base_;
 };
 
 #endif /* FONTS_HPP_ */

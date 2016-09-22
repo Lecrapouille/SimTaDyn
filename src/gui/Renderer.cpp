@@ -19,8 +19,9 @@ void Renderer::initialize()
   glCheck(glEnable(GL_ALPHA_TEST));
 
   // Models, textures and fonts
-  display_list_[Node3D] = create3DModelNode();
-  font_list_[0].loadTexture("../data/Font.tga");
+  //display_list_[Node3D] = create3DModelNode();
+  //font_list_[0].open(SimTaDynFont::MappedTexture, "../data/Font.tga");
+  font_list_[0].open(SimTaDynFont::SystemFont, "fixed");
 }
 
 Renderer::~Renderer()
@@ -43,6 +44,7 @@ void Renderer::applyViewport(Camera2D& camera)
   glCheck(glLoadIdentity());
   glCheck(glOrtho(0.0f, width, 0.0f, height, -1.0f, 1.0f));
   glCheck(glMatrixMode(GL_MODELVIEW));
+  glCheck(glLoadIdentity());
 }
 
 void Renderer::applyViewport()
@@ -125,7 +127,7 @@ void Renderer::draw(const RTreeNode& root) const
 
 }
 
-void Renderer::draw(const SimTaDynGraph& graph) const
+void Renderer::draw(const SimTaDynGraph& graph) //const
 {
   std::map<Key, SimTaDynCell*>::const_iterator it;
 

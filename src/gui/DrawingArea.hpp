@@ -36,7 +36,7 @@ public:
   virtual ~GlDrawingArea() {};
 
   // Movement in the world
-  enum Direction { Forward, Backward, Up, Down, Right, Left, no_};
+  enum Direction { Forward, Backward, Up, Down, Right, Left, no_ };
   void keyPressed(Direction d) { direction_[d] = true; }
   void keyReleased(Direction d) { direction_[d] = false; }
 

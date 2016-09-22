@@ -82,7 +82,7 @@ public:
   /*
    * Draw a graph as friend function
    */
-  void draw(const SimTaDynGraph& graph) const;
+  void draw(const SimTaDynGraph& graph);// const;
   void draw(const RTreeNode& root) const;
   void zoomFitPage(const SimTaDynGraph& graph);
 
@@ -105,7 +105,7 @@ protected:
   Camera2D current_camera_;
   Color background_color_;
   GLuint display_list_[nolist_] = {};
-  Font font_list_[1];
+  SimTaDynFont font_list_[1];
   RenderStyle style_;
 };
 

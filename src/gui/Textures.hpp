@@ -7,25 +7,37 @@
 class Texture
 {
 public:
+  // *************************************************************************************************
+  // Constructor: load a texture from a file (tga ...)
+  // *************************************************************************************************
   Texture(std::string const& filename)
+    : texture_loaded_(false)
   {
-    loaded_ = loadFromFile(filename);
+    open(filename);
   }
 
+  // *************************************************************************************************
+  // Constructor
+  // *************************************************************************************************
   Texture()
+    : texture_loaded_(false)
   {
-    loaded_ = false;
   }
 
+  // *************************************************************************************************
+  // Destructor
+  // *************************************************************************************************
   ~Texture()
   {
-    glDeleteTextures(1, &id_);
+    dropTexture();
   }
 
-  bool loadFromFile(std::string const& filename)
+  // *************************************************************************************************
+  // Constructor: load a texture from a file (tga ...)
+  // TODO: tester 2 chargement textures a la suite avec/sans echec
+  // *************************************************************************************************
+  virtual bool open(std::string const& filename)
   {
-    bool loaded = false;
-
     std::string::size_type idx = filename.rfind('.');
     if (std::string::npos != idx)
       {
@@ -33,43 +45,67 @@ public:
 
         if ("tga" == extension)
           {
-            loaded = LoadTGA(filename);
+            dropTexture();
+            texture_loaded_ = LoadTGA(filename);
           }
         else
           {
             std::cerr << "[ERROR]: loading '" << extension << "' files is not yet managed" << std::endl;
-            return false;
           }
       }
     else
       {
         std::cerr << "[ERROR]: the file '" << filename << "' need an extension" << std::endl;
-        return false;
       }
 
-    if (!loaded)
+    if (!texture_loaded_)
       {
         std::cerr << "[ERROR]: Failed loading texture from '" << filename << "'" << std::endl;
       }
-    return loaded;
+    return texture_loaded_;
   }
 
-  inline bool isLoaded() const
+  // *************************************************************************************************
+  // Return if a font has been succesfully loaded
+  // *************************************************************************************************
+  virtual inline bool isLoaded() const
   {
-    return loaded_;
+    return texture_loaded_;
   }
 
-  inline GLuint getId() const
+  // *************************************************************************************************
+  // FIXME: useful ? Never used !
+  // *************************************************************************************************
+  virtual inline GLuint getId() const
   {
-    std::cerr << "[WARN]: Trying to get texture id from a non loaded texture" << std::endl;
-    return id_;
+    if (!texture_loaded_)
+      {
+        std::cerr << "[WARN]: Trying to get texture id from a non loaded texture. " << std::endl;
+      }
+    return texture_id_;
   }
 
 protected:
+
+  // *************************************************************************************************
+  // Delete OpenGL display lists
+  // *************************************************************************************************
+  inline void dropTexture()
+  {
+    if (texture_loaded_)
+      {
+        glDeleteTextures(1, &texture_id_);
+        texture_loaded_ = false;
+      }
+  }
+
+  // *************************************************************************************************
+  //
+  // *************************************************************************************************
   bool LoadTGA(std::string const& filename);
 
-  GLuint id_;
-  bool loaded_;
+  GLuint texture_id_;
+  bool texture_loaded_;
 };
 
 #endif /* TEXTURE_HPP_ */

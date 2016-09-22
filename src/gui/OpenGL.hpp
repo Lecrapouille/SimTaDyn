@@ -9,7 +9,10 @@
 #    include <GL/glut.h>
 #    include <GL/gl.h>
 #    include <GL/glu.h>
+#    include <GL/glx.h>
 #  endif
+
+//#  include <X11/Intrinsic.h>
 
 namespace simGL
 {
