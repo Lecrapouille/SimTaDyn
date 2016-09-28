@@ -15,13 +15,13 @@ void Renderer::initialize()
   glCheck(glEnable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   glCheck(glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE));
-  glCheck(glLineWidth(10));
+  glCheck(glLineWidth(1.0f));
   glCheck(glEnable(GL_ALPHA_TEST));
 
   // Models, textures and fonts
   //display_list_[Node3D] = create3DModelNode();
-  //font_list_[0].open(SimTaDynFont::MappedTexture, "../data/Font.tga");
-  font_list_[0].open(SimTaDynFont::SystemFont, "fixed");
+  font_list_[0].open(SimTaDynFont::MappedTexture, "../data/Font.tga");
+  //font_list_[0].open(SimTaDynFont::SystemFont, "fixed");
 }
 
 Renderer::~Renderer()
@@ -30,7 +30,38 @@ Renderer::~Renderer()
 }
 
 void Renderer::applyViewport(Camera2D& camera)
-{
+{/*
+int w  = getScreenWidth();
+int h  = getScreenHeight();
+
+   GLdouble size;
+   GLdouble aspect;
+
+   // Use the whole window.
+   glViewport(0, 0, w, h);
+
+   // We are going to do some 2-D orthographic drawing.
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   size = (GLdouble)((w >= h) ? w : h) / 2.0;
+   if (w <= h) {
+      aspect = (GLdouble)h/(GLdouble)w;
+      glOrtho(-size, size, -size*aspect, size*aspect, -100000.0, 100000.0);
+   }
+   else {
+      aspect = (GLdouble)w/(GLdouble)h;
+      glOrtho(-size*aspect, size*aspect, -size, size, -100000.0, 100000.0);
+   }
+
+   // Make the world and window coordinates coincide so that 1.0 in
+   // model space equals one pixel in window space.
+   glScaled(aspect, aspect, 1.0);
+
+   // Now determine where to draw things.
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+ */
+
   const float32_t width  = static_cast<float32_t>(getScreenWidth());
   const float32_t height = static_cast<float32_t>(getScreenHeight());
 
@@ -122,12 +153,74 @@ void Renderer::zoomFitPage(const SimTaDynGraph& graph)
   //                       static_cast<float32_t>(getScreenHeight()) / 2.0f);
 }
 
-void Renderer::draw(const RTreeNode& root) const
+void Renderer::draw(const AABB& bbox, const Vector3D& center) const
 {
+  //glBegin(GL_LINES);
+  const Vector3D screen(getScreenWidth() / 2.0f, getScreenHeight() / 2.0f);
+  const Vector3D mouse(current_camera_.look_at_x_ / 2.0f, current_camera_.look_at_y_ / 2.0f);
+  //const Vector3D center = graph.bbox.centerPoint();
 
+  AABB box(screen + (bbox.bbmin - center) * current_camera_.getZoom(),
+           screen + (bbox.bbmax - center) * current_camera_.getZoom());
+
+glRectf(box.bbmin.x, box.bbmin.y, box.bbmax.x, box.bbmax.y);
+/*
+  glVertex3f(box.bbmin.x, box.bbmin.y, box.bbmin.z);
+  glVertex3f(box.bbmax.x, box.bbmin.y, box.bbmin.z);
+  glVertex3f(box.bbmin.x, box.bbmin.y, box.bbmin.z);
+  glVertex3f(box.bbmin.x, box.bbmax.y, box.bbmin.z);
+  glVertex3f(box.bbmax.x, box.bbmax.y, box.bbmin.z);
+  glVertex3f(box.bbmax.x, box.bbmin.y, box.bbmin.z);
+  glVertex3f(box.bbmax.x, box.bbmax.y, box.bbmin.z);
+  glVertex3f(box.bbmin.x, box.bbmax.y, box.bbmin.z);
+
+  glVertex3f(box.bbmin.x, box.bbmin.y, box.bbmin.z);
+  glVertex3f(box.bbmin.x, box.bbmin.y, box.bbmax.z);
+  glVertex3f(box.bbmin.x, box.bbmax.y, box.bbmin.z);
+  glVertex3f(box.bbmin.x, box.bbmax.y, box.bbmax.z);
+  glVertex3f(box.bbmax.x, box.bbmin.y, box.bbmin.z);
+  glVertex3f(box.bbmax.x, box.bbmin.y, box.bbmax.z);
+  glVertex3f(box.bbmax.x, box.bbmax.y, box.bbmin.z);
+  glVertex3f(box.bbmax.x, box.bbmax.y, box.bbmax.z);
+
+  glVertex3f(box.bbmin.x, box.bbmin.y, box.bbmax.z);
+  glVertex3f(box.bbmax.x, box.bbmin.y, box.bbmax.z);
+  glVertex3f(box.bbmin.x, box.bbmin.y, box.bbmax.z);
+  glVertex3f(box.bbmin.x, box.bbmax.y, box.bbmax.z);
+  glVertex3f(box.bbmax.x, box.bbmax.y, box.bbmax.z);
+  glVertex3f(box.bbmax.x, box.bbmin.y, box.bbmax.z);
+  glVertex3f(box.bbmax.x, box.bbmax.y, box.bbmax.z);
+  glVertex3f(box.bbmin.x, box.bbmax.y, box.bbmax.z);
+*/
+  //glEnd();
+  //std::cout << "LOL2 " << bbox << "  " << box << std::endl;
 }
 
-void Renderer::draw(const SimTaDynGraph& graph) //const
+void Renderer::draw(const RTreeNode* root, const Vector3D& center) const
+{
+  RTreeNode *node;
+  uint32_t i;
+
+  for (i = 0; i < RTREE_MAX_NODES; i++)
+    {
+      glColor3f(0.0f, 1.0f - root->level / 5.0f, 0.0f);
+      draw(root->branch[i].box, center);
+    }
+
+  if (!IS_A_RTREE_LEAF(root->level))
+    {
+      for (i = 0; i < RTREE_MAX_NODES; i++)
+        {
+          node = root->branch[i].child;
+          if (NULL != node)
+            {
+              draw(node, center);
+            }
+        }
+    }
+}
+
+void Renderer::draw(/*const*/ SimTaDynGraph& graph) //const
 {
   std::map<Key, SimTaDynCell*>::const_iterator it;
 
@@ -135,20 +228,54 @@ void Renderer::draw(const SimTaDynGraph& graph) //const
   const Vector3D mouse(current_camera_.look_at_x_ / 2.0f, current_camera_.look_at_y_ / 2.0f);
   const Vector3D center = graph.bbox.centerPoint();
   Position3D position;
+
   AABB bbox = graph.bbox;
 
-  // bbox
-  glPushMatrix();
-  bbox.bbmin = screen + (bbox.bbmin - center) * current_camera_.getZoom();
-  bbox.bbmax = screen + (bbox.bbmax - center) * current_camera_.getZoom();
-  glColor3f(0.1f, 0.0f, 0.0f);
-  glRectf(bbox.bbmin.x, bbox.bbmin.y, bbox.bbmax.x, bbox.bbmax.y);
-  glPopMatrix();
+  // Map
+  //bbox.bbmin = screen + (bbox.bbmin - center) * current_camera_.getZoom();
+  //bbox.bbmax = screen + (bbox.bbmax - center) * current_camera_.getZoom();
+  //glColor3f(0.1f, 0.0f, 0.0f);
+  //glRectf(bbox.bbmin.x, bbox.bbmin.y, bbox.bbmax.x, bbox.bbmax.y);
+
+
+  /*SimTaDynCell *c = graph.getNode(1);
+  bbox.bbmin = screen + (c->box_.bbmin - center) * current_camera_.getZoom();
+  bbox.bbmax = screen + (c->box_.bbmax - center) * current_camera_.getZoom();
+  glColor3f(0.0f, 1.0f, 1.0f);
+  glRectf(bbox.bbmin.x, bbox.bbmin.y, bbox.bbmax.x, bbox.bbmax.y);*/
+
+  //glColor3f(0.0f, 1.0f, 0.0f);
+  //position = screen + (c->getPosition() - center) * current_camera_.getZoom();
+  //glRectf(position.x -1.0f, position.y -1.0f, position.x +1.0f, position.y + 1.0f);
+
+  glColor3f(0.0f, 1.0f, 1.0f);
+  //glBegin(GL_LINES);
+  draw(graph.rtree, center);
+  //glEnd();
+
+  // Draw all nodes
+  glColor3f(1.0f, 0.0f, 0.0f);
+  for (it = graph.nodes_.begin(); it != graph.nodes_.end(); ++it)
+    {
+      position = screen + (it->second->getPosition() - center) * current_camera_.getZoom();
+      glRectf(position.x -1.0f, position.y -1.0f, position.x +1.0f, position.y + 1.0f);
+      //glRasterPos2f(position.x, position.y);
+      glPushMatrix();
+      glTranslatef(position.x, position.y, 0.0f);
+      font_list_[0].draw(it->second->name);
+      glPopMatrix();
+    }
+
+  // Graph name
+  font_list_[0].draw(graph.name);
+  //std::cout << "-----------------------------------------------\n";
+  //std::cout << *(graph.rtree) << std::endl;
+
 
   // Draw all zones
   // Draw all arcs
   // Draw all nodes
-  glColor3f(0.0f, 0.0f, 1.0f);
+ /* glColor3f(0.0f, 0.0f, 1.0f);
   for (it = graph.nodes_.begin(); it != graph.nodes_.end(); ++it)
     {
       //font_list[0].setText(it->second->name.c_str());
@@ -166,5 +293,5 @@ void Renderer::draw(const SimTaDynGraph& graph) //const
           break;
         }
       glPopMatrix();
-    }
+      }*/
 }

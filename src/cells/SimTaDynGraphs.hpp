@@ -2,6 +2,7 @@
 #  define GRAPH_HPP_
 
 #  include "SimTaDynCells.hpp"
+#  include "RTree.hpp"
 
 class SimTaDynGraph: private ClassCounter<SimTaDynGraph>
 {
@@ -18,15 +19,22 @@ public:
    */
   AABB bbox;
 
+  /*
+   * RTree
+   */
+  RTreeNode* rtree;
+
   SimTaDynGraph()
   {
     id_ = howMany();
     name = "Graph_" + std::to_string(id_);
+    rtree = new RTreeNode(RTREE_LEAF);
   }
 
   SimTaDynGraph(std::string const& name)
   {
     this->name = name;
+    rtree = new RTreeNode(RTREE_LEAF);
   }
 
   ~SimTaDynGraph()
@@ -46,9 +54,19 @@ public:
   SimTaDynCell* addNode(Position3D const& p)
   {
     SimTaDynCell* node = new SimTaDynCell();// FIXMEnew SimTaDynNode();
-    node->moveToPosition(p);
+
+    std::cout << " SimTaDynCell* addNode " << node->privateId() << std::endl;
+    node->moveToPosition(p);// FIXME pas optim
+
+    node->box_.setBox(p-0.05f, p+0.05f);
+    // node->box_.scaleFromCenter(10.5f);
 
     nodes_[node->privateId()] = node;
+    rtree = rtree->insert(node->privateId(), node->box_, 0);
+    std::cout << "---" << node->privateId() << "-----------------------------------------------\n";
+    std::cout << *rtree << std::endl;
+    #warning "bug entre insertion 18 et 19. Node 12 is deleted"
+
     return node;
   }
 
@@ -59,6 +77,11 @@ public:
 
     nodes_[node->privateId()] = node;
     return node;
+  }
+
+  SimTaDynCell *getNode(const Key id)
+  {
+    return nodes_[id];
   }
 
   void removeNode(const Key id)

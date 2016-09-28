@@ -82,8 +82,9 @@ public:
   /*
    * Draw a graph as friend function
    */
-  void draw(const SimTaDynGraph& graph);// const;
-  void draw(const RTreeNode& root) const;
+  void draw(/*const*/ SimTaDynGraph& graph);// const;
+  void draw(const RTreeNode* root, const Vector3D& center) const;
+  void draw(const AABB& box, const Vector3D& center) const;
   void zoomFitPage(const SimTaDynGraph& graph);
 
   /*

@@ -161,10 +161,24 @@ public:
     return Vector3D((bbmax + bbmin) * 0.5f);
   }
 
-  inline AABB scaleFromCenter(const float32_t scalar) const
+  /*inline AABB scaleFromCenter(const float32_t scalar) const
   {
     const Vector3D c = centerPoint();
     return AABB((bbmin - c) * scalar, (bbmax - c) * scalar) + c;
+    }*/
+  inline void scaleFromCenter(const float32_t scalar)
+  {
+    if (bbmin != bbmax)
+      {
+        const Vector3D c = centerPoint();
+        bbmin = ((bbmin - c) * scalar) + c;
+        bbmax = ((bbmax - c) * scalar) + c;
+      }
+    else
+      {
+        bbmin = bbmin * scalar;
+        bbmax = bbmax * scalar;
+      }
   }
 
   inline Vector3D dimension() const
