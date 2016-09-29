@@ -46,7 +46,7 @@ RTreeNode *RTreeNode::splitNodeQuadratic(RTreeBranch const& b, RTreeSpliter& s)
         }
     }
 
-  if (count + newnode->count == RTREE_MAX_NODES + 2U)
+  if (count + newnode->count != RTREE_MAX_NODES + 1U)
     {
       std::cerr << "assertion false: RTreeNode::splitNodeQuadratic: too many branches\n";
     }
@@ -152,6 +152,22 @@ void RTreeNode::PartitionVars::methodZero(RTreeSpliter& s)
             }
         }
       classify(chosen, betterGroup, s);
+    }
+
+  /* if one group too full, put remaining rects in the other */
+  if (count[RTREE_PARTITION_0] + count[RTREE_PARTITION_1] < RTREE_MAX_NODES + 1U)
+    {
+      if (count[RTREE_PARTITION_0] >= RTREE_MAX_NODES + 1U - RTREE_MIN_FILL)
+        group = 1;
+      else
+        group = 0;
+      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; i++)
+        {
+          if (!taken[i])
+            {
+              classify(i, group, s);
+            }
+        }
     }
 }
 
