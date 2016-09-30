@@ -1,7 +1,7 @@
 #include "dictionnaire.h"
 
 
-inline void extremite_core()
+static void extremite_core()
 {
      int s,a;
 
@@ -12,25 +12,25 @@ inline void extremite_core()
      empiler(&guts.pile_donnees, int_to_elt(extremite(s,a)));
 }
 
-inline void screen_core()
+static void screen_core()
 {
      screenshot();
 }
 
-inline void sqrt_core()
+static void sqrt_core()
 {
        t_cf e;
 
        e = sommet(&guts.pile_donnees);
        guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
        if (e.type == ENTIER)
-	    guts.pile_donnees.donnees[guts.pile_donnees.position].reel = sqrt(e.entier);
+            guts.pile_donnees.donnees[guts.pile_donnees.position].reel = sqrt(e.entier);
        else
-	    guts.pile_donnees.donnees[guts.pile_donnees.position].reel = sqrt(e.reel);
+            guts.pile_donnees.donnees[guts.pile_donnees.position].reel = sqrt(e.reel);
 }
 
 /* mot Forth : >STRING */
-inline void to_string_core()
+static void to_string_core()
 {
      t_cf e;
      char* ch;
@@ -39,22 +39,22 @@ inline void to_string_core()
      e = sommet(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
      if (e.type == ENTIER)
-	  sprintf(ch,"%d",e.entier);
+          sprintf(ch,"%d",e.entier);
      else if (e.type == REEL)
-	  sprintf(ch,"%f",e.reel);
+          sprintf(ch,"%f",e.reel);
      else guts.erreur = true;
      empiler(&guts.pile_donnees, ad_to_elt(ch, AD_STRING));
 //     ajout_trash(&guts.main_trash, ch);
 }
 
 /* Mot FORTH : CARD */
-inline void nb_elt_pile_core()
+static void nb_elt_pile_core()
 {
      empiler(&guts.pile_donnees, int_to_elt(guts.pile_donnees.position));
 }
 
 /* Mot FORTH : CONCAT */
-inline void concat_core()
+static void concat_core()
 {
      t_cf e1,e2;
      char * ch;
@@ -73,46 +73,46 @@ inline void concat_core()
 
 /*
 ** ============================================
-** 
-**  KERNEL : ne pas toucher a ces definitions. 
-**           Sans eux plus de definition de 
+**
+**  KERNEL : ne pas toucher a ces definitions.
+**           Sans eux plus de definition de
 **           nouveaux mots FORTH !!!!
 **
 ** ============================================
 */
 
 /* mot FORTH : SAVE */
-inline void save_core()
+static void save_core()
 {
      t_nfa nfa;
-     
+
      nfa = (t_nfa) guts.dernier_mot_cree[0].adresse;
      ajouter_mot_hash_et_gtk(&guts.dictionnaire, guts.dernier_mot_cree, nfa->nom);
 }
 
 /* mot FORTH : SVGDE */
-inline void sauvegarde_core()
+static void sauvegarde_core()
 {
      t_nfa nfa;
-     
+
      nfa = (t_nfa) guts.dernier_mot_cree[0].adresse;
      ajouter_mot_hash(&guts.dictionnaire, guts.dernier_mot_cree, nfa->nom);
 }
 
 /* mot FORTH : EXEC */
-inline void exec_core()
+static void exec_core()
 {
      guts.mode = MODE_EXECUTION;
 }
 
 /* mot FORTH : COMP */
-inline void comp_core()
+static void comp_core()
 {
      guts.mode = MODE_COMPILATION;
 }
 
 /* mot FORTH : BUILDS */
-inline void builds_core()
+static void builds_core()
 {
      nouveau_mot_courant();
 }
@@ -162,7 +162,7 @@ void point_virgule_rec_core()
      mot = nouveau_mot(";REC", PRECEDENCE_BIT, NULL);
      ajouter_adresse(mot, chercher_mot_hash(&guts.dictionnaire, "EXEC"), CFA);
      ajouter_mot_hash_et_gtk(&guts.dictionnaire, mot, ";REC");
-#endif 
+#endif
 }
 
 void forget_core()
@@ -173,66 +173,66 @@ void forget_core()
 
 /*
 ** ============================================
-** 
-** MOTS LIES A LA COMPILATION 
+**
+** MOTS LIES A LA COMPILATION
 **
 ** ============================================
 */
 
 /* mot FORTH : COMPILE */
-inline void compile_core()
+static void compile_core()
 {
      ++guts.IP;
      ajouter_elt_dans_mot(guts.dernier_mot_cree, *(guts.IP));
 }
 
 /* mot FORTH : }COMPILE */
-inline void end_compile_core()
+static void end_compile_core()
 {
      //NE FAIT RIEN
 }
 
 /* mot FORTH : COMPILE{ */
-inline void begin_compile_core()
+static void begin_compile_core()
 {
      t_cfa ad;
-     ad = guts.dictionnaire.tab[chercher_donnee_hash(&guts.dictionnaire, "}COMPILE")].donnee; 
+     ad = guts.dictionnaire.tab[chercher_donnee_hash(&guts.dictionnaire, "}COMPILE")].donnee;
      while ((*(guts.IP+1)).adresse != ad)
      {
-	  ++guts.IP;
-	  ajouter_elt_dans_mot(guts.dernier_mot_cree, *(guts.IP));
+          ++guts.IP;
+          ajouter_elt_dans_mot(guts.dernier_mot_cree, *(guts.IP));
      }
 }
 
 /*
 ** ============================================
-** 
-** AUTRES MOTS IMPORTANTS 
+**
+** AUTRES MOTS IMPORTANTS
 **
 ** ============================================
 */
 
 /* mot FORTH : LITERAL */
-inline void literal_core()
+static void literal_core()
 {
      ++guts.IP; ++guts.PC;
      empiler(&guts.pile_donnees, *(guts.PC));
 }
 
 /* mot FORTH : ALLOT */
-inline void allot_core()
+static void allot_core()
 {
      int i, nb;
 
      /* nb = guts.dernier_mot_cree.taille_utilisee */
-     nb = sommet(&guts.pile_donnees).entier; 
+     nb = sommet(&guts.pile_donnees).entier;
      depiler(&guts.pile_donnees);
      for (i = 0; i < nb; i++)
-	  ajouter_adresse(guts.dernier_mot_cree, NULL, AD_NULL);
+          ajouter_adresse(guts.dernier_mot_cree, NULL, AD_NULL);
 }
 
 /* mot FORTH : , */
-inline void comma_core()
+static void comma_core()
 {
      //non le vrai mot est : ajouter_elt_dans_mot(@ contenue dans HERE, sommet(&guts.pile_donnees));
      ajouter_elt_dans_mot(guts.dernier_mot_cree, sommet(&guts.pile_donnees));
@@ -240,28 +240,28 @@ inline void comma_core()
 }
 
 /* mot FORTH : IMMEDIATE */
-inline void immediat_core()
+static void immediat_core()
 {
      t_nfa nfa;
 
      nfa = (t_nfa) guts.dernier_mot_cree[0].adresse;
-     change_masque(&nfa->info, PRECEDENCE_BIT);    
+     change_masque(&nfa->info, PRECEDENCE_BIT);
 }
 
 /* mot FORTH : FIND */
-inline void find_core()
+static void find_core()
 {
      guts.mytoken = my_cut(&guts.tampon, guts.mytoken, &guts.iter);
      t_cfa cfa = chercher_mot_hash(&guts.dictionnaire, guts.mytoken);
      if (cfa == NULL)
-	  empiler(&guts.pile_donnees, int_to_elt(0));
+          empiler(&guts.pile_donnees, int_to_elt(0));
      else
-	  empiler(&guts.pile_donnees, ad_to_elt(cfa,ADRESSE));
+          empiler(&guts.pile_donnees, ad_to_elt(cfa,ADRESSE));
 }
 
 
 /* mot FORTH ." */
-inline void create_string_core()
+static void create_string_core()
 {
      char * ch;
      t_cfa mot;
@@ -272,42 +272,42 @@ inline void create_string_core()
      ++guts.tampon;// ++guts.iter;
      while ((*guts.tampon != '\0') && ('\"' != *guts.tampon))
      {
-	  s[0] = *guts.tampon;
-	  ch = g_strconcat(ch, s, NULL);
-	  ++guts.tampon;
-	  //++guts.iter;
+          s[0] = *guts.tampon;
+          ch = g_strconcat(ch, s, NULL);
+          ++guts.tampon;
+          //++guts.iter;
      }
 
      if (guts.mode == MODE_EXECUTION)
-	  empiler(&guts.pile_donnees, ad_to_elt(ch, AD_STRING));
+          empiler(&guts.pile_donnees, ad_to_elt(ch, AD_STRING));
      else
      {
-	  mot = chercher_mot_hash(&guts.dictionnaire, "LITERAL");
-	  ajouter_adresse(guts.dernier_mot_cree, mot, CFA);
-	  ajouter_elt_dans_mot(guts.dernier_mot_cree, ad_to_elt(ch, AD_STRING));
+          mot = chercher_mot_hash(&guts.dictionnaire, "LITERAL");
+          ajouter_adresse(guts.dernier_mot_cree, mot, CFA);
+          ajouter_elt_dans_mot(guts.dernier_mot_cree, ad_to_elt(ch, AD_STRING));
      }
 
 #if 0
      guts.mytoken = my_cut(&guts.tampon, guts.mytoken, &guts.iter);
      while ((guts.mytoken != "") && strcmp("\"",guts.mytoken) != 0)
      {
-	  if (prem) ch = g_strconcat(ch, guts.mytoken, NULL);
-	  else ch = g_strconcat(ch, " ", guts.mytoken, NULL);
-	  prem = false;
-	  guts.mytoken = my_cut(&guts.tampon, guts.mytoken, &guts.iter);
+          if (prem) ch = g_strconcat(ch, guts.mytoken, NULL);
+          else ch = g_strconcat(ch, " ", guts.mytoken, NULL);
+          prem = false;
+          guts.mytoken = my_cut(&guts.tampon, guts.mytoken, &guts.iter);
      }
      empiler(&guts.pile_donnees, ad_to_elt(ch, AD_STRING));
 #endif
 }
 
 /* mot FORTH " */
-inline void guillemets_core()
+static void guillemets_core()
 {
 /* ne fait rien */
 }
 
 /* mot FORTH : MYSQL */
-inline void mysql_core()
+static void mysql_core()
 {
      t_cf e;
 
@@ -318,7 +318,7 @@ inline void mysql_core()
 }
 
 /* mot FORTH : @END-! */
-inline void end_store_core()
+static void end_store_core()
 {
      t_cf e1, e2;
      t_cfa mot;
@@ -333,7 +333,7 @@ inline void end_store_core()
 }
 
 /* mot FORTH : ! */
-inline void store_core()
+static void store_core()
 {
      t_cf e1, e2;
      GtkTextIter fin;
@@ -345,29 +345,29 @@ inline void store_core()
 
      switch (e1.type)
      {
-     case ADRESSE : 
-	  *((t_cfa) e1.adresse) = e2;
-	  break;
+     case ADRESSE :
+          *((t_cfa) e1.adresse) = e2;
+          break;
      case AD_ENTIER :
-	  *((int*) e1.adresse) = (int) e2.entier;	  
-	  break;
+          *((int*) e1.adresse) = (int) e2.entier;
+          break;
      case AD_REEL :
-	  *((float*) e1.adresse) = (float) e2.reel;
-	  break;
+          *((float*) e1.adresse) = (float) e2.reel;
+          break;
 //     case AD_STRING :
-//	  *((float*) e1.adresse) = (char*) e2.adresse;
-//	  break;
+//        *((float*) e1.adresse) = (char*) e2.adresse;
+//        break;
      default :
-	  guts.erreur = true;
-	  printf("\007Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n");  
-	  gtk_text_buffer_get_end_iter(bf_res, &fin);
-	  gtk_text_buffer_insert(bf_res, &fin, "Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n", -1);
-	  break;
+          guts.erreur = true;
+          printf("\007Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n");
+          gtk_text_buffer_get_end_iter(bf_res, &fin);
+          gtk_text_buffer_insert(bf_res, &fin, "Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n", -1);
+          break;
      }
 }
 
 /* mot FORTH : @ */
-inline void fetch_core()
+static void fetch_core()
 {
      GtkTextIter fin;
      t_cf elt;
@@ -375,31 +375,31 @@ inline void fetch_core()
      elt = sommet(&guts.pile_donnees);
      switch (elt.type)
      {
-     case ADRESSE : 
-	  guts.pile_donnees.donnees[guts.pile_donnees.position] = *((t_cfa) elt.adresse);
-	  break;
+     case ADRESSE :
+          guts.pile_donnees.donnees[guts.pile_donnees.position] = *((t_cfa) elt.adresse);
+          break;
      case AD_ENTIER :
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = *((int*) elt.adresse);
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
-	  break;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = *((int*) elt.adresse);
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
+          break;
      case AD_REEL :
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = *((float*) elt.adresse);
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
-	  break;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = *((float*) elt.adresse);
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
+          break;
 
      default :
-	  guts.erreur = true;
-	  printf("\007Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n");  
-	  gtk_text_buffer_get_end_iter(bf_res, &fin);
-	  gtk_text_buffer_insert(bf_res, &fin, "Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n", -1);
-	  break;
+          guts.erreur = true;
+          printf("\007Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n");
+          gtk_text_buffer_get_end_iter(bf_res, &fin);
+          gtk_text_buffer_insert(bf_res, &fin, "Erreur : le sommet de la pile doit etre une adresse pour que le token @ puisse fonctionner correctement.\nOr ce n'est pas le cas ici !!\n", -1);
+          break;
      }
 }
 
 /*
 ** ============================================
-** 
-** MOT DE DEFINITION 
+**
+** MOT DE DEFINITION
 **
 ** ============================================
 */
@@ -430,7 +430,7 @@ void does_core()
      ajouter_mot_hash_et_gtk(&guts.dictionnaire, mot, "DOES");
 }
 
-inline void does1_core()
+static void does1_core()
 {
      /* preparation du deroutement */
      guts.dernier_mot_cree[1].adresse = chercher_mot_hash(&guts.dictionnaire, "DOES2");
@@ -443,23 +443,23 @@ inline void does1_core()
      save_core();
      /* arret de l'execution */
      while ((*(guts.IP+1)).adresse != NULL)
-	  ++guts.IP;
+          ++guts.IP;
      guts.PC = guts.IP;
 
 
 //*((t_cfa) sommet(&guts.pile_retour).adresse);
 }
 
-inline void does2_core()
+static void does2_core()
 {
-     empiler(&guts.pile_donnees, ad_to_elt(guts.IP+2, ADRESSE)); 
-     //empiler(&guts.pile_donnees, *(guts.IP+2)); 
-     
-     /* 
+     empiler(&guts.pile_donnees, ad_to_elt(guts.IP+2, ADRESSE));
+     //empiler(&guts.pile_donnees, *(guts.IP+2));
+
+     /*
      ** deroutement sur le mot DOES et non pas le mot
      ** qui suit DOES comme le suggere [SALMAN83]
-     ** car dans execute_mot (interpreteur.c) 
-     ** apres avoir executer la fct C guts.IP est 
+     ** car dans execute_mot (interpreteur.c)
+     ** apres avoir executer la fct C guts.IP est
      ** incremente de 1.
      */
      guts.IP = (*(guts.IP+1)).adresse;
@@ -493,18 +493,18 @@ void variable_core()
 
 /*
 ** ============================================
-** 
-** BRANCHEMENT 
+**
+** BRANCHEMENT
 **
 ** ============================================
 */
 
 /* mot FORTH : HERE */
-inline void here_core()
+static void here_core()
 {
      t_nfa nfa;
      t_cfa cfa;
-     
+
      cfa = guts.dernier_mot_cree;
      nfa = (t_nfa) (*cfa).adresse;
      empiler(&guts.pile_donnees, ad_to_elt(cfa+nfa->taille_utilisee, ADRESSE));
@@ -512,107 +512,107 @@ inline void here_core()
 }
 
 /* mot FORTH : BRANCH  il est tjs suivit d'une @ ou un nombre */
-inline void branch_core()
+static void branch_core()
 {
      guts.PC = guts.IP + 1;
-     if ((*guts.PC).type == ADRESSE) 
-	  guts.IP += ((*guts.PC).entier) / sizeof(t_cf);
+     if ((*guts.PC).type == ADRESSE)
+          guts.IP += ((*guts.PC).entier) / sizeof(t_cf);
      else
-	  guts.IP += (*guts.PC).entier;
+          guts.IP += (*guts.PC).entier;
 }
 
 /* mot FORTH : 0BRANCH */
-inline void zero_branch_core()
+static void zero_branch_core()
 {
      t_cf elt = sommet(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
 
      if ((elt.adresse == NULL) || (elt.entier == 0))
-	  branch_core();
+          branch_core();
      else
      {
-	  ++guts.IP; //il faut sauter le nombre qui suit 0BRANCH
-	  ++guts.PC;
+          ++guts.IP; //il faut sauter le nombre qui suit 0BRANCH
+          ++guts.PC;
      }
 }
 
 /* mot FORTH : 1BRANCH */
-inline void un_branch_core()
+static void un_branch_core()
 {
      if (pile_vide(&guts.pile_donnees))
-	  return ;
+          return ;
 
      t_cf elt = sommet(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
 
      if (elt.entier == 1)
-	  branch_core();
+          branch_core();
      else
      {
-	  ++guts.IP; //il faut sauter le nombre qui suit 1BRANCH
-	  ++guts.PC;
+          ++guts.IP; //il faut sauter le nombre qui suit 1BRANCH
+          ++guts.PC;
      }
 }
 
 /*
 ** ============================================
-** 
-** MANIPULATION DES PILES 
+**
+** MANIPULATION DES PILES
 **
 ** ============================================
 */
 
 /* mot FORTH : ABORT */
-inline void abort_core()
+static void abort_core()
 {
      reinit_pile(&guts.pile_donnees);
      reinit_pile(&guts.pile_retour);
 }
 
 /* mot FORTH : >R */
-inline void data_to_return_core()
+static void data_to_return_core()
 {
      empiler(&guts.pile_retour, sommet(&guts.pile_donnees));
      depiler(&guts.pile_donnees);
 }
 
 /* mot FORTH : R> */
-inline void return_to_data_core()
+static void return_to_data_core()
 {
      empiler(&guts.pile_donnees, sommet(&guts.pile_retour));
      depiler(&guts.pile_retour);
 }
 
 /* mot FORTH : DUP */
-inline void dup_core()
+static void dup_core()
 {
      empiler(&guts.pile_donnees, sommet(&guts.pile_donnees));
 }
 
 /* mot FORTH : DROP */
-inline void drop_core()
+static void drop_core()
 {
      depiler(&guts.pile_donnees);
 }
 
 /* mot FORTH : SWAP */
-inline void swap_core()
+static void swap_core()
 {
      t_cf elt = guts.pile_donnees.donnees[guts.pile_donnees.position-1];
-     guts.pile_donnees.donnees[guts.pile_donnees.position-1] = 
-	  guts.pile_donnees.donnees[guts.pile_donnees.position];
-     guts.pile_donnees.donnees[guts.pile_donnees.position] = elt;     
+     guts.pile_donnees.donnees[guts.pile_donnees.position-1] =
+          guts.pile_donnees.donnees[guts.pile_donnees.position];
+     guts.pile_donnees.donnees[guts.pile_donnees.position] = elt;
 }
 
 /* mot FORTH : OVER */
-inline void over_core()
+static void over_core()
 {
-     t_cf elt = guts.pile_donnees.donnees[guts.pile_donnees.position-1]; 
+     t_cf elt = guts.pile_donnees.donnees[guts.pile_donnees.position-1];
      empiler(&guts.pile_donnees, elt);
 }
 
 /* mot FORTH : ROT */
-inline void rot_core()
+static void rot_core()
 {
      t_cf e1, e2, e3;
 
@@ -626,37 +626,37 @@ inline void rot_core()
 }
 
 /* mot FORTH : 2DUP */
-inline void deux_dup_core()
+static void deux_dup_core()
 {
      over_core();
      over_core();
 }
 
 /* mot FORTH : 2DROP */
-inline void deux_drop_core()
+static void deux_drop_core()
 {
      depiler(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
 }
 
 /* mot FORTH : 2SWAP */
-inline void deux_swap_core()
+static void deux_swap_core()
 {
      rot_core(); data_to_return_core();
      rot_core(); return_to_data_core();
 }
 
 /* mot FORTH : 2OVER */
-inline void deux_over_core()
+static void deux_over_core()
 {
      data_to_return_core(); data_to_return_core();
-     deux_dup_core(); 
+     deux_dup_core();
      return_to_data_core(); return_to_data_core();
      deux_swap_core();
 }
 
 /* mot FORTH : 2ROT */
-inline void deux_rot_core()
+static void deux_rot_core()
 {
      data_to_return_core(); data_to_return_core(); deux_swap_core();
      return_to_data_core(); return_to_data_core(); deux_swap_core();
@@ -664,32 +664,32 @@ inline void deux_rot_core()
 
 /*
 ** ============================================
-** 
+**
 **  AFFICHAGE
 **
 ** ============================================
 */
 
 /* mot FORTH : CR */
-inline void retour_chariot_core()
+static void retour_chariot_core()
 {
      printf("\n");
 }
 
 /* mot FORTH : TAB */
-inline void tabulation_core()
+static void tabulation_core()
 {
      printf("\t");
 }
 
 /* mot FORTH : WORDS */
-inline void words_core()
+static void words_core()
 {
      afficher_hash(&guts.dictionnaire);
 }
 
 /* FORTH : . */
-inline void afficher_core()
+static void afficher_core()
 {
 //     GtkTextIter fin;
 
@@ -705,7 +705,7 @@ inline void afficher_core()
 }
 
 /* FORTH : PRETURN */
-static inline void return_stack_core()
+static void return_stack_core()
 {
      GtkTextIter fin;
 
@@ -720,7 +720,7 @@ static inline void return_stack_core()
 }
 
 /* FORTH : PDATA */
-inline void data_stack_core()
+static void data_stack_core()
 {
      GtkTextIter fin;
 
@@ -734,7 +734,7 @@ inline void data_stack_core()
 
 /*
 ** ============================================
-** 
+**
 **  OPERATIONS ARTHIMETIQUE ET DE LOGIQUE
 **
 ** ============================================
@@ -743,100 +743,100 @@ inline void data_stack_core()
 void addition_core()
 {
      t_cf a,b;
-     
+
      a = sommet(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
      b = sommet(&guts.pile_donnees);
      if ((a.type == REEL) && (b.type == REEL))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel+b.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel+b.reel;
      else if ((a.type == ENTIER) && (b.type == ENTIER))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = a.entier+b.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = a.entier+b.entier;
      else if ((a.type == ADRESSE) && (a.type == ADRESSE))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.adresse - a.adresse;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.adresse - a.adresse;
      else if (a.type == ENTIER)
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.entier+b.reel;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;	  
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.entier+b.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
-     else 
+     else
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel+b.entier;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel+b.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
 }
 
 void multiplication_core()
 {
      t_cf a,b;
-     
+
      a = sommet(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
      b = sommet(&guts.pile_donnees);
      if ((a.type == REEL) && (b.type == REEL))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel*b.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel*b.reel;
      else if ((a.type == ENTIER) && (b.type == ENTIER))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = a.entier*b.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = a.entier*b.entier;
      else if (a.type == ENTIER)
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.entier*b.reel;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;	  
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.entier*b.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
-     else 
+     else
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel*b.entier;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel*b.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
 }
 
 void soustraction_core()
 {
      t_cf a,b;
-     
+
      a = sommet(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
      b = sommet(&guts.pile_donnees);
      if ((a.type == REEL) && (b.type == REEL))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.reel - a.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.reel - a.reel;
      else if ((a.type == ENTIER) && (b.type == ENTIER))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.entier - a.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.entier - a.entier;
      else if ((a.type == ADRESSE) && (a.type == ADRESSE))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.adresse - a.adresse;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.adresse - a.adresse;
      else if (a.type == ENTIER)
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.entier*b.reel;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;	  
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.entier*b.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
-     else 
+     else
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel*b.entier;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = a.reel*b.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
 }
 
 void division_core()
 {
      t_cf a,b;
-     
+
      a = sommet(&guts.pile_donnees);
      depiler(&guts.pile_donnees);
      b = sommet(&guts.pile_donnees);
      if ((a.type == REEL) && (b.type == REEL))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.reel/a.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.reel/a.reel;
      else if ((a.type == ENTIER) && (b.type == ENTIER))
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.entier/a.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = b.entier/a.entier;
      else if (a.type == ENTIER)
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.reel/a.entier;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;	  
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.reel/a.entier;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
-     else 
+     else
      {
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.entier/a.reel;
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].reel = b.entier/a.reel;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
      }
 }
 
-inline void egalite_core()
+static void egalite_core()
 {
      t_cf e1, e2;
 
@@ -848,20 +848,20 @@ inline void egalite_core()
 }
 
 /* mot FORTH : 0= */
-inline void egalite_zero_core()
+static void egalite_zero_core()
 {
      guts.pile_donnees.donnees[guts.pile_donnees.position].entier = (sommet(&guts.pile_donnees).entier == 0);
      guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
 }
 
 /* mot FORTH : 0!= */
-inline void non_zero_core()
+static void non_zero_core()
 {
      guts.pile_donnees.donnees[guts.pile_donnees.position].entier = (sommet(&guts.pile_donnees).entier != 0);
      guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
 }
 
-inline void inf_core()
+static void inf_core()
 {
      t_cf e1, e2;
 
@@ -872,7 +872,7 @@ inline void inf_core()
      guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
 }
 
-inline void inf_egal_core()
+static void inf_egal_core()
 {
      t_cf e1, e2;
 
@@ -883,7 +883,7 @@ inline void inf_egal_core()
      guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
 }
 
-inline void sup_core()
+static void sup_core()
 {
      t_cf e1, e2;
 
@@ -894,7 +894,7 @@ inline void sup_core()
      guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
 }
 
-inline void sup_egal_core()
+static void sup_egal_core()
 {
      t_cf e1, e2;
 
@@ -906,31 +906,31 @@ inline void sup_egal_core()
 }
 
 /* mot FORTH : 1+ */
-inline void plus_un_entier_core()
+static void plus_un_entier_core()
 {
      guts.pile_donnees.donnees[guts.pile_donnees.position].entier += 1;
 }
 
 /* mot FORTH : 1- */
-inline void moins_un_entier_core()
+static void moins_un_entier_core()
 {
      guts.pile_donnees.donnees[guts.pile_donnees.position].entier -= 1;
 }
 
 /* mot FORTH : 1.+ */
-inline void plus_un_reel_core()
+static void plus_un_reel_core()
 {
      guts.pile_donnees.donnees[guts.pile_donnees.position].reel += 1;
 }
 
 /* mot FORTH : 1.- */
-inline void moins_un_reel_core()
+static void moins_un_reel_core()
 {
      guts.pile_donnees.donnees[guts.pile_donnees.position].reel -= 1;
 }
 
 /* mot FORTH : >INT */
-inline void to_int_core()
+static void to_int_core()
 {
      float x = guts.pile_donnees.donnees[guts.pile_donnees.position].reel;
      guts.pile_donnees.donnees[guts.pile_donnees.position].type = ENTIER;
@@ -938,7 +938,7 @@ inline void to_int_core()
 }
 
 /* mot FORTH : >FLOAT */
-inline void to_float_core()
+static void to_float_core()
 {
      int x = guts.pile_donnees.donnees[guts.pile_donnees.position].entier;
      guts.pile_donnees.donnees[guts.pile_donnees.position].type = REEL;
@@ -947,14 +947,14 @@ inline void to_float_core()
 
 /*
 ** ============================================
-** 
+**
 ** SIMTADYN : tt les fcts qui manipulent la carte
 **
 ** ============================================
 */
 
 /* mot FORTH : ARC */
-inline void arc_core()
+static void arc_core()
 {
      t_cf e1, e2;
      int s;
@@ -967,38 +967,38 @@ inline void arc_core()
      depiler(&guts.pile_donnees);
      s = id_to_tab2(e2.entier);
 
-     if (s == -1) 
+     if (s == -1)
      {
-	  ch = (char*) xmalloc(30 * sizeof(char));
-	  printf("\007Le sommet %d n'existe pas !!\n", e2.entier);
-	  sprintf(ch, "Le sommet %d n'existe pas !!\n", e2.entier);
-	  gtk_text_buffer_get_end_iter(bf_res, &fin);
-	  gtk_text_buffer_insert(bf_res, &fin, ch, -1);
-	  free(ch);
-	  guts.erreur = true;
-	  return ;
-     } 
+          ch = (char*) xmalloc(30 * sizeof(char));
+          printf("\007Le sommet %d n'existe pas !!\n", e2.entier);
+          sprintf(ch, "Le sommet %d n'existe pas !!\n", e2.entier);
+          gtk_text_buffer_get_end_iter(bf_res, &fin);
+          gtk_text_buffer_insert(bf_res, &fin, ch, -1);
+          free(ch);
+          guts.erreur = true;
+          return ;
+     }
      switch (e1.entier)
      {
      case ID :
-	  empiler(&guts.pile_donnees, ad_to_elt(&arete[s].id, AD_ENTIER));
-	  break;
+          empiler(&guts.pile_donnees, ad_to_elt(&arete[s].id, AD_ENTIER));
+          break;
      case COUT :
-	  empiler(&guts.pile_donnees, ad_to_elt(&arete[s].cout, AD_REEL));
-	  break;
+          empiler(&guts.pile_donnees, ad_to_elt(&arete[s].cout, AD_REEL));
+          break;
      default :
-	  ch = (char*) xmalloc(30 * sizeof(char));
-	  sprintf(ch, "Champ %d non recevable pour la structure ARC !!\n",e1.entier);
-	  printf("\007 Champ %d non recevable pour la structure ARC !!\n",e1.entier);
-	  gtk_text_buffer_get_end_iter(bf_res, &fin);
-	  gtk_text_buffer_insert(bf_res, &fin, ch, -1);
-	  free(ch);
-	  guts.erreur = true;
+          ch = (char*) xmalloc(30 * sizeof(char));
+          sprintf(ch, "Champ %d non recevable pour la structure ARC !!\n",e1.entier);
+          printf("\007 Champ %d non recevable pour la structure ARC !!\n",e1.entier);
+          gtk_text_buffer_get_end_iter(bf_res, &fin);
+          gtk_text_buffer_insert(bf_res, &fin, ch, -1);
+          free(ch);
+          guts.erreur = true;
      }
 }
 
 /* A>S */
-inline void arc_to_som_core()
+static void arc_to_som_core()
 {
      int e;
      e = id_to_tab2(sommet(&guts.pile_donnees).entier);
@@ -1008,7 +1008,7 @@ inline void arc_to_som_core()
 }
 
 /* mot FORTH : SOMMET */
-inline void sommet_core()
+static void sommet_core()
 {
      t_cf e1, e2;
      int s;
@@ -1021,52 +1021,52 @@ inline void sommet_core()
      depiler(&guts.pile_donnees);
      s = id_to_tab(e2.entier);
 
-     if (s == -1) 
+     if (s == -1)
      {
-	  ch = (char*) xmalloc(30 * sizeof(char));
-	  printf("\007Le sommet %d n'existe pas !!\n", e2.entier);
-	  sprintf(ch, "Le sommet %d n'existe pas !!\n", e2.entier);
-	  gtk_text_buffer_get_end_iter(bf_res, &fin);
-	  gtk_text_buffer_insert(bf_res, &fin, ch, -1);
-	  free(ch);
-	  guts.erreur = true;
-	  return ;
-     } 
+          ch = (char*) xmalloc(30 * sizeof(char));
+          printf("\007Le sommet %d n'existe pas !!\n", e2.entier);
+          sprintf(ch, "Le sommet %d n'existe pas !!\n", e2.entier);
+          gtk_text_buffer_get_end_iter(bf_res, &fin);
+          gtk_text_buffer_insert(bf_res, &fin, ch, -1);
+          free(ch);
+          guts.erreur = true;
+          return ;
+     }
      switch (e1.entier)
      {
      case ID :
-	  empiler(&guts.pile_donnees, ad_to_elt(&som[s].id, AD_ENTIER));
-	  break;
+          empiler(&guts.pile_donnees, ad_to_elt(&som[s].id, AD_ENTIER));
+          break;
      case POIGNETX :
      case POSX :
-	  empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.x, AD_REEL));
-	  break;
+          empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.x, AD_REEL));
+          break;
      case POIGNETY :
      case POSY :
-	  empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.y, AD_REEL));
-	  break;
+          empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.y, AD_REEL));
+          break;
      case POSZ :
-	  empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.z, AD_REEL));
-	  break;
+          empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.z, AD_REEL));
+          break;
      case POIGNET :
      case POSITION :
-	  empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.z, AD_REEL));
-	  empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.y, AD_REEL));
-	  empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.x, AD_REEL));
-	  break;
+          empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.z, AD_REEL));
+          empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.y, AD_REEL));
+          empiler(&guts.pile_donnees, ad_to_elt(&som[s].pos.x, AD_REEL));
+          break;
      default :
-	  ch = (char*) xmalloc(30 * sizeof(char));
-	  sprintf(ch, "Champ %d non recevable pour la structure SOMMET !!\n",e1.entier);
-	  printf("\007 Champ %d non recevable pour la structure SOMMET !!\n",e1.entier);
-	  gtk_text_buffer_get_end_iter(bf_res, &fin);
-	  gtk_text_buffer_insert(bf_res, &fin, ch, -1);
-	  free(ch);
-	  guts.erreur = true;
+          ch = (char*) xmalloc(30 * sizeof(char));
+          sprintf(ch, "Champ %d non recevable pour la structure SOMMET !!\n",e1.entier);
+          printf("\007 Champ %d non recevable pour la structure SOMMET !!\n",e1.entier);
+          gtk_text_buffer_get_end_iter(bf_res, &fin);
+          gtk_text_buffer_insert(bf_res, &fin, ch, -1);
+          free(ch);
+          guts.erreur = true;
      }
 }
 
 /* mot FORTH : COUT */
-inline void type_cout_core() 
+static void type_cout_core()
 {
      t_cfa mot;
 
@@ -1077,7 +1077,7 @@ inline void type_cout_core()
 }
 
 /* mot FORTH : ID */
-inline void type_ID_core() 
+static void type_ID_core()
 {
      t_cfa mot;
 
@@ -1088,7 +1088,7 @@ inline void type_ID_core()
 }
 
 /* mot FORTH : POSX */
-inline void type_positionx_core() 
+static void type_positionx_core()
 {
      t_cfa mot;
 
@@ -1099,7 +1099,7 @@ inline void type_positionx_core()
 }
 
 /* mot FORTH : POSY */
-inline void type_positiony_core() 
+static void type_positiony_core()
 {
      t_cfa mot;
 
@@ -1110,7 +1110,7 @@ inline void type_positiony_core()
 }
 
 /* mot FORTH : POSZ */
-inline void type_positionz_core() 
+static void type_positionz_core()
 {
      t_cfa mot;
 
@@ -1121,7 +1121,7 @@ inline void type_positionz_core()
 }
 
 /* mot FORTH : POSY */
-inline void type_position_core() 
+static void type_position_core()
 {
      t_cfa mot;
 
@@ -1132,7 +1132,7 @@ inline void type_position_core()
 }
 
 /* mot FORTH : POIGX */
-inline void type_poignetx_core() 
+static void type_poignetx_core()
 {
      t_cfa mot;
 
@@ -1143,7 +1143,7 @@ inline void type_poignetx_core()
 }
 
 /* mot FORTH : POIGY */
-inline void type_poignety_core() 
+static void type_poignety_core()
 {
      t_cfa mot;
 
@@ -1154,7 +1154,7 @@ inline void type_poignety_core()
 }
 
 /* mot FORTH : POIGNET */
-inline void type_poignet_core() 
+static void type_poignet_core()
 {
      t_cfa mot;
 
@@ -1165,37 +1165,37 @@ inline void type_poignet_core()
 }
 
 /* mot FORTH : NSOM */
-inline void nb_sommets_core()
+static void nb_sommets_core()
 {
      empiler(&guts.pile_donnees, int_to_elt(nbr_sommet));
 }
 
 /* mot FORTH : NARC */
-inline void nb_arcs_core()
+static void nb_arcs_core()
 {
      empiler(&guts.pile_donnees, int_to_elt(nbr_arete));
 }
 
 /* mot FORTH : NZONE */
-inline void nb_zones_core()
+static void nb_zones_core()
 {
      empiler(&guts.pile_donnees, int_to_elt(nbr_zone));
 }
 
 /* mot FORTH : NCEL */
-inline void nb_cellules_core()
+static void nb_cellules_core()
 {
      empiler(&guts.pile_donnees, int_to_elt(nbr_zone+nbr_arete+nbr_sommet));
 }
 
 /* mot FORTH : FORALL */
-inline void forall_core()
+static void forall_core()
 {
      empiler(&guts.pile_donnees, int_to_elt(nbr_selec_som));
 }
 
 /* mot FORTH : >IDS */
-inline void to_id_sommet_core()
+static void to_id_sommet_core()
 {
      t_cf e;
 
@@ -1204,7 +1204,7 @@ inline void to_id_sommet_core()
 }
 
 /* mot FORTH : >IDA */
-inline void to_id_arc_core()
+static void to_id_arc_core()
 {
      t_cf e;
 
@@ -1213,15 +1213,15 @@ inline void to_id_arc_core()
 }
 
 /* mot FORTH : DEG */
-inline void degre_core()
-{ 
+static void degre_core()
+{
      int i;
      i = sommet(&guts.pile_donnees).entier;
      guts.pile_donnees.donnees[guts.pile_donnees.position].entier = degre(i);
 }
 
 /* mot FORTH : IVOISIN */
-inline void ieme_voisin_core()
+static void ieme_voisin_core()
 {
      int s, i;
      s = sommet(&guts.pile_donnees).entier;
@@ -1230,17 +1230,17 @@ inline void ieme_voisin_core()
      guts.pile_donnees.donnees[guts.pile_donnees.position].entier = ieme_succ(s, i);
 }
 
-inline void ieme_arete_core()
+static void ieme_arete_core()
 {
      int s,i;
      s = sommet(&guts.pile_donnees).entier;
      depiler(&guts.pile_donnees);
      i = sommet(&guts.pile_donnees).entier;
-     guts.pile_donnees.donnees[guts.pile_donnees.position].entier = ieme_succ_arete(s,i);  
+     guts.pile_donnees.donnees[guts.pile_donnees.position].entier = ieme_succ_arete(s,i);
 }
 
 /* MOT FORTH : S+ */
-inline void new_sommet_core()
+static void new_sommet_core()
 {
      coordx = sommet(&guts.pile_donnees).entier;
      depiler(&guts.pile_donnees);
@@ -1250,7 +1250,7 @@ inline void new_sommet_core()
 }
 
 /* MOT FORTH : S- */
-inline void destroy_sommet_core()
+static void destroy_sommet_core()
 {
      sommet_selec1 = sommet(&guts.pile_donnees).entier;
      depiler(&guts.pile_donnees);
@@ -1258,7 +1258,7 @@ inline void destroy_sommet_core()
 }
 
 /* MOT FORTH : A+ */
-inline void new_arete_core()
+static void new_arete_core()
 {
      sommet_selec1 = sommet(&guts.pile_donnees).entier;
      depiler(&guts.pile_donnees);
@@ -1268,7 +1268,7 @@ inline void new_arete_core()
 }
 
 /* MOT FORTH : A- */
-inline void destroy_arete_core()
+static void destroy_arete_core()
 {
      arete_selec = sommet(&guts.pile_donnees).entier;
      depiler(&guts.pile_donnees);
@@ -1276,26 +1276,26 @@ inline void destroy_arete_core()
 }
 
 /* mot Forth : EXISTS */
-inline void exists_core()
+static void exists_core()
 {
      int s;
 
      s = sommet(&guts.pile_donnees).entier;
      if (id_to_tab(s) == -1)
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = 0;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = 0;
      else
-	  guts.pile_donnees.donnees[guts.pile_donnees.position].entier = 1;
+          guts.pile_donnees.donnees[guts.pile_donnees.position].entier = 1;
 }
 
 /* mot Forth : TOK2POP */
-inline void token_to_popup_core()
+static void token_to_popup_core()
 {
      guts.mytoken = my_cut(&guts.tampon, guts.mytoken, &guts.iter);
      nouveau_item_popup(guts.mytoken, &menu_popup);
 }
 
 /* mot Forth : >TABLE */
-inline void to_table_core()
+static void to_table_core()
 {
      tab_to_mysql_som();
      tab_to_mysql_arete();
@@ -1311,7 +1311,7 @@ void creer_dico_min()
      ajouter_mot_hash_et_gtk(&guts.dictionnaire, nouveau_mot("BUILDS", EMPTY_WORD, builds_core), "BUILDS");
      ajouter_mot_hash_et_gtk(&guts.dictionnaire, nouveau_mot("FORGET", EMPTY_WORD, forget_core), "FORGET");
      deux_points_core(); point_virgule_core();
-     deux_points_rec_core(); 
+     deux_points_rec_core();
      ajouter_mot_hash_et_gtk(&guts.dictionnaire, nouveau_mot(";REC", PRECEDENCE_BIT, point_virgule_rec_core), ";REC");
 
      ajouter_mot_hash_et_gtk(&guts.dictionnaire, nouveau_mot("COMPILE", EMPTY_WORD, compile_core), "COMPILE");
