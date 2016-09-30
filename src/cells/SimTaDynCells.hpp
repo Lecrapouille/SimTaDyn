@@ -78,6 +78,12 @@ public:
    */
   bool selected;
 
+  /*
+   * Bounding box for spatialization. Set as protected to be sure to
+   * use accessors which can prevent other cells that this cell changed.
+   */
+  AABB box_;
+
 protected:
   /*
    * Make this instance unique with this identifier.
@@ -91,11 +97,7 @@ protected:
    */
   Position3D position_;
 
-  /*
-   * Bounding box for spatialization. Set as protected to be sure to
-   * use accessors which can prevent other cells that this cell changed.
-   */
-  AABB box_;
+
 
   /*
    * Mark for already visited element when walking in the grpah
@@ -132,6 +134,9 @@ public:
     data = NULL;
     selected = visited = false;
     value_ = 0;
+    //EVITER d'avoir du 1 POUR 1: Separer dans une utre structure et init un int comme mask avec toutes les evts par default. Avec un accessor on pourra eventuellement changer le mask
+    //allow_event = onMoved | onFormulaChanged | onDestruction;
+
     registerEventFunc(this, &SimTaDynCell::onMoved);
     registerEventFunc(this, &SimTaDynCell::onFormulaChanged);
     registerEventFunc(this, &SimTaDynCell::onDestruction);

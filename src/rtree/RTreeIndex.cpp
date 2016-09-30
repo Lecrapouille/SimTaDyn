@@ -59,7 +59,7 @@ uint32_t RTreeNode::search_aux(AABB const& bbox) const
 {
   uint32_t hitCount = 0;
 
-  if (IS_A_RTREE_LEAF(level))
+  if (IS_A_RTREE_LEAF(level)) // FIXME: faire if (is_leaf())
     {
       for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
         {

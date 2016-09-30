@@ -259,11 +259,10 @@ void Renderer::draw(/*const*/ SimTaDynGraph& graph) //const
     {
       position = screen + (it->second->getPosition() - center) * current_camera_.getZoom();
       glRectf(position.x -1.0f, position.y -1.0f, position.x +1.0f, position.y + 1.0f);
-      //glRasterPos2f(position.x, position.y);
-      glPushMatrix();
-      glTranslatef(position.x, position.y, 0.0f);
-      font_list_[0].draw(it->second->name);
-      glPopMatrix();
+      //glPushMatrix();
+      //glTranslatef(position.x, position.y, 0.0f);
+      //font_list_[0].draw(it->second->name);
+      //glPopMatrix();
     }
 
   // Graph name

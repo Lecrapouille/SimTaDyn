@@ -35,14 +35,14 @@
 #define IS_A_RTREE_LEAF(level) (RTREE_LEAF == level)
 
 #  ifndef RTREE_MAX_NODES
-#    define RTREE_MAX_NODES  4U
+#    define RTREE_MAX_NODES  8U
 #  endif /* RTREE_MAX_NODES */
 
 /*
  * Balance criterion for node splitting
  */
 #  ifndef RTREE_MIN_FILL
-#    define RTREE_MIN_FILL (RTREE_MAX_NODES / 3U)
+#    define RTREE_MIN_FILL (RTREE_MAX_NODES / 4U)
 #  endif /* RTREE_MIN_FILL */
 
 class RTreeNode;

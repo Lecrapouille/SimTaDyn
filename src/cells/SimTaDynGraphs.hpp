@@ -57,15 +57,10 @@ public:
 
     std::cout << " SimTaDynCell* addNode " << node->privateId() << std::endl;
     node->moveToPosition(p);// FIXME pas optim
-
     node->box_.setBox(p-0.05f, p+0.05f);
-    // node->box_.scaleFromCenter(10.5f);
 
     nodes_[node->privateId()] = node;
     rtree = rtree->insert(node->privateId(), node->box_, 0);
-    std::cout << "---" << node->privateId() << "-----------------------------------------------\n";
-    std::cout << *rtree << std::endl;
-    #warning "bug entre insertion 18 et 19. Node 12 is deleted"
 
     return node;
   }

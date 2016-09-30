@@ -37,6 +37,7 @@ void SimTaDynFont::buildMappedTexture()
     }
 }
 
+// https://openclassrooms.com/forum/sujet/opengl-gerer-un-score-86107
 // *************************************************************************************************
 // Open a Unix/X system font. Routine only available on Unix/X systems.
 // *************************************************************************************************
@@ -67,7 +68,7 @@ bool SimTaDynFont::loadXFont(std::string const& fontname)
   // Tell GLX which font & glyphs to use.
   id = font_info->fid;
   first = 32;//font_info->min_char_or_byte2;
-  last  = 192;//font_info->max_char_or_byte2;
+  last  = 126;//font_info->max_char_or_byte2;
 
   base_ = glCheck(glGenLists((GLuint) last + 1));
   if (0 == base_)
@@ -79,7 +80,7 @@ bool SimTaDynFont::loadXFont(std::string const& fontname)
   // Create bitmap display lists from an X font
   glXUseXFont(id, first, last - first + 1, base_ + first);
 
-  nb_fonts_ = last + 1;
+  nb_fonts_ = last - first + 1;
   XCloseDisplay(display);
   return true;
 }

@@ -10,7 +10,8 @@ int main(int argc, char** argv)
   Gtk::GL::init(argc, argv);
 
   simtadyn.loader.loadShapefile("../data/Corsica-points.shp", simtadyn.graph);
-  std::cout << simtadyn.graph.name << std::endl;
+  //simtadyn.loader.loadShapefile("../data/3dpoints.shp", simtadyn.graph);
+  //std::cout << simtadyn.graph.name << std::endl;
 
   SimTaDynWindow main_window("SimTaDyn");
   kit.run(main_window);
