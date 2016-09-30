@@ -4,13 +4,33 @@
 // *************************************************************************************************
 // SimTaDyn main window
 // *************************************************************************************************
-SimTaDynWindow::SimTaDynWindow(const std::string& title): Gtk::Window()
+SimTaDynWindow::SimTaDynWindow(const std::string& title)
+  : Gtk::Window(), m_Label1("Contents of tab 1")
 {
   std::cout << "SimTaDynWindow::SimTaDynWindow\n";
   set_title(title);
-  set_default_size(800, 600);
+  set_default_size(1000, 600);
   set_position(Gtk::WIN_POS_CENTER);
-  add(drawing_area_);
+
+  // Text editor
+  m_scrolledwindow.add(m_textview);
+  m_scrolledwindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+
+  // Text editors in notebook
+  m_notebook[0].set_scrollable();
+  m_notebook[0].append_page(m_scrolledwindow, "Forth Editor");
+
+  // Menu
+  m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_File", m_menufile) );
+  m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Edit", m_menuedit) );
+  m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
+  m_vbox[0].pack_start(m_notebook[0]);
+
+  // Horizontal split
+  add(m_hpaned[0]);
+  m_hpaned[0].set_position(600);
+  m_hpaned[0].pack1(m_drawing_area);
+  m_hpaned[0].pack2(m_vbox[0]);
 
   add_events(Gdk::KEY_RELEASE_MASK);
   signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
@@ -108,26 +128,26 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
     case GDK_KEY_F1:
       {
         SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-        drawing_area_.zoomFitPage(simtadyn.graph);
+        m_drawing_area.zoomFitPage(simtadyn.graph);
       }
       break;
     case GDK_KEY_Page_Up:
-      drawing_area_.keyPressed(GlDrawingArea::Forward);
+      m_drawing_area.keyPressed(GlDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      drawing_area_.keyPressed(GlDrawingArea::Backward);
+      m_drawing_area.keyPressed(GlDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      drawing_area_.keyPressed(GlDrawingArea::Up);
+      m_drawing_area.keyPressed(GlDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      drawing_area_.keyPressed(GlDrawingArea::Down);
+      m_drawing_area.keyPressed(GlDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      drawing_area_.keyPressed(GlDrawingArea::Right);
+      m_drawing_area.keyPressed(GlDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      drawing_area_.keyPressed(GlDrawingArea::Left);
+      m_drawing_area.keyPressed(GlDrawingArea::Left);
       break;
     default:
       break;
@@ -139,22 +159,22 @@ void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)
   switch (evenement->keyval)
     {
     case GDK_KEY_Page_Up:
-      drawing_area_.keyReleased(GlDrawingArea::Forward);
+      m_drawing_area.keyReleased(GlDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      drawing_area_.keyReleased(GlDrawingArea::Backward);
+      m_drawing_area.keyReleased(GlDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      drawing_area_.keyReleased(GlDrawingArea::Up);
+      m_drawing_area.keyReleased(GlDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      drawing_area_.keyReleased(GlDrawingArea::Down);
+      m_drawing_area.keyReleased(GlDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      drawing_area_.keyReleased(GlDrawingArea::Right);
+      m_drawing_area.keyReleased(GlDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      drawing_area_.keyReleased(GlDrawingArea::Left);
+      m_drawing_area.keyReleased(GlDrawingArea::Left);
       break;
     default:
       break;
