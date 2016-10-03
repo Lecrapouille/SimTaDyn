@@ -2,8 +2,7 @@
 #  define SIMTADYNWINDOW_HPP_
 
 #  include "DrawingArea.hpp"
-#  include <utility>
-#  include <gtkmm.h> // FIXME
+#  include "TextEditor.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -24,23 +23,39 @@ protected:
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
-  // TODO faire ma propre class notebook/text editor ??
-  std::pair<Gtk::TextView*, std::string> getCurrentTextView();
-  void fileOpen();
-  void fileSave();
-  void fileSaveAs();
-  void fileNew();
+  inline void saveCurrentTab()
+  {
+    m_texteditor.saveCurrentTab();
+  }
+  inline void saveCurrentTabAs()
+  {
+    m_texteditor.saveCurrentTabAs();
+  }
+  inline void addEmptyTab()
+  {
+    m_texteditor.addEmptyTab();
+  }
+  inline void addFileTab()
+   {
+    m_texteditor.addFileTab();
+  }
 
   GlDrawingArea m_drawing_area;
   Gtk::HPaned m_hpaned[1];
-  Gtk::VBox m_vbox[1];
+  Gtk::VPaned m_vpaned[1];
+
+  Gtk::VBox m_vbox[2];
+  Gtk::HBox m_hbox[1];
   Gtk::MenuBar m_menubar;
   Gtk::Menu m_menu[3];
-  Gtk::Notebook m_notebook[1];
-  Gtk::ScrolledWindow m_scrolledwindow[16];
-  Gtk::TextView m_textview[16];
   Gtk::Image m_menuimage[32];
-  uint32_t m_nb_opened_documents;
+  TextEditor m_texteditor;
+  Gtk::Toolbar m_toolbar[2];
+  Gtk::Notebook m_notebook[1];
+  Gtk::SeparatorToolItem m_separator[2];
+  Gtk::Statusbar m_statusbar[1];
+  Gtk::ScrolledWindow m_scrolledwindow[4];
+  Gtk::TextView m_textview[4];
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

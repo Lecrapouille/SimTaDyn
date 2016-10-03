@@ -35,7 +35,7 @@ OBJECTS_RTREE = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_FORTH = Forth.o ForthDico.o ForthPrimitives.o
 OBJECTS_CELLS = SimTaDynCells.o SimTaDynGraphs.o ShapeFile.o
  # SimTaDynNodes.o SimTaDynArcs.o ShapeFile.o
-OBJECTS_GUI = OpenGL.o Textures.o Fonts.o Renderer.o DrawingArea.o SimTaDynWindow.o
+OBJECTS_GUI = OpenGL.o Textures.o Fonts.o Renderer.o DrawingArea.o TextEditor.o SimTaDynWindow.o
 OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_RTREE) $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_GUI) main.o
 TARGET = SimTaDyn
 
@@ -45,8 +45,8 @@ TARGET = SimTaDyn
 #CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 #LDFLAGS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 CXX=g++
-CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
-LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
+CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
+LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
 DEFINES = -DCHECK_OPENGL
 
 ###################################################
