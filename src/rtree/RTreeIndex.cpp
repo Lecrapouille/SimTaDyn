@@ -125,7 +125,7 @@ RTreeNode* RTreeNode::insert_aux(const uint32_t tid, AABB const& bbox, uint32_t 
   // Have reached level for insertion. Add rect, split if necessary
   else if (this->level == level)
     {
-      RTreeBranch b(bbox, (RTreeNode*) tid);
+      RTreeBranch b(bbox, tid);
       return addBranch(b);
     }
 
@@ -183,7 +183,7 @@ RTreeNode* RTreeNode::remove(const uint32_t tid, AABB const& bbox)
             {
               if (NULL != t->branch[i].child)
                 {
-                  t->branch[i].child->insert((uint32_t) t->branch[i].child,
+                  t->branch[i].child->insert(t->branch[i].tid,
                                              t->branch[i].box,
                                              t->level);
                 }
@@ -220,7 +220,7 @@ bool RTreeNode::remove_aux(const uint32_t tid, AABB const& bbox, RTreeNodeList* 
       for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
         {
           if ((NULL != branch[i].child) &&
-              (((RTreeNode *) tid) == branch[i].child))
+              (tid == branch[i].tid))
             {
               std::cout << "Found branch to remove " << i << std::endl;
               disconnectBranch(i);

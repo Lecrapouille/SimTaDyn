@@ -108,7 +108,9 @@ bool RTreeNode::getBranches(RTreeBranch const& b, RTreeSpliter& s)
 void RTreeNode::PartitionVars::methodZero(RTreeSpliter& s)
 {
   float32_t growth0, growth1, diff, biggestDiff;
-  uint32_t group, chosen, betterGroup;
+  uint32_t group;
+  uint32_t chosen = 0;
+  uint32_t betterGroup = 0;
 
   init();
   pickSeeds(s);
@@ -143,7 +145,7 @@ void RTreeNode::PartitionVars::methodZero(RTreeSpliter& s)
                   chosen = i;
                   betterGroup = group;
                 }
-              else if ((fabs(diff - biggestDiff) <= 0.0001) && // diff == biggestDiff
+              else if ((fabs(diff - biggestDiff) <= 0.0001f) && // diff == biggestDiff
                        (count[group] < count[betterGroup]))
                 {
                   chosen = i;

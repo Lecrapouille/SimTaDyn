@@ -64,6 +64,12 @@ public:
     child = c;
   }
 
+  RTreeBranch(AABB const& bbox, const uint32_t id)
+  {
+    box = bbox;
+    tid = id;
+  }
+
   /*inline friend std::ostream& operator<<(std::ostream& os, const RTreeBranch& b)
   {
     os << "RTreeBranch(" << b.box << ", " << *(b.child) << "\n";
@@ -71,7 +77,11 @@ public:
     }*/
 
   AABB box;
-  RTreeNode* child;
+  union
+  {
+    RTreeNode* child;
+    uint32_t tid; // Tuple ID
+  };
 };
 
 // **************************************************************
