@@ -59,6 +59,7 @@ public:
         res = loadXFont(name);
         break;
       default:
+        res = false;
         break;
       }
     std::cout << res << "\n\n";
