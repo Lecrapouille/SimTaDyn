@@ -299,13 +299,18 @@ void TextEditor::addFileTab()
 // *************************************************************************************************
 void TextEditor::saveCurrentTab()
 {
-  if (0 == document()->m_filename.compare(""))
+  TextDocument* doc = document();
+
+  if (nullptr != doc)
     {
-      document()->winSaveAs();
-    }
-  else
-    {
-      document()->save();
+      if (0 == doc->m_filename.compare(""))
+        {
+          doc->winSaveAs();
+        }
+      else
+        {
+          doc->save();
+        }
     }
 }
 
@@ -314,5 +319,44 @@ void TextEditor::saveCurrentTab()
 // *************************************************************************************************
 void TextEditor::saveCurrentTabAs()
 {
-  document()->winSaveAs();
+  TextDocument* doc = document();
+
+  if (nullptr != doc)
+    {
+      doc->winSaveAs();
+    }
 }
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+Glib::ustring TextEditor::text()
+{
+  TextDocument* doc = document();
+
+  if (nullptr != doc)
+    {
+      return doc->m_textview.get_buffer()->get_text();
+    }
+  else
+    {
+      return Glib::ustring("");
+    }
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool TextEditor::execForth(Forth& forth)
+{
+  return forth.eatString(text().raw());
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+//bool TextEditor::execForth()
+//{
+//  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+//  execForth(simtadyn.forth);
+//}

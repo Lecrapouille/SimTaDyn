@@ -13,73 +13,115 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   set_position(Gtk::WIN_POS_CENTER);
 
   // Menus
-  m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Map", m_menu[0]));
-  m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Forth", m_menu[1]));
-  m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Help", m_menu[2]));
+  {
+    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Map", m_menu[0]));
+    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Forth", m_menu[1]));
+    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Help", m_menu[2]));
+  }
 
   // Submenus 'Forth'
-  Gtk::Menu::MenuList& menulist = m_menu[1].items();
-  m_menuimage[3].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-  menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New",
-     m_menuimage[3], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab)));
-  m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
-  menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
-     m_menuimage[0], sigc::mem_fun(*this, &SimTaDynWindow::addFileTab)));
-  m_menuimage[1].set(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_MENU);
-  menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_SaveAs",
-     m_menuimage[1], sigc::mem_fun(*this, &SimTaDynWindow::saveCurrentTabAs)));
-  m_menuimage[2].set(Gtk::Stock::SAVE, Gtk::ICON_SIZE_MENU);
-  menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Save",
-     m_menuimage[2], sigc::mem_fun(*this, &SimTaDynWindow::saveCurrentTab)));
+  {
+    Gtk::Menu::MenuList& menulist = m_menu[1].items();
+
+    m_menuimage[3].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New",
+       m_menuimage[3], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab)));
+
+    m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
+       m_menuimage[0], sigc::mem_fun(*this, &SimTaDynWindow::addFileTab)));
+
+    m_menuimage[1].set(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_SaveAs",
+       m_menuimage[1], sigc::mem_fun(*this, &SimTaDynWindow::saveCurrentTabAs)));
+
+    m_menuimage[2].set(Gtk::Stock::SAVE, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Save",
+       m_menuimage[2], sigc::mem_fun(*this, &SimTaDynWindow::saveCurrentTab)));
+  }
 
   // Map toolbar
-  // m_toolbar[0].append(Gtk::ToggleToolButton("Click me", sigc:::mem_fun(*this, &SimTaDynWindow::saveCurrentTab), "Toolbar item"));
-  m_toolbar[0].append(m_separator[0]);
+  {
+    //m_toolbar[0].append(m_toolbutton[0]);
+    //m_toolbar[0].append(m_separator[0]);
+  }
+
+  // Forth toolbar
+  {
+    m_toolbutton[0].set_label("New");
+    m_toolbutton[0].set_stock_id(Gtk::Stock::NEW);
+
+    m_toolbutton[1].set_label("Exec");
+    m_toolbutton[1].set_stock_id(Gtk::Stock::EXECUTE);
+
+    m_toolbar[1].append(m_toolbutton[0], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab));
+    m_toolbar[1].append(m_separator[1]);
+    m_toolbar[1].append(m_toolbutton[1], sigc::mem_fun(*this, &SimTaDynWindow::execForth));
+  }
 
   // Horizontal split
-  add(m_hpaned[0]);
-  m_hpaned[0].set_position(800);
-  m_hpaned[0].pack1(m_drawing_area); // FIXME ajouter l'editeur de proprietes des cellules sous la map
-  m_hpaned[0].pack2(m_hbox[0]);
+  {
+    add(m_hpaned[0]);
+    m_hpaned[0].set_position(800);
+    m_hpaned[0].pack1(m_drawing_area); // FIXME ajouter l'editeur de proprietes des cellules sous la map
+    m_hpaned[0].pack2(m_hbox[0]);
+  }
 
   // Rigth side
-  m_hbox[0].pack_start(m_toolbar[0], Gtk::PACK_SHRINK);
-  m_hbox[0].pack_start(m_vpaned[0]);
-  m_vpaned[0].set_position(350);
+  {
+    m_hbox[0].pack_start(m_toolbar[0], Gtk::PACK_SHRINK);
+    m_hbox[0].pack_start(m_vpaned[0]);
+    m_vpaned[0].set_position(350);
 
-  m_vpaned[0].pack1(m_vbox[0]);
-  m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
-  m_vbox[0].pack_start(m_texteditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
+    m_vpaned[0].pack1(m_vbox[0]);
+    m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
+    m_vbox[0].pack_start(m_texteditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
 
-  m_vpaned[0].pack2(m_vbox[1]);
-  m_vbox[1].pack_start(m_toolbar[1], Gtk::PACK_SHRINK);
-  m_vbox[1].pack_start(m_notebook[0], Gtk::PACK_EXPAND_WIDGET);
-  m_vbox[1].pack_start(m_statusbar[0], Gtk::PACK_SHRINK);
+    m_vpaned[0].pack2(m_vbox[1]);
+    m_vbox[1].pack_start(m_toolbar[1], Gtk::PACK_SHRINK);
+    m_vbox[1].pack_start(m_notebook[0], Gtk::PACK_EXPAND_WIDGET);
+    m_vbox[1].pack_start(m_statusbar[0], Gtk::PACK_SHRINK);
 
-  m_toolbar[1].append(m_separator[1]);
+    m_scrolledwindow[0].add(m_textview[0]);
+    m_scrolledwindow[0].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[1].add(m_textview[1]);
+    m_scrolledwindow[1].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[2].add(m_textview[2]);
+    m_scrolledwindow[2].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[3].add(m_textview[3]);
+    m_scrolledwindow[3].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+  }
 
-  m_scrolledwindow[0].add(m_textview[0]);
-  m_scrolledwindow[0].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  m_scrolledwindow[1].add(m_textview[1]);
-  m_scrolledwindow[1].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  m_scrolledwindow[2].add(m_textview[2]);
-  m_scrolledwindow[2].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  m_scrolledwindow[3].add(m_textview[3]);
-  m_scrolledwindow[3].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+  // Forth notebooks
+  {
+    m_notebook[0].append_page(m_scrolledwindow[0], "Result");
+    m_notebook[0].append_page(m_scrolledwindow[1], "Historic");
+    m_notebook[0].append_page(m_scrolledwindow[2], "Debug");
+    m_notebook[0].append_page(m_scrolledwindow[3], "Dico");
+  }
 
-  m_notebook[0].append_page(m_scrolledwindow[0], "Result");
-  m_notebook[0].append_page(m_scrolledwindow[1], "Historic");
-  m_notebook[0].append_page(m_scrolledwindow[2], "Debug");
-  m_notebook[0].append_page(m_scrolledwindow[3], "Dico");
+  // Statusbar
+  {
+    m_statusbar[0].push("SimTaDyn");
+  }
 
-  m_statusbar[0].push("QQ");
-
-  add_events(Gdk::KEY_RELEASE_MASK);
-  signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
-  signal_key_release_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyReleased));
-  //signal_scroll_event().connect(sigc::mem_fun(*this, &SimTaDynWindow::on_scroll_event));
+  // OpenGL area
+  {
+    add_events(Gdk::KEY_RELEASE_MASK);
+    signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
+    signal_key_release_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyReleased));
+    //signal_scroll_event().connect(sigc::mem_fun(*this, &SimTaDynWindow::on_scroll_event));
+  }
 
   show_all_children();
+}
+
+// FIXME 1: impossible de mettre ca dans hpp
+// FIXME 2: bug string vide interprete comme primitive 34 et ca retourne 0 ok
+void  SimTaDynWindow::execForth()
+{
+  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+  m_texteditor.execForth(simtadyn.forth);
 }
 
 #if 0

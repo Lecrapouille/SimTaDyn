@@ -14,6 +14,7 @@ public:
   inline void changeDisplayBase(const uint8_t newbase);
   virtual bool eatFile(std::string const& filename);
   virtual bool eatString(std::string const& code_forth);
+  virtual bool eatString(const char* const code_forth);
   virtual bool dumpDico(std::string const& filename);
   virtual void displayDico();
 

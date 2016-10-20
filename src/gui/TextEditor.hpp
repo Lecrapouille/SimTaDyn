@@ -2,7 +2,7 @@
 #  define TEXTEDITOR_HPP_
 
 #  include <gtkmm.h>
-#  include "simtypes.hpp"
+#  include "Forth.hpp"
 
 class TextDocument : public Gtk::ScrolledWindow
 {
@@ -37,6 +37,9 @@ public:
   void saveCurrentTab();
   void saveCurrentTabAs();
   TextDocument* document();
+  Glib::ustring text();
+  bool execForth(Forth& forth);
+  //bool execForth();
 
   Gtk::Notebook m_notebook;
 

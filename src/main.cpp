@@ -9,6 +9,9 @@ int main(int argc, char** argv)
   const Gtk::Main kit(argc, argv);
   Gtk::GL::init(argc, argv);
 
+  // Start the Forth core
+  simtadyn.forth.boot();
+  // Load an initial map
   simtadyn.loader.loadShapefile("../data/Corsica-points.shp", simtadyn.graph);
   //simtadyn.loader.loadShapefile("../data/3dpoints.shp", simtadyn.graph);
   //std::cout << simtadyn.graph.name << std::endl;

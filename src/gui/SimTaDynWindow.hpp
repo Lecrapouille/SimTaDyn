@@ -36,9 +36,10 @@ protected:
     m_texteditor.addEmptyTab();
   }
   inline void addFileTab()
-   {
+  {
     m_texteditor.addFileTab();
   }
+  void execForth();
 
   GlDrawingArea m_drawing_area;
   Gtk::HPaned m_hpaned[1];
@@ -56,6 +57,7 @@ protected:
   Gtk::Statusbar m_statusbar[1];
   Gtk::ScrolledWindow m_scrolledwindow[4];
   Gtk::TextView m_textview[4];
+  Gtk::ToolButton m_toolbutton[4];
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

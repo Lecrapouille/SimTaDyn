@@ -190,6 +190,14 @@ void Forth::eat(std::string const& word)
     }
 }
 
+// **************************************************************
+// FIXME: convert char* --> string can be consumns lot of memory ?!
+// **************************************************************
+bool Forth::eatString(const char* const code_forth)
+{
+  std::string str(code_forth);
+  return Forth::eatString(str);
+}
 
 // **************************************************************
 //
