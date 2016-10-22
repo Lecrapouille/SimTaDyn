@@ -3,20 +3,44 @@
 // *************************************************************************************************
 //
 // *************************************************************************************************
-TextDocument::TextDocument()
-  : m_filename("")
+CloseLabel::CloseLabel(std::string const& text)
+  : tab_label(text),
+    close_button(),
+    image(Gtk::Stock::CLOSE, Gtk::ICON_SIZE_MENU)
 {
-  Gtk::ScrolledWindow::add(m_textview);
-  Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+  close_button.add(image);
+  close_button.set_relief(Gtk::RELIEF_NONE);
+  close_button.set_focus_on_click(false);
+  close_button.signal_clicked().connect(sigc::mem_fun(*this, &CloseLabel::on_close_button_clicked));
+  pack_start(tab_label);
+  pack_start(close_button);
+  show_all();
+}
+
+void CloseLabel::on_close_button_clicked()
+{
+  std::cout << "on_close_button_clicked" << std::endl;
+  //Gtk::NoteBook* nb = dynamic_cast<Gtk::NoteBook*>(get_ancestor());
+  //nb->remove_page();
 }
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
+TextDocument::TextDocument()
+  : m_filename(""),
+    m_findwindow(nullptr)
+{
+  Gtk::ScrolledWindow::add(m_textview);
+  Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+  //m_textview.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &TextDocument::onChanged));
+}
+
+// *************************************************************************************************
+// FIXME: never called
+// *************************************************************************************************
 TextDocument::~TextDocument()
 {
-  #warning "Jamais appelle"
-  std::cout << "DEstructor TextDocument::~TextDocument()\n";
   TextDocument::questionSave();
 }
 
@@ -29,7 +53,100 @@ bool TextDocument::isModified() const
 }
 
 // *************************************************************************************************
-// Check if the document need to be save. If the doc needs to be saved, a popup is created
+//
+// *************************************************************************************************
+void FindWindow::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
+{
+  Gtk::TextBuffer::iterator mstart, mend;
+
+  if (iter.forward_search(text, Gtk::TEXT_SEARCH_TEXT_ONLY, mstart, mend))
+    {
+      m_ancestor->m_textview.get_buffer()->select_range(mstart, mend);
+      m_ancestor->m_textview.get_buffer()->create_mark("last_pos", mend, false);
+    }
+  else
+    {
+      std::cout << "Not found\n";
+      Gtk::MessageDialog dialog(*this, "End of search !");
+      dialog.set_secondary_text("Not found");
+      dialog.run();
+    }
+}
+
+void FindWindow::findNext()//Gtk::Entry* entry)//Glib::ustring const& text)
+{
+  Gtk::TextBuffer::iterator iter;
+  Glib::RefPtr<Gtk::TextBuffer::Mark> last_pos;
+
+  last_pos = m_ancestor->m_textview.get_buffer()->get_mark("last_pos");
+  if (0 == last_pos)
+    {
+      findFirst();
+      return ;
+    }
+  iter = m_ancestor->m_textview.get_buffer()->get_iter_at_mark(last_pos);
+  FindWindow::find(entry.get_text(), iter);
+}
+
+void FindWindow::findFirst()//Gtk::Entry* entry)//Glib::ustring const& text)
+{
+  Gtk::TextBuffer::iterator mstart = m_ancestor->m_textview.get_buffer()->begin();
+  FindWindow::find(entry.get_text(), mstart);
+}
+
+FindWindow::FindWindow(TextDocument* ancestor)
+  : search("Search"),
+    next("Next"),
+    m_ancestor(ancestor)
+{
+  hbox.pack_start(entry);
+  hbox.pack_start(search);
+  hbox.pack_start(next);
+  vbox.pack_start(hbox);
+  add(vbox);
+  show_all_children();
+
+  search.signal_clicked().connect(sigc::mem_fun(*this, &FindWindow::findFirst));
+  next.signal_clicked().connect(sigc::mem_fun(*this, &FindWindow::findNext));
+
+  //search.signal_clicked().connect(sigc::bind<Gtk::Entry*>(sigc::mem_fun(*this, &FindWindow::findFirst), &entry));
+  //next.signal_clicked().connect(sigc::bind<Gtk::Entry*>(sigc::mem_fun(*this, &TextDocument::findNext), &entry));
+}
+
+void TextDocument::findWindowClose()
+{
+  m_findwindow = nullptr;
+}
+
+void TextDocument::find()
+{
+  if (nullptr != m_findwindow)
+    return ;
+
+  m_findwindow = new FindWindow(this);
+  m_findwindow->signal_hide().connect(sigc::mem_fun(*this, &TextDocument::findWindowClose));
+
+  m_findwindow->show();
+}
+
+
+
+
+//void TextDocument::onChanged()
+//{
+//}
+
+// *************************************************************************************************
+// Erase all text in the document
+// *************************************************************************************************
+void TextDocument::clear()
+{
+  m_textview.get_buffer()->erase(m_textview.get_buffer()->begin(),
+                                 m_textview.get_buffer()->end());
+}
+
+// *************************************************************************************************
+// Check if the document need to be saved. If the doc needs to be saved, a popup is created
 // to prevent the user and depending on the user choice save or not the document.
 // Return a bool if the document has been correctly saved.
 // *************************************************************************************************
@@ -37,13 +154,14 @@ bool TextDocument::questionSave()
 {
   if (TextDocument::isModified())
     {
-      Gtk::MessageDialog dialog("Buffer Modified. Do you want to save it now ?", false,
-                                Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO);
+      Gtk::MessageDialog dialog("The document '" + m_title + "' has been modified. Do you want to save it now ?",
+                                false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO);
+      dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_APPLY);
 
       int result = dialog.run();
       if (Gtk::RESPONSE_YES == result)
         {
-          if (0 == m_filename.compare("")) // FIXME || bouton SAVE_AS
+          if (0 == m_filename.compare(""))
             {
               return TextDocument::winSaveAs();
             }
@@ -51,6 +169,10 @@ bool TextDocument::questionSave()
             {
               return TextDocument::save();
             }
+        }
+      else if (Gtk::RESPONSE_APPLY == result)
+        {
+          return TextDocument::winSaveAs();
         }
     }
 
@@ -62,12 +184,12 @@ bool TextDocument::questionSave()
 // *************************************************************************************************
 bool TextDocument::winSaveAs()
 {
-  Gtk::FileChooserDialog dialog("Please choose a file to save as", Gtk::FILE_CHOOSER_ACTION_OPEN);
+  Gtk::FileChooserDialog dialog("Please choose a file to save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
   //dialog.set_transient_for(*this);
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+  dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_OK);
 
   // Add filters, so that only certain file types can be selected:
   Gtk::FileFilter filter_forth;
@@ -91,7 +213,7 @@ bool TextDocument::winSaveAs()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      return saveAs(dialog.get_filename());
+      return TextDocument::saveAs(dialog.get_filename());
     }
   return false;
 }
@@ -171,7 +293,8 @@ TextEditor::TextEditor()
 // *************************************************************************************************
 TextEditor::~TextEditor()
 {
-  std::cout << "DEstructor TextEditor::~TextEditor()\n";
+  std::cout << "DDDDDDDDDDEstructor TextEditor::~TextEditor()\n";
+  document()->questionSave();
 }
 
 // *************************************************************************************************
@@ -214,7 +337,7 @@ const std::string TextEditor::title()
 // *************************************************************************************************
 void TextEditor::title(std::string const& title)
 {
-  m_notebook.set_tab_label_text(*(m_notebook.get_nth_page(m_notebook.get_current_page())), title);
+  //m_notebook.set_tab_label_text(*(m_notebook.get_nth_page(m_notebook.get_current_page())), title);
 }
 
 // *************************************************************************************************
@@ -223,12 +346,14 @@ void TextEditor::title(std::string const& title)
 void TextEditor::addEmptyTab()
 {
   TextDocument *doc = new TextDocument();
+  CloseLabel *label = new CloseLabel("New Forth Script");
 
-  m_notebook.append_page(*doc, "New Forth Script");
+  m_notebook.append_page(*doc, *label);
   document()->m_textview.get_buffer()->set_text("1 1 + .");
-
   m_notebook.show_all();
   m_notebook.set_current_page(-1);
+
+  document()->find();
 }
 
 // *************************************************************************************************
@@ -237,9 +362,11 @@ void TextEditor::addEmptyTab()
 void TextEditor::addFileTab(std::string const& filename)
 {
   TextDocument *doc = new TextDocument();
+
   doc->load(filename);
 
-  m_notebook.append_page(*doc, doc->m_title);
+  CloseLabel *label = new CloseLabel(doc->m_title);
+  m_notebook.append_page(*doc, *label);
 
   m_notebook.show_all();
   m_notebook.set_current_page(-1);
@@ -301,11 +428,13 @@ void TextEditor::saveCurrentTab()
 {
   TextDocument* doc = document();
 
+  std::cout << "TextEditor::saveCurrentTab()\n";
   if (nullptr != doc)
     {
       if (0 == doc->m_filename.compare(""))
         {
           doc->winSaveAs();
+          title(doc->m_title);
         }
       else
         {
@@ -321,14 +450,16 @@ void TextEditor::saveCurrentTabAs()
 {
   TextDocument* doc = document();
 
+  std::cout << "TextEditor::saveCurrentTabAs()\n";
   if (nullptr != doc)
     {
       doc->winSaveAs();
+      title(doc->m_title);
     }
 }
 
 // *************************************************************************************************
-//
+// Return the UTF8 string from the current text editor
 // *************************************************************************************************
 Glib::ustring TextEditor::text()
 {
@@ -345,18 +476,23 @@ Glib::ustring TextEditor::text()
 }
 
 // *************************************************************************************************
-//
+// Erase all text in the current text editor
 // *************************************************************************************************
-bool TextEditor::execForth(Forth& forth)
+void TextEditor::clear()
 {
-  return forth.eatString(text().raw());
+  TextDocument* doc = document();
+
+  if (nullptr != doc)
+    {
+      doc->clear();
+    }
 }
 
 // *************************************************************************************************
-//
+// Get all text in the current text editor and give it to the Forth interpreter
+// Return true if the code was interpreted correctly, else return false.
 // *************************************************************************************************
-//bool TextEditor::execForth()
-//{
-//  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-//  execForth(simtadyn.forth);
-//}
+bool ForthEditor::execForth(Forth& forth)
+{
+  return forth.eatString(text().raw());
+}

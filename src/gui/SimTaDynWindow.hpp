@@ -8,7 +8,10 @@ class SimTaDynWindow: public Gtk::Window
 {
 public:
   SimTaDynWindow(const std::string& title);
-  virtual ~SimTaDynWindow() {};
+  virtual ~SimTaDynWindow()
+  {
+    Gtk::Main::quit();
+  }
 
   uint32_t getScreenWidth()
   {
@@ -20,24 +23,25 @@ public:
   }
 
 protected:
+  bool quitting();
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
   inline void saveCurrentTab()
   {
-    m_texteditor.saveCurrentTab();
+    m_fortheditor.saveCurrentTab();
   }
   inline void saveCurrentTabAs()
   {
-    m_texteditor.saveCurrentTabAs();
+    m_fortheditor.saveCurrentTabAs();
   }
   inline void addEmptyTab()
   {
-    m_texteditor.addEmptyTab();
+    m_fortheditor.addEmptyTab();
   }
   inline void addFileTab()
   {
-    m_texteditor.addFileTab();
+    m_fortheditor.addFileTab();
   }
   void execForth();
 
@@ -50,7 +54,7 @@ protected:
   Gtk::MenuBar m_menubar;
   Gtk::Menu m_menu[3];
   Gtk::Image m_menuimage[32];
-  TextEditor m_texteditor;
+  ForthEditor m_fortheditor;
   Gtk::Toolbar m_toolbar[2];
   Gtk::Notebook m_notebook[1];
   Gtk::SeparatorToolItem m_separator[2];

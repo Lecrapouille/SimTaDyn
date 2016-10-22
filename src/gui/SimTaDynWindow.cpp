@@ -2,6 +2,15 @@
 #include "SimTaDynContext.hpp"
 
 // *************************************************************************************************
+// When terminating the SimTaDyn application
+// *************************************************************************************************
+bool SimTaDynWindow::quitting()
+{
+  std::cout << "SimTaDynWindow said: 'bye bye'" << std::endl;
+  return false;
+}
+
+// *************************************************************************************************
 // SimTaDyn main window
 // *************************************************************************************************
 SimTaDynWindow::SimTaDynWindow(const std::string& title)
@@ -11,6 +20,9 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   set_title(title);
   set_default_size(1024, 800);
   set_position(Gtk::WIN_POS_CENTER);
+
+  // FIXME: m_simForth qui contient un bout de fenetre menu/notebook/statusbar ...
+  // comme ca on pourra detacher et ajouter de nouvelles fenetres ?
 
   // Menus
   {
@@ -26,6 +38,10 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     m_menuimage[3].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
     menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New",
        m_menuimage[3], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab)));
+
+    m_menuimage[4].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Template",
+       m_menuimage[4], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab))); // TODO
 
     m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
     menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
@@ -75,7 +91,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
 
     m_vpaned[0].pack1(m_vbox[0]);
     m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
-    m_vbox[0].pack_start(m_texteditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
+    m_vbox[0].pack_start(m_fortheditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
 
     m_vpaned[0].pack2(m_vbox[1]);
     m_vbox[1].pack_start(m_toolbar[1], Gtk::PACK_SHRINK);
@@ -113,15 +129,30 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     //signal_scroll_event().connect(sigc::mem_fun(*this, &SimTaDynWindow::on_scroll_event));
   }
 
+  // When terminating the SimTaDyn application
+  Gtk::Main::signal_quit().connect(sigc::mem_fun(this, &SimTaDynWindow::quitting));
+
   show_all_children();
 }
 
 // FIXME 1: impossible de mettre ca dans hpp
 // FIXME 2: bug string vide interprete comme primitive 34 et ca retourne 0 ok
-void  SimTaDynWindow::execForth()
+void SimTaDynWindow::execForth()
 {
   SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-  m_texteditor.execForth(simtadyn.forth);
+  bool res = m_fortheditor.execForth(simtadyn.forth);
+  if (res)
+    {
+      m_statusbar[0].push("OK");
+      // TODO: copy paste text into historic
+      // FIXME: inserer nouveau mot dans tree ==> SimForth herite de Forth et ou std::cout va dans status bar
+      m_fortheditor.clear();
+    }
+  else
+    {
+      // Text view: indiquer ligne ko
+      m_statusbar[0].push("FAILED: reason");
+    }
 }
 
 #if 0
