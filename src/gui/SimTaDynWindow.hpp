@@ -27,21 +27,29 @@ protected:
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
-  inline void saveCurrentTab()
+  inline void saveCurrentTab() // FIXME
   {
-    m_fortheditor.saveCurrentTab();
+    m_fortheditor.saveCurrentDocument();
   }
-  inline void saveCurrentTabAs()
+  inline void saveCurrentTabAs() // FIXME
   {
-    m_fortheditor.saveCurrentTabAs();
+    m_fortheditor.saveAsCurrentDocument();
   }
-  inline void addEmptyTab()
+  inline void addEmptyTab() // FIXME
   {
-    m_fortheditor.addEmptyTab();
+    m_fortheditor.newEmptyDocument();
   }
-  inline void addFileTab()
+  inline void addTemplateTab() // FIXME
   {
-    m_fortheditor.addFileTab();
+    m_fortheditor.newTemplatedDocument("1 1 + .");
+  }
+  inline void addFileTab() // FIXME
+  {
+    m_fortheditor.newDocument();
+  }
+  inline void find()
+  {
+    m_fortheditor.find();
   }
   void execForth();
 
@@ -62,6 +70,8 @@ protected:
   Gtk::ScrolledWindow m_scrolledwindow[4];
   Gtk::TextView m_textview[4];
   Gtk::ToolButton m_toolbutton[4];
+  Gtk::SeparatorMenuItem separator[1];
+  FindWindow *m_findwin;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

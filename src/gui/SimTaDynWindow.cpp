@@ -41,7 +41,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
 
     m_menuimage[4].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
     menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Template",
-       m_menuimage[4], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab))); // TODO
+       m_menuimage[4], sigc::mem_fun(*this, &SimTaDynWindow::addTemplateTab))); // TODO
 
     m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
     menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
@@ -54,6 +54,12 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     m_menuimage[2].set(Gtk::Stock::SAVE, Gtk::ICON_SIZE_MENU);
     menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Save",
        m_menuimage[2], sigc::mem_fun(*this, &SimTaDynWindow::saveCurrentTab)));
+
+    menulist.push_back(separator[0]);
+
+    m_menuimage[5].set(Gtk::Stock::FIND, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Find",
+       m_menuimage[5], sigc::mem_fun(*this, &SimTaDynWindow::find)));
   }
 
   // Map toolbar
@@ -137,6 +143,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
 
 // FIXME 1: impossible de mettre ca dans hpp
 // FIXME 2: bug string vide interprete comme primitive 34 et ca retourne 0 ok
+// FIXME 3: ne pas effacer le text sauf dans la fenetre special interactive et cellules
 void SimTaDynWindow::execForth()
 {
   SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
