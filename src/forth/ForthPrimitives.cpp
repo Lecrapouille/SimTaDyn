@@ -1,4 +1,4 @@
-#include "Forth.hpp"
+#include "ForthInner.hpp"
 
 // **************************************************************
 //
@@ -9,63 +9,75 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
   switch (idPrimitive)
     {
     case FORTH_PRIMITIVE_NOP:
-      std::cout << "PERDUUUUUUUU\n";
+      std::cout << "NOP\n";
+      break;
+
+    case FORTH_PRIMITIVE_LPARENTHESIS:
+      m_saved_state = m_state;
+      m_state = COMMENT_STATE;
+      break;
+
+    case FORTH_PRIMITIVE_RPARENTHESIS:
+      m_state = m_saved_state;
+      break;
+
+    case FORTH_PRIMITIVE_COMMENTARY:
+      m_reader.skipLine();
       break;
 
     case FORTH_PRIMITIVE_COLON:
       {
-        DPUSH(tos);
-        state = COMPILATION_STATE;
+        DPUSH(m_tos);
+        m_state = COMPILATION_STATE;
         //mode++;
 
         // FIXME: afficher redifined
         std::string word;
-        if (reader.getNextWord(word))
+        if (m_reader.nextWord(word))
           {
-            Cell32 length = word.size();
-            createDicoEntry(here + NEXT_MULTIPLE_OF_2(length + 1U) + 2U,
-                            word, 0); // TODO FLAG_SMUDGE);
+            Cell16 token = m_dico.here() + word.size() + 1U + 2U; // 1: flags, 2: NFA
+            m_dico.add(token, word, 0); // TODO FLAG_SMUDGE);
           }
       }
       break;
 
     case FORTH_PRIMITIVE_EXIT:
-      RPOP(ip);
+      RPOP(m_ip);
       break;
 
     case FORTH_PRIMITIVE_SEMICOLON:
-      DPUSH(tos);
-      dicoAppendCell16(FORTH_PRIMITIVE_EXIT);
+      DPUSH(m_tos);
+      m_dico.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size wor definition
       // TODO clear FLAG_SMUDGE
-      state = EXECUTION_STATE;
+      m_state = EXECUTION_STATE;
       //mode--;
       break;
 
     case FORTH_PRIMITIVE_LITERAL:
-      DPUSH(tos);
+      DPUSH(m_tos);
       //std::cout << "------------\n";
-      ip++; tos1 = readCell16at(ip);
-      ip++; tos2 = readCell16at(ip);
-      tos = tos1 * 65536U + tos2;
-      //std::cout << tos << "\n------------\n";
+      std::cerr << "TODO\n";//m_ip++; m_tos1 = m_dico.read16at(m_ip);
+      std::cerr << "TODO\n";//m_ip++; m_tos2 = m_dico.read16at(m_ip);
+      std::cerr << "TODO\n";//m_tos = m_tos1 * 65536U + m_tos2;
+      //std::cout << m_tos << "\n------------\n";
       break;
 
     case FORTH_PRIMITIVE_1MINUS:
-      tos--;
+      m_tos--;
       break;
     case FORTH_PRIMITIVE_1PLUS:
-      tos++;
+      m_tos++;
       break;
     case FORTH_PRIMITIVE_2MINUS:
-      tos -= 2;
+      m_tos -= 2;
       break;
     case FORTH_PRIMITIVE_2PLUS:
-      tos += 2;
+      m_tos += 2;
       break;
 
       // drop ( a -- )
     case FORTH_PRIMITIVE_DROP:
-      DPOP(tos);
+      DPOP(m_tos);
       break;
 
       // nip ( a b -- b ) swap drop ;
@@ -75,67 +87,67 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // dup ( a -- a a )
     case FORTH_PRIMITIVE_DUP:
-      DPUSH(tos);
+      DPUSH(m_tos);
       break;
 
       // swap ( a b -- b a )
     case FORTH_PRIMITIVE_SWAP:
-      tos2 = tos;
-      DPOP(tos);
-      DPUSH(tos2);
+      m_tos2 = m_tos;
+      DPOP(m_tos);
+      DPUSH(m_tos2);
       break;
 
       // over ( a b -- a b a )
     case FORTH_PRIMITIVE_OVER:
-      DPUSH(tos);
-      tos = DPICK(1);
+      DPUSH(m_tos);
+      m_tos = DPICK(1);
       break;
 
       // rot ( a b c -- b c a )
     case FORTH_PRIMITIVE_ROT:
-      DPOP(tos2);
-      DPOP(tos3);
-      DPUSH(tos2);
-      DPUSH(tos);
-      tos = tos3;
+      DPOP(m_tos2);
+      DPOP(m_tos3);
+      DPUSH(m_tos2);
+      DPUSH(m_tos);
+      m_tos = m_tos3;
       break;
 
       // tuck ( a b -- b a b ) swap over ;
     case FORTH_PRIMITIVE_TUK:
-      DPOP(tos2);
-      DPUSH(tos);
-      DPUSH(tos2);
+      DPOP(m_tos2);
+      DPUSH(m_tos);
+      DPUSH(m_tos2);
       break;
 
       // 2dup ( a b -- a b a b ) over over ;
     case FORTH_PRIMITIVE_2DUP:
-      DPUSH(tos);
-      tos2 = DPICK(1);
-      DPUSH(tos2);
+      DPUSH(m_tos);
+      m_tos2 = DPICK(1);
+      DPUSH(m_tos2);
       break;
 
       // 2over ( a b c d -- a b c d a b )
     case FORTH_PRIMITIVE_2OVER:
-      DPUSH(tos);
-      tos2 = DPICK(3);
-      DPUSH(tos2);
-      tos = DPICK(3);
+      DPUSH(m_tos);
+      m_tos2 = DPICK(3);
+      DPUSH(m_tos2);
+      m_tos = DPICK(3);
       break;
 
       // 2swap ( a b c d -- c d a b )
     case FORTH_PRIMITIVE_2SWAP:
-      DPOP(tos2);
-      DPOP(tos3);
-      DPOP(tos4);
-      DPUSH(tos3);
-      DPUSH(tos4);
-      DPUSH(tos2);
+      DPOP(m_tos2);
+      DPOP(m_tos3);
+      DPOP(m_tos4);
+      DPUSH(m_tos3);
+      DPUSH(m_tos4);
+      DPUSH(m_tos2);
       break;
 
       // 2drop ( a b -- ) drop drop ;
     case FORTH_PRIMITIVE_2DROP:
       DDROP();
-      DPOP(tos);
+      DPOP(m_tos);
       break;
 
     case FORTH_PRIMITIVE_PLUS:
@@ -181,8 +193,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       BINARY_OP(^);
       break;
     case FORTH_PRIMITIVE_DISP:
-      std::cout << std::setbase(base) << tos << " ";//std::endl;
-      DPOP(tos);
+      std::cout << std::setbase(m_base) << m_tos << " ";//std::endl;
+      DPOP(m_tos);
       break;
     default:
       ForthUnknownPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;

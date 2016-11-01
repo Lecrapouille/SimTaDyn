@@ -1,9 +1,7 @@
-#ifndef FORTHEXCEPTIONS_HPP_
-#  define FORTHEXCEPTIONS_HPP_
+#ifndef FORTH_EXCEPTIONS_HPP_
+#  define FORTH_EXCEPTIONS_HPP_
 
-#  include "ForthIncludes.hpp"
-#  include <sstream> //for std::stringstream
-#  include <string>  //for std::string
+#  include "ForthHelper.hpp"
 
 class ForthException: public std::exception
 {
@@ -23,6 +21,34 @@ public:
   }
 };
 
+class ForthTooLongDef: public ForthException
+{
+public:
+  ForthTooLongDef(std::string const& word)
+  {
+    m_word = word;
+  }
+  virtual const char* what() const throw ()
+  {
+    return "Exception from SimTaDynForth: word '" /*+ m_word +*/ "' contains more than 2^16 words.";
+  }
+  std::string m_word;
+};
+
+class ForthMalformedWord: public ForthException
+{
+public:
+  ForthMalformedWord(std::string const& word)
+  {
+    m_word = word;
+  }
+  virtual const char* what() const throw ()
+  {
+    return "Exception from SimTaDynForth: word '" /*+ m_word +*/ "' is mal formed. It shall contain 1 ... 31 characters.";
+  }
+  std::string m_word;
+};
+
 class ForthDicoOOB: public ForthException
 {
 public:
@@ -33,7 +59,7 @@ public:
   {
     func_name = funcName;
   }
-  virtual const char* what () const throw ()
+  virtual const char* what() const throw ()
   {
     return error_msg.c_str();
   }
@@ -46,28 +72,32 @@ public:
 class ForthDicoNoSpace: public ForthException
 {
 public:
-  virtual const char* what () const throw ()
+  virtual const char* what() const throw ()
   {
     return "Exception from SimTaDynForth: the dictionary has no more space";
   }
 };
 
-class ForthRStackOV: public ForthException
+class ForthStackOV: public ForthException
 {
 public:
-  virtual const char* what () const throw ()
+  ForthStackOV(uint32_t stack_id) // FIXME SimForth::StackId
   {
-    return "Exception from SimTaDynForth: return stack over flow";
+    m_stack_id = stack_id;
   }
-};
-
-class ForthDStackOV: public ForthException
-{
-public:
-  virtual const char* what () const throw ()
+  virtual const char* what() const throw ()
   {
-    return "Exception from SimTaDynForth: data stack over flow";
+    switch (m_stack_id)
+    {
+    case DATA_STACK:
+      return "Exception from SimTaDynForth: Data Stack overflow";
+    case RETURN_STACK:
+      return "Exception from SimTaDynForth: Return Stack overflow";
+    default:
+      return "Exception from SimTaDynForth: stack overflow";
+    }
   }
+  uint32_t m_stack_id;
 };
 
 class ForthUnknownPrimitive: public ForthException
@@ -106,4 +136,4 @@ public:
   std::string error_msg;
 };
 
-#endif /* FORTHEXCEPTIONS_HPP_ */
+#endif /* FORTH_EXCEPTIONS_HPP_ */
