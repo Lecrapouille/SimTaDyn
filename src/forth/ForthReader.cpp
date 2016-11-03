@@ -88,25 +88,43 @@ bool ForthReader::nextWord(std::string& word)
       return false;
     }
 
+  // Empty line case
+  if (0 == word.compare(""))
+    return false;
+
   // Success reading m_cursor_next word
   word = res.second;
   return true;
 }
 
 // **************************************************************
-// Return true if reached the end of the string, else false.
+// Find and extract the first forth word if present. A forth word
+// is a set of ASCII characters delimited by a space character.
+// Return true if reached the end of the string (last word found),
+// else false.
 // **************************************************************
 std::pair<bool, std::string> ForthReader::split(std::string const& text)
 {
-  std::string delimiter = " \t\n"; // FIXME sauf '\ '
+  std::string delimiter = " \t\n";
   std::string word;
 
-  if ((m_cursor_next = text.find_first_of(delimiter, m_cursor_last)) != std::string::npos)
+  // Skip spaces
+  m_cursor_last = text.find_first_not_of(delimiter, m_cursor_last);
+
+  // Not found (empty string)
+  if (m_cursor_last == std::string::npos)
+    return std::make_pair(true, std::string(""));
+
+  // Go to the end of the word
+  m_cursor_next = text.find_first_of(delimiter, m_cursor_last);
+  if (m_cursor_next != std::string::npos)
     {
+      // Extract the word which is not the last of the line
       word = text.substr(m_cursor_last, m_cursor_next - m_cursor_last);
       m_cursor_last = m_cursor_next + 1;
       return std::make_pair(false, word);
     }
+  // Extract the word which is the last of the line
   word = text.substr(m_cursor_last);
   return std::make_pair(true, word);
 }

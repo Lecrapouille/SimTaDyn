@@ -297,6 +297,7 @@ std::pair<bool, std::string> Forth::parseStream()
   try
     {
       // FIXME: le stream peut ne pas etre termine: attendre
+      // FIXME: retourne ok si on lui donne une ligne vide
       while (m_reader.nextWord(word))
         {
           interprete(word);
