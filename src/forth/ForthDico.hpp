@@ -11,6 +11,7 @@ public:
   ForthDico();
   void add(const Cell16 token, std::string const& word, const bool immediate);
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
+  std::pair<bool, int32_t> find(const Cell16 token) const;
   bool dump(std::string const& filename) const;
   void display() const;
   Cell16 last() const;

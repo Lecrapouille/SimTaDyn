@@ -108,6 +108,44 @@ bool ForthDico::find(std::string const& word, Cell16& token, bool& immediate) co
 }
 
 // **************************************************************
+// Convert a string into a token
+// **************************************************************
+std::pair<bool, int32_t> ForthDico::find(const Cell16 token) const
+{
+  Cell32 nfa;
+  Cell32 length;
+
+  // last is a Cell16 but for computation with minus operator we need 32bits
+  int32_t ptr = m_last;
+
+  // 0 (aka NULL) meaning the last m_dictionary entry.  Because we are
+  // using relative addresses as uint16_t to save space we cannot use
+  // NULL
+  do
+    {
+      // Get the length of the forth name
+      length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+
+      // Ignore words with the SMUDGE bit */
+      if (!(m_dictionary[ptr] & FLAG_SMUDGE))
+        {
+          // Compare name lengths before comparing strings
+          if (token == m_dictionary[ptr + length + 3U] * 256U + m_dictionary[ptr + length + 4U])
+            {
+              // Word found in dictionnary
+              return std::make_pair(true, ptr);
+            }
+        }
+
+      // Not found: go to the previous word
+      nfa = m_dictionary[ptr + length + 1U] * 256U + m_dictionary[ptr + length + 2U];
+      ptr = ptr - nfa;
+    } while (nfa);
+
+  return std::make_pair(false, ptr);
+}
+
+// **************************************************************
 // Save the dictionnary in a binary file.
 // Use the commande hexdump -C filename for debugging it
 // **************************************************************
@@ -221,11 +259,26 @@ void ForthDico::display() const
                     color = RED;
                 }
 
-              // from nfa, go back to begin of definition
-              uint32_t j = token - 2U; // 2: skip NFA
-              while (0 == (m_dictionary[j] & 0x80))
-                --j;
-              std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
+              if (token < NUM_PRIMITIVES)
+                {
+                  std::pair<bool, int32_t> res = find(token);
+                  if (res.first)
+                    {
+                      std::cout << color << (char *) &m_dictionary[res.second + 1U] << " ";
+                    }
+                  else
+                    {
+                      std::cout << color << "XXX ";
+                    }
+                }
+              else
+                {
+                  // from nfa, go back to begin of definition
+                  uint32_t j = token - 2U; // 2: skip NFA
+                  while (0 == (m_dictionary[j] & 0x80))
+                    --j;
+                  std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
+                }
             }
 
           std::cout << std::endl;
@@ -245,21 +298,21 @@ void ForthDico::display() const
       ptr = ptr - nfa;
     } while (nfa);
 
-    std::cout << DEFAULT << std::endl;
+  std::cout << DEFAULT << std::endl;
 }
 
 /*void ForthDico::addPadding16(Cell8 *addr)
-{
+  {
   while (addr & UINT16_MASK)
-    *addr++ = 0x00;
-}
+  *addr++ = 0x00;
+  }
 
-// No check
-void ForthDico::addPadding32(Cell8 *addr)
-{
+  // No check
+  void ForthDico::addPadding32(Cell8 *addr)
+  {
   while (addr & UINT32_MASK)
-    *addr++ = 0x00;
-    }*/
+  *addr++ = 0x00;
+  }*/
 
 // **************************************************************
 // Store at 8-byte data the first free location in the dictionary
