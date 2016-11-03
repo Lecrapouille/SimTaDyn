@@ -8,7 +8,7 @@ class ForthException: public std::exception
 public:
   ForthException() throw () {}
   ~ForthException() throw () {}
-  virtual const char* what () const throw ()
+  virtual const char* what() const throw ()
   {
     return "Exception from SimTaDynForth";
   }
@@ -16,6 +16,7 @@ public:
   {
     const void* address = static_cast<const void*>(ad);
     std::stringstream stream;
+
     stream << address;
     return stream.str();
   }
@@ -27,12 +28,14 @@ public:
   ForthTooLongDef(std::string const& word)
   {
     m_word = word;
+    m_error_msg = "Exception from SimTaDynForth: word '" + m_word + "' contains more than 2^16 words.";
   }
   virtual const char* what() const throw ()
   {
-    return "Exception from SimTaDynForth: word '" /*+ m_word +*/ "' contains more than 2^16 words.";
+    return m_error_msg.c_str();
   }
   std::string m_word;
+  std::string m_error_msg;
 };
 
 class ForthMalformedWord: public ForthException
@@ -41,32 +44,34 @@ public:
   ForthMalformedWord(std::string const& word)
   {
     m_word = word;
+    m_error_msg = "Exception from SimTaDynForth: word '" + m_word + "' is mal formed. It shall contain 1 ... 31 characters.";
   }
   virtual const char* what() const throw ()
   {
-    return "Exception from SimTaDynForth: word '" /*+ m_word +*/ "' is mal formed. It shall contain 1 ... 31 characters.";
+    return m_error_msg.c_str();
   }
   std::string m_word;
+  std::string m_error_msg;
 };
 
 class ForthDicoOOB: public ForthException
 {
 public:
   ForthDicoOOB(const Cell16* const ip, std::string const& funcName) throw ()
-    : wrong_ip(ip),
-      error_msg("Exception from SimTaDynForth: attempt to leave the dictionary bounds 0x"
-                + convertPointerToStringAddress(ip) + " in " + funcName)
+    : m_wrong_ip(ip),
+      m_error_msg("Exception from SimTaDynForth: attempt to leave the dictionary bounds 0x"
+                  + convertPointerToStringAddress(ip) + " in " + funcName)
   {
-    func_name = funcName;
+    m_func_name = funcName;
   }
   virtual const char* what() const throw ()
   {
-    return error_msg.c_str();
+    return m_error_msg.c_str();
   }
 
-  const Cell16* const wrong_ip;
-  std::string func_name;
-  std::string error_msg;
+  const Cell16* const m_wrong_ip;
+  std::string m_func_name;
+  std::string m_error_msg;
 };
 
 class ForthDicoNoSpace: public ForthException
@@ -104,36 +109,36 @@ class ForthUnknownPrimitive: public ForthException
 {
 public:
   ForthUnknownPrimitive(const Cell16 badToken, std::string const& funcName)
-    : error_msg("Exception from SimTaDynForth: try to execute an unknown primitive "
-                + std::to_string((uint32_t) bad_token) + " in " + func_name)
+    : m_error_msg("Exception from SimTaDynForth: try to execute an unknown primitive "
+                  + std::to_string((uint32_t) badToken) + " in " + funcName)
   {
-    bad_token = badToken;
-    func_name = funcName;
+    m_bad_token = badToken;
+    m_func_name = funcName;
   }
-  virtual const char* what () const throw ()
+  virtual const char* what() const throw ()
   {
-    return error_msg.c_str();
+    return m_error_msg.c_str();
   }
 
-  Cell16 bad_token;
-  std::string func_name;
-  std::string error_msg;
+  Cell16 m_bad_token;
+  std::string m_func_name;
+  std::string m_error_msg;
 };
 
 class ForthUnknownWord: public ForthException
 {
 public:
   ForthUnknownWord(std::string const& word)
-    : error_msg("Exception from SimTaDynForth: unrecognized word " + word)
   {
-    unknown_word = word;
+    m_unknown_word = word;
+    m_error_msg = "Exception from SimTaDynForth: unrecognized word '" + word + "'";
   }
-  virtual const char* what () const throw ()
+  virtual const char* what() const throw ()
   {
-    return error_msg.c_str();
+    return m_error_msg.c_str();
   }
-  std::string unknown_word;
-  std::string error_msg;
+  std::string m_unknown_word;
+  std::string m_error_msg;
 };
 
 #endif /* FORTH_EXCEPTIONS_HPP_ */
