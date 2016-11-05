@@ -2,7 +2,6 @@
 #  define RENDERER_HPP_
 
 #  include "OpenGL.hpp"
-#  include "Color.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
 #  include "SimTaDynGraphs.hpp"

@@ -4,9 +4,6 @@
 #  include "ClassCounter.hpp"
 #  include "BoundingBox.hpp"
 
-#include <iostream>
-#include <fstream>
-
 // Inspired from:
 //   http://web.archive.org/web/20030624200338/http://www.es.ucsc.edu/~tonig/
 // and:

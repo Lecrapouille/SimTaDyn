@@ -1,7 +1,6 @@
 #ifndef FORTH_DICO_HPP_
 #  define FORTH_DICO_HPP_
 
-#  include "ForthHelper.hpp"
 #  include "ForthExceptions.hpp"
 #  include "ForthPrimitives.hpp"
 
