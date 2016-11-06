@@ -88,12 +88,14 @@ bool ForthReader::nextWord(std::string& word)
       return false;
     }
 
+  //
+  word = res.second;
+
   // Empty line case
   if (0 == word.compare(""))
     return false;
 
   // Success reading m_cursor_next word
-  word = res.second;
   return true;
 }
 
@@ -124,6 +126,7 @@ std::pair<bool, std::string> ForthReader::split(std::string const& text)
       m_cursor_last = m_cursor_next + 1;
       return std::make_pair(false, word);
     }
+
   // Extract the word which is the last of the line
   word = text.substr(m_cursor_last);
   return std::make_pair(true, word);
