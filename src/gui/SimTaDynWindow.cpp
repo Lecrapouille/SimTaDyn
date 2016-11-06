@@ -14,8 +14,10 @@ bool SimTaDynWindow::quitting()
 // SimTaDyn main window
 // *************************************************************************************************
 SimTaDynWindow::SimTaDynWindow(const std::string& title)
-  : Gtk::Window()
+  : Gtk::Window(),
+    m_fortheditor(m_textview[0], m_statusbar[0], m_textview[1], false)
 {
+#warning "Bug: constructor tres tres lent"
   std::cout << "SimTaDynWindow::SimTaDynWindow\n";
   set_title(title);
   set_default_size(1024, 800);
@@ -24,11 +26,16 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   // FIXME: m_simForth qui contient un bout de fenetre menu/notebook/statusbar ...
   // comme ca on pourra detacher et ajouter de nouvelles fenetres ?
 
-  // Menus
+  // Menus:
+  // * _Map: Import/export/save/load/... geographic maps.
+  // * _Forth: Import/export/save/load/... Forth scripts
+  // * _Plugins: TBD: Let the user to add an menu calling it's on fprth scripts.
+  // * _Help: TBD: add About/help/interactive tutorials
   {
     m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Map", m_menu[0]));
     m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Forth", m_menu[1]));
-    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Help", m_menu[2]));
+    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Plugins", m_menu[2]));
+    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Help", m_menu[3]));
   }
 
   // Submenus 'Forth'
@@ -36,30 +43,36 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     Gtk::Menu::MenuList& menulist = m_menu[1].items();
 
     m_menuimage[3].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New",
-       m_menuimage[3], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab)));
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New File",
+       m_menuimage[3], sigc::mem_fun(m_fortheditor, &ForthEditor::newEmptyDocument)));
 
     m_menuimage[4].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
     menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Template",
        m_menuimage[4], sigc::mem_fun(*this, &SimTaDynWindow::addTemplateTab))); // TODO
 
-    m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
-       m_menuimage[0], sigc::mem_fun(*this, &SimTaDynWindow::addFileTab)));
-
-    m_menuimage[1].set(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_SaveAs",
-       m_menuimage[1], sigc::mem_fun(*this, &SimTaDynWindow::saveCurrentTabAs)));
-
-    m_menuimage[2].set(Gtk::Stock::SAVE, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Save",
-       m_menuimage[2], sigc::mem_fun(*this, &SimTaDynWindow::saveCurrentTab)));
+    m_menuimage[6].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Prompt",
+       m_menuimage[6], sigc::mem_fun(m_fortheditor, &ForthEditor::newEmptyDocument))); // FIXME TBD TODO
 
     menulist.push_back(separator[0]);
 
+    m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
+       m_menuimage[0], sigc::mem_fun(m_fortheditor, &ForthEditor::newDocument)));
+
+    m_menuimage[1].set(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_SaveAs",
+       m_menuimage[1], sigc::mem_fun(m_fortheditor, &ForthEditor::saveAsCurrentDocument)));
+
+    m_menuimage[2].set(Gtk::Stock::SAVE, Gtk::ICON_SIZE_MENU);
+    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Save",
+       m_menuimage[2], sigc::mem_fun(m_fortheditor, &ForthEditor::saveCurrentDocument)));
+
+    menulist.push_back(separator[1]);
+
     m_menuimage[5].set(Gtk::Stock::FIND, Gtk::ICON_SIZE_MENU);
     menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Find",
-       m_menuimage[5], sigc::mem_fun(*this, &SimTaDynWindow::find)));
+       m_menuimage[5], sigc::mem_fun(m_fortheditor, &ForthEditor::find)));
   }
 
   // Map toolbar
@@ -76,9 +89,9 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     m_toolbutton[1].set_label("Exec");
     m_toolbutton[1].set_stock_id(Gtk::Stock::EXECUTE);
 
-    m_toolbar[1].append(m_toolbutton[0], sigc::mem_fun(*this, &SimTaDynWindow::addEmptyTab));
+    m_toolbar[1].append(m_toolbutton[0], sigc::mem_fun(m_fortheditor, &ForthEditor::newDocument));
     m_toolbar[1].append(m_separator[1]);
-    m_toolbar[1].append(m_toolbutton[1], sigc::mem_fun(*this, &SimTaDynWindow::execForth));
+    m_toolbar[1].append(m_toolbutton[1], sigc::mem_fun(m_fortheditor, &ForthEditor::execForth));
   }
 
   // Horizontal split
@@ -124,7 +137,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
 
   // Statusbar
   {
-    m_statusbar[0].push("SimTaDyn");
+    m_statusbar[0].push("Welcome to SimTaDyn !");
   }
 
   // OpenGL area
@@ -139,27 +152,6 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   Gtk::Main::signal_quit().connect(sigc::mem_fun(this, &SimTaDynWindow::quitting));
 
   show_all_children();
-}
-
-// FIXME 1: impossible de mettre ca dans hpp
-// FIXME 2: bug string vide interprete comme primitive 34 et ca retourne 0 ok
-// FIXME 3: ne pas effacer le text sauf dans la fenetre special interactive et cellules
-void SimTaDynWindow::execForth()
-{
-  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-  bool res = m_fortheditor.execForth(simtadyn.forth);
-  if (res)
-    {
-      m_statusbar[0].push("OK");
-      // TODO: copy paste text into historic
-      // FIXME: inserer nouveau mot dans tree ==> SimForth herite de Forth et ou std::cout va dans status bar
-      m_fortheditor.clear();
-    }
-  else
-    {
-      // Text view: indiquer ligne ko
-      m_statusbar[0].push("FAILED: reason");
-    }
 }
 
 #if 0
@@ -250,7 +242,7 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
     case GDK_KEY_F1:
       {
         SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-        m_drawing_area.zoomFitPage(simtadyn.graph);
+        m_drawing_area.zoomFitPage(simtadyn.m_graph);
       }
       break;
     case GDK_KEY_Page_Up:

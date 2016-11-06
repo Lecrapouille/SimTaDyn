@@ -43,7 +43,7 @@ void ShapefileLoader::goToByte(const uint32_t offset)
   infile_.seekg(offset, ios::beg);
   if (!infile_)
     {
-      ShapefileLoaderException e;
+      ShapefileLoaderException e(offset, "ShapefileLoader::goToByte");
       throw e;
     }
 }
@@ -52,7 +52,7 @@ void ShapefileLoader::skypeNBytes(const uint32_t offset)
   infile_.seekg(offset, ios::cur);
   if (!infile_)
     {
-      ShapefileLoaderException e;
+      ShapefileLoaderException e(offset, "ShapefileLoader::skypeNBytes");
       throw e;
     }
 }
@@ -250,7 +250,8 @@ void ShapefileLoader::getAllRecords(SimTaDynGraph& graph)
     }
 }
 
-bool ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph) // new graph ?
+bool ShapefileLoader::load(const string& filename, SimTaDynGraph& graph)
+// new graph ?
 {
   uint32_t value32b;
 
@@ -303,5 +304,5 @@ bool ShapefileLoader::loadShapefile(const string& filename, SimTaDynGraph& graph
 
 ShapefileLoader::ShapefileLoader(const string& filename, SimTaDynGraph& graph)
 {
-  loadShapefile(filename, graph);
+  load(filename, graph);
 }

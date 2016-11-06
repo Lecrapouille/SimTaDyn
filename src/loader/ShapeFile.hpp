@@ -1,10 +1,22 @@
 #ifndef SHAPEFILE_HPP_
 #  define SHAPEFILE_HPP_
 
-#  include "SimTaDynGraphs.hpp"
+#  include "Loader.hpp"
 
-class ShapefileLoaderException { };
-class ShapefileLoaderOpenFailed : public ShapefileLoaderException
+class ShapefileLoaderException : public SimTaDynLoaderException
+{
+ public:
+  uint32_t m_offset;
+  std::string m_funcName;
+
+  ShapefileLoaderException(const uint32_t offset, const std::string funcName)
+  {
+    m_offset = offset;
+    m_funcName = funcName;
+  }
+};
+
+class ShapefileLoaderOpenFailed : public SimTaDynLoaderException
 {
 public:
   int error;
@@ -15,7 +27,7 @@ public:
   }
 };
 
-class ShapefileLoaderBadId : public ShapefileLoaderException
+class ShapefileLoaderBadId : public SimTaDynLoaderException
 {
 public:
   int bad_id;
@@ -28,7 +40,7 @@ public:
   }
 };
 
-class ShapefileLoaderBadLength : public ShapefileLoaderException
+class ShapefileLoaderBadLength : public SimTaDynLoaderException
 {
 public:
   int real_size;
@@ -41,12 +53,19 @@ public:
   }
 };
 
-class ShapefileLoader
+class ShapefileLoader : public SimTaDynLoader
 {
 public:
   ShapefileLoader(const string& filename, SimTaDynGraph& graph);
-  ShapefileLoader() { }
-  ~ShapefileLoader() { }
+  ShapefileLoader()
+  {
+  }
+  ~ShapefileLoader()
+  {
+  }
+  bool         load(const string& filename, SimTaDynGraph& graph) override;
+
+  //protected:
 
   int32_t      readBigEndianInt();
   int32_t      readLittleEndianInt();
@@ -63,7 +82,6 @@ public:
   void         getBoundingBox(AABB& bbox);
   uint32_t     getRecordAt(SimTaDynGraph& graph, const uint32_t offset);
   void         getAllRecords(SimTaDynGraph& graph);
-  bool         loadShapefile(const string& filename, SimTaDynGraph& graph);
 
 private:
   ifstream     infile_;

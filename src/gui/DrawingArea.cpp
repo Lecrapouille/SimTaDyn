@@ -73,8 +73,8 @@ void GlDrawingArea::on_realize()
 bool GlDrawingArea::on_expose_event(GdkEventExpose* event)
 {
   std::cout << "GlDrawingArea::on_expose_event()\n";
-  const SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-  Renderer::zoomFitPage(simtadyn.graph);
+  const SimTaDynContext& simtadyn = SIMTADYN();
+  Renderer::zoomFitPage(simtadyn.m_graph);
   Renderer::applyViewport();
 
   onIdle();
@@ -91,8 +91,8 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
 
   windowGL->gl_begin(get_gl_context());
 
-  const SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-  Renderer::zoomFitPage(simtadyn.graph);
+  const SimTaDynContext& simtadyn = SIMTADYN();
+  Renderer::zoomFitPage(simtadyn.m_graph);
   Renderer::applyViewport();
 
   windowGL->gl_end();
@@ -104,7 +104,7 @@ bool GlDrawingArea::on_configure_event(GdkEventConfigure* event)
 // *************************************************************************************************
 bool GlDrawingArea::onIdle()
 {
-  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+  SimTaDynContext& simtadyn = SIMTADYN();
   Glib::RefPtr<Gdk::GL::Window> windowGL = get_gl_window();
   if (!windowGL) throw ErrorGlDrawingArea();
 
@@ -112,7 +112,7 @@ bool GlDrawingArea::onIdle()
 
   Renderer::clearScreen();
   glCheck(glLoadIdentity());
-  Renderer::draw(simtadyn.graph);
+  Renderer::draw(simtadyn.m_graph);
 
   windowGL->gl_end();
   windowGL->swap_buffers();

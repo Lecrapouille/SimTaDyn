@@ -584,12 +584,3 @@ void TextEditor::find()
 {
   m_findwindow.show();
 }
-
-// *************************************************************************************************
-// Get all text in the current text editor and give it to the Forth interpreter
-// Return true if the code was interpreted correctly, else return false.
-// *************************************************************************************************
-bool ForthEditor::execForth(Forth& forth)
-{
-  return forth.eatString(text().raw());
-}

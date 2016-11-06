@@ -194,7 +194,7 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
 }
 
 // **************************************************************
-//COMPILATION_STATE
+// COMPILATION_STATE
 // **************************************************************
 void Forth::interprete(std::string const& word)
 {
@@ -206,7 +206,7 @@ void Forth::interprete(std::string const& word)
     {
       if (m_dico.find(word, token, immediate))
         {
-          execToken(token);
+          execToken(token); // FIXME: ce serait cool de pouvoir stocker le nombre de param dans la def du mot
         }
       else if (toNumber(word, number))
         {

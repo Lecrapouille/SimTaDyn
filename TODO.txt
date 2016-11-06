@@ -1,0 +1,91 @@
+Smooth lines: https://forum.libcinder.org/topic/smooth-thick-lines-using-geometry-shader
+
+Graph
+
+https://github.com/anvaka/ngraph.pixel#demo
+
+HitTest: raycaster + sphere
+
+Forth ajouter mots -- et -> 
+C1 C2 -> pour dire que C1 et C2 sont en relation
+
+Node --> subgraph via filtre
+Sprite --> Node
+
+Renommer SimTaDynGraph pour SimTaDynMap
+
+Ajouter une class context SimTaDyn { Renderer* graphs* loader* } http://fabiensanglard.net/doom3/
+
+Ajouter aux references: https://gephi.org/
+
+Comme dans: quand on bouge un noeud ca fasse un effet ressort: ajouter Event:FREEMOVE Event:SPRINGMOVE
+https://github.com/anvaka/ngraph.pixel#demo
+
+================ Idees a creuser ========
+
+Les couleurs/positions d'une cellule sont copiees dans dans un tableau commun
+=> puis flag puis dans update() si flag alors geometry se dessine.
+Le but ? queue de traitement ?
+
+Les 3 champs importants: position, size, color
+
+Illusion:
+vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+gl_PointSize = size * ( 351.0 / length( mvPosition.xyz ) );
+gl_Position = projectionMatrix * mvPosition;',
+
+http://www.opengl-tutorial.org/fr/beginners-tutorials/tutorial-3-matrices/
+[Model Coordinate] --- Model Matrix --> [World Coord] --- View Matrix --> [Camera Coord] --- Proj Matrix --> [Homogeneous Coord]
+
+ModelViewProjMatrix (MVP):
+MVP = proj x view x model;
+transformed_vertex = MVP * in_vertex;
+
+================ TODO ===================
+
+Forth: add buton calling a Foth command. Add a menu item instead of button (= plugins)
+Forth: INCLUDE
+Graph: prendre un script forth ou C parser les includes les mettre dans SimGraph et generer un graph comme Doxygen
+Tutorials: "Faire comme dans Scilab: tutoriels avec ouverture d'une editeur text notebook qui affiche des commentaires et du code forth et qui prend la main sur la souris pour cliquer sur les onglets" 
+
+
+
+viewport facon emacs (split 2) puis mettre une fenetre active (tracer les bords en rouge) permet de voir la meme scene ou bien deux univers (facilite les copiers colles)
+
+Corriger bug camera project/zoom
+==> ajouter classe Souris avec une bbox avec fonction projectioToWorld et Inv
+==> remettre au propre
+==> glviewport et x,y,witdh, height de l'ecran sont inverses en y !!!
+==> Ne pas confondre camera.zoom qui fait un zoom des pixel du
+glTranslated(cell.p.x + getScreenHeight() / 2.0f,
+                       cell.p.y + getScreenWidth() / 2.0f,
+                       0.0f);
+qui zoom sans degrader
+
+Ne pas stocker X evenements par cellules dans le handler. ==> trop lent ==> separer dans une table a part ou alors ajouter une fonct exec dans l'evenement que l'on envoie aux voisins.
+
+draw(Rtree) bbox en rouge, selectionees en vert
+
+Forth mettre le dico dans une classe et avoir un ensemble de ddico.
+
+Faire le mot forth INCLUDE
+
+Voir la page web pour les fontes https://www.opengl.org/archives/resources/features/fontsurvey/
+
+Sauver la scene dans une texture et la coller dans un sprite pour les noeuds.
+
+Cellule => supercellule avec LOADMAP maville2.simtadyn
+
+Ajouter une skybox pour pouvoir mettre une carte reelle.
+
+==== BUG ====
+
+Ajouter le ** dans le titre d'un editeur Forth
+
+Fenetre Search: ne pas afficher si 0 onglets dans le notebook et la cacher si on fermer le dernier
+
+Faire une fenetre special Forth "interactive" et qui demande pas de sauvegarder a la fin de la session.
+
+Ajouter touches haut/bas pour shifter le buffer historic
+
+

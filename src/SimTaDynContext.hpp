@@ -1,27 +1,30 @@
 #ifndef CONTEXT_HPP_
 #  define CONTEXT_HPP_
 
-#  include "gui/SimTaDynWindow.hpp"
+#  include "SimTaDynWindow.hpp"
 #  include "RTree.hpp"
-#  include "Forth.hpp"
-#  include "ShapeFile.hpp"
-#  include <algorithm> // swap
+#  include "SimForth.hpp"
+#  include "SimTaDynLoader.hpp"
 
-// With singleton pattern (not thread safe)
+#  define SIMTADYN() SimTaDynContext::getInstance()
+
+// Singleton pattern (not thread safe)
 class SimTaDynContext
 {
 public:
+
+  SimTaDynWindow* m_window;
+  SimTaDynLoaderManager m_loader;
+  SimForth m_forth;
+  RTreeNode* m_root; // FIXME: a attacher dans le graph
+  SimTaDynGraph m_graph; // FIXME: a renommer en maps
+
+public:
+
   static SimTaDynContext& getInstance()
   {
-    return singleton;
+    return s_SimTaDyn;
   }
-
-  //SimTaDynWindow main_window;
-  // renommer ca en map
-  Forth forth;
-  RTreeNode* root; // a attacher dans le graph
-  SimTaDynGraph graph;
-  ShapefileLoader loader;
 
 private:
 
@@ -31,19 +34,28 @@ private:
   }
 
   SimTaDynContext(const SimTaDynContext&)
+    : m_root(NULL) // FIXME: a virer
   {
   }
 
   SimTaDynContext()
-    : root(NULL)
+    : m_root(NULL) // FIXME: a virer
   {
+    // Start the Forth core
+    s_SimTaDyn.m_forth.boot();
+    s_SimTaDyn.m_forth.eatString(": FOO + . ;");
+    s_SimTaDyn.m_forth.dictionary().display();
+
+    // Load an initial map
+    s_SimTaDyn.m_loader.load("../data/Corsica-points.shp", s_SimTaDyn.m_graph);
   }
 
   ~SimTaDynContext()
   {
   }
 
-  static SimTaDynContext singleton;
+  // Singleton
+  static SimTaDynContext s_SimTaDyn;
 };
 
 #endif /* CONTEXT_HPP_ */

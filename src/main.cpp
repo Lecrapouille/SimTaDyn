@@ -1,23 +1,20 @@
 #include "SimTaDynContext.hpp"
 
-SimTaDynContext SimTaDynContext::singleton = SimTaDynContext();
+// Create the context as singleton
+SimTaDynContext SimTaDynContext::s_SimTaDyn = SimTaDynContext();
 
 int main(int argc, char** argv)
 {
-  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-
   const Gtk::Main kit(argc, argv);
   Gtk::GL::init(argc, argv);
 
-  // Start the Forth core
-  simtadyn.forth.boot();
-  // Load an initial map
-  simtadyn.loader.loadShapefile("../data/Corsica-points.shp", simtadyn.graph);
-  //simtadyn.loader.loadShapefile("../data/3dpoints.shp", simtadyn.graph);
-  //std::cout << simtadyn.graph.name << std::endl;
-
   SimTaDynWindow main_window("SimTaDyn");
-  kit.run(main_window);
+  SimTaDynContext& SimTaDyn = SIMTADYN();
+  SimTaDyn.m_window = &main_window;
 
+  // FIXME: temporary, just for testing
+  SimTaDyn.m_forth.addForthButon(Gtk::Stock::COLOR_PICKER, "FOO"); // FIXME "42 42 FOO" ne fonctionne pas // FIXME2: interdire une compilation
+
+  kit.run(*(SimTaDyn.m_window));
   return 0;
 }

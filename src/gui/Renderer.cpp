@@ -229,7 +229,7 @@ void Renderer::draw(/*const*/ SimTaDynGraph& graph) //const
   const Vector3D center = graph.bbox.centerPoint();
   Position3D position;
 
-  AABB bbox = graph.bbox;
+  //AABB bbox = graph.bbox;
 
   // Map
   //bbox.bbmin = screen + (bbox.bbmin - center) * current_camera_.getZoom();

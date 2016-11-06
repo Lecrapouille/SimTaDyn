@@ -1,7 +1,6 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
-#  include "OpenGL.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
 #  include "SimTaDynGraphs.hpp"

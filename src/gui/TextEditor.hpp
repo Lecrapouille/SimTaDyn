@@ -110,17 +110,4 @@ protected:
   int m_nb_nonames;
 };
 
-// *************************************************************************************************
-//
-// *************************************************************************************************
-//A bouger ailleurs
-class ForthEditor : public TextEditor
-{
-public:
-  ForthEditor()
-  {
-  }
-  bool execForth(Forth& forth);
-};
-
 #endif /* TEXTEDITOR_HPP_ */

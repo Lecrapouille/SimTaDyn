@@ -2,7 +2,7 @@
 #  define SIMTADYNWINDOW_HPP_
 
 #  include "DrawingArea.hpp"
-#  include "TextEditor.hpp"
+#  include "ForthEditor.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -15,7 +15,7 @@ public:
 
   uint32_t getScreenWidth()
   {
-    return m_drawing_area. getScreenWidth();
+    return m_drawing_area.getScreenWidth();
   }
  uint32_t getScreenHeight()
   {
@@ -27,31 +27,10 @@ protected:
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
-  inline void saveCurrentTab() // FIXME
-  {
-    m_fortheditor.saveCurrentDocument();
-  }
-  inline void saveCurrentTabAs() // FIXME
-  {
-    m_fortheditor.saveAsCurrentDocument();
-  }
-  inline void addEmptyTab() // FIXME
-  {
-    m_fortheditor.newEmptyDocument();
-  }
   inline void addTemplateTab() // FIXME
   {
     m_fortheditor.newTemplatedDocument("1 1 + .");
   }
-  inline void addFileTab() // FIXME
-  {
-    m_fortheditor.newDocument();
-  }
-  inline void find()
-  {
-    m_fortheditor.find();
-  }
-  void execForth();
 
   GlDrawingArea m_drawing_area;
   Gtk::HPaned m_hpaned[1];
@@ -60,18 +39,20 @@ protected:
   Gtk::VBox m_vbox[2];
   Gtk::HBox m_hbox[1];
   Gtk::MenuBar m_menubar;
-  Gtk::Menu m_menu[3];
+  Gtk::Menu m_menu[32];
   Gtk::Image m_menuimage[32];
   ForthEditor m_fortheditor;
-  Gtk::Toolbar m_toolbar[2];
   Gtk::Notebook m_notebook[1];
   Gtk::SeparatorToolItem m_separator[2];
   Gtk::Statusbar m_statusbar[1];
   Gtk::ScrolledWindow m_scrolledwindow[4];
   Gtk::TextView m_textview[4];
-  Gtk::ToolButton m_toolbutton[4];
-  Gtk::SeparatorMenuItem separator[1];
+  Gtk::SeparatorMenuItem separator[2];
   FindWindow *m_findwin;
+
+public:
+  Gtk::ToolButton m_toolbutton[32];
+  Gtk::Toolbar m_toolbar[2];
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */
