@@ -13,6 +13,7 @@ public:
   std::pair<bool, std::string> eatString(std::string const& code_forth);
   std::pair<bool, std::string> eatString(const char* const code_forth);
   std::pair<bool, std::string> eatFile(std::string const& filename);
+  void ok(std::pair<bool, std::string> const& res);
   // TODO: std::pair<bool, std::string> eatString(); std::cin
   const ForthDico& dictionary() const;
   // TODO: charge un fichier dico et ecrase le dico ou le charge a la fin

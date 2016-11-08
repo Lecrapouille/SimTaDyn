@@ -32,11 +32,15 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
         //mode++;
 
         // FIXME: afficher redifined
-        std::string word;
-        if (m_reader.nextWord(word))
+        if (m_reader.hasMoreWords())
           {
+            std::string word = m_reader.nextWord();
             Cell16 token = m_dico.here() + word.size() + 1U + 2U; // 1: flags, 2: NFA
             m_dico.add(token, word, 0); // TODO FLAG_SMUDGE);
+          }
+        else
+          {
+            // FIXME exception et restaurer LAST
           }
       }
       break;

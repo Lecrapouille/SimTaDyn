@@ -266,7 +266,7 @@ std::pair<bool, std::string> Forth::eatFile(std::string const& filename)
     }
   else
     {
-      return std::make_pair(false, "[ERROR]: failed opening file"); // reader.strerrno());
+      return std::make_pair(false, "failed opening this file");
     }
 }
 
@@ -298,9 +298,9 @@ std::pair<bool, std::string> Forth::parseStream()
     {
       // FIXME: le stream peut ne pas etre termine: attendre
       // FIXME: retourne ok si on lui donne une ligne vide
-      while (m_reader.nextWord(word))
+      while (m_reader.hasMoreWords())
         {
-          interprete(word);
+          interprete(m_reader.nextWord());
         }
       return std::make_pair(true, "ok");
     }
@@ -312,6 +312,25 @@ std::pair<bool, std::string> Forth::parseStream()
       return std::make_pair(false, e.what());
     }
 }
+
+// **************************************************************
+//
+// **************************************************************
+void Forth::ok(std::pair<bool, std::string> const& res)
+{
+  if (res.first)
+    {
+      std::cout << res.second << std::endl;
+    }
+  else
+    {
+      std::pair<size_t, size_t> p = m_reader.cursors();
+      std::cerr << "[ERROR] " << m_reader.file() << ":"
+                << p.first << ":" << p.second << ": "
+                << res.second << std::endl;
+    }
+}
+
 
 // **************************************************************
 //
