@@ -15,6 +15,22 @@ Forth::Forth()
 // **************************************************************
 //
 // **************************************************************
+inline void Forth::restore()
+{
+   if (COMPILATION_STATE == m_state)
+     {
+       m_dico.m_last = m_last_at_colon;
+       m_dico.m_here = m_here_at_colon;
+     }
+
+   m_state = EXECUTION_STATE;
+   m_dsp = data_stack;
+   m_rsp = return_stack;
+}
+
+// **************************************************************
+//
+// **************************************************************
 const ForthDico& Forth::dictionary() const
 {
   return m_dico;
@@ -40,7 +56,7 @@ inline bool Forth::isPrimitive(const Cell16 id) const
 // **************************************************************
 // Return the number of elements in the return stack
 // **************************************************************
-inline int32_t Forth::RStackDepth() const
+int32_t Forth::RStackDepth() const
 {
   return m_rsp - return_stack;
 }
@@ -48,7 +64,7 @@ inline int32_t Forth::RStackDepth() const
 // **************************************************************
 // Return the number of elements in the data stack
 // **************************************************************
-inline int32_t Forth::DStackDepth() const
+int32_t Forth::DStackDepth() const
 {
   return m_dsp - data_stack;
 }
@@ -61,6 +77,8 @@ void Forth::execToken(const Cell16 tx)
   int32_t depth;
   Cell16 token = tx;
   m_ip = nullptr;
+
+  //std::cout << "AVANT " << m_dsp - data_stack << std::endl;
 
   // Always eat the top of the stack and store the value in a working register.
   DPOP(m_tos);
@@ -80,15 +98,15 @@ void Forth::execToken(const Cell16 tx)
           token = m_dico.read16at(ADDR8(m_ip));
         }
 
+      //
+      execPrimitive(token);
+
       // Data stack overflow ?
       depth = DStackDepth();
       if (depth < -1)
         {
           ForthStackOV e(DATA_STACK); throw e;
         }
-
-      //
-      execPrimitive(token);
 
       // Do not forget than non-primitive words have the
       // token EXIT to pop the return stack to get back
@@ -110,6 +128,7 @@ void Forth::execToken(const Cell16 tx)
 
   // Store the working register
   DPUSH(m_tos);
+  //std::cout << "APRES " << m_dsp - data_stack << std::endl;
 }
 
 // **************************************************************
@@ -165,7 +184,6 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
         }
       else
         {
-          std::cout << "POUET\n";
           return false;
         }
     }
@@ -204,8 +222,10 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
         number = (negative ? LONG_MIN : LONG_MAX);
 
         std::pair<size_t, size_t> p = m_reader.cursors();
-        std::cerr << "[WARNING] " << m_reader.file() << ":"
-                  << p.first << ":" << p.second << " Out of range number '" + word + "' will be truncated" << std::endl;
+        std::cerr << YELLOW << "[WARNING] " << m_reader.file() << ":"
+                  << p.first << ":" << p.second
+                  << " Out of range number '" + word + "' will be truncated"
+                  << DEFAULT << std::endl;
         return true;
       }
 #else // FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE == FORTH_OUT_OF_RANGE_NUMBERS_ARE_WORDS
@@ -231,10 +251,12 @@ void Forth::interprete(std::string const& word)
     {
       if (m_dico.find(word, token, immediate))
         {
+          //std::cout << "Forth::interprete '" << word << "' EXEC WORD\n";
           execToken(token); // FIXME: ce serait cool de pouvoir stocker le nombre de param dans la def du mot
         }
       else if (toNumber(word, number))
         {
+          //std::cout << "Forth::interprete '" << word << "' EXEC NUMBER\n";
           DPUSH(number);
         }
       else
@@ -248,15 +270,18 @@ void Forth::interprete(std::string const& word)
         {
           if (immediate)
             {
+              //std::cout << "Forth::interprete '" << word << "' COMP + IMM" << std::endl;
               execToken(token);
             }
           else
             {
+              //std::cout << "Forth::interprete '" << word << "' COMP -> append dico\n";
               m_dico.appendCell16(token);
             }
         }
       else if (toNumber(word, number))
         {
+          //std::cout << "Forth::interprete '" << word << "' COMP NUMBER\n";
           // Optim si number < 65536 alors
           // m_dicoAppendCell16(FORTH_PRIMITIVE_LITERAL16)
           // m_dicoAppendCell16(number);
@@ -309,6 +334,7 @@ std::pair<bool, std::string> Forth::eatString(const char* const code_forth)
 std::pair<bool, std::string> Forth::eatString(std::string const& code_forth)
 {
   m_reader.setStringToParse(code_forth);
+  std::cout << code_forth << std::endl;
   return parseStream();
 }
 
@@ -332,8 +358,7 @@ std::pair<bool, std::string> Forth::parseStream()
 
   catch (std::exception const& e)
     {
-      // TODO: restore Forth context
-      std::cerr << e.what() << std::endl;
+      restore();
       return std::make_pair(false, e.what());
     }
 }
@@ -345,14 +370,14 @@ void Forth::ok(std::pair<bool, std::string> const& res)
 {
   if (res.first)
     {
-      std::cout << res.second << std::endl;
+      std::cout << "    " << res.second << std::endl;
     }
   else
     {
       std::pair<size_t, size_t> p = m_reader.cursors();
-      std::cerr << "[ERROR] " << m_reader.file() << ":"
+      std::cerr << RED << "[ERROR] " << m_reader.file() << ":"
                 << p.first << ":" << p.second << ": "
-                << res.second << std::endl;
+                << res.second << DEFAULT << std::endl;
     }
 }
 
@@ -370,6 +395,7 @@ void Forth::boot()
   // Words for definitions
   m_dico.add(FORTH_PRIMITIVE_COLON, ":", 0);
   m_dico.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
+  m_dico.add(FORTH_PRIMITIVE_IMMEDIATE, "IMMEDIATE", 0);
 
   // Words changing IP
   m_dico.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
@@ -421,6 +447,7 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_XOR, "XOR", 0);
 
   // Data Stack
+  m_dico.add(FORTH_PRIMITIVE_DEPTH, "DEPTH", 0);
   m_dico.add(FORTH_PRIMITIVE_NIP, "NIP", 0);
   m_dico.add(FORTH_PRIMITIVE_PICK, "PICK", 0);
   m_dico.add(FORTH_PRIMITIVE_DUP, "DUP", 0);

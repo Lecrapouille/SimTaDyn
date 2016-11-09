@@ -3,6 +3,19 @@
 // **************************************************************
 //
 // **************************************************************
+std::string Forth::getWord()
+{
+  if (!m_reader.hasMoreWords())
+    {
+      ForthReaderTruncatedFile e(m_reader.file());
+      throw e;
+    }
+  return m_reader.nextWord();
+}
+
+// **************************************************************
+//
+// **************************************************************
 void Forth::execPrimitive(const Cell16 idPrimitive)
 {
   //std::cout << "execPrimitive " << idPrimitive << std::endl;
@@ -32,29 +45,43 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // Begin the definition of a new word
     case FORTH_PRIMITIVE_COLON:
       {
-        DPUSH(m_tos);
+        // Extract next word
+        m_creating_word = getWord();
+        if (m_dico.exists(m_creating_word))
+          {
+            std::cout << YELLOW << "[WARNING] Redefining '" << m_creating_word << "'" << DEFAULT << std::endl;
+          }
+
+        // Save informations which will be checked
+        // when executing the SEMI_COLON primitive.
+        m_last_at_colon = m_dico.m_last;
+        m_here_at_colon = m_dico.m_here;
+        m_depth_at_colon = DStackDepth();
+
+        // Add it in the dictionary
+        Cell16 token = m_dico.here() + m_creating_word.size() + 1U + 2U; // 1: flags, 2: NFA
+        m_dico.add(token, m_creating_word, 0);
+
+        // Compilation mode
         m_state = COMPILATION_STATE;
-        if (m_reader.hasMoreWords())
-          {
-            std::string word = m_reader.nextWord();
-            Cell16 token = m_dico.here() + word.size() + 1U + 2U; // 1: flags, 2: NFA
-            m_dico.add(token, word, 0); // TODO FLAG_SMUDGE);
-          }
-        else
-          {
-            // FIXME: afficher redifined
-            // FIXME: exception et restaurer LAST
-            // FIXME: checker si RSTACK et DSTACK est intact
-          }
       }
       break;
 
       // End the definition of a new word
     case FORTH_PRIMITIVE_SEMICOLON:
-      DPUSH(m_tos);
-      m_dico.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size wor definition
-      // TODO clear FLAG_SMUDGE
+      m_dico.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size word definition
       m_state = EXECUTION_STATE;
+      if (m_depth_at_colon != DStackDepth())
+        {
+          m_dico.m_last = m_last_at_colon;
+          m_dico.m_here = m_here_at_colon;
+          ForthUnbalancedDef e(m_creating_word); throw e;
+        }
+      break;
+
+      // Set immediate the last word
+    case FORTH_PRIMITIVE_IMMEDIATE:
+      m_dico.m_dictionary[m_dico.m_last] |= FLAG_IMMEDIATE;
       break;
 
       // Restore the IP when interpreting the definition
@@ -143,6 +170,11 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // drop ( a -- )
     case FORTH_PRIMITIVE_DROP:
       DPOP(m_tos);
+      break;
+
+    case FORTH_PRIMITIVE_DEPTH:
+      DPUSH(m_tos);
+      m_tos = DStackDepth();
       break;
 
       // nip ( a b -- b ) swap drop ;
@@ -286,7 +318,6 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
     case FORTH_PRIMITIVE_CARRIAGE_RETURN:
       std::cout << std::endl;
-      DPOP(m_tos);
       break;
     default:
       ForthUnknownPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;

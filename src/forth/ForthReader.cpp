@@ -61,7 +61,7 @@ void ForthReader::setStringToParse(std::string const& str)
 {
   init();
   m_mode = READ_STRING;
-  m_filename = "";
+  m_filename = "<string>";
   m_str = str;
 }
 

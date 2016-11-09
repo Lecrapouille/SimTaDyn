@@ -108,6 +108,17 @@ bool ForthDico::find(std::string const& word, Cell16& token, bool& immediate) co
 }
 
 // **************************************************************
+//
+// **************************************************************
+bool ForthDico::exists(std::string const& word) const
+{
+  Cell16 token;
+  bool immediate;
+
+  return ForthDico::find(word, token, immediate);
+}
+
+// **************************************************************
 // Convert a string into a token
 // **************************************************************
 std::pair<bool, int32_t> ForthDico::find(const Cell16 token) const
@@ -173,11 +184,6 @@ void ForthDico::display() const
 {
   int def_length, length, token, nfa, ptr, code, prev, i, ii, kk, c;
   bool smudge, immediate;
-  const char *GREY   = "\033[32m";
-  const char *RED    = "\033[31m";
-  const char *YELLOW = "\033[33m";
-  const char *WHITE  = "\033[37m";
-  const char *DEFAULT= "\033[00m";
   const char *color = DEFAULT;
 
   prev = m_here;

@@ -22,6 +22,22 @@ public:
   }
 };
 
+class ForthUnbalancedDef: public ForthException
+{
+public:
+  ForthUnbalancedDef(std::string const& word)
+  {
+    m_word = word;
+    m_error_msg = "Stack depth changed during the definition of the word '" + m_word + "' probably unbalanced condition";
+  }
+  virtual const char* what() const throw ()
+  {
+    return m_error_msg.c_str();
+  }
+  std::string m_word;
+  std::string m_error_msg;
+};
+
 class ForthTooLongDef: public ForthException
 {
 public:
@@ -138,6 +154,22 @@ public:
     return m_error_msg.c_str();
   }
   std::string m_unknown_word;
+  std::string m_error_msg;
+};
+
+class ForthReaderTruncatedFile: public ForthException
+{
+public:
+  ForthReaderTruncatedFile(std::string const& filename)
+  {
+    m_filename = filename;
+    m_error_msg = "Exception from SimTaDynForth: unfinished '" + filename + "'";
+  }
+  virtual const char* what() const throw ()
+  {
+    return m_error_msg.c_str();
+  }
+  std::string m_filename;
   std::string m_error_msg;
 };
 

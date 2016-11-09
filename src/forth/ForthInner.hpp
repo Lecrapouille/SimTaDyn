@@ -25,8 +25,7 @@ public:
   std::pair<bool, std::string> eatString(std::string const& code_forth);
   std::pair<bool, std::string> eatString(const char* const code_forth);
   std::pair<bool, std::string> eatFile(std::string const& filename);
-  void ok(std::pair<bool, std::string> const& res);
-  // TODO: std::pair<bool, std::string> eatString(); std::cin
+  virtual void ok(std::pair<bool, std::string> const& res);
   const ForthDico& dictionary() const;
   // TODO: charge un fichier dico et ecrase le dico ou le charge a la fin
   // loadCompilFile(std::string const& filename, bool append) ou alors boot(std::string const& filename, bool append)
@@ -36,10 +35,12 @@ protected:
   bool toNumber(std::string const& word, Cell32& number);
   void execPrimitive(const Cell16 idPrimitive);
   void execToken(const Cell16 tx);
-  inline int32_t RStackDepth() const;
-  inline int32_t DStackDepth() const;
+  int32_t RStackDepth() const;
+  int32_t DStackDepth() const;
   inline bool isPrimitive(const Cell16 id) const;
   inline void changeDisplayBase(const uint8_t newbase);
+  inline void restore();
+  std::string getWord();
 
 protected:
   // Stacks
@@ -55,6 +56,14 @@ protected:
   Cell16 *m_ip;    // Instruction pointer (CFA of the next word to be executed)
   int32_t  m_base; // Base (octal, decimal, hexa) when displaying numbers
   Cell32  m_state; // compile/execution
+
+  // Backup during the definition of a new word
+  int32_t  m_depth_at_colon;
+  Cell16  m_last_at_colon;
+  Cell16  m_here_at_colon;
+  std::string m_creating_word;
+
+  // Backup Forth state when entering in a commentary
   Cell32  m_saved_state;
 
   // Ascii reader

@@ -10,6 +10,7 @@ public:
   ForthDico();
   void add(const Cell16 token, std::string const& word, const bool immediate);
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
+  bool exists(std::string const& word) const;
   std::pair<bool, int32_t> find(const Cell16 token) const;
   bool dump(std::string const& filename) const;
   void display() const;
@@ -30,6 +31,8 @@ public:
   Cell16 *ip(Cell16 token);
 
 protected:
+
+  friend class Forth;
 
   Cell8   m_dictionary[DICTIONARY_SIZE];
   Cell16  m_last;  // NFA of the last dictionnary entry.
