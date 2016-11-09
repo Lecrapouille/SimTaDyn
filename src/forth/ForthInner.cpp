@@ -356,28 +356,75 @@ void Forth::ok(std::pair<bool, std::string> const& res)
     }
 }
 
-
 // **************************************************************
-//
+// TODO: Les ranger par ordre lexico ?
 // **************************************************************
 void Forth::boot()
 {
-  // Les ranger par ordre lexico ?
+  // Dummy word and comments
   m_dico.add(FORTH_PRIMITIVE_NOP, "NOP", 0);
   m_dico.add(FORTH_PRIMITIVE_LPARENTHESIS, "(", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_RPARENTHESIS, ")", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_COMMENTARY, "\\", FLAG_IMMEDIATE);
-  m_dico.add(FORTH_PRIMITIVE_COLON, ":", 0);
-  m_dico.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
-  m_dico.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
-  m_dico.add(FORTH_PRIMITIVE_LITERAL, "LITERAL", 0);
-  m_dico.add(FORTH_PRIMITIVE_1MINUS, "1-", 0);
-  m_dico.add(FORTH_PRIMITIVE_1PLUS, "1+", 0);
-  m_dico.add(FORTH_PRIMITIVE_2MINUS, "2-", 0);
-  m_dico.add(FORTH_PRIMITIVE_2PLUS, "2+", 0);
 
+  // Words for definitions
+  m_dico.add(FORTH_PRIMITIVE_COLON, ":", 0);
+  m_dico.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
+
+  // Words changing IP
+  m_dico.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
+  m_dico.add(FORTH_PRIMITIVE_BRANCH, "BRANCH", 0);
+  m_dico.add(FORTH_PRIMITIVE_0BRANCH, "0BRANCH", 0);
+
+  // Return Stack
+  m_dico.add(FORTH_PRIMITIVE_TO_RSTACK, ">R", 0);
+  m_dico.add(FORTH_PRIMITIVE_FROM_RSTACK, "R>", 0);
+  m_dico.add(FORTH_PRIMITIVE_2TO_RSTACK, "2>R", 0);
+  m_dico.add(FORTH_PRIMITIVE_2FROM_RSTACK, "2R>", 0);
+
+  // cell sizeof
+  m_dico.add(FORTH_PRIMITIVE_CELL, "CELL", 0);
+  m_dico.add(FORTH_PRIMITIVE_CELL, "CELLS", 0);
+
+  // Literals
+  m_dico.add(FORTH_PRIMITIVE_LITERAL, "LITERAL", 0);
+
+  // Arithmetic
+  m_dico.add(FORTH_PRIMITIVE_ABS, "ABS", 0);
+  m_dico.add(FORTH_PRIMITIVE_NEGATE, "NEGATE", 0);
+  m_dico.add(FORTH_PRIMITIVE_MIN, "MIN", 0);
+  m_dico.add(FORTH_PRIMITIVE_MAX, "MAX", 0);
+  m_dico.add(FORTH_PRIMITIVE_PLUS, "+", 0);
+  m_dico.add(FORTH_PRIMITIVE_1PLUS, "1+", 0);
+  m_dico.add(FORTH_PRIMITIVE_2PLUS, "2+", 0);
+  m_dico.add(FORTH_PRIMITIVE_MINUS, "-", 0);
+  m_dico.add(FORTH_PRIMITIVE_1MINUS, "1-", 0);
+  m_dico.add(FORTH_PRIMITIVE_2MINUS, "2-", 0);
+  m_dico.add(FORTH_PRIMITIVE_TIMES, "*", 0);
+  m_dico.add(FORTH_PRIMITIVE_DIV, "/", 0);
+  m_dico.add(FORTH_PRIMITIVE_RSHIFT, ">>", 0);
+  m_dico.add(FORTH_PRIMITIVE_LSHIFT, "<<", 0);
+  m_dico.add(FORTH_PRIMITIVE_RSHIFT, "RSHIFT", 0);
+  m_dico.add(FORTH_PRIMITIVE_LSHIFT, "LSHIFT", 0);
+
+  // Logic
+  m_dico.add(FORTH_PRIMITIVE_GREATER, ">", 0);
+  m_dico.add(FORTH_PRIMITIVE_GREATER_EQUAL, ">=", 0);
+  m_dico.add(FORTH_PRIMITIVE_LOWER, "<", 0);
+  m_dico.add(FORTH_PRIMITIVE_LOWER_EQUAL, "<=", 0);
+  m_dico.add(FORTH_PRIMITIVE_EQUAL, "==", 0);
+  m_dico.add(FORTH_PRIMITIVE_EQUAL, "=", 0);
+  m_dico.add(FORTH_PRIMITIVE_NOT_EQUAL, "<>", 0);
+  m_dico.add(FORTH_PRIMITIVE_NOT_EQUAL, "!=", 0);
+  m_dico.add(FORTH_PRIMITIVE_AND, "AND", 0);
+  m_dico.add(FORTH_PRIMITIVE_OR, "OR", 0);
+  m_dico.add(FORTH_PRIMITIVE_XOR, "XOR", 0);
+
+  // Data Stack
   m_dico.add(FORTH_PRIMITIVE_NIP, "NIP", 0);
+  m_dico.add(FORTH_PRIMITIVE_PICK, "PICK", 0);
   m_dico.add(FORTH_PRIMITIVE_DUP, "DUP", 0);
+  m_dico.add(FORTH_PRIMITIVE_QDUP, "?DUP", 0);
   m_dico.add(FORTH_PRIMITIVE_DROP, "DROP", 0);
   m_dico.add(FORTH_PRIMITIVE_SWAP, "SWAP", 0);
   m_dico.add(FORTH_PRIMITIVE_OVER, "OVER", 0);
@@ -388,19 +435,7 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_2SWAP, "2SWAP", 0);
   m_dico.add(FORTH_PRIMITIVE_2OVER, "2OVER", 0);
 
-  m_dico.add(FORTH_PRIMITIVE_PLUS, "+", 0);
-  m_dico.add(FORTH_PRIMITIVE_MINUS, "-", 0);
-  m_dico.add(FORTH_PRIMITIVE_DIV, "/", 0);
-  m_dico.add(FORTH_PRIMITIVE_TIMES, "*", 0);
-  m_dico.add(FORTH_PRIMITIVE_RSHIFT, ">>", 0);
-  m_dico.add(FORTH_PRIMITIVE_LSHIFT, "<<", 0);
-  m_dico.add(FORTH_PRIMITIVE_GREATER_EQUAL, ">=", 0);
-  m_dico.add(FORTH_PRIMITIVE_LOWER_EQUAL, "<=", 0);
-  m_dico.add(FORTH_PRIMITIVE_GREATER, ">", 0);
-  m_dico.add(FORTH_PRIMITIVE_LOWER, "<", 0);
-  m_dico.add(FORTH_PRIMITIVE_EQUAL, "==", 0);
-  m_dico.add(FORTH_PRIMITIVE_AND, "AND", 0);
-  m_dico.add(FORTH_PRIMITIVE_OR, "OR", 0);
-  m_dico.add(FORTH_PRIMITIVE_XOR, "XOR", 0);
+  // Printf
   m_dico.add(FORTH_PRIMITIVE_DISP, ".", 0);
+  m_dico.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, "CR", 0);
 }

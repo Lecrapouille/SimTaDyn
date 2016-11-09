@@ -78,8 +78,9 @@ typedef uint8_t        Cell8;
 #  define BINARY_OP(op) { m_tos = DDROP() op m_tos; } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
 
 // Return stack (store calling functions)
-#  define RPUSH(a) (*(m_rsp++) = CADDR(a))   // Store an address a on the top of stack
-#  define RPOP(r)  (r = *(--m_rsp))          // Discard the top of the stack
+#  define RPUSH(a)  (*(m_rsp++) = CADDR(a))   // Store an address a on the top of stack
+#  define RPOP(r) (r = CELL32(*(--m_rsp)))  // Discard the top of the stack
+#  define RPOP16(r)   (r = *(--m_rsp))
 
 // **************************************************************
 //

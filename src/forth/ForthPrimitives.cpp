@@ -8,30 +8,32 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
   //std::cout << "execPrimitive " << idPrimitive << std::endl;
   switch (idPrimitive)
     {
+      // Dummy word / No operation
     case FORTH_PRIMITIVE_NOP:
       std::cout << "NOP\n";
       break;
 
+      // Begin of commentary
     case FORTH_PRIMITIVE_LPARENTHESIS:
       m_saved_state = m_state;
       m_state = COMMENT_STATE;
       break;
 
+      // End of commentary
     case FORTH_PRIMITIVE_RPARENTHESIS:
       m_state = m_saved_state;
       break;
 
+      // Line of commentary
     case FORTH_PRIMITIVE_COMMENTARY:
       m_reader.skipLine();
       break;
 
+      // Begin the definition of a new word
     case FORTH_PRIMITIVE_COLON:
       {
         DPUSH(m_tos);
         m_state = COMPILATION_STATE;
-        //mode++;
-
-        // FIXME: afficher redifined
         if (m_reader.hasMoreWords())
           {
             std::string word = m_reader.nextWord();
@@ -40,21 +42,80 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
           }
         else
           {
-            // FIXME exception et restaurer LAST
+            // FIXME: afficher redifined
+            // FIXME: exception et restaurer LAST
+            // FIXME: checker si RSTACK et DSTACK est intact
           }
       }
       break;
 
-    case FORTH_PRIMITIVE_EXIT:
-      RPOP(m_ip);
-      break;
-
+      // End the definition of a new word
     case FORTH_PRIMITIVE_SEMICOLON:
       DPUSH(m_tos);
       m_dico.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size wor definition
       // TODO clear FLAG_SMUDGE
       m_state = EXECUTION_STATE;
-      //mode--;
+      break;
+
+      // Restore the IP when interpreting the definition
+      // of a non primitive word
+    case FORTH_PRIMITIVE_EXIT:
+      RPOP16(m_ip);
+      break;
+
+      // Change IP
+    case FORTH_PRIMITIVE_BRANCH:
+      m_ip = CADDR(ADDR8(m_ip) +  m_dico.read16at(ADDR8(m_ip)));
+      break;
+
+      // Change IP if top of stack is 0
+    case FORTH_PRIMITIVE_0BRANCH:
+      if (0 == m_tos)
+        {
+          m_ip = CADDR(ADDR8(m_ip) +  m_dico.read16at(ADDR8(m_ip)));
+        }
+      else
+        {
+          ++m_ip;
+        }
+      DDROP();
+      break;
+
+      // Move x to the return stack.
+      // ( x -- ) ( R: -- x )
+    case FORTH_PRIMITIVE_TO_RSTACK:
+      RPUSH(m_tos);
+      DDROP();
+      break;
+
+      // Transfer cell pair x1 x2 to the return stack
+      // ( x1 x2 -- ) ( R: -- x1 x2 )
+    case FORTH_PRIMITIVE_2TO_RSTACK:
+      DPOP(m_tos1);
+      RPUSH(m_tos1);
+      RPUSH(m_tos);
+      DDROP();
+      break;
+
+    case FORTH_PRIMITIVE_FROM_RSTACK:
+      DPUSH(m_tos);
+      RPOP(m_tos);
+      break;
+
+    case FORTH_PRIMITIVE_2FROM_RSTACK:
+      DPUSH(m_tos);
+      RPOP(m_tos);
+      RPOP(m_tos1);
+      DPUSH(m_tos1);
+      break;
+
+    case FORTH_PRIMITIVE_CELL:
+      DPUSH(m_tos);
+      m_tos = sizeof (Cell32);
+      break;
+
+    case FORTH_PRIMITIVE_CELLS:
+      m_tos = m_tos * sizeof (Cell32);
       break;
 
     case FORTH_PRIMITIVE_LITERAL:
@@ -89,9 +150,21 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       DDROP();
       break;
 
+      // ( ... n -- sp(n) )
+    case FORTH_PRIMITIVE_PICK:
+      m_tos = DPICK(m_tos);
+      break;
+
       // dup ( a -- a a )
     case FORTH_PRIMITIVE_DUP:
       DPUSH(m_tos);
+      break;
+
+    case FORTH_PRIMITIVE_QDUP:
+      if (m_tos)
+        {
+          DPUSH(m_tos);
+        }
       break;
 
       // swap ( a b -- b a )
@@ -187,6 +260,9 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_EQUAL:
       BINARY_OP(==);
       break;
+    case FORTH_PRIMITIVE_NOT_EQUAL:
+      BINARY_OP(!=);
+      break;
     case FORTH_PRIMITIVE_AND:
       BINARY_OP(&);
       break;
@@ -196,8 +272,20 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_XOR:
       BINARY_OP(^);
       break;
+    case FORTH_PRIMITIVE_MIN:
+      DPOP(m_tos1);
+      m_tos = (m_tos < m_tos1) ? m_tos : m_tos1;
+      break;
+    case FORTH_PRIMITIVE_MAX:
+      DPOP(m_tos1);
+      m_tos = (m_tos > m_tos1) ? m_tos : m_tos1;
+      break;
     case FORTH_PRIMITIVE_DISP:
       std::cout << std::setbase(m_base) << m_tos << " ";//std::endl;
+      DPOP(m_tos);
+      break;
+    case FORTH_PRIMITIVE_CARRIAGE_RETURN:
+      std::cout << std::endl;
       DPOP(m_tos);
       break;
     default:
