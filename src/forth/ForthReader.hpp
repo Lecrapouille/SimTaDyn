@@ -34,6 +34,7 @@ protected:
   std::string m_word;     // The Forth word read (token)
   size_t m_cursor_last;   // Split iterator on Forth words
   size_t m_cursor_next;   // Split iterator on Forth words
+  size_t m_cursor_prev;
   size_t m_lines;         // Line counter
   bool m_eol;             // End of line reached ?
   bool m_eof;             // End of file reached ?

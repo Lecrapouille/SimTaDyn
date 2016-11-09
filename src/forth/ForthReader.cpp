@@ -29,7 +29,7 @@ ForthReader::~ForthReader()
 // **************************************************************
 void ForthReader::init()
 {
-  m_cursor_last = m_cursor_next = m_lines = 0;
+  m_cursor_last = m_cursor_next = m_cursor_prev = m_lines = 0;
   m_eol = m_eof = true;
   m_word = "";
   m_word_picked = true;
@@ -76,6 +76,7 @@ void ForthReader::skipLine()
   if (READ_STRING == m_mode)
     {
       // Go to the next end of file markor.
+      m_cursor_prev = m_cursor_last;
       m_cursor_last = m_str.find_first_of("\n", m_cursor_last);
       m_cursor_next = m_cursor_last;
       // Reached the end of the string ?
@@ -104,7 +105,7 @@ bool ForthReader::refill()
   if (!m_infile.is_open())
     return false;
 
-  m_cursor_last = m_cursor_next = 0;
+  m_cursor_prev = m_cursor_last = m_cursor_next = 0;
 
   // Try reading next line
   if (!std::getline(m_infile, m_str))
@@ -179,6 +180,8 @@ bool ForthReader::split()
     {
       // Found a word
       m_word = m_str.substr(m_cursor_last, m_cursor_next - m_cursor_last);
+
+      m_cursor_prev = m_cursor_last;
       m_cursor_last = m_cursor_next;
       return true;
     }
@@ -196,7 +199,7 @@ bool ForthReader::split()
 // **************************************************************
 std::pair<size_t, size_t> ForthReader::cursors()
 {
-  return std::make_pair(m_lines, m_cursor_next);
+  return std::make_pair(m_lines, m_cursor_prev + 1U);
 }
 
 // **************************************************************
