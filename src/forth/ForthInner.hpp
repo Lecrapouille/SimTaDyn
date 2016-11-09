@@ -4,6 +4,18 @@
 #  include "ForthReader.hpp"
 #  include "ForthDico.hpp"
 
+// **************************************************************
+// When Forth reads a number which does not fit in the expected
+// number of bits, what is the expected strategy ? Ignore it as
+// a number which probably produce an undefined dictionary word
+// or truncated it with a warning message.
+// **************************************************************
+#define FORTH_OUT_OF_RANGE_NUMBERS_ARE_WORDS 0
+#define FORTH_TRUNCATE_OUT_OF_RANGE_NUMBERS  1
+#ifndef FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE
+#  define FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE FORTH_TRUNCATE_OUT_OF_RANGE_NUMBERS
+#endif
+
 class Forth
 {
 public:

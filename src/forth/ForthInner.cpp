@@ -1,4 +1,5 @@
 #include "ForthInner.hpp"
+#include <limits.h>
 
 // **************************************************************
 // Constructor: initialize the context but do not boot
@@ -119,15 +120,20 @@ void Forth::execToken(const Cell16 tx)
 bool Forth::toNumber(std::string const& word, Cell32& number)
 {
   int base = m_base;
-  int32_t sign = 1;
-  int32_t i = 0;
+  uint32_t negative = 0;
+  uint32_t i = 0;
 
   // sign
   if ('-' == word[i])
     {
       ++i;
-      sign = -1;
+      negative = 1;
     }
+  else if ('+' == word[i])
+    {
+      ++i;
+    }
+
   // decimal
   if (('&' == word[i]) || ('#' == word[i]))
     {
@@ -159,6 +165,7 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
         }
       else
         {
+          std::cout << "POUET\n";
           return false;
         }
     }
@@ -168,7 +175,7 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
       int s = word.size();
       if ((2 == s) || ((3 == s) && ('\'' == word[i + 2])))
         {
-          number = sign * word[i + 1];
+          number = (negative ? -word[i + 1] : word[i + 1]);
           return true;
         }
       return false;
@@ -178,9 +185,9 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
   try
     {
       std::size_t sz;
-      std::string str = word;//FIXME word.substr(word, i, std::string::npos);
 
-      number = sign * std::stoi(str, &sz, base);
+      unsigned long val = std::stoul(word, &sz, base);
+      number = (negative ? -val : val);
       return sz == word.size();
     }
   catch (const std::invalid_argument& ia)
@@ -189,7 +196,25 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
     }
   catch (const std::out_of_range& oor)
     {
-      return false;
+      // Two strategies:
+#if (FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE == FORTH_TRUNCATE_OUT_OF_RANGE_NUMBERS)
+      {
+        // 1st strategy: runcate the number with a warning message to
+        // avoid abort the program.
+        number = (negative ? LONG_MIN : LONG_MAX);
+
+        std::pair<size_t, size_t> p = m_reader.cursors();
+        std::cerr << "[WARNING] " << m_reader.file() << ":"
+                  << p.first << ":" << p.second << " Out of range number '" + word + "' will be truncated" << std::endl;
+        return true;
+      }
+#else // FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE == FORTH_OUT_OF_RANGE_NUMBERS_ARE_WORDS
+      {
+        // 2nd strategy: do not consider the word as a number which
+        // probably result an "unknown word" error message.
+        return false;
+      }
+#endif // FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE
     }
 }
 
