@@ -25,9 +25,9 @@ public:
   void write8at(Cell8 *addr, Cell8 data);
   void write16at(Cell8 *addr, Cell16 data);
   void write32at(Cell8 *addr, Cell32 data);
-  Cell8  read8at(Cell8 *addr) const;
-  Cell16 read16at(Cell8 *addr) const;
-  Cell32 read32at(Cell8 *addr) const;
+  Cell8  read8at(const Cell8 *addr) const;
+  Cell16 read16at(const Cell8 *addr) const;
+  Cell32 read32at(const Cell8 *addr) const;
   Cell16 *ip(Cell16 token);
 
 protected:

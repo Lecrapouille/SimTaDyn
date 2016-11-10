@@ -172,7 +172,7 @@ bool ForthDico::dump(std::string const& filename) const
     }
   else
     {
-      std::cerr << "Cannot dump the dico. Reason was xxx" << std::endl;
+      std::cerr << "Cannot dump the dico. Reason was xxx" << std::endl; // FIXME
       return false;
     }
 }
@@ -261,6 +261,8 @@ void ForthDico::display() const
                 {
                   if (m_dictionary[token] & FLAG_IMMEDIATE)
                     color = YELLOW;
+                  else if (FORTH_PRIMITIVE_LITERAL == token)
+                    color = BLUE;
                   else
                     color = RED;
                 }
@@ -271,6 +273,15 @@ void ForthDico::display() const
                   if (res.first)
                     {
                       std::cout << color << (char *) &m_dictionary[res.second + 1U] << " ";
+                      if (FORTH_PRIMITIVE_LITERAL == token)
+                        {
+                          const Cell8* p = &m_dictionary[ptr + length + 4U + i];
+#warning "TODO changer read32at(&m_dictionary[p]) pour read32at(p)"
+                          uint32_t data32 = read32at(p);
+                          std::cout << color << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
+                          i += 4U;
+                          c--;
+                        }
                     }
                   else
                     {
@@ -383,8 +394,8 @@ void ForthDico::write16at(Cell8 *addr, Cell16 data)
 {
   if ((addr >= &m_dictionary[NUM_PRIMITIVES]) && (addr + 1U < &m_dictionary[DICTIONARY_SIZE]))
     {
-      *addr++ = data / 256U;
-      *addr = data & 255U;
+      *addr = data / 256U;
+      *(addr + 1U) = data & 255U;
     }
   else
     {
@@ -398,13 +409,13 @@ void ForthDico::write16at(Cell8 *addr, Cell16 data)
 void ForthDico::write32at(Cell8 *addr, Cell32 data)
 {
   write16at(addr, data / 655356U);
-  write16at(addr, data & 655355U);
+  write16at(addr + 2U, data & 655355U);
 }
 
 // **************************************************************
 //
 // **************************************************************
-Cell8 ForthDico::read8at(Cell8 *addr) const
+Cell8 ForthDico::read8at(const Cell8 *addr) const
 {
   if ((addr >= m_dictionary) && (addr < &m_dictionary[DICTIONARY_SIZE]))
     {
@@ -420,14 +431,17 @@ Cell8 ForthDico::read8at(Cell8 *addr) const
 // **************************************************************
 //
 // **************************************************************
-Cell16 ForthDico::read16at(Cell8 *addr) const
+Cell16 ForthDico::read16at(const Cell8 *addr) const
 {
   Cell16 data = 0;
 
+  // FIXME addr doit etre comme m_here
+  // FIXME if (addr < DICTIONARY_SIZE]
+  // { Cell16 d1 = m_dictionary[addr]; d2 = m_dictionary[addr + 1]; }
   if ((addr >= m_dictionary) && (addr + 1U < &m_dictionary[DICTIONARY_SIZE]))
     {
-      Cell16 d1 = *addr++;
-      Cell16 d2 = *addr;
+      Cell16 d1 = *addr;
+      Cell16 d2 = *(addr + 1U);
       data = d1 * 256U + d2;
     }
   else
@@ -438,15 +452,15 @@ Cell16 ForthDico::read16at(Cell8 *addr) const
 }
 
 // **************************************************************
-//
+// FIXME Cell8 *const addr
 // **************************************************************
-Cell32 ForthDico::read32at(Cell8 *addr) const
+Cell32 ForthDico::read32at(const Cell8 *addr) const
 {
   Cell32 d1;
   Cell32 d2;
 
   d1 = read16at(addr);
-  d2 = read16at(addr);
+  d2 = read16at(addr + 2U);
 
   return ((uint32_t) d1) * 65536U + ((uint32_t) d2);
 }

@@ -6,6 +6,13 @@ int main(void)
   std::pair<bool, std::string> res;
 
   forth.boot();
+#warning "BUG non detecte"
+  res = forth.eatString(": NB 42 ;");
+  forth.ok(res);
+  res = forth.eatString("NB + 24 .");
+  forth.ok(res);
+  return 0;
+
   /*
   res = forth.eatString("\\ AAA \n: FOOBAR + + . ;\n1 2 3 FOOBAR \\ POUET");
   //res = forth.eatFile("hello.fs");
@@ -46,6 +53,16 @@ int main(void)
   res = forth.eatString("4 5 6 BAR");
   forth.ok(res);
   res = forth.eatString("DEPTH . CR");
+  forth.ok(res);
+
+  res = forth.eatString(": NB 42 ;");
+  forth.ok(res);
+  //#warning "BUG non detecte"
+  //res = forth.eatString("44 +");
+  //forth.ok(res);
+  //res = forth.eatString("NB + 24 .");
+  //forth.ok(res);
+  res = forth.eatString("NB 24 + .");
   forth.ok(res);
 
   forth.dictionary().display();

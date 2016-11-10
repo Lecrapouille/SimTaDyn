@@ -147,11 +147,10 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_LITERAL:
       DPUSH(m_tos);
-      //std::cout << "------------\n";
-      std::cerr << "TODO\n";//m_ip++; m_tos1 = m_dico.read16at(m_ip);
-      std::cerr << "TODO\n";//m_ip++; m_tos2 = m_dico.read16at(m_ip);
-      std::cerr << "TODO\n";//m_tos = m_tos1 * 65536U + m_tos2;
-      //std::cout << m_tos << "\n------------\n";
+      ++m_ip; // Skip primitive LITTERAL
+      m_tos = m_dico.read32at(ADDR8(m_ip));
+      std::cout << "LIT " << std::hex << m_tos << std::endl;
+      m_ip += (4U / sizeof (m_ip)); // Skip the number
       break;
 
     case FORTH_PRIMITIVE_1MINUS:
@@ -313,7 +312,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_tos = (m_tos > m_tos1) ? m_tos : m_tos1;
       break;
     case FORTH_PRIMITIVE_DISP:
-      std::cout << std::setbase(m_base) << m_tos << " ";//std::endl;
+      std::cout << std::setbase(m_base) << m_tos << " ";
       DPOP(m_tos);
       break;
     case FORTH_PRIMITIVE_CARRIAGE_RETURN:
