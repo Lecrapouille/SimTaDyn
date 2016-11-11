@@ -73,20 +73,26 @@ public:
 class ForthDicoOOB: public ForthException
 {
 public:
-  ForthDicoOOB(const Cell16* const ip, std::string const& funcName) throw ()
-    : m_wrong_ip(ip),
-      m_error_msg("Exception from SimTaDynForth: attempt to leave the dictionary bounds 0x"
-                  + convertPointerToStringAddress(ip) + " in " + funcName)
+  ForthDicoOOB(const Cell16* const ip) throw ()
+    : m_wrong_addr(0),
+      m_wrong_ip(ip),
+      m_error_msg("Exception from SimTaDynForth: IP tried to access an invalid address: "
+                  + convertPointerToStringAddress(ip))
   {
-    m_func_name = funcName;
+  }
+  ForthDicoOOB(const uint32_t addr) throw ()
+    : m_wrong_addr(addr),
+      m_wrong_ip(nullptr),
+      m_error_msg("Exception from SimTaDynForth: " + std::to_string(addr) + "is an invalid dictionary address ")
+  {
   }
   virtual const char* what() const throw ()
   {
     return m_error_msg.c_str();
   }
 
+  const uint32_t m_wrong_addr;
   const Cell16* const m_wrong_ip;
-  std::string m_func_name;
   std::string m_error_msg;
 };
 

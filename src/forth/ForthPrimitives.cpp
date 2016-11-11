@@ -84,26 +84,54 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_dico.m_dictionary[m_dico.m_last] |= FLAG_IMMEDIATE;
       break;
 
+    case FORTH_PRIMITIVE_HERE:
+      DPUSH(m_tos);
+      m_tos = m_dico.here();
+      break;
+
+    case FORTH_PRIMITIVE_ALLOT:
+      m_dico.allot((int32_t) m_tos);
+      break;
+
+      // Reserve one cell of data space and store x in the cell.
+    case FORTH_PRIMITIVE_COMMA:
+      m_dico.appendCell32(m_tos);
+      break;
+
+      // ( a-addr -- x )
+      // x is the value stored at a-addr.
+    case FORTH_PRIMITIVE_FETCH:
+      m_tos = m_dico.read32at(m_tos);
+      break;
+
+      // Store x at a-addr.
+      // ( x a-addr -- )
+    case FORTH_PRIMITIVE_STORE:
+      DPOP(m_tos1);
+      m_dico.write32at(m_tos, m_tos1);
+      std::cout << "Store " << m_tos1 << " at " << m_tos << std::endl;
+      break;
+
       // Restore the IP when interpreting the definition
       // of a non primitive word
     case FORTH_PRIMITIVE_EXIT:
-      RPOP16(m_ip);
+      RPOP(m_ip);
       break;
 
       // Change IP
     case FORTH_PRIMITIVE_BRANCH:
-      m_ip = CADDR(ADDR8(m_ip) +  m_dico.read16at(ADDR8(m_ip)));
+      m_ip += m_dico.read16at(m_ip);
       break;
 
       // Change IP if top of stack is 0
     case FORTH_PRIMITIVE_0BRANCH:
       if (0 == m_tos)
         {
-          m_ip = CADDR(ADDR8(m_ip) +  m_dico.read16at(ADDR8(m_ip)));
+          m_ip += m_dico.read16at(m_ip);
         }
       else
         {
-          ++m_ip;
+          m_ip += 2U;
         }
       DDROP();
       break;
@@ -111,7 +139,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // Move x to the return stack.
       // ( x -- ) ( R: -- x )
     case FORTH_PRIMITIVE_TO_RSTACK:
-      RPUSH(m_tos);
+      APUSH(m_tos);
       DDROP();
       break;
 
@@ -119,20 +147,20 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // ( x1 x2 -- ) ( R: -- x1 x2 )
     case FORTH_PRIMITIVE_2TO_RSTACK:
       DPOP(m_tos1);
-      RPUSH(m_tos1);
-      RPUSH(m_tos);
+      APUSH(m_tos1);
+      APUSH(m_tos);
       DDROP();
       break;
 
     case FORTH_PRIMITIVE_FROM_RSTACK:
       DPUSH(m_tos);
-      RPOP(m_tos);
+      APOP(m_tos);
       break;
 
     case FORTH_PRIMITIVE_2FROM_RSTACK:
       DPUSH(m_tos);
-      RPOP(m_tos);
-      RPOP(m_tos1);
+      APOP(m_tos);
+      APOP(m_tos1);
       DPUSH(m_tos1);
       break;
 
@@ -145,12 +173,17 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_tos = m_tos * sizeof (Cell32);
       break;
 
-    case FORTH_PRIMITIVE_LITERAL:
+    case FORTH_PRIMITIVE_LITERAL_16:
       DPUSH(m_tos);
-      ++m_ip; // Skip primitive LITTERAL
-      m_tos = m_dico.read32at(ADDR8(m_ip));
-      std::cout << "LIT " << std::hex << m_tos << std::endl;
-      m_ip += (4U / sizeof (m_ip)); // Skip the number
+      m_ip += 2U; // Skip primitive LITTERAL
+      m_tos = m_dico.read32at(m_ip);
+      break;
+
+    case FORTH_PRIMITIVE_LITERAL_32:
+      DPUSH(m_tos);
+      m_ip += 2U; // Skip primitive LITTERAL
+      m_tos = m_dico.read32at(m_ip);
+      m_ip += 2U; // Skip the number - 2 because of next ip
       break;
 
     case FORTH_PRIMITIVE_1MINUS:
@@ -259,6 +292,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
     case FORTH_PRIMITIVE_PLUS:
+      std::cout << "ADDITION\n";
       BINARY_OP(+);
       break;
     case FORTH_PRIMITIVE_MINUS:

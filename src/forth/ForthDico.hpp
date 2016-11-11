@@ -16,21 +16,20 @@ public:
   void display() const;
   Cell16 last() const;
   Cell16 here() const;
-
-  //void addPadding16(Cell8 *addr);
-  //void addPadding32(Cell8 *addr);
-  void appendCell8(Cell8 value);
-  void appendCell16(Cell16 value);
-  void appendCell32(Cell32 value);
-  void write8at(Cell8 *addr, Cell8 data);
-  void write16at(Cell8 *addr, Cell16 data);
-  void write32at(Cell8 *addr, Cell32 data);
-  Cell8  read8at(const Cell8 *addr) const;
-  Cell16 read16at(const Cell8 *addr) const;
-  Cell32 read32at(const Cell8 *addr) const;
-  Cell16 *ip(Cell16 token);
+  void allot(const int32_t nb_bytes);
+  void appendCell8(const Cell32 value);
+  void appendCell16(const Cell32 value);
+  void appendCell32(const Cell32 value);
+  void write8at(const uint32_t addr, const Cell32 data);
+  void write16at(const uint32_t addr, const Cell32 data);
+  void write32at(const uint32_t addr, const Cell32 data);
+  Cell32 read8at(const uint32_t addr) const;
+  Cell32 read16at(const uint32_t addr) const;
+  Cell32 read32at(const uint32_t addr) const;
 
 protected:
+
+  void checkBounds(const uint32_t addr, const int32_t nb_bytes) const;
 
   friend class Forth;
 

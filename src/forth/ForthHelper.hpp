@@ -77,10 +77,15 @@ typedef uint8_t        Cell8;
 #  define DPICK(n) (*(m_dsp - n - 1))        // Look at the nth element (n >= 1) of the stack from the top (1 = 1st element)
 #  define BINARY_OP(op) { m_tos = DDROP() op m_tos; } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
 
-// Return stack (store calling functions)
-#  define RPUSH(a)  (*(m_rsp++) = CADDR(a))   // Store an address a on the top of stack
-#  define RPOP(r) (r = CELL32(*(--m_rsp)))  // Discard the top of the stack
-#  define RPOP16(r)   (r = *(--m_rsp))
+// Alternative data stack (function parameters manipulation)
+#  define APUSH(n) (*(m_asp++) = CELL32(n))  // Store the number n on the top of stack
+#  define ADROP()  (*(--m_asp))              // Discard the top of the stack
+#  define APOP(r)  (r = ADROP())             // Discard the top of the stack, save its value in the register
+
+// Return stack (store calling functions (tokens))
+#  define RPUSH(a)  (*(m_rsp++) = CELL16(a)) // Store an address a on the top of stack
+#  define RPOP(r)   (r = *(--m_rsp))         // Discard the top of the stack
+#  define RPOP16(r) (r = *(--m_rsp))
 
 // **************************************************************
 //

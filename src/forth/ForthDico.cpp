@@ -53,12 +53,10 @@ void ForthDico::add(const Cell16 token, std::string const& word, const bool imme
     }
 
   // Store the NFA of the preceding word
-  m_dictionary[m_here++] = nfa / 256U;
-  m_dictionary[m_here++] = nfa & 255U;
+  appendCell16(nfa);
 
   // Store the token
-  m_dictionary[m_here++] = token / 256U;
-  m_dictionary[m_here++] = token & 255U;
+  appendCell16(token);
 }
 
 // **************************************************************
@@ -93,14 +91,14 @@ bool ForthDico::find(std::string const& word, Cell16& token, bool& immediate) co
                   immediate = (m_dictionary[ptr] & FLAG_IMMEDIATE);
 
                   // Word found in dictionnary
-                  token = m_dictionary[ptr + length + 3U] * 256U + m_dictionary[ptr + length + 4U];
+                  token = read16at(ptr + length + 3U);
                   return true;
                 }
             }
         }
 
       // Not found: go to the previous word
-      nfa = m_dictionary[ptr + length + 1U] * 256U + m_dictionary[ptr + length + 2U];
+      nfa = read16at(ptr + length + 1U);
       ptr = ptr - nfa;
     } while (nfa);
 
@@ -141,7 +139,7 @@ std::pair<bool, int32_t> ForthDico::find(const Cell16 token) const
       if (!(m_dictionary[ptr] & FLAG_SMUDGE))
         {
           // Compare name lengths before comparing strings
-          if (token == m_dictionary[ptr + length + 3U] * 256U + m_dictionary[ptr + length + 4U])
+          if (token == read16at(ptr + length + 3U))
             {
               // Word found in dictionnary
               return std::make_pair(true, ptr);
@@ -149,7 +147,7 @@ std::pair<bool, int32_t> ForthDico::find(const Cell16 token) const
         }
 
       // Not found: go to the previous word
-      nfa = m_dictionary[ptr + length + 1U] * 256U + m_dictionary[ptr + length + 2U];
+      nfa = read16at(ptr + length + 1U);
       ptr = ptr - nfa;
     } while (nfa);
 
@@ -261,7 +259,8 @@ void ForthDico::display() const
                 {
                   if (m_dictionary[token] & FLAG_IMMEDIATE)
                     color = YELLOW;
-                  else if (FORTH_PRIMITIVE_LITERAL == token)
+                  else if ((FORTH_PRIMITIVE_LITERAL_32 == token) ||
+                           (FORTH_PRIMITIVE_LITERAL_16 == token))
                     color = BLUE;
                   else
                     color = RED;
@@ -273,14 +272,23 @@ void ForthDico::display() const
                   if (res.first)
                     {
                       std::cout << color << (char *) &m_dictionary[res.second + 1U] << " ";
-                      if (FORTH_PRIMITIVE_LITERAL == token)
+                      if ((FORTH_PRIMITIVE_LITERAL_32 == token) ||
+                          (FORTH_PRIMITIVE_LITERAL_16 == token))
                         {
-                          const Cell8* p = &m_dictionary[ptr + length + 4U + i];
-#warning "TODO changer read32at(&m_dictionary[p]) pour read32at(p)"
-                          uint32_t data32 = read32at(p);
-                          std::cout << color << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
-                          i += 4U;
+                          uint32_t p = ptr + length + 4U + i;
                           c--;
+                          if (FORTH_PRIMITIVE_LITERAL_32 == token)
+                            {
+                              uint32_t data32 = read32at(p);
+                              std::cout << color << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
+                              i += 4U;
+                            }
+                          else
+                            {
+                              uint16_t data16 = read16at(p);
+                              std::cout << color << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                              i += 2U;
+                            }
                         }
                     }
                   else
@@ -318,157 +326,132 @@ void ForthDico::display() const
   std::cout << DEFAULT << std::endl;
 }
 
-/*void ForthDico::addPadding16(Cell8 *addr)
-  {
-  while (addr & UINT16_MASK)
-  *addr++ = 0x00;
-  }
-
-  // No check
-  void ForthDico::addPadding32(Cell8 *addr)
-  {
-  while (addr & UINT32_MASK)
-  *addr++ = 0x00;
-  }*/
-
 // **************************************************************
-// Store at 8-byte data the first free location in the dictionary
+//
 // **************************************************************
-void ForthDico::appendCell8(Cell8 value)
+void ForthDico::checkBounds(const uint32_t addr, const int32_t nb_bytes) const
 {
-  if (m_here + 1U < DICTIONARY_SIZE)
+  // FIXME: proteger en ecriture les anciens mots definis
+  // FIXME: autoriser en lecture toutes les addr du dico
+  if (/*(addr < m_here_at_colon) &&*/ (addr + nb_bytes >= DICTIONARY_SIZE))
     {
-      m_dictionary[m_here++] = value;
+      ForthDicoOOB e(addr); throw e;
     }
-  else
-    {
-      ForthDicoNoSpace e; throw e;
-    }
-}
-
-// **************************************************************
-// Store at 16-byte data the first free location in the dictionary
-// **************************************************************
-void ForthDico::appendCell16(Cell16 value)
-{
-  if (m_here + 2U < DICTIONARY_SIZE)
-    {
-      m_dictionary[m_here++] = value / 256U;
-      m_dictionary[m_here++] = value & 255U;
-    }
-  else
-    {
-      ForthDicoNoSpace e; throw e;
-    }
-}
-
-// **************************************************************
-// Store at 32-byte data the first free location in the dictionary
-// **************************************************************
-void ForthDico::appendCell32(Cell32 value)
-{
-  appendCell16(value / 65536U);
-  appendCell16(value & 65535U);
 }
 
 // **************************************************************
 // FIXME: au lieu de addr >= &m_dictionary[NUM_PRIMITIVES]
 // faire addr >= &m_dictionary[m_last + m_last_def_size]
 // **************************************************************
-void ForthDico::write8at(Cell8 *addr, Cell8 data)
+void ForthDico::write8at(const uint32_t addr, const Cell32 data)
 {
-  if ((addr >= &m_dictionary[NUM_PRIMITIVES]) && (addr < &m_dictionary[DICTIONARY_SIZE]))
-    {
-      *addr = data;
-    }
-  else
-    {
-      //ForthDicoOOB e(addr, funcName); throw e;
-    }
+  checkBounds(addr, 0U);
+  m_dictionary[addr] = (data >> 0) & 0xFF;
 }
 
 // **************************************************************
 //
 // **************************************************************
-void ForthDico::write16at(Cell8 *addr, Cell16 data)
+void ForthDico::write16at(const uint32_t addr, const Cell32 data)
 {
-  if ((addr >= &m_dictionary[NUM_PRIMITIVES]) && (addr + 1U < &m_dictionary[DICTIONARY_SIZE]))
-    {
-      *addr = data / 256U;
-      *(addr + 1U) = data & 255U;
-    }
-  else
-    {
-      //ForthDicoOOB e(addr, funcName); throw e;
-    }
+  checkBounds(addr, 1U);
+  m_dictionary[addr + 0U] = (data >> 8) & 0xFF;
+  m_dictionary[addr + 1U] = (data >> 0) & 0xFF;
 }
 
 // **************************************************************
 //
 // **************************************************************
-void ForthDico::write32at(Cell8 *addr, Cell32 data)
+void ForthDico::write32at(const uint32_t addr, const Cell32 data)
 {
-  write16at(addr, data / 655356U);
-  write16at(addr + 2U, data & 655355U);
+  checkBounds(addr, 3U);
+  m_dictionary[addr + 0U] = (data >> 24) & 0xFF;
+  m_dictionary[addr + 1U] = (data >> 16) & 0xFF;
+  m_dictionary[addr + 2U] = (data >> 8) & 0xFF;
+  m_dictionary[addr + 3U] = (data >> 0) & 0xFF;
 }
 
 // **************************************************************
 //
 // **************************************************************
-Cell8 ForthDico::read8at(const Cell8 *addr) const
+Cell32 ForthDico::read8at(const uint32_t addr) const
 {
-  if ((addr >= m_dictionary) && (addr < &m_dictionary[DICTIONARY_SIZE]))
-    {
-      return *addr;
-    }
-  else
-    {
-      //ForthDicoOOB e(ip, funcName); throw e;
-      return 0;
-    }
+  checkBounds(addr, 0U);
+  return m_dictionary[addr];
 }
 
 // **************************************************************
 //
 // **************************************************************
-Cell16 ForthDico::read16at(const Cell8 *addr) const
+Cell32 ForthDico::read16at(const uint32_t addr) const
 {
-  Cell16 data = 0;
+  checkBounds(addr, 1U);
+  Cell32 res =
+    (m_dictionary[addr + 0U] << 8U) |
+    (m_dictionary[addr + 1U] << 0U);
 
-  // FIXME addr doit etre comme m_here
-  // FIXME if (addr < DICTIONARY_SIZE]
-  // { Cell16 d1 = m_dictionary[addr]; d2 = m_dictionary[addr + 1]; }
-  if ((addr >= m_dictionary) && (addr + 1U < &m_dictionary[DICTIONARY_SIZE]))
-    {
-      Cell16 d1 = *addr;
-      Cell16 d2 = *(addr + 1U);
-      data = d1 * 256U + d2;
-    }
-  else
-    {
-      //ForthDicoOOB e(ip, funcName); throw e;
-    }
-  return data;
+  return res;
 }
 
 // **************************************************************
 // FIXME Cell8 *const addr
 // **************************************************************
-Cell32 ForthDico::read32at(const Cell8 *addr) const
+Cell32 ForthDico::read32at(const uint32_t addr) const
 {
-  Cell32 d1;
-  Cell32 d2;
+  checkBounds(addr, 3U);
+  Cell32 res =
+    (m_dictionary[addr + 0U] << 24UL) |
+    (m_dictionary[addr + 1U] << 16UL) |
+    (m_dictionary[addr + 2U] << 8UL) |
+    (m_dictionary[addr + 3U] << 0UL);
 
-  d1 = read16at(addr);
-  d2 = read16at(addr + 2U);
-
-  return ((uint32_t) d1) * 65536U + ((uint32_t) d2);
+  return res;
 }
 
 // **************************************************************
-//
+// Store at 8-byte data the first free location in the dictionary
 // **************************************************************
-Cell16 *ForthDico::ip(Cell16 token)
+void ForthDico::appendCell8(const Cell32 value)
 {
-  return CADDR(m_dictionary + token);
+  write8at(m_here, value);
+  m_here += 1U;
+}
+
+// **************************************************************
+// Store at 16-byte data the first free location in the dictionary
+// **************************************************************
+void ForthDico::appendCell16(const Cell32 value)
+{
+  write16at(m_here, value);
+  m_here += 2U;
+}
+
+// **************************************************************
+// Store at 32-byte data the first free location in the dictionary
+// **************************************************************
+void ForthDico::appendCell32(const Cell32 value)
+{
+  write32at(m_here, value);
+  m_here += 4U;
+}
+
+// **************************************************************
+// Reserve or release nb consecutive bytes from HERE
+// **************************************************************
+void ForthDico::allot(const int32_t nb_bytes)
+{
+  if (nb_bytes > 0)
+    {
+      checkBounds(m_here, nb_bytes);
+      m_here = m_here + nb_bytes;
+    }
+  else if (nb_bytes < 0)
+    {
+      checkBounds(m_here - nb_bytes, nb_bytes);
+      m_here = m_here - nb_bytes;
+    }
+  else // 0 == nb_bytes
+    {
+      // Do nothing
+    }
 }

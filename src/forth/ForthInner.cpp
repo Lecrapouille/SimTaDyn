@@ -7,8 +7,9 @@
 Forth::Forth()
 {
   m_state = EXECUTION_STATE;
-  m_dsp = data_stack;
-  m_rsp = return_stack;
+  m_dsp = m_data_stack;
+  m_asp = m_alternative_stack;
+  m_rsp = m_return_stack;
   m_base = 10U;
 }
 
@@ -24,8 +25,9 @@ inline void Forth::restore()
      }
 
    m_state = EXECUTION_STATE;
-   m_dsp = data_stack;
-   m_rsp = return_stack;
+   m_dsp = m_data_stack;
+   m_asp = m_alternative_stack;
+   m_rsp = m_return_stack;
 }
 
 // **************************************************************
@@ -58,7 +60,7 @@ inline bool Forth::isPrimitive(const Cell16 id) const
 // **************************************************************
 int32_t Forth::RStackDepth() const
 {
-  return m_rsp - return_stack;
+  return m_rsp - m_return_stack;
 }
 
 // **************************************************************
@@ -66,7 +68,7 @@ int32_t Forth::RStackDepth() const
 // **************************************************************
 int32_t Forth::DStackDepth() const
 {
-  return m_dsp - data_stack;
+  return m_dsp - m_data_stack;
 }
 
 // **************************************************************
@@ -76,7 +78,7 @@ void Forth::execToken(const Cell16 tx)
 {
   int32_t depth;
   Cell16 token = tx;
-  m_ip = nullptr;
+  m_ip = 65535U;
 
   //std::cout << "AVANT " << m_dsp - data_stack << std::endl;
 
@@ -92,10 +94,9 @@ void Forth::execToken(const Cell16 tx)
           // Save the next token to exec after the end of the definition
           RPUSH(m_ip);
 
-          m_ip = m_dico.ip(token);
-          //checkDicoBoundaries(m_ip, "execToken");
-          m_ip++;
-          token = m_dico.read16at(ADDR8(m_ip));
+          m_ip = m_dico.read16at(token);
+          m_ip += 2U;
+          token = m_dico.read16at(m_ip);
         }
 
       //
@@ -111,10 +112,10 @@ void Forth::execToken(const Cell16 tx)
       // Do not forget than non-primitive words have the
       // token EXIT to pop the return stack to get back
       // IP value.
-      if (nullptr != m_ip)
+      if (65535U != m_ip)
         {
-          m_ip++;
-          token = m_dico.read16at(ADDR8(m_ip));
+          m_ip += 2U;
+          token = m_dico.read16at(m_ip);
         }
 
       // Return stack overflow ?
@@ -281,14 +282,16 @@ void Forth::interprete(std::string const& word)
         }
       else if (toNumber(word, number))
         {
-          //std::cout << "Forth::interprete '" << word << "' COMP NUMBER\n";
-          // Optim si number < 65536 alors
-          // m_dicoAppendCell16(FORTH_PRIMITIVE_LITERAL16)
-          // m_dicoAppendCell16(number);
-          m_dico.appendCell16(FORTH_PRIMITIVE_LITERAL); // _LITERAL32
-          // align @32 ?
-          m_dico.appendCell16(number / 65536U);
-          m_dico.appendCell16(number & 65535U);
+          if (number <= 65535U)
+            {
+              m_dico.appendCell16(FORTH_PRIMITIVE_LITERAL_16);
+              m_dico.appendCell16(number);
+            }
+          else
+            {
+              m_dico.appendCell16(FORTH_PRIMITIVE_LITERAL_32);
+              m_dico.appendCell32(number);
+            }
         }
       else
         {
@@ -397,6 +400,13 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_IMMEDIATE, "IMMEDIATE", 0);
 
+  // Dictionnary manipulation
+  m_dico.add(FORTH_PRIMITIVE_HERE, "HERE", 0);
+  m_dico.add(FORTH_PRIMITIVE_ALLOT, "ALLOT", 0);
+  m_dico.add(FORTH_PRIMITIVE_COMMA, ",", 0);
+  m_dico.add(FORTH_PRIMITIVE_FETCH, "@", 0);
+  m_dico.add(FORTH_PRIMITIVE_STORE, "!", 0);
+
   // Words changing IP
   m_dico.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
   m_dico.add(FORTH_PRIMITIVE_BRANCH, "BRANCH", 0);
@@ -413,7 +423,8 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_CELL, "CELLS", 0);
 
   // Literals
-  m_dico.add(FORTH_PRIMITIVE_LITERAL, "LITERAL", 0);
+  m_dico.add(FORTH_PRIMITIVE_LITERAL_16, "LITERAL16", 0);
+  m_dico.add(FORTH_PRIMITIVE_LITERAL_32, "LITERAL32", 0);
 
   // Arithmetic
   m_dico.add(FORTH_PRIMITIVE_ABS, "ABS", 0);

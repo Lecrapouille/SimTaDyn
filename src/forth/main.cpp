@@ -6,6 +6,49 @@ int main(void)
   std::pair<bool, std::string> res;
 
   forth.boot();
+  res = forth.eatString("55 >R R> .");
+  forth.ok(res);
+
+  res = forth.eatString("1 2 MIN .");
+  forth.ok(res);
+  res = forth.eatString("1 2 MAX .");
+  forth.ok(res);
+  res = forth.eatString("HERE . DEPTH .");
+  forth.ok(res);
+  res = forth.eatString("42 HERE !");
+  forth.ok(res);
+  forth.dictionary().dump("toto2.bin");
+
+  res = forth.eatString("HERE @ .");
+  forth.ok(res);
+
+  return 0;
+
+  res = forth.eatString("1 1 + .");
+  forth.ok(res);
+
+  res = forth.eatString(": PLUS + + ;");
+  forth.ok(res);
+
+  res = forth.eatString(": DPLUS PLUS . ;");
+  forth.ok(res);
+
+  res = forth.eatString("1 2 3 DPLUS");
+  forth.ok(res);
+
+  res = forth.eatString(": NB 42 ;");
+  forth.ok(res);
+forth.dictionary().dump("toto2.bin");
+ forth.dictionary().display();
+  res = forth.eatString("NB 24 + .");
+  forth.ok(res);
+
+  return 0;
+
+
+
+
+
 #warning "BUG non detecte"
   res = forth.eatString(": NB 42 ;");
   forth.ok(res);
