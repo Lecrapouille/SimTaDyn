@@ -6,6 +6,15 @@ int main(void)
   std::pair<bool, std::string> res;
 
   forth.boot();
+
+  res = forth.eatString("$1400 .");
+  forth.ok(res);
+
+  res = forth.eatString("\'A' .");
+  forth.ok(res);
+  return 0;
+
+
   res = forth.eatString("55 >R R> .");
   forth.ok(res);
 

@@ -171,10 +171,10 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
     {
       ++i;
       base = 16;
-      if (m_base < 33)
+      if (m_base >= 33)
         return false;
     }
-  // hexadecimal, if base<33.
+  // hexadecimal, if base < 33.
   else if ('0' == word[i])
     {
       ++i;
@@ -204,10 +204,9 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
   try
     {
       std::size_t sz;
-
-      unsigned long val = std::stoul(word, &sz, base);
+      unsigned long val = std::stoul(word.substr(i, word.length() - i), &sz, base);
       number = (negative ? -val : val);
-      return sz == word.size();
+      return (sz + i) == word.length();
     }
   catch (const std::invalid_argument& ia)
     {
