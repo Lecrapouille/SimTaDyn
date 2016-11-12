@@ -122,13 +122,16 @@ typedef uint8_t        Cell8;
 // Console color
 //
 // **************************************************************
-#  define RED     "\033[31m"
-#  define GREY    "\033[32m"
-#  define YELLOW  "\033[33m"
-#  define BLUE    "\033[34m"
-#  define WHITE   "\033[37m"
-#  define DEFAULT "\033[00m"
+#  define RED     "\033[1;31m"
+#  define GREEN   "\033[1;32m"
+#  define YELLOW  "\033[1;33m"
+#  define BLUE    "\033[1;34m"
+#  define AZUL    "\033[0;36m"
+#  define GREY    "\033[0;37m"
+#  define WHITE   "\033[1;37m"
+#  define DEFAULT "\033[0;00m"
 
+// TODO: definir COLOR_IMMEDIATE YELLOW etc
 
 //#  define DEBUG(txt) do { std::cout << txt << std::endl; } while (0)
 //#  define DEBUG3(a, txt, b) do { std::cout << a << txt << b << std::endl; } while (0)

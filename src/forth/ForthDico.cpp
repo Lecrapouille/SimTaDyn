@@ -184,6 +184,9 @@ void ForthDico::display() const
   bool smudge, immediate;
   const char *color = DEFAULT;
 
+  std::cout << "Address                    Word  Token    Definition (tokens)    Translation" << std::endl;
+  std::cout << "============================================================================" << std::endl;
+
   prev = m_here;
   ptr = m_last;
   do
@@ -196,11 +199,19 @@ void ForthDico::display() const
       smudge = m_dictionary[ptr] & FLAG_SMUDGE;
       immediate = m_dictionary[ptr] & FLAG_IMMEDIATE;
 
+      // Next word in the dictionary (relative address)
+      nfa = m_dictionary[ptr + length + 1U] * 256U + m_dictionary[ptr + length + 2U];
+
+      // Code Pointer
+      code = m_dictionary[ptr + length + 3U] * 256U + m_dictionary[ptr + length + 4U];
+
       // Select color depending on word flag bits
       if (immediate)
         color = YELLOW;
       else if (smudge)
         color = GREY;
+      else if (code < NUM_PRIMITIVES)
+        color = BLUE;
       else
         color = RED;
 
@@ -209,23 +220,14 @@ void ForthDico::display() const
                 << color << " " << (char *) &m_dictionary[ptr + 1U]
                 << " ";
 
-      // Let color in grey for unused words
-      if (!smudge)
-        color = WHITE;
-
-      // Next word in the dictionary (relative address)
-      nfa = m_dictionary[ptr + length + 1U] * 256U + m_dictionary[ptr + length + 2U];
-
-      // Code Pointer
-      code = m_dictionary[ptr + length + 3U] * 256U + m_dictionary[ptr + length + 4U];
-      std::cout << color << std::setfill('0') << std::setw(4) << std::hex << code << ": ";
+      if (!smudge) color = AZUL; // Let color in grey for unused words
+      std::cout << color << '(' << std::setfill('0') << std::setw(4) << std::hex << code << ")    ";
 
       // Word definition grouped by 4 cell
       def_length = prev - ptr - length - 3U;
       for (i = 2; i < def_length; )
         {
-          if (!smudge)
-            color = WHITE;
+          if (!smudge) color = WHITE;
 
           // Tokens in hexa
           c = 4U; ii = i; kk = 0;
@@ -240,8 +242,9 @@ void ForthDico::display() const
           // Align space
           if (kk < 4)
             {
-              std::cout << color << std::setfill(' ') << std::setw((4 - kk) * 5) << " ";
+              std::cout << color << std::setfill(' ') << std::setw((4 - kk) * 5) << "    ";
             }
+          std::cout << "   ";
 
           // Tokens name
           c = 4U; i = ii;
@@ -250,28 +253,28 @@ void ForthDico::display() const
               token = m_dictionary[ptr + length + 3U + i] * 256U + m_dictionary[ptr + length + 4U + i];
               i += 2U;
 
-              // Colorize
-              if ((smudge) || (m_dictionary[token] & FLAG_SMUDGE))
-                {
-                  color = GREY;
-                }
-              else
-                {
-                  if (m_dictionary[token] & FLAG_IMMEDIATE)
-                    color = YELLOW;
-                  else if ((FORTH_PRIMITIVE_LITERAL_32 == token) ||
-                           (FORTH_PRIMITIVE_LITERAL_16 == token))
-                    color = BLUE;
-                  else
-                    color = RED;
-                }
-
               if (token < NUM_PRIMITIVES)
                 {
                   std::pair<bool, int32_t> res = find(token);
                   if (res.first)
                     {
-                      std::cout << color << (char *) &m_dictionary[res.second + 1U] << " ";
+                      // Colorize
+                      uint32_t j = res.second;
+                      if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
+                        {
+                          color = GREY;
+                        }
+                      else
+                        {
+                          if (m_dictionary[j] & FLAG_IMMEDIATE)
+                            color = YELLOW;
+                          else if ((FORTH_PRIMITIVE_LITERAL_32 == token) ||
+                                   (FORTH_PRIMITIVE_LITERAL_16 == token))
+                            color = GREEN;
+                          else
+                            color = BLUE;
+                        }
+
                       if ((FORTH_PRIMITIVE_LITERAL_32 == token) ||
                           (FORTH_PRIMITIVE_LITERAL_16 == token))
                         {
@@ -290,6 +293,10 @@ void ForthDico::display() const
                               i += 2U;
                             }
                         }
+                      else
+                        {
+                          std::cout << color << (char *) &m_dictionary[res.second + 1U] << " ";
+                        }
                     }
                   else
                     {
@@ -302,6 +309,19 @@ void ForthDico::display() const
                   uint32_t j = token - 2U; // 2: skip NFA
                   while (0 == (m_dictionary[j] & 0x80))
                     --j;
+
+                      if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
+                        {
+                          color = GREY;
+                        }
+                      else
+                        {
+                          if (m_dictionary[j] & FLAG_IMMEDIATE)
+                            color = YELLOW;
+                          else
+                            color = RED;
+                        }
+
                   std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
                 }
             }
@@ -309,14 +329,14 @@ void ForthDico::display() const
           std::cout << std::endl;
           if (i < def_length - 1)
             {
-              std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + i << " ";
-              std::cout << std::setfill(' ') << std::setw(29U + 6U) << " ";
+              std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + i << "    ";
+              std::cout << GREY << std::setfill(' ') << std::setw(29U + 5U) << "    ";
             }
         }
 
       // primitive
       if (2U == def_length)
-        std::cout << "primitive" << std::endl;
+        std::cout << WHITE << "primitive" << std::endl;
 
       // Go to the previous entry
       prev = ptr;
