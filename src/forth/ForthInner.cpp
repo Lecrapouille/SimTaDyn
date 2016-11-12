@@ -403,6 +403,11 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_COLON, ":", 0);
   m_dico.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_IMMEDIATE, "IMMEDIATE", 0);
+  m_dico.add(FORTH_PRIMITIVE_SMUDGE, "SMUDGE", 0);
+
+  // Words
+  m_dico.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);
+  m_dico.add(FORTH_PRIMITIVE_EXECUTE, "EXECUTE", 0);
 
   // Dictionnary manipulation
   m_dico.add(FORTH_PRIMITIVE_HERE, "HERE", 0);

@@ -6,6 +6,22 @@ int main(void)
   std::pair<bool, std::string> res;
 
   forth.boot();
+  res = forth.eatFile("hello.fs");
+  forth.ok(res);
+  forth.dictionary().display();
+  forth.dictionary().dump("toto2.bin");
+  return 0;
+
+  res = forth.eatString(": GT1 123 . ;");
+  forth.ok(res);
+  //res = forth.eatString("' GT1 EXECUTE");
+  //forth.ok(res);
+  res = forth.eatString("GT1");
+  forth.ok(res);
+  forth.dictionary().display();
+  forth.dictionary().dump("toto2.bin");
+  return 0;
+
 
   res = forth.eatString("$1400 .");
   forth.ok(res);

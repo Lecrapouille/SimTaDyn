@@ -84,6 +84,51 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_dico.m_dictionary[m_dico.m_last] |= FLAG_IMMEDIATE;
       break;
 
+    case FORTH_PRIMITIVE_SMUDGE:
+      {
+        std::string word = getWord();
+        Cell16 token;
+        bool immediate;
+        if (m_dico.find(word, token, immediate))
+          {
+            std::cout << "FOUND " << word << " " << token << std::endl;
+
+            // Go back to the word definition
+            uint32_t j = token - 2U; // 2: skip NFA
+            while (0 == (m_dico.m_dictionary[j] & 0x80))
+              --j;
+            m_dico.m_dictionary[j] |= FLAG_SMUDGE;
+          }
+        else
+          {
+            std::cout << YELLOW << "[WARNING] Unknown word '"
+                      << word << "'. Word SMUDGE Ignored !"
+                      << DEFAULT << std::endl;
+          }
+      }
+      break;
+
+    case FORTH_PRIMITIVE_TICK:
+      {
+        std::string word = getWord();
+        Cell16 token;
+        bool immediate;
+        if (false == m_dico.find(word, token, immediate))
+          {
+            token = 0;
+            std::cout << YELLOW << "[WARNING] Unknown word '"
+                      << word << "'. Word TICK Ignored !"
+                      << DEFAULT << std::endl;
+          }
+        DPUSH(m_tos);
+        m_tos = token;
+      }
+      break;
+
+     case FORTH_PRIMITIVE_EXECUTE:
+       execToken(m_tos);
+       break;
+
     case FORTH_PRIMITIVE_HERE:
       DPUSH(m_tos);
       m_tos = m_dico.here();
@@ -176,7 +221,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_LITERAL_16:
       DPUSH(m_tos);
       m_ip += 2U; // Skip primitive LITTERAL
-      m_tos = m_dico.read32at(m_ip);
+      m_tos = m_dico.read16at(m_ip);
       break;
 
     case FORTH_PRIMITIVE_LITERAL_32:
