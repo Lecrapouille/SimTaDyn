@@ -291,8 +291,33 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       DPOP(m_tos);
       break;
 
+      //
+    case FORTH_PRIMITIVE_BINARY:
+      changeDisplayBase(2U);
+      break;
+    case FORTH_PRIMITIVE_OCTAL:
+      changeDisplayBase(8U);
+      break;
+    case FORTH_PRIMITIVE_HEXADECIMAL:
+      changeDisplayBase(16U);
+      break;
+    case FORTH_PRIMITIVE_DECIMAL:
+      changeDisplayBase(10U);
+      break;
+
+      // gforth 16 BASE !
+      // A BASE !
+      // Mais SimForth: 16 BASE A BASE
+    case FORTH_PRIMITIVE_BASE:// FIXME USER VARIABLE
+      if (!changeDisplayBase(m_tos))
+        {
+          std::cerr << YELLOW << "[WARNING] '"
+                    << m_tos << "' is an invalid base and shall be [2..36]. Ignored !"
+                    << DEFAULT << std::endl;
+        }
+      break;
+
     case FORTH_PRIMITIVE_PLUS:
-      std::cout << "ADDITION\n";
       BINARY_OP(+);
       break;
     case FORTH_PRIMITIVE_MINUS:

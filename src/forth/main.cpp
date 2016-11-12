@@ -9,8 +9,17 @@ int main(void)
 
   res = forth.eatString("$1400 .");
   forth.ok(res);
-
+  res = forth.eatString("16 BASE $1400 .");
+  forth.ok(res);
+  res = forth.eatString("ABC .");
+  forth.ok(res);
+  res = forth.eatString("A BASE $ABC .");
+  forth.ok(res);
   res = forth.eatString("\'A' .");
+  forth.ok(res);
+  res = forth.eatString("1 BASE");
+  forth.ok(res);
+  res = forth.eatString("2 .");
   forth.ok(res);
   return 0;
 

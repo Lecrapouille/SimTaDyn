@@ -38,7 +38,7 @@ protected:
   int32_t RStackDepth() const;
   int32_t DStackDepth() const;
   inline bool isPrimitive(const Cell16 id) const;
-  inline void changeDisplayBase(const uint8_t newbase);
+  bool changeDisplayBase(const uint8_t newbase);
   inline void restore();
   std::string getWord();
 

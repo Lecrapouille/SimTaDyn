@@ -42,9 +42,14 @@ const ForthDico& Forth::dictionary() const
 // When displaying numbers on screen, display them on the
 // selected base.
 // **************************************************************
-inline void Forth::changeDisplayBase(const uint8_t newbase)
+bool Forth::changeDisplayBase(const uint8_t newbase)
 {
-  m_base = newbase;
+  if ((newbase >= 2) && (newbase <= 36))
+    {
+      m_base = newbase;
+      return true;
+    }
+  return false;
 }
 
 // **************************************************************
@@ -442,6 +447,13 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_LSHIFT, "<<", 0);
   m_dico.add(FORTH_PRIMITIVE_RSHIFT, "RSHIFT", 0);
   m_dico.add(FORTH_PRIMITIVE_LSHIFT, "LSHIFT", 0);
+
+  // Base
+  m_dico.add(FORTH_PRIMITIVE_BASE, "BIN", 0);
+  m_dico.add(FORTH_PRIMITIVE_BASE, "OCTAL", 0);
+  m_dico.add(FORTH_PRIMITIVE_BASE, "HEX", 0);
+  m_dico.add(FORTH_PRIMITIVE_BASE, "DECIMAL", 0);
+  m_dico.add(FORTH_PRIMITIVE_BASE, "BASE", 0);
 
   // Logic
   m_dico.add(FORTH_PRIMITIVE_GREATER, ">", 0);
