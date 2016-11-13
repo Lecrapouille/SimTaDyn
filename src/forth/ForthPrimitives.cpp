@@ -1,7 +1,7 @@
 #include "ForthInner.hpp"
 
 #  define BINARY_OP(op) { m_tos = DDROP() op m_tos; } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
-#  define LOGICAL_OP(op) { m_tos = (DDROP() op m_tos) * (-1); }
+#  define LOGICAL_OP(op) { m_tos = -1 * (DDROP() op m_tos); }
 
 // **************************************************************
 //
@@ -202,28 +202,28 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // Move x to the return stack.
       // ( x -- ) ( R: -- x )
     case FORTH_PRIMITIVE_TO_RSTACK:
-      APUSH(m_tos);
-      DDROP();
+      RPUSH(m_tos);
+      DPOP(m_tos);
       break;
 
       // Transfer cell pair x1 x2 to the return stack
       // ( x1 x2 -- ) ( R: -- x1 x2 )
     case FORTH_PRIMITIVE_2TO_RSTACK:
       DPOP(m_tos1);
-      APUSH(m_tos1);
-      APUSH(m_tos);
-      DDROP();
+      RPUSH(m_tos1);
+      RPUSH(m_tos);
+      DPOP(m_tos);
       break;
 
     case FORTH_PRIMITIVE_FROM_RSTACK:
       DPUSH(m_tos);
-      APOP(m_tos);
+      RPOP(m_tos);
       break;
 
     case FORTH_PRIMITIVE_2FROM_RSTACK:
       DPUSH(m_tos);
-      APOP(m_tos);
-      APOP(m_tos1);
+      RPOP(m_tos);
+      RPOP(m_tos1);
       DPUSH(m_tos1);
       break;
 
@@ -274,7 +274,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // nip ( a b -- b ) swap drop ;
     case FORTH_PRIMITIVE_NIP:
-      DDROP();
+      DPOP(m_tos);
       break;
 
       // ( ... n -- sp(n) )
@@ -350,7 +350,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // 2drop ( a b -- ) drop drop ;
     case FORTH_PRIMITIVE_2DROP:
-      DDROP();
+      DPOP(m_tos);
       DPOP(m_tos);
       break;
 

@@ -48,7 +48,7 @@ protected:
   // Stacks
   Cell32  m_data_stack[STACK_SIZE];
   Cell32  m_alternative_stack[STACK_SIZE];
-  Cell16  m_return_stack[STACK_SIZE];
+  Cell32  m_return_stack[STACK_SIZE];
 
   // Top of (data) Stack
   Cell32  m_tos, m_tos1, m_tos2, m_tos3, m_tos4;
@@ -56,7 +56,7 @@ protected:
   // Registers
   Cell32 *m_dsp;   // Data stack pointer
   Cell32 *m_asp;   // Alternative data stack pointer
-  Cell16 *m_rsp;   // Return stack pointer
+  Cell32 *m_rsp;   // Return stack pointer
   Cell16  m_ip;    // Instruction pointer (CFA of the next word to be executed)
   int32_t m_base;  // Base (octal, decimal, hexa) when displaying numbers
   Cell32  m_state; // compile/execution

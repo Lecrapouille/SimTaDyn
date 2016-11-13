@@ -121,7 +121,8 @@ void Forth::execToken(const Cell16 tx)
       while (!isPrimitive(token))
         {
           // Save the next token to exec after the end of the definition
-          RPUSH(m_ip);
+          Cell32 c = m_ip; RPUSH(c);
+          //std::cout << "PUSH "; m_dico.displayToken(m_ip); std::cout << std::endl;
 
           m_ip = m_dico.read16at(token);
           m_ip += 2U;

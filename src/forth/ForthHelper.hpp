@@ -83,7 +83,7 @@ typedef uint8_t        Cell8;
 #  define APOP(r)  (r = ADROP())             // Discard the top of the stack, save its value in the register
 
 // Return stack (store calling functions (tokens))
-#  define RPUSH(a)  (*(m_rsp++) = CELL16(a)) // Store an address a on the top of stack
+#  define RPUSH(a)  (*(m_rsp++) = CELL32(a)) // Store an address a on the top of stack
 #  define RPOP(r)   (r = *(--m_rsp))         // Discard the top of the stack
 #  define RPOP16(r) (r = *(--m_rsp))
 
