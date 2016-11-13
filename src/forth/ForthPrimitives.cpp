@@ -1,5 +1,8 @@
 #include "ForthInner.hpp"
 
+#  define BINARY_OP(op) { m_tos = DDROP() op m_tos; } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
+#  define LOGICAL_OP(op) { m_tos = (DDROP() op m_tos) * (-1); }
+
 // **************************************************************
 //
 // **************************************************************
@@ -125,8 +128,21 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       }
       break;
 
+     case FORTH_PRIMITIVE_COMPILE:
+       m_ip += 2;
+       m_dico.appendCell16(m_dico.read16at(m_ip));
+       break;
+
      case FORTH_PRIMITIVE_EXECUTE:
        execToken(m_tos);
+       break;
+
+     case FORTH_PRIMITIVE_LBRACKET:
+       m_state = EXECUTION_STATE;
+       break;
+
+    case FORTH_PRIMITIVE_RBRACKET:
+       m_state = COMPILATION_STATE;
        break;
 
     case FORTH_PRIMITIVE_HERE:
@@ -140,7 +156,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Reserve one cell of data space and store x in the cell.
     case FORTH_PRIMITIVE_COMMA:
-      m_dico.appendCell32(m_tos);
+      m_dico.appendCell16(m_tos);
+      DPOP(m_tos);
       break;
 
       // ( a-addr -- x )
@@ -154,7 +171,6 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_STORE:
       DPOP(m_tos1);
       m_dico.write32at(m_tos, m_tos1);
-      std::cout << "Store " << m_tos1 << " at " << m_tos << std::endl;
       break;
 
       // Restore the IP when interpreting the definition
@@ -165,20 +181,22 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Change IP
     case FORTH_PRIMITIVE_BRANCH:
-      m_ip += m_dico.read16at(m_ip);
+      m_ip += m_dico.read16at(m_ip + 2U);
+      // Do not forget that m_ip will be += 2 next iteration
       break;
 
       // Change IP if top of stack is 0
     case FORTH_PRIMITIVE_0BRANCH:
       if (0 == m_tos)
         {
-          m_ip += m_dico.read16at(m_ip);
+          m_ip += m_dico.read16at(m_ip + 2U);
         }
       else
         {
           m_ip += 2U;
         }
-      DDROP();
+      // Do not forget that m_ip will be += 2 next iteration
+      DPOP(m_tos);
       break;
 
       // Move x to the return stack.
@@ -354,7 +372,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // A BASE !
       // Mais SimForth: 16 BASE A BASE
     case FORTH_PRIMITIVE_BASE:// FIXME USER VARIABLE
-      if (!changeDisplayBase(m_tos))
+      if (false == changeDisplayBase(m_tos))
         {
           std::cerr << YELLOW << "[WARNING] '"
                     << m_tos << "' is an invalid base and shall be [2..36]. Ignored !"
@@ -380,23 +398,35 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_LSHIFT:
       BINARY_OP(<<);
       break;
+    case FORTH_PRIMITIVE_FALSE:
+      m_tos = 0;
+      DPUSH(m_tos);
+      break;
+    case FORTH_PRIMITIVE_TRUE:
+      m_tos = -1;
+      DPUSH(m_tos);
+      break;
     case FORTH_PRIMITIVE_GREATER_EQUAL:
-      BINARY_OP(>=);
+      LOGICAL_OP(>=);
       break;
     case FORTH_PRIMITIVE_LOWER_EQUAL:
-      BINARY_OP(<=);
+      LOGICAL_OP(<=);
       break;
     case FORTH_PRIMITIVE_GREATER:
-      BINARY_OP(>);
+      LOGICAL_OP(>);
       break;
     case FORTH_PRIMITIVE_LOWER:
-      BINARY_OP(<);
+      LOGICAL_OP(<);
       break;
     case FORTH_PRIMITIVE_EQUAL:
-      BINARY_OP(==);
+      LOGICAL_OP(==);
+      break;
+    case FORTH_PRIMITIVE_0EQUAL:
+      DPUSH(0U);
+      LOGICAL_OP(==);
       break;
     case FORTH_PRIMITIVE_NOT_EQUAL:
-      BINARY_OP(!=);
+      LOGICAL_OP(!=);
       break;
     case FORTH_PRIMITIVE_AND:
       BINARY_OP(&);
@@ -421,6 +451,11 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
     case FORTH_PRIMITIVE_CARRIAGE_RETURN:
       std::cout << std::endl;
+      break;
+    case FORTH_PRIMITIVE_DISPLAY_DSTACK:
+      DPUSH(m_tos);
+      displayDStack();
+      DPOP(m_tos);
       break;
     default:
       ForthUnknownPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;

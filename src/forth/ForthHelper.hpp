@@ -10,6 +10,7 @@
 #  include <string>
 #  include <iomanip>
 #  include <utility>
+#  include <algorithm>
 
 // **************************************************************
 //
@@ -75,7 +76,6 @@ typedef uint8_t        Cell8;
 #  define DDROP()  (*(--m_dsp))              // Discard the top of the stack
 #  define DPOP(r)  (r = DDROP())             // Discard the top of the stack, save its value in the register r
 #  define DPICK(n) (*(m_dsp - n - 1))        // Look at the nth element (n >= 1) of the stack from the top (1 = 1st element)
-#  define BINARY_OP(op) { m_tos = DDROP() op m_tos; } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
 
 // Alternative data stack (function parameters manipulation)
 #  define APUSH(n) (*(m_asp++) = CELL32(n))  // Store the number n on the top of stack

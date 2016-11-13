@@ -79,6 +79,30 @@ int32_t Forth::DStackDepth() const
 // **************************************************************
 //
 // **************************************************************
+void Forth::displayDStack() const
+{
+  int32_t depth = m_dsp - m_data_stack;
+
+  for (int32_t s = 0; s < depth; ++s)
+    {
+      std::cout << std::setbase(m_base) << m_data_stack[s] << ' ';
+    }
+  std::cout << std::endl;
+}
+
+// **************************************************************
+//
+// **************************************************************
+void Forth::displayRStack() const
+{
+  int32_t depth = m_rsp - m_return_stack;
+
+  for (int32_t s = 0; s < depth; ++s)
+    {
+      std::cout << std::hex << m_return_stack[s] << ' ';
+    }
+  std::cout << std::endl;
+}
 void Forth::execToken(const Cell16 tx)
 {
   int32_t depth;
@@ -407,6 +431,9 @@ void Forth::boot()
   // Words
   m_dico.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_EXECUTE, "EXECUTE", 0);
+  m_dico.add(FORTH_PRIMITIVE_COMPILE, "COMPILE", 0);
+  m_dico.add(FORTH_PRIMITIVE_LBRACKET, "[", FLAG_IMMEDIATE);
+  m_dico.add(FORTH_PRIMITIVE_RBRACKET, "]", 0);
 
   // Dictionnary manipulation
   m_dico.add(FORTH_PRIMITIVE_HERE, "HERE", 0);
@@ -460,12 +487,15 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_BASE, "BASE", 0);
 
   // Logic
+  m_dico.add(FORTH_PRIMITIVE_FALSE, "FALSE", 0);
+  m_dico.add(FORTH_PRIMITIVE_TRUE, "TRUE", 0);
   m_dico.add(FORTH_PRIMITIVE_GREATER, ">", 0);
   m_dico.add(FORTH_PRIMITIVE_GREATER_EQUAL, ">=", 0);
   m_dico.add(FORTH_PRIMITIVE_LOWER, "<", 0);
   m_dico.add(FORTH_PRIMITIVE_LOWER_EQUAL, "<=", 0);
   m_dico.add(FORTH_PRIMITIVE_EQUAL, "==", 0);
   m_dico.add(FORTH_PRIMITIVE_EQUAL, "=", 0);
+  m_dico.add(FORTH_PRIMITIVE_0EQUAL, "0=", 0);
   m_dico.add(FORTH_PRIMITIVE_NOT_EQUAL, "<>", 0);
   m_dico.add(FORTH_PRIMITIVE_NOT_EQUAL, "!=", 0);
   m_dico.add(FORTH_PRIMITIVE_AND, "AND", 0);
@@ -491,4 +521,5 @@ void Forth::boot()
   // Printf
   m_dico.add(FORTH_PRIMITIVE_DISP, ".", 0);
   m_dico.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, "CR", 0);
+  m_dico.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, ".S", 0);
 }
