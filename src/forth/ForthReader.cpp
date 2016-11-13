@@ -181,6 +181,9 @@ bool ForthReader::split()
       // Found a word
       m_word = m_str.substr(m_cursor_last, m_cursor_next - m_cursor_last);
 
+      // Convert the word to upper case
+      std::transform(m_word.begin(), m_word.end(), m_word.begin(), ::toupper);
+
       m_cursor_prev = m_cursor_last;
       m_cursor_last = m_cursor_next;
       return true;
