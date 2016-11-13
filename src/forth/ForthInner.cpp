@@ -180,12 +180,11 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
         return false;
     }
   // hexadecimal, if base < 33.
-  else if ('0' == word[i])
+  else if (('0' == word[i]) && ('x' == word[i + 1]))
     {
-      ++i;
-      if (('x' == word[i + 1]) && (m_base < 33))
+      if (m_base < 33)
         {
-          ++i;
+          i += 2U;
           base = 16;
         }
       else
@@ -454,10 +453,10 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_LSHIFT, "LSHIFT", 0);
 
   // Base
-  m_dico.add(FORTH_PRIMITIVE_BASE, "BIN", 0);
-  m_dico.add(FORTH_PRIMITIVE_BASE, "OCTAL", 0);
-  m_dico.add(FORTH_PRIMITIVE_BASE, "HEX", 0);
-  m_dico.add(FORTH_PRIMITIVE_BASE, "DECIMAL", 0);
+  m_dico.add(FORTH_PRIMITIVE_BINARY, "BIN", 0);
+  m_dico.add(FORTH_PRIMITIVE_OCTAL, "OCTAL", 0);
+  m_dico.add(FORTH_PRIMITIVE_HEXADECIMAL, "HEX", 0);
+  m_dico.add(FORTH_PRIMITIVE_DECIMAL, "DECIMAL", 0);
   m_dico.add(FORTH_PRIMITIVE_BASE, "BASE", 0);
 
   // Logic
