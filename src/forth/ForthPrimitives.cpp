@@ -90,19 +90,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_SMUDGE:
       {
         std::string word = getWord();
-        Cell16 token;
-        bool immediate;
-        if (m_dico.find(word, token, immediate))
-          {
-            std::cout << "FOUND " << word << " " << token << std::endl;
-
-            // Go back to the word definition
-            uint32_t j = token - 2U; // 2: skip NFA
-            while (0 == (m_dico.m_dictionary[j] & 0x80))
-              --j;
-            m_dico.m_dictionary[j] |= FLAG_SMUDGE;
-          }
-        else
+        if (false == m_dico.smudge(word))
           {
             std::cout << YELLOW << "[WARNING] Unknown word '"
                       << word << "'. Word SMUDGE Ignored !"

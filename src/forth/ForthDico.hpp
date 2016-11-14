@@ -12,6 +12,7 @@ public:
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
   bool exists(std::string const& word) const;
   std::pair<bool, int32_t> find(const Cell16 token) const;
+  bool smudge(std::string const& word);
   bool dump(std::string const& filename) const;
   void display() const;
   Cell16 last() const;

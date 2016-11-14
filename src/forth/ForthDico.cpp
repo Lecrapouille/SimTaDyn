@@ -106,6 +106,45 @@ bool ForthDico::find(std::string const& word, Cell16& token, bool& immediate) co
 }
 
 // **************************************************************
+// Smudge a word
+// **************************************************************
+bool ForthDico::smudge(std::string const& word)
+{
+  Cell32 nfa;
+  Cell32 length;
+
+  // last is a Cell16 but for computation with minus operator we need 32bits
+  int32_t ptr = m_last;
+
+  // 0 (aka NULL) meaning the last m_dictionary entry.  Because we are
+  // using relative addresses as uint16_t to save space we cannot use
+  // NULL
+  do
+    {
+      // Get the length of the forth name
+      length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+
+      // Compare name lengths before comparing strings
+      if (length == word.size())
+        {
+          // Same length, check if names mismatch
+          if (0 == std::strncmp(word.c_str(), (char*) &m_dictionary[ptr + 1U], length))
+            {
+              // Toogle the smudge bit
+              m_dictionary[ptr] ^= FLAG_SMUDGE;
+              return true;
+            }
+        }
+
+      // Not found: go to the previous word
+      nfa = read16at(ptr + length + 1U);
+      ptr = ptr - nfa;
+    } while (nfa);
+
+  return false;
+}
+
+// **************************************************************
 //
 // **************************************************************
 bool ForthDico::exists(std::string const& word) const
