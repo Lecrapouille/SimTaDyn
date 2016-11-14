@@ -11,6 +11,7 @@
 #  include <iomanip>
 #  include <utility>
 #  include <algorithm>
+#  include <assert.h>
 
 // **************************************************************
 //

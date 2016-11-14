@@ -18,11 +18,12 @@ Forth::Forth()
 // **************************************************************
 inline void Forth::restore()
 {
-   if (COMPILATION_STATE == m_state)
-     {
-       m_dico.m_last = m_last_at_colon;
-       m_dico.m_here = m_here_at_colon;
-     }
+  if ((COMPILATION_STATE == m_state) ||
+      ((COMMENT_STATE == m_state) && (COMPILATION_STATE == m_saved_state)))
+    {
+      m_dico.m_last = m_last_at_colon;
+      m_dico.m_here = m_here_at_colon;
+    }
 
    m_state = EXECUTION_STATE;
    m_dsp = m_data_stack;
@@ -379,10 +380,22 @@ std::pair<bool, std::string> Forth::parseStream()
   try
     {
       // FIXME: le stream peut ne pas etre termine: attendre
-      // FIXME: retourne ok si on lui donne une ligne vide
+      // FIXME: retourne ok si on lui donne une ligne vide dans un string
       while (m_reader.hasMoreWords())
         {
           interprete(m_reader.nextWord());
+        }
+
+      // Check Forth state shall be in execute mode at the end of the
+      // stream.  Else this means the end of the stream is truncated
+      // with a non finished function definition or non finished
+      // commentary.
+      if (EXECUTION_STATE != m_state)
+        {
+          // FIXME: the stream colum information is erroneous because
+          // a ForthReader::refill() has been called before. But I like
+          // this !
+          ForthTruncatedStream e(m_state); throw e;
         }
       return std::make_pair(true, "ok");
     }

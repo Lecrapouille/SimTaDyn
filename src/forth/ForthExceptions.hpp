@@ -22,6 +22,32 @@ public:
   }
 };
 
+class ForthTruncatedStream: public ForthException
+{
+public:
+  ForthTruncatedStream(const Cell32 Forthstate)
+  {
+    switch (Forthstate)
+      {
+      case COMPILATION_STATE:
+        m_error_msg = "Word definition not terminated when reaching the end of the stream";
+        break;
+      case COMMENT_STATE:
+        m_error_msg = "Commentary not terminated when reaching the end of the stream";
+        break;
+      default:
+        // This case is not possible
+        assert(1);
+        break;
+      }
+  }
+  virtual const char* what() const throw ()
+  {
+    return m_error_msg.c_str();
+  }
+  std::string m_error_msg;
+};
+
 class ForthUnbalancedDef: public ForthException
 {
 public:

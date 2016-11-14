@@ -12,6 +12,16 @@ int main(void)
   forth.dictionary().dump("toto2.bin");
   return 0;
 
+  res = forth.eatString(": FOO + + ;");
+  forth.ok(res);
+  res = forth.eatString("SMUDGE FOO");
+  forth.ok(res);
+  forth.dictionary().display();
+  res = forth.eatString("SMUDGE FOO");
+  forth.ok(res);
+  forth.dictionary().display();
+  return 0;
+
   res = forth.eatString(": GT1 123 . ;");
   forth.ok(res);
   //res = forth.eatString("' GT1 EXECUTE");
