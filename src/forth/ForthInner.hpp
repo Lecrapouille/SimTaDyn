@@ -27,6 +27,7 @@ public:
   std::pair<bool, std::string> eatFile(std::string const& filename);
   virtual void ok(std::pair<bool, std::string> const& res);
   const ForthDico& dictionary() const;
+  ForthDico& dictionary();
   void displayDStack() const;
   void displayRStack() const;
   // TODO: charge un fichier dico et ecrase le dico ou le charge a la fin

@@ -197,19 +197,55 @@ std::pair<bool, int32_t> ForthDico::find(const Cell16 token) const
 // Save the dictionnary in a binary file.
 // Use the commande hexdump -C filename for debugging it
 // **************************************************************
-bool ForthDico::dump(std::string const& filename) const
+bool ForthDico::dump(std::string const& filename) //const
 {
-  std::ofstream out = std::ofstream(filename, std::ios::binary | std::ios::trunc);
+  std::ofstream out(filename, std::ios::out | std::ios::binary | std::ios::trunc);
 
   if (out.is_open())
     {
-      out.write((char*) m_dictionary, m_here * sizeof (char));
+      // Hack: store LAST word at the end of the dictionnary to
+      // be sure that LAST will be splited in correct endian.
+      write16at(m_here, m_last);
+
+      // Store all the dictionary including LAST
+      out.write((char*) m_dictionary, (m_here + 2U) * sizeof (Cell8));
       out.close();
       return true;
     }
   else
     {
       std::cerr << "Cannot dump the dico. Reason was xxx" << std::endl; // FIXME
+      return false;
+    }
+}
+
+// **************************************************************
+// Load a dictionnary from a binary file.
+// TBD: skip the dictionary ?
+// **************************************************************
+bool ForthDico::load(std::string const& filename)
+{
+  std::ifstream in(filename, std::ios::in | std::ios::binary);
+
+  if (in.is_open())
+    {
+      // Get the length of file
+      in.seekg(0, in.end);
+      int length = in.tellg();
+      in.seekg(0, in.beg);
+
+      // Load the dictionary with LAST
+      in.read((char*) m_dictionary, length);
+
+      // Skip LAST and set HERE
+      m_here = length - 2U;
+      m_last = read16at(m_here);
+      in.close();
+      return true;
+    }
+  else
+    {
+      std::cerr << "Cannot load the file '" << filename << "'. Reason was xxx" << std::endl; // FIXME
       return false;
     }
 }

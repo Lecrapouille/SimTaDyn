@@ -13,7 +13,8 @@ public:
   bool exists(std::string const& word) const;
   std::pair<bool, int32_t> find(const Cell16 token) const;
   bool smudge(std::string const& word);
-  bool dump(std::string const& filename) const;
+  bool dump(std::string const& filename);// FIXME const;
+  bool load(std::string const& filename);
   void display() const;
   Cell16 last() const;
   Cell16 here() const;
@@ -35,8 +36,8 @@ protected:
   friend class Forth;
 
   Cell8   m_dictionary[DICTIONARY_SIZE];
-  Cell16  m_last;  // NFA of the last dictionnary entry.
-  Cell16  m_here;  // Address of the next available dictionary location.
+  Cell16  m_last;  // NFA of the last dictionnary entry (Forth word: LAST).
+  Cell16  m_here;  // Address of the next available dictionary location (word: HERE).
 };
 
 #endif /* FORTH_DICO_HPP_ */
