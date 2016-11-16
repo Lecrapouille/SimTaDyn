@@ -1,0 +1,70 @@
+Mots CORE forth a faire:
+========================
+*/
+*/MOD
+/MOD
++!
+."
+2@
+0<
+BUILD DOES
+RECURSE ---> utilise la definition en cours. Sinon utiliser le nom en cours de deifinition donc modifier la fonction find pour commencer a chercher a partir du mot en cours de definition 
+FIND
+C-FUNCTION
+CMOVE
+:T{ --> }T
+
+Mots SimTaDyn forth a faire:
+============================
+
+Forth ajouter mots -- et --> 
+C1 C2 -> pour dire que C1 et C2 sont en relation orienté ou non. Rique de conflit de nom avec celui des tests unitaires.
+
+Conflit de nom entre CELL de Forth et SimTaDynCell
+
+add buton calling a Foth command (token et string et file). Add a menu item instead of button (= plugins)
+
+Mot OpenGL
+
+BUG/FIXME/TBD
+=============
+
+::toupper pas mis au bon endroit mais ou ?
+
+Bug d'affichage du dico avec les mots 0BRANCH et BRANCH selon que le mot COMPILE est devant ou pas
+
+Bug d'affichage du dico avec un literal en 4em position fait planter
+: MULT
+  1 10 0 DO 
+  DUP 1+
+  1 10 0 DO
+    DUP 1+ 
+	OVER OVER * .
+  LOOP DROP CR
+LOOP DROP ;
+
+Exception quand on veut executer un mot compile-only ? dans le code ou dans un flag comme SMUDGE ?
+
+A tester:
+( COMMENTAIRE ( OUI ) POUET ) pforth et gforth plantent 
+==> faut il une var qui compte les parentheses ? Cas idiot: )
+
+Evolution
+==========
+
+Ajouter un mode interactif au standalone
+
+Faire une sauvegarde de LAST et HERE avant de parser un fichier afin de pouvoir restaurer le dico
+
+Faire une fenetre special Forth "interactive" et qui demande pas de sauvegarder a la fin de la session.
+
+Ajouter un historic des commandes avec les touches haut/bas ainsi que la touche TAB complete un mot et autorise une tabulation si on est en debut de ligne (ou char espaces) sinon elle est inactive.
+
+Comparer : positionner dup position = if drop exit then droite positionner ;
+avec : positionner begin dup position <> while droite repeat drop ;
+
+Color syntaxique Forth. Bouton clique droit sur include pour ouvrir le fichier et voir la definition (ainsi que la ligne du dictionnaire si mot compilé).
+
+Selectionner une portion de code puis cliquer sur executer
+
+Mode tutorial: comme les demos Scilab: texte qui s'affiche, l'utilisateur appuie sur return et une anim se passe. Ideeprendre le controle de la souris
