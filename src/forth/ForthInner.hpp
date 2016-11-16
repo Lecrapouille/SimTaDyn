@@ -72,7 +72,8 @@ protected:
   Cell32  m_saved_state;
 
   // Ascii reader
-  ForthReader m_reader;
+  ForthReader m_readers[8];
+  int32_t m_reader;
 
   // Dictionary
   ForthDico m_dico;

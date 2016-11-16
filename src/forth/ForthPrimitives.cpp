@@ -8,12 +8,12 @@
 // **************************************************************
 std::string Forth::getWord()
 {
-  if (!m_reader.hasMoreWords())
+  if (!READER.hasMoreWords())
     {
-      ForthReaderTruncatedFile e(m_reader.file());
+      ForthReaderTruncatedFile e(READER.file());
       throw e;
     }
-  return m_reader.nextWord();
+  return READER.nextWord();
 }
 
 // **************************************************************
@@ -42,7 +42,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Line of commentary
     case FORTH_PRIMITIVE_COMMENTARY:
-      m_reader.skipLine();
+      READER.skipLine();
       break;
 
       // Begin the definition of a new word
@@ -85,6 +85,44 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // Set immediate the last word
     case FORTH_PRIMITIVE_IMMEDIATE:
       m_dico.m_dictionary[m_dico.m_last] |= FLAG_IMMEDIATE;
+      break;
+
+    case FORTH_PRIMITIVE_INCLUDE:
+      {
+        // Restore TOS register (because execToken() pop TOS)
+        DPUSH(m_tos);
+
+        std::string filename = getWord();
+        std::cout << "Including " << filename << " " << std::endl;
+
+        // Save the current stream in a stack
+        ++m_reader;
+
+        // Parse the file
+        std::pair<bool, std::string> res;
+        res = eatFile(filename);
+        if (res.first)
+          {
+            // Succes
+            res.second += " parsed ";
+            res.second += filename;
+          }
+
+        ok(res);
+
+        if (res.first)
+          {
+            // Pop the previous stream
+            --m_reader;
+
+            //
+            DPOP(m_tos);
+          }
+        else
+          {
+            m_reader = 0;
+          }
+      }
       break;
 
     case FORTH_PRIMITIVE_SMUDGE:

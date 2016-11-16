@@ -6,11 +6,10 @@
 // **************************************************************
 Forth::Forth()
 {
-  m_state = EXECUTION_STATE;
-  m_dsp = m_data_stack;
-  m_asp = m_alternative_stack;
-  m_rsp = m_return_stack;
   m_base = 10U;
+  m_state = EXECUTION_STATE;
+  restore();
+  m_reader = 0;
 }
 
 // **************************************************************
@@ -18,6 +17,7 @@ Forth::Forth()
 // **************************************************************
 inline void Forth::restore()
 {
+  std::cout << "Restoring context\n";
   if ((COMPILATION_STATE == m_state) ||
       ((COMMENT_STATE == m_state) && (COMPILATION_STATE == m_saved_state)))
     {
@@ -112,6 +112,7 @@ void Forth::displayRStack() const
     }
   std::cout << std::endl;
 }
+
 void Forth::execToken(const Cell16 tx)
 {
   int32_t depth;
@@ -259,8 +260,8 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
         // avoid abort the program.
         number = (negative ? LONG_MIN : LONG_MAX);
 
-        std::pair<size_t, size_t> p = m_reader.cursors();
-        std::cerr << YELLOW << "[WARNING] " << m_reader.file() << ":"
+        std::pair<size_t, size_t> p = READER.cursors();
+        std::cerr << YELLOW << "[WARNING] " << READER.file() << ":"
                   << p.first << ":" << p.second
                   << " Out of range number '" + word + "' will be truncated"
                   << DEFAULT << std::endl;
@@ -350,7 +351,7 @@ void Forth::interprete(std::string const& word)
 // **************************************************************
 std::pair<bool, std::string> Forth::eatFile(std::string const& filename)
 {
-  if (m_reader.setFileToParse(filename))
+  if (READER.setFileToParse(filename))
     {
       return parseStream();
     }
@@ -373,7 +374,7 @@ std::pair<bool, std::string> Forth::eatString(const char* const code_forth)
 // **************************************************************
 std::pair<bool, std::string> Forth::eatString(std::string const& code_forth)
 {
-  m_reader.setStringToParse(code_forth);
+  READER.setStringToParse(code_forth);
   std::cout << code_forth << std::endl;
   return parseStream();
 }
@@ -389,9 +390,9 @@ std::pair<bool, std::string> Forth::parseStream()
     {
       // FIXME: le stream peut ne pas etre termine: attendre
       // FIXME: retourne ok si on lui donne une ligne vide dans un string
-      while (m_reader.hasMoreWords())
+      while (READER.hasMoreWords())
         {
-          interprete(m_reader.nextWord());
+          interprete(READER.nextWord());
         }
 
       // Check Forth state shall be in execute mode at the end of the
@@ -426,8 +427,8 @@ void Forth::ok(std::pair<bool, std::string> const& res)
     }
   else
     {
-      std::pair<size_t, size_t> p = m_reader.cursors();
-      std::cerr << RED << "[ERROR] " << m_reader.file() << ":"
+      std::pair<size_t, size_t> p = READER.cursors();
+      std::cerr << RED << "[ERROR] " << READER.file() << ":"
                 << p.first << ":" << p.second << ": "
                 << res.second << DEFAULT << std::endl;
     }
@@ -443,6 +444,7 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_LPARENTHESIS, "(", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_RPARENTHESIS, ")", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_COMMENTARY, "\\", FLAG_IMMEDIATE);
+  m_dico.add(FORTH_PRIMITIVE_INCLUDE, "INCLUDE", 0);
 
   // Words for definitions
   m_dico.add(FORTH_PRIMITIVE_COLON, ":", 0);
