@@ -443,7 +443,11 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_tos = (m_tos > m_tos1) ? m_tos : m_tos1;
       break;
     case FORTH_PRIMITIVE_DISP:
-      std::cout << std::setbase(m_base) << m_tos << " ";
+      std::cout << std::setbase(m_base) << (int32_t) m_tos << " ";
+      DPOP(m_tos);
+      break;
+    case FORTH_PRIMITIVE_UDISP:
+      std::cout << std::setbase(m_base) << (uint32_t) m_tos << " ";
       DPOP(m_tos);
       break;
     case FORTH_PRIMITIVE_CARRIAGE_RETURN:

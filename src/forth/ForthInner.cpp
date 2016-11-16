@@ -597,6 +597,7 @@ void Forth::boot()
 
   // Printf
   m_dico.add(FORTH_PRIMITIVE_DISP, ".", 0);
+  m_dico.add(FORTH_PRIMITIVE_UDISP, "U.", 0);
   m_dico.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, "CR", 0);
   m_dico.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, ".S", 0);
 }
