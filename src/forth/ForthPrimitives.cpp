@@ -88,41 +88,12 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
     case FORTH_PRIMITIVE_INCLUDE:
-      {
-        // Restore TOS register (because execToken() pop TOS)
-        DPUSH(m_tos);
+      // Restore TOS register (because execToken() poped TOS)
+      DPUSH(m_tos);
 
-        std::string filename = getWord();
-        std::cout << "Including " << filename << " " << std::endl;
+      includeFile(getWord());
 
-        // Save the current stream in a stack
-        ++m_reader;
-
-        // Parse the file
-        std::pair<bool, std::string> res;
-        res = eatFile(filename);
-        if (res.first)
-          {
-            // Succes
-            res.second += " parsed ";
-            res.second += filename;
-          }
-
-        ok(res);
-
-        if (res.first)
-          {
-            // Pop the previous stream
-            --m_reader;
-
-            //
-            DPOP(m_tos);
-          }
-        else
-          {
-            m_reader = 0;
-          }
-      }
+      DPOP(m_tos);
       break;
 
     case FORTH_PRIMITIVE_SMUDGE:

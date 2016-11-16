@@ -40,6 +40,7 @@ void ForthReader::init()
 // **************************************************************
 bool ForthReader::setFileToParse(std::string const& filename)
 {
+  init();
   m_mode = READ_FILE;
 
   // Re-open a file ? Close the old one
@@ -139,6 +140,7 @@ bool ForthReader::hasMoreWords()
   } while (false != res);
 
   // End of file
+  // FIXME: close the stream
   return false;
 }
 
@@ -148,6 +150,7 @@ bool ForthReader::hasMoreWords()
 std::string ForthReader::nextWord()
 {
   //m_word_picked = true;
+  //std::cout << "nextWord '" << m_word << "'" << std::endl;
   return m_word;
 }
 

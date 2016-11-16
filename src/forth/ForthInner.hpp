@@ -35,6 +35,7 @@ public:
 
 protected:
   std::pair<bool, std::string> parseStream();
+  void includeFile(std::string const& filename);
   bool toNumber(std::string const& word, Cell32& number);
   void execPrimitive(const Cell16 idPrimitive);
   void execToken(const Cell16 tx);
@@ -72,8 +73,8 @@ protected:
   Cell32  m_saved_state;
 
   // Ascii reader
-  ForthReader m_readers[8];
-  int32_t m_reader;
+  ForthReader m_readers[MAX_OPENED_STREAMS];
+  uint32_t m_stream;
 
   // Dictionary
   ForthDico m_dico;

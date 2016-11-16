@@ -9,7 +9,6 @@ Forth::Forth()
   m_base = 10U;
   m_state = EXECUTION_STATE;
   restore();
-  m_reader = 0;
 }
 
 // **************************************************************
@@ -25,10 +24,11 @@ inline void Forth::restore()
       m_dico.m_here = m_here_at_colon;
     }
 
-   m_state = EXECUTION_STATE;
-   m_dsp = m_data_stack;
-   m_asp = m_alternative_stack;
-   m_rsp = m_return_stack;
+  m_state = EXECUTION_STATE;
+  m_dsp = m_data_stack;
+  m_asp = m_alternative_stack;
+  m_rsp = m_return_stack;
+  m_stream = 0;
 }
 
 // **************************************************************
@@ -119,8 +119,6 @@ void Forth::execToken(const Cell16 tx)
   Cell16 token = tx;
   m_ip = 65535U;
 
-  //std::cout << "AVANT " << m_dsp - data_stack << std::endl;
-
   // Always eat the top of the stack and store the value in a working register.
   DPOP(m_tos);
 
@@ -169,7 +167,6 @@ void Forth::execToken(const Cell16 tx)
 
   // Store the working register
   DPUSH(m_tos);
-  //std::cout << "APRES " << m_dsp - data_stack << std::endl;
 }
 
 // **************************************************************
@@ -351,6 +348,7 @@ void Forth::interprete(std::string const& word)
 // **************************************************************
 std::pair<bool, std::string> Forth::eatFile(std::string const& filename)
 {
+  std::cout << "eating File " << filename << std::endl;
   if (READER.setFileToParse(filename))
     {
       return parseStream();
@@ -409,9 +407,8 @@ std::pair<bool, std::string> Forth::parseStream()
       return std::make_pair(true, "ok");
     }
 
-  catch (std::exception const& e)
+  catch (ForthException const& e)
     {
-      restore();
       return std::make_pair(false, e.what());
     }
 }
@@ -428,9 +425,65 @@ void Forth::ok(std::pair<bool, std::string> const& res)
   else
     {
       std::pair<size_t, size_t> p = READER.cursors();
-      std::cerr << RED << "[ERROR] " << READER.file() << ":"
-                << p.first << ":" << p.second << ": "
+      std::cerr << RED << "[ERROR] from " << READER.file() << ':'
+                << p.first << ':'
+                << p.second << ' '
                 << res.second << DEFAULT << std::endl;
+      restore();
+    }
+}
+
+// **************************************************************
+// Forth code: INCLUDE filename.fs
+//
+// Note: this is an indirect recursive function trhough functions
+// eatFile() which can call this routine again through the function
+// execPrimitive() if the Forth word INCLUDE is found.
+// **************************************************************
+void Forth::includeFile(std::string const& filename)
+{
+  std::cout << "Including " << filename << " " << std::endl;
+
+  // Save the current stream in a stack
+  ++m_stream;
+
+  // Reached maximum depth of include file including file including ... etc
+  if (m_stream >= MAX_OPENED_STREAMS)
+    {
+      ForthException e("too many opened streams");
+      throw e;
+    }
+
+  // Parse the included file (recursive)
+  std::pair<bool, std::string> res = eatFile(filename);
+  if (res.first)
+    {
+      // Succes
+      res.second += " parsed ";
+      res.second += filename;
+      ok(res);
+
+      // Pop the previous stream
+      assert(m_stream > 0);
+      --m_stream;
+    }
+  else
+    {
+      // Compilation failure.
+      // Concat the message error from the previous stream
+      // given
+      std::pair<size_t, size_t> p = READER.cursors();
+      std::string msg("\n        including " + READER.file() + ':'
+                      + std::to_string(p.first) + ':'
+                      + std::to_string(p.second) + ' '
+                      + res.second);
+
+      // Pop the previous stream
+      --m_stream;
+
+      // Call exception that will be caugh by the parseStream()
+      ForthException e(msg);
+      throw e;
     }
 }
 

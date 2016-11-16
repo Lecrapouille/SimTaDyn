@@ -119,9 +119,10 @@ typedef uint8_t        Cell8;
 #  define RETURN_STACK       (1U)
 
 // **************************************************************
-//
+// Stream
 // **************************************************************
-#define READER m_readers[m_reader]
+#define READER m_readers[m_stream]    // current stream parsed
+#define MAX_OPENED_STREAMS   (16U)    // depth of INCLUDE calls
 
 // **************************************************************
 //
