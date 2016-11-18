@@ -34,6 +34,7 @@ public:
   // loadCompilFile(std::string const& filename, bool append) ou alors boot(std::string const& filename, bool append)
 
 protected:
+  void createWord(std::string const& word);
   std::pair<bool, std::string> parseStream();
   void includeFile(std::string const& filename);
   bool toNumber(std::string const& word, Cell32& number);

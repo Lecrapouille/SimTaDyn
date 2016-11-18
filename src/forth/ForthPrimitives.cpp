@@ -47,27 +47,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Begin the definition of a new word
     case FORTH_PRIMITIVE_COLON:
-      {
-        // Extract next word
-        m_creating_word = getWord();
-        if (m_dico.exists(m_creating_word))
-          {
-            std::cout << YELLOW << "[WARNING] Redefining '" << m_creating_word << "'" << DEFAULT << std::endl;
-          }
-
-        // Save informations which will be checked
-        // when executing the SEMI_COLON primitive.
-        m_last_at_colon = m_dico.m_last;
-        m_here_at_colon = m_dico.m_here;
-        m_depth_at_colon = DStackDepth();
-
-        // Add it in the dictionary
-        Cell16 token = m_dico.here() + m_creating_word.size() + 1U + 2U; // 1: flags, 2: NFA
-        m_dico.add(token, m_creating_word, 0);
-
-        // Compilation mode
-        m_state = COMPILATION_STATE;
-      }
+      createWord(getWord());
+      m_state = COMPILATION_STATE;
       break;
 
       // End the definition of a new word
@@ -82,6 +63,28 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
         }
       break;
 
+      // Push in data stack the next free slot in the dictionary
+    case FORTH_PRIMITIVE_PCREATE:
+      DPUSH(m_tos);
+      m_tos = m_ip + 4U;
+      break;
+
+      // Give a name to the next free slot in the dictionary.
+      // (note: HERE is not moved)
+      // https://fr.wikiversity.org/wiki/Forth/Conserver_des_donn%C3%A9es
+    case FORTH_PRIMITIVE_CREATE:
+      createWord(getWord());
+      m_dico.appendCell16(FORTH_PRIMITIVE_PCREATE);
+      m_dico.appendCell16(FORTH_PRIMITIVE_EXIT);
+      break;
+
+    case FORTH_PRIMITIVE_BUILDS:
+      createWord(getWord());
+      break;
+
+    case FORTH_PRIMITIVE_DOES:
+      break;
+
       // Set immediate the last word
     case FORTH_PRIMITIVE_IMMEDIATE:
       m_dico.m_dictionary[m_dico.m_last] |= FLAG_IMMEDIATE;
@@ -94,6 +97,11 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       includeFile(getWord());
 
       DPOP(m_tos);
+      break;
+
+    case FORTH_PRIMITIVE_STATE:
+      DPUSH(m_tos);
+      m_tos = m_state;
       break;
 
     case FORTH_PRIMITIVE_SMUDGE:
@@ -147,13 +155,18 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_tos = m_dico.here();
       break;
 
+    case FORTH_PRIMITIVE_LAST:
+      DPUSH(m_tos);
+      m_tos = m_dico.last();
+      break;
+
     case FORTH_PRIMITIVE_ALLOT:
       m_dico.allot((int32_t) m_tos);
       break;
 
       // Reserve one cell of data space and store x in the cell.
     case FORTH_PRIMITIVE_COMMA:
-      m_dico.appendCell16(m_tos);
+      m_dico.appendCell32(m_tos);
       DPOP(m_tos);
       break;
 
@@ -314,7 +327,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
       // tuck ( a b -- b a b ) swap over ;
-    case FORTH_PRIMITIVE_TUK:
+    case FORTH_PRIMITIVE_TUCK:
       DPOP(m_tos2);
       DPUSH(m_tos);
       DPUSH(m_tos2);
@@ -369,7 +382,12 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // A BASE !
       // Mais SimForth: 16 BASE A BASE
     case FORTH_PRIMITIVE_BASE:// FIXME USER VARIABLE
-      if (false == changeDisplayBase(m_tos))
+      if (DStackDepth() < 0)
+        {
+          DPUSH(m_tos);
+          m_tos = m_base;
+        }
+      else if (false == changeDisplayBase(m_tos))
         {
           std::cerr << YELLOW << "[WARNING] '"
                     << m_tos << "' is an invalid base and shall be [2..36]. Ignored !"

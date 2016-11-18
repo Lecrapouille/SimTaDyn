@@ -16,6 +16,11 @@ Cell16 ForthDico::here() const
   return m_here;
 }
 
+void ForthDico::here(const Cell16 here)
+{
+  m_here = here;
+}
+
 // **************************************************************
 // Create a new forth definition (aka entry) at the 1st empty location of the m_dictionary.
 // The 1st empty location in the dictionnary is given by the variable 'here'.

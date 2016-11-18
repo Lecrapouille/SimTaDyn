@@ -18,6 +18,7 @@ public:
   void display() const;
   Cell16 last() const;
   Cell16 here() const;
+  void here(const Cell16 here);
   void allot(const int32_t nb_bytes);
   void appendCell8(const Cell32 value);
   void appendCell16(const Cell32 value);

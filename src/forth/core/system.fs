@@ -1,3 +1,12 @@
+: ? @ . ;
+
+: +! ( value addr -- ) TUCK @ + SWAP ! ;
+
+: VARIABLE
+  CREATE HERE !
+  CELL ALLOT
+;
+
 : BEGIN HERE ; IMMEDIATE
 
 : AGAIN 
@@ -27,6 +36,3 @@ COMPILE R>
 COMPILE R>
 COMPILE 2DROP
 ; IMMEDIATE
-
-: DISPLAY 1 10 0 DO DUP . CR 1+ LOOP DROP ;
-DISPLAY

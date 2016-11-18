@@ -29,9 +29,16 @@ Mot OpenGL
 BUG/FIXME/TBD
 =============
 
+Le . affiche dans l'endian de l'ordi. DEvrait utiliser le meme endian que le dico
+
 ::toupper pas mis au bon endroit mais ou ?
 
+Fermer correctement les stream quand on finit de parser un INCLUDE
+
+Ajouter la protection contre les inclusions multiples
+
 Bug d'affichage du dico avec les mots 0BRANCH et BRANCH selon que le mot COMPILE est devant ou pas
+Bug d'affichage du dico avec les mots PCREATE et literral 2 crans plus loin
 
 Bug d'affichage du dico avec un literal en 4em position fait planter
 : MULT
@@ -48,6 +55,20 @@ Exception quand on veut executer un mot compile-only ? dans le code ou dans un f
 A tester:
 ( COMMENTAIRE ( OUI ) POUET ) pforth et gforth plantent 
 ==> faut il une var qui compte les parentheses ? Cas idiot: )
+
+Dump du dictionnaire, c'est cool mais pas mieux de ne charger que les mots apres le coeur ? Ce sera mieux pour les fichiers SimTaDyn
+
+Ajouter un CRC dans en fin de dico ?
+
+Tests
+==========
+
+Faire un tableau de comparaison entre gforth, pforth reforth avec le code qui plante ou reprise sur erreur meilleure
+Par exemple 42 >R R> .
+ou 1234567891234567 .
+
+gforth: 16 BASE ! Avantage ils peuvent sauver et restaurer la base apres un INCLUDE pas moi
+moi: 16 BASE. Avantage moins de code
 
 Evolution
 ==========

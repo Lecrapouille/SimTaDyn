@@ -16,7 +16,6 @@ Forth::Forth()
 // **************************************************************
 inline void Forth::restore()
 {
-  std::cout << "Restoring context\n";
   if ((COMPILATION_STATE == m_state) ||
       ((COMMENT_STATE == m_state) && (COMPILATION_STATE == m_saved_state)))
     {
@@ -113,6 +112,31 @@ void Forth::displayRStack() const
   std::cout << std::endl;
 }
 
+// **************************************************************
+//
+// **************************************************************
+void Forth::createWord(std::string const& word)
+{
+  if (m_dico.exists(word))
+    {
+      std::cout << YELLOW << "[WARNING] Redefining '" << word << "'" << DEFAULT << std::endl;
+    }
+
+  // Save informations which will be checked
+  // when executing the SEMI_COLON primitive.
+  m_creating_word = word;
+  m_last_at_colon = m_dico.m_last;
+  m_here_at_colon = m_dico.m_here;
+  m_depth_at_colon = DStackDepth();
+
+  // Add it in the dictionary
+  Cell16 token = m_dico.here() + word.size() + 1U + 2U; // 1: flags, 2: NFA
+  m_dico.add(token, word, 0);
+}
+
+// **************************************************************
+//
+// **************************************************************
 void Forth::execToken(const Cell16 tx)
 {
   int32_t depth;
@@ -373,7 +397,6 @@ std::pair<bool, std::string> Forth::eatString(const char* const code_forth)
 std::pair<bool, std::string> Forth::eatString(std::string const& code_forth)
 {
   READER.setStringToParse(code_forth);
-  std::cout << code_forth << std::endl;
   return parseStream();
 }
 
@@ -442,8 +465,6 @@ void Forth::ok(std::pair<bool, std::string> const& res)
 // **************************************************************
 void Forth::includeFile(std::string const& filename)
 {
-  std::cout << "Including " << filename << " " << std::endl;
-
   // Save the current stream in a stack
   ++m_stream;
 
@@ -502,8 +523,14 @@ void Forth::boot()
   // Words for definitions
   m_dico.add(FORTH_PRIMITIVE_COLON, ":", 0);
   m_dico.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
+  m_dico.add(FORTH_PRIMITIVE_PCREATE, "(CREATE)", 0);
+  m_dico.add(FORTH_PRIMITIVE_CREATE, "CREATE", 0);
+  m_dico.add(FORTH_PRIMITIVE_BUILDS, "<BUILDS", 0);
+  m_dico.add(FORTH_PRIMITIVE_DOES, "DOES>", FLAG_IMMEDIATE);
+
   m_dico.add(FORTH_PRIMITIVE_IMMEDIATE, "IMMEDIATE", 0);
   m_dico.add(FORTH_PRIMITIVE_SMUDGE, "SMUDGE", 0);
+  m_dico.add(FORTH_PRIMITIVE_STATE, "STATE", 0);
 
   // Words
   m_dico.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);
@@ -513,6 +540,7 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_RBRACKET, "]", 0);
 
   // Dictionnary manipulation
+  m_dico.add(FORTH_PRIMITIVE_LAST, "LAST", 0);
   m_dico.add(FORTH_PRIMITIVE_HERE, "HERE", 0);
   m_dico.add(FORTH_PRIMITIVE_ALLOT, "ALLOT", 0);
   m_dico.add(FORTH_PRIMITIVE_COMMA, ",", 0);
@@ -589,7 +617,7 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_SWAP, "SWAP", 0);
   m_dico.add(FORTH_PRIMITIVE_OVER, "OVER", 0);
   m_dico.add(FORTH_PRIMITIVE_ROT, "ROT", 0);
-  m_dico.add(FORTH_PRIMITIVE_TUK, "TUK", 0);
+  m_dico.add(FORTH_PRIMITIVE_TUCK, "TUCK", 0);
   m_dico.add(FORTH_PRIMITIVE_2DUP, "2DUP", 0);
   m_dico.add(FORTH_PRIMITIVE_2DROP, "2DROP", 0);
   m_dico.add(FORTH_PRIMITIVE_2SWAP, "2SWAP", 0);
@@ -600,4 +628,7 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_UDISP, "U.", 0);
   m_dico.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, "CR", 0);
   m_dico.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, ".S", 0);
+
+  // Hide some words to user
+  m_dico.smudge("(CREATE)");
 }
