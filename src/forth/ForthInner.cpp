@@ -7,7 +7,7 @@
 Forth::Forth()
 {
   m_base = 10U;
-  m_state = EXECUTION_STATE;
+  m_state = INTERPRETER_STATE;
   restore();
 }
 
@@ -23,7 +23,7 @@ inline void Forth::restore()
       m_dico.m_here = m_here_at_colon;
     }
 
-  m_state = EXECUTION_STATE;
+  m_state = INTERPRETER_STATE;
   m_dsp = m_data_stack;
   m_asp = m_alternative_stack;
   m_rsp = m_return_stack;
@@ -307,7 +307,7 @@ void Forth::interprete(std::string const& word)
   Cell16 token;
   bool immediate;
 
-  if (EXECUTION_STATE == m_state)
+  if (INTERPRETER_STATE == m_state)
     {
       if (m_dico.find(word, token, immediate))
         {
@@ -416,11 +416,14 @@ std::pair<bool, std::string> Forth::parseStream()
           interprete(READER.nextWord());
         }
 
+      // TODO: checker les piles
+      #warning " Warning: stack depth changed during include!"
+
       // Check Forth state shall be in execute mode at the end of the
       // stream.  Else this means the end of the stream is truncated
       // with a non finished function definition or non finished
       // commentary.
-      if (EXECUTION_STATE != m_state)
+      if (INTERPRETER_STATE != m_state)
         {
           // FIXME: the stream colum information is erroneous because
           // a ForthReader::refill() has been called before. But I like
@@ -448,7 +451,8 @@ void Forth::ok(std::pair<bool, std::string> const& res)
   else
     {
       std::pair<size_t, size_t> p = READER.cursors();
-      std::cerr << RED << "[ERROR] from " << READER.file() << ':'
+      std::cerr << RED << "[ERROR] Ambiguous condition from "
+                << READER.file() << ':'
                 << p.first << ':'
                 << p.second << ' '
                 << res.second << DEFAULT << std::endl;
@@ -503,6 +507,7 @@ void Forth::includeFile(std::string const& filename)
       --m_stream;
 
       // Call exception that will be caugh by the parseStream()
+      std::cout << "ICCCCCI\n";
       ForthException e(msg);
       throw e;
     }
@@ -536,6 +541,8 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_EXECUTE, "EXECUTE", 0);
   m_dico.add(FORTH_PRIMITIVE_COMPILE, "COMPILE", 0);
+  m_dico.add(FORTH_PRIMITIVE_ICOMPILE, "[COMPILE]", FLAG_IMMEDIATE);
+  m_dico.add(FORTH_PRIMITIVE_POSTPONE, "POSTPONE", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_LBRACKET, "[", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_RBRACKET, "]", 0);
 

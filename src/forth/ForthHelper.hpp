@@ -106,7 +106,7 @@ typedef uint8_t        Cell8;
 // Forth mode
 //
 // **************************************************************
-#  define EXECUTION_STATE    (0U)
+#  define INTERPRETER_STATE  (0U)
 #  define COMPILATION_STATE  (1U)
 #  define COMMENT_STATE      (2U)
 

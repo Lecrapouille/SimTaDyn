@@ -54,7 +54,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // End the definition of a new word
     case FORTH_PRIMITIVE_SEMICOLON:
       m_dico.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size word definition
-      m_state = EXECUTION_STATE;
+      m_state = INTERPRETER_STATE;
       if (m_depth_at_colon != DStackDepth())
         {
           m_dico.m_last = m_last_at_colon;
@@ -143,7 +143,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
        break;
 
      case FORTH_PRIMITIVE_LBRACKET:
-       m_state = EXECUTION_STATE;
+       m_state = INTERPRETER_STATE;
        break;
 
     case FORTH_PRIMITIVE_RBRACKET:

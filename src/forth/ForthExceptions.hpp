@@ -11,7 +11,7 @@ class ForthException: public std::exception
 public:
   ForthException() throw ()
   {
-    m_error_msg = "Exception from SimTaDynForth";
+    m_error_msg = "Ambiguous condition";
   }
   ForthException(std::string const& word) throw ()
   {
