@@ -138,6 +138,51 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
        m_dico.appendCell16(m_dico.read16at(m_ip));
        break;
 
+       // Append to the dictionary the next word
+     case FORTH_PRIMITIVE_ICOMPILE:
+       {
+         Cell16 token;
+         bool immediate;
+         std::string word = getWord();
+
+         //m_ip += 2;
+         if (m_dico.find(word, token, immediate))
+           {
+             m_dico.appendCell16(token);
+           }
+         else
+           {
+             ForthUnknownWord e(word); throw e;
+           }
+       }
+       break;
+
+       // ANSI word to replace [COMPILE] and COMPILE
+    case FORTH_PRIMITIVE_POSTPONE:
+      {
+        Cell16 token;
+        bool immediate;
+        std::string word = getWord();
+
+        if (m_dico.find(word, token, immediate))
+          {
+            if (immediate)
+              {
+                m_dico.appendCell16(token);
+              }
+            else
+              {
+                m_ip += 2;
+                m_dico.appendCell16(m_dico.read16at(m_ip));
+              }
+          }
+        else
+          {
+            ForthUnknownWord e(word); throw e;
+          }
+      }
+      break;
+
      case FORTH_PRIMITIVE_EXECUTE:
        execToken(m_tos);
        break;
