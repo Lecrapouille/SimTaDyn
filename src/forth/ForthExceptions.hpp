@@ -63,7 +63,6 @@ public:
   {
     m_error_msg = "Stack depth changed during the definition of the word '" + word + "' probably unbalanced condition";
   }
-  std::string m_error_msg;
 };
 
 // **************************************************************
