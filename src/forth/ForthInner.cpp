@@ -550,9 +550,13 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_LAST, "LAST", 0);
   m_dico.add(FORTH_PRIMITIVE_HERE, "HERE", 0);
   m_dico.add(FORTH_PRIMITIVE_ALLOT, "ALLOT", 0);
-  m_dico.add(FORTH_PRIMITIVE_COMMA, ",", 0);
+  m_dico.add(FORTH_PRIMITIVE_COMMA32, ",", 0);
+  m_dico.add(FORTH_PRIMITIVE_COMMA16, "S,", 0);
+  m_dico.add(FORTH_PRIMITIVE_COMMA8, "C,", 0);
   m_dico.add(FORTH_PRIMITIVE_FETCH, "@", 0);
-  m_dico.add(FORTH_PRIMITIVE_STORE, "!", 0);
+  m_dico.add(FORTH_PRIMITIVE_STORE32, "!", 0);
+  m_dico.add(FORTH_PRIMITIVE_STORE16, "S!", 0);
+  m_dico.add(FORTH_PRIMITIVE_STORE8, "C!", 0);
 
   // Words changing IP
   m_dico.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);

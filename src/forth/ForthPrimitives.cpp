@@ -210,8 +210,20 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
       // Reserve one cell of data space and store x in the cell.
-    case FORTH_PRIMITIVE_COMMA:
+    case FORTH_PRIMITIVE_COMMA32:
       m_dico.appendCell32(m_tos);
+      DPOP(m_tos);
+      break;
+
+      // Reserve one cell of data space and store x in the cell.
+    case FORTH_PRIMITIVE_COMMA16:
+      m_dico.appendCell16(m_tos);
+      DPOP(m_tos);
+      break;
+
+      // Reserve one cell of data space and store x in the cell.
+    case FORTH_PRIMITIVE_COMMA8:
+      m_dico.appendCell8(m_tos);
       DPOP(m_tos);
       break;
 
@@ -223,9 +235,22 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Store x at a-addr.
       // ( x a-addr -- )
-    case FORTH_PRIMITIVE_STORE:
+    case FORTH_PRIMITIVE_STORE32:
       DPOP(m_tos1);
       m_dico.write32at(m_tos, m_tos1);
+      DPOP(m_tos);
+      break;
+
+    case FORTH_PRIMITIVE_STORE16:
+      DPOP(m_tos1);
+      m_dico.write16at(m_tos, m_tos1);
+      DPOP(m_tos);
+      break;
+
+    case FORTH_PRIMITIVE_STORE8:
+      DPOP(m_tos1);
+      m_dico.write8at(m_tos, m_tos1);
+      DPOP(m_tos);
       break;
 
       // Restore the IP when interpreting the definition
