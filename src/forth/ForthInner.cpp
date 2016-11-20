@@ -622,7 +622,7 @@ void Forth::boot()
 
   // cell sizeof
   m_dico.add(FORTH_PRIMITIVE_CELL, "CELL", 0);
-  m_dico.add(FORTH_PRIMITIVE_CELL, "CELLS", 0);
+  m_dico.add(FORTH_PRIMITIVE_CELLS, "CELLS", 0);
 
   // Literals
   m_dico.add(FORTH_PRIMITIVE_LITERAL_16, "LITERAL16", 0);
