@@ -215,6 +215,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_ALLOT:
       m_dico.allot((int32_t) m_tos);
+      DPOP(m_tos);
       break;
 
       // Reserve one cell of data space and store x in the cell.
