@@ -29,6 +29,7 @@ public:
   Cell32 read8at(const uint32_t addr) const;
   Cell32 read16at(const uint32_t addr) const;
   Cell32 read32at(const uint32_t addr) const;
+  void displayToken(const Cell16 token) const;
 
 protected:
 

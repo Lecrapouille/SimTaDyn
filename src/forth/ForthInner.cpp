@@ -28,6 +28,7 @@ inline void Forth::restore()
   m_asp = m_alternative_stack;
   m_rsp = m_return_stack;
   m_stream = 0;
+  m_trace = false;
 }
 
 // **************************************************************
@@ -121,6 +122,12 @@ void Forth::createWord(std::string const& word)
     {
       std::cout << YELLOW << "[WARNING] Redefining '" << word << "'" << DEFAULT << std::endl;
     }
+  else
+    {
+      if (m_trace) {
+        std::cout << "Append new word definition '" << word << "' in dictionary" << std::endl;
+      }
+    }
 
   // Save informations which will be checked
   // when executing the SEMI_COLON primitive.
@@ -143,6 +150,13 @@ void Forth::execToken(const Cell16 tx)
   Cell16 token = tx;
   m_ip = 65535U;
 
+  if (m_trace) {
+    std::cout << "================ Etat initial ==================" << std::endl;
+    std::cout << "DStack: "; displayDStack();
+    std::cout << "RStack: "; displayRStack();
+    std::cout << "Execute token " << std::hex << token << std::endl << std::endl;
+  }
+
   // Always eat the top of the stack and store the value in a working register.
   DPOP(m_tos);
 
@@ -152,17 +166,41 @@ void Forth::execToken(const Cell16 tx)
       // A non primitive word is a consecutive set of primitive identifier
       while (!isPrimitive(token))
         {
+          if (m_trace) {
+            std::cout << "Token "; m_dico.displayToken(token);
+            std::cout << " is not a primitive " << std::endl;
+          }
+
           // Save the next token to exec after the end of the definition
           Cell32 c = m_ip; RPUSH(c);
-          //std::cout << "PUSH "; m_dico.displayToken(m_ip); std::cout << std::endl;
+          if (m_trace) {
+            std::cout << "PUSH "; m_dico.displayToken(m_ip);
+            std::cout << std::endl;
+          }
 
           m_ip = m_dico.read16at(token);
           m_ip += 2U;
           token = m_dico.read16at(m_ip);
+          if (m_trace) {
+            std::cout << "Next token is "; m_dico.displayToken(token);
+            std::cout << std::endl << std::endl;
+          }
         }
 
       //
+      if (m_trace) {
+        std::cout << "Token "; m_dico.displayToken(token);
+        std::cout <<" is a primitive. Consum it"
+                  << std::endl;
+      }
       execPrimitive(token);
+
+      if (m_trace) {
+        DPUSH(m_tos); std::cout << "DStack: ";
+        displayDStack(); DPOP(m_tos);
+        std::cout << "RStack: "; displayRStack();
+        std::cout << std::endl;
+      }
 
       // Data stack overflow ?
       depth = DStackDepth();
@@ -178,19 +216,30 @@ void Forth::execToken(const Cell16 tx)
         {
           m_ip += 2U;
           token = m_dico.read16at(m_ip);
+          if (m_trace) {
+            std::cout << "Next token is "; m_dico.displayToken(token);
+            std::cout << std::endl;
+          }
         }
 
       // Return stack overflow ?
       depth = RStackDepth();
       if (depth < 0)
-
         {
           ForthStackOV e(RETURN_STACK); throw e;
         }
+      if (m_trace) {
+        std::cout << "RStack: "; displayRStack();
+      }
     } while (depth > 0);
 
   // Store the working register
   DPUSH(m_tos);
+
+  if (m_trace) {
+    std::cout << "================ Etat final ===================="
+              << std::endl << std::endl;
+  }
 }
 
 // **************************************************************
@@ -311,12 +360,12 @@ void Forth::interprete(std::string const& word)
     {
       if (m_dico.find(word, token, immediate))
         {
-          //std::cout << "Forth::interprete '" << word << "' EXEC WORD\n";
+          if (m_trace) std::cout << std::endl << "Execute word '" << word << "'" << std::endl;
           execToken(token); // FIXME: ce serait cool de pouvoir stocker le nombre de param dans la def du mot
         }
       else if (toNumber(word, number))
         {
-          //std::cout << "Forth::interprete '" << word << "' EXEC NUMBER\n";
+          if (m_trace) std::cout << "PUSH number " << word << std::endl;
           DPUSH(number);
         }
       else
@@ -330,17 +379,18 @@ void Forth::interprete(std::string const& word)
         {
           if (immediate)
             {
-              //std::cout << "Forth::interprete '" << word << "' COMP + IMM" << std::endl;
+              if (m_trace) std::cout << std::endl << "Execute immediate word '" << word << "'" << std::endl;
               execToken(token);
             }
           else
             {
-              //std::cout << "Forth::interprete '" << word << "' COMP -> append dico\n";
+              if (m_trace) std::cout << "Append new word '" << word << "' in dictionary" << std::endl;
               m_dico.appendCell16(token);
             }
         }
       else if (toNumber(word, number))
         {
+          if (m_trace) std::cout << "Append literal " << number << "' in dictionary" << std::endl;
           if (number <= 65535U)
             {
               m_dico.appendCell16(FORTH_PRIMITIVE_LITERAL_16);
@@ -372,7 +422,7 @@ void Forth::interprete(std::string const& word)
 // **************************************************************
 std::pair<bool, std::string> Forth::eatFile(std::string const& filename)
 {
-  std::cout << "eating File " << filename << std::endl;
+  if (m_trace) std::cout << "eating File " << filename << std::endl;
   if (READER.setFileToParse(filename))
     {
       return parseStream();
@@ -507,7 +557,6 @@ void Forth::includeFile(std::string const& filename)
       --m_stream;
 
       // Call exception that will be caugh by the parseStream()
-      std::cout << "ICCCCCI\n";
       ForthException e(msg);
       throw e;
     }
@@ -536,6 +585,8 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_IMMEDIATE, "IMMEDIATE", 0);
   m_dico.add(FORTH_PRIMITIVE_SMUDGE, "SMUDGE", 0);
   m_dico.add(FORTH_PRIMITIVE_STATE, "STATE", 0);
+  m_dico.add(FORTH_PRIMITIVE_TRACE_ON, "TRACE.ON", 0);
+  m_dico.add(FORTH_PRIMITIVE_TRACE_OFF, "TRACE.OFF", 0);
 
   // Words
   m_dico.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);

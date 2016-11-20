@@ -146,4 +146,10 @@ typedef uint8_t        Cell8;
 //#  define DEBUG(txt) do { std::cout << txt << std::endl; } while (0)
 //#  define DEBUG3(a, txt, b) do { std::cout << a << txt << b << std::endl; } while (0)
 
+// **************************************************************
+//
+// **************************************************************
+#define SWAP32(x) (((x) & 0xff) << 24 | ((x) & 0xff00) << 8 | ((x) & 0xff0000) >> 8 | ((x) >> 24) & 0xff)
+#define SWAP16(x) (((x) & 0xff) << 8 | (((x) & 0xff00) >> 8))
+
 #endif /* FORTH_HELPER_HPP_ */

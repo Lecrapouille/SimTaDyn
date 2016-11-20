@@ -256,6 +256,23 @@ bool ForthDico::load(std::string const& filename)
 }
 
 // **************************************************************
+//
+// **************************************************************
+void ForthDico::displayToken(const Cell16 token) const
+{
+  std::pair<bool, int32_t> res = find(token);
+  if (res.first)
+    {
+      std::cout << "'" << (char *) &m_dictionary[res.second + 1U] << "' ("
+                << std::hex << (int) token << ')';
+    }
+  else
+    {
+      std::cout << "ffff";
+    }
+}
+
+// **************************************************************
 // Uggly print of the dictionary
 // **************************************************************
 void ForthDico::display() const

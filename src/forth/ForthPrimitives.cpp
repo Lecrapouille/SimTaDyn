@@ -104,6 +104,14 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_tos = m_state;
       break;
 
+    case FORTH_PRIMITIVE_TRACE_ON:
+      m_trace = true;
+      break;
+
+    case FORTH_PRIMITIVE_TRACE_OFF:
+      m_trace = false;
+      break;
+
     case FORTH_PRIMITIVE_SMUDGE:
       {
         std::string word = getWord();
@@ -257,6 +265,9 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // of a non primitive word
     case FORTH_PRIMITIVE_EXIT:
       RPOP(m_ip);
+      if (m_trace) {
+        std::cout << "POPed: " << std::hex << (int) m_ip << std::endl;
+      }
       break;
 
       // Change IP

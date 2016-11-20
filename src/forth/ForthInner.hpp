@@ -79,6 +79,9 @@ protected:
 
   // Dictionary
   ForthDico m_dico;
+
+  // Debug
+  bool  m_trace;
 };
 
 #endif /* FORTH_INNER_HPP_ */
