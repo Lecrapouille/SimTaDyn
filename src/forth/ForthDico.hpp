@@ -11,7 +11,7 @@ public:
   void add(const Cell16 token, std::string const& word, const bool immediate);
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
   bool exists(std::string const& word) const;
-  std::pair<bool, int32_t> find(const Cell16 token) const;
+  std::pair<bool, int32_t> find(const Cell16 token, const bool even_smudge) const;
   bool smudge(std::string const& word);
   bool dump(std::string const& filename);// FIXME const;
   bool load(std::string const& filename);

@@ -163,7 +163,7 @@ bool ForthDico::exists(std::string const& word) const
 // **************************************************************
 // Convert a string into a token
 // **************************************************************
-std::pair<bool, int32_t> ForthDico::find(const Cell16 token) const
+std::pair<bool, int32_t> ForthDico::find(const Cell16 token, const bool even_smudge=false) const
 {
   Cell32 nfa;
   Cell32 length;
@@ -180,7 +180,7 @@ std::pair<bool, int32_t> ForthDico::find(const Cell16 token) const
       length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
 
       // Ignore words with the SMUDGE bit */
-      if (!(m_dictionary[ptr] & FLAG_SMUDGE))
+      if ((0 == (m_dictionary[ptr] & FLAG_SMUDGE)) || (even_smudge))
         {
           // Compare name lengths before comparing strings
           if (token == read16at(ptr + length + 3U))
@@ -260,30 +260,35 @@ bool ForthDico::load(std::string const& filename)
 // **************************************************************
 void ForthDico::display() const
 {
-  int def_length, length, token, nfa, ptr, code, prev, i, ii, kk, c;
+  int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping;
   bool smudge, immediate;
+  bool compiled = false;
+  bool truncated = false;
   const char *color = DEFAULT;
+  const char *color1 = DEFAULT;
 
-  std::cout << "Address                    Word  Token    Definition (tokens)    Translation" << std::endl;
-  std::cout << "============================================================================" << std::endl;
+  std::cout << "Address                    Word  Token    Definition (tokens)    ";
+  std::cout << std::setw(11 + 5 * (WORD_GROUPING - 4)) << "Translation" << std::endl;
+  std::cout << std::setfill('=') << std::setw(77 + 5 * (WORD_GROUPING - 4));
+  std::cout << " " << std::endl;
 
   prev = m_here;
   ptr = m_last;
   do
     {
-      // Dic addresses
+      // Display dictionary addresses in hex
       std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr << " ";
 
-      // word informations
+      // Get word flags
       length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
       smudge = m_dictionary[ptr] & FLAG_SMUDGE;
       immediate = m_dictionary[ptr] & FLAG_IMMEDIATE;
 
       // Next word in the dictionary (relative address)
-      nfa = m_dictionary[ptr + length + 1U] * 256U + m_dictionary[ptr + length + 2U];
+      nfa = read16at(ptr + length + 1U);
 
-      // Code Pointer
-      code = m_dictionary[ptr + length + 3U] * 256U + m_dictionary[ptr + length + 4U];
+      // Code Pointer (Exec token)
+      code = read16at(ptr + length + 3U);
 
       // Select color depending on word flag bits
       if (immediate)
@@ -295,101 +300,75 @@ void ForthDico::display() const
       else
         color = RED;
 
-      // display word name (right centered)
+      // Display word name (right centered)
       std::cout << std::setfill('.') << std::setw(32U - length)
                 << color << " " << (char *) &m_dictionary[ptr + 1U]
                 << " ";
 
+      // Display Exec token
       if (!smudge) color = AZUL; // Let color in grey for unused words
       std::cout << color << '(' << std::setfill('0') << std::setw(4) << std::hex << code << ")    ";
 
-      // Word definition grouped by 4 cell
+      // Word definition
       def_length = prev - ptr - length - 3U;
-      for (i = 2; i < def_length; )
+
+      // primitive
+      if (code < NUM_PRIMITIVES)
+        {
+          std::cout << WHITE << "primitive" << std::endl;
+        }
+
+      // Skip NFA
+      d = dd = 2;
+      while (d < def_length)
         {
           if (!smudge) color = WHITE;
 
-          // Tokens in hexa
-          c = 4U; ii = i; kk = 0;
-          while ((c--) && (i < def_length))
+          // Display tokens in hexa
+          grouping = WORD_GROUPING;
+          while ((grouping--) && (d < def_length))
             {
-              token = m_dictionary[ptr + length + 3U + i] * 256U + m_dictionary[ptr + length + 4U + i];
-              i += 2U;
-              kk++;
+              token = read16at(ptr + length + 3U + d);
+              d += 2U;
               std::cout << color << std::setfill('0') << std::setw(4) << std::hex << token << " ";
             }
 
-          // Align space
-          if (kk < 4)
+          // If number of tokens is not a multiple of WORD_GROUPIN add spaces
+          ++grouping;
+          if (grouping)
             {
-              std::cout << color << std::setfill(' ') << std::setw((4 - kk) * 5) << "    ";
+              std::cout << color << std::setfill(' ') << std::setw(grouping * 5) << "    ";
             }
           std::cout << "   ";
 
           // Tokens name
-          c = 4U; i = ii;
-          while ((c--) && (i < def_length))
+          grouping = WORD_GROUPING;
+          while ((grouping-- > 0) && (dd < def_length))
             {
-              token = m_dictionary[ptr + length + 3U + i] * 256U + m_dictionary[ptr + length + 4U + i];
-              i += 2U;
+              if (truncated) { truncated = false; grouping--; }
+              token = read16at(ptr + length + 3U + dd);
+              dd += 2U;
 
-              if (token < NUM_PRIMITIVES)
+              //std::cout << "G(" << std::dec << grouping << ") ";
+
+              // Not a primitive: display the name
+              if (token >= NUM_PRIMITIVES)
                 {
-                  std::pair<bool, int32_t> res = find(token);
-                  if (res.first)
+                  std::pair<bool, int32_t> res = find(token, true);
+                  if (!res.first)
                     {
-                      // Colorize
-                      uint32_t j = res.second;
-                      if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
-                        {
-                          color = GREY;
-                        }
-                      else
-                        {
-                          if (m_dictionary[j] & FLAG_IMMEDIATE)
-                            color = YELLOW;
-                          else if ((FORTH_PRIMITIVE_LITERAL_32 == token) ||
-                                   (FORTH_PRIMITIVE_LITERAL_16 == token))
-                            color = GREEN;
-                          else
-                            color = BLUE;
-                        }
-
-                      if ((FORTH_PRIMITIVE_LITERAL_32 == token) ||
-                          (FORTH_PRIMITIVE_LITERAL_16 == token))
-                        {
-                          uint32_t p = ptr + length + 4U + i;
-                          c--;
-                          if (FORTH_PRIMITIVE_LITERAL_32 == token)
-                            {
-                              uint32_t data32 = read32at(p);
-                              std::cout << color << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
-                              i += 4U;
-                            }
-                          else
-                            {
-                              uint16_t data16 = read16at(p);
-                              std::cout << color << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
-                              i += 2U;
-                            }
-                        }
-                      else
-                        {
-                          std::cout << color << (char *) &m_dictionary[res.second + 1U] << " ";
-                        }
+                      // Not found. Display token in hex and in grey
+                      std::cout << GREEN << std::setfill('0') << std::setw(4) << std::hex << token << " ";
                     }
                   else
                     {
-                      std::cout << color << "XXX ";
-                    }
-                }
-              else
-                {
-                  // from nfa, go back to begin of definition
-                  uint32_t j = token - 2U; // 2: skip NFA
-                  while (0 == (m_dictionary[j] & 0x80))
-                    --j;
+                      // From NFA, go back to the begin of word definition
+                      // To get flags
+                      uint32_t j = token - 2U; // -2 fir skiping NFA
+                      while (0 == (m_dictionary[j] & 0x80))
+                        --j;
 
+                      // Colorize
                       if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
                         {
                           color = GREY;
@@ -402,21 +381,91 @@ void ForthDico::display() const
                             color = RED;
                         }
 
-                  std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
+                      // Display
+                      std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
+                    }
                 }
-            }
+              else // primitive words
+                {
+                  std::pair<bool, int32_t> res = find(token, true);
+                  if (!res.first)
+                    {
+                      // Not found. Display token in hex and in grey
+                      std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+                    }
+                  else
+                    {
+                      // Colorize
+                      uint32_t j = res.second;
+                      color1 = GREEN;
+                      if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
+                        {
+                          color = color1 = GREY;
+                        }
+                      else if (m_dictionary[j] & FLAG_IMMEDIATE)
+                        color = YELLOW;
+                      else
+                        color = BLUE;
+                      uint32_t p = ptr + length + 4U + dd;
 
+                      // Several strategies
+                      switch (token)
+                        {
+                        case FORTH_PRIMITIVE_COMPILE:
+                          std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
+                          compiled = true;
+                          break;
+                        case FORTH_PRIMITIVE_0BRANCH:
+                        case FORTH_PRIMITIVE_BRANCH:
+                          std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
+                          if (compiled)
+                            {
+                              compiled = false;
+                            }
+                          else
+                            {
+                              uint16_t data16 = read16at(p);
+                              dd += 2U;
+                              --grouping;
+                              std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                            }
+                          break;
+                        case FORTH_PRIMITIVE_LITERAL_16:
+                          {
+                            uint16_t data16 = read16at(p);
+                            dd += 2U;
+                            --grouping;
+                            std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                          }
+                          break;
+                        case FORTH_PRIMITIVE_LITERAL_32:
+                          {
+                            uint32_t data32 = read32at(p);
+                            dd += 4U;
+                            --grouping;
+                            std::cout << color1 << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
+                          }
+                          break;
+                        default:
+                          compiled = false;
+                          std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
+                          break;
+                        }
+                      truncated = (grouping < 0);
+                      //if (truncated) std::cout << "|| ";
+                    } // if found
+                } // if primitive
+            } // while grouping
+
+          // End of line of group of words
           std::cout << std::endl;
-          if (i < def_length - 1)
+          if (d < def_length - 1)
             {
-              std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + i << "    ";
+              // Dictionary address
+              std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + d << "    ";
               std::cout << GREY << std::setfill(' ') << std::setw(29U + 5U) << "    ";
             }
-        }
-
-      // primitive
-      if (2U == def_length)
-        std::cout << WHITE << "primitive" << std::endl;
+        } // while definition
 
       // Go to the previous entry
       prev = ptr;

@@ -140,6 +140,9 @@ typedef uint8_t        Cell8;
 
 // TODO: definir COLOR_IMMEDIATE YELLOW etc
 
+// Dictionnary display
+#  define WORD_GROUPING 6
+
 //#  define DEBUG(txt) do { std::cout << txt << std::endl; } while (0)
 //#  define DEBUG3(a, txt, b) do { std::cout << a << txt << b << std::endl; } while (0)
 
