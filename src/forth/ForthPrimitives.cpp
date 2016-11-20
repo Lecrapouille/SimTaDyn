@@ -380,7 +380,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
     case FORTH_PRIMITIVE_QDUP:
-      if (m_tos)
+      if (DStackDepth() >= -1)
         {
           DPUSH(m_tos);
         }
