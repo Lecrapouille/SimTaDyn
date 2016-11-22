@@ -32,7 +32,7 @@ public:
   void displayRStack() const;
   // TODO: charge un fichier dico et ecrase le dico ou le charge a la fin
   // loadCompilFile(std::string const& filename, bool append) ou alors boot(std::string const& filename, bool append)
-
+  void restore();
 protected:
   void createWord(std::string const& word);
   std::pair<bool, std::string> parseStream();
@@ -44,7 +44,6 @@ protected:
   int32_t DStackDepth() const;
   inline bool isPrimitive(const Cell16 id) const;
   bool changeDisplayBase(const uint8_t newbase);
-  inline void restore();
   std::string getWord();
 
 protected:

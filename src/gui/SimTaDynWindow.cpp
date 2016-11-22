@@ -14,7 +14,9 @@ bool SimTaDynWindow::quitting()
 // SimTaDyn main window
 // *************************************************************************************************
 SimTaDynWindow::SimTaDynWindow(const std::string& title)
-  : Gtk::Window()
+  : Gtk::Window(),
+    m_nb_forth_buttons(0),
+    m_nb_map_buttons(0)
 {
   set_title(title);
   set_default_size(1024, 800);
@@ -27,7 +29,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   // * _Help: TBD: add About/help/interactive tutorials
   {
     m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Map", m_menu[0]));
-    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Forth", m_menu[1]));
+    m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Forth", m_fortheditor.m_menu));
     m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Plugins", m_menu[2]));
     m_menubar.items().push_back(Gtk::Menu_Helpers::MenuElem("_Help", m_menu[3]));
   }
@@ -42,54 +44,17 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     //m_toolbar[MapToolbar].append(m_separator[0]);
   }
 
-  // Submenus '_Forth'
-  {
-    Gtk::Menu::MenuList& menulist = m_menu[1].items();
-
-    m_menuimage[3].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New File",
-       m_menuimage[3], sigc::mem_fun(m_fortheditor, &ForthEditor::newEmptyDocument)));
-
-    m_menuimage[4].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Template",
-       m_menuimage[4], sigc::mem_fun(*this, &SimTaDynWindow::addTemplateTab))); // TODO
-
-    m_menuimage[6].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Prompt",
-       m_menuimage[6], sigc::mem_fun(m_fortheditor, &ForthEditor::newEmptyDocument))); // FIXME TBD TODO
-
-    menulist.push_back(separator[0]);
-
-    m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
-       m_menuimage[0], sigc::mem_fun(m_fortheditor, &ForthEditor::newDocument)));
-
-    m_menuimage[1].set(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_SaveAs",
-       m_menuimage[1], sigc::mem_fun(m_fortheditor, &ForthEditor::saveAsCurrentDocument)));
-
-    m_menuimage[2].set(Gtk::Stock::SAVE, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Save",
-       m_menuimage[2], sigc::mem_fun(m_fortheditor, &ForthEditor::saveCurrentDocument)));
-
-    menulist.push_back(separator[1]);
-
-    m_menuimage[5].set(Gtk::Stock::FIND, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Find",
-       m_menuimage[5], sigc::mem_fun(m_fortheditor, &ForthEditor::find)));
-  }
-
   // Forth toolbar
   {
     m_toolbutton[0].set_label("New");
     m_toolbutton[0].set_stock_id(Gtk::Stock::NEW);
+    m_toolbar[ForthToolbar].append(m_toolbutton[0], sigc::mem_fun(m_fortheditor, &ForthEditor::newDocument));
 
     m_toolbutton[1].set_label("Exec");
     m_toolbutton[1].set_stock_id(Gtk::Stock::EXECUTE);
-
-    m_toolbar[ForthToolbar].append(m_toolbutton[0], sigc::mem_fun(m_fortheditor, &ForthEditor::newDocument));
+    m_toolbar[ForthToolbar].append(m_toolbutton[1], sigc::mem_fun(m_fortheditor, &ForthEditor::exec));
     m_toolbar[ForthToolbar].append(m_separator[1]);
-    m_toolbar[ForthToolbar].append(m_toolbutton[1], sigc::mem_fun(m_fortheditor, &ForthEditor::execForth));
+    m_nb_forth_buttons += 2U;
   }
 
   // Split horizontaly the main window
@@ -117,8 +82,8 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
 
     //
     m_vbox[1].pack_start(m_toolbar[ForthToolbar], Gtk::PACK_SHRINK);
-    m_vbox[1].pack_start(m_fortheditor.m_res_notebooks, Gtk::PACK_EXPAND_WIDGET);
     m_vbox[1].pack_start(m_fortheditor.m_statusbar, Gtk::PACK_SHRINK);
+    m_vbox[1].pack_start(m_fortheditor.m_res_notebooks, Gtk::PACK_EXPAND_WIDGET);
 
     m_hbox[0].pack_start(m_toolbar[MapToolbar], Gtk::PACK_SHRINK);
     m_hbox[0].pack_start(m_vpaned[0]);
@@ -133,7 +98,45 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   show_all_children();
 }
 
-#if 0
+// **************************************************************
+//
+// **************************************************************
+void SimTaDynWindow::addForthButon(const Gtk::BuiltinStockID icon,
+                                   const std::string &script) //const Cell16 ForthToken)
+
+{
+  if (m_nb_forth_buttons < 32)
+    {
+      // FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
+      m_toolbutton[m_nb_forth_buttons].set_label(script);
+      m_toolbutton[m_nb_forth_buttons].set_stock_id(icon);
+      // FIXME: ajouter le postip avec la definiton du mot "WORD ( n1 n2 -- n3 n4 )"
+      m_toolbutton[m_nb_forth_buttons].set_tooltip_text("COUCOU");
+      // FIXME ne pas autoriser a compiler
+      m_toolbar[ForthToolbar].append(m_toolbutton[m_nb_forth_buttons],
+                                     sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::exec1), script));
+      m_toolbar[ForthToolbar].show_all_children();
+      ++m_nb_forth_buttons;
+    }
+  else
+    {
+      Gtk::MessageDialog dialog(*this, "FIXME: Max buttons reached");
+      dialog.run();
+    }
+}
+
+// **************************************************************
+//
+// **************************************************************
+void SimTaDynWindow::addForthMenu(const Gtk::BuiltinStockID icon,
+                                  const std::string &word)
+{
+  //m_menuimage[5].set(Gtk::Stock::FIND, Gtk::ICON_SIZE_MENU);
+  //menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Find",
+  // m_menuimage[5], sigc::mem_fun(*this, &SimTaDynWindow::find)));
+}
+
+#if 0 // FIXME
 // Mouse button pressed : process mouse button event
 bool SimTaDynWindow::on_button_press_event(GdkEventButton *event)
 {

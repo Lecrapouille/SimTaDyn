@@ -22,36 +22,36 @@ public:
     return m_drawing_area.getScreenHeight();
   }
 
+  void addForthMenu(const Gtk::BuiltinStockID icon,
+                    const std::string &word);
+  void addForthButon(const Gtk::BuiltinStockID icon,
+                     const std::string &word); // FIXME: Glib::ustring, const Cell16 Forthtoken);
+
 protected:
   enum ToolBarNames { MapToolbar, ForthToolbar };
+  enum MenuNames { MapMenu, ForthMenu, PlugginsMenu };
 
   bool quitting();
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
-  inline void addTemplateTab() // FIXME
-  {
-    m_fortheditor.newTemplatedDocument("1 1 + .");
-  }
-
-  GlDrawingArea m_drawing_area;
   Gtk::HPaned m_hpaned[1];
   Gtk::VPaned m_vpaned[1];
-
   Gtk::VBox m_vbox[2];
   Gtk::HBox m_hbox[1];
   Gtk::MenuBar m_menubar;
-  Gtk::Menu m_menu[32];
-  Gtk::Image m_menuimage[32];
-  ForthEditor m_fortheditor;
-
+  Gtk::Menu m_menu[4];
   Gtk::SeparatorToolItem m_separator[2];
-  Gtk::SeparatorMenuItem separator[2];
-  FindWindow *m_findwin;
-
-public:
-  Gtk::ToolButton m_toolbutton[32];
   Gtk::Toolbar m_toolbar[2];
+
+  // FIXME: remplacer tableau de button par std::array
+  Gtk::ToolButton m_toolbutton[32];
+  uint32_t m_nb_forth_buttons;
+  uint32_t m_nb_map_buttons;
+
+  GlDrawingArea m_drawing_area;
+  ForthEditor m_fortheditor;
+  FindWindow *m_findwin;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

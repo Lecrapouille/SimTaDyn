@@ -3,7 +3,7 @@
 
 #  include "SimTaDynWindow.hpp"
 #  include "RTree.hpp"
-#  include "SimForth.hpp"
+#  include "Forth.hpp"
 #  include "SimTaDynLoader.hpp"
 
 #  define SIMTADYN() SimTaDynContext::getInstance()
@@ -15,7 +15,7 @@ public:
 
   SimTaDynWindow* m_window;
   SimTaDynLoaderManager m_loader;
-  SimForth m_forth;
+  Forth m_forth;
   RTreeNode* m_root; // FIXME: a attacher dans le graph
   SimTaDynGraph m_graph; // FIXME: a renommer en maps
 
@@ -43,8 +43,9 @@ private:
   {
     // Start the Forth core
     s_SimTaDyn.m_forth.boot();
-    s_SimTaDyn.m_forth.eatString(": FOO + . ;");
-    s_SimTaDyn.m_forth.dictionary().display();
+    s_SimTaDyn.m_forth.eatFile("forth/core/system.fs");
+    //s_SimTaDyn.m_forth.eatString(": FOO + . ;");
+    //s_SimTaDyn.m_forth.dictionary().display();
 
     // Load an initial map
     s_SimTaDyn.m_loader.load("../data/Corsica-points.shp", s_SimTaDyn.m_graph);

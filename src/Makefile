@@ -36,7 +36,7 @@ OBJECTS_FORTH  = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
 OBJECTS_CELLS  = SimTaDynCells.o SimTaDynGraphs.o
 OBJECTS_LOADER = ShapeFile.o
 OBJECTS_GUI    = OpenGL.o Textures.o Fonts.o Renderer.o DrawingArea.o \
-	         TextEditor.o ForthEditor.o SimTaDynWindow.o SimForth.o
+	         TextEditor.o ForthEditor.o SimTaDynWindow.o
 OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_RTREE) $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_LOADER) $(OBJECTS_GUI) main.o
 TARGET = SimTaDyn
 

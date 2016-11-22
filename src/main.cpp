@@ -13,7 +13,8 @@ int main(int argc, char** argv)
   SimTaDyn.m_window = &main_window;
 
   // FIXME: temporary, just for testing
-  SimTaDyn.m_forth.addForthButon(Gtk::Stock::COLOR_PICKER, "FOO"); // FIXME "42 42 FOO" ne fonctionne pas // FIXME2: interdire une compilation
+  SimTaDyn.m_window->addForthButon(Gtk::Stock::YES, "TRACE.ON"); // FIXME "42 42 FOO" ne fonctionne pas // FIXME2: interdire une compilation
+  SimTaDyn.m_window->addForthButon(Gtk::Stock::NO, "TRACE.OFF");
 
   kit.run(*(SimTaDyn.m_window));
   return 0;
