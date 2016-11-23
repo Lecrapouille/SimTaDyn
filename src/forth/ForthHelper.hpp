@@ -86,7 +86,7 @@ typedef uint8_t        Cell8;
 // Return stack (store calling functions (tokens))
 #  define RPUSH(a)  (*(m_rsp++) = CELL32(a)) // Store an address a on the top of stack
 #  define RPOP(r)   (r = *(--m_rsp))         // Discard the top of the stack
-#  define RPOP16(r) (r = *(--m_rsp))
+#  define RPICK(n)  (*(m_rsp - n - 1))       // Look at the nth element (n >= 1) of the stack from the top (1 = 1st element)
 
 // **************************************************************
 //

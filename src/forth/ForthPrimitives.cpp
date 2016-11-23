@@ -319,6 +319,16 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       DPUSH(m_tos1);
       break;
 
+    case FORTH_PRIMITIVE_I:
+      DPUSH(m_tos);
+      m_tos = RPICK(0);
+      break;
+
+    case FORTH_PRIMITIVE_J:
+      DPUSH(m_tos);
+      m_tos = RPICK(2);
+      break;
+
     case FORTH_PRIMITIVE_CELL:
       DPUSH(m_tos);
       m_tos = sizeof (Cell32);

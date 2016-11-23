@@ -619,6 +619,8 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_FROM_RSTACK, "R>", 0);
   m_dico.add(FORTH_PRIMITIVE_2TO_RSTACK, "2>R", 0);
   m_dico.add(FORTH_PRIMITIVE_2FROM_RSTACK, "2R>", 0);
+  m_dico.add(FORTH_PRIMITIVE_I, "I", 0);
+  m_dico.add(FORTH_PRIMITIVE_J, "J", 0);
 
   // cell sizeof
   m_dico.add(FORTH_PRIMITIVE_CELL, "CELL", 0);
