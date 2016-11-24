@@ -277,22 +277,25 @@ void ForthDico::displayToken(const Cell16 token) const
 // **************************************************************
 void ForthDico::display() const
 {
-  int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping;
+  int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping, skip;
   bool smudge, immediate;
   bool compiled = false;
   bool truncated = false;
+  bool creat = false;
   const char *color = DEFAULT;
   const char *color1 = DEFAULT;
 
-  std::cout << "Address                    Word  Token    Definition (tokens)    ";
+  std::cout << "Address                          Word  Token    Definition (tokens)    ";
   std::cout << std::setw(11 + 5 * (WORD_GROUPING - 4)) << "Translation" << std::endl;
-  std::cout << std::setfill('=') << std::setw(77 + 5 * (WORD_GROUPING - 4));
+  std::cout << std::setfill('=') << std::setw(83 + 5 * (WORD_GROUPING - 4));
   std::cout << " " << std::endl;
 
   prev = m_here;
   ptr = m_last;
   do
     {
+      creat = false;
+
       // Display dictionary addresses in hex
       std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr << " ";
 
@@ -318,7 +321,7 @@ void ForthDico::display() const
         color = RED;
 
       // Display word name (right centered)
-      std::cout << std::setfill('.') << std::setw(32U - length)
+      std::cout << std::setfill('.') << std::setw(38U - length)
                 << color << " " << (char *) &m_dictionary[ptr + 1U]
                 << " ";
 
@@ -362,11 +365,29 @@ void ForthDico::display() const
           grouping = WORD_GROUPING;
           while ((grouping-- > 0) && (dd < def_length))
             {
+              // (CREATE) EXIT xx .. yy
+              if (creat)
+                {
+                  if (0 == skip)
+                    {
+                      uint32_t p = ptr + length + 3U + dd;
+                      while (dd < def_length)
+                        {
+                          std::cout << GREEN << std::setfill('0') << std::setw(2) << std::hex << read8at(p) << " ";
+                          ++p;
+                          ++dd;
+                        }
+                      continue;
+                    }
+                  else
+                    {
+                      --skip; // skipping (CREATE) EXIT
+                    }
+                }
+
               if (truncated) { truncated = false; grouping--; }
               token = read16at(ptr + length + 3U + dd);
               dd += 2U;
-
-              //std::cout << "G(" << std::dec << grouping << ") ";
 
               // Not a primitive: display the name
               if (token >= NUM_PRIMITIVES)
@@ -425,6 +446,13 @@ void ForthDico::display() const
                         color = BLUE;
                       uint32_t p = ptr + length + 4U + dd;
 
+                      // (CREATE) EXIT xx .. yy
+                      if ((FORTH_PRIMITIVE_PCREATE == token) && (FORTH_PRIMITIVE_EXIT == read16at(p-1)))
+                        {
+                          creat = true;
+                          skip = 1;
+                        }
+
                       // Several strategies
                       switch (token)
                         {
@@ -480,7 +508,7 @@ void ForthDico::display() const
             {
               // Dictionary address
               std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + d << "    ";
-              std::cout << GREY << std::setfill(' ') << std::setw(29U + 5U) << "    ";
+              std::cout << GREY << std::setfill(' ') << std::setw(40U) << "    ";
             }
         } // while definition
 
