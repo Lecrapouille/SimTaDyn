@@ -72,7 +72,7 @@ void ForthReader::setStringToParse(std::string const& str)
 void ForthReader::skipLine()
 {
   m_eol = true;
-  ++m_lines;
+  //++m_lines;
 
   if (READ_STRING == m_mode)
     {
