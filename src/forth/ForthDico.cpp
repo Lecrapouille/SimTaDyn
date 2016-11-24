@@ -649,3 +649,17 @@ void ForthDico::allot(const int32_t nb_bytes)
       // Do nothing
     }
 }
+
+// **************************************************************
+//
+// **************************************************************
+void ForthDico::move(const uint32_t destination,
+                     const uint32_t source,
+                     const uint32_t nbytes)
+{
+  checkBounds(source, nbytes);
+  checkBounds(destination, nbytes);
+  std::memmove(m_dictionary + destination,
+               m_dictionary + source,
+               nbytes);
+}

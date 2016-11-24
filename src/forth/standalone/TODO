@@ -29,6 +29,10 @@ Mot OpenGL
 BUG/FIXME/TBD
 =============
 
+gforth et pforth gerent des mots de taille > 32 char pas moi
+
+Remplacer le code ideux de gestion des ( ) par : (   ')' word drop ; immediate
+
 Le . affiche dans l'endian de l'ordi. DEvrait utiliser le meme endian que le dico
 
 ::toupper pas mis au bon endroit mais ou ?
@@ -37,8 +41,6 @@ Fermer correctement les stream quand on finit de parser un INCLUDE
 
 Ajouter la protection contre les inclusions multiples
 
-Bug d'affichage du dico avec les mots 0BRANCH et BRANCH selon que le mot COMPILE est devant ou pas
-Bug d'affichage du dico avec les mots PCREATE et literral 2 crans plus loin
 
 Bug d'affichage du dico avec un literal en 4em position fait planter
 : MULT

@@ -568,7 +568,7 @@ void Forth::includeFile(std::string const& filename)
 void Forth::boot()
 {
   // Dummy word and comments
-  m_dico.add(FORTH_PRIMITIVE_NOP, "NOP", 0);
+  m_dico.add(FORTH_PRIMITIVE_NOP, "NOOP", 0);
   m_dico.add(FORTH_PRIMITIVE_LPARENTHESIS, "(", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_RPARENTHESIS, ")", FLAG_IMMEDIATE);
   m_dico.add(FORTH_PRIMITIVE_COMMENTARY, "\\", FLAG_IMMEDIATE);
@@ -608,6 +608,7 @@ void Forth::boot()
   m_dico.add(FORTH_PRIMITIVE_STORE32, "!", 0);
   m_dico.add(FORTH_PRIMITIVE_STORE16, "S!", 0);
   m_dico.add(FORTH_PRIMITIVE_STORE8, "C!", 0);
+  m_dico.add(FORTH_PRIMITIVE_CMOVE, "CMOVE", 0);
 
   // Words changing IP
   m_dico.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);

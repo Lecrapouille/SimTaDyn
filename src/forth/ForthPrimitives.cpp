@@ -262,6 +262,14 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       DPOP(m_tos);
       break;
 
+      /* ( src dst n -- ) */
+    case FORTH_PRIMITIVE_CMOVE:
+      DPOP(m_tos2); // dst
+      DPOP(m_tos1); // src
+      m_dico.move(m_tos2, m_tos1, m_tos);
+      DPOP(m_tos);
+      break;
+
       // Restore the IP when interpreting the definition
       // of a non primitive word
     case FORTH_PRIMITIVE_EXIT:
