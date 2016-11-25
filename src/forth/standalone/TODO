@@ -1,18 +1,22 @@
 Mots CORE forth a faire:
 ========================
-*/
+
+." TYPE SOURCE WORD
+ABORT BYE
+THROW CATCH
+
+*/ --> : % 100 */ ; et passer par un calcul 64 bits
 */MOD
 /MOD
 +!
-."
 2@
 0<
-BUILD DOES
+DOES
 RECURSE ---> utilise la definition en cours. Sinon utiliser le nom en cours de deifinition donc modifier la fonction find pour commencer a chercher a partir du mot en cours de definition 
 FIND
 C-FUNCTION
-CMOVE
-:T{ --> }T
+
+Il faut vraiement faire les espaces de noms DUP est equivalent SYS:DUP
 
 Mots SimTaDyn forth a faire:
 ============================
@@ -29,6 +33,8 @@ Mot OpenGL
 BUG/FIXME/TBD
 =============
 
+Securite: champs de bits (ou matrice creuse) pour indiquer les endroits ou la memoire ne peut pas etre ecrite (par defaut tout a 1 sauf avec ALLOT qui met des 0 pour indiquer que l'on peut ecrire dedans. Comme ca on evite de mettre un int32 dans int16. Mais aussi uniformiser le type int32 (C, et , meme chose) comme en 4th
+
 gforth et pforth gerent des mots de taille > 32 char pas moi
 
 Remplacer le code ideux de gestion des ( ) par : (   ')' word drop ; immediate
@@ -39,7 +45,7 @@ Le . affiche dans l'endian de l'ordi. DEvrait utiliser le meme endian que le dic
 
 Fermer correctement les stream quand on finit de parser un INCLUDE
 
-Ajouter la protection contre les inclusions multiples
+Ajouter la protection contre les inclusions multiples et verifier l'etat de la pile quand on termine un fichier
 
 
 Bug d'affichage du dico avec un literal en 4em position fait planter
@@ -78,6 +84,8 @@ Evolution
 Ajouter un mode interactif au standalone
 
 Faire une sauvegarde de LAST et HERE avant de parser un fichier afin de pouvoir restaurer le dico
+
+Ecrire HEX et DECIMAL dans des fichiers qui s'incluent c'est prendre le risque d'un effet de bord.
 
 Faire une fenetre special Forth "interactive" et qui demande pas de sauvegarder a la fin de la session.
 
