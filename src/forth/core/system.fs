@@ -1,11 +1,32 @@
+: BYE ;
+
 : ? @ . ;
 
 : +! ( value addr -- ) TUCK @ + SWAP ! ;
 
-: VARIABLE
+\ : (DOES>) LAST
+
+: VALUE
   CREATE HERE !
-  CELL ALLOT
-;
+  CELL ALLOT ;
+
+( 66 VALUE TOTO
+TOTO ? CR )
+
+: VARIABLE  CREATE  0 , ;
+\ : CONSTANT  CREATE    ,  DOES> @ ;
+
+( VARIABLE IW3 IMMEDIATE 234 IW3 ! IW3 ?
+
+HEX
+LAST . )
+
+( VARIABLE DATE VARIABLE FOO
+12 DATE !
+DATE ?  CR
+26 FOO !
+FOO ? CR )
+
 
 : BEGIN HERE ; IMMEDIATE
 
@@ -36,6 +57,8 @@
   COMPILE R>
   COMPILE 2DROP
 ; IMMEDIATE
+
+: LEAVE R> R> R> DROP DUP >R >R >R ;
 
 : >MARK      ( -- addr )   HERE 0 S,  ;
 : IF COMPILE 0BRANCH >MARK ; IMMEDIATE
