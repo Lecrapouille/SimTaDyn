@@ -1,7 +1,7 @@
 #include "ForthInner.hpp"
 
-#  define BINARY_OP(op) { m_tos = DDROP() op m_tos; } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
-#  define LOGICAL_OP(op) { m_tos = -1 * (DDROP() op m_tos); }
+#  define BINARY_OP(op) { m_tos = ((int32_t) DDROP()) op ((int32_t) m_tos); } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
+#  define LOGICAL_OP(op) { m_tos = -1 * (((int32_t) DDROP()) op ((int32_t) m_tos)); }
 
 // **************************************************************
 //
@@ -384,7 +384,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // nip ( a b -- b ) swap drop ;
     case FORTH_PRIMITIVE_NIP:
-      DPOP(m_tos);
+      DPOP(m_tos1);
       break;
 
       // ( ... n -- sp(n) )
@@ -398,7 +398,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
     case FORTH_PRIMITIVE_QDUP:
-      if (DStackDepth() >= -1)
+      if (m_tos)
         {
           DPUSH(m_tos);
         }
@@ -450,12 +450,13 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // 2swap ( a b c d -- c d a b )
     case FORTH_PRIMITIVE_2SWAP:
+      DPOP(m_tos1);
       DPOP(m_tos2);
       DPOP(m_tos3);
-      DPOP(m_tos4);
+      DPUSH(m_tos1);
+      DPUSH(m_tos);
       DPUSH(m_tos3);
-      DPUSH(m_tos4);
-      DPUSH(m_tos2);
+      m_tos = m_tos2;
       break;
 
       // 2drop ( a b -- ) drop drop ;
@@ -493,6 +494,13 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
                     << m_tos << "' is an invalid base and shall be [2..36]. Ignored !"
                     << DEFAULT << std::endl;
         }
+      break;
+
+    case FORTH_PRIMITIVE_NEGATE:
+      m_tos = -m_tos;
+      break;
+    case FORTH_PRIMITIVE_ABS:
+      m_tos = std::abs((int32_t) m_tos);
       break;
 
     case FORTH_PRIMITIVE_PLUS:
@@ -554,11 +562,11 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
     case FORTH_PRIMITIVE_MIN:
       DPOP(m_tos1);
-      m_tos = (m_tos < m_tos1) ? m_tos : m_tos1;
+      m_tos = ((int32_t) m_tos < (int32_t) m_tos1) ? m_tos : m_tos1;
       break;
     case FORTH_PRIMITIVE_MAX:
       DPOP(m_tos1);
-      m_tos = (m_tos > m_tos1) ? m_tos : m_tos1;
+      m_tos = ((int32_t) m_tos > (int32_t) m_tos1) ? m_tos : m_tos1;
       break;
     case FORTH_PRIMITIVE_DISP:
       std::cout << std::setbase(m_base) << (int32_t) m_tos << " ";

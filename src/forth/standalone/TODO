@@ -85,7 +85,7 @@ Ajouter un mode interactif au standalone
 
 Faire une sauvegarde de LAST et HERE avant de parser un fichier afin de pouvoir restaurer le dico
 
-Ecrire HEX et DECIMAL dans des fichiers qui s'incluent c'est prendre le risque d'un effet de bord.
+Ecrire HEX et DECIMAL dans des fichiers qui s'incluent c'est prendre le risque d'un effet de bord ==> empiler m_base quand on parse un nouveau stream
 
 Faire une fenetre special Forth "interactive" et qui demande pas de sauvegarder a la fin de la session.
 
