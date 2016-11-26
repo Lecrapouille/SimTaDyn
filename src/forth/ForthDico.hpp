@@ -16,22 +16,41 @@ public:
   bool dump(std::string const& filename);// FIXME const;
   bool load(std::string const& filename);
   void display() const;
-  Cell16 last() const;
-  Cell16 here() const;
-  void here(const Cell16 here);
+  inline Cell16 last() const { return m_last; }
+  inline Cell16 here() const { return m_here; }
+  inline void here(const Cell16 here) { m_here = here; }
   void allot(const int32_t nb_bytes);
-  void appendCell8(const Cell32 value);
-  void appendCell16(const Cell32 value);
-  void appendCell32(const Cell32 value);
+  inline void appendCell8(const Cell32 value)
+  {
+    write8at(m_here, value);
+    m_here += 1U;
+  }
+  inline void appendCell16(const Cell32 value)
+  {
+    write16at(m_here, value);
+    m_here += 2U;
+  }
+  inline void appendCell32(const Cell32 value)
+  {
+    write32at(m_here, value);
+    m_here += 4U;
+  }
   void write8at(const uint32_t addr, const Cell32 data);
   void write16at(const uint32_t addr, const Cell32 data);
   void write32at(const uint32_t addr, const Cell32 data);
   Cell32 read8at(const uint32_t addr) const;
   Cell32 read16at(const uint32_t addr) const;
   Cell32 read32at(const uint32_t addr) const;
-  void move(const uint32_t destination,
-            const uint32_t source,
-            const uint32_t nbytes);
+  inline void move(const uint32_t destination,
+                   const uint32_t source,
+                   const uint32_t nbytes)
+  {
+    checkBounds(source, nbytes);
+    checkBounds(destination, nbytes);
+    std::memmove(m_dictionary + destination,
+                 m_dictionary + source,
+                 nbytes);
+  }
   void displayToken(const Cell16 token) const;
 
 protected:

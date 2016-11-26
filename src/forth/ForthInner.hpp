@@ -26,8 +26,8 @@ public:
   std::pair<bool, std::string> eatString(const char* const code_forth);
   std::pair<bool, std::string> eatFile(std::string const& filename);
   virtual void ok(std::pair<bool, std::string> const& res);
-  const ForthDico& dictionary() const;
-  ForthDico& dictionary();
+  inline const ForthDico& dictionary() const { return m_dico; }
+  inline ForthDico& dictionary() { return m_dico; }
   void displayDStack() const;
   void displayRStack() const;
   // TODO: charge un fichier dico et ecrase le dico ou le charge a la fin
@@ -40,9 +40,9 @@ protected:
   bool toNumber(std::string const& word, Cell32& number);
   void execPrimitive(const Cell16 idPrimitive);
   void execToken(const Cell16 tx);
-  int32_t RStackDepth() const;
-  int32_t DStackDepth() const;
-  inline bool isPrimitive(const Cell16 id) const;
+  inline int32_t RStackDepth() const { return m_rsp - m_return_stack; }
+  inline int32_t DStackDepth() const { return m_dsp - m_data_stack; }
+  inline bool isPrimitive(const Cell16 id) const { return /*(id >= 0) &&*/ (id < NUM_PRIMITIVES); }
   bool changeDisplayBase(const uint8_t newbase);
   std::string getWord();
 

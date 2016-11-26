@@ -12,7 +12,7 @@ Forth::Forth()
 }
 
 // **************************************************************
-//
+// FIXME: meilleur nom abort()
 // **************************************************************
 inline void Forth::restore()
 {
@@ -32,22 +32,6 @@ inline void Forth::restore()
 }
 
 // **************************************************************
-//
-// **************************************************************
-const ForthDico& Forth::dictionary() const
-{
-  return m_dico;
-}
-
-// **************************************************************
-//
-// **************************************************************
-ForthDico& Forth::dictionary()
-{
-  return m_dico;
-}
-
-// **************************************************************
 // When displaying numbers on screen, display them on the
 // selected base.
 // **************************************************************
@@ -59,30 +43,6 @@ bool Forth::changeDisplayBase(const uint8_t newbase)
       return true;
     }
   return false;
-}
-
-// **************************************************************
-// Check if the token is a forth primitive
-// **************************************************************
-inline bool Forth::isPrimitive(const Cell16 id) const
-{
-  return /*(id >= 0) &&*/ (id < NUM_PRIMITIVES);
-}
-
-// **************************************************************
-// Return the number of elements in the return stack
-// **************************************************************
-int32_t Forth::RStackDepth() const
-{
-  return m_rsp - m_return_stack;
-}
-
-// **************************************************************
-// Return the number of elements in the data stack
-// **************************************************************
-int32_t Forth::DStackDepth() const
-{
-  return m_dsp - m_data_stack;
 }
 
 // **************************************************************
@@ -674,6 +634,7 @@ void Forth::boot()
 
   // Data Stack
   m_dico.add(FORTH_PRIMITIVE_DEPTH, "DEPTH", 0);
+  m_dico.add(FORTH_PRIMITIVE_ROLL, "ROLL", 0);
   m_dico.add(FORTH_PRIMITIVE_NIP, "NIP", 0);
   m_dico.add(FORTH_PRIMITIVE_PICK, "PICK", 0);
   m_dico.add(FORTH_PRIMITIVE_DUP, "DUP", 0);

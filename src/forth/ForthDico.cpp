@@ -6,21 +6,6 @@ ForthDico::ForthDico()
   m_last = 0U;
 }
 
-Cell16 ForthDico::last() const
-{
-  return m_last;
-}
-
-Cell16 ForthDico::here() const
-{
-  return m_here;
-}
-
-void ForthDico::here(const Cell16 here)
-{
-  m_here = here;
-}
-
 // **************************************************************
 // Create a new forth definition (aka entry) at the 1st empty location of the m_dictionary.
 // The 1st empty location in the dictionnary is given by the variable 'here'.
@@ -603,33 +588,6 @@ Cell32 ForthDico::read32at(const uint32_t addr) const
 }
 
 // **************************************************************
-// Store at 8-byte data the first free location in the dictionary
-// **************************************************************
-void ForthDico::appendCell8(const Cell32 value)
-{
-  write8at(m_here, value);
-  m_here += 1U;
-}
-
-// **************************************************************
-// Store at 16-byte data the first free location in the dictionary
-// **************************************************************
-void ForthDico::appendCell16(const Cell32 value)
-{
-  write16at(m_here, value);
-  m_here += 2U;
-}
-
-// **************************************************************
-// Store at 32-byte data the first free location in the dictionary
-// **************************************************************
-void ForthDico::appendCell32(const Cell32 value)
-{
-  write32at(m_here, value);
-  m_here += 4U;
-}
-
-// **************************************************************
 // Reserve or release nb consecutive bytes from HERE
 // **************************************************************
 void ForthDico::allot(const int32_t nb_bytes)
@@ -648,18 +606,4 @@ void ForthDico::allot(const int32_t nb_bytes)
     {
       // Do nothing
     }
-}
-
-// **************************************************************
-//
-// **************************************************************
-void ForthDico::move(const uint32_t destination,
-                     const uint32_t source,
-                     const uint32_t nbytes)
-{
-  checkBounds(source, nbytes);
-  checkBounds(destination, nbytes);
-  std::memmove(m_dictionary + destination,
-               m_dictionary + source,
-               nbytes);
 }

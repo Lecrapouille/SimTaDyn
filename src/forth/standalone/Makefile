@@ -1,4 +1,4 @@
-.PHONY: clean build
+.PHONY: clean build coverage with-code-coverage
 
 ###################################################
 # Color
@@ -52,6 +52,13 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
 POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
 
 ###################################################
+# Code coverage
+ifneq ($(filter with-code-coverage, $(MAKECMDGOALS)),)
+CXXFLAGS += --coverage
+LDFLAGS += --coverage
+endif
+
+###################################################
 # Main entry
 all: $(TARGET)
 
@@ -66,10 +73,20 @@ $(TARGET): $(OBJECTS)
 	@$(POSTCOMPILE)
 
 ###################################################
+# Code coverage
+with-code-coverage: all
+
+coverage-report: $(TARGET)
+	@mkdir -p coverage_report 2> /dev/null
+	@rm -fr coverage_report/* 2> /dev/null
+	@gcovr -r ../../. --html -o coverage_report/coverage.html --html-details
+	@firefox coverage_report/coverage.html
+
+###################################################
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~ ../*~ $(BUILD) 2> /dev/null
+	@rm -fr *~ ../*~ $(BUILD) coverage_report 2> /dev/null
 
 ###################################################
 # Create a temporary folder to store *.o
