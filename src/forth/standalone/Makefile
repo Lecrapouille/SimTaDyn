@@ -22,24 +22,25 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I.. -I../common
+INCLUDES = -I. -I.. -I../../common -I../../common/SharedLibrary
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):..:../common
+VPATH=.:$(BUILD):..:../../common:../../common/SharedLibrary
 
 ###################################################
 # Set objects architecture specific
+OBJECTS_POCO       = Exception.o SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_FORTH      = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
-OBJECTS_STANDALONE = main.o
-OBJECTS = $(OBJECTS_FORTH) $(OBJECTS_STANDALONE)
-TARGET = SimForth
+OBJECTS_STANDALONE =
+OBJECTS            = $(OBJECTS_POCO) $(OBJECTS_FORTH) $(OBJECTS_STANDALONE) main.o
+TARGET             = SimForth
 
 ###################################################
 # Compil options
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11
-LDFLAGS =
+LDFLAGS = -ldl
 DEFINES =
 
 ###################################################

@@ -30,14 +30,16 @@ VPATH=.:$(BUILD):gui:loader:cells:forth:rtree:common
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_COMMON = Color.o Vector3D.o Camera2D.o
+OBJECTS_COMMON = Exception.o Color.o Vector3D.o Camera2D.o
 OBJECTS_RTREE  = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_FORTH  = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
 OBJECTS_CELLS  = SimTaDynCells.o SimTaDynGraphs.o
 OBJECTS_LOADER = ShapeFile.o
 OBJECTS_GUI    = OpenGL.o Textures.o Fonts.o Renderer.o DrawingArea.o \
 	         TextEditor.o ForthEditor.o SimTaDynWindow.o
-OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_RTREE) $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_LOADER) $(OBJECTS_GUI) main.o
+OBJECTS        = $(OBJECTS_POCO) $(OBJECTS_COMMON) $(OBJECTS_RTREE)  \
+                 $(OBJECTS_FORTH) $(OBJECTS_CELLS) $(OBJECTS_LOADER) \
+                 $(OBJECTS_GUI) main.o
 TARGET = SimTaDyn
 
 ###################################################
