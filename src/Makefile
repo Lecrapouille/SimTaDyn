@@ -48,8 +48,10 @@ TARGET = SimTaDyn
 #CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 #LDFLAGS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
-LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
+CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+#CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
+#LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
 DEFINES = -DCHECK_OPENGL
 
 ###################################################
@@ -57,7 +59,7 @@ DEFINES = -DCHECK_OPENGL
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo
+       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW
 
 ###################################################
 # Files dependencies

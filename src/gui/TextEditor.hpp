@@ -2,6 +2,7 @@
 #  define TEXTEDITOR_HPP_
 
 #  include <gtkmm.h>
+#  include <gtksourceviewmm.h>
 #  include "Forth.hpp"
 
 class TextDocument;
@@ -14,8 +15,8 @@ class TextEditor;
 class FindWindow : public Gtk::Window
 {
 public:
-  FindWindow(Gtk::TextView* document);
-  void document(Gtk::TextView* document);
+  FindWindow(Gsv::View* document);
+  void document(Gsv::View* document);
   void findNext();
   void findFirst();
 
@@ -31,7 +32,7 @@ protected:
   Gtk::Entry m_entry;
   Gtk::Button m_search;
   Gtk::Button m_next;
-  Gtk::TextView* m_document;
+  Gsv::View* m_document;
 };
 
 // *************************************************************************************************
@@ -62,7 +63,7 @@ protected:
 class TextDocument : public Gtk::ScrolledWindow
 {
 public:
-  TextDocument();
+  TextDocument(Glib::RefPtr<Gsv::Language> language);
   ~TextDocument();
   void clear();
   bool isModified() const;
@@ -74,7 +75,8 @@ public:
 protected:
   friend class TextEditor;
 
-  Gtk::TextView m_textview;
+  Gsv::View m_textview;
+  Glib::RefPtr<Gsv::Buffer> m_buffer;
   CloseLabel m_button;
   std::string m_filename;
   // FIXME: mode interactif ==> ne pas sauvegarder
@@ -106,9 +108,11 @@ protected:
   bool dialogSave(TextDocument *doc);
   bool saveAs(TextDocument *doc);
   void newLoadedDocument(std::string const& filename);
-  void onPageSwitched(GtkNotebookPage* page, guint page_num);
+  void onPageSwitched(Gtk::Widget* page, guint page_num);
 
   int m_nb_nonames;
+  Glib::RefPtr<Gsv::LanguageManager> m_language_manager;
+  Glib::RefPtr<Gsv::Language> m_language;
 };
 
 #endif /* TEXTEDITOR_HPP_ */

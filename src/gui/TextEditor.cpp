@@ -1,9 +1,10 @@
 #include "TextEditor.hpp"
+#include <gtkmm/cssprovider.h>
 
 // *************************************************************************************************
 // Create a kind of dialog window for searching a string inside a text document.
 // *************************************************************************************************
-FindWindow::FindWindow(Gtk::TextView* document)
+FindWindow::FindWindow(Gsv::View* document)
   : m_label("Search:"),
     m_search("First"),
     m_next("Next"),
@@ -28,7 +29,7 @@ FindWindow::FindWindow(Gtk::TextView* document)
 // When switching a notebook page, and if the search dialog is present, change the reference of the
 // document to search in.
 // *************************************************************************************************
-void FindWindow::document(Gtk::TextView* document)
+void FindWindow::document(Gsv::View* document)
 {
   m_document = document;
 }
@@ -54,7 +55,7 @@ void FindWindow::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter
     {
       m_document->get_buffer()->select_range(mstart, mend);
       mark = m_document->get_buffer()->create_mark("last_pos", mend, false);
-      m_document->scroll_mark_onscreen(mark);
+      m_document->scroll_to(mark);
       m_status.set_text("Found: yes");
     }
   else
@@ -112,10 +113,16 @@ CloseLabel::CloseLabel(std::string const& text)
     m_button(),
     m_image(Gtk::Stock::CLOSE, Gtk::ICON_SIZE_MENU)
 {
+  set_can_focus(false); // Gtk::HBox
+  m_label.set_can_focus(false);
+  //m_button.set_image_from_icon_name("window-close-symbolic");
   m_button.add(m_image);
-  m_button.set_relief(Gtk::RELIEF_NONE);
-  m_button.set_focus_on_click(false);
+  m_button.set_can_focus(false);
+  m_button.set_relief(Gtk::ReliefStyle::RELIEF_NONE);
   m_button.signal_clicked().connect(sigc::mem_fun(*this, &CloseLabel::onClicked));
+  pack_start(m_label, Gtk::PACK_SHRINK);
+  pack_end(m_button, Gtk::PACK_SHRINK);
+
   pack_start(m_label);
   pack_start(m_button);
   show_all();
@@ -157,14 +164,28 @@ void CloseLabel::link(Gtk::Notebook *notebook, Gtk::Widget *widget)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-TextDocument::TextDocument()
+TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   : m_button(""),
     m_filename("")
 {
   Gtk::ScrolledWindow::add(m_textview);
   Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-  m_textview.get_buffer()->signal_changed().connect(sigc::mem_fun(this, &TextDocument::onChanged));
+  // Create the text buffer with syntax coloration
+  m_buffer = Gsv::Buffer::create(language);
+  m_buffer->set_highlight_syntax(true);
+  m_textview.set_source_buffer(m_buffer);
+
+  // Behavior of the text view
+  m_textview.set_show_line_numbers(true);
+  m_textview.set_show_right_margin(true);
+  m_textview.set_highlight_current_line(true);
+  m_textview.set_tab_width(4U);
+  m_textview.set_indent_width(4U);
+  m_textview.set_insert_spaces_instead_of_tabs(true);
+  m_textview.set_auto_indent(true);
+
+  m_buffer->signal_changed().connect(sigc::mem_fun(this, &TextDocument::onChanged));
 }
 
 // *************************************************************************************************
@@ -181,8 +202,7 @@ TextDocument::~TextDocument()
 // *************************************************************************************************
 void TextDocument::clear()
 {
-  m_textview.get_buffer()->erase(m_textview.get_buffer()->begin(),
-                                 m_textview.get_buffer()->end());
+  m_buffer->erase(m_buffer->begin(), m_buffer->end());
 }
 
 // *************************************************************************************************
@@ -190,7 +210,7 @@ void TextDocument::clear()
 // *************************************************************************************************
 bool TextDocument::isModified() const
 {
-  return m_textview.get_buffer()->get_modified();
+  return m_buffer->get_modified();
 }
 
 // *************************************************************************************************
@@ -218,9 +238,10 @@ bool TextDocument::save()
       outfile.open(m_filename, std::fstream::out);
       if (outfile)
         {
-          outfile << m_textview.get_buffer()->get_text();
+          outfile << m_buffer->get_text();
           outfile.close();
-          m_textview.get_buffer()->set_modified(false);
+          m_buffer->set_modified(false);
+          m_button.set_tooltip_text(m_filename);
         }
       else
         {
@@ -256,6 +277,7 @@ bool TextDocument::load(std::string const& filename, bool clear)
       m_filename = filename;
       std::string title = filename.substr(filename.find_last_of("/") + 1);
       m_button.label(title);
+      m_button.set_tooltip_text(filename);
     }
 
   infile.open(filename, std::fstream::in);
@@ -265,13 +287,15 @@ bool TextDocument::load(std::string const& filename, bool clear)
   while (std::getline(infile, line))
     {
       line = line + '\n';
-      m_textview.get_buffer()->insert(m_textview.get_buffer()->end(), line);
+      m_buffer->begin_not_undoable_action();
+      m_buffer->insert(m_buffer->end(), line);
+      m_buffer->end_not_undoable_action();
     }
   infile.close();
 
   if (clear)
     {
-      m_textview.get_buffer()->set_modified(false);
+      m_buffer->set_modified(false);
     }
 
   return true;
@@ -286,6 +310,23 @@ TextEditor::TextEditor()
 {
   m_notebook.set_scrollable();
   m_notebook.signal_switch_page().connect(sigc::mem_fun(*this, &TextEditor::onPageSwitched));
+
+  // Default Syntax coloration is Forth
+  m_language_manager = Gsv::LanguageManager::get_default();
+  m_language = m_language_manager->get_language("forth");
+  if (m_language)
+    {
+      std::cerr << "[WARNING] TextEditor::TextEditor: No syntax highlighted found for Forth" << std::endl;
+    }
+
+  // Change the look. Inspiration from juCi++ project (https://github.com/cppit/jucipp)
+  auto provider = Gtk::CssProvider::create();
+#if GTK_VERSION_GE(3, 20)
+  provider->load_from_data("tab {border-radius: 5px 5px 0 0; padding: 0 4px; margin: 0;}");
+#else
+  provider->load_from_data(".notebook {-GtkNotebook-tab-overlap: 0px;} tab {border-radius: 5px 5px 0 0; padding: 4px 4px;}");
+#endif
+  m_notebook.get_style_context()->add_provider(provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
 // *************************************************************************************************
@@ -378,22 +419,22 @@ bool TextEditor::saveAs(TextDocument *doc)
   dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_OK);
 
   // Add filters, so that only certain file types can be selected:
-  Gtk::FileFilter filter_forth;
-  filter_forth.set_name("Forth files");
-  filter_forth.add_pattern("*.fs");
-  filter_forth.add_pattern("*.fth");
-  filter_forth.add_pattern("*.4th");
-  filter_forth.add_pattern("*.forth");
+  auto filter_forth = Gtk::FileFilter::create();
+  filter_forth->set_name("Forth files");
+  filter_forth->add_pattern("*.fs");
+  filter_forth->add_pattern("*.fth");
+  filter_forth->add_pattern("*.4th");
+  filter_forth->add_pattern("*.forth");
   dialog.add_filter(filter_forth);
 
-  Gtk::FileFilter filter_text;
-  filter_text.set_name("Text files");
-  filter_text.add_mime_type("text/plain");
+  auto filter_text = Gtk::FileFilter::create();
+  filter_text->set_name("Text files");
+  filter_text->add_mime_type("text/plain");
   dialog.add_filter(filter_text);
 
-  Gtk::FileFilter filter_any;
-  filter_any.set_name("Any files");
-  filter_any.add_pattern("*");
+  auto filter_any = Gtk::FileFilter::create();
+  filter_any->set_name("Any files");
+  filter_any->add_pattern("*");
   dialog.add_filter(filter_any);
 
   int result = dialog.run();
@@ -422,22 +463,22 @@ void TextEditor::newDocument()
   dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 
   // Add filters, so that only certain file types can be selected:
-  Gtk::FileFilter filter_text;
-  filter_text.set_name("Text files");
-  filter_text.add_mime_type("text/plain");
+  auto filter_text = Gtk::FileFilter::create();
+  filter_text->set_name("Text files");
+  filter_text->add_mime_type("text/plain");
   dialog.add_filter(filter_text);
 
-  Gtk::FileFilter filter_forth;
-  filter_forth.set_name("Forth files");
-  filter_forth.add_pattern("*.fs");
-  filter_forth.add_pattern("*.fth");
-  filter_forth.add_pattern("*.4th");
-  filter_forth.add_pattern("*.forth");
+  auto filter_forth = Gtk::FileFilter::create();
+  filter_forth->set_name("Forth files");
+  filter_forth->add_pattern("*.fs");
+  filter_forth->add_pattern("*.fth");
+  filter_forth->add_pattern("*.4th");
+  filter_forth->add_pattern("*.forth");
   dialog.add_filter(filter_forth);
 
-  Gtk::FileFilter filter_any;
-  filter_any.set_name("Any files");
-  filter_any.add_pattern("*");
+  auto filter_any = Gtk::FileFilter::create();
+  filter_any->set_name("Any files");
+  filter_any->add_pattern("*");
   dialog.add_filter(filter_any);
 
   int result = dialog.run();
@@ -461,7 +502,7 @@ void TextEditor::newDocument()
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::onPageSwitched(GtkNotebookPage* page, guint page_num)
+void TextEditor::onPageSwitched(Gtk::Widget* page, guint page_num)
 {
   (void) page;
   m_findwindow.document(&(TextEditor::document(page_num)->m_textview));
@@ -472,7 +513,7 @@ void TextEditor::onPageSwitched(GtkNotebookPage* page, guint page_num)
 // *************************************************************************************************
 void TextEditor::newEmptyDocument()
 {
-  TextDocument *doc = new TextDocument();
+  TextDocument *doc = new TextDocument(m_language);
 
   m_nb_nonames++;
   doc->m_button.label("New Forth Script " + std::to_string(m_nb_nonames));
@@ -488,11 +529,11 @@ void TextEditor::newEmptyDocument()
 // *************************************************************************************************
 void TextEditor::newTemplatedDocument(std::string const& text)
 {
-  TextDocument *doc = new TextDocument();
+  TextDocument *doc = new TextDocument(m_language);
 
   m_nb_nonames++;
   doc->m_button.label("New Forth Script " + std::to_string(m_nb_nonames));
-  doc->m_textview.get_buffer()->set_text(text);
+  doc->m_buffer->set_text(text);
   doc->m_button.link(&m_notebook, doc);
 
   m_notebook.append_page(*doc, doc->m_button);
@@ -505,7 +546,7 @@ void TextEditor::newTemplatedDocument(std::string const& text)
 // *************************************************************************************************
 void TextEditor::newLoadedDocument(std::string const& filename)
 {
-  TextDocument *doc = new TextDocument();
+  TextDocument *doc = new TextDocument(m_language);
 
   doc->load(filename);
   doc->m_button.link(&m_notebook, doc);
@@ -558,7 +599,7 @@ Glib::ustring TextEditor::text()
 
   if (nullptr != doc)
     {
-      return doc->m_textview.get_buffer()->get_text();
+      return doc->m_buffer->get_text();
     }
   else
     {
