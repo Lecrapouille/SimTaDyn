@@ -1,0 +1,4 @@
+class GlDrawingArea: public Gtk::GLArea, public Renderer
+cannot work because of a bug in gtkmm. See: https://www.mail-archive.com/gtkmm-list@gnome.org/msg19689.html
+
+Try updating gtkmm

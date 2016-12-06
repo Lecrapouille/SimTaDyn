@@ -48,7 +48,7 @@ private:
     //s_SimTaDyn.m_forth.dictionary().display();
 
     // Load an initial map
-    s_SimTaDyn.m_loader.load("../data/Corsica-points.shp", s_SimTaDyn.m_graph);
+    //s_SimTaDyn.m_loader.load("../data/Corsica-points.shp", s_SimTaDyn.m_graph);
   }
 
   ~SimTaDynContext()

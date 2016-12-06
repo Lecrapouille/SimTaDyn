@@ -1,4 +1,4 @@
-.PHONY: clean build
+.PHONY: clean build coverage with-code-coverage
 
 ###################################################
 # Color
@@ -17,58 +17,47 @@ print-link= \
 ###################################################
 # Path where to store *.o files. Default: ./build/
 ifeq ($(BUILD),)
-BUILD = ../build
+BUILD = build
 endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -ICommon -ICommon/SharedLibrary -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap/RTree -ISimMap/Cells -ISimMap/Loaders -ISimGui
-#-Igui  -I/usr/include/mysql
+INCLUDES = -I. -I.. -I../../../Common -I../../../Common/SharedLibrary
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Cells:SimMap/Loaders:SimGui
-#gui:loader:cells:rtree:
+VPATH=.:$(BUILD):..:../../../Common:../../../Common/SharedLibrary
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_COMMON   = Exception.o Color.o Vector3D.o Camera2D.o SharedLibrary_UNIX.o SharedLibrary.o
-OBJECTS_OPENGL   = OpenGL.o Textures.o Fonts.o
-OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJECTS_MAP      = SimTaDynCells.o SimTaDynGraphs.o
-OBJECTS_LOADER   = ShapeFile.o
-OBJECTS_FORTH    = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
-OBJECTS_GUI      = TextEditor.o ForthEditor.o SimTaDynWindow.o
-OBJECTS_SIMTADYN = Renderer.o SimForth.o main.o
-
-OBJECTS         = $(OBJECTS_COMMON) $(OBJECTS_OPENGL) $(OBJECTS_RTREE) \
-                  $(OBJECTS_MAP) $(OBJECTS_LOADER) $(OBJECTS_FORTH)    \
-                  $(OBJECTS_GUI) $(OBJECTS_SIMTADYN)
-TARGET = SimTaDyn
+OBJECTS_POCO       = Exception.o SharedLibrary_UNIX.o SharedLibrary.o
+OBJECTS_FORTH      = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
+OBJECTS_STANDALONE =
+OBJECTS            = $(OBJECTS_POCO) $(OBJECTS_FORTH) $(OBJECTS_STANDALONE) main.o
+TARGET             = SimForth
 
 ###################################################
 # Compil options
-#CC = gcc
-#CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
-#LDFLAGS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-#CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
-#LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
-DEFINES = -DCHECK_OPENGL
+CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11
+LDFLAGS = -ldl
+DEFINES =
 
 ###################################################
 # Set Libraries
-LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
-       -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
-       -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW -ldl
+LIBS =
 
 ###################################################
 # Files dependencies
 DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
 POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
+
+###################################################
+# Code coverage
+ifneq ($(filter with-code-coverage, $(MAKECMDGOALS)),)
+CXXFLAGS += --coverage
+LDFLAGS += --coverage
+endif
 
 ###################################################
 # Main entry
@@ -85,10 +74,20 @@ $(TARGET): $(OBJECTS)
 	@$(POSTCOMPILE)
 
 ###################################################
+# Code coverage
+with-code-coverage: all
+
+coverage-report: $(TARGET)
+	@mkdir -p coverage_report 2> /dev/null
+	@rm -fr coverage_report/* 2> /dev/null
+	@gcovr -r ../../. --html -o coverage_report/coverage.html --html-details
+	@firefox coverage_report/coverage.html
+
+###################################################
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(BUILD) 2> /dev/null
+	@rm -fr *~ ../*~ $(BUILD) coverage_report 2> /dev/null
 
 ###################################################
 # Create a temporary folder to store *.o

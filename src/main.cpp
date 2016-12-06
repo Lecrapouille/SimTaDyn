@@ -6,8 +6,8 @@ SimTaDynContext SimTaDynContext::s_SimTaDyn = SimTaDynContext();
 int main(int argc, char** argv)
 {
   const Gtk::Main kit(argc, argv);
-  Gtk::GL::init(argc, argv);
   Gsv::init();
+  //Gtk::GL::init(argc, argv);
 
   SimTaDynWindow main_window("SimTaDyn");
   SimTaDynContext& SimTaDyn = SIMTADYN();
