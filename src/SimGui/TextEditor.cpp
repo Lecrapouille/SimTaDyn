@@ -109,29 +109,29 @@ void FindWindow::findNext()
 // A notebook as tabs but Gtkmm does not give tab with a closing button. This is the aim of CloseLabel
 // *************************************************************************************************
 CloseLabel::CloseLabel(std::string const& text)
-  : m_label(text),
+  : Box(Gtk::ORIENTATION_HORIZONTAL),
+    m_label(text),
     m_button(),
     m_image(Gtk::Stock::CLOSE, Gtk::ICON_SIZE_MENU)
 {
-  set_can_focus(false); // Gtk::HBox
+  set_can_focus(false);
   m_label.set_can_focus(false);
-  //m_button.set_image_from_icon_name("window-close-symbolic");
+  // m_button.set_image_from_icon_name("window-close-symbolic");
   m_button.add(m_image);
   m_button.set_can_focus(false);
   m_button.set_relief(Gtk::ReliefStyle::RELIEF_NONE);
   m_button.signal_clicked().connect(sigc::mem_fun(*this, &CloseLabel::onClicked));
+  m_button.signal_button_press_event().connect(sigc::mem_fun(*this, &CloseLabel::onButtonPressEvent));
+
   pack_start(m_label, Gtk::PACK_SHRINK);
   pack_end(m_button, Gtk::PACK_SHRINK);
-
-  pack_start(m_label);
-  pack_start(m_button);
   show_all();
 }
 
 // *************************************************************************************************
 // Return the text of the button (here the filename of the document)
 // *************************************************************************************************
-Glib::ustring CloseLabel::label()
+Glib::ustring CloseLabel::title()
 {
   return m_label.get_text().raw();
 }
@@ -139,7 +139,7 @@ Glib::ustring CloseLabel::label()
 // *************************************************************************************************
 // Change the text of the button
 // *************************************************************************************************
-void CloseLabel::label(std::string const& text)
+void CloseLabel::title(std::string const& text)
 {
   m_label.set_text(text);
 }
@@ -170,12 +170,10 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
 {
   Gtk::ScrolledWindow::add(m_textview);
   Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-
   // Create the text buffer with syntax coloration
   m_buffer = Gsv::Buffer::create(language);
   m_buffer->set_highlight_syntax(true);
   m_textview.set_source_buffer(m_buffer);
-
   // Behavior of the text view
   m_textview.set_show_line_numbers(true);
   m_textview.set_show_right_margin(true);
@@ -184,7 +182,6 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   m_textview.set_indent_width(4U);
   m_textview.set_insert_spaces_instead_of_tabs(true);
   m_textview.set_auto_indent(true);
-
   m_buffer->signal_changed().connect(sigc::mem_fun(this, &TextDocument::onChanged));
 }
 
@@ -257,7 +254,7 @@ bool TextDocument::save()
 bool TextDocument::saveAs(std::string const& filename)
 {
   std::string title = filename.substr(filename.find_last_of("/") + 1);
-  m_button.label(title);
+  m_button.title(title);
   m_filename = filename;
   return TextDocument::save();
 }
@@ -276,7 +273,7 @@ bool TextDocument::load(std::string const& filename, bool clear)
       TextDocument::clear();
       m_filename = filename;
       std::string title = filename.substr(filename.find_last_of("/") + 1);
-      m_button.label(title);
+      m_button.title(title);
       m_button.set_tooltip_text(filename);
     }
 
@@ -380,7 +377,7 @@ TextDocument* TextEditor::document(const uint32_t i)
 // *************************************************************************************************
 bool TextEditor::dialogSave(TextDocument *doc)
 {
-  Gtk::MessageDialog dialog("The document '" + doc->m_button.label() + "' has been modified. Do you want to save it now ?",
+  Gtk::MessageDialog dialog("The document '" + doc->m_button.title() + "' has been modified. Do you want to save it now ?",
                             false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO);
   dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_APPLY);
 
@@ -412,7 +409,7 @@ bool TextEditor::dialogSave(TextDocument *doc)
 bool TextEditor::saveAs(TextDocument *doc)
 {
   Gtk::FileChooserDialog dialog("Please choose a file to save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
-  //dialog.set_transient_for(*this);
+  dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -456,7 +453,7 @@ bool TextEditor::saveAs(TextDocument *doc)
 void TextEditor::open()
 {
   Gtk::FileChooserDialog dialog("Please choose a file to open", Gtk::FILE_CHOOSER_ACTION_OPEN);
-  //dialog.set_transient_for(*this);
+  dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -516,7 +513,7 @@ void TextEditor::empty(std::string const& title)
   TextDocument *doc = new TextDocument(m_language);
 
   m_nb_nonames++;
-  doc->m_button.label(title + ' ' + std::to_string(m_nb_nonames));
+  doc->m_button.title(title + ' ' + std::to_string(m_nb_nonames));
   doc->m_button.link(&m_notebook, doc);
 
   m_notebook.append_page(*doc, doc->m_button);

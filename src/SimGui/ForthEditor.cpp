@@ -20,7 +20,7 @@ ForthEditor::ForthEditor()
 
     //
     m_submenu[1].set_label("New Forth templated document");
-    m_image[1].set_from_icon_name("document-new", Gtk::ICON_SIZE_MENU);
+    m_image[1].set_from_icon_name("text-x-generic-template", Gtk::ICON_SIZE_MENU);
     m_submenu[1].set_image(m_image[1]);
     m_submenu[1].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::templated));
     m_menu.append(m_submenu[1]);

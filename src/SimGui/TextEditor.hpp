@@ -39,18 +39,25 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class CloseLabel : public Gtk::HBox
+class CloseLabel : public Gtk::Box
 {
 public:
   CloseLabel(std::string const& text);
-  void label(std::string const& text);
-  Glib::ustring label();
+  void title(std::string const& text);
+  Glib::ustring title();
   void link(Gtk::Notebook *notebook, Gtk::Widget *widget);
 
 protected:
   void onClicked();
 
-  Gtk::HBox  m_hbox;
+  // Use the middle button to close the document
+  bool onButtonPressEvent(GdkEventButton* event)
+  {
+    bool res = (GDK_BUTTON_MIDDLE == event->button);
+    if (res) onClicked();
+    return res;
+  }
+
   Gtk::Label m_label;
   Gtk::Button m_button;
   Gtk::Image m_image;
