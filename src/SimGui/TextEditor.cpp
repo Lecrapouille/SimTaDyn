@@ -453,7 +453,7 @@ bool TextEditor::saveAs(TextDocument *doc)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::newDocument()
+void TextEditor::open()
 {
   Gtk::FileChooserDialog dialog("Please choose a file to open", Gtk::FILE_CHOOSER_ACTION_OPEN);
   //dialog.set_transient_for(*this);
@@ -511,29 +511,12 @@ void TextEditor::onPageSwitched(Gtk::Widget* page, guint page_num)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::newEmptyDocument()
+void TextEditor::empty(std::string const& title)
 {
   TextDocument *doc = new TextDocument(m_language);
 
   m_nb_nonames++;
-  doc->m_button.label("New Forth Script " + std::to_string(m_nb_nonames));
-  doc->m_button.link(&m_notebook, doc);
-
-  m_notebook.append_page(*doc, doc->m_button);
-  m_notebook.show_all();
-  m_notebook.set_current_page(-1);
-}
-
-// *************************************************************************************************
-//
-// *************************************************************************************************
-void TextEditor::newTemplatedDocument(std::string const& text)
-{
-  TextDocument *doc = new TextDocument(m_language);
-
-  m_nb_nonames++;
-  doc->m_button.label("New Forth Script " + std::to_string(m_nb_nonames));
-  doc->m_buffer->set_text(text);
+  doc->m_button.label(title + ' ' + std::to_string(m_nb_nonames));
   doc->m_button.link(&m_notebook, doc);
 
   m_notebook.append_page(*doc, doc->m_button);
@@ -560,7 +543,7 @@ void TextEditor::newLoadedDocument(std::string const& filename)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::saveCurrentDocument()
+void TextEditor::save()
 {
   TextDocument* doc = document();
 
@@ -580,7 +563,7 @@ void TextEditor::saveCurrentDocument()
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::saveAsCurrentDocument()
+void TextEditor::saveAs()
 {
   TextDocument* doc = document();
 

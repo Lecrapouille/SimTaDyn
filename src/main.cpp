@@ -14,8 +14,9 @@ int main(int argc, char** argv)
   SimTaDyn.m_window = &main_window;
 
   // FIXME: temporary, just for testing
-  SimTaDyn.m_window->addForthButon(Gtk::Stock::YES, "TRACE.ON"); // FIXME "42 42 FOO" ne fonctionne pas // FIXME2: interdire une compilation
-  SimTaDyn.m_window->addForthButon(Gtk::Stock::NO, "TRACE.OFF");
+  SimTaDyn.m_window->addForthScriptButon(Gtk::Stock::YES, "TRACE.ON", "TRACE.ON ( -- )");
+  SimTaDyn.m_window->addForthScriptButon(Gtk::Stock::NO, "TRACE.OFF", "TRACE.OFF ( -- )");
+  SimTaDyn.m_window->addMapScriptButon(Gtk::Stock::NO, "42 42 FOO", "42 42 FOO");
 
   kit.run(*(SimTaDyn.m_window));
   return 0;

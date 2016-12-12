@@ -5,44 +5,68 @@
 //
 // *************************************************************************************************
 ForthEditor::ForthEditor()
-{/*
-  // Submenus '_Forth'
+{
+  // Menus '_Forth'
   {
-    Gtk::Menu_Helpers::MenuList& menulist = m_menu.items();
+    m_menuitem.set_label("Forth");
+    m_menuitem.set_submenu(m_menu);
 
-    m_menuimage[3].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New File",
-       m_menuimage[3], sigc::mem_fun(*this, &ForthEditor::newEmptyDocument)));
+    //
+    m_submenu[0].set_label("New Forth document");
+    m_image[0].set_from_icon_name("document-new", Gtk::ICON_SIZE_MENU);
+    m_submenu[0].set_image(m_image[0]);
+    m_submenu[0].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::empty));
+    m_menu.append(m_submenu[0]);
 
-    m_menuimage[4].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Template",
-       m_menuimage[4], sigc::mem_fun(*this, &ForthEditor::newTemplatedDocument))); // TODO
+    //
+    m_submenu[1].set_label("New Forth templated document");
+    m_image[1].set_from_icon_name("document-new", Gtk::ICON_SIZE_MENU);
+    m_submenu[1].set_image(m_image[1]);
+    m_submenu[1].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::templated));
+    m_menu.append(m_submenu[1]);
 
-    m_menuimage[6].set(Gtk::Stock::NEW, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_New Prompt",
-       m_menuimage[6], sigc::mem_fun(*this, &ForthEditor::newEmptyDocument))); // FIXME TBD TODO
+    //
+    m_submenu[2].set_label("Interactive Forth");
+    m_image[2].set_from_icon_name("utilities-terminal", Gtk::ICON_SIZE_MENU);
+    m_submenu[2].set_image(m_image[2]);
+    m_submenu[2].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::empty));// TODO
+    m_menu.append(m_submenu[2]);
 
-    menulist.push_back(m_menuseparator[0]);
+    //
+    m_menu.append(m_menuseparator[0]);
 
-    m_menuimage[0].set(Gtk::Stock::OPEN, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Open",
-       m_menuimage[0], sigc::mem_fun(*this, &ForthEditor::newDocument)));
+    //
+    m_submenu[3].set_label("Open Forth document");
+    m_image[3].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
+    m_submenu[3].set_image(m_image[3]);
+    m_submenu[3].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::open));
+    m_menu.append(m_submenu[3]);
 
-    m_menuimage[1].set(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_SaveAs",
-       m_menuimage[1], sigc::mem_fun(*this, &ForthEditor::saveAsCurrentDocument)));
+    //
+    m_submenu[4].set_label("Save");
+    m_image[4].set_from_icon_name("document-save", Gtk::ICON_SIZE_MENU);
+    m_submenu[4].set_image(m_image[4]);
+    m_submenu[4].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::save));
+    m_menu.append(m_submenu[4]);
 
-    m_menuimage[2].set(Gtk::Stock::SAVE, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Save",
-       m_menuimage[2], sigc::mem_fun(*this, &ForthEditor::saveCurrentDocument)));
+    //
+    m_submenu[5].set_label("Save As");
+    m_image[5].set_from_icon_name("document-save-as", Gtk::ICON_SIZE_MENU);
+    m_submenu[5].set_image(m_image[5]);
+    m_submenu[5].signal_activate().connect(sigc::mem_fun0(*this, &ForthEditor::saveAs));
+    m_menu.append(m_submenu[5]);
 
-    menulist.push_back(m_menuseparator[1]);
+    //
+    m_menu.append(m_menuseparator[1]);
 
-    m_menuimage[5].set(Gtk::Stock::FIND, Gtk::ICON_SIZE_MENU);
-    menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Find",
-    m_menuimage[5], sigc::mem_fun(*this, &ForthEditor::find)));
+    //
+    m_submenu[6].set_label("Find");
+    m_image[6].set_from_icon_name("edit-find", Gtk::ICON_SIZE_MENU);
+    m_submenu[6].set_image(m_image[6]);
+    m_submenu[6].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::find));
+    m_menu.append(m_submenu[6]);
   }
- */
+
   // Forth text view for storing results, debug, historic, dictionary
   {
     // FIXME: mettre les text view en read-only
@@ -81,9 +105,18 @@ ForthEditor::~ForthEditor()
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void ForthEditor::newTemplatedDocument()
+void ForthEditor::empty()
 {
-  TextEditor::newTemplatedDocument(": COMPUTE-ME 1 1 + . ;\nCOMPUTE-ME");
+  TextEditor::empty("New Forth script");
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ForthEditor::templated()
+{
+  ForthEditor::empty();
+  TextEditor::document()->buffer()->set_text(": COMPUTE-ME 1 1 + . ;\nCOMPUTE-ME");
 }
 
 // *************************************************************************************************
@@ -158,9 +191,9 @@ void ForthEditor::exec1(const std::string &script)
 
       // Clear the text editor if and only if we are in an interactive mode
       //if (m_interactive)
-        {
-          ForthEditor::clear();
-        }
+      {
+        ForthEditor::clear();
+      }
 
       // TODO: inserer nouveau mot dans tree
     }

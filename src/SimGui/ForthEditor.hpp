@@ -14,7 +14,8 @@ public:
 
   ForthEditor();
   ~ForthEditor();
-  void newTemplatedDocument();
+  void empty();
+  void templated();
   void exec1(const std::string &script);
   void exec();
   std::string elapsedTime();
@@ -26,9 +27,12 @@ public:
   Gtk::TextView       m_debug;
   Gtk::TextView       m_dico;
   Gtk::Statusbar      m_statusbar;
-  Gtk::Menu              m_menu;
+  Gtk::MenuItem       m_menuitem;
+  Gtk::Menu           m_menu;
+  Gtk::ImageMenuItem  m_submenu[8];
+  Gtk::Image          m_image[8];
   Gtk::SeparatorMenuItem m_menuseparator[2];
-  Gtk::Image             m_menuimage[8];
+
   //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
 
 protected:

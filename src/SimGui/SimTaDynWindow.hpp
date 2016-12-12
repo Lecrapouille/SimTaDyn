@@ -7,10 +7,13 @@
 class SimTaDynWindow: public Gtk::Window
 {
 public:
+  enum ToolBarNames { MapToolbar, ForthToolbar };
+  enum MenuNames { MapMenu, ForthMenu, PlugginsMenu };
+
   SimTaDynWindow(const std::string& title);
   virtual ~SimTaDynWindow()
   {
-    Gtk::Main::quit();
+      //Gtk::Main::quit();
   }
 
   void onRealize();
@@ -19,26 +22,26 @@ public:
 
   void addForthMenu(const Gtk::BuiltinStockID icon,
                     const std::string &word);
-  void addForthButon(const Gtk::BuiltinStockID icon,
-                     const std::string &word); // FIXME: Glib::ustring, const Cell16 Forthtoken);
-
+  Gtk::ToolButton *addForthButon(enum ToolBarNames toolbar,
+                                 const Gtk::BuiltinStockID icon,
+                                 const std::string &script,
+                                 const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
+  Gtk::ToolButton *addForthScriptButon(const Gtk::BuiltinStockID icon,
+                                       const std::string &script,
+                                       const std::string &help);
+  Gtk::ToolButton *addMapScriptButon(const Gtk::BuiltinStockID icon,
+                                     const std::string &script,
+                                     const std::string &help);
 protected:
-  enum ToolBarNames { MapToolbar, ForthToolbar };
-  enum MenuNames { MapMenu, ForthMenu, PlugginsMenu };
-
   Gtk::HPaned m_hpaned[1];
   Gtk::VPaned m_vpaned[1];
   Gtk::VBox m_vbox[2];
   Gtk::HBox m_hbox[1];
   Gtk::MenuBar m_menubar;
-  Gtk::MenuItem m_menu[4];
+  Gtk::MenuItem m_menuitem[4];
   Gtk::SeparatorToolItem m_separator[2];
   Gtk::Toolbar m_toolbar[2];
-
-  // FIXME: remplacer tableau de button par std::array
-  Gtk::ToolButton m_toolbutton[32];
-  uint32_t m_nb_forth_buttons;
-  uint32_t m_nb_map_buttons;
+  std::vector<Gtk::ToolButton> m_toolbuttons;
 
   //GlDrawingArea m_drawing_area; // FIXME a cause d'un bug de gtkmm
   Gtk::GLArea m_drawing_area;

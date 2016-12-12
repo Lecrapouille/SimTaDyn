@@ -72,6 +72,10 @@ public:
   bool save();
   bool saveAs(std::string const& filename);
   bool load(std::string const& filename, bool clear = true);
+  inline Glib::RefPtr<Gsv::Buffer> buffer()
+  {
+    return m_buffer;
+  }
 
 protected:
   friend class TextEditor;
@@ -91,11 +95,10 @@ class TextEditor
 public:
   TextEditor();
   ~TextEditor();
-  void newDocument();
-  void newEmptyDocument();
-  void newTemplatedDocument(std::string const& text);
-  void saveCurrentDocument();
-  void saveAsCurrentDocument();
+  void open();
+  void empty(std::string const& title = "New document");
+  void save();
+  void saveAs();
   Glib::ustring text();
   void clear();
   void find();
