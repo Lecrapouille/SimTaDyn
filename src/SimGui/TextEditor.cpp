@@ -174,7 +174,10 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   m_buffer = Gsv::Buffer::create(language);
   m_buffer->set_highlight_syntax(true);
   m_textview.set_source_buffer(m_buffer);
-  // Behavior of the text view
+  // Fonts size
+  m_textview.override_font(Pango::FontDescription("mono 8"));
+  // Behavior/Display of the text view
+  gtk_source_view_set_background_pattern(m_textview.gobj(), GTK_SOURCE_BACKGROUND_PATTERN_TYPE_GRID);
   m_textview.set_show_line_numbers(true);
   m_textview.set_show_right_margin(true);
   m_textview.set_highlight_current_line(true);

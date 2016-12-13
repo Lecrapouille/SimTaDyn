@@ -11,7 +11,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   // Main window
   {
     set_title(title);
-    set_default_size(1024, 800);
+    set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
   }
 
