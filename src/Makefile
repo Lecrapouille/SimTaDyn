@@ -31,12 +31,11 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 ###################################################
 # Set include paths
 INCLUDES = -I. -ICommon -ICommon/SharedLibrary -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap/RTree -ISimMap/Cells -ISimMap/Loaders -ISimGui
-#-Igui  -I/usr/include/mysql
+# -I/usr/include/mysql
 
 ###################################################
 # Path for Makefile to find *.o
 VPATH=.:$(BUILD):Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Cells:SimMap/Loaders:SimGui
-#gui:loader:cells:rtree:
 
 ###################################################
 # Set objects architecture specific
@@ -56,15 +55,10 @@ TARGET = SimTaDyn
 
 ###################################################
 # Compil options
-#CC = gcc
-#CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
-#LDFLAGS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-#CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
-#LDFLAGS = `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2 sigc++-2.0`
-DEFINES = -DCHECK_OPENGL
+DEFINES =
 
 ###################################################
 # Set Libraries

@@ -9,7 +9,7 @@ namespace simGL
   // @param shader_file_path the filename of the shader to compile
   // @return 0 if failed. Else return the ID of the compiled shader
   // *************************************************************************************************
-  static GLuint createShader(int shader_type, const char *shader_file_path)
+  static GLuint createShader(int shader_type, const std::string& shader_file_path)
   {
     if ((GL_FRAGMENT_SHADER != shader_type) && (GL_VERTEX_SHADER != shader_type))
       {
@@ -68,7 +68,7 @@ namespace simGL
   // *************************************************************************************************
   //
   // *************************************************************************************************
-  GLuint createShaderProgram(const char *vertex_shader_file_path, const char *fragment_shader_file_path)
+  GLuint createShaderProgram(const std::string& vertex_shader_file_path, const std::string& fragment_shader_file_path)
   {
     GLuint program = 0;
     GLuint fragment, vertex;

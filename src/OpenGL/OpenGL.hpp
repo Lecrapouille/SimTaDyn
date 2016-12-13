@@ -6,7 +6,7 @@
 
 namespace simGL
 {
-  GLuint createShaderProgram(const char *vertex_shader_file_path, const char *fragment_shader_file_path);
+  GLuint createShaderProgram(const std::string& vertex_shader_file_path, const std::string& fragment_shader_file_path);
 }
 
 #endif /* OPENGL_HPP_ */

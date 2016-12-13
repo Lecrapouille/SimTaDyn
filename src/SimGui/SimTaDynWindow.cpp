@@ -5,7 +5,8 @@
 // SimTaDyn main window
 // *************************************************************************************************
 SimTaDynWindow::SimTaDynWindow(const std::string& title)
-  : Gtk::Window()
+  : Gtk::Window(),
+    m_nb_plugins(0)
 {
   // Main window
   {
@@ -37,14 +38,21 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   // * _Plugins: TBD: Let the user to add an menu calling it's on fprth scripts.
   // * _Help: TBD: add About/help/interactive tutorials
   {
-    m_menuitem[0].set_label("Map"); m_menubar.append(m_menuitem[0]);
-    m_menubar.append(m_fortheditor.m_menuitem);
-    m_menuitem[2].set_label("Plugins"); m_menubar.append(m_menuitem[2]);
-    m_menuitem[3].set_label("Help"); m_menubar.append(m_menuitem[3]);
-  }
+    // Menu '_Map'
+    m_menuitem[MapMenu].set_label("Map"); m_menubar.append(m_menuitem[MapMenu]);
+    m_menuitem[MapMenu].set_submenu(m_menu[MapMenu]);
 
-  // Submenus '_Map'
-  {
+    // Menu '_Forth'
+    m_menubar.append(m_fortheditor.m_menuitem);
+
+    // Menu '_Plugins'
+    m_menuitem[PlugginsMenu].set_label("Plugins"); m_menubar.append(m_menuitem[PlugginsMenu]);
+    m_menuitem[PlugginsMenu].set_submenu(m_menu[PlugginsMenu]);
+    addPluggin("text-x-generic-template", "41 1 + . CR", "test");
+
+    // Menu '_Help'
+    m_menuitem[HelpMenu].set_label("Help"); m_menubar.append(m_menuitem[HelpMenu]);
+    m_menuitem[HelpMenu].set_submenu(m_menu[HelpMenu]);
   }
 
   // Map toolbar (vertical)
@@ -232,14 +240,17 @@ Gtk::ToolButton *SimTaDynWindow::addMapScriptButon(const Gtk::BuiltinStockID ico
 }
 
 // **************************************************************
-//
+// 
 // **************************************************************
-void SimTaDynWindow::addForthMenu(const Gtk::BuiltinStockID icon,
-                                  const std::string &word)
+uint32_t SimTaDynWindow::addPluggin(const Glib::ustring& icon_name,
+                                    const std::string &script,
+                                    const std::string &help)
 {
-  (void) icon;
-  (void) word;
-  //m_menuimage[5].set(Gtk::Stock::FIND, Gtk::ICON_SIZE_MENU);
-  //menulist.push_back(Gtk::Menu_Helpers::ImageMenuElem("_Find",
-  // m_menuimage[5], sigc::mem_fun(*this, &SimTaDynWindow::find)));
+  m_plugins_submenu[m_nb_plugins].set_label(help);
+  m_plugins_image[m_nb_plugins].set_from_icon_name(icon_name, Gtk::ICON_SIZE_MENU);
+  m_plugins_submenu[m_nb_plugins].set_image(m_plugins_image[m_nb_plugins]);
+  m_plugins_submenu[m_nb_plugins].signal_activate().connect(sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::exec1), script));
+  m_menu[PlugginsMenu].append(m_plugins_submenu[m_nb_plugins]);
+  ++m_nb_plugins;
+  return m_nb_plugins - 1U;
 }

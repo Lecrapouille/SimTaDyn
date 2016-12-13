@@ -9,8 +9,8 @@ int main(int argc, char** argv)
   Gsv::init();
   //Gtk::GL::init(argc, argv);
 
-  SimTaDynWindow main_window("SimTaDyn");
   SimTaDynContext& SimTaDyn = SIMTADYN();
+  SimTaDynWindow main_window("SimTaDyn");
   SimTaDyn.m_window = &main_window;
 
   // FIXME: temporary, just for testing

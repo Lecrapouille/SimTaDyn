@@ -8,7 +8,7 @@ class SimTaDynWindow: public Gtk::Window
 {
 public:
   enum ToolBarNames { MapToolbar, ForthToolbar };
-  enum MenuNames { MapMenu, ForthMenu, PlugginsMenu };
+  enum MenuNames { MapMenu, ForthMenu, PlugginsMenu, HelpMenu };
 
   SimTaDynWindow(const std::string& title);
   virtual ~SimTaDynWindow()
@@ -20,8 +20,9 @@ public:
   void onUnrealize();
   bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */);
 
-  void addForthMenu(const Gtk::BuiltinStockID icon,
-                    const std::string &word);
+  uint32_t addPluggin(const Glib::ustring& icon_name,
+                      const std::string &script,
+                      const std::string &help);
   Gtk::ToolButton *addForthButon(enum ToolBarNames toolbar,
                                  const Gtk::BuiltinStockID icon,
                                  const std::string &script,
@@ -38,7 +39,10 @@ protected:
   Gtk::VBox m_vbox[2];
   Gtk::HBox m_hbox[1];
   Gtk::MenuBar m_menubar;
+  Gtk::Menu     m_menu[4];
   Gtk::MenuItem m_menuitem[4];
+  Gtk::ImageMenuItem  m_plugins_submenu[8];
+  Gtk::Image          m_plugins_image[8];
   Gtk::SeparatorToolItem m_separator[2];
   Gtk::Toolbar m_toolbar[2];
   std::vector<Gtk::ToolButton> m_toolbuttons;
@@ -48,6 +52,7 @@ protected:
   Renderer m_renderer;// FIXME a retirer
   ForthEditor m_fortheditor;
   FindWindow *m_findwin;
+  uint32_t m_nb_plugins;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */
