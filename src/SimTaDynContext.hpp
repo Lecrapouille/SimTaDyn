@@ -13,6 +13,7 @@ class SimTaDynContext
 {
 public:
 
+  const std::string m_data_path;
   SimTaDynWindow* m_window;
   SimTaDynLoaderManager m_loader;
   Forth m_forth;
@@ -26,20 +27,24 @@ public:
     return s_SimTaDyn;
   }
 
-private:
-
-  SimTaDynContext& operator=(const SimTaDynContext&)
+  const std::string& data_path() const
   {
-    return *this;
+     return m_data_path;
   }
 
+private:
+
+  SimTaDynContext& operator=(const SimTaDynContext&) = delete;
+
   SimTaDynContext(const SimTaDynContext&)
-    : m_root(NULL) // FIXME: a virer
+    : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
+      m_root(NULL) // FIXME: a virer
   {
   }
 
   SimTaDynContext()
-    : m_root(NULL) // FIXME: a virer
+    : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
+      m_root(NULL) // FIXME: a virer
   {
     // Start the Forth core
     s_SimTaDyn.m_forth.boot();

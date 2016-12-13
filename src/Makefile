@@ -1,4 +1,4 @@
-.PHONY: clean build
+.PHONY: clean build install-datum
 
 ###################################################
 # Color
@@ -19,6 +19,14 @@ print-link= \
 ifeq ($(BUILD),)
 BUILD = ../build
 endif
+
+###################################################
+# Where to install project datum
+# FIXME: do not change this location (for the moment)
+# ifeq ($(PROJECT_DATA_ROOT),)
+PROJECT_DATA_ROOT = ~/.SimTaDyn
+# endif
+PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
@@ -89,6 +97,14 @@ $(TARGET): $(OBJECTS)
 clean:
 	@echo "*** Cleaning"
 	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(BUILD) 2> /dev/null
+
+###################################################
+# Install project datum
+install-data:
+	@$(call print-link,"Copying","../data","$(PROJECT_DATA_PATH)","")
+	@rm -fr $(PROJECT_DATA_PATH)
+	@mkdir -p $(PROJECT_DATA_PATH)
+	@cp -r ../data/* $(PROJECT_DATA_PATH)
 
 ###################################################
 # Create a temporary folder to store *.o
