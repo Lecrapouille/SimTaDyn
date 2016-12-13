@@ -27,9 +27,9 @@ public:
     return s_SimTaDyn;
   }
 
-  const std::string& data_path() const
+  const std::string data_path(const std::string& path) const
   {
-     return m_data_path;
+     return m_data_path + path;
   }
 
 private:

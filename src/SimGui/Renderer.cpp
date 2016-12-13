@@ -38,8 +38,8 @@ void Renderer::start()
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  m_Program = simGL::createShaderProgram(SIMTADYN().data_path() + std::string("vertex.glsl"),
-                                         SIMTADYN().data_path() + std::string("fragment.glsl"));
+  m_Program = simGL::createShaderProgram(SIMTADYN().data_path("vertex.glsl"),
+                                         SIMTADYN().data_path("fragment.glsl"));
   if (0 != m_Program)
     {
       m_Mvp = glGetUniformLocation(m_Program, "mvp");
