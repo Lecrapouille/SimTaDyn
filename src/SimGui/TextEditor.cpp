@@ -380,7 +380,10 @@ TextDocument* TextEditor::document(const uint32_t i)
 // *************************************************************************************************
 bool TextEditor::dialogSave(TextDocument *doc)
 {
-  Gtk::MessageDialog dialog("The document '" + doc->m_button.title() + "' has been modified. Do you want to save it now ?",
+  // FIXME: faire apparaitre avant de tuer la fenetre principale sinon le dialog peut etre cache par d'autres fentres
+  Gtk::MessageDialog dialog((Gtk::Window&) (*m_notebook.get_toplevel()),
+                            "The document '" + doc->m_button.title() +
+                            "' has been modified. Do you want to save it now ?",
                             false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO);
   dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_APPLY);
 
