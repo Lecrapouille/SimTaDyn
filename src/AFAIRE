@@ -1,0 +1,21 @@
+Ajouter des mots ON_REALIZE ... Exemple: void SimTaDynWindow::onRealize() ajouter if (exists("ON_REALIZE") { exec("ON_REALIZE"); }
+qui permettront de lancer des petits scripts
+
+Callback: quand un mot echoue: ouvrir le fichier et colorier la ligne
+
+Completion des mots forth
+
+Ne pas effacer la fenetre sauf si fenetre interactive.
+
+Faire le dico forth dans la fenetre gtktreeview.
+
+fontes X11 opengl
+
+gtkmm::ganv pour faire des widgets graph
+
+Faire des standalone (rtree, loader) pour verifier les fuites de memoires
+
+Test creer des gros fichiers textes et voir si mes std::string sont biens passes en argument dans mes fonctions c++ et non pas copies
+Fichier de 100 lignes de 4 mots
+ruby -e 'a=STDIN.readlines;100.times do;b=[];4.times do; b << a[rand(a.size)].chomp end; puts b.join(" "); end' < /usr/share/dict/words > file.txt
+

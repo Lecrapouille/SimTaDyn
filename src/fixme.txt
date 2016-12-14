@@ -1,0 +1,81 @@
+./Common/Observer.hpp:103:        // FIXME ugly patch to avoid segfault loop iterator + erase
+./Common/Observer.hpp:117:  std::vector<Observer<T, A> *> observers_; // FIXME containers
+./Common/Observer.hpp:92:    observers_.clear();//FIXME
+./main.cpp:16:  // FIXME: temporary, just for testing
+./OpenGL/Textures.hpp:37:  // TODO: tester 2 chargement textures a la suite avec/sans echec
+./OpenGL/Textures.hpp:77:  // FIXME: useful ? Never used !
+./redirect.cpp:27:std::cerr << "QQ" << strCout.str() << "QQ" << std::endl;
+./SimForth/Forth/ForthDico.cpp:207:      std::cerr << "Cannot dump the dico. Reason was xxx" << std::endl; // FIXME
+./SimForth/Forth/ForthDico.cpp:214:// TBD: skip the dictionary ?
+./SimForth/Forth/ForthDico.cpp:238:      std::cerr << "Cannot load the file '" << filename << "'. Reason was xxx" << std::endl; // FIXME
+./SimForth/Forth/ForthDico.cpp:513:  // FIXME: proteger en ecriture les anciens mots definis
+./SimForth/Forth/ForthDico.cpp:514:  // FIXME: autoriser en lecture toutes les addr du dico
+./SimForth/Forth/ForthDico.cpp:522:// FIXME: au lieu de addr >= &m_dictionary[NUM_PRIMITIVES]
+./SimForth/Forth/ForthDico.cpp:576:// FIXME Cell8 *const addr
+./SimForth/Forth/ForthDico.hpp:16:  bool dump(std::string const& filename);// FIXME const;
+./SimForth/Forth/ForthExceptions.hpp:121:  ForthStackOV(uint32_t stack_id) // FIXME SimForth::StackId
+./SimForth/Forth/ForthHelper.hpp:141:// TODO: definir COLOR_IMMEDIATE YELLOW etc
+./SimForth/Forth/ForthHelper.hpp:49:// FIXME: Maybe we can divide / 2 addresses because they are aligned.
+./SimForth/Forth/ForthHelper.hpp:54:// FIXME: COMPIL_ASSERT_TIME((DICTIONARY_SIZE - 1U) <= CELL16_MAX_VALUE)
+./SimForth/Forth/ForthHelper.hpp:63:#  define SPARE_VALUE   (0x00) // FIXME: risque de bug si != 0x0 lors du display
+./SimForth/Forth/ForthInner.cpp:132:              // FIXME: changer le message
+./SimForth/Forth/ForthInner.cpp:15:// FIXME: meilleur nom abort()
+./SimForth/Forth/ForthInner.cpp:331:          execToken(token); // FIXME: ce serait cool de pouvoir stocker le nombre de param dans la def du mot
+./SimForth/Forth/ForthInner.cpp:404:// FIXME: convert char* --> string can be consumns lot of memory ?!
+./SimForth/Forth/ForthInner.cpp:429:      // FIXME: le stream peut ne pas etre termine: attendre
+./SimForth/Forth/ForthInner.cpp:430:      // FIXME: retourne ok si on lui donne une ligne vide dans un string
+./SimForth/Forth/ForthInner.cpp:436:      // TODO: checker les piles
+./SimForth/Forth/ForthInner.cpp:445:          // FIXME: the stream colum information is erroneous because
+./SimForth/Forth/ForthInner.cpp:533:// TODO: Les ranger par ordre lexico ?
+./SimForth/Forth/ForthInner.hpp:33:  // TODO: charge un fichier dico et ecrase le dico ou le charge a la fin
+./SimForth/Forth/ForthPrimitives.cpp:508:    case FORTH_PRIMITIVE_BASE:// FIXME USER VARIABLE
+./SimForth/Forth/ForthPrimitives.cpp:56:      m_dico.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size word definition
+./SimForth/Forth/ForthPrimitives.hpp:138:// TODO: ASSERT_COMPILE_TIME(NUM_PRIMITIVES < sizeof (Cell16))
+./SimForth/Forth/ForthPrimitives.hpp:4:// TODO: primitive INCLUDE
+./SimForth/Forth/ForthReader.cpp:143:  // FIXME: close the stream
+./SimGui/ForthEditor.cpp:104:  // TODO: save the historic buffer
+./SimGui/ForthEditor.cpp:204:      // TODO: inserer nouveau mot dans tree
+./SimGui/ForthEditor.cpp:34:    m_submenu[2].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::empty));// TODO
+./SimGui/ForthEditor.cpp:74:    // FIXME: mettre les text view en read-only
+./SimGui/ForthEditor.hpp:24:  Gtk::Notebook       m_res_notebooks; // FIXME: attention collision de noms TextEditor::m_notebook
+./SimGui/ForthEditor.hpp:37:  //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
+./SimGui/Renderer.hpp:124:  // FIXME
+./SimGui/Renderer.hpp:42:  void applyViewport(Camera2D& camera); // FIXME: pas de const a cause de getTransform
+./SimGui/Renderer.hpp:47:  inline void applyViewport() // FIXME const;
+./SimGui/Renderer.hpp:98:   * TODO: ajouter une texture comme fond d'ecran
+./SimGui/SimTaDynWindow.cpp:192:// FIXME const Cell16 ForthToken)
+./SimGui/SimTaDynWindow.cpp:194:// FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
+./SimGui/SimTaDynWindow.cpp:195:// FIXME: ajouter le postip avec la definiton du mot "WORD ( n1 n2 -- n3 n4 )"
+./SimGui/SimTaDynWindow.cpp:196:// FIXME ne pas autoriser a compiler
+./SimGui/SimTaDynWindow.cpp:211:      // FIXME: exec1 est trop violent: ca efface le script en cours d'edition
+./SimGui/SimTaDynWindow.cpp:39:  // * _Plugins: TBD: Let the user to add an menu calling it's on fprth scripts.
+./SimGui/SimTaDynWindow.cpp:40:  // * _Help: TBD: add About/help/interactive tutorials
+./SimGui/SimTaDynWindow.hpp:29:                                 const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
+./SimGui/SimTaDynWindow.hpp:50:  //GlDrawingArea m_drawing_area; // FIXME a cause d'un bug de gtkmm
+./SimGui/SimTaDynWindow.hpp:52:  Renderer m_renderer;// FIXME a retirer
+./SimGui/TextEditor.cpp:192:// FIXME: never called
+./SimGui/TextEditor.cpp:217:// TODO: for undo/redo actions
+./SimGui/TextEditor.cpp:237:      // FIXME BUG si  m_filename == ""
+./SimGui/TextEditor.cpp:267:// of the file. Note: we do not popup a dialog to ask if needed saving (TBD: bool save_before_otrunc)
+./SimGui/TextEditor.cpp:383:  // FIXME: faire apparaitre avant de tuer la fenetre principale sinon le dialog peut etre cache par d'autres fentres
+./SimGui/TextEditor.cpp:495:              std::cout << "Already opened\n"; // TODO statusbar
+./SimGui/TextEditor.cpp:543:  // FIXME: mettre en gris le fond si le document est en read-only
+./SimGui/TextEditor.cpp:555:      if (0 == doc->m_filename.compare("")) // FIXME || read-only(file)
+./SimGui/TextEditor.hpp:69:// TBD: undo/redo
+./SimGui/TextEditor.hpp:94:  // FIXME: mode interactif ==> ne pas sauvegarder
+./SimMap/Cells/CellForth.hpp:62:  // FIXME: Unit test: tester eatString("")
+./SimMap/Cells/SimTaDynArcs.hpp:24:  // FIXME utiliser des &
+./SimMap/Cells/SimTaDynCells.hpp:121:  //std::vector<SimTaDynCell*> subjects_; // FIXME: trouver meilleur container
+./SimMap/Cells/SimTaDynCells.hpp:273:   * Accessor: set a value instead of the code forth result.  FIXME:
+./SimMap/Cells/SimTaDynGraphs.hpp:11:// FIXME: SimForth m_forth;
+./SimMap/Cells/SimTaDynGraphs.hpp:59:    SimTaDynCell* node = new SimTaDynCell();// FIXMEnew SimTaDynNode();
+./SimMap/Cells/SimTaDynGraphs.hpp:62:    node->moveToPosition(p);// FIXME pas optim
+./SimMap/Cells/SimTaDynGraphs.hpp:73:    SimTaDynCell* node = new SimTaDynCell(name, code_forth, data);// FIXMEnew SimTaDynNode();
+./SimMap/Cells/SimTaDynGraphs.hpp:7:// FIXME: changer nom ou alors SimTaDynMap = { SimTaDynGraph + RTree + Forth }
+./SimMap/Loaders/ShapeFile.cpp:258:  try // FIXME: comment faire undo en cas d'echec ?
+./SimMap/RTree/RTreeIndex.cpp:62:  if (IS_A_RTREE_LEAF(level)) // FIXME: faire if (is_leaf())
+./SimMap/RTree/RTreeNode.cpp:8:  level = 0; // FIXME -1
+./SimTaDynContext.hpp:20:  RTreeNode* m_root; // FIXME: a attacher dans le graph
+./SimTaDynContext.hpp:21:  SimTaDynGraph m_graph; // FIXME: a renommer en maps
+./SimTaDynContext.hpp:41:      m_root(NULL) // FIXME: a virer
+./SimTaDynContext.hpp:47:      m_root(NULL) // FIXME: a virer

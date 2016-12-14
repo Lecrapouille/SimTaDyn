@@ -185,7 +185,7 @@ void ForthEditor::exec1(const std::string &script)
   if (res.first)
     {
       m_elapsed_time = std::chrono::duration_cast<ns>(t1 - t0);
-      m_statusbar.push("OK ! Done in " + elapsedTime());
+      m_statusbar.push(elapsedTime());
 
       // Paste the script Forth result in the "Result" tab of the notebook
       buf->insert(buf->end(), res.second);

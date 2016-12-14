@@ -75,17 +75,17 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
       button->set_tooltip_text("New Forth document");
       m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::empty));
     }
+  }
+
+  // Forth toolbar (horizontal)
+  {
     {
       Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
       button->set_label("Exec");
       button->set_stock_id(Gtk::Stock::EXECUTE);
       button->set_tooltip_text("Run Forth script");
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::exec));
+      m_toolbar[ForthToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::exec));
     }
-  }
-
-  // Forth toolbar (horizontal)
-  {
     m_toolbar[ForthToolbar].append(m_separator[1]);
   }
 
@@ -208,6 +208,7 @@ Gtk::ToolButton *SimTaDynWindow::addForthButon(enum ToolBarNames toolbar,
       button->set_label(script);
       button->set_stock_id(icon);
       button->set_tooltip_text(help);
+      // FIXME: exec1 est trop violent: ca efface le script en cours d'edition
       m_toolbar[toolbar].append(*button,
          sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::exec1), script));
       m_toolbar[toolbar].show_all_children();
