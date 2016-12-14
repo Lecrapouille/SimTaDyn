@@ -5,6 +5,8 @@
 //
 // *************************************************************************************************
 ForthEditor::ForthEditor()
+  : m_cout(std::cout, m_result.get_buffer()),
+    m_cerr(std::cerr, m_result.get_buffer())
 {
   // Menus '_Forth'
   {
@@ -167,14 +169,18 @@ void ForthEditor::exec1(const std::string &script)
   std::pair<bool, std::string> res;
   SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
 
+  // Clear the old text in the "Result" tab of the notebook
+  Glib::RefPtr<Gtk::TextBuffer> buf = m_result.get_buffer();
+  buf->erase(buf->begin(), buf->end());
+
   // Exec the Forth script and  measure the execution time
   auto t0 = Time::now();
   res = simtadyn.m_forth.eatString(script);
   auto t1 = Time::now();
 
-  // Clear the old text in the "Result" tab of the notebook
-  Glib::RefPtr<Gtk::TextBuffer> buf = m_result.get_buffer();
-  buf->erase(buf->begin(), buf->end());
+  // Flush the std::cout in the textview
+  m_cout.flush();
+  m_cerr.flush();
 
   if (res.first)
     {

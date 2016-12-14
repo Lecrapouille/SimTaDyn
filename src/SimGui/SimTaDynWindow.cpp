@@ -6,6 +6,7 @@
 // *************************************************************************************************
 SimTaDynWindow::SimTaDynWindow(const std::string& title)
   : Gtk::Window(),
+    m_fortheditor(),
     m_nb_plugins(0)
 {
   // Main window
@@ -240,7 +241,7 @@ Gtk::ToolButton *SimTaDynWindow::addMapScriptButon(const Gtk::BuiltinStockID ico
 }
 
 // **************************************************************
-// 
+//
 // **************************************************************
 uint32_t SimTaDynWindow::addPluggin(const Glib::ustring& icon_name,
                                     const std::string &script,

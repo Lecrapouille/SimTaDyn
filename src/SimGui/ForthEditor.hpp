@@ -4,6 +4,7 @@
 #  include "TextEditor.hpp"
 #  include "Forth.hpp"
 #  include <chrono>
+#  include "Redirection.hpp"
 
 // *************************************************************************************************
 //
@@ -37,6 +38,8 @@ public:
 
 protected:
   std::chrono::nanoseconds m_elapsed_time;
+  streamgui m_cout; // std::cout redirected inside the GUI
+  streamgui m_cerr; // std::cerr redirected inside the GUI
 };
 
 #endif /* FORTHEDITOR_HPP_ */

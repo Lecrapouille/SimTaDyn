@@ -218,7 +218,7 @@ bool TextDocument::isModified() const
 // *************************************************************************************************
 void TextDocument::onChanged()
 {
-  std::cout << "Text changed\n";
+  //std::cout << "Text changed\n";
   // ajouter un "*" au titre
 }
 
