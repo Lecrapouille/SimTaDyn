@@ -1,57 +1,69 @@
 #include "TextEditor.hpp"
 #include <gtkmm/cssprovider.h>
 
-// *************************************************************************************************
-// Create a kind of dialog window for searching a string inside a text document.
-// *************************************************************************************************
-FindWindow::FindWindow(Gsv::View* document)
-  : m_label("Search:"),
-    m_search("First"),
-    m_next("Next"),
+GotoLineWindow::GotoLineWindow(Gsv::View* document)
+  : m_label("Line number:"),
+    m_button("Go to line"),
     m_document(document)
 {
   m_hbox.pack_start(m_label);
   m_hbox.pack_start(m_entry);
-  m_hbox.pack_start(m_search);
-  m_hbox.pack_start(m_next);
+  m_hbox.pack_start(m_button);
   m_vbox.pack_start(m_hbox);
-  m_vbox.pack_start(m_status);
   add(m_vbox);
-  set_title("SimTaForth Search");
-  show_all_children();
+  set_title("Go to line");
 
-  //m_entry.signal_activate().connect(sigc::mem_fun(*this, &FindWindow::clearMessage));
-  m_search.signal_clicked().connect(sigc::mem_fun(*this, &FindWindow::findFirst));
-  m_next.signal_clicked().connect(sigc::mem_fun(*this, &FindWindow::findNext));
+  m_button.signal_clicked().connect(sigc::mem_fun(*this, &GotoLineWindow::gotoLine));
+
+  show_all_children();
+}
+
+void GotoLineWindow::gotoLine()
+{
+  if (nullptr != m_document)
+    {
+      // m_document->get_buffer()->cursorAt(std::stoi(m_entry.get_text().raw()) - 1, 0);
+      // m_document->get_buffer()->scroll_to_cursor_delayed(document, true, false);
+    }
 }
 
 // *************************************************************************************************
 // When switching a notebook page, and if the search dialog is present, change the reference of the
 // document to search in.
 // *************************************************************************************************
-void FindWindow::document(Gsv::View* document)
+void GotoLineWindow::document(Gsv::View* document)
 {
   m_document = document;
 }
 
 // *************************************************************************************************
-// Clear the text "Found/Not found"
+//
 // *************************************************************************************************
-/*void FindWindow::clearMessage()
+Find::Find(Gsv::View* document)
+  : m_document(document),
+    m_found(false)
 {
-  std::cout << "clearMessage\n";
-  m_status.set_text("");
-  }*/
+}
+
+// *************************************************************************************************
+// When switching a notebook page, and if the search dialog is present, change the reference of the
+// document to search in.
+// *************************************************************************************************
+void Find::document(Gsv::View* document)
+{
+  m_document = document;
+  m_found = false;
+}
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void FindWindow::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
+void Find::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
 {
-  Gtk::TextBuffer::iterator mstart, mend;
   Glib::RefPtr<Gtk::TextBuffer::Mark> mark;
 
-  if (iter.forward_search(text, Gtk::TEXT_SEARCH_TEXT_ONLY, mstart, mend))
+  m_found = iter.forward_search(text, Gtk::TEXT_SEARCH_TEXT_ONLY, mstart, mend);
+  if (m_found)
     {
       m_document->get_buffer()->select_range(mstart, mend);
       mark = m_document->get_buffer()->create_mark("last_pos", mend, false);
@@ -67,23 +79,24 @@ void FindWindow::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter
 // *************************************************************************************************
 // Search the word occurence
 // *************************************************************************************************
-void FindWindow::findFirst()
+void Find::findFirst()
 {
   if (nullptr != m_document)
     {
-      Gtk::TextBuffer::iterator mstart = m_document->get_buffer()->begin();
-      FindWindow::find(m_entry.get_text(), mstart);
+      mstart = m_document->get_buffer()->begin();
+      Find::find(m_entry.get_text(), mstart);
     }
   else
     {
       m_status.set_text("No more found");
+      m_found = false;
     }
 }
 
 // *************************************************************************************************
 // Search the next occurence
 // *************************************************************************************************
-void FindWindow::findNext()
+void Find::findNext()
 {
   if (nullptr != m_document)
     {
@@ -97,12 +110,102 @@ void FindWindow::findNext()
           return ;
         }
       iter = m_document->get_buffer()->get_iter_at_mark(last_pos);
-      FindWindow::find(m_entry.get_text(), iter);
+      Find::find(m_entry.get_text(), iter);
     }
   else
     {
       m_status.set_text("Not found");
+      m_found = false;
     }
+}
+
+// *************************************************************************************************
+// Create a kind of dialog window for searching a string inside a text document.
+// *************************************************************************************************
+FindWindow::FindWindow(Gsv::View* document)
+  : Find(document),
+    m_label("Find"),
+    m_next("Next")
+{
+  m_hbox.pack_start(m_label);
+  m_hbox.pack_start(m_entry);
+  m_hbox.pack_start(m_next);
+  m_vbox.pack_start(m_hbox);
+  m_vbox.pack_start(m_status);
+  add(m_vbox);
+
+  m_next.signal_clicked().connect(sigc::mem_fun(*this, &Find::findNext));
+
+  show_all_children();
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+ReplaceWindow::ReplaceWindow(Gsv::View* document)
+  : Find(document),
+    m_label("Replace"),
+    m_label2("by"),
+    m_search("Find"),
+    m_replace("Replace"),
+    m_all("Replace All")
+{
+  m_hbox.pack_start(m_label);
+  m_hbox.pack_start(m_entry);
+  m_hbox.pack_start(m_label2);
+  m_hbox.pack_start(m_entry2);
+  m_hbox.pack_start(m_search);
+  m_hbox.pack_start(m_replace);
+  m_hbox.pack_start(m_all);
+  m_vbox.pack_start(m_hbox);
+  m_vbox.pack_start(m_status);
+  add(m_vbox);
+
+  m_search.signal_clicked().connect(sigc::mem_fun0(*this, &ReplaceWindow::find));
+  m_replace.signal_clicked().connect(sigc::mem_fun(*this, &ReplaceWindow::replace));
+  m_all.signal_clicked().connect(sigc::mem_fun(*this, &ReplaceWindow::replaceAll));
+
+  show_all_children();
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ReplaceWindow::find()
+{
+  Find::findNext();
+  if (!m_found)
+    {
+      Find::findFirst();
+    }
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ReplaceWindow::replace()
+{
+  if (!m_found)
+    {
+      ReplaceWindow::find();
+    }
+  if (m_found)
+    {
+      Gtk::TextBuffer::iterator i;
+      i = m_document->get_buffer()->erase(mstart, mend);
+      m_document->get_buffer()->insert(i, m_entry2.get_text());
+      Find::findNext();
+    }
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ReplaceWindow::replaceAll()
+{
+  do {
+    ReplaceWindow::replace();
+  } while (m_found);
 }
 
 // *************************************************************************************************
@@ -223,6 +326,17 @@ void TextDocument::onChanged()
 }
 
 // *************************************************************************************************
+//
+// *************************************************************************************************
+/*void TextDocument::cursorAt(const uint32_t line, const uint32_t index)
+{
+  int l = std::min((int) line, m_buffer->get_line_count() - 1);
+  Gtk::TextIter iter = m_textview.get_iter_at_line_end(l);
+  index = std::min(index, iter.get_line_index());
+  m_buffer->place_cursor(m_buffer->get_iter_at_line_index(l, index));
+  }*/
+
+// *************************************************************************************************
 // Save the document defined by the private field m_filename
 // Return a bool if the document has been correctly saved.
 // *************************************************************************************************
@@ -306,6 +420,8 @@ bool TextDocument::load(std::string const& filename, bool clear)
 // *************************************************************************************************
 TextEditor::TextEditor()
   : m_findwindow(nullptr),
+    m_replacewindow(nullptr),
+    m_gotolinewindow(nullptr),
     m_nb_nonames(0)
 {
   m_notebook.set_scrollable();
@@ -503,12 +619,17 @@ void TextEditor::open()
 }
 
 // *************************************************************************************************
-//
+// When switching page on the notebook, reaffect windows find, replace to the switched document
 // *************************************************************************************************
 void TextEditor::onPageSwitched(Gtk::Widget* page, guint page_num)
 {
   (void) page;
   m_findwindow.document(&(TextEditor::document(page_num)->m_textview));
+  m_findwindow.title(TextEditor::document(page_num)->title());
+  m_replacewindow.document(&(TextEditor::document(page_num)->m_textview));
+  m_replacewindow.title(TextEditor::document(page_num)->title());
+  m_gotolinewindow.document(&(TextEditor::document(page_num)->m_textview));
+  m_gotolinewindow.title(TextEditor::document(page_num)->title());
 }
 
 // *************************************************************************************************
@@ -612,4 +733,20 @@ void TextEditor::clear()
 void TextEditor::find()
 {
   m_findwindow.show();
+}
+
+// *************************************************************************************************
+// Launch the find and replace window
+// *************************************************************************************************
+void TextEditor::replace()
+{
+  m_replacewindow.show();
+}
+
+// *************************************************************************************************
+// Launch the go to line window
+// *************************************************************************************************
+void TextEditor::gotoLine()
+{
+  m_gotolinewindow.show();
 }

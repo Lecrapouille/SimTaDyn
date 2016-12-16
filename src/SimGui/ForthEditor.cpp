@@ -67,6 +67,20 @@ ForthEditor::ForthEditor()
     m_submenu[6].set_image(m_image[6]);
     m_submenu[6].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::find));
     m_menu.append(m_submenu[6]);
+
+    //
+    m_submenu[7].set_label("Replace");
+    m_image[7].set_from_icon_name("edit-find-replace", Gtk::ICON_SIZE_MENU);
+    m_submenu[7].set_image(m_image[7]);
+    m_submenu[7].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::replace));
+    m_menu.append(m_submenu[7]);
+
+    //
+    m_submenu[8].set_label("Go to Line");
+    m_image[8].set_from_icon_name("go-bottom", Gtk::ICON_SIZE_MENU);
+    m_submenu[8].set_image(m_image[8]);
+    m_submenu[8].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::gotoLine));
+    m_menu.append(m_submenu[8]);
   }
 
   // Forth text view for storing results, debug, historic, dictionary

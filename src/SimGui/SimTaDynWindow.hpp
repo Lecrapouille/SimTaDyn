@@ -52,6 +52,8 @@ protected:
   Renderer m_renderer;// FIXME a retirer
   ForthEditor m_fortheditor;
   FindWindow *m_findwin;
+  ReplaceWindow *m_replacewin;
+  GotoLineWindow *m_gotolinewindow;
   uint32_t m_nb_plugins;
 };
 

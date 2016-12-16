@@ -30,8 +30,8 @@ public:
   Gtk::Statusbar      m_statusbar;
   Gtk::MenuItem       m_menuitem;
   Gtk::Menu           m_menu;
-  Gtk::ImageMenuItem  m_submenu[8];
-  Gtk::Image          m_image[8];
+  Gtk::ImageMenuItem  m_submenu[16];
+  Gtk::Image          m_image[16];
   Gtk::SeparatorMenuItem m_menuseparator[2];
 
   //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes

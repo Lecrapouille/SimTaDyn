@@ -8,32 +8,95 @@
 
 class TextDocument;
 class FindWindow;
+class ReplaceWindow;
+class GotoLineWindow;
 class TextEditor;
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class FindWindow : public Gtk::Window
+class GotoLineWindow : public Gtk::Window
 {
 public:
-  FindWindow(Gsv::View* document);
+  GotoLineWindow(Gsv::View* document);
+  void document(Gsv::View* document);
+  void gotoLine();
+  inline void title(std::string const& text)
+  {
+    set_title("Go to Line in " + text);
+  }
+
+  Gtk::VBox m_vbox;
+  Gtk::HBox m_hbox;
+  Gtk::Label m_label;
+  Gtk::Entry m_entry;
+  Gtk::Button m_button;
+  Gsv::View* m_document;
+};
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+class Find : public Gtk::Window
+{
+public:
+  Find(Gsv::View* document);
   void document(Gsv::View* document);
   void findNext();
   void findFirst();
 
 protected:
   void find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter);
-  //void clearMessage();
+  Gsv::View* m_document;
+  Gtk::Entry m_entry;
+  Gtk::Label m_status;
+  bool m_found;
+  Gtk::TextBuffer::iterator mstart, mend;
+};
 
-  Gtk::Window m_win;
+// *************************************************************************************************
+//
+// *************************************************************************************************
+class FindWindow : public Find
+{
+public:
+  FindWindow(Gsv::View* document);
+  inline void title(std::string const& text)
+  {
+    set_title("Find in " + text);
+  }
+
+protected:
   Gtk::VBox m_vbox;
   Gtk::HBox m_hbox;
   Gtk::Label m_label;
-  Gtk::Label m_status;
-  Gtk::Entry m_entry;
-  Gtk::Button m_search;
   Gtk::Button m_next;
-  Gsv::View* m_document;
+};
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+class ReplaceWindow : public Find
+{
+public:
+  ReplaceWindow(Gsv::View* document);
+  void replace();
+  void replaceAll();
+  void find();
+  inline void title(std::string const& text)
+  {
+    set_title("Find and Replace in " + text);
+  }
+
+protected:
+  Gtk::VBox m_vbox;
+  Gtk::HBox m_hbox;
+  Gtk::Label m_label;
+  Gtk::Label m_label2;
+  Gtk::Entry m_entry2;
+  Gtk::Button m_search;
+  Gtk::Button m_replace;
+  Gtk::Button m_all;
 };
 
 // *************************************************************************************************
@@ -79,9 +142,18 @@ public:
   bool save();
   bool saveAs(std::string const& filename);
   bool load(std::string const& filename, bool clear = true);
+  void cursorAt(const uint32_t line, const uint32_t index);
   inline Glib::RefPtr<Gsv::Buffer> buffer()
   {
     return m_buffer;
+  }
+  inline void title(std::string const& text)
+  {
+    m_button.title(text);
+  }
+  inline Glib::ustring title()
+  {
+    return m_button.title();
   }
 
 protected:
@@ -109,9 +181,13 @@ public:
   Glib::ustring text();
   void clear();
   void find();
+  void replace();
+  void gotoLine();
 
   Gtk::Notebook m_notebook;
   FindWindow m_findwindow;
+  ReplaceWindow m_replacewindow;
+  GotoLineWindow m_gotolinewindow;
 
 protected:
   TextDocument* document();
