@@ -8,79 +8,72 @@ ForthEditor::ForthEditor()
   : m_cout(std::cout, m_result.get_buffer()),
     m_cerr(std::cerr, m_result.get_buffer())
 {
-  // Menus '_Forth'
+  // Menus '_Forth Scripts'
   {
-    m_menuitem.set_label("Forth");
-    m_menuitem.set_submenu(m_menu);
+    m_menuitem[1].set_label("Forth");
+    m_menuitem[1].set_submenu(m_menu[1]);
 
     //
-    m_submenu[0].set_label("New Forth document");
+    m_submenu[0].set_label("New Script");
     m_image[0].set_from_icon_name("document-new", Gtk::ICON_SIZE_MENU);
     m_submenu[0].set_image(m_image[0]);
     m_submenu[0].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::empty));
-    m_menu.append(m_submenu[0]);
+    m_menu[1].append(m_submenu[0]);
 
     //
-    m_submenu[1].set_label("New Forth templated document");
+    m_submenu[1].set_label("New Templated Script");
     m_image[1].set_from_icon_name("text-x-generic-template", Gtk::ICON_SIZE_MENU);
     m_submenu[1].set_image(m_image[1]);
     m_submenu[1].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::templated));
-    m_menu.append(m_submenu[1]);
+    m_menu[1].append(m_submenu[1]);
 
     //
-    m_submenu[2].set_label("Interactive Forth");
+    m_submenu[2].set_label("Interactive");
     m_image[2].set_from_icon_name("utilities-terminal", Gtk::ICON_SIZE_MENU);
     m_submenu[2].set_image(m_image[2]);
     m_submenu[2].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::empty));// TODO
-    m_menu.append(m_submenu[2]);
+    m_menu[1].append(m_submenu[2]);
 
     //
-    m_menu.append(m_menuseparator[0]);
+    m_menu[1].append(m_menuseparator[0]);
 
     //
-    m_submenu[3].set_label("Open Forth document");
+    m_submenu[3].set_label("Open Script");
     m_image[3].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
     m_submenu[3].set_image(m_image[3]);
     m_submenu[3].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::open));
-    m_menu.append(m_submenu[3]);
+    m_menu[1].append(m_submenu[3]);
 
     //
-    m_submenu[4].set_label("Save");
+    m_submenu[4].set_label("Save Script");
     m_image[4].set_from_icon_name("document-save", Gtk::ICON_SIZE_MENU);
     m_submenu[4].set_image(m_image[4]);
     m_submenu[4].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::save));
-    m_menu.append(m_submenu[4]);
+    m_menu[1].append(m_submenu[4]);
 
     //
-    m_submenu[5].set_label("Save As");
+    m_submenu[5].set_label("Save As Script");
     m_image[5].set_from_icon_name("document-save-as", Gtk::ICON_SIZE_MENU);
     m_submenu[5].set_image(m_image[5]);
     m_submenu[5].signal_activate().connect(sigc::mem_fun0(*this, &ForthEditor::saveAs));
-    m_menu.append(m_submenu[5]);
+    m_menu[1].append(m_submenu[5]);
 
     //
-    m_menu.append(m_menuseparator[1]);
+    m_menu[1].append(m_menuseparator[1]);
 
     //
-    m_submenu[6].set_label("Find");
-    m_image[6].set_from_icon_name("edit-find", Gtk::ICON_SIZE_MENU);
-    m_submenu[6].set_image(m_image[6]);
-    m_submenu[6].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::find));
-    m_menu.append(m_submenu[6]);
+    m_submenu[9].set_label("Load Dictionary");
+    m_image[9].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
+    m_submenu[9].set_image(m_image[9]);
+    m_submenu[9].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::loadDictionary));
+    m_menu[1].append(m_submenu[9]);
 
     //
-    m_submenu[7].set_label("Replace");
-    m_image[7].set_from_icon_name("edit-find-replace", Gtk::ICON_SIZE_MENU);
-    m_submenu[7].set_image(m_image[7]);
-    m_submenu[7].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::replace));
-    m_menu.append(m_submenu[7]);
-
-    //
-    m_submenu[8].set_label("Go to Line");
-    m_image[8].set_from_icon_name("go-bottom", Gtk::ICON_SIZE_MENU);
-    m_submenu[8].set_image(m_image[8]);
-    m_submenu[8].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::gotoLine));
-    m_menu.append(m_submenu[8]);
+    m_submenu[10].set_label("Save As Dictionary");
+    m_image[10].set_from_icon_name("document-save-as", Gtk::ICON_SIZE_MENU);
+    m_submenu[10].set_image(m_image[10]);
+    m_submenu[10].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::dumpDictionary));
+    m_menu[1].append(m_submenu[10]);
   }
 
   // Forth text view for storing results, debug, historic, dictionary
@@ -138,7 +131,73 @@ void ForthEditor::templated()
 // *************************************************************************************************
 //
 // *************************************************************************************************
-std::string  ForthEditor::elapsedTime()
+void ForthEditor::dumpDictionary()
+{
+  Gtk::FileChooserDialog dialog("Choose a binary file to save Forth dictionary",
+                                Gtk::FILE_CHOOSER_ACTION_SAVE);
+  dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
+
+  // Add response buttons the the dialog:
+  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_OK);
+
+  // Add filters, so that only certain file types can be selected:
+  auto filter_forth = Gtk::FileFilter::create();
+  filter_forth->set_name("Forth dictionary files");
+  filter_forth->add_pattern("*.simdico");
+  dialog.add_filter(filter_forth);
+
+  auto filter_any = Gtk::FileFilter::create();
+  filter_any->set_name("Any files");
+  filter_any->add_pattern("*");
+  dialog.add_filter(filter_any);
+
+  int result = dialog.run();
+  if (Gtk::RESPONSE_OK == result)
+    {
+      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+      simtadyn.m_forth.dictionary().dump(dialog.get_filename());
+      // FIXME return not taken into account
+    }
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ForthEditor::loadDictionary()
+{
+  Gtk::FileChooserDialog dialog("Choose a binary file to save Forth dictionary",
+                                Gtk::FILE_CHOOSER_ACTION_OPEN);
+  dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
+
+  // Add response buttons the the dialog:
+  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+  // Add filters, so that only certain file types can be selected:
+  auto filter_forth = Gtk::FileFilter::create();
+  filter_forth->set_name("Forth dictionary files");
+  filter_forth->add_pattern("*.simdico");
+  dialog.add_filter(filter_forth);
+
+  auto filter_any = Gtk::FileFilter::create();
+  filter_any->set_name("Any files");
+  filter_any->add_pattern("*");
+  dialog.add_filter(filter_any);
+
+  int result = dialog.run();
+  if (Gtk::RESPONSE_OK == result)
+    {
+      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+      simtadyn.m_forth.dictionary().load(dialog.get_filename());
+      // FIXME return not taken into account
+    }
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+std::string ForthEditor::elapsedTime()
 {
   using namespace std;
   using namespace std::chrono;

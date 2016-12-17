@@ -12,7 +12,6 @@
 class ForthEditor : public TextEditor
 {
 public:
-
   ForthEditor();
   ~ForthEditor();
   void empty();
@@ -20,6 +19,8 @@ public:
   void exec1(const std::string &script);
   void exec();
   std::string elapsedTime();
+  void loadDictionary();
+  void dumpDictionary();
 
   Gtk::Notebook       m_res_notebooks; // FIXME: attention collision de noms TextEditor::m_notebook
   Gtk::ScrolledWindow m_scrolledwindow[4];
@@ -28,11 +29,6 @@ public:
   Gtk::TextView       m_debug;
   Gtk::TextView       m_dico;
   Gtk::Statusbar      m_statusbar;
-  Gtk::MenuItem       m_menuitem;
-  Gtk::Menu           m_menu;
-  Gtk::ImageMenuItem  m_submenu[16];
-  Gtk::Image          m_image[16];
-  Gtk::SeparatorMenuItem m_menuseparator[2];
 
   //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
 

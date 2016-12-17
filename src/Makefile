@@ -45,7 +45,7 @@ OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = SimTaDynCells.o SimTaDynGraphs.o
 OBJECTS_LOADER   = ShapeFile.o
 OBJECTS_FORTH    = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
-OBJECTS_GUI      = TextEditor.o ForthEditor.o SimTaDynWindow.o
+OBJECTS_GUI      = TextEditor.o ForthEditor.o MapEditor.o SimTaDynWindow.o
 OBJECTS_SIMTADYN = Renderer.o SimForth.o main.o
 
 OBJECTS         = $(OBJECTS_COMMON) $(OBJECTS_OPENGL) $(OBJECTS_RTREE) \

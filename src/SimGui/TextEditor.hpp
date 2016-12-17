@@ -51,7 +51,7 @@ protected:
   Gtk::Entry m_entry;
   Gtk::Label m_status;
   bool m_found;
-  Gtk::TextBuffer::iterator mstart, mend;
+  Gtk::TextBuffer::iterator m_start, m_end;
 };
 
 // *************************************************************************************************
@@ -188,6 +188,12 @@ public:
   FindWindow m_findwindow;
   ReplaceWindow m_replacewindow;
   GotoLineWindow m_gotolinewindow;
+
+  Gtk::MenuItem       m_menuitem[2];
+  Gtk::Menu           m_menu[2];
+  Gtk::ImageMenuItem  m_submenu[16];
+  Gtk::Image          m_image[16];
+  Gtk::SeparatorMenuItem m_menuseparator[4];
 
 protected:
   TextDocument* document();

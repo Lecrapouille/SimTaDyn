@@ -62,11 +62,11 @@ void Find::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
 {
   Glib::RefPtr<Gtk::TextBuffer::Mark> mark;
 
-  m_found = iter.forward_search(text, Gtk::TEXT_SEARCH_TEXT_ONLY, mstart, mend);
+  m_found = iter.forward_search(text, Gtk::TEXT_SEARCH_TEXT_ONLY, m_start, m_end);
   if (m_found)
     {
-      m_document->get_buffer()->select_range(mstart, mend);
-      mark = m_document->get_buffer()->create_mark("last_pos", mend, false);
+      m_document->get_buffer()->select_range(m_start, m_end);
+      mark = m_document->get_buffer()->create_mark("last_pos", m_end, false);
       m_document->scroll_to(mark);
       m_status.set_text("Found: yes");
     }
@@ -83,8 +83,8 @@ void Find::findFirst()
 {
   if (nullptr != m_document)
     {
-      mstart = m_document->get_buffer()->begin();
-      Find::find(m_entry.get_text(), mstart);
+      m_start = m_document->get_buffer()->begin();
+      Find::find(m_entry.get_text(), m_start);
     }
   else
     {
@@ -192,7 +192,7 @@ void ReplaceWindow::replace()
   if (m_found)
     {
       Gtk::TextBuffer::iterator i;
-      i = m_document->get_buffer()->erase(mstart, mend);
+      i = m_document->get_buffer()->erase(m_start, m_end);
       m_document->get_buffer()->insert(i, m_entry2.get_text());
       Find::findNext();
     }
@@ -424,6 +424,33 @@ TextEditor::TextEditor()
     m_gotolinewindow(nullptr),
     m_nb_nonames(0)
 {
+  // Menus '_Documents'
+  {
+    m_menuitem[0].set_label("Text Editor");
+    m_menuitem[0].set_submenu(m_menu[0]);
+
+    //
+    m_submenu[6].set_label("Find");
+    m_image[6].set_from_icon_name("edit-find", Gtk::ICON_SIZE_MENU);
+    m_submenu[6].set_image(m_image[6]);
+    m_submenu[6].signal_activate().connect(sigc::mem_fun(*this, &TextEditor::find));
+    m_menu[0].append(m_submenu[6]);
+
+    //
+    m_submenu[7].set_label("Replace");
+    m_image[7].set_from_icon_name("edit-find-replace", Gtk::ICON_SIZE_MENU);
+    m_submenu[7].set_image(m_image[7]);
+    m_submenu[7].signal_activate().connect(sigc::mem_fun(*this, &TextEditor::replace));
+    m_menu[0].append(m_submenu[7]);
+
+    //
+    m_submenu[8].set_label("Go to Line");
+    m_image[8].set_from_icon_name("go-bottom", Gtk::ICON_SIZE_MENU);
+    m_submenu[8].set_image(m_image[8]);
+    m_submenu[8].signal_activate().connect(sigc::mem_fun(*this, &TextEditor::gotoLine));
+    m_menu[0].append(m_submenu[8]);
+  }
+
   m_notebook.set_scrollable();
   m_notebook.signal_switch_page().connect(sigc::mem_fun(*this, &TextEditor::onPageSwitched));
 

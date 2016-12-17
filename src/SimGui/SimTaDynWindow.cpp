@@ -40,11 +40,11 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   // * _Help: TBD: add About/help/interactive tutorials
   {
     // Menu '_Map'
-    m_menuitem[MapMenu].set_label("Map"); m_menubar.append(m_menuitem[MapMenu]);
-    m_menuitem[MapMenu].set_submenu(m_menu[MapMenu]);
+    m_menubar.append(m_mapeditor.m_menuitem[0]);
 
     // Menu '_Forth'
-    m_menubar.append(m_fortheditor.m_menuitem);
+    m_menubar.append(m_fortheditor.m_menuitem[1]);
+    m_menubar.append(m_fortheditor.m_menuitem[0]);
 
     // Menu '_Plugins'
     m_menuitem[PlugginsMenu].set_label("Plugins"); m_menubar.append(m_menuitem[PlugginsMenu]);
@@ -52,6 +52,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
     // Menu '_Help'
+    // TODO: submenus Tuto, Help, Example, About
     m_menuitem[HelpMenu].set_label("Help"); m_menubar.append(m_menuitem[HelpMenu]);
     m_menuitem[HelpMenu].set_submenu(m_menu[HelpMenu]);
   }
@@ -63,17 +64,18 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
 
     {
       Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("Open");
-      button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Open Forth document");
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::open));
-    }
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
       button->set_label("New");
       button->set_stock_id(Gtk::Stock::NEW);
       button->set_tooltip_text("New Forth document");
       m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::empty));
+    }
+
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("Open");
+      button->set_stock_id(Gtk::Stock::NEW);
+      button->set_tooltip_text("Open Forth document");
+      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::open));
     }
   }
 

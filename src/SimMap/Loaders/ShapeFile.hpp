@@ -1,9 +1,9 @@
 #ifndef SHAPEFILE_HPP_
 #  define SHAPEFILE_HPP_
 
-#  include "Loader.hpp"
+#  include "IMapLoader.hpp"
 
-class ShapefileLoaderException : public SimTaDynLoaderException
+class ShapefileLoaderException : public SimTaDynMapLoaderException
 {
  public:
   uint32_t m_offset;
@@ -16,7 +16,7 @@ class ShapefileLoaderException : public SimTaDynLoaderException
   }
 };
 
-class ShapefileLoaderOpenFailed : public SimTaDynLoaderException
+class ShapefileLoaderOpenFailed : public SimTaDynMapLoaderException
 {
 public:
   int error;
@@ -27,7 +27,7 @@ public:
   }
 };
 
-class ShapefileLoaderBadId : public SimTaDynLoaderException
+class ShapefileLoaderBadId : public SimTaDynMapLoaderException
 {
 public:
   int bad_id;
@@ -40,7 +40,7 @@ public:
   }
 };
 
-class ShapefileLoaderBadLength : public SimTaDynLoaderException
+class ShapefileLoaderBadLength : public SimTaDynMapLoaderException
 {
 public:
   int real_size;
@@ -53,7 +53,7 @@ public:
   }
 };
 
-class ShapefileLoader : public SimTaDynLoader
+class ShapefileLoader : public SimTaDynMapLoader
 {
 public:
   ShapefileLoader(const string& filename, SimTaDynGraph& graph);
@@ -65,7 +65,7 @@ public:
   }
   bool         load(const string& filename, SimTaDynGraph& graph) override;
 
-  //protected:
+  // FIXME: protected:
 
   int32_t      readBigEndianInt();
   int32_t      readLittleEndianInt();

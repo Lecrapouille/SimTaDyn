@@ -1,8 +1,9 @@
 #ifndef SIMTADYNWINDOW_HPP_
 #  define SIMTADYNWINDOW_HPP_
 
-#  include "ForthEditor.hpp"
 #  include "DrawingArea.hpp"
+#  include "ForthEditor.hpp"
+#  include "MapEditor.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -49,8 +50,9 @@ protected:
 
   //GlDrawingArea m_drawing_area; // FIXME a cause d'un bug de gtkmm
   Gtk::GLArea m_drawing_area;
-  Renderer m_renderer;// FIXME a retirer
+  Renderer m_renderer;// FIXME a deplacer dans le contexte
   ForthEditor m_fortheditor;
+  MapEditor m_mapeditor;
   FindWindow *m_findwin;
   ReplaceWindow *m_replacewin;
   GotoLineWindow *m_gotolinewindow;

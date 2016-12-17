@@ -244,6 +244,6 @@ inline std::ostream& operator<<(std::ostream& os, const Vector3D& p)
   return os;
 }
 
-#define Position3D Vector3D
+typedef Vector3D Position3D;
 
 #endif /* VECTOR3D_HPP_ */
