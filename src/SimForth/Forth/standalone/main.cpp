@@ -34,7 +34,8 @@ static void test()
 */
 int main(int argc,char *argv[])
 {
-  Forth forth;
+  ForthDico dico;
+  Forth forth(dico);
   std::pair<bool, std::string> res;
   bool r;
   int tmp;

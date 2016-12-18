@@ -15,7 +15,7 @@ public:
   bool smudge(std::string const& word);
   bool dump(std::string const& filename);// FIXME const;
   bool load(std::string const& filename);
-  void display() const;
+  virtual void display() const;
   inline Cell16 last() const { return m_last; }
   inline Cell16 here() const { return m_here; }
   inline void here(const Cell16 here) { m_here = here; }

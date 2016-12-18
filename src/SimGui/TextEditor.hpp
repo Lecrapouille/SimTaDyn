@@ -4,7 +4,6 @@
 #  include <gtkmm.h>
 #  include <gtksourceviewmm.h>
 #  include "simtypes.hpp"
-//#  include "Forth.hpp"
 
 class TextDocument;
 class FindWindow;

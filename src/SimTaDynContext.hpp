@@ -2,7 +2,7 @@
 #  define CONTEXT_HPP_
 
 #  include "SimTaDynWindow.hpp"
-#  include "Forth.hpp"
+#  include "SimForth.hpp"
 
 #  define SIMTADYN() SimTaDynContext::getInstance()
 
@@ -13,9 +13,7 @@ public:
 
   const std::string m_data_path;
   SimTaDynWindow* m_window;
-  Forth m_forth; // FIXME: Creer SimForth et deplacer cette line
-
-public:
+  SimForth m_forth;
 
   static SimTaDynContext& getInstance()
   {
@@ -32,12 +30,14 @@ private:
   SimTaDynContext& operator=(const SimTaDynContext&) = delete;
 
   SimTaDynContext(const SimTaDynContext&)
-    : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/"))
+    : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
+      m_forth(m_dico)
   {
   }
 
   SimTaDynContext()
-    : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/"))
+    : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
+      m_forth(m_dico)
   {
     // Start the Forth core
     s_SimTaDyn.m_forth.boot();
@@ -50,6 +50,10 @@ private:
 
   // Singleton
   static SimTaDynContext s_SimTaDyn;
+
+protected:
+
+  SimForthDico m_dico;
 };
 
 #endif /* CONTEXT_HPP_ */

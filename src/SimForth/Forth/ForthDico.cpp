@@ -258,7 +258,7 @@ void ForthDico::displayToken(const Cell16 token) const
 }
 
 // **************************************************************
-// Uggly print of the dictionary
+// Pretty print of the dictionary
 // **************************************************************
 void ForthDico::display() const
 {

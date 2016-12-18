@@ -2,7 +2,7 @@
 #  define FORTHEDITOR_HPP_
 
 #  include "TextEditor.hpp"
-#  include "Forth.hpp"
+#  include "SimForth.hpp"
 #  include <chrono>
 #  include "Redirection.hpp"
 

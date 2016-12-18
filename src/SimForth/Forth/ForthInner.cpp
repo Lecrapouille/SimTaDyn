@@ -4,7 +4,8 @@
 // **************************************************************
 // Constructor: initialize the context but do not boot
 // **************************************************************
-Forth::Forth()
+Forth::Forth(ForthDico& dico)
+  : m_dico(dico)
 {
   m_base = 10U;
   m_state = INTERPRETER_STATE;

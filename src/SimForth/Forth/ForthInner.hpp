@@ -19,7 +19,7 @@
 class Forth
 {
 public:
-  Forth();
+  Forth(ForthDico& dico);
   void boot();
   void interprete(std::string const& word);
   std::pair<bool, std::string> eatString(std::string const& code_forth);
@@ -28,6 +28,7 @@ public:
   virtual void ok(std::pair<bool, std::string> const& res);
   inline const ForthDico& dictionary() const { return m_dico; }
   inline ForthDico& dictionary() { return m_dico; }
+  inline void dictionary(ForthDico& dico) { m_dico = dico; }
   void displayDStack() const;
   void displayRStack() const;
   // TODO: charge un fichier dico et ecrase le dico ou le charge a la fin
@@ -77,7 +78,7 @@ protected:
   uint32_t m_stream;
 
   // Dictionary
-  ForthDico m_dico;
+  ForthDico& m_dico;
 
   // Debug
   bool  m_trace;
