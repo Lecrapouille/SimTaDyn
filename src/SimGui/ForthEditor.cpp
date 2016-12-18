@@ -76,7 +76,25 @@ ForthEditor::ForthEditor()
     m_menu[1].append(m_submenu[10]);
   }
 
-  // Forth text view for storing results, debug, historic, dictionary
+  // Forth dictionary display
+  {
+    m_ref_tree_model = Gtk::ListStore::create(m_columns);
+    m_dico.set_model(m_ref_tree_model);
+
+    m_dico.append_column("Word", m_columns.m_word);
+    m_dico.append_column("Token", m_columns.m_token);
+
+    // Test
+    Gtk::TreeModel::Row row = *(m_ref_tree_model->append());
+    row[m_columns.m_word] = "Billy";
+    row[m_columns.m_token] = 42;
+
+    row = *(m_ref_tree_model->append());
+    row[m_columns.m_word] = "Foo";
+    row[m_columns.m_token] = 43;
+  }
+
+  // Forth text view for storing results, debug, historic
   {
     // FIXME: mettre les text view en read-only
     m_scrolledwindow[0].add(m_result);
