@@ -6,7 +6,7 @@
 // **************************************************************
 //
 // **************************************************************
-std::string Forth::getWord()
+std::string Forth::nextWord()
 {
   if (!READER.hasMoreWords())
     {
@@ -47,7 +47,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Begin the definition of a new word
     case FORTH_PRIMITIVE_COLON:
-      createWord(getWord());
+      create(nextWord());
       m_state = COMPILATION_STATE;
       break;
 
@@ -73,13 +73,13 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // (note: HERE is not moved)
       // https://fr.wikiversity.org/wiki/Forth/Conserver_des_donn%C3%A9es
     case FORTH_PRIMITIVE_CREATE:
-      createWord(getWord());
+      create(nextWord());
       m_dico.appendCell16(FORTH_PRIMITIVE_PCREATE);
       m_dico.appendCell16(FORTH_PRIMITIVE_EXIT);
       break;
 
     case FORTH_PRIMITIVE_BUILDS:
-      createWord(getWord());
+      create(nextWord());
       break;
 
     case FORTH_PRIMITIVE_DOES:
@@ -94,7 +94,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // Restore TOS register (because execToken() poped TOS)
       DPUSH(m_tos);
 
-      includeFile(getWord());
+      includeFile(nextWord());
 
       DPOP(m_tos);
       break;
@@ -114,7 +114,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_SMUDGE:
       {
-        std::string word = getWord();
+        std::string word = nextWord();
         if (false == m_dico.smudge(word))
           {
             std::cout << YELLOW << "[WARNING] Unknown word '"
@@ -126,7 +126,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_TICK:
       {
-        std::string word = getWord();
+        std::string word = nextWord();
         Cell16 token;
         bool immediate;
         if (false == m_dico.find(word, token, immediate))
@@ -151,7 +151,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
        {
          Cell16 token;
          bool immediate;
-         std::string word = getWord();
+         std::string word = nextWord();
 
          //m_ip += 2;
          if (m_dico.find(word, token, immediate))
@@ -170,7 +170,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       {
         Cell16 token;
         bool immediate;
-        std::string word = getWord();
+        std::string word = nextWord();
 
         if (m_dico.find(word, token, immediate))
           {

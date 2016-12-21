@@ -1,5 +1,5 @@
 #include "Forth.hpp"
-#include "SharedLibrary.hpp"
+//#include "SharedLibrary.hpp"
 #include <unistd.h>
 
 static void usage(const std::string& fun)
@@ -7,7 +7,8 @@ static void usage(const std::string& fun)
   std::cout << "Usage:   " << fun << " [-option] [argument]" << std::endl;
   std::cout << "option:  " << "-h              Show help information" << std::endl;
   std::cout << "option:  " << "-u              Show help information" << std::endl;
-  std::cout << "         " << "-l dico         Load a SimForth dictionary binary file instead of booting the by default core" << std::endl;
+  std::cout << "         " << "-l dico         Load a SimForth dictionary file and replace the old dictionary" << std::endl;
+  std::cout << "         " << "-a dico         Load and append a SimForth dictionary file" << std::endl;
   std::cout << "         " << "-d dico         Dump the dictionary as a binary file" << std::endl;
   std::cout << "         " << "-f file         Run a SimForth text file" << std::endl;
   std::cout << "         " << "-e string       Execute a string as SimForth script" << std::endl;
@@ -38,7 +39,7 @@ int main(int argc,char *argv[])
   Forth forth(dico);
   std::pair<bool, std::string> res;
   bool r;
-  int tmp;
+  int opt;
 
   //test();
 
@@ -53,9 +54,9 @@ int main(int argc,char *argv[])
   // a dictionary instead
   forth.boot();
 
-  while ((tmp = getopt(argc, argv, "hul:d:f:e:pi")) != -1)
+  while ((opt = getopt(argc, argv, "hua:l:d:f:e:pi")) != -1)
   {
-    switch (tmp)
+    switch (opt)
       {
         // Help infomation
       case 'h':
@@ -65,8 +66,9 @@ int main(int argc,char *argv[])
         break;
 
         // Load a dictionary
+      case 'a':
       case 'l':
-        r = forth.dictionary().load(optarg);
+        r = forth.dictionary().load(optarg, ('l' == opt));
         if (r)
           {
             std::cout << "Dictionary successfully loaded from file '"
@@ -86,13 +88,13 @@ int main(int argc,char *argv[])
 
         // Execute a script file
       case 'f':
-        res = forth.eatFile(optarg);
+        res = forth.interpreteFile(optarg);
         forth.ok(res);
         break;
 
         // Execute a script given as option
       case 'e':
-        res = forth.eatString(optarg);
+        res = forth.interpreteString(optarg);
         forth.ok(res);
         break;
 
@@ -112,5 +114,6 @@ int main(int argc,char *argv[])
       }
   }
 
+  forth.completion("QQ");
   return 0;
 }

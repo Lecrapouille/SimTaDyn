@@ -2,24 +2,27 @@
 #include <limits.h>
 
 // **************************************************************
-// Constructor: initialize the context but do not boot
+//! Constructor: initialize the Forth interpretor context. The
+//! dictionary is given as reference to allow the inheritance.
+//! \param dico the reference of (an empty) Forth dictionary.
 // **************************************************************
 Forth::Forth(ForthDico& dico)
   : m_dico(dico)
 {
   m_base = 10U;
-  m_state = INTERPRETER_STATE;
-  restore();
+  abort();
+  m_last_completion = m_dico.last();
 }
 
 // **************************************************************
-// FIXME: meilleur nom abort()
+//! Reset the context like the Forth word ABORT does.
 // **************************************************************
-inline void Forth::restore()
+inline void Forth::abort()
 {
   if ((COMPILATION_STATE == m_state) ||
       ((COMMENT_STATE == m_state) && (COMPILATION_STATE == m_saved_state)))
     {
+      // Drop the Forth word not totaly compiled
       m_dico.m_last = m_last_at_colon;
       m_dico.m_here = m_here_at_colon;
     }
@@ -28,26 +31,29 @@ inline void Forth::restore()
   m_dsp = m_data_stack;
   m_asp = m_alternative_stack;
   m_rsp = m_return_stack;
-  m_stream = 0;
+  m_opened_streams = 0;
   m_trace = false;
 }
 
 // **************************************************************
-// When displaying numbers on screen, display them on the
-// selected base.
+//! When displaying numbers on screen, display them on the
+//! selected base. For example 10 in base 10 => A in base 16.
+//! \param base the new displaying base.
+//! \return if the new base can be used. If this is not the case
+//! the older base is not changed.
 // **************************************************************
-bool Forth::changeDisplayBase(const uint8_t newbase)
+bool Forth::changeDisplayBase(const uint8_t base)
 {
-  if ((newbase >= 2) && (newbase <= 36))
+  if ((base >= 2) && (base <= 36))
     {
-      m_base = newbase;
+      m_base = base;
       return true;
     }
   return false;
 }
 
 // **************************************************************
-//
+//! Used for trace and debug.
 // **************************************************************
 void Forth::displayDStack() const
 {
@@ -61,7 +67,7 @@ void Forth::displayDStack() const
 }
 
 // **************************************************************
-//
+//! Used for trace and debug.
 // **************************************************************
 void Forth::displayRStack() const
 {
@@ -75,9 +81,9 @@ void Forth::displayRStack() const
 }
 
 // **************************************************************
-//
+//! \param word the Forth name to store in the dictionary.
 // **************************************************************
-void Forth::createWord(std::string const& word)
+void Forth::create(std::string const& word)
 {
   if (m_dico.exists(word))
     {
@@ -98,12 +104,14 @@ void Forth::createWord(std::string const& word)
   m_depth_at_colon = DStackDepth();
 
   // Add it in the dictionary
-  Cell16 token = m_dico.here() + word.size() + 1U + 2U; // 1: flags, 2: NFA
+  Cell16 token = m_dico.here() + word.size() + 3U; // 3U: flags + NFA
   m_dico.add(token, word, 0);
 }
 
 // **************************************************************
-//
+//! \param tx token to execute (either a Forth primitive or a user
+//! word definition).
+//! \throw ForthStackOV if the data or the return stack overflowed.
 // **************************************************************
 void Forth::execToken(const Cell16 tx)
 {
@@ -211,9 +219,30 @@ void Forth::execToken(const Cell16 tx)
 }
 
 // **************************************************************
-// Convert a string to a number.
-// Note prefixes 'b', 'h' and '0x' are not standard
-// Return false if an error occured
+//!
+// **************************************************************
+void Forth::completion(std::string const& partial_name)
+{
+  std::pair<bool, char*> p;
+
+  p = m_dico.completion(m_last_completion, partial_name);
+  if (p.first)
+    {
+      std::cout << p.second << std::endl;
+    }
+  else
+    {
+      m_last_completion = dictionary().last();
+    }
+}
+
+// **************************************************************
+//! \param word (in) the number to convert
+//! \param number (out) the result of the conversion if the function
+//! returned true (else the number is undefined).
+//! \return false if the number is malformed (not a number in the
+//! current base or too huge to store in a cell.
+//! \note: prefixes 'b', 'h' and '0x' are not Forth standard.
 // **************************************************************
 bool Forth::toNumber(std::string const& word, Cell32& number)
 {
@@ -316,9 +345,11 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
 }
 
 // **************************************************************
-// COMPILATION_STATE
+//! \param word the Forth word extracted from the stream.
+//! \throw ForthUnknownWord if the word does not exist in the
+//! dictionary and is not a number.
 // **************************************************************
-void Forth::interprete(std::string const& word)
+void Forth::interpreteWord(std::string const& word)
 {
   Cell32 number;
   Cell16 token;
@@ -386,9 +417,13 @@ void Forth::interprete(std::string const& word)
 }
 
 // **************************************************************
-//
+//! \param filename the file name of the Forth script (ascii file)
+//! to interprete.
+//! \return a pair: a boolean indicating if the file has been
+//! correctly interpreted (no error) and a string containing the
+//! result of the interpreter.
 // **************************************************************
-std::pair<bool, std::string> Forth::eatFile(std::string const& filename)
+std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 {
   if (m_trace) std::cout << "eating File " << filename << std::endl;
   if (READER.setFileToParse(filename))
@@ -402,24 +437,27 @@ std::pair<bool, std::string> Forth::eatFile(std::string const& filename)
 }
 
 // **************************************************************
+//! \param code_forth the forth script stored as char*.
+//! \return See Forth::interpreteFile
 // FIXME: convert char* --> string can be consumns lot of memory ?!
 // **************************************************************
-std::pair<bool, std::string> Forth::eatString(const char* const code_forth)
+std::pair<bool, std::string> Forth::interpreteString(const char* const code_forth)
 {
-  return Forth::eatString(std::string(code_forth));
+  return Forth::interpreteString(std::string(code_forth));
 }
 
 // **************************************************************
-//
+//! \param code_forth the forth script stored as string.
+//! \return See Forth::interpreteFile
 // **************************************************************
-std::pair<bool, std::string> Forth::eatString(std::string const& code_forth)
+std::pair<bool, std::string> Forth::interpreteString(std::string const& code_forth)
 {
   READER.setStringToParse(code_forth);
   return parseStream();
 }
 
 // **************************************************************
-//
+//! \return See Forth::interpreteFile
 // **************************************************************
 std::pair<bool, std::string> Forth::parseStream()
 {
@@ -431,7 +469,7 @@ std::pair<bool, std::string> Forth::parseStream()
       // FIXME: retourne ok si on lui donne une ligne vide dans un string
       while (READER.hasMoreWords())
         {
-          interprete(READER.nextWord());
+          interpreteWord(READER.nextWord());
         }
 
       // TODO: checker les piles
@@ -458,7 +496,7 @@ std::pair<bool, std::string> Forth::parseStream()
 }
 
 // **************************************************************
-//
+//! \param res See Forth::interpreteFile
 // **************************************************************
 void Forth::ok(std::pair<bool, std::string> const& res)
 {
@@ -474,31 +512,34 @@ void Forth::ok(std::pair<bool, std::string> const& res)
                 << p.first << ':'
                 << p.second << ' '
                 << res.second << DEFAULT << std::endl;
-      restore();
+      abort(); // FIXME bad location
     }
 }
 
 // **************************************************************
-// Forth code: INCLUDE filename.fs
-//
-// Note: this is an indirect recursive function trhough functions
-// eatFile() which can call this routine again through the function
-// execPrimitive() if the Forth word INCLUDE is found.
+//! Forth code: INCLUDE filename.fs
+//! Note: this is an indirect recursive function trhough functions
+//! eatFile() which can call this routine again through the function
+//! execPrimitive() if the Forth word INCLUDE is found.
+//! \param filename the new stream to parse.
+//! \throw ForthException if too many streams are opened or if a
+//! included file contains an error detected by the interpretor.
 // **************************************************************
 void Forth::includeFile(std::string const& filename)
 {
+  // FIXME memoriser m_base
   // Save the current stream in a stack
-  ++m_stream;
+  ++m_opened_streams;
 
   // Reached maximum depth of include file including file including ... etc
-  if (m_stream >= MAX_OPENED_STREAMS)
+  if (m_opened_streams >= MAX_OPENED_STREAMS)
     {
       ForthException e("too many opened streams");
       throw e;
     }
 
   // Parse the included file (recursive)
-  std::pair<bool, std::string> res = eatFile(filename);
+  std::pair<bool, std::string> res = interpreteFile(filename);
   if (res.first)
     {
       // Succes
@@ -507,8 +548,8 @@ void Forth::includeFile(std::string const& filename)
       ok(res);
 
       // Pop the previous stream
-      assert(m_stream > 0);
-      --m_stream;
+      assert(m_opened_streams > 0);
+      --m_opened_streams;
     }
   else
     {
@@ -522,7 +563,7 @@ void Forth::includeFile(std::string const& filename)
                       + res.second);
 
       // Pop the previous stream
-      --m_stream;
+      --m_opened_streams;
 
       // Call exception that will be caugh by the parseStream()
       ForthException e(msg);
@@ -531,10 +572,16 @@ void Forth::includeFile(std::string const& filename)
 }
 
 // **************************************************************
-// TODO: Les ranger par ordre lexico ?
+//! This method should be called after the contructor Forth().
+//! boot() has been separated from the constructor to load the
+//! dictionary at the desired moment.
 // **************************************************************
 void Forth::boot()
 {
+  // TODO: Les ranger par ordre lexico ?
+  // FIXME: init m_last et m_here pour etre sur que le client ne
+  // charge pas plusieurs fois les memes primitives
+
   // Dummy word and comments
   m_dico.add(FORTH_PRIMITIVE_NOP, "NOOP", 0);
   m_dico.add(FORTH_PRIMITIVE_LPARENTHESIS, "(", FLAG_IMMEDIATE);

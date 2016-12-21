@@ -1,5 +1,8 @@
 #include "ForthDico.hpp"
 
+// **************************************************************
+//! Constructor: Reset dictionary states to make an empty dictionary.
+// **************************************************************
 ForthDico::ForthDico()
 {
   m_here = 0U;
@@ -7,21 +10,21 @@ ForthDico::ForthDico()
 }
 
 // **************************************************************
-// Create a new forth definition (aka entry) at the 1st empty location of the m_dictionary.
-// The 1st empty location in the dictionnary is given by the variable 'here'.
-// The last inserted entry is given by the variable 'last'.
-// An entry is stored as:
-// byte -1 ||       byte0         | byte1 .. byteN |     byteN+1 byteN+2       | byteN+3 .. byteM || byteM+1 ..
-//  ..     || flags + word length | the word name  | Realtive @ Previous entry | word deffinition ||   ..
-// All entries are consecutive.
+//! \param token either the CFA of a none primitive word or an
+//! enum ForthPrimitives for primitive words.
+//! \param name of the Forth word.
+//! \param immediate a boolean indicating if the word shall be immediate.
+//! \throw ForthMalformedWord is the name of the word length is not <= 31
+//! characters.
+//! \throw ForthDicoNoSpace if the dictionary is full.
 // **************************************************************
-void ForthDico::add(const Cell16 token, std::string const& word, const bool immediate)
+void ForthDico::add(const Cell16 token, std::string const& name, const bool immediate)
 {
   // Forth words are max 31 bytes long
-  Cell32 length = word.size();
+  Cell32 length = name.size();
   if ((length > 31U) || (0U == length))
     {
-      ForthMalformedWord e(word); throw e;
+      ForthMalformedWord e(name); throw e;
     }
 
   // No more space in the m_dictionary ?
@@ -34,12 +37,12 @@ void ForthDico::add(const Cell16 token, std::string const& word, const bool imme
   m_last = m_here;
 
   // Store the word header
-  m_dictionary[m_here++] = (1U << 7U) | (immediate << 6U) | length;
+  appendCell8((1U << 7U) | (immediate << 6U) | length);
 
   // Store the word name
   for (uint8_t i = 0; i < length; ++i)
     {
-      m_dictionary[m_here++] = word[i];
+      appendCell8(name[i]);
     }
 
   // Store the NFA of the preceding word
@@ -50,9 +53,13 @@ void ForthDico::add(const Cell16 token, std::string const& word, const bool imme
 }
 
 // **************************************************************
-// Convert a string into a token
+//! Convert a string into a token.
+//! \param name (in) the name of the Forth word.
+//! \param token (out) returns the token value if the word was found.
+//! \param immediate (out) returns if the found word is immediate.
+//! \return true if the word was found in the dictionary, else return false.
 // **************************************************************
-bool ForthDico::find(std::string const& word, Cell16& token, bool& immediate) const
+bool ForthDico::find(std::string const& name, Cell16& token, bool& immediate) const
 {
   Cell32 nfa;
   Cell32 length;
@@ -72,10 +79,10 @@ bool ForthDico::find(std::string const& word, Cell16& token, bool& immediate) co
       if (!(m_dictionary[ptr] & FLAG_SMUDGE))
         {
           // Compare name lengths before comparing strings
-          if (length == word.size())
+          if (length == name.size())
             {
               // Same length, check if names mismatch
-              if (0 == std::strncmp(word.c_str(), (char*) &m_dictionary[ptr + 1U], length))
+              if (0 == std::strncmp(name.c_str(), (char*) &m_dictionary[ptr + 1U], length))
                 {
                   // Set the param if the word is immediate
                   immediate = (m_dictionary[ptr] & FLAG_IMMEDIATE);
@@ -96,9 +103,59 @@ bool ForthDico::find(std::string const& word, Cell16& token, bool& immediate) co
 }
 
 // **************************************************************
-// Smudge a word
+//! Complete the word name from the dictionary.
+//! \param last (in) start the search at the LFA of a word (can be m_last for example).
+//! \param partial_name (in) the begining of a forth word.
+//! \return the pair true + address of the first matching name, else return false + NULL.
 // **************************************************************
-bool ForthDico::smudge(std::string const& word)
+std::pair<bool, char*> ForthDico::completion(Cell16& last, std::string const& partial_name) const
+{
+  Cell32 nfa;
+  Cell32 length;
+
+  // last is a Cell16 but for computation with minus operator we need 32bits
+  int32_t ptr = last;
+
+  // 0 (aka NULL) meaning the last m_dictionary entry.  Because we are
+  // using relative addresses as uint16_t to save space we cannot use
+  // NULL
+  do
+    {
+      // Get the length of the forth name
+      length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+
+      // Ignore words with the SMUDGE bit */
+      if (!(m_dictionary[ptr] & FLAG_SMUDGE))
+        {
+          // Check if names mismatch
+          if (0 == std::strncmp(partial_name.c_str(),
+                                (char*) &m_dictionary[ptr + 1U],
+                                partial_name.length()))
+            {
+              // Go to the previous word
+              nfa = read16at(ptr + length + 1U);
+              ptr = ptr - nfa;
+              last = (Cell16) ptr;
+
+              return std::make_pair(true, (char*) &m_dictionary[ptr + 1U]);
+            }
+        }
+
+      // Not found: go to the previous word
+      nfa = read16at(ptr + length + 1U);
+      ptr = ptr - nfa;
+    } while (nfa);
+
+  last = (Cell16) ptr;
+  return std::make_pair(false, nullptr);
+}
+
+// **************************************************************
+//! Toggle the Smudge bit in the flags location.
+//! \param name (in) the name of the Forth word.
+//! \return true if the word exists (even hidden), else false.
+// **************************************************************
+bool ForthDico::smudge(std::string const& name)
 {
   Cell32 nfa;
   Cell32 length;
@@ -115,10 +172,10 @@ bool ForthDico::smudge(std::string const& word)
       length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
 
       // Compare name lengths before comparing strings
-      if (length == word.size())
+      if (length == name.size())
         {
           // Same length, check if names mismatch
-          if (0 == std::strncmp(word.c_str(), (char*) &m_dictionary[ptr + 1U], length))
+          if (0 == std::strncmp(name.c_str(), (char*) &m_dictionary[ptr + 1U], length))
             {
               // Toogle the smudge bit
               m_dictionary[ptr] ^= FLAG_SMUDGE;
@@ -135,20 +192,26 @@ bool ForthDico::smudge(std::string const& word)
 }
 
 // **************************************************************
-//
+//! Interface for ForthDico::find (hide output parameters).
+//! \param name (in) the name of the Forth word.
+//! \return ForthDico::find.
 // **************************************************************
-bool ForthDico::exists(std::string const& word) const
+bool ForthDico::exists(std::string const& name) const
 {
   Cell16 token;
   bool immediate;
 
-  return ForthDico::find(word, token, immediate);
+  return ForthDico::find(name, token, immediate);
 }
 
 // **************************************************************
-// Convert a string into a token
+//! Looking for the Forth word name from its token.
+//! \param token the CFA to look for in the dictionary.
+//! \param even_smudge if false ignore smudged definitions.
+//! \return the pair a boolean if the token was found and the address
+//! of the name.
 // **************************************************************
-std::pair<bool, int32_t> ForthDico::find(const Cell16 token, const bool even_smudge=false) const
+std::pair<bool, int32_t> ForthDico::find(const Cell16 token, const bool even_smudge) const
 {
   Cell32 nfa;
   Cell32 length;
@@ -184,17 +247,21 @@ std::pair<bool, int32_t> ForthDico::find(const Cell16 token, const bool even_smu
 }
 
 // **************************************************************
-// Save the dictionnary in a binary file.
-// Use the commande hexdump -C filename for debugging it
+//! Save the dictionnary in a binary file. The user can use the
+//! command hexdump -C filename for debuging the dictionary.
+//! \param filename the file name where the dictionary will be stored.
+//! \return a boolean indicating if the process succeeded.
 // **************************************************************
-bool ForthDico::dump(std::string const& filename) //const
+bool ForthDico::dump(std::string const& filename) // FIXME const
 {
   std::ofstream out(filename, std::ios::out | std::ios::binary | std::ios::trunc);
 
   if (out.is_open())
     {
       // Hack: store LAST word at the end of the dictionnary to
-      // be sure that LAST will be splited in correct endian.
+      // be sure that LAST will be splited in correct endian but
+      // break the const-ness of the function.
+      // TODO: ajouter un param ou commence la sauvegarde dans le dico (ex: skip primitives)
       write16at(m_here, m_last);
 
       // Store all the dictionary including LAST
@@ -204,16 +271,24 @@ bool ForthDico::dump(std::string const& filename) //const
     }
   else
     {
-      std::cerr << "Cannot dump the dico. Reason was xxx" << std::endl; // FIXME
+      std::cerr << "Cannot save the dictionary in file '"
+                << filename
+                << "'. Reason is '" << strerror(errno) << "'"
+                << std::endl;
       return false;
     }
 }
 
 // **************************************************************
-// Load a dictionnary from a binary file.
-// TBD: skip the dictionary ?
+//! Load a dictionnary from a binary file.
+//! \param the filename containing a dictionary. Note: no verification
+//! is made for checking if the dictionary image is well formed or is
+//! a real dictionary file.
+//! \param replace if true the old dictionary is smashed else the
+//! new dictionary is appened to the old one.
+//! \return a boolean indicating if the process succeeded.
 // **************************************************************
-bool ForthDico::load(std::string const& filename)
+bool ForthDico::load(std::string const& filename, const bool replace)
 {
   std::ifstream in(filename, std::ios::in | std::ios::binary);
 
@@ -221,27 +296,61 @@ bool ForthDico::load(std::string const& filename)
     {
       // Get the length of file
       in.seekg(0, in.end);
-      int length = in.tellg();
+      Cell32 length = in.tellg();
       in.seekg(0, in.beg);
 
       // Load the dictionary with LAST
-      in.read((char*) m_dictionary, length);
+      if (replace)
+        {
+          // Smash the old dictionary
+          in.read((char*) m_dictionary, length);
 
-      // Skip LAST and set HERE
-      m_here = length - 2U;
-      m_last = read16at(m_here);
+          // Update Forth words LAST and HERE
+          m_here = m_here - 2U; // 2U because LAST was stored in file
+          m_last = read16at(m_here);
+        }
+      else
+        {
+          // Append the dictionary
+          in.read((char*) m_dictionary + m_here, length);
+
+          // Link the PFA of 1st entry of the new dictionary to
+          // the PFA of the last entry of the previous dictionary
+          Cell32 word_length = m_dictionary[m_here] & MASK_FORTH_NAME_SIZE;
+          try
+            {
+              write16at(m_here + word_length + 1U, m_here - m_last);
+            }
+          catch (const ForthDicoOOB& e)
+            {
+              std::cerr << "Cannot load the dictionary from the file '"
+                        << filename
+                        << "'. Reason is the image is bigger than the dictionary size."
+                        << std::endl;
+              in.close();
+              return false;
+            }
+
+          // Update Forth words LAST and HERE
+          m_here = m_here + length - 2U; // 2U because LAST was stored in file
+          m_last = length - 2U + read16at(m_here);
+        }
+
       in.close();
       return true;
     }
   else
     {
-      std::cerr << "Cannot load the file '" << filename << "'. Reason was xxx" << std::endl; // FIXME
+      std::cerr << "Cannot load the dictionary from the file '"
+                << filename
+                << "'. Reason is '" << strerror(errno) << "'"
+                << std::endl;
       return false;
     }
 }
 
 // **************************************************************
-//
+//! \param token
 // **************************************************************
 void ForthDico::displayToken(const Cell16 token) const
 {
@@ -258,7 +367,7 @@ void ForthDico::displayToken(const Cell16 token) const
 }
 
 // **************************************************************
-// Pretty print of the dictionary
+//
 // **************************************************************
 void ForthDico::display() const
 {
