@@ -57,7 +57,8 @@ public:
   virtual void displayRStack() const;
   //! \brief restore the Forth context to its initial state.
   void abort();
-
+  //! \brief restore the Forth context to its initial state and throw an exception.
+  void abort(std::string const& msg);
 protected:
   //! \brief Create the header of a Forth word in the dictionary.
   void create(std::string const& word);

@@ -2,7 +2,7 @@
 #include <limits.h>
 
 // **************************************************************
-//! Constructor: initialize the Forth interpretor context. The
+//! Initialize the Forth interpretor context. The
 //! dictionary is given as reference to allow the inheritance.
 //! \param dico the reference of (an empty) Forth dictionary.
 // **************************************************************
@@ -17,7 +17,7 @@ Forth::Forth(ForthDico& dico)
 // **************************************************************
 //! Reset the context like the Forth word ABORT does.
 // **************************************************************
-inline void Forth::abort()
+void Forth::abort()
 {
   if ((COMPILATION_STATE == m_state) ||
       ((COMMENT_STATE == m_state) && (COMPILATION_STATE == m_saved_state)))
@@ -36,7 +36,17 @@ inline void Forth::abort()
 }
 
 // **************************************************************
-//! When displaying numbers on screen, display them on the
+//! \param msg the message to pass in the exception.
+// **************************************************************
+void Forth::abort(std::string const& msg)
+{
+  Forth::abort();
+  ForthException e(msg);
+  throw e;
+}
+
+// **************************************************************
+//! When displaying numbers on screen, display them on this
 //! selected base. For example 10 in base 10 => A in base 16.
 //! \param base the new displaying base.
 //! \return if the new base can be used. If this is not the case
@@ -572,8 +582,8 @@ void Forth::includeFile(std::string const& filename)
 }
 
 // **************************************************************
-//! This method should be called after the contructor Forth().
-//! boot() has been separated from the constructor to load the
+//! This method should be called after the contructor Forth()
+//! and has been separated from the constructor to load the
 //! dictionary at the desired moment.
 // **************************************************************
 void Forth::boot()
@@ -605,6 +615,7 @@ void Forth::boot()
 
   // Words
   m_dico.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);
+  m_dico.add(FORTH_PRIMITIVE_ABORT, "ABORT", 0);
   m_dico.add(FORTH_PRIMITIVE_EXECUTE, "EXECUTE", 0);
   m_dico.add(FORTH_PRIMITIVE_COMPILE, "COMPILE", 0);
   m_dico.add(FORTH_PRIMITIVE_ICOMPILE, "[COMPILE]", FLAG_IMMEDIATE);

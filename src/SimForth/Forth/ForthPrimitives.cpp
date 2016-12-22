@@ -191,6 +191,10 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       }
       break;
 
+     case FORTH_PRIMITIVE_ABORT:
+       abort("COUCOU");
+       break;
+
      case FORTH_PRIMITIVE_EXECUTE:
        execToken(m_tos);
        break;

@@ -7,53 +7,89 @@
 #  include "ForthPrimitives.hpp"
 
 //! \class ForthDico
-//! \brief class for managing the Forth dictionary.
 //!
-//! In Forth a dictionary is a consecutive set of Forth words. A Forth
-//! word is known as "function" in language like C with a name and a
-//! definition. In our implementation Forth words are stored in the
-//! dictionary as a linked list of dictionary entries.
+//! In Forth, a dictionary is a consecutive set of Forth words. The
+//! term word is equivalent to the term "function" in language like C
+//! with a name and a definition (but contrary to C parameters are not
+//! described in the dictionary). In this current implementation of
+//! Forth, words are stored in the dictionary as a linked list of
+//! dictionary entries like shwon in the next figure.
 //!
-//!  <--- DICTIONARY ENTRY (HEADER) ----------------------->
-//!  +------------------------+--------+---------- - - - - +----------- - - - -
-//!  | LINK POINTER           | LENGTH/| NAME              | DEFINITION
-//!  |                        | FLAGS  |                   |
-//!  +--- (2 bytes) ----------+- 1byte +- 1 .. 31 bytes  - +----------- - - - -
+//! \code{.unparsed}
+//!  <--- DICTIONARY ENTRY (HEADER) ----------->
+//!  +--------+-----------------+--------------+-----------+---- - - - -
+//!  | LENGTH/| NAME            | LINK POINTER | TOKEN     | DEFINITION
+//!  | FLAGS  |                 |              |           |
+//!  + 1 byte +- 1 to 31 bytes -+-- 2 bytes ---+--2 bytes--+---- - - - -
+//! \endcode
 //!
-//! Link pointer contains the RELATIVE address (not absolute) named
-//! LFA to the previous entry. With 2 bytes Our dictionary has a
-//! limited size of 65535 bytes. The most recently defined word is
-//! memorized by the member m_last of the class ForthDico and in Forth
-//! the word LAST refered to it.
+//! Example:
 //!
-//! Flags contains the length of the word name coded on 5 bits. 3
-//! additional bits are used: the 3th bit is always set to 1 as a
-//! marker for detecting the begining of the definiton. The 2nd bit is
-//! the smudge bit: hiding or not the definition and the 1st bit for
-//! defining IMMEDIATE words (a word executed during the compilation
-//! of a word).
+//! ForthDico::dump() saves a dictionary in a binary file. Calling hexdump -C
+//! on this file will give a result similar to this:
+//! \code{.unparsed}
+//! 00000000  84 4e 4f 4f 50 00 00 00  00 c1 28 00 09 00 01  |.NOOP.....(.....|
+//! \endcode
 //!
-//! The definition of a Forth is a list of consecutive tokens. The
-//! address of the begining of the definition is named Code Field
-//! Address (CFA). A token is either the CFA of none-primitive word or
-//! a value for primitive words. A primitive word is here a C++ code.
+//! Address 0x00000000 in the dictionary is the entry of the word NOOP.
+//! 0x84 as flags means the word name is 4 characters. 0x4e 0x4f 0x4f 0x50 are
+//! the ASCII code for "NOOP". 0x00 0x00 means the token 0 (primitive
+//! word) 0x00  0x00 is the LFA of the previous name. In this case because
+//! NOOP is the first entry there is no previous word so equivalent to NULL in C
+//! language.
 //!
-//! In C language a space memory is used for storing variables (the heap)
-//! but in Forth the dictionary is used as a heap.
+//! Address 0x00000008 in the dictionary is the entry of the word (.
+//! 0xc1 as flags means the word name is 1 character and immediate. 0x28 is
+//! the ASCII code for (. 0x00 0x09 is LFA pointing to NOOP. 0x00 0x01
+//! is the token 1 (primitive word).
+//!
+//! Description of the figure:
+//!
+//! LENGTH/FLAGS contains the length of the word name coded on 5 bits
+//! (so a Forth word cannot have more than 31 caracters). 3
+//! additional bits are used: the 3th bit is always set to 1 and is
+//! used as a marker for detecting the begining of the entry. The 2nd
+//! bit is the smudge bit: hiding or not the definition to find
+//! functions and the first bit is used for defining IMMEDIATE words (a
+//! immediate word is executed during the compilation of a word).
+//!
+//! NAME is the name of the word. Up to 31 caracter (usually ASCII).
+//!
+//! The LINK POINTER contains the RELATIVE address (not absolute) to
+//! the previous entry and it's named LFA. Note that with 2 bytes our
+//! dictionary has a maximum size of 65535 bytes. The most recently
+//! defined word is memorized by the member ForthDico::m_last and in
+//! Forth by the word LAST.
+//!
+//! TOKEN is an unique identifier for each word in dictionary. It also
+//! allows to distinguish two kind of Forth words: primitives and
+//! compiled words. Primitives are Forth words calling machine code.
+//!
+//! The DEFINITION of the Forth word is a list of consecutive tokens.
+//! The address of the begining of the definition is named Code Field
+//! Address (CFA).
+//!
+//! In C language a space memory is used for storing variables (the
+//! heap) but in Forth the dictionary is both used as a heap and as
+//! entries store. That is why Forth is considered as a virtual
+//! machine.  The first free location in the dictionary is given by
+//! ForthDico::m_here and in Forth by the word DP or the word HERE.
+//! Contrary to other Forth virtual machine, here our dictionary does
+//! not need to manage aligned memories (padding) or manage endianess.
 class ForthDico
 {
 public:
   //! \brief Constructor.
   ForthDico();
-  //! \brief Add a new Forth word in the dictionary.
+  //! \brief Append a new Forth entry in the dictionary.
   void add(const Cell16 token, std::string const& word, const bool immediate);
   //! \brief Look for a word in the dictionary.
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
-  //! \brief Same behavior than find(std::string const& word ...) but without outpout paramaters
+  //! \brief Interface for ForthDico::find but hiding output parameters.
   bool exists(std::string const& word) const;
   //! \brief Look for a token in the dictionary.
   std::pair<bool, int32_t> find(const Cell16 token, const bool even_smudge = false) const;
-  //! \brief Look for a word name from a partial name (used for auto-completion).
+  //! \brief Get the complete name given a partial Forth name (used for auto-completion).
   std::pair<bool, char*> completion(Cell16& last, std::string const& partial_word) const;
   //! \brief Hide or unhide a Forth definition from the user.
   bool smudge(std::string const& word);
@@ -61,39 +97,48 @@ public:
   bool dump(std::string const& filename);// FIXME const;
   //! \brief Load a dictionary from a binary file, append or replace the old one.
   bool load(std::string const& filename, const bool replace = true);
-  //! \brief Pretty print the dictionary.
+  //! \brief Pretty print the dictionary in std::cout.
   virtual void display() const;
-  //! \brief Accessor. Return the last word entry in the dictionary.
+  //! \brief Accessor. Return the most recent entry in the dictionary.
   inline Cell16 last() const { return m_last; }
-  //! \brief Accessor. Return the address of the 1st free slot in the dictionary.
+  //! \brief Accessor. Return the address of the first free location in the dictionary.
   inline Cell16 here() const { return m_here; }
-  //! \brief Accessor. Modify the address of the 1st free slot in the dictionary.
+  //! \brief Accessor. Modify the address of the first free location in the dictionary.
   inline void here(const Cell16 here) { m_here = here; }
-  //! \brief Reserve memory in the dictionary from the 1st free slot and modify it.
+  //! \brief Reserve or release a chunk of memory in the dictionary.
   void allot(const int32_t nb_bytes);
-  //! \brief Store a byte at the end of the dictionnary.
-  inline void appendCell8(const Cell32 value)
+  //! \brief Store a byte at the end of the dictionnary. Endianess is hiden.
+  //! ForthDico::m_here is updated.
+  //! \param data is a 32-bits data (casted into Cell8) to store at location ForthDico::m_here
+  //! \throw ForthDicoOOB if overflows/underflows is detected.
+  inline void appendCell8(const Cell32 data)
   {
-    write8at(m_here, value);
+    write8at(m_here, data);
     m_here += 1U;
   }
-  //! \brief Store two consecutive bytes at the end of the dictionnary.
-  inline void appendCell16(const Cell32 value)
+  //! \brief Store two consecutive bytes at the end of the dictionnary. Endianess is hiden.
+  //! ForthDico::m_here is updated.
+  //! \param data is a 32-bits data (casted into Cell16) to store at location ForthDico::m_here
+  //! \throw ForthDicoOOB if overflows/underflows is detected.
+  inline void appendCell16(const Cell32 data)
   {
-    write16at(m_here, value);
+    write16at(m_here, data);
     m_here += 2U;
   }
-  //! \brief Store four consecutive bytes at the end of the dictionnary.
-  inline void appendCell32(const Cell32 value)
+  //! \brief Store four consecutive bytes at the end of the dictionnary. Endianess is hiden.
+  //! ForthDico::m_here is updated.
+  //! \param data is a 32-bits data to store at location ForthDico::m_here
+  //! \throw ForthDicoOOB if overflows/underflows is detected.
+  inline void appendCell32(const Cell32 data)
   {
-    write32at(m_here, value);
+    write32at(m_here, data);
     m_here += 4U;
   }
-  //! \brief Read a byte at given address in the dictionnary.
+  //! \brief Read a byte at given address in the dictionnary. Endianess is hiden.
   Cell32 read8at(const uint32_t addr) const;
-  //! \brief Read two consecutive bytes at given address in the dictionnary.
+  //! \brief Read two consecutive bytes at given address in the dictionnary. Endianess is hiden.
   Cell32 read16at(const uint32_t addr) const;
-  //! \brief Read four consecutive bytes at given address in the dictionnary.
+  //! \brief Read four consecutive bytes at given address in the dictionnary. Endianess is hiden.
   Cell32 read32at(const uint32_t addr) const;
   //! \brief Safe move a chunck of memory in the dictionary.
   inline void move(const uint32_t destination,
@@ -108,13 +153,13 @@ public:
   }
 
 protected:
-  //! \brief Pretty print a Forth token
+  //! \brief Pretty print a Forth token in std::cout.
   virtual void displayToken(const Cell16 token) const;
-  //! \brief Store a byte at given address in the dictionnary.
+  //! \brief Store a byte at given address in the dictionnary. Endianess is hiden.
   void write8at(const uint32_t addr, const Cell32 data);
-  //! \brief Store two consecutive bytes at given address in the dictionnary.
+  //! \brief Store two consecutive bytes at given address in the dictionnary. Endianess is hiden.
   void write16at(const uint32_t addr, const Cell32 data);
-  //! \brief Store four consecutive bytes at given address in the dictionnary.
+  //! \brief Store four consecutive bytes at given address in the dictionnary. Endianess is hiden.
   void write32at(const uint32_t addr, const Cell32 data);
   //! \brief Safe guard. Check if given address is inside the dictionary.
   void checkBounds(const uint32_t addr, const int32_t nb_bytes) const;
@@ -122,9 +167,12 @@ protected:
   //! \brief Allow the Forth context class to modify the dictionary.
   friend class Forth;
 
-  Cell8   m_dictionary[DICTIONARY_SIZE]; //! The memory of the dictionary.
-  Cell16  m_last;  //! Name Field Address (NFA) of the last dictionnary entry (Forth word: LAST).
-  Cell16  m_here;  //! Address of the 1st free dictionary slot (Forth word: HERE, DP).
+  //! The memory of the dictionary.
+  Cell8   m_dictionary[DICTIONARY_SIZE];
+  //! Name Field Address (NFA) of the most recently entry (Forth word: LAST).
+  Cell16  m_last;
+  //! Address of the first free location in the dictionary (Forth word: HERE, DP).
+  Cell16  m_here;
 };
 
 #endif /* FORTH_DICO_HPP_ */
