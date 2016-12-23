@@ -1,33 +1,49 @@
-#include "ForthReader.hpp"
+#include "ForthStream.hpp"
 
 // **************************************************************
-// ForthReader == TokenScanner
+//! When calling this constructor, no stream was opened. You need
+//! to call ForthStream::setFileToParse() or ForthStream::setStringToParse()
+//! to init a stream.
 // **************************************************************
-ForthReader::ForthReader()
+ForthStream::ForthStream()
 {
-  m_word.reserve(64U); // 32 is enough for correct Forth words
+  // 64 is enough for storing correct Forth words (32 char max)
+  m_word.reserve(64U);
+  m_mode = NOTHING_TO_READ;
   init();
-  m_mode = READ_STRING;
   m_str = "";
   m_filename = "";
 }
 
 // **************************************************************
-//
+//!
 // **************************************************************
-ForthReader::~ForthReader()
+ForthStream::~ForthStream()
 {
+  ForthStream::close();
+}
+
+// **************************************************************
+//! Called by the destructor.
+// **************************************************************
+void ForthStream::close()
+{
+  if (READ_FILE != m_mode)
+    return ;
+
   if (m_infile.is_open())
     {
       m_infile.close();
       m_infile.clear();
+      m_mode = NOTHING_TO_READ;
     }
 }
 
 // **************************************************************
-//
+//! Called by the constructor and ForthStream::setFileToParse()
+//! or ForthStream::setStringToParse()
 // **************************************************************
-void ForthReader::init()
+void ForthStream::init()
 {
   m_cursor_last = m_cursor_next = m_cursor_prev = m_lines = 0;
   m_eol = m_eof = true;
@@ -36,40 +52,41 @@ void ForthReader::init()
 }
 
 // **************************************************************
-//
+//! \param str the script Forth stored in an ascii file.
+//! \return a boolean indicating if the file could be opned with success.
 // **************************************************************
-bool ForthReader::setFileToParse(std::string const& filename)
+bool ForthStream::loadFile(std::string const& filename)
 {
+  close();
   init();
-  m_mode = READ_FILE;
 
-  // Re-open a file ? Close the old one
+  m_infile.open(filename, std::ios::in);
   if (m_infile.is_open())
     {
-      m_infile.close();
-      m_infile.clear();
+      m_filename = filename;
+      m_mode = READ_FILE;
     }
-  m_filename = filename;
-  m_infile.open(filename, std::ios::in);
 
   return m_infile.good() && refill();
 }
 
 // **************************************************************
-//
+//! \param str the script Forth stored as a string.
 // **************************************************************
-void ForthReader::setStringToParse(std::string const& str)
+void ForthStream::loadString(std::string const& str)
 {
+  close();
   init();
+
   m_mode = READ_STRING;
   m_filename = "<string>";
   m_str = str;
 }
 
 // **************************************************************
-// Ignore the curent line and go to the next one
+//!
 // **************************************************************
-void ForthReader::skipLine()
+void ForthStream::skipLine()
 {
   m_eol = true;
   //++m_lines;
@@ -83,22 +100,25 @@ void ForthReader::skipLine()
       // Reached the end of the string ?
       m_eof = (m_cursor_last == std::string::npos);
     }
-  else // if (READ_FILE == m_mode)
+  else if (READ_FILE == m_mode)
     {
       refill();
     }
 }
 
 // **************************************************************
-// Read next line of file
+//! \return if next line was loaded.
 // **************************************************************
-bool ForthReader::refill()
+bool ForthStream::refill()
 {
+  if (NOTHING_TO_READ == m_mode)
+    return false;
+
   // End of line not reached: finish it first
   if (false == m_eol)
     return true;
 
-  // Reading a string or ForthReader not init
+  // Reading a string or ForthStream not init
   if (READ_FILE != m_mode)
     return false;
 
@@ -122,11 +142,15 @@ bool ForthReader::refill()
 }
 
 // **************************************************************
-// Check if a word can be extracted
+//! \return true if the stream has more data to extract,
+//! else return false.
 // **************************************************************
-bool ForthReader::hasMoreWords()
+bool ForthStream::hasMoreWords()
 {
   bool res;
+
+  if (NOTHING_TO_READ == m_mode)
+    return false;
 
   do {
     // Get next word ?
@@ -145,26 +169,15 @@ bool ForthReader::hasMoreWords()
 }
 
 // **************************************************************
-//
+//! \return true if a word has been found, else return false.
+//! The word extracted is saved as m_word
 // **************************************************************
-std::string ForthReader::nextWord()
-{
-  //m_word_picked = true;
-  //std::cout << "nextWord '" << m_word << "'" << std::endl;
-  return m_word;
-}
-
-// **************************************************************
-// Read the next word delimited by space characters.
-// Return true if a word has been found, else return false.
-// The word extracted is saved as m_word
-// **************************************************************
-bool ForthReader::split()
+bool ForthStream::split()
 {
   // Avoid accident by calling several times hasMoreWords() which
   // gives the side effect to drop previous word
   //if (false == m_word_picked)
-  //  {std::cout << "ForthReader::split 1111\n";
+  //  {std::cout << "ForthStream::split 1111\n";
   //    return true;}
 
   // Be sure to read an opened file
@@ -198,21 +211,4 @@ bool ForthReader::split()
 
   //
   return !m_eol;
-}
-
-// **************************************************************
-// Return the current line and colon
-// **************************************************************
-std::pair<size_t, size_t> ForthReader::cursors()
-{
-  return std::make_pair(m_lines, m_cursor_prev + 1U);
-}
-
-// **************************************************************
-// Return the filename currently reading, else return "" if reading
-// a string.
-// **************************************************************
-std::string ForthReader::file()
-{
-  return m_filename;
 }

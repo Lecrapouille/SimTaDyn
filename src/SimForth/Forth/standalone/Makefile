@@ -31,7 +31,7 @@ VPATH=.:$(BUILD):..:../../../Common:../../../Common/SharedLibrary
 ###################################################
 # Set objects architecture specific
 OBJECTS_POCO       = Exception.o SharedLibrary_UNIX.o SharedLibrary.o
-OBJECTS_FORTH      = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
+OBJECTS_FORTH      = ForthStream.o ForthDico.o ForthPrimitives.o ForthInner.o
 OBJECTS_STANDALONE =
 OBJECTS            = $(OBJECTS_POCO) $(OBJECTS_FORTH) $(OBJECTS_STANDALONE) main.o
 TARGET             = SimForth

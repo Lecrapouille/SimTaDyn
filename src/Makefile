@@ -44,7 +44,7 @@ OBJECTS_OPENGL   = OpenGL.o Textures.o Fonts.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = SimTaDynCells.o SimTaDynGraphs.o
 OBJECTS_LOADER   = ShapeFile.o
-OBJECTS_FORTH    = ForthReader.o ForthDico.o ForthPrimitives.o ForthInner.o
+OBJECTS_FORTH    = ForthStream.o ForthDico.o ForthPrimitives.o ForthInner.o
 OBJECTS_GUI      = TextEditor.o ForthEditor.o MapEditor.o SimTaDynWindow.o
 OBJECTS_SIMTADYN = Renderer.o SimForth.o main.o
 

@@ -337,8 +337,8 @@ bool Forth::toNumber(std::string const& word, Cell32& number)
         // avoid abort the program.
         number = (negative ? LONG_MIN : LONG_MAX);
 
-        std::pair<size_t, size_t> p = READER.cursors();
-        std::cerr << YELLOW << "[WARNING] " << READER.file() << ":"
+        std::pair<size_t, size_t> p = STREAM.position();
+        std::cerr << YELLOW << "[WARNING] " << STREAM.name() << ":"
                   << p.first << ":" << p.second
                   << " Out of range number '" + word + "' will be truncated"
                   << DEFAULT << std::endl;
@@ -436,7 +436,7 @@ void Forth::interpreteWord(std::string const& word)
 std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 {
   if (m_trace) std::cout << "eating File " << filename << std::endl;
-  if (READER.setFileToParse(filename))
+  if (STREAM.loadFile(filename))
     {
       return parseStream();
     }
@@ -462,7 +462,7 @@ std::pair<bool, std::string> Forth::interpreteString(const char* const code_fort
 // **************************************************************
 std::pair<bool, std::string> Forth::interpreteString(std::string const& code_forth)
 {
-  READER.setStringToParse(code_forth);
+  STREAM.loadString(code_forth);
   return parseStream();
 }
 
@@ -477,9 +477,9 @@ std::pair<bool, std::string> Forth::parseStream()
     {
       // FIXME: le stream peut ne pas etre termine: attendre
       // FIXME: retourne ok si on lui donne une ligne vide dans un string
-      while (READER.hasMoreWords())
+      while (STREAM.hasMoreWords())
         {
-          interpreteWord(READER.nextWord());
+          interpreteWord(STREAM.nextWord());
         }
 
       // TODO: checker les piles
@@ -516,9 +516,9 @@ void Forth::ok(std::pair<bool, std::string> const& res)
     }
   else
     {
-      std::pair<size_t, size_t> p = READER.cursors();
+      std::pair<size_t, size_t> p = STREAM.position();
       std::cerr << RED << "[ERROR] Ambiguous condition from "
-                << READER.file() << ':'
+                << STREAM.name() << ':'
                 << p.first << ':'
                 << p.second << ' '
                 << res.second << DEFAULT << std::endl;
@@ -566,8 +566,8 @@ void Forth::includeFile(std::string const& filename)
       // Compilation failure.
       // Concat the message error from the previous stream
       // given
-      std::pair<size_t, size_t> p = READER.cursors();
-      std::string msg("\n        including " + READER.file() + ':'
+      std::pair<size_t, size_t> p = STREAM.position();
+      std::string msg("\n        including " + STREAM.name() + ':'
                       + std::to_string(p.first) + ':'
                       + std::to_string(p.second) + ' '
                       + res.second);

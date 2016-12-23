@@ -4,7 +4,7 @@
 //! \brief This file contains the root class for the Forth interpretor.
 //! containing other classes like dictionary and stream reader context.
 
-#  include "ForthReader.hpp"
+#  include "ForthStream.hpp"
 #  include "ForthDico.hpp"
 
 // **************************************************************
@@ -113,7 +113,7 @@ protected:
   Cell16  m_here_at_colon;   //! Save the last dictionary free slot before creating a new Forth word.
   std::string m_creating_word; //! The Forth word currently in creation.
   Cell32  m_saved_state; //! Save the interpreter state when enetring in a comment.
-  ForthReader m_streams_stack[MAX_OPENED_STREAMS]; //! A stack of streams when script file include other files
+  ForthStream m_streams_stack[MAX_OPENED_STREAMS]; //! A stack of streams when script file include other files
   uint32_t m_opened_streams; //! Number of streams opened.
   ForthDico& m_dico; //! Forth dictionary.
   bool  m_trace; //! Trace the execution of a word.

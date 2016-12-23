@@ -8,12 +8,12 @@
 // **************************************************************
 std::string Forth::nextWord()
 {
-  if (!READER.hasMoreWords())
+  if (!STREAM.hasMoreWords())
     {
-      ForthReaderTruncatedFile e(READER.file());
+      ForthReaderTruncatedFile e(STREAM.name());
       throw e;
     }
-  return READER.nextWord();
+  return STREAM.nextWord();
 }
 
 // **************************************************************
@@ -42,7 +42,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Line of commentary
     case FORTH_PRIMITIVE_COMMENTARY:
-      READER.skipLine();
+      STREAM.skipLine();
       break;
 
       // Begin the definition of a new word
