@@ -90,7 +90,7 @@ public:
   //! \brief Look for a token in the dictionary.
   std::pair<bool, int32_t> find(const Cell16 token, const bool even_smudge = false) const;
   //! \brief Get the complete name given a partial Forth name (used for auto-completion).
-  std::pair<bool, char*> completion(Cell16& last, std::string const& partial_word) const;
+  std::pair<bool, const char*> completion(Cell16& last, std::string const& partial_word) const;
   //! \brief Hide or unhide a Forth definition from the user.
   bool smudge(std::string const& word);
   //! \brief Save the whole content of the dictionary in a binary file.

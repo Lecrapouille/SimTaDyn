@@ -267,7 +267,7 @@ void Forth::execToken(const Cell16 tx)
 // **************************************************************
 void Forth::completion(std::string const& partial_name)
 {
-  std::pair<bool, char*> p;
+  std::pair<bool, const char*> p;
 
   p = m_dictionary.completion(m_last_completion, partial_name);
   if (p.first)

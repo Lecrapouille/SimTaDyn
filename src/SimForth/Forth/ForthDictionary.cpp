@@ -111,7 +111,7 @@ bool ForthDictionary::find(std::string const& name, Cell16& token, bool& immedia
 //! \param partial_name the begining of a forth word.
 //! \return the pair true + address of the first matching name, else return false + NULL.
 // **************************************************************
-std::pair<bool, char*> ForthDictionary::completion(Cell16& last, std::string const& partial_name) const
+std::pair<bool, const char*> ForthDictionary::completion(Cell16& last, std::string const& partial_name) const
 {
   Cell32 nfa;
   Cell32 length;

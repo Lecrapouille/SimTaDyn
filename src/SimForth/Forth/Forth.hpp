@@ -65,7 +65,7 @@ protected:
   //! \brief Parse an included file when parsing a Forth script.
   void includeFile(std::string const& filename);
   //! \brief Try converting a Forth word as a number.
-  bool toNumber(std::string const& word, Cell32& number);
+  bool toNumber(std::string const& word, Cell32& number) const;
   //! \brief Perform the action of a Forth primitive.
   void execPrimitive(const Cell16 idPrimitive);
   //! \brief Perform the action of a Forth token (byte code).

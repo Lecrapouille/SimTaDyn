@@ -32,6 +32,10 @@ std::string Forth::nextWord()
 //! \throw AbortForth if triggered by the Forth word ABORT.
 //! \throw ModifiedStackDepth if the data stack depth is modified
 //! during a definition.
+//! \throw OutOfBoundDictionary if attempting to store data outside
+//! the dictionary bounds.
+//! \throw NoSpaceDictionary if attempting to add a new entry in a
+//! full dictionary.
 // **************************************************************
 void Forth::execPrimitive(const Cell16 idPrimitive)
 {
