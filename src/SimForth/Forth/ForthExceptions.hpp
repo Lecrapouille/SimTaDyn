@@ -128,16 +128,17 @@ public:
     : ForthException(36)
   {
     m_stack_id = stack_id;
-    m_depth = depth;
-
     switch (m_stack_id)
       {
       case DATA_STACK:
         m_msg = "Data Stack";
+        break;
       case RETURN_STACK:
         m_msg = "Return Stack";
+        break;
       default:
         m_msg = "";
+        break;
       }
 
     if (depth < 0)
@@ -151,7 +152,6 @@ public:
   }
 
   uint32_t m_stack_id;
-  int32_t m_depth;
 };
 
 // **************************************************************

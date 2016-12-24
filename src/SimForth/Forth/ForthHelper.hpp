@@ -41,8 +41,13 @@ typedef uint8_t        Cell8;
 
 #  define TOKEN2ADDR(a) (CADDR(a + dictionary))
 
-// Memory for data stack, return stack
+//! Memory for data stack, return stack
 #  define STACK_SIZE     (1024U) // of Cells
+
+//! Rerserve additional bytes to detect stack underflows and prevent
+//! data corruption.
+#  define STACK_UNDERFLOW_MARGIN (8U) // bytes
+//ASSERT_COMPILE_TIME(STACK_UNDERFLOW_MARGIN < STACK_SIZE)
 
 // Memory for the dictionnary
 // 64 Ko is the maximal reachable address with a 16-bits word

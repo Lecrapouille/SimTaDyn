@@ -29,6 +29,9 @@ void Forth::abort()
     }
 
   m_state = INTERPRETER_STATE;
+  m_data_stack = m_data_stack_ + STACK_UNDERFLOW_MARGIN;
+  m_alternative_stack = m_alternative_stack_ + STACK_UNDERFLOW_MARGIN;
+  m_return_stack = m_return_stack_ + STACK_UNDERFLOW_MARGIN;
   m_dsp = m_data_stack;
   m_asp = m_alternative_stack;
   m_rsp = m_return_stack;
@@ -45,6 +48,43 @@ void Forth::abort(std::string const& msg)
   Forth::abort();
   AbortForth e(msg);
   throw e;
+}
+
+// **************************************************************
+//! \throw OutOfBoundStack is data stack underflows or overflows
+// **************************************************************
+void Forth::isDStackUnderOverFlow() const
+{
+  int32_t depth = DStackDepth();
+  if (depth < -1)
+    {
+      // Underflow
+      OutOfBoundStack e(DATA_STACK, depth); throw e;
+    }
+  else if (depth >= (int32_t) (STACK_SIZE - STACK_UNDERFLOW_MARGIN))
+    {
+      // Overflow
+      OutOfBoundStack e(DATA_STACK, depth); throw e;
+    }
+}
+
+// **************************************************************
+//! \throw OutOfBoundStack is data stack underflows or overflows
+// **************************************************************
+int32_t Forth::isRStackUnderOverFlow() const
+{
+  int32_t depth = RStackDepth();
+  if (depth < -1)
+    {
+      // Underflow
+      OutOfBoundStack e(RETURN_STACK, depth); throw e;
+    }
+  else if (depth >= (int32_t) (STACK_SIZE - STACK_UNDERFLOW_MARGIN))
+    {
+      // Overflow
+      OutOfBoundStack e(RETURN_STACK, depth); throw e;
+    }
+  return depth;
 }
 
 // **************************************************************
@@ -190,12 +230,8 @@ void Forth::execToken(const Cell16 tx)
         std::cout << std::endl;
       }
 
-      // Data stack overflow ?
-      depth = DStackDepth();
-      if (depth < -1)
-        {
-          OutOfBoundStack e(DATA_STACK, depth); throw e;
-        }
+      // Data stack under/overflow ?
+      isDStackUnderOverFlow();
 
       // Do not forget than non-primitive words have the
       // token EXIT to pop the return stack to get back
@@ -210,12 +246,8 @@ void Forth::execToken(const Cell16 tx)
           }
         }
 
-      // Return stack overflow ?
-      depth = RStackDepth();
-      if (depth < 0)
-        {
-          OutOfBoundStack e(RETURN_STACK, depth); throw e;
-        }
+      // Return stack under/overflow ?
+      depth = isRStackUnderOverFlow();
       if (m_trace) {
         std::cout << "RStack: "; displayRStack();
       }
@@ -378,6 +410,7 @@ void Forth::interpreteWord(std::string const& word)
         {
           if (m_trace) std::cout << "PUSH number " << word << std::endl;
           DPUSH(number);
+          isDStackUnderOverFlow();
         }
       else
         {

@@ -89,16 +89,26 @@ protected:
   {
     return /*(token >= 0) &&*/ (token < NUM_PRIMITIVES);
   }
+  //! \brief Check if the data stack is not under/overflowing.
+  void isDStackUnderOverFlow() const;
+  //! \brief Check if the return stack is not under/overflowing.
+  int32_t isRStackUnderOverFlow() const;
+
   //! \brief Change the base of displayed numbers.
   bool changeDisplayBase(const uint8_t base);
-
 protected:
   //! Data stack: store function parameters.
-  Cell32  m_data_stack[STACK_SIZE];
+  Cell32  m_data_stack_[STACK_SIZE];
+  //! Data stack with a marging of security to prevent against stack underflow.
+  Cell32  *m_data_stack;
   //! Alternative data stack (secondary stack).
-  Cell32  m_alternative_stack[STACK_SIZE];
+  Cell32  m_alternative_stack_[STACK_SIZE];
+  //! Alternative stack with a marging of security to prevent against stack underflow.
+  Cell32  *m_alternative_stack;
   //! Return stack: store word tokens (function addresses)
-  Cell32  m_return_stack[STACK_SIZE];
+  Cell32  m_return_stack_[STACK_SIZE];
+  //! Return stack with a marging of security to prevent against stack underflow.
+  Cell32  *m_return_stack;
   //! Top of Stack
   Cell32  m_tos, m_tos1, m_tos2, m_tos3, m_tos4;
   // Registers
