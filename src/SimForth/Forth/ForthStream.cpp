@@ -60,14 +60,15 @@ bool ForthStream::loadFile(std::string const& filename)
   close();
   init();
 
+  m_filename = filename;
   m_infile.open(filename, std::ios::in);
   if (m_infile.is_open())
     {
-      m_filename = filename;
       m_mode = READ_FILE;
+      refill();
+      return true;
     }
-
-  return m_infile.good() && refill();
+  return false;
 }
 
 // **************************************************************
@@ -111,9 +112,6 @@ void ForthStream::skipLine()
 // **************************************************************
 bool ForthStream::refill()
 {
-  if (NOTHING_TO_READ == m_mode)
-    return false;
-
   // End of line not reached: finish it first
   if (false == m_eol)
     return true;

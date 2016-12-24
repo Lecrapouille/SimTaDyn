@@ -43,12 +43,12 @@ public:
   {
     return m_filename;
   }
+  //! \brief release the opened stream.
+  void close();
 
 protected:
   //! \brief Reset the stream states except the stream is still open.
   void init();
-  //! \brief release the opened stream.
-  void close();
   //! \brief When the current line has been parse refill with the next one.
   bool refill();
   //! \brief Read the next word delimited by space characters.

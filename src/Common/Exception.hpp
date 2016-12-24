@@ -87,7 +87,7 @@ class Exception: public std::exception
   void extendedMessage(const std::string& arg);
   /// Sets the extended message for the exception.
 
- private:
+ protected:
   std::string m_msg;
   Exception*  m_pNested;
   int         m_code;
@@ -139,7 +139,7 @@ inline int Exception::code() const
     CLS& operator = (const CLS& exc);                                   \
     const char* name() const throw();                                   \
     const char* className() const throw();                              \
-    SimTaDyn::Exception* clone() const;                                     \
+    SimTaDyn::Exception* clone() const;                                 \
     void rethrow() const;                                               \
   };
 
@@ -181,7 +181,7 @@ inline int Exception::code() const
   {                                                                     \
     return typeid(*this).name();                                        \
   }                                                                     \
-  SimTaDyn::Exception* CLS::clone() const                                   \
+  SimTaDyn::Exception* CLS::clone() const                               \
   {                                                                     \
     return new CLS(*this);                                              \
   }                                                                     \

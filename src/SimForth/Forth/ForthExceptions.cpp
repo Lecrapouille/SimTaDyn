@@ -1,3 +1,4 @@
-#include "ForthExeceptions.hpp"
+#include "ForthExceptions.hpp"
 
-POCO_IMPLEMENT_EXCEPTION(ForthException, SimTaDyn::Exception, "SimForth");
+//! This macro (from the library POCO) will generate code for members.
+POCO_IMPLEMENT_EXCEPTION(ForthException, SimTaDyn::Exception, "Forth Exception");

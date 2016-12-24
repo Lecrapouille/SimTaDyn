@@ -1,51 +1,33 @@
 #ifndef FORTH_EXCEPTIONS_HPP_
 #  define FORTH_EXCEPTIONS_HPP_
 
+//! \brief This file defined all exceptions used for the Forth parser.
+//! Exceptions are derived from the project common ancestor SimTaDyn::Exception
+//! which is also derived from the POCO library execption.
+
+#  include "Exception.hpp"
 #  include "ForthHelper.hpp"
 
-//POCO_DECLARE_EXCEPTION(ForthException, SimTaDyn::Exception);
+//! This macro (from the library POCO) will declare a class
+//! ForthException derived from SimTaDyn::Exception.
+POCO_DECLARE_EXCEPTION(ForthException, SimTaDyn::Exception);
 
 // **************************************************************
 //
 // **************************************************************
-class ForthException: public std::exception
+class UnfinishedStream: public ForthException
 {
 public:
-  ForthException() throw ()
-  {
-    m_error_msg = "Ambiguous condition";
-  }
-  ForthException(std::string const& word) throw ()
-  {
-    m_error_msg = word;
-  }
-  ~ForthException() throw ()
-  {
-  }
-
-  virtual const char* what() const throw ()
-  {
-    return m_error_msg.c_str();
-  }
-
-  std::string m_error_msg;
-};
-
-// **************************************************************
-//
-// **************************************************************
-class ForthTruncatedStream: public ForthException
-{
-public:
-  ForthTruncatedStream(const Cell32 Forthstate)
+  UnfinishedStream(const Cell32 Forthstate)
+    : ForthException(42)
   {
     switch (Forthstate)
       {
       case COMPILATION_STATE:
-        m_error_msg = "Word definition not terminated when reaching the end of the stream";
+        m_msg = "Word definition not terminated when reaching the end of the stream";
         break;
       case COMMENT_STATE:
-        m_error_msg = "Commentary not terminated when reaching the end of the stream";
+        m_msg = "Commentary not terminated when reaching the end of the stream";
         break;
       default:
         // This case is not possible
@@ -58,93 +40,130 @@ public:
 // **************************************************************
 //
 // **************************************************************
-class ForthUnbalancedDef: public ForthException
+class TooManyOpenedStreams: public ForthException
 {
 public:
-  ForthUnbalancedDef(std::string const& word)
+  TooManyOpenedStreams()
+    : ForthException(41)
   {
-    m_error_msg = "Stack depth changed during the definition of the word '" + word + "' probably unbalanced condition";
+    m_msg = "too many opened streams";
+  }
+};
+
+
+// **************************************************************
+//
+// **************************************************************
+class ModifiedStackDepth: public ForthException
+{
+public:
+  ModifiedStackDepth(std::string const& word)
+    : ForthException(41)
+  {
+    m_msg = "Stack depth changed during the definition of the word '" + word + "' probably unbalanced condition";
   }
 };
 
 // **************************************************************
 //
 // **************************************************************
-class ForthTooLongDef: public ForthException
+class ForthDefinition: public ForthException
 {
 public:
-  ForthTooLongDef(std::string const& word)
+  ForthDefinition(std::string const& word)
+    : ForthException(40)
   {
-    m_error_msg = "Exception from SimTaDynForth: word '" + word + "' contains more than 2^16 words.";
+    m_msg = "Exception from SimTaDynForth: word '" + word + "' contains more than 2^16 words.";
   }
 };
 
 // **************************************************************
 //
 // **************************************************************
-class ForthMalformedWord: public ForthException
+class MalformedForthWord: public ForthException
 {
 public:
-  ForthMalformedWord(std::string const& word)
+  MalformedForthWord(std::string const& word)
+    : ForthException(39)
   {
-    m_error_msg = "Exception from SimTaDynForth: word '" + word + "' is mal formed. It shall contain 1 ... 31 characters.";
-  }
-};
-
-class ForthDicoOOB: public ForthException
-{
-public:
-  ForthDicoOOB(const uint32_t addr) throw ()
-  {
-    m_error_msg = "Exception from SimTaDynForth: " + std::to_string(addr) + "is an invalid dictionary address ";
+    m_msg = "Exception from SimTaDynForth: word '" + word + "' is mal formed. It shall contain 1 ... 31 characters.";
   }
 };
 
 // **************************************************************
 //
 // **************************************************************
-class ForthDicoNoSpace: public ForthException
+class OutOfBoundDictionary: public ForthException
 {
 public:
-  ForthDicoNoSpace()
+  OutOfBoundDictionary(const uint32_t addr)
+    : ForthException(38)
   {
-    m_error_msg = "Exception from SimTaDynForth: the dictionary has no more space";
+    m_msg = "Trying to access out of the dictionary bounds ("
+      + std::to_string(addr) + ')';
   }
 };
 
 // **************************************************************
 //
 // **************************************************************
-class ForthStackOV: public ForthException
+class NoSpaceDictionary: public ForthException
 {
 public:
-  ForthStackOV(uint32_t stack_id) // FIXME SimForth::StackId
+  NoSpaceDictionary()
+    : ForthException(37)
+  {
+    m_msg = "The Forth dictionary is full";
+  }
+};
+
+// **************************************************************
+//
+// **************************************************************
+class OutOfBoundStack: public ForthException
+{
+public:
+  // FIXME SimForth::StackId au lieu de uint32_t
+  OutOfBoundStack(const uint32_t stack_id, const int32_t depth)
+    : ForthException(36)
   {
     m_stack_id = stack_id;
+    m_depth = depth;
 
     switch (m_stack_id)
       {
       case DATA_STACK:
-        m_error_msg = "Exception from SimTaDynForth: Data Stack overflow";
+        m_msg = "Data Stack";
       case RETURN_STACK:
-        m_error_msg = "Exception from SimTaDynForth: Return Stack overflow";
+        m_msg = "Return Stack";
       default:
-        m_error_msg = "Exception from SimTaDynForth: stack overflow";
+        m_msg = "";
+      }
+
+    if (depth < 0)
+      {
+        m_msg += " underflow";
+      }
+    else
+      {
+        m_msg += " overflow";
       }
   }
 
   uint32_t m_stack_id;
+  int32_t m_depth;
 };
 
 // **************************************************************
 //
 // **************************************************************
-class ForthUnknownPrimitive: public ForthException
+class UnknownForthPrimitive: public ForthException
 {
 public:
-  ForthUnknownPrimitive(const Cell16 badToken, std::string const& funcName)
+  UnknownForthPrimitive(const Cell16 badToken, std::string const& funcName)
+    : ForthException(35)
   {
-    m_error_msg = "Exception from SimTaDynForth: try to execute an unknown primitive "
+    m_msg = "Exception from SimTaDynForth: try to execute an unknown primitive "
       + std::to_string((uint32_t) badToken) + " in " + funcName;
   }
 };
@@ -152,24 +171,26 @@ public:
 // **************************************************************
 //
 // **************************************************************
-class ForthUnknownWord: public ForthException
+class UnknownForthWord: public ForthException
 {
 public:
-  ForthUnknownWord(std::string const& word)
+  UnknownForthWord(std::string const& word)
+    : ForthException(34)
   {
-    m_error_msg = "Exception from SimTaDynForth: unrecognized word '" + word + "'";
+    m_msg = "Unrecognized word '" + word + "'";
   }
 };
 
 // **************************************************************
 //
 // **************************************************************
-class ForthReaderTruncatedFile: public ForthException
+class AbortForth: public ForthException
 {
 public:
-  ForthReaderTruncatedFile(std::string const& filename)
+  AbortForth(std::string const& msg)
+    : ForthException(34)
   {
-    m_error_msg = "Exception from SimTaDynForth: unfinished '" + filename + "'";
+    m_msg = "Aborting '" + msg + "'";
   }
 };
 

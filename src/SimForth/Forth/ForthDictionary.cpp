@@ -1,10 +1,10 @@
-#include "ForthDico.hpp"
+#include "ForthDictionary.hpp"
 
 // **************************************************************
 //! Initialize dictionary states to obtain an empty dictionary
 //! (with no Forth words inside).
 // **************************************************************
-ForthDico::ForthDico()
+ForthDictionary::ForthDictionary()
 {
   m_here = 0U;
   m_last = 0U;
@@ -12,29 +12,29 @@ ForthDico::ForthDico()
 
 // **************************************************************
 //! The new entry is stored at the end of the dictionary (the
-//! location given ForthDico::m_here which is updated as well
-//! ForthDico::m_last).
+//! location given ForthDictionary::m_here which is updated as well
+//! ForthDictionary::m_last).
 //! \param token either the CFA of a none primitive word or the value
 //! of enum ForthPrimitives.
 //! \param name of the Forth word.
 //! \param immediate a boolean indicating if the word shall be interpreted when compiled.
-//! \throw ForthMalformedWord is the name of the word length is not <= 31
+//! \throw MalformedForthWord is the name of the word length is not <= 31
 //! characters.
-//! \throw ForthDicoNoSpace if the dictionary is full.
+//! \throw NoSpaceDictionary if the dictionary is full.
 // **************************************************************
-void ForthDico::add(const Cell16 token, std::string const& name, const bool immediate)
+void ForthDictionary::add(const Cell16 token, std::string const& name, const bool immediate)
 {
   // Forth words are max 31 bytes long
   Cell32 length = name.size();
   if ((length > 31U) || (0U == length))
     {
-      ForthMalformedWord e(name); throw e;
+      MalformedForthWord e(name); throw e;
     }
 
   // No more space in the m_dictionary ?
   if (length + 8U > DICTIONARY_SIZE) // 8U = padded(1: flags, 2: NFA, 2: token, 2: EXIT)
     {
-      ForthDicoNoSpace e; throw e;
+      NoSpaceDictionary e; throw e;
     }
 
   Cell32 nfa = m_here - m_last;
@@ -63,7 +63,7 @@ void ForthDico::add(const Cell16 token, std::string const& name, const bool imme
 //! \param immediate (out) returns if the found word is immediate.
 //! \return true if the word was found in the dictionary, else return false.
 // **************************************************************
-bool ForthDico::find(std::string const& name, Cell16& token, bool& immediate) const
+bool ForthDictionary::find(std::string const& name, Cell16& token, bool& immediate) const
 {
   Cell32 nfa;
   Cell32 length;
@@ -111,7 +111,7 @@ bool ForthDico::find(std::string const& name, Cell16& token, bool& immediate) co
 //! \param partial_name the begining of a forth word.
 //! \return the pair true + address of the first matching name, else return false + NULL.
 // **************************************************************
-std::pair<bool, char*> ForthDico::completion(Cell16& last, std::string const& partial_name) const
+std::pair<bool, char*> ForthDictionary::completion(Cell16& last, std::string const& partial_name) const
 {
   Cell32 nfa;
   Cell32 length;
@@ -158,7 +158,7 @@ std::pair<bool, char*> ForthDico::completion(Cell16& last, std::string const& pa
 //! \param name (in) the name of the Forth word.
 //! \return true if the word exists (even hidden), else false.
 // **************************************************************
-bool ForthDico::smudge(std::string const& name)
+bool ForthDictionary::smudge(std::string const& name)
 {
   Cell32 nfa;
   Cell32 length;
@@ -196,14 +196,14 @@ bool ForthDico::smudge(std::string const& name)
 
 // **************************************************************
 //! \param name (in) the name of the Forth word.
-//! \return ForthDico::find.
+//! \return ForthDictionary::find.
 // **************************************************************
-bool ForthDico::exists(std::string const& name) const
+bool ForthDictionary::exists(std::string const& name) const
 {
   Cell16 token;
   bool immediate;
 
-  return ForthDico::find(name, token, immediate);
+  return ForthDictionary::find(name, token, immediate);
 }
 
 // **************************************************************
@@ -213,7 +213,7 @@ bool ForthDico::exists(std::string const& name) const
 //! \return the pair a boolean if the token was found and the address
 //! of the name.
 // **************************************************************
-std::pair<bool, int32_t> ForthDico::find(const Cell16 token, const bool even_smudge) const
+std::pair<bool, int32_t> ForthDictionary::find(const Cell16 token, const bool even_smudge) const
 {
   Cell32 nfa;
   Cell32 length;
@@ -254,7 +254,7 @@ std::pair<bool, int32_t> ForthDico::find(const Cell16 token, const bool even_smu
 //! \param filename the file name where the dictionary will be stored.
 //! \return a boolean indicating if the process succeeded.
 // **************************************************************
-bool ForthDico::dump(std::string const& filename) // FIXME const
+bool ForthDictionary::dump(std::string const& filename) // FIXME const
 {
   std::ofstream out(filename, std::ios::out | std::ios::binary | std::ios::trunc);
 
@@ -275,7 +275,7 @@ bool ForthDico::dump(std::string const& filename) // FIXME const
     {
       std::cerr << "Cannot save the dictionary in file '"
                 << filename
-                << "'. Reason is '" << strerror(errno) << "'"
+                << "'. Reason is '" << std::strerror(errno) << "'"
                 << std::endl;
       return false;
     }
@@ -290,7 +290,7 @@ bool ForthDico::dump(std::string const& filename) // FIXME const
 //! new dictionary is appened to the old one.
 //! \return a boolean indicating if the process succeeded.
 // **************************************************************
-bool ForthDico::load(std::string const& filename, const bool replace)
+bool ForthDictionary::load(std::string const& filename, const bool replace)
 {
   std::ifstream in(filename, std::ios::in | std::ios::binary);
 
@@ -323,7 +323,7 @@ bool ForthDico::load(std::string const& filename, const bool replace)
             {
               write16at(m_here + word_length + 1U, m_here - m_last);
             }
-          catch (const ForthDicoOOB& e)
+          catch (const OutOfBoundDictionary& e)
             {
               std::cerr << "Cannot load the dictionary from the file '"
                         << filename
@@ -354,7 +354,7 @@ bool ForthDico::load(std::string const& filename, const bool replace)
 // **************************************************************
 //! \param token
 // **************************************************************
-void ForthDico::displayToken(const Cell16 token) const
+void ForthDictionary::displayToken(const Cell16 token) const
 {
   std::pair<bool, int32_t> res = find(token);
   if (res.first)
@@ -371,7 +371,7 @@ void ForthDico::displayToken(const Cell16 token) const
 // **************************************************************
 //
 // **************************************************************
-void ForthDico::display() const
+void ForthDictionary::display() const
 {
   int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping, skip;
   bool smudge, immediate;
@@ -621,15 +621,15 @@ void ForthDico::display() const
 //! if the given range of address overflows/underflows the dictionary.
 //! \param addr the dictionary to check
 //! \param nb_bytes positive or negative offset to adr.
-//! \throw ForthDicoOOB if overflows/underflows is detected.
+//! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // **************************************************************
-void ForthDico::checkBounds(const uint32_t addr, const int32_t nb_bytes) const
+void ForthDictionary::checkBounds(const uint32_t addr, const int32_t nb_bytes) const
 {
   // FIXME: proteger en ecriture les anciens mots definis
   // FIXME: autoriser en lecture toutes les addr du dico
   if (/*(addr < m_here_at_colon) &&*/ (addr + nb_bytes >= DICTIONARY_SIZE))
     {
-      ForthDicoOOB e(addr); throw e;
+      OutOfBoundDictionary e(addr); throw e;
     }
 }
 
@@ -637,11 +637,11 @@ void ForthDico::checkBounds(const uint32_t addr, const int32_t nb_bytes) const
 //! \param data is a 32-bits data to store as Cell8 at the given
 //! address.
 //! \param addr the desired dictionary address.
-//! \throw ForthDicoOOB if overflows/underflows is detected.
+//! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // FIXME: au lieu de addr >= &m_dictionary[NUM_PRIMITIVES]
 // faire addr >= &m_dictionary[m_last + m_last_def_size]
 // **************************************************************
-void ForthDico::write8at(const uint32_t addr, const Cell32 data)
+void ForthDictionary::write8at(const uint32_t addr, const Cell32 data)
 {
   checkBounds(addr, 0U);
   m_dictionary[addr] = (data >> 0) & 0xFF;
@@ -651,9 +651,9 @@ void ForthDico::write8at(const uint32_t addr, const Cell32 data)
 //! \param data is a 32-bits data to store as Cell16 at the given
 //! address.
 //! \param addr the desired dictionary address.
-//! \throw ForthDicoOOB if overflows/underflows is detected.
+//! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // **************************************************************
-void ForthDico::write16at(const uint32_t addr, const Cell32 data)
+void ForthDictionary::write16at(const uint32_t addr, const Cell32 data)
 {
   checkBounds(addr, 1U);
   m_dictionary[addr + 0U] = (data >> 8) & 0xFF;
@@ -663,9 +663,9 @@ void ForthDico::write16at(const uint32_t addr, const Cell32 data)
 // **************************************************************
 //! \param data is a 32-bits data to store at the given address.
 //! \param addr the desired dictionary address.
-//! \throw ForthDicoOOB if overflows/underflows is detected.
+//! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // **************************************************************
-void ForthDico::write32at(const uint32_t addr, const Cell32 data)
+void ForthDictionary::write32at(const uint32_t addr, const Cell32 data)
 {
   checkBounds(addr, 3U);
   m_dictionary[addr + 0U] = (data >> 24) & 0xFF;
@@ -677,9 +677,9 @@ void ForthDico::write32at(const uint32_t addr, const Cell32 data)
 // **************************************************************
 //! \param addr the desired dictionary address.
 //! \return the 8-bits data casted as Cell32 read at the given address.
-//! \throw ForthDicoOOB if overflows/underflows is detected.
+//! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // **************************************************************
-Cell32 ForthDico::read8at(const uint32_t addr) const
+Cell32 ForthDictionary::read8at(const uint32_t addr) const
 {
   checkBounds(addr, 0U);
   return m_dictionary[addr];
@@ -688,9 +688,9 @@ Cell32 ForthDico::read8at(const uint32_t addr) const
 // **************************************************************
 //! \param addr the desired dictionary address.
 //! \return the 16-bits data casted as Cell32 read at the given address.
-//! \throw ForthDicoOOB if overflows/underflows is detected.
+//! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // **************************************************************
-Cell32 ForthDico::read16at(const uint32_t addr) const
+Cell32 ForthDictionary::read16at(const uint32_t addr) const
 {
   checkBounds(addr, 1U);
   Cell32 res =
@@ -703,9 +703,9 @@ Cell32 ForthDico::read16at(const uint32_t addr) const
 // **************************************************************
 //! \param addr the desired dictionary address.
 //! \return the 32-bits data read at the given address.
-//! \throw ForthDicoOOB if overflows/underflows is detected.
+//! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // **************************************************************
-Cell32 ForthDico::read32at(const uint32_t addr) const
+Cell32 ForthDictionary::read32at(const uint32_t addr) const
 {
   // FIXME Cell8 *const addr
   checkBounds(addr, 3U);
@@ -720,14 +720,14 @@ Cell32 ForthDico::read32at(const uint32_t addr) const
 
 // **************************************************************
 //! Reserve or release a consecutive number of bytes starting at
-//! ForthDico::m_here. Then ForthDico::m_here is updated. Values
+//! ForthDictionary::m_here. Then ForthDictionary::m_here is updated. Values
 //! inside the reserved memory are not cleared.
 //! \param nb_bytes the number of consecutive bytes needed: if > 0
 //! memory is reserved, else if < 0 release the memory. if = 0 nothing
 //! is made.
-//! \throw ForthDicoOOB when attempting to go outside the dictionary bounds.
+//! \throw OutOfBoundDictionary when attempting to go outside the dictionary bounds.
 // **************************************************************
-void ForthDico::allot(const int32_t nb_bytes)
+void ForthDictionary::allot(const int32_t nb_bytes)
 {
   if (nb_bytes > 0)
     {

@@ -1,23 +1,37 @@
-#include "ForthInner.hpp"
+#include "Forth.hpp"
 
 #  define BINARY_OP(op) { m_tos = ((int32_t) DDROP()) op ((int32_t) m_tos); } // Pop a value, apply it the operation op with the content of the register tos (Top Of Stack)
 #  define LOGICAL_OP(op) { m_tos = -1 * (((int32_t) DDROP()) op ((int32_t) m_tos)); }
 
 // **************************************************************
-//
+//! Called by Forth words needed to extract the next word. The
+//! stream shall contains at least one word else an exception is
+//! triggered.
+//! \return the next Forth word in the stream.
+//! \throw UnfinishedStream
 // **************************************************************
 std::string Forth::nextWord()
 {
   if (!STREAM.hasMoreWords())
     {
-      ForthReaderTruncatedFile e(STREAM.name());
+      UnfinishedStream e(m_state);
       throw e;
     }
   return STREAM.nextWord();
 }
 
 // **************************************************************
-//
+//! \param idPrimitive the token of a primitive else an exception
+//! is triggered.
+//! UnknownForthPrimitive if idPrimitive is not the token of a
+//! primitive (idPrimitive >= NUM_PRIMITIVES).
+//! \throw UnfinishedStream called by Forth::nextWord() if the
+//! stream does not contain a Forth word.
+//! \throw UnknownForthWord if the extracted word by Forth::nextWord()
+//! is not present in the dictionary.
+//! \throw AbortForth if triggered by the Forth word ABORT.
+//! \throw ModifiedStackDepth if the data stack depth is modified
+//! during a definition.
 // **************************************************************
 void Forth::execPrimitive(const Cell16 idPrimitive)
 {
@@ -53,13 +67,14 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // End the definition of a new word
     case FORTH_PRIMITIVE_SEMICOLON:
-      m_dico.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size word definition
+      m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size word definition
       m_state = INTERPRETER_STATE;
       if (m_depth_at_colon != DStackDepth())
         {
-          m_dico.m_last = m_last_at_colon;
-          m_dico.m_here = m_here_at_colon;
-          ForthUnbalancedDef e(m_creating_word); throw e;
+          m_dictionary.m_last = m_last_at_colon;
+          m_dictionary.m_here = m_here_at_colon;
+          ModifiedStackDepth e(m_creating_word);
+          throw e;
         }
       break;
 
@@ -74,8 +89,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // https://fr.wikiversity.org/wiki/Forth/Conserver_des_donn%C3%A9es
     case FORTH_PRIMITIVE_CREATE:
       create(nextWord());
-      m_dico.appendCell16(FORTH_PRIMITIVE_PCREATE);
-      m_dico.appendCell16(FORTH_PRIMITIVE_EXIT);
+      m_dictionary.appendCell16(FORTH_PRIMITIVE_PCREATE);
+      m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT);
       break;
 
     case FORTH_PRIMITIVE_BUILDS:
@@ -87,7 +102,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Set immediate the last word
     case FORTH_PRIMITIVE_IMMEDIATE:
-      m_dico.m_dictionary[m_dico.m_last] |= FLAG_IMMEDIATE;
+      m_dictionary.m_dictionary[m_dictionary.m_last] |= FLAG_IMMEDIATE;
       break;
 
     case FORTH_PRIMITIVE_INCLUDE:
@@ -115,7 +130,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_SMUDGE:
       {
         std::string word = nextWord();
-        if (false == m_dico.smudge(word))
+        if (false == m_dictionary.smudge(word))
           {
             std::cout << YELLOW << "[WARNING] Unknown word '"
                       << word << "'. Word SMUDGE Ignored !"
@@ -129,7 +144,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
         std::string word = nextWord();
         Cell16 token;
         bool immediate;
-        if (false == m_dico.find(word, token, immediate))
+        if (false == m_dictionary.find(word, token, immediate))
           {
             token = 0;
             std::cout << YELLOW << "[WARNING] Unknown word '"
@@ -143,7 +158,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
      case FORTH_PRIMITIVE_COMPILE:
        m_ip += 2;
-       m_dico.appendCell16(m_dico.read16at(m_ip));
+       m_dictionary.appendCell16(m_dictionary.read16at(m_ip));
        break;
 
        // Append to the dictionary the next word
@@ -154,13 +169,13 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
          std::string word = nextWord();
 
          //m_ip += 2;
-         if (m_dico.find(word, token, immediate))
+         if (m_dictionary.find(word, token, immediate))
            {
-             m_dico.appendCell16(token);
+             m_dictionary.appendCell16(token);
            }
          else
            {
-             ForthUnknownWord e(word); throw e;
+             UnknownForthWord e(word); throw e;
            }
        }
        break;
@@ -172,21 +187,21 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
         bool immediate;
         std::string word = nextWord();
 
-        if (m_dico.find(word, token, immediate))
+        if (m_dictionary.find(word, token, immediate))
           {
             if (immediate)
               {
-                m_dico.appendCell16(token);
+                m_dictionary.appendCell16(token);
               }
             else
               {
                 m_ip += 2;
-                m_dico.appendCell16(m_dico.read16at(m_ip));
+                m_dictionary.appendCell16(m_dictionary.read16at(m_ip));
               }
           }
         else
           {
-            ForthUnknownWord e(word); throw e;
+            UnknownForthWord e(word); throw e;
           }
       }
       break;
@@ -209,60 +224,60 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_HERE:
       DPUSH(m_tos);
-      m_tos = m_dico.here();
+      m_tos = m_dictionary.here();
       break;
 
     case FORTH_PRIMITIVE_LAST:
       DPUSH(m_tos);
-      m_tos = m_dico.last();
+      m_tos = m_dictionary.last();
       break;
 
     case FORTH_PRIMITIVE_ALLOT:
-      m_dico.allot((int32_t) m_tos);
+      m_dictionary.allot((int32_t) m_tos);
       DPOP(m_tos);
       break;
 
       // Reserve one cell of data space and store x in the cell.
     case FORTH_PRIMITIVE_COMMA32:
-      m_dico.appendCell32(m_tos);
+      m_dictionary.appendCell32(m_tos);
       DPOP(m_tos);
       break;
 
       // Reserve one cell of data space and store x in the cell.
     case FORTH_PRIMITIVE_COMMA16:
-      m_dico.appendCell16(m_tos);
+      m_dictionary.appendCell16(m_tos);
       DPOP(m_tos);
       break;
 
       // Reserve one cell of data space and store x in the cell.
     case FORTH_PRIMITIVE_COMMA8:
-      m_dico.appendCell8(m_tos);
+      m_dictionary.appendCell8(m_tos);
       DPOP(m_tos);
       break;
 
       // ( a-addr -- x )
       // x is the value stored at a-addr.
     case FORTH_PRIMITIVE_FETCH:
-      m_tos = m_dico.read32at(m_tos);
+      m_tos = m_dictionary.read32at(m_tos);
       break;
 
       // Store x at a-addr.
       // ( x a-addr -- )
     case FORTH_PRIMITIVE_STORE32:
       DPOP(m_tos1);
-      m_dico.write32at(m_tos, m_tos1);
+      m_dictionary.write32at(m_tos, m_tos1);
       DPOP(m_tos);
       break;
 
     case FORTH_PRIMITIVE_STORE16:
       DPOP(m_tos1);
-      m_dico.write16at(m_tos, m_tos1);
+      m_dictionary.write16at(m_tos, m_tos1);
       DPOP(m_tos);
       break;
 
     case FORTH_PRIMITIVE_STORE8:
       DPOP(m_tos1);
-      m_dico.write8at(m_tos, m_tos1);
+      m_dictionary.write8at(m_tos, m_tos1);
       DPOP(m_tos);
       break;
 
@@ -270,7 +285,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_CMOVE:
       DPOP(m_tos2); // dst
       DPOP(m_tos1); // src
-      m_dico.move(m_tos2, m_tos1, m_tos);
+      m_dictionary.move(m_tos2, m_tos1, m_tos);
       DPOP(m_tos);
       break;
 
@@ -293,7 +308,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // Change IP
     case FORTH_PRIMITIVE_BRANCH:
-      m_ip += m_dico.read16at(m_ip + 2U);
+      m_ip += m_dictionary.read16at(m_ip + 2U);
       // Do not forget that m_ip will be += 2 next iteration
       break;
 
@@ -301,7 +316,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_0BRANCH:
       if (0 == m_tos)
         {
-          m_ip += m_dico.read16at(m_ip + 2U);
+          m_ip += m_dictionary.read16at(m_ip + 2U);
         }
       else
         {
@@ -361,13 +376,13 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_LITERAL_16:
       DPUSH(m_tos);
       m_ip += 2U; // Skip primitive LITTERAL
-      m_tos = m_dico.read16at(m_ip);
+      m_tos = m_dictionary.read16at(m_ip);
       break;
 
     case FORTH_PRIMITIVE_LITERAL_32:
       DPUSH(m_tos);
       m_ip += 2U; // Skip primitive LITTERAL
-      m_tos = m_dico.read32at(m_ip);
+      m_tos = m_dictionary.read32at(m_ip);
       m_ip += 2U; // Skip the number - 2 because of next ip
       break;
 
@@ -612,7 +627,151 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       DPOP(m_tos);
       break;
     default:
-      ForthUnknownPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;
+      UnknownForthPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;
       break;
     }
+}
+
+// **************************************************************
+//! This method should be called after the contructor Forth()
+//! and has been separated from the constructor to load the
+//! dictionary at the desired moment.
+// **************************************************************
+void Forth::boot()
+{
+  // TODO: Les ranger par ordre lexico ?
+  // FIXME: init m_last et m_here pour etre sur que le client ne
+  // charge pas plusieurs fois les memes primitives
+
+  // Dummy word and comments
+  m_dictionary.add(FORTH_PRIMITIVE_NOP, "NOOP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LPARENTHESIS, "(", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_RPARENTHESIS, ")", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMENTARY, "\\", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_INCLUDE, "INCLUDE", 0);
+
+  // Words for definitions
+  m_dictionary.add(FORTH_PRIMITIVE_COLON, ":", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_PCREATE, "(CREATE)", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CREATE, "CREATE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_BUILDS, "<BUILDS", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DOES, "DOES>", FLAG_IMMEDIATE);
+
+  m_dictionary.add(FORTH_PRIMITIVE_IMMEDIATE, "IMMEDIATE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_SMUDGE, "SMUDGE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STATE, "STATE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TRACE_ON, "TRACE.ON", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TRACE_OFF, "TRACE.OFF", 0);
+
+  // Words
+  m_dictionary.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_ABORT, "ABORT", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EXECUTE, "EXECUTE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMPILE, "COMPILE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ICOMPILE, "[COMPILE]", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_POSTPONE, "POSTPONE", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_LBRACKET, "[", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_RBRACKET, "]", 0);
+
+  // Dictionnary manipulation
+  m_dictionary.add(FORTH_PRIMITIVE_LAST, "LAST", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_HERE, "HERE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ALLOT, "ALLOT", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMA32, ",", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMA16, "S,", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMA8, "C,", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_FETCH, "@", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STORE32, "!", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STORE16, "S!", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STORE8, "C!", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CMOVE, "CMOVE", 0);
+
+  // Words changing IP
+  m_dictionary.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_BRANCH, "BRANCH", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_0BRANCH, "0BRANCH", 0);
+
+  // Return Stack
+  m_dictionary.add(FORTH_PRIMITIVE_TO_RSTACK, ">R", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_FROM_RSTACK, "R>", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2TO_RSTACK, "2>R", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2FROM_RSTACK, "2R>", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_I, "I", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_J, "J", 0);
+
+  // cell sizeof
+  m_dictionary.add(FORTH_PRIMITIVE_CELL, "CELL", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CELLS, "CELLS", 0);
+
+  // Literals
+  m_dictionary.add(FORTH_PRIMITIVE_LITERAL_16, "LITERAL16", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LITERAL_32, "LITERAL32", 0);
+
+  // Arithmetic
+  m_dictionary.add(FORTH_PRIMITIVE_ABS, "ABS", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NEGATE, "NEGATE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_MIN, "MIN", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_MAX, "MAX", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_PLUS, "+", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_1PLUS, "1+", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2PLUS, "2+", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_MINUS, "-", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_1MINUS, "1-", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2MINUS, "2-", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TIMES, "*", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DIV, "/", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_RSHIFT, ">>", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LSHIFT, "<<", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_RSHIFT, "RSHIFT", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LSHIFT, "LSHIFT", 0);
+
+  // Base
+  m_dictionary.add(FORTH_PRIMITIVE_BINARY, "BIN", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_OCTAL, "OCTAL", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_HEXADECIMAL, "HEX", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DECIMAL, "DECIMAL", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_BASE, "BASE", 0);
+
+  // Logic
+  m_dictionary.add(FORTH_PRIMITIVE_FALSE, "FALSE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TRUE, "TRUE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_GREATER, ">", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_GREATER_EQUAL, ">=", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LOWER, "<", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LOWER_EQUAL, "<=", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EQUAL, "==", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EQUAL, "=", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_0EQUAL, "0=", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NOT_EQUAL, "<>", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NOT_EQUAL, "!=", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_AND, "AND", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_OR, "OR", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_XOR, "XOR", 0);
+
+  // Data Stack
+  m_dictionary.add(FORTH_PRIMITIVE_DEPTH, "DEPTH", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ROLL, "ROLL", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NIP, "NIP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_PICK, "PICK", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DUP, "DUP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_QDUP, "?DUP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DROP, "DROP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_SWAP, "SWAP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_OVER, "OVER", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ROT, "ROT", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TUCK, "TUCK", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2DUP, "2DUP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2DROP, "2DROP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2SWAP, "2SWAP", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2OVER, "2OVER", 0);
+
+  // Printf
+  m_dictionary.add(FORTH_PRIMITIVE_DISP, ".", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_UDISP, "U.", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, "CR", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, ".S", 0);
+
+  // Hide some words to user
+  m_dictionary.smudge("(CREATE)");
 }

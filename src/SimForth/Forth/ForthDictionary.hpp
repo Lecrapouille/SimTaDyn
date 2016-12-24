@@ -1,12 +1,12 @@
-#ifndef FORTH_DICO_HPP_
-#  define FORTH_DICO_HPP_
+#ifndef FORTH_DICTIONARY_HPP_
+#  define FORTH_DICTIONARY_HPP_
 
 //! \brief This file contains the class managing the Forth dictionary.
 
 #  include "ForthExceptions.hpp"
 #  include "ForthPrimitives.hpp"
 
-//! \class ForthDico
+//! \class ForthDictionary
 //!
 //! In Forth, a dictionary is a consecutive set of Forth words. The
 //! term word is equivalent to the term "function" in language like C
@@ -25,7 +25,7 @@
 //!
 //! Example:
 //!
-//! ForthDico::dump() saves a dictionary in a binary file. Calling hexdump -C
+//! ForthDictionary::dump() saves a dictionary in a binary file. Calling hexdump -C
 //! on this file will give a result similar to this:
 //! \code{.unparsed}
 //! 00000000  84 4e 4f 4f 50 00 00 00  00 c1 28 00 09 00 01  |.NOOP.....(.....|
@@ -58,7 +58,7 @@
 //! The LINK POINTER contains the RELATIVE address (not absolute) to
 //! the previous entry and it's named LFA. Note that with 2 bytes our
 //! dictionary has a maximum size of 65535 bytes. The most recently
-//! defined word is memorized by the member ForthDico::m_last and in
+//! defined word is memorized by the member ForthDictionary::m_last and in
 //! Forth by the word LAST.
 //!
 //! TOKEN is an unique identifier for each word in dictionary. It also
@@ -73,19 +73,19 @@
 //! heap) but in Forth the dictionary is both used as a heap and as
 //! entries store. That is why Forth is considered as a virtual
 //! machine.  The first free location in the dictionary is given by
-//! ForthDico::m_here and in Forth by the word DP or the word HERE.
+//! ForthDictionary::m_here and in Forth by the word DP or the word HERE.
 //! Contrary to other Forth virtual machine, here our dictionary does
 //! not need to manage aligned memories (padding) or manage endianess.
-class ForthDico
+class ForthDictionary
 {
 public:
   //! \brief Constructor.
-  ForthDico();
+  ForthDictionary();
   //! \brief Append a new Forth entry in the dictionary.
   void add(const Cell16 token, std::string const& word, const bool immediate);
   //! \brief Look for a word in the dictionary.
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
-  //! \brief Interface for ForthDico::find but hiding output parameters.
+  //! \brief Interface for ForthDictionary::find but hiding output parameters.
   bool exists(std::string const& word) const;
   //! \brief Look for a token in the dictionary.
   std::pair<bool, int32_t> find(const Cell16 token, const bool even_smudge = false) const;
@@ -108,8 +108,8 @@ public:
   //! \brief Reserve or release a chunk of memory in the dictionary.
   void allot(const int32_t nb_bytes);
   //! \brief Store a byte at the end of the dictionnary. Endianess is hiden.
-  //! ForthDico::m_here is updated.
-  //! \param data is a 32-bits data (casted into Cell8) to store at location ForthDico::m_here
+  //! ForthDictionary::m_here is updated.
+  //! \param data is a 32-bits data (casted into Cell8) to store at location ForthDictionary::m_here
   //! \throw ForthDicoOOB if overflows/underflows is detected.
   inline void appendCell8(const Cell32 data)
   {
@@ -117,8 +117,8 @@ public:
     m_here += 1U;
   }
   //! \brief Store two consecutive bytes at the end of the dictionnary. Endianess is hiden.
-  //! ForthDico::m_here is updated.
-  //! \param data is a 32-bits data (casted into Cell16) to store at location ForthDico::m_here
+  //! ForthDictionary::m_here is updated.
+  //! \param data is a 32-bits data (casted into Cell16) to store at location ForthDictionary::m_here
   //! \throw ForthDicoOOB if overflows/underflows is detected.
   inline void appendCell16(const Cell32 data)
   {
@@ -126,8 +126,8 @@ public:
     m_here += 2U;
   }
   //! \brief Store four consecutive bytes at the end of the dictionnary. Endianess is hiden.
-  //! ForthDico::m_here is updated.
-  //! \param data is a 32-bits data to store at location ForthDico::m_here
+  //! ForthDictionary::m_here is updated.
+  //! \param data is a 32-bits data to store at location ForthDictionary::m_here
   //! \throw ForthDicoOOB if overflows/underflows is detected.
   inline void appendCell32(const Cell32 data)
   {
@@ -175,4 +175,4 @@ protected:
   Cell16  m_here;
 };
 
-#endif /* FORTH_DICO_HPP_ */
+#endif /* FORTH_DICTIONARY_HPP_ */

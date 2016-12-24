@@ -33,9 +33,10 @@ static void test()
   library.unload();
 }
 */
+
 int main(int argc,char *argv[])
 {
-  ForthDico dico;
+  ForthDictionary dico;
   Forth forth(dico);
   std::pair<bool, std::string> res;
   bool r;
@@ -114,6 +115,5 @@ int main(int argc,char *argv[])
       }
   }
 
-  forth.completion("QQ");
   return 0;
 }
