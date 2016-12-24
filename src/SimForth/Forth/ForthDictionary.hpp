@@ -110,7 +110,7 @@ public:
   //! \brief Store a byte at the end of the dictionnary. Endianess is hiden.
   //! ForthDictionary::m_here is updated.
   //! \param data is a 32-bits data (casted into Cell8) to store at location ForthDictionary::m_here
-  //! \throw ForthDicoOOB if overflows/underflows is detected.
+  //! \throw OutOfBoundDictionary if overflows/underflows is detected.
   inline void appendCell8(const Cell32 data)
   {
     write8at(m_here, data);
@@ -119,7 +119,7 @@ public:
   //! \brief Store two consecutive bytes at the end of the dictionnary. Endianess is hiden.
   //! ForthDictionary::m_here is updated.
   //! \param data is a 32-bits data (casted into Cell16) to store at location ForthDictionary::m_here
-  //! \throw ForthDicoOOB if overflows/underflows is detected.
+  //! \throw OutOfBoundDictionary if overflows/underflows is detected.
   inline void appendCell16(const Cell32 data)
   {
     write16at(m_here, data);
@@ -128,7 +128,7 @@ public:
   //! \brief Store four consecutive bytes at the end of the dictionnary. Endianess is hiden.
   //! ForthDictionary::m_here is updated.
   //! \param data is a 32-bits data to store at location ForthDictionary::m_here
-  //! \throw ForthDicoOOB if overflows/underflows is detected.
+  //! \throw OutOfBoundDictionary if overflows/underflows is detected.
   inline void appendCell32(const Cell32 data)
   {
     write32at(m_here, data);

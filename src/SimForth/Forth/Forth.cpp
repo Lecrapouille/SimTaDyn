@@ -288,7 +288,7 @@ void Forth::completion(std::string const& partial_name)
 //! current base or too huge to store in a cell.
 //! \note: prefixes 'b', 'h' and '0x' are not Forth standard.
 // **************************************************************
-bool Forth::toNumber(std::string const& word, Cell32& number)
+bool Forth::toNumber(std::string const& word, Cell32& number) const
 {
   int base = m_base;
   uint32_t negative = 0;
@@ -404,7 +404,7 @@ void Forth::interpreteWord(std::string const& word)
       if (m_dictionary.find(word, token, immediate))
         {
           if (m_trace) std::cout << std::endl << "Execute word '" << word << "'" << std::endl;
-          execToken(token); // FIXME: ce serait cool de pouvoir stocker le nombre de param dans la def du mot
+          execToken(token);
         }
       else if (toNumber(word, number))
         {

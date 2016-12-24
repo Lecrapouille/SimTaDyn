@@ -67,7 +67,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
       // End the definition of a new word
     case FORTH_PRIMITIVE_SEMICOLON:
-      m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size word definition
+      m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT);
       m_state = INTERPRETER_STATE;
       if (m_depth_at_colon != DStackDepth())
         {
@@ -520,11 +520,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_DECIMAL:
       changeDisplayBase(10U);
       break;
-
-      // gforth 16 BASE !
-      // A BASE !
-      // Mais SimForth: 16 BASE A BASE
-    case FORTH_PRIMITIVE_BASE:// FIXME USER VARIABLE
+    case FORTH_PRIMITIVE_BASE:
       if (DStackDepth() < 0)
         {
           DPUSH(m_tos);

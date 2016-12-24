@@ -19,10 +19,6 @@
 #  define FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE FORTH_TRUNCATE_OUT_OF_RANGE_NUMBERS
 #endif
 
-// TODO: charge un fichier dico et ecrase le dico ou le charge a la fin
-// loadCompilFile(std::string const& filename, bool append) ou alors boot(std::string const& filename, bool append)
-
-
 //! \class Forth
 //! \brief class containg the whole Forth interpretor context.
 class Forth

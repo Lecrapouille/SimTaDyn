@@ -162,7 +162,6 @@ bool ForthStream::hasMoreWords()
   } while (false != res);
 
   // End of file
-  // FIXME: close the stream
   return false;
 }
 

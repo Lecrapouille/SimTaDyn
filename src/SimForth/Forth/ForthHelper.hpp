@@ -64,9 +64,6 @@ typedef uint8_t        Cell8;
 // Used for aligning 16-bits addresses
 #  define NEXT_MULTIPLE_OF_2(x) (((x) + 1) & ~0x01)
 
-// Spare byte
-#  define SPARE_VALUE   (0x00) // FIXME: risque de bug si != 0x0 lors du display
-
 // Padding
 #define UINT32_MASK  ((sizeof (Cell32) - 1))
 #define UINT16_MASK  ((sizeof (Cell16) - 1))

@@ -1,7 +1,6 @@
 #ifndef FORTH_PRIMITIVES_HPP_
 #  define FORTH_PRIMITIVES_HPP_
 
-// TODO: primitive INCLUDE
 enum ForthPrimitives
   {
     // Dummy word and comments
