@@ -143,8 +143,8 @@ void SimTaDynWindow::onRealize()
 
     m_drawing_area.throw_if_error();
 
-    m_renderer.start();
-    m_renderer.clearScreen();
+    m_drawing_area.start();
+    m_drawing_area.clearScreen();
   }
   catch (const Gdk::GLError& gle)
   {
@@ -162,7 +162,7 @@ void SimTaDynWindow::onUnrealize()
   try
   {
     m_drawing_area.throw_if_error();
-    m_renderer.end();
+    m_drawing_area.end();
   }
   catch (const Gdk::GLError& gle)
   {
@@ -179,7 +179,7 @@ bool SimTaDynWindow::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
   try
   {
     m_drawing_area.throw_if_error();
-    m_renderer.render();
+    m_drawing_area.render();
 
     return true;
   }

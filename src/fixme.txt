@@ -51,8 +51,6 @@
 ./SimGui/SimTaDynWindow.cpp:40:  // * _Help: TBD: add About/help/interactive tutorials
 ./SimGui/SimTaDynWindow.cpp:55:    // TODO: submenus Tuto, Help, Example, About
 ./SimGui/SimTaDynWindow.hpp:30:                                 const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
-./SimGui/SimTaDynWindow.hpp:51:  //GlDrawingArea m_drawing_area; // FIXME a cause d'un bug de gtkmm
-./SimGui/SimTaDynWindow.hpp:53:  Renderer m_renderer;// FIXME a deplacer dans le contexte
 ./SimGui/TextEditor.cpp:295:// FIXME: never called
 ./SimGui/TextEditor.cpp:320:// TODO: for undo/redo actions
 ./SimGui/TextEditor.cpp:351:      // FIXME BUG si  m_filename == ""

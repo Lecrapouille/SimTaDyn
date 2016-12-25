@@ -104,7 +104,7 @@ void Find::findNext()
       Glib::RefPtr<Gtk::TextBuffer::Mark> last_pos;
 
       last_pos = m_document->get_buffer()->get_mark("last_pos");
-      if (0 == last_pos)
+      //if (nullptr == last_pos)
         {
           findFirst();
           return ;

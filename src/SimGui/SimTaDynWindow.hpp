@@ -48,9 +48,7 @@ protected:
   Gtk::Toolbar m_toolbar[2];
   std::vector<Gtk::ToolButton> m_toolbuttons;
 
-  //GlDrawingArea m_drawing_area; // FIXME a cause d'un bug de gtkmm
-  Gtk::GLArea m_drawing_area;
-  Renderer m_renderer;// FIXME a deplacer dans le contexte
+  GlDrawingArea m_drawing_area;
   ForthEditor m_fortheditor;
   MapEditor m_mapeditor;
   FindWindow *m_findwin;
