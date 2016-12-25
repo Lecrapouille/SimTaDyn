@@ -266,7 +266,7 @@ void ForthEditor::exec1(const std::string &script)
 
   // Exec the Forth script and  measure the execution time
   auto t0 = Time::now();
-  res = simtadyn.m_forth.eatString(script);
+  res = simtadyn.m_forth.interpreteString(script);
   auto t1 = Time::now();
 
   // Flush the std::cout in the textview
@@ -300,12 +300,13 @@ void ForthEditor::exec1(const std::string &script)
       m_statusbar.push("FAILED");
 
       //std::pair<size_t, size_t> p = simtadyn.m_forth.READER.cursors();
-      buf->insert(buf->end(), "Ambiguous condition from "
+      buf->insert(buf->end(), //"Ambiguous condition from "
                   //+ simtadyn.m_forth.READER.file() + ':'
                   //+ p.first << ':'
                   //+ p.second << ' '
-                  + res.second);
-      simtadyn.m_forth.restore();
+                  //+
+                  res.second);
+      simtadyn.m_forth.abort();
     }
 }
 

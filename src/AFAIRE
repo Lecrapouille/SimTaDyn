@@ -2,6 +2,8 @@ Ajouter des mots ON_REALIZE ... Exemple: void SimTaDynWindow::onRealize() ajoute
 qui permettront de lancer des petits scripts
 
 Callback: quand un mot echoue: ouvrir le fichier et colorier la ligne
+De meme bouton droit sur un INCLUDE => ouvre le fichier
+De meme bouton droit sur un mot ==> ouvre la definition
 
 Completion des mots forth
 

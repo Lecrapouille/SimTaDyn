@@ -2,7 +2,7 @@
 //#include "SharedLibrary.hpp"
 #include <unistd.h>
 
-static void usage(const std::string& fun)
+static void usage(const char* fun)
 {
   std::cout << "Usage:   " << fun << " [-option] [argument]" << std::endl;
   std::cout << "option:  " << "-h              Show help information" << std::endl;

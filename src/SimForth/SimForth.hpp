@@ -3,11 +3,11 @@
 
 #  include "Forth.hpp"
 
-class SimForthDico : public ForthDico
+class SimForthDictionary : public ForthDictionary
 {
 public:
-  SimForthDico()
-    : ForthDico()
+  SimForthDictionary()
+    : ForthDictionary()
   {
   }
 };
@@ -15,8 +15,8 @@ public:
 class SimForth : public Forth
 {
 public:
-  SimForth(ForthDico& dico)
-    : Forth(dico)
+  SimForth(ForthDictionary& dictionary)
+    : Forth(dictionary)
   {
   }
 };

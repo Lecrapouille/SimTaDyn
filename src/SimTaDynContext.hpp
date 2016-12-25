@@ -31,17 +31,17 @@ private:
 
   SimTaDynContext(const SimTaDynContext&)
     : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
-      m_forth(m_dico)
+      m_forth(m_dictionary)
   {
   }
 
   SimTaDynContext()
     : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
-      m_forth(m_dico)
+      m_forth(m_dictionary)
   {
     // Start the Forth core
     s_SimTaDyn.m_forth.boot();
-    s_SimTaDyn.m_forth.eatFile("forth/core/system.fs");
+    s_SimTaDyn.m_forth.interpreteFile("forth/core/system.fs");
   }
 
   ~SimTaDynContext()
@@ -53,7 +53,7 @@ private:
 
 protected:
 
-  SimForthDico m_dico;
+  SimForthDictionary m_dictionary;
 };
 
 #endif /* CONTEXT_HPP_ */

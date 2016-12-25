@@ -5,7 +5,6 @@
 ./OpenGL/Textures.hpp:37:  // TODO: tester 2 chargement textures a la suite avec/sans echec
 ./OpenGL/Textures.hpp:77:  // FIXME: useful ? Never used !
 ./SimForth/Forth/Forth.cpp:153:              // FIXME: changer le message
-./SimForth/Forth/Forth.cpp:375:          execToken(token); // FIXME: ce serait cool de pouvoir stocker le nombre de param dans la def du mot
 ./SimForth/Forth/Forth.cpp:457:// FIXME: convert char* --> string can be consumns lot of memory ?!
 ./SimForth/Forth/Forth.cpp:485:      // FIXME: le stream peut ne pas etre termine: attendre
 ./SimForth/Forth/Forth.cpp:486:      // FIXME: retourne ok si on lui donne une ligne vide dans un string
@@ -13,7 +12,6 @@
 ./SimForth/Forth/Forth.cpp:501:          // FIXME: the stream colum information is erroneous because
 ./SimForth/Forth/Forth.cpp:532:      abort(); // FIXME bad location
 ./SimForth/Forth/Forth.cpp:547:  // FIXME memoriser m_base
-./SimForth/Forth/ForthDictionary.cpp:257:bool ForthDictionary::dump(std::string const& filename) // FIXME const
 ./SimForth/Forth/ForthDictionary.cpp:266:      // TODO: ajouter un param ou commence la sauvegarde dans le dico (ex: skip primitives)
 ./SimForth/Forth/ForthDictionary.cpp:628:  // FIXME: proteger en ecriture les anciens mots definis
 ./SimForth/Forth/ForthDictionary.cpp:629:  // FIXME: autoriser en lecture toutes les addr du dico
@@ -24,15 +22,9 @@
 ./SimForth/Forth/ForthHelper.hpp:141:// TODO: definir COLOR_IMMEDIATE YELLOW etc
 ./SimForth/Forth/ForthHelper.hpp:49:// FIXME: Maybe we can divide / 2 addresses because they are aligned.
 ./SimForth/Forth/ForthHelper.hpp:54:// FIXME: COMPIL_ASSERT_TIME((DICTIONARY_SIZE - 1U) <= CELL16_MAX_VALUE)
-./SimForth/Forth/ForthHelper.hpp:63:#  define SPARE_VALUE   (0x00) // FIXME: risque de bug si != 0x0 lors du display
-./SimForth/Forth/Forth.hpp:22:// TODO: charge un fichier dico et ecrase le dico ou le charge a la fin
-./SimForth/Forth/ForthPrimitives.cpp:527:    case FORTH_PRIMITIVE_BASE:// FIXME USER VARIABLE
 ./SimForth/Forth/ForthPrimitives.cpp:642:  // TODO: Les ranger par ordre lexico ?
 ./SimForth/Forth/ForthPrimitives.cpp:643:  // FIXME: init m_last et m_here pour etre sur que le client ne
-./SimForth/Forth/ForthPrimitives.cpp:70:      m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT); // FIXME check size word definition
 ./SimForth/Forth/ForthPrimitives.hpp:139:// TODO: ASSERT_COMPILE_TIME(NUM_PRIMITIVES < sizeof (Cell16))
-./SimForth/Forth/ForthPrimitives.hpp:4:// TODO: primitive INCLUDE
-./SimForth/Forth/ForthStream.cpp:165:  // FIXME: close the stream
 ./SimGui/ForthEditor.cpp:129:  // TODO: save the historic buffer
 ./SimGui/ForthEditor.cpp:178:      // FIXME return not taken into account
 ./SimGui/ForthEditor.cpp:211:      // FIXME return not taken into account

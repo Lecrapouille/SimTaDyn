@@ -7,7 +7,8 @@
 //! \param dictionary the reference of (an empty) Forth dictionary.
 // **************************************************************
 Forth::Forth(ForthDictionary& dictionary)
-  : m_dictionary(dictionary)
+  : m_state(INTERPRETER_STATE),
+    m_dictionary(dictionary)
 {
   m_base = 10U;
   abort();
