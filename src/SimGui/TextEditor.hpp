@@ -154,6 +154,14 @@ public:
   {
     return m_button.title();
   }
+  inline void filename(std::string const& filename)
+  {
+    m_filename = filename;
+  }
+  inline const std::string& filename() const
+  {
+    return m_filename;
+  }
 
 protected:
   friend class TextEditor;
@@ -174,6 +182,7 @@ public:
   TextEditor();
   ~TextEditor();
   void open();
+  void open1(std::string const& filename); // FIXME ugly name: temporary
   void empty(std::string const& title = "New document");
   void save();
   void saveAs();

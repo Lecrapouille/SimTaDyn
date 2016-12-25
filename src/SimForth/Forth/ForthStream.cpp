@@ -74,13 +74,14 @@ bool ForthStream::loadFile(std::string const& filename)
 // **************************************************************
 //! \param str the script Forth stored as a string.
 // **************************************************************
-void ForthStream::loadString(std::string const& str)
+void ForthStream::loadString(std::string const& str,
+                             std::string const& name)
 {
   close();
   init();
 
   m_mode = READ_STRING;
-  m_filename = "<string>";
+  m_filename = name;
   m_str = str;
 }
 

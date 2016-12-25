@@ -10,6 +10,7 @@ Forth::Forth(ForthDictionary& dictionary)
   : m_state(INTERPRETER_STATE),
     m_dictionary(dictionary)
 {
+  m_err_stream = 0;
   m_base = 10U;
   abort();
   m_last_completion = m_dictionary.last();
@@ -490,18 +491,21 @@ std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 //! \return See Forth::interpreteFile
 // FIXME: convert char* --> string can be consumns lot of memory ?!
 // **************************************************************
-std::pair<bool, std::string> Forth::interpreteString(const char* const code_forth)
+std::pair<bool, std::string> Forth::interpreteString(const char* const code_forth,
+                                                     std::string const& name)
 {
-  return Forth::interpreteString(std::string(code_forth));
+  return Forth::interpreteString(std::string(code_forth), name);
 }
 
 // **************************************************************
 //! \param code_forth the forth script stored as string.
 //! \return See Forth::interpreteFile
 // **************************************************************
-std::pair<bool, std::string> Forth::interpreteString(std::string const& code_forth)
+std::pair<bool, std::string> Forth::interpreteString(std::string const& code_forth,
+                                                     std::string const& name)
 {
-  STREAM.loadString(code_forth);
+  m_err_stream = 0;
+  STREAM.loadString(code_forth, name);
   return parseStream();
 }
 
@@ -514,6 +518,7 @@ std::pair<bool, std::string> Forth::parseStream()
 {
   std::string word;
 
+  m_err_stream = 0;
   try
     {
       // FIXME: le stream peut ne pas etre termine: attendre
@@ -542,6 +547,10 @@ std::pair<bool, std::string> Forth::parseStream()
 
   catch (ForthException const& e)
     {
+      if (0 == m_err_stream)
+        {
+          m_err_stream = m_opened_streams;
+        }
       return std::make_pair(false, e.message());
     }
 }

@@ -16,7 +16,8 @@ public:
   //! \brief For feeding a Forth interpreter with an ascii file.
   bool loadFile(std::string const& filename);
   //! \brief For feeding a Forth interpreter with a string.
-  void loadString(std::string const& str);
+  void loadString(std::string const& str,
+                  std::string const& name = "<string>");
   //! \brief Drop the current line and load the next one.
   void skipLine();
   //! \brief Check if a word can be extracted it's extracted.
@@ -42,6 +43,10 @@ public:
   inline const std::string& name() const
   {
     return m_filename;
+  }
+  inline void name(const std::string& filename)
+  {
+    m_filename = filename;
   }
   //! \brief release the opened stream.
   void close();

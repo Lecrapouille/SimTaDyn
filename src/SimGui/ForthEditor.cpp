@@ -41,7 +41,7 @@ ForthEditor::ForthEditor()
     m_submenu[3].set_label("Open Script");
     m_image[3].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
     m_submenu[3].set_image(m_image[3]);
-    m_submenu[3].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::open));
+    m_submenu[3].signal_activate().connect(sigc::mem_fun0(*this, &TextEditor::open));
     m_menu[1].append(m_submenu[3]);
 
     //
@@ -266,7 +266,7 @@ void ForthEditor::exec1(const std::string &script)
 
   // Exec the Forth script and  measure the execution time
   auto t0 = Time::now();
-  res = simtadyn.m_forth.interpreteString(script);
+  res = simtadyn.m_forth.interpreteString(script, document()->filename());
   auto t1 = Time::now();
 
   // Flush the std::cout in the textview
@@ -299,14 +299,11 @@ void ForthEditor::exec1(const std::string &script)
       // Text view: indiquer ligne ko
       m_statusbar.push("FAILED");
 
-      //std::pair<size_t, size_t> p = simtadyn.m_forth.READER.cursors();
-      buf->insert(buf->end(), //"Ambiguous condition from "
-                  //+ simtadyn.m_forth.READER.file() + ':'
-                  //+ p.first << ':'
-                  //+ p.second << ' '
-                  //+
-                  res.second);
-      simtadyn.m_forth.abort();
+      // Show the faulty document
+      TextEditor::open1(simtadyn.m_forth.m_streams_stack[simtadyn.m_forth.m_err_stream].name());
+
+      // Show res (redirect sdout to gui)
+      simtadyn.m_forth.ok(res);
     }
 }
 

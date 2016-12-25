@@ -32,9 +32,11 @@ public:
   //! \brief interprete a new forth word extracted from a stream.
   void interpreteWord(std::string const& word);
   //! \brief interprete a Forth script stored as a string.
-  std::pair<bool, std::string> interpreteString(std::string const& code_forth);
+  std::pair<bool, std::string> interpreteString(std::string const& code_fort,
+                                                std::string const& name = "<string>");
   //! \brief interprete a Forth script stored as a char*.
-  std::pair<bool, std::string> interpreteString(const char* const code_forth);
+  std::pair<bool, std::string> interpreteString(const char* const code_forth,
+                                                std::string const& name = "<string>");
   //! \brief interprete a Forth script stored in an ascii file.
   std::pair<bool, std::string> interpreteFile(std::string const& filename);
   //! \brief Display the result prompt after interpreting a script.
@@ -119,11 +121,13 @@ protected:
   Cell16  m_here_at_colon;   //! Save the last dictionary free slot before creating a new Forth word.
   std::string m_creating_word; //! The Forth word currently in creation.
   Cell32  m_saved_state; //! Save the interpreter state when enetring in a comment.
+public:
   ForthStream m_streams_stack[MAX_OPENED_STREAMS]; //! A stack of streams when script file include other files
   uint32_t m_opened_streams; //! Number of streams opened.
   ForthDictionary& m_dictionary; //! Forth dictionary.
   bool  m_trace; //! Trace the execution of a word.
   Cell16 m_last_completion;
+  int32_t m_err_stream;
 };
 
 #endif /* FORTH_INNER_HPP_ */
