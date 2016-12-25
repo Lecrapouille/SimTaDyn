@@ -1,6 +1,6 @@
 ### SimForth ###
 
-SimForth is the script langage used in SimTaDyn replacing Visual Basic in traditional spreadsheet.
+SimForth is the script langage used in SimTaDyn replacing Visual Basic in traditional spreadsheet. It also can be used as standalone forth: see [here](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/SimForth/Forth/doc/standalone.md) for more details.
 
 SimForth is based on standard Forth 1978 .. 2012 like [Gforth](https://www.gnu.org/software/gforth/), [pForth](http://www.softsynth.com/pforth/), [4th](https://thebeez.home.xs4all.nl/4tH/4tHmanual.pdf), [reforth](https://github.com/seanpringle/reforth) but, for the moment, with some incompatibilites or missing words with the standard [Forth 2012](http://lars.nocrew.org/forth2012/core.html).
 

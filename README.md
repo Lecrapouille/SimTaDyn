@@ -14,7 +14,7 @@ https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md
 
 ## Help and tutorials
 
-* SimForth scripts: home/qq/SimTaDyn/src/SimForth/Forth/doc/forth.md
+* SimForth scripts: https://github.com/Lecrapouille/SimTaDyn/blob/master/src/SimForth/Forth/doc/forth.md
 
 ## Credits
 
