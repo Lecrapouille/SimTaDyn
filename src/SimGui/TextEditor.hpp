@@ -105,12 +105,35 @@ class CloseLabel : public Gtk::Box
 {
 public:
   CloseLabel(std::string const& text);
-  void title(std::string const& text);
-  Glib::ustring title();
-  void link(Gtk::Notebook *notebook, Gtk::Widget *widget);
+  //! Kind of button.signal_clicked().connect(sigc::bind<T>(sigc::mem_fun(*this, &CloseLabel::onClicked), T));
+  inline void link(Gtk::Notebook *notebook, Gtk::Widget *widget)
+  {
+    m_notebook = notebook;
+    m_widget = widget;
+  }
+  //! Return the text of the button (here the filename of the
+  //! document).
+  inline const std::string& title() const
+  {
+    return m_title;
+  }
+  //! Change the text of the button
+  inline void title(std::string const& title)
+  {
+    m_title = title;
+    m_label.set_text(m_title);
+  }
+  void asterisk(const bool asterisk);
+  inline bool asterisk() const
+  {
+    return m_asterisk;
+  }
 
 protected:
-  void onClicked();
+  inline void onClicked()
+  {
+    m_notebook->remove_page(*m_widget);
+  }
 
   // Use the middle button to close the document
   bool onButtonPressEvent(GdkEventButton* event)
@@ -125,6 +148,8 @@ protected:
   Gtk::Image m_image;
   Gtk::Notebook *m_notebook;
   Gtk::Widget *m_widget;
+  bool m_asterisk;
+  std::string m_title;
 };
 
 // *************************************************************************************************
@@ -134,7 +159,6 @@ class TextDocument : public Gtk::ScrolledWindow
 {
 public:
   TextDocument(Glib::RefPtr<Gsv::Language> language);
-  ~TextDocument();
   void clear();
   bool isModified() const;
   void onChanged();
@@ -186,6 +210,7 @@ public:
   void empty(std::string const& title = "New document");
   void save();
   void saveAs();
+  void saveAll();
   Glib::ustring text();
   void clear();
   void find();

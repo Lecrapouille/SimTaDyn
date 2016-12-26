@@ -232,43 +232,30 @@ CloseLabel::CloseLabel(std::string const& text)
 }
 
 // *************************************************************************************************
-// Return the text of the button (here the filename of the document)
-// *************************************************************************************************
-Glib::ustring CloseLabel::title()
-{
-  return m_label.get_text().raw();
-}
-
-// *************************************************************************************************
-// Change the text of the button
-// *************************************************************************************************
-void CloseLabel::title(std::string const& text)
-{
-  m_label.set_text(text);
-}
-
-// *************************************************************************************************
 //
 // *************************************************************************************************
-void CloseLabel::onClicked()
+void CloseLabel::asterisk(const bool asterisk)
 {
-  m_notebook->remove_page(*m_widget);
-}
-
-// *************************************************************************************************
-// Kind of button.signal_clicked().connect(sigc::bind<T>(sigc::mem_fun(*this, &CloseLabel::onClicked), T));
-// *************************************************************************************************
-void CloseLabel::link(Gtk::Notebook *notebook, Gtk::Widget *widget)
-{
-  m_notebook = notebook;
-  m_widget = widget;
+  if (m_asterisk != asterisk)
+    {
+      m_asterisk = asterisk;
+      if (m_asterisk)
+        {
+          m_label.set_text("** " + m_title);
+        }
+      else
+        {
+          m_label.set_text(m_title);
+        }
+    }
 }
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
 TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
-  : m_button(""),
+  : Gtk::ScrolledWindow(),
+    m_button(""),
     m_filename("")
 {
   Gtk::ScrolledWindow::add(m_textview);
@@ -292,15 +279,6 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
 }
 
 // *************************************************************************************************
-// FIXME: never called
-// *************************************************************************************************
-TextDocument::~TextDocument()
-{
-  //TextDocument::dialogSave();
-  //save();
-}
-
-// *************************************************************************************************
 // Erase all text in the document
 // *************************************************************************************************
 void TextDocument::clear()
@@ -321,8 +299,7 @@ bool TextDocument::isModified() const
 // *************************************************************************************************
 void TextDocument::onChanged()
 {
-  //std::cout << "Text changed\n";
-  // ajouter un "*" au titre
+  m_button.asterisk(true);
 }
 
 // *************************************************************************************************
@@ -355,6 +332,7 @@ bool TextDocument::save()
           outfile << m_buffer->get_text();
           outfile.close();
           m_buffer->set_modified(false);
+          m_button.asterisk(false);
           m_button.set_tooltip_text(m_filename);
         }
       else
@@ -410,6 +388,7 @@ bool TextDocument::load(std::string const& filename, bool clear)
   if (clear)
     {
       m_buffer->set_modified(false);
+      m_button.asterisk(false);
     }
 
   return true;
@@ -473,9 +452,17 @@ TextEditor::TextEditor()
 }
 
 // *************************************************************************************************
-//
+// FIXME:: le seul endroit ou appeller les sauvegardes
 // *************************************************************************************************
 TextEditor::~TextEditor()
+{
+  TextEditor::saveAll();
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void TextEditor::saveAll()
 {
   for (int k = 0; k < m_notebook.get_n_pages(); ++k)
     {
