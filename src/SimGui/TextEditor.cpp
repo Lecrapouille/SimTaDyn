@@ -405,7 +405,8 @@ TextEditor::TextEditor()
 {
   // Menus '_Documents'
   {
-    m_menuitem[0].set_label("Text Editor");
+    m_menuitem[0].set_label("Text _Editor");
+    m_menuitem[0].set_use_underline(true);
     m_menuitem[0].set_submenu(m_menu[0]);
 
     //

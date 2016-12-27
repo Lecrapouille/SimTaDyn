@@ -9,7 +9,8 @@ MapEditor::MapEditor()
 {
   // Menus '_Map'
   {
-    m_menuitem[0].set_label("Map");
+    m_menuitem[0].set_label("_Map");
+    m_menuitem[0].set_use_underline(true);
     m_menuitem[0].set_submenu(m_menu[0]);
 
     // TODO: New Map

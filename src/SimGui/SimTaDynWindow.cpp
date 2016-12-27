@@ -47,13 +47,17 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     m_menubar.append(m_fortheditor.m_menuitem[0]);
 
     // Menu '_Plugins'
-    m_menuitem[PlugginsMenu].set_label("Plugins"); m_menubar.append(m_menuitem[PlugginsMenu]);
+    m_menuitem[PlugginsMenu].set_label("_Plugins");
+    m_menuitem[PlugginsMenu].set_use_underline(true);
+    m_menubar.append(m_menuitem[PlugginsMenu]);
     m_menuitem[PlugginsMenu].set_submenu(m_menu[PlugginsMenu]);
     addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
     // Menu '_Help'
     // TODO: submenus Tuto, Help, Example, About
-    m_menuitem[HelpMenu].set_label("Help"); m_menubar.append(m_menuitem[HelpMenu]);
+    m_menuitem[HelpMenu].set_label("_Help");
+    m_menuitem[HelpMenu].set_use_underline(true);
+    m_menubar.append(m_menuitem[HelpMenu]);
     m_menuitem[HelpMenu].set_submenu(m_menu[HelpMenu]);
   }
 

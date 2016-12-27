@@ -10,7 +10,8 @@ ForthEditor::ForthEditor()
 {
   // Menus '_Forth Scripts'
   {
-    m_menuitem[1].set_label("Forth");
+    m_menuitem[1].set_label("_Forth");
+    m_menuitem[1].set_use_underline(true);
     m_menuitem[1].set_submenu(m_menu[1]);
 
     //
@@ -109,10 +110,10 @@ ForthEditor::ForthEditor()
 
   // Forth notebook
   {
-    m_res_notebooks.append_page(m_scrolledwindow[0], "Result");
-    m_res_notebooks.append_page(m_scrolledwindow[1], "Historic");
-    m_res_notebooks.append_page(m_scrolledwindow[2], "Debug");
-    m_res_notebooks.append_page(m_scrolledwindow[3], "Dico");
+    m_res_notebooks.append_page(m_scrolledwindow[0], "_Result", true);
+    m_res_notebooks.append_page(m_scrolledwindow[1], "H_istory", true);
+    m_res_notebooks.append_page(m_scrolledwindow[2], "Debu_g", true);
+    m_res_notebooks.append_page(m_scrolledwindow[3], "_Dico", true);
   }
 
   // Statusbar
