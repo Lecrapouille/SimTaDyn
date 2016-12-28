@@ -7,7 +7,7 @@
 #  define SIMTADYN() SimTaDynContext::getInstance()
 
 // Singleton pattern (not thread safe)
-class SimTaDynContext
+class SimTaDynContext // FIXME: peut on faire public SimTaDynWindow: je ne pense pas
 {
 public:
 

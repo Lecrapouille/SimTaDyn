@@ -25,7 +25,7 @@ public:
   Gtk::Notebook       m_res_notebooks; // FIXME: attention collision de noms TextEditor::m_notebook
   Gtk::ScrolledWindow m_scrolledwindow[4];
   Gtk::TextView       m_result;
-  Gtk::TextView       m_historic;
+  Gtk::TextView       m_history;
   Gtk::TextView       m_debug;
   Gtk::TreeView       m_dico;
   Gtk::Statusbar      m_statusbar;

@@ -100,7 +100,7 @@ ForthEditor::ForthEditor()
     // FIXME: mettre les text view en read-only
     m_scrolledwindow[0].add(m_result);
     m_scrolledwindow[0].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[1].add(m_historic);
+    m_scrolledwindow[1].add(m_history);
     m_scrolledwindow[1].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     m_scrolledwindow[2].add(m_debug);
     m_scrolledwindow[2].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -283,7 +283,7 @@ void ForthEditor::exec1(const std::string &script)
       buf->insert(buf->end(), res.second);
 
       // Copy paste the Forth script into the historic buffer
-      buf = m_historic.get_buffer();
+      buf = m_history.get_buffer();
       buf->insert(buf->end(), script);
       buf->insert(buf->end(), "\n\n");
 
