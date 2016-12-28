@@ -7,6 +7,7 @@
 ForthEditor::ForthEditor()
   : m_cout(std::cout, m_result.get_buffer()),
     m_cerr(std::cerr, m_result.get_buffer())
+    m_color(m_history.get_buffer())
 {
   // Menus '_Forth Scripts'
   {

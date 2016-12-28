@@ -5,6 +5,7 @@
 
 #  include "ForthExceptions.hpp"
 #  include "ForthPrimitives.hpp"
+#  include "TextColor.hpp"
 
 //! \class ForthDictionary
 //!
@@ -98,7 +99,7 @@ public:
   //! \brief Load a dictionary from a binary file, append or replace the old one.
   bool load(std::string const& filename, const bool replace = true);
   //! \brief Pretty print the dictionary in std::cout.
-  virtual void display() const;
+  virtual void display(TextColor& display) const;
   //! \brief Accessor. Return the most recent entry in the dictionary.
   inline Cell16 last() const { return m_last; }
   //! \brief Accessor. Return the address of the first free location in the dictionary.

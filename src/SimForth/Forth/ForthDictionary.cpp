@@ -371,15 +371,13 @@ void ForthDictionary::displayToken(const Cell16 token) const
 // **************************************************************
 //
 // **************************************************************
-void ForthDictionary::display() const
+void ForthDictionary::display(TextColor& color) const
 {
   int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping, skip;
   bool smudge, immediate;
   bool compiled = false;
   bool truncated = false;
   bool creat = false;
-  const char *color = DEFAULT;
-  const char *color1 = DEFAULT;
 
   std::cout << "Address                          Word  Token    Definition (tokens)    ";
   std::cout << std::setw(11 + 5 * (WORD_GROUPING - 4)) << "Translation" << std::endl;
@@ -393,7 +391,8 @@ void ForthDictionary::display() const
       creat = false;
 
       // Display dictionary addresses in hex
-      std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr << " ";
+      color.grey();
+      std::cout << color << std::setfill('0') << std::setw(4) << std::hex << ptr << " ";
 
       // Get word flags
       length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
@@ -408,13 +407,13 @@ void ForthDictionary::display() const
 
       // Select color depending on word flag bits
       if (immediate)
-        color = YELLOW;
+        color.yellow();
       else if (smudge)
-        color = GREY;
+        color.grey();
       else if (code < NUM_PRIMITIVES)
-        color = BLUE;
+        color.blue();
       else
-        color = RED;
+        color.red();
 
       // Display word name (right centered)
       std::cout << std::setfill('.') << std::setw(38U - length)
@@ -422,7 +421,7 @@ void ForthDictionary::display() const
                 << " ";
 
       // Display Exec token
-      if (!smudge) color = AZUL; // Let color in grey for unused words
+      if (!smudge) color.azul(); // Let color in grey for unused words
       std::cout << color << '(' << std::setfill('0') << std::setw(4) << std::hex << code << ")    ";
 
       // Word definition
@@ -431,14 +430,15 @@ void ForthDictionary::display() const
       // primitive
       if (code < NUM_PRIMITIVES)
         {
-          std::cout << WHITE << "primitive" << std::endl;
+          color.white();
+          std::cout << color << "primitive" << std::endl;
         }
 
       // Skip NFA
       d = dd = 2;
       while (d < def_length)
         {
-          if (!smudge) color = WHITE;
+          if (!smudge) color.white();
 
           // Display tokens in hexa
           grouping = WORD_GROUPING;
@@ -469,7 +469,8 @@ void ForthDictionary::display() const
                       uint32_t p = ptr + length + 3U + dd;
                       while (dd < def_length)
                         {
-                          std::cout << GREEN << std::setfill('0') << std::setw(2) << std::hex << read8at(p) << " ";
+                          color.green();
+                          std::cout << color << std::setfill('0') << std::setw(2) << std::hex << read8at(p) << " ";
                           ++p;
                           ++dd;
                         }
@@ -492,7 +493,8 @@ void ForthDictionary::display() const
                   if (!res.first)
                     {
                       // Not found. Display token in hex and in grey
-                      std::cout << GREEN << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+                      color.green();
+                      std::cout << color << std::setfill('0') << std::setw(4) << std::hex << token << " ";
                     }
                   else
                     {
@@ -505,14 +507,14 @@ void ForthDictionary::display() const
                       // Colorize
                       if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
                         {
-                          color = GREY;
+                          color.grey();
                         }
                       else
                         {
                           if (m_dictionary[j] & FLAG_IMMEDIATE)
-                            color = YELLOW;
+                            color.yellow();
                           else
-                            color = RED;
+                            color.red();
                         }
 
                       // Display
@@ -525,21 +527,25 @@ void ForthDictionary::display() const
                   if (!res.first)
                     {
                       // Not found. Display token in hex and in grey
-                      std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+                      color.grey();
+                      std::cout << color << std::setfill('0') << std::setw(4) << std::hex << token << " ";
                     }
                   else
                     {
                       // Colorize
                       uint32_t j = res.second;
-                      color1 = GREEN;
+                      // FIXME: ugly but how to fix that ?
+                      TextColor *color1 = color.clone();
+                      color1->green();
                       if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
                         {
-                          color = color1 = GREY;
+                          color1->grey();
+                          color.grey();
                         }
                       else if (m_dictionary[j] & FLAG_IMMEDIATE)
-                        color = YELLOW;
+                        color.yellow();
                       else
-                        color = BLUE;
+                        color.blue();
                       uint32_t p = ptr + length + 4U + dd;
 
                       // (CREATE) EXIT xx .. yy
@@ -568,7 +574,7 @@ void ForthDictionary::display() const
                               uint16_t data16 = read16at(p);
                               dd += 2U;
                               --grouping;
-                              std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                              std::cout << *color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
                             }
                           break;
                         case FORTH_PRIMITIVE_LITERAL_16:
@@ -576,7 +582,7 @@ void ForthDictionary::display() const
                             uint16_t data16 = read16at(p);
                             dd += 2U;
                             --grouping;
-                            std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                            std::cout << *color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
                           }
                           break;
                         case FORTH_PRIMITIVE_LITERAL_32:
@@ -584,7 +590,7 @@ void ForthDictionary::display() const
                             uint32_t data32 = read32at(p);
                             dd += 4U;
                             --grouping;
-                            std::cout << color1 << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
+                            std::cout << *color1 << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
                           }
                           break;
                         default:
@@ -594,6 +600,7 @@ void ForthDictionary::display() const
                         }
                       truncated = (grouping < 0);
                       //if (truncated) std::cout << "|| ";
+                      delete color1;
                     } // if found
                 } // if primitive
             } // while grouping
@@ -603,8 +610,9 @@ void ForthDictionary::display() const
           if (d < def_length - 1)
             {
               // Dictionary address
-              std::cout << GREY << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + d << "    ";
-              std::cout << GREY << std::setfill(' ') << std::setw(40U) << "    ";
+              color.grey();
+              std::cout << color << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + d << "    ";
+              std::cout << color << std::setfill(' ') << std::setw(40U) << "    ";
             }
         } // while definition
 
@@ -613,7 +621,8 @@ void ForthDictionary::display() const
       ptr = ptr - nfa;
     } while (nfa);
 
-  std::cout << DEFAULT << std::endl;
+  color.normal();
+  std::cout << color << std::endl;
 }
 
 // **************************************************************

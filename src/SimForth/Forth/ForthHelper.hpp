@@ -126,19 +126,6 @@ typedef uint8_t        Cell8;
 #define STREAM m_streams_stack[m_opened_streams] // current stream parsed
 #define MAX_OPENED_STREAMS   (16U)    // depth of INCLUDE calls
 
-// **************************************************************
-//
-// Console color
-//
-// **************************************************************
-#  define RED     "\033[1;31m"
-#  define GREEN   "\033[1;32m"
-#  define YELLOW  "\033[1;33m"
-#  define BLUE    "\033[1;34m"
-#  define AZUL    "\033[0;36m"
-#  define GREY    "\033[0;37m"
-#  define WHITE   "\033[1;37m"
-#  define DEFAULT "\033[0;00m"
 
 // TODO: definir COLOR_IMMEDIATE YELLOW etc
 

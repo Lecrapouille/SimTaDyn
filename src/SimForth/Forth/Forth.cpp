@@ -6,8 +6,9 @@
 //! dictionary is given as reference to allow the inheritance.
 //! \param dictionary the reference of (an empty) Forth dictionary.
 // **************************************************************
-Forth::Forth(ForthDictionary& dictionary)
-  : m_state(INTERPRETER_STATE),
+Forth::Forth(ForthDictionary& dictionary, TextColor &color)
+  : m_color(color),
+    m_state(INTERPRETER_STATE),
     m_dictionary(dictionary)
 {
   m_err_stream = 0;
@@ -141,7 +142,10 @@ void Forth::create(std::string const& word)
 {
   if (m_dictionary.exists(word))
     {
-      std::cout << YELLOW << "[WARNING] Redefining '" << word << "'" << DEFAULT << std::endl;
+      m_color.yellow();
+      std::cout << m_color << "[WARNING] Redefining '" << word << "'";
+      m_color.normal();
+      std::cout << m_color << std::endl;
     }
   else
     {
@@ -374,10 +378,13 @@ bool Forth::toNumber(std::string const& word, Cell32& number) const
         number = (negative ? LONG_MIN : LONG_MAX);
 
         std::pair<size_t, size_t> p = STREAM.position();
-        std::cerr << YELLOW << "[WARNING] " << STREAM.name() << ":"
+
+        m_color.yellow();
+        std::cerr << m_color << "[WARNING] " << STREAM.name() << ":"
                   << p.first << ":" << p.second
-                  << " Out of range number '" + word + "' will be truncated"
-                  << DEFAULT << std::endl;
+                  << " Out of range number '" + word + "' will be truncated";
+        m_color.normal();
+        std::cout << m_color << std::endl;
         return true;
       }
 #else // FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE == FORTH_OUT_OF_RANGE_NUMBERS_ARE_WORDS
@@ -567,11 +574,14 @@ void Forth::ok(std::pair<bool, std::string> const& res)
   else
     {
       std::pair<size_t, size_t> p = STREAM.position();
-      std::cerr << RED << "[ERROR] from "
+      m_color.red();
+      std::cerr << m_color << "[ERROR] from "
                 << STREAM.name() << ':'
                 << p.first << ':'
                 << p.second << ' '
-                << res.second << DEFAULT << std::endl;
+                << res.second;
+      m_color.normal();
+      std::cerr << m_color << std::endl;
       abort(); // FIXME bad location
     }
 }

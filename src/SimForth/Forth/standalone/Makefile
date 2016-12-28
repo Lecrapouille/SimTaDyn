@@ -32,7 +32,7 @@ VPATH=.:$(BUILD):..:../../../Common:../../../Common/SharedLibrary
 # Set objects architecture specific
 OBJECTS_POCO       = Exception.o SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJECTS_STANDALONE =
+OBJECTS_STANDALONE = TextColor.o
 OBJECTS            = $(OBJECTS_POCO) $(OBJECTS_FORTH) $(OBJECTS_STANDALONE) main.o
 TARGET             = SimForth
 

@@ -15,8 +15,8 @@ public:
 class SimForth : public Forth
 {
 public:
-  SimForth(ForthDictionary& dictionary)
-    : Forth(dictionary)
+  SimForth(ForthDictionary& dictionary, TextColor& color)
+    : Forth(dictionary, color)
   {
   }
 };

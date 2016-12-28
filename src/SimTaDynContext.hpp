@@ -13,6 +13,7 @@ public:
 
   const std::string m_data_path;
   SimTaDynWindow* m_window;
+  NoColor m_color;
   SimForth m_forth;
 
   static SimTaDynContext& getInstance()
@@ -31,13 +32,13 @@ private:
 
   SimTaDynContext(const SimTaDynContext&)
     : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
-      m_forth(m_dictionary)
+      m_forth(m_dictionary, m_color)
   {
   }
 
   SimTaDynContext()
     : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/")),
-      m_forth(m_dictionary)
+      m_forth(m_dictionary, m_color)
   {
     // Start the Forth core
     s_SimTaDyn.m_forth.boot();

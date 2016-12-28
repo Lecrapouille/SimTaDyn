@@ -1,19 +1,21 @@
 #include "Forth.hpp"
 //#include "SharedLibrary.hpp"
 #include <unistd.h>
+#include <memory>
 
 static void usage(const char* fun)
 {
   std::cout << "Usage:   " << fun << " [-option] [argument]" << std::endl;
-  std::cout << "option:  " << "-h              Show help information" << std::endl;
-  std::cout << "option:  " << "-u              Show help information" << std::endl;
-  std::cout << "         " << "-l dico         Load a SimForth dictionary file and replace the old dictionary" << std::endl;
-  std::cout << "         " << "-a dico         Load and append a SimForth dictionary file" << std::endl;
-  std::cout << "         " << "-d dico         Dump the dictionary as a binary file" << std::endl;
-  std::cout << "         " << "-f file         Run a SimForth text file" << std::endl;
-  std::cout << "         " << "-e string       Execute a string as SimForth script" << std::endl;
-  std::cout << "         " << "-p              Pretty print the dictionary" << std::endl;
-  std::cout << "         " << "-i              Interactive mode" << std::endl;
+  std::cout << "option:  " << "-h              Show this usage" << std::endl;
+  std::cout << "         " << "-u              Show this usage" << std::endl;
+  std::cout << "         " << "-l dico         Load a SimForth dictionary file and smash the current dictionary" << std::endl;
+  std::cout << "         " << "-a dico         load a SimForth dictionary file and append to the current dictionary" << std::endl;
+  std::cout << "         " << "-d dico         Dump the current dictionary into a binary file" << std::endl;
+  std::cout << "         " << "-f file         Interprete a SimForth script file (ascii)" << std::endl;
+  std::cout << "         " << "-e string       Interprete a SimForth script string (ascii)" << std::endl;
+  std::cout << "         " << "-p              Pretty print the dictionary with or without color (depending on option -x)" << std::endl;
+  std::cout << "         " << "-i              Interactive mode (not yet implemented)" << std::endl;
+  std::cout << "         " << "-x              Do not use color when displaying dictionary" << std::endl;
 }
 
 /*
@@ -36,13 +38,7 @@ static void test()
 
 int main(int argc,char *argv[])
 {
-  ForthDictionary dico;
-  Forth forth(dico);
-  std::pair<bool, std::string> res;
-  bool r;
-  int opt;
-
-  //test();
+  TextColor* color;
 
   // No option
   if (1 == argc)
@@ -51,11 +47,35 @@ int main(int argc,char *argv[])
     return 1;
   }
 
+  // Look for option -x
+  bool no_color = false;
+  for (int i = 1; i < argc; ++i)
+    {
+      if ((argv[i][0] == '-') && (argv[i][1] == 'x'))
+        {
+          no_color = true;
+        }
+    }
+  if (no_color)
+    {
+      color = new NoColor();
+    }
+  else
+    {
+      color = new PosixColor();
+    }
+
+  ForthDictionary dico;
+  Forth forth(dico, *color);
+  std::pair<bool, std::string> res;
+  bool r;
+  int opt;
+
   // Boot the default core. Even if the user will load
   // a dictionary instead
   forth.boot();
 
-  while ((opt = getopt(argc, argv, "hua:l:d:f:e:pi")) != -1)
+  while ((opt = getopt(argc, argv, "hua:l:d:f:e:pix")) != -1)
   {
     switch (opt)
       {
@@ -101,7 +121,7 @@ int main(int argc,char *argv[])
 
         // Pretty print the dictionary
       case 'p':
-        forth.dictionary().display();
+        forth.dictionary().display(*color);
         break;
 
         // Interactive mode
@@ -115,5 +135,6 @@ int main(int argc,char *argv[])
       }
   }
 
+  delete color;
   return 0;
 }

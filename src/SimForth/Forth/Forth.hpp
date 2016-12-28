@@ -26,7 +26,7 @@ class Forth
 public:
   //! \brief Constructor with the reference of a Forth dictionary for
   //! an easier inheritance management.
-  Forth(ForthDictionary& dico);
+  Forth(ForthDictionary& dico, TextColor &color);
   //! \brief Load all Forth primitives in the dictionary.
   virtual void boot();
   //! \brief interprete a new forth word extracted from a stream.
@@ -95,6 +95,7 @@ protected:
   //! \brief Change the base of displayed numbers.
   bool changeDisplayBase(const uint8_t base);
 protected:
+  TextColor &m_color;
   //! Data stack: store function parameters.
   Cell32  m_data_stack_[STACK_SIZE];
   //! Data stack with a marging of security to prevent against stack underflow.
