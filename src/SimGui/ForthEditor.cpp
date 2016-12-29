@@ -4,10 +4,108 @@
 // *************************************************************************************************
 //
 // *************************************************************************************************
+ForthDocument::ForthDocument(Glib::RefPtr<Gsv::Language> language)
+  : TextDocument(language)
+{
+  // Tag for Forth word not in dictionary
+  m_tag_unknown_word = m_buffer->create_tag("error");
+  m_tag_unknown_word->property_underline() = Pango::UNDERLINE_ERROR;
+
+  // Tag for immediate Forth words
+  m_tag_immediate_word = m_buffer->create_tag("immediate");
+  m_tag_immediate_word->property_underline() = Pango::UNDERLINE_SINGLE;
+
+  // Signal for checking Forth word and autocompletion
+  m_buffer->signal_insert().connect(sigc::mem_fun(this, &ForthDocument::onInsertText));
+}
+
+// *************************************************************************************************
+// Slot. FIXME: gerer les commentaires
+// *************************************************************************************************
+void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
+                                 const Glib::ustring& text_inserted,
+                                 __attribute__((unused)) int bytes)
+{
+  // New char inserted
+  char c = *(text_inserted.data());
+  if (isspace(c))
+    {
+      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+
+      Gtk::TextBuffer::iterator pos(pos1);
+      // Remove the space
+      --pos;
+      Gtk::TextBuffer::iterator start(pos1);
+      Gtk::TextBuffer::iterator tmp;
+
+      // Extract the word just before the space
+      do {
+        // FIXME: several consecutive spaces: KO
+
+        // Skip the word and check if we reached a space
+        if (false == start.backward_word_start())
+          return ;
+        tmp = start;
+        if ((false == tmp.backward_char()) || (isspace(tmp.get_char())))
+          break ;
+      } while (1);
+
+      std::string partial_word = m_buffer->get_text(start, pos).raw();
+      // Auto-completion
+      if ('\t' == c)
+        {
+          // Look for it in the Forth dictionary
+          const char* completed_word =
+            simtadyn.m_forth.completion(partial_word);
+
+          if (nullptr == completed_word)
+            {
+              std::cout << "NOT FOUND '" << partial_word << "'" << std::endl;
+              // Not found: highline the word
+              m_buffer->erase(start, pos);
+              m_buffer->insert(pos, partial_word);
+            }
+          else
+            {
+              std::cout << "FOUND '" << partial_word << "'" << std::endl;
+
+              // OK. FIXME: mettre en jaune les mots immediats
+              m_buffer->erase(start, pos);
+              m_buffer->insert(pos, completed_word);
+            }
+        }
+      else
+        {std::cout << "ICI\n";
+          // Mark unknown word. FIXME underline IMMEDIATE words
+          Cell16 token;
+          bool immediate;
+          if (simtadyn.m_forth.dictionary().find(partial_word, token, immediate))
+            {
+              if (immediate)
+                {
+                  m_buffer->apply_tag(m_tag_immediate_word, start, pos);
+                }
+            }
+          else
+            {
+              Cell32 val;
+              if (false == simtadyn.m_forth.toNumber(partial_word, val))
+                {
+                  m_buffer->apply_tag(m_tag_unknown_word, start, pos);
+                }
+            }
+        }
+    }
+
+  // FIXME: reset completion state
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
 ForthEditor::ForthEditor()
   : m_cout(std::cout, m_result.get_buffer()),
     m_cerr(std::cerr, m_result.get_buffer())
-    m_color(m_history.get_buffer())
 {
   // Menus '_Forth Scripts'
   {

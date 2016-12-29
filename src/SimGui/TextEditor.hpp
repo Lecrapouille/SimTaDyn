@@ -229,6 +229,10 @@ public:
   Gtk::SeparatorMenuItem m_menuseparator[4];
 
 protected:
+  inline virtual TextDocument* create()
+  {
+    return new TextDocument(m_language);
+  }
   TextDocument* document();
   TextDocument* document(const uint32_t i);
   bool dialogSave(TextDocument *doc);

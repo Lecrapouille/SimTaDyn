@@ -48,7 +48,7 @@ public:
   //! \brief Accessor. Get the reference of a new forth dictionary.
   inline void dictionary(ForthDictionary& dico) { m_dictionary = dico; }
   //! \brief Complete the name a forth word from the dictionary.
-  void completion(std::string const& partial_name);
+  const char* completion(std::string const& partial_name);
   //! \brief Display the data stack.
   virtual void displayDStack() const;
   //! \brief Display the return stack.
@@ -57,6 +57,8 @@ public:
   void abort();
   //! \brief restore the Forth context to its initial state and throw an exception.
   void abort(std::string const& msg);
+  //! \brief Try converting a Forth word as a number.
+  bool toNumber(std::string const& word, Cell32& number) const;
 protected:
   //! \brief Create the header of a Forth word in the dictionary.
   void create(std::string const& word);
@@ -66,8 +68,6 @@ protected:
   std::pair<bool, std::string> parseStream();
   //! \brief Parse an included file when parsing a Forth script.
   void includeFile(std::string const& filename);
-  //! \brief Try converting a Forth word as a number.
-  bool toNumber(std::string const& word, Cell32& number) const;
   //! \brief Perform the action of a Forth primitive.
   void execPrimitive(const Cell16 idPrimitive);
   //! \brief Perform the action of a Forth token (byte code).

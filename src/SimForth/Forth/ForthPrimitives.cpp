@@ -780,4 +780,6 @@ void Forth::boot()
 
   // Hide some words to user
   m_dictionary.smudge("(CREATE)");
+
+  m_last_completion = dictionary().last();
 }

@@ -109,9 +109,9 @@ bool ForthDictionary::find(std::string const& name, Cell16& token, bool& immedia
 // **************************************************************
 //! \param last start the search at the LFA of a word (can be m_last for example).
 //! \param partial_name the begining of a forth word.
-//! \return the pair true + address of the first matching name, else return false + NULL.
+//! \return the address of the first matching name, else return nullptr.
 // **************************************************************
-std::pair<bool, const char*> ForthDictionary::completion(Cell16& last, std::string const& partial_name) const
+const char* ForthDictionary::completion(Cell16& last, std::string const& partial_name) const
 {
   Cell32 nfa;
   Cell32 length;
@@ -137,10 +137,9 @@ std::pair<bool, const char*> ForthDictionary::completion(Cell16& last, std::stri
             {
               // Go to the previous word
               nfa = read16at(ptr + length + 1U);
-              ptr = ptr - nfa;
-              last = (Cell16) ptr;
+              last = (Cell16) ptr - nfa;
 
-              return std::make_pair(true, (char*) &m_dictionary[ptr + 1U]);
+              return (char*) &m_dictionary[ptr + 1U];
             }
         }
 
@@ -150,7 +149,7 @@ std::pair<bool, const char*> ForthDictionary::completion(Cell16& last, std::stri
     } while (nfa);
 
   last = (Cell16) ptr;
-  return std::make_pair(false, nullptr);
+  return nullptr;
 }
 
 // **************************************************************

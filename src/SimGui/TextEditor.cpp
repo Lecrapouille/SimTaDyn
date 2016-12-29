@@ -1,5 +1,6 @@
 #include "TextEditor.hpp"
 #include <gtkmm/cssprovider.h>
+#include <ctype.h>
 
 GotoLineWindow::GotoLineWindow(Gsv::View* document)
   : m_label("Line number:"),
@@ -295,7 +296,7 @@ bool TextDocument::isModified() const
 }
 
 // *************************************************************************************************
-// TODO: for undo/redo actions
+// Slot.
 // *************************************************************************************************
 void TextDocument::onChanged()
 {
@@ -659,7 +660,7 @@ void TextEditor::onPageSwitched(Gtk::Widget* page, guint page_num)
 // *************************************************************************************************
 void TextEditor::empty(std::string const& title)
 {
-  TextDocument *doc = new TextDocument(m_language);
+  TextDocument *doc = create();
 
   m_nb_nonames++;
   doc->m_button.title(title + ' ' + std::to_string(m_nb_nonames));
@@ -675,7 +676,7 @@ void TextEditor::empty(std::string const& title)
 // *************************************************************************************************
 void TextEditor::newLoadedDocument(std::string const& filename)
 {
-  TextDocument *doc = new TextDocument(m_language);
+  TextDocument *doc = create();
 
   doc->load(filename);
   doc->m_button.link(&m_notebook, doc);

@@ -271,19 +271,28 @@ void Forth::execToken(const Cell16 tx)
 // **************************************************************
 //!
 // **************************************************************
-void Forth::completion(std::string const& partial_name)
+const char* Forth::completion(std::string const& partial_name)
 {
-  std::pair<bool, const char*> p;
+  const char* complete_name;
 
-  p = m_dictionary.completion(m_last_completion, partial_name);
-  if (p.first)
+  complete_name = m_dictionary.completion(m_last_completion, partial_name);
+  if (nullptr == complete_name)
     {
-      std::cout << p.second << std::endl;
+      // FIXME eviter de retester des mots deja vus en pasant en param
+      // l'ancienne valeur m_last_completion est en la testant pendant
+      // l'iteration des mots
+      m_last_completion = dictionary().last();
+      complete_name = m_dictionary.completion(m_last_completion, partial_name);
+    }
+  if (nullptr == complete_name)
+    {
+      std::cout << "No completion" << std::endl;
     }
   else
     {
-      m_last_completion = dictionary().last();
+      std::cout << "Completion:" << complete_name << std::endl;
     }
+  return complete_name;
 }
 
 // **************************************************************
