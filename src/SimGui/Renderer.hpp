@@ -39,7 +39,12 @@ public:
    * When camera states change, apply
    * these changement to the screen.
    */
-  void applyViewport(Camera2D& camera); // FIXME: pas de const a cause de getTransform
+  void applyViewport(Camera2D& camera) // FIXME: pas de const a cause de getTransform
+  {
+    (void) camera;
+    //std::cerr << "applyViewport A refaire" << std::endl;
+    // FIXME
+  }
 
   /*
    * Apply the viewport for the current camera.

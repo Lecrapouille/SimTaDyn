@@ -165,4 +165,12 @@ public:
   float32_t matrix[16];
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Camera2D& c)
+{
+  os << "Camera2D((x: " << c.look_at_x_ << ", y: " << c.look_at_y_
+     << "), (W: " << c.look_at_width_ << ", H: " << c.look_at_height_
+     << "))";
+  return os;
+}
+
 #endif /* CAMERA_HPP_ */

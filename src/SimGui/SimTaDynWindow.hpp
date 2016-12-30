@@ -14,7 +14,6 @@ public:
   SimTaDynWindow(const std::string& title);
   virtual ~SimTaDynWindow()
   {
-      //Gtk::Main::quit();
   }
 
   void onRealize();
@@ -34,7 +33,13 @@ public:
   Gtk::ToolButton *addMapScriptButon(const Gtk::BuiltinStockID icon,
                                      const std::string &script,
                                      const std::string &help);
+
 protected:
+  void onKeyPressed(GdkEventKey* evenement);
+  void onKeyReleased(GdkEventKey* evenement);
+
+  ForthEditor m_fortheditor;
+  MapEditor m_mapeditor;
   Gtk::HPaned m_hpaned[1];
   Gtk::VPaned m_vpaned[1];
   Gtk::VBox m_vbox[2];
@@ -49,8 +54,6 @@ protected:
   std::vector<Gtk::ToolButton> m_toolbuttons;
 
   GlDrawingArea m_drawing_area;
-  ForthEditor m_fortheditor;
-  MapEditor m_mapeditor;
   FindWindow *m_findwin;
   ReplaceWindow *m_replacewin;
   GotoLineWindow *m_gotolinewindow;
