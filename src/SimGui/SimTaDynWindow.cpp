@@ -140,24 +140,24 @@ void SimTaDynWindow::onRealize()
 {
   m_drawing_area.make_current();
   try
-  {
-    // GLArea only support Core profile.
-    glewExperimental = true;
-    if (GLEW_OK != glewInit())
     {
-      std::cerr << "[FAILED] when initializing GLEW (Maybe the OpenGL context does not exist)." << std::endl;
+      // GLArea only support Core profile.
+      glewExperimental = true;
+      if (GLEW_OK != glewInit())
+        {
+          std::cerr << "[FAILED] when initializing GLEW (Maybe the OpenGL context does not exist)." << std::endl;
+        }
+
+      m_drawing_area.throw_if_error();
+
+      m_drawing_area.start();
+      m_drawing_area.clearScreen();
     }
-
-    m_drawing_area.throw_if_error();
-
-    m_drawing_area.start();
-    m_drawing_area.clearScreen();
-  }
   catch (const Gdk::GLError& gle)
-  {
-    std::cerr << "[FAILED] An error occured making the context current during realize:" << std::endl;
-    std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
-  }
+    {
+      std::cerr << "[FAILED] An error occured making the context current during realize:" << std::endl;
+      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
+    }
 }
 
 // *************************************************************************************************
@@ -167,15 +167,15 @@ void SimTaDynWindow::onUnrealize()
 {
   m_drawing_area.make_current();
   try
-  {
-    m_drawing_area.throw_if_error();
-    m_drawing_area.end();
-  }
+    {
+      m_drawing_area.throw_if_error();
+      m_drawing_area.end();
+    }
   catch (const Gdk::GLError& gle)
-  {
-    std::cerr << "[FAILED] An error occured making the context current during unrealize" << std::endl;
-    std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
-  }
+    {
+      std::cerr << "[FAILED] An error occured making the context current during unrealize" << std::endl;
+      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
+    }
 }
 
 // *************************************************************************************************
@@ -184,18 +184,18 @@ void SimTaDynWindow::onUnrealize()
 bool SimTaDynWindow::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
 {
   try
-  {
-    m_drawing_area.throw_if_error();
-    m_drawing_area.render();
+    {
+      m_drawing_area.throw_if_error();
+      m_drawing_area.render();
 
-    return true;
-  }
+      return true;
+    }
   catch (const Gdk::GLError& gle)
-  {
-    std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
-    std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
-    return false;
-  }
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
+      return false;
+    }
 }
 
 // FIXME const Cell16 ForthToken)
@@ -219,7 +219,7 @@ Gtk::ToolButton *SimTaDynWindow::addForthButon(enum ToolBarNames toolbar,
       button->set_tooltip_text(help);
       // FIXME: exec1 est trop violent: ca efface le script en cours d'edition
       m_toolbar[toolbar].append(*button,
-         sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::exec1), script));
+                                sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::exec1), script));
       m_toolbar[toolbar].show_all_children();
     }
   else

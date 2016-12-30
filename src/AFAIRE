@@ -1,13 +1,20 @@
+PANGO_UNDERLINE_ERROR et http://www.bravegnu.org/gtktext/x498.html pour rechercher un mot forth
+
+Racourci Ctr-S save Ctr-O open dans l'editeur de texte.
+Changer le titre en ajoutan ** quand un fichier est modifie.
+Surligner le mot forth KO (faire avant le go to line)
+Nettoyer open1() et public: dans Forth.
+Completion des mots forth
+De meme bouton droit sur un INCLUDE => ouvre le fichier
+De meme bouton droit sur un mot ==> ouvre la definition
+Quand qq modifie le fichier associe au notebook. Faire une popup: refresh.
+Coloroer en gris quand un fichier est en read only.
+
 Ajouter des mots ON_REALIZE ... Exemple: void SimTaDynWindow::onRealize() ajouter if (exists("ON_REALIZE") { exec("ON_REALIZE"); }
 qui permettront de lancer des petits scripts
 
-Callback: quand un mot echoue: ouvrir le fichier et colorier la ligne
-De meme bouton droit sur un INCLUDE => ouvre le fichier
-De meme bouton droit sur un mot ==> ouvre la definition
 
-Completion des mots forth
-
-Ne pas effacer la fenetre sauf si fenetre interactive.
+Ne pas effacer la fenetre sauf si fenetre interactive. On peut ajouter des widgets faire une sorte de QT console
 
 Faire le dico forth dans la fenetre gtktreeview.
 
@@ -21,3 +28,28 @@ Test creer des gros fichiers textes et voir si mes std::string sont biens passes
 Fichier de 100 lignes de 4 mots
 ruby -e 'a=STDIN.readlines;100.times do;b=[];4.times do; b << a[rand(a.size)].chomp end; puts b.join(" "); end' < /usr/share/dict/words > file.txt
 
+ii  libgtk-3-0:i386                         3.18.9-1ubuntu3.1        i386                     GTK+ graphical user interface library
+ii  libgtk2.0-0:i386                        2.24.30-1ubuntu1         i386                     GTK+ graphical user interface library
+
+
+
+==9985== 232 bytes in 1 blocks are definitely lost in loss record 20,379 of 21,291
+==9985==    at 0x402D6BC: operator new(unsigned int) (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==9985==    by 0x807FE64: SimTaDynGraph::SimTaDynGraph() (SimTaDynGraphs.hpp:34)
+==9985==    by 0x807F035: MapEditor::MapEditor() (MapEditor.cpp:8)
+==9985==    by 0x808251F: SimTaDynWindow::SimTaDynWindow(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (SimTaDynWindow.cpp:10)
+==9985==    by 0x8087A40: main (main.cpp:13)
+
+==9985== 6 bytes in 1 blocks are definitely lost in loss record 701 of 21,291
+==9985==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==9985==    by 0x5806228: g_malloc (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
+==9985==    by 0x581F67D: g_strdup (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
+==9985==    by 0x5CA2C20: ??? (in /usr/lib/i386-linux-gnu/libgio-2.0.so.0.4800.1)
+==9985==    by 0x5C9203E: ??? (in /usr/lib/i386-linux-gnu/libgio-2.0.so.0.4800.1)
+==9985==    by 0x57FD5FF: ??? (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
+==9985==    by 0x5800D8A: g_main_context_dispatch (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
+==9985==    by 0x5801178: ??? (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
+==9985==    by 0x5801528: g_main_loop_run (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
+==9985==    by 0x50AF412: gtk_dialog_run (in /usr/lib/i386-linux-gnu/libgtk-3.so.0.1800.9)
+==9985==    by 0x43848F0: Gtk::Dialog::run() (in /usr/lib/i386-linux-gnu/libgtkmm-3.0.so.1.1.0)
+==9985==    by 0x8074354: TextEditor::open() (TextEditor.cpp:630)

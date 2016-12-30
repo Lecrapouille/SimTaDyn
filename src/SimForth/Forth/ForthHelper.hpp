@@ -126,9 +126,6 @@ typedef uint8_t        Cell8;
 #define STREAM m_streams_stack[m_opened_streams] // current stream parsed
 #define MAX_OPENED_STREAMS   (16U)    // depth of INCLUDE calls
 
-
-// TODO: definir COLOR_IMMEDIATE YELLOW etc
-
 // Dictionnary display
 #  define WORD_GROUPING 6
 
