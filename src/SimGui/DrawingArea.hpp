@@ -34,14 +34,14 @@ public:
   {
   }
 
-  inline uint32_t screenWidth() const //override
+  inline uint32_t screenWidth() const override
   {
-    return get_width();
+    return Gtk::GLArea::get_width();
   }
 
-  inline uint32_t screenHeight() const //override
+  inline uint32_t screenHeight() const override
   {
-    return get_height();
+    return Gtk::GLArea::get_height();
   }
 
   inline void keyPressed(Direction d) { m_direction[d] = true; }

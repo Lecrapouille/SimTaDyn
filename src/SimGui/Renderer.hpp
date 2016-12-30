@@ -124,11 +124,8 @@ public:
   /*
    * Number of pixels of the opengl window
    */
-  //virtual uint32_t screenWidth() const = 0;
-  //virtual uint32_t screenHeight() const = 0;
-  // FIXME
-  uint32_t screenWidth() { return 0; }
-  uint32_t screenHeight() { return 0; }
+  virtual uint32_t screenWidth() const = 0;
+  virtual uint32_t screenHeight() const = 0;
 
 protected:
   enum { X_AXIS, Y_AXIS, Z_AXIS, N_AXIS };
