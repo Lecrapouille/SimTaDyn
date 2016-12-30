@@ -10,13 +10,78 @@ ForthDocument::ForthDocument(Glib::RefPtr<Gsv::Language> language)
   // Tag for Forth word not in dictionary
   m_tag_unknown_word = m_buffer->create_tag("error");
   m_tag_unknown_word->property_underline() = Pango::UNDERLINE_ERROR;
+  m_tag_unknown_word->property_style() = Pango::STYLE_ITALIC;
 
   // Tag for immediate Forth words
   m_tag_immediate_word = m_buffer->create_tag("immediate");
-  m_tag_immediate_word->property_underline() = Pango::UNDERLINE_SINGLE;
+  m_tag_immediate_word->property_foreground() = "#FFA000";
+  m_tag_immediate_word->property_weight() = Pango::WEIGHT_BOLD;
 
   // Signal for checking Forth word and autocompletion
+  add_events(Gdk::KEY_PRESS_MASK);
+  signal_key_press_event().connect(sigc::mem_fun(this, &ForthDocument::onKeyPressed));
+
+  // Signal for highlighting unknow Forth words aor immediate words.
   m_buffer->signal_insert().connect(sigc::mem_fun(this, &ForthDocument::onInsertText));
+}
+
+// *************************************************************************************************
+//!
+// *************************************************************************************************
+bool ForthDocument::onKeyPressed(GdkEventKey* key_event)
+{
+  std::cout << "Key pressed " << (int) key_event->keyval << std::endl;
+  if (GDK_KEY_Tab == key_event->keyval)
+    {
+      m_buffer->insert(m_buffer->end(), "QQQQQQQ");
+
+        // Look for it in the Forth dictionary
+      /*SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+      const char* completed_word = simtadyn.m_forth.completion(partial_word);
+      if (nullptr != completed_word)
+        {
+          m_buffer->erase(start, pos);
+          m_buffer->insert(pos, completed_word);
+          }*/
+      return true;
+    }
+  return false;
+}
+
+// *************************************************************************************************
+//!
+// *************************************************************************************************
+void ForthDocument::skipWord(Gtk::TextBuffer::iterator& iter)
+{
+  while (1)
+    {
+      if (!iter.backward_char())
+        return ;
+
+      if (isspace(iter.get_char()))
+        {
+          iter.forward_char();
+          return ;
+        }
+    }
+}
+
+// *************************************************************************************************
+//!
+// *************************************************************************************************
+void ForthDocument::skipSpaces(Gtk::TextBuffer::iterator& iter)
+{
+  while (1)
+    {
+      if (!iter.backward_char())
+        return ;
+
+      if (!isspace(iter.get_char()))
+        {
+          iter.forward_char();
+          return ;
+        }
+    }
 }
 
 // *************************************************************************************************
@@ -26,75 +91,52 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
                                  const Glib::ustring& text_inserted,
                                  __attribute__((unused)) int bytes)
 {
+  // FIXME: enlever les tags
   // New char inserted
-  char c = *(text_inserted.data());
-  if (isspace(c))
+  std::string c = text_inserted.raw();
+  std::cout << "c: '" <<  text_inserted.raw() << "'" << std::endl;
+
+  if (isspace(c[0])) // Pas bon !! il faut faire une boucle text_inserted peut etre un gros morceau de code
     {
       SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
 
       Gtk::TextBuffer::iterator pos(pos1);
-      // Remove the space
-      --pos;
-      Gtk::TextBuffer::iterator start(pos1);
-      Gtk::TextBuffer::iterator tmp;
-
-      // Extract the word just before the space
-      do {
-        // FIXME: several consecutive spaces: KO
-
-        // Skip the word and check if we reached a space
-        if (false == start.backward_word_start())
-          return ;
-        tmp = start;
-        if ((false == tmp.backward_char()) || (isspace(tmp.get_char())))
-          break ;
-      } while (1);
-
+      skipSpaces(pos);
+      Gtk::TextBuffer::iterator start(pos);
+      skipWord(start);
       std::string partial_word = m_buffer->get_text(start, pos).raw();
-      // Auto-completion
-      if ('\t' == c)
-        {
-          // Look for it in the Forth dictionary
-          const char* completed_word =
-            simtadyn.m_forth.completion(partial_word);
+      std::cout << "WORD '" << partial_word << "'" << std::endl;
 
-          if (nullptr == completed_word)
-            {
-              std::cout << "NOT FOUND '" << partial_word << "'" << std::endl;
-              // Not found: highline the word
-              m_buffer->erase(start, pos);
-              m_buffer->insert(pos, partial_word);
-            }
-          else
-            {
-              std::cout << "FOUND '" << partial_word << "'" << std::endl;
-
-              // OK. FIXME: mettre en jaune les mots immediats
-              m_buffer->erase(start, pos);
-              m_buffer->insert(pos, completed_word);
-            }
-        }
-      else
-        {std::cout << "ICI\n";
-          // Mark unknown word. FIXME underline IMMEDIATE words
-          Cell16 token;
-          bool immediate;
-          if (simtadyn.m_forth.dictionary().find(partial_word, token, immediate))
-            {
-              if (immediate)
-                {
-                  m_buffer->apply_tag(m_tag_immediate_word, start, pos);
-                }
-            }
-          else
-            {
-              Cell32 val;
-              if (false == simtadyn.m_forth.toNumber(partial_word, val))
-                {
-                  m_buffer->apply_tag(m_tag_unknown_word, start, pos);
-                }
-            }
-        }
+      // TODO: not in a comment
+      {
+        // Mark unknown word. FIXME underline IMMEDIATE words
+        Cell16 token;
+        bool immediate;
+        if (simtadyn.m_forth.dictionary().find(partial_word, token, immediate))
+          {
+            if (immediate)
+              {
+                m_buffer->apply_tag(m_tag_immediate_word, start, pos);
+              }
+          }
+        else
+          {
+            Cell32 val;
+            if (false == simtadyn.m_forth.toNumber(partial_word, val))
+              {
+                // Check if not a definition
+                Gtk::TextBuffer::iterator p1(start);
+                skipSpaces(p1);
+                Gtk::TextBuffer::iterator p2(p1);
+                skipWord(p1);
+                partial_word = m_buffer->get_text(p1, p2).raw();
+                if (0 != partial_word.compare(":"))
+                  {
+                    m_buffer->apply_tag(m_tag_unknown_word, start, pos);
+                  }
+              }
+          }
+      }
     }
 
   // FIXME: reset completion state

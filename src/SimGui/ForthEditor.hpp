@@ -16,6 +16,9 @@ public:
 
 protected:
   void onInsertText(const Gtk::TextBuffer::iterator& pos, const Glib::ustring& text_inserted, int bytes);
+  void skipWord(Gtk::TextBuffer::iterator& iter);
+  void skipSpaces(Gtk::TextBuffer::iterator& iter);
+  bool onKeyPressed(GdkEventKey* key_event);
 
   Glib::RefPtr<Gtk::TextTag> m_tag_unknown_word;
   Glib::RefPtr<Gtk::TextTag> m_tag_immediate_word;
