@@ -4,14 +4,6 @@ bool GlDrawingArea::keyboard()
 {
     Camera2D& camera = Renderer::camera2D();
 
-    /*std::cout << "GlDrawingArea::keyboard:";
-    for (int i = GlDrawingArea::DirectionIterBegin;
-         i < GlDrawingArea::DirectionIterEnd; ++i)
-    {
-        std::cout << " " << m_direction[i];
-        }
-        std::cout << std::endl;*/
-
     if (m_direction[GlDrawingArea::Forward])
     {
       camera.zoomOffset(0.01f);
@@ -37,7 +29,7 @@ bool GlDrawingArea::keyboard()
       camera.moveOffset(-10.0f, 0.0f);
     }
 
-    std::cout << camera << std::endl;
+    // std::cout << camera << std::endl;
     Renderer::applyViewport(camera);
     return true;
 }

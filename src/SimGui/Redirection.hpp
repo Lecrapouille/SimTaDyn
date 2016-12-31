@@ -5,6 +5,7 @@
 #  include <gtkmm/textview.h>
 
 // http://gtk.10911.n7.nabble.com/Redirecting-cout-to-a-TextBuffer-td42437.html
+// TODO: set_color() ?
 class streamgui : public std::streambuf
 {
 public:
