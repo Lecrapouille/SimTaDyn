@@ -265,6 +265,14 @@ ForthEditor::ForthEditor()
     m_res_notebooks[1].append_page(m_scrolledwindow[ForthMsgTab], "_Messages", true);
     m_res_notebooks[1].set_tab_detachable(m_scrolledwindow[ForthMsgTab], true);
 
+    // Scroll to the end of the document when inserting text
+    // TBD: ouvrir l'onglet concerne ?
+    m_messages.get_buffer()->signal_insert().connect(
+    [this](const Gtk::TextIter, const Glib::ustring, int)
+      {
+        Gtk::TextBuffer::iterator iter = m_messages.get_buffer()->end();
+        m_messages.scroll_to(iter);
+      });
   }
 
   // Statusbar
