@@ -116,7 +116,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     //
     m_vbox[1].pack_start(m_toolbar[ForthToolbar], Gtk::PACK_SHRINK);
     m_vbox[1].pack_start(m_fortheditor.m_statusbar, Gtk::PACK_SHRINK);
-    m_vbox[1].pack_start(m_fortheditor.m_res_notebooks, Gtk::PACK_EXPAND_WIDGET);
+    m_vbox[1].pack_start(m_fortheditor.m_hpaned, Gtk::PACK_EXPAND_WIDGET);
 
     //
     m_hbox[0].pack_start(m_toolbar[MapToolbar], Gtk::PACK_SHRINK);

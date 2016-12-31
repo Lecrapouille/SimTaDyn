@@ -30,6 +30,8 @@ protected:
 class ForthEditor : public TextEditor
 {
 public:
+  enum ForthTabNames { ForthResTab, ForthHistoryTab, ForthDicoTab, ForthMsgTab };
+
   ForthEditor();
   ~ForthEditor();
   void empty();
@@ -40,13 +42,14 @@ public:
   void loadDictionary();
   void dumpDictionary();
 
-  Gtk::Notebook       m_res_notebooks; // FIXME: attention collision de noms TextEditor::m_notebook
+  Gtk::Notebook       m_res_notebooks[2]; // FIXME: attention collision de noms TextEditor::m_notebook
   Gtk::ScrolledWindow m_scrolledwindow[4];
-  Gtk::TextView       m_result;
+  Gtk::TextView       m_results;
   Gtk::TextView       m_history;
-  Gtk::TextView       m_debug;
+  Gtk::TextView       m_messages;
   Gtk::TreeView       m_dico;
   Gtk::Statusbar      m_statusbar;
+  Gtk::HPaned         m_hpaned;
 
   //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
 

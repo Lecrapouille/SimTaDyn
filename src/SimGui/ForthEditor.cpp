@@ -146,8 +146,8 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
 //
 // *************************************************************************************************
 ForthEditor::ForthEditor()
-  : m_cout(std::cout, m_result.get_buffer()),
-    m_cerr(std::cerr, m_result.get_buffer())
+  : m_cout(std::cout, m_results.get_buffer()),
+    m_cerr(std::cerr, m_messages.get_buffer())
 {
   // Menus '_Forth Scripts'
   {
@@ -239,22 +239,32 @@ ForthEditor::ForthEditor()
   // Forth text view for storing results, debug, historic
   {
     // FIXME: mettre les text view en read-only
-    m_scrolledwindow[0].add(m_result);
-    m_scrolledwindow[0].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[1].add(m_history);
-    m_scrolledwindow[1].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[2].add(m_debug);
-    m_scrolledwindow[2].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[3].add(m_dico);
-    m_scrolledwindow[3].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[ForthResTab].add(m_results);
+    m_scrolledwindow[ForthResTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[ForthHistoryTab].add(m_history);
+    m_scrolledwindow[ForthHistoryTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[ForthDicoTab].add(m_dico);
+    m_scrolledwindow[ForthDicoTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[ForthMsgTab].add(m_messages);
+    m_scrolledwindow[ForthMsgTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   }
 
-  // Forth notebook
+  // Forth detachable notebook
   {
-    m_res_notebooks.append_page(m_scrolledwindow[0], "_Result", true);
-    m_res_notebooks.append_page(m_scrolledwindow[1], "H_istory", true);
-    m_res_notebooks.append_page(m_scrolledwindow[2], "Debu_g", true);
-    m_res_notebooks.append_page(m_scrolledwindow[3], "_Dico", true);
+    m_hpaned.pack1(m_res_notebooks[0]);
+    m_res_notebooks[0].set_group_name("forth_res_notebooks");
+    m_res_notebooks[0].append_page(m_scrolledwindow[ForthResTab], "_Result", true);
+    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[ForthResTab], true);
+    m_res_notebooks[0].append_page(m_scrolledwindow[ForthHistoryTab], "H_istory", true);
+    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[ForthHistoryTab], true);
+    m_res_notebooks[0].append_page(m_scrolledwindow[ForthDicoTab], "_Dico", true);
+    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[ForthDicoTab], true);
+
+    m_hpaned.pack2(m_res_notebooks[1]);
+    m_res_notebooks[1].set_group_name("forth_res_notebooks");
+    m_res_notebooks[1].append_page(m_scrolledwindow[ForthMsgTab], "_Messages", true);
+    m_res_notebooks[1].set_tab_detachable(m_scrolledwindow[ForthMsgTab], true);
+
   }
 
   // Statusbar
@@ -403,7 +413,7 @@ void ForthEditor::exec1(const std::string &script)
   SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
 
   // Clear the old text in the "Result" tab of the notebook
-  Glib::RefPtr<Gtk::TextBuffer> buf = m_result.get_buffer();
+  Glib::RefPtr<Gtk::TextBuffer> buf = m_results.get_buffer();
   buf->erase(buf->begin(), buf->end());
 
   // Exec the Forth script and  measure the execution time
