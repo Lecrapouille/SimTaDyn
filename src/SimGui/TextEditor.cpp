@@ -23,8 +23,21 @@ void GotoLineWindow::gotoLine()
 {
   if (nullptr != m_document)
     {
-      // m_document->get_buffer()->cursorAt(std::stoi(m_entry.get_text().raw()) - 1, 0);
-      // m_document->get_buffer()->scroll_to_cursor_delayed(document, true, false);
+      // Allow only numbers to be entered
+      Glib::ustring text = m_entry.get_text();
+      for (uint32_t i = 0; i < text.length(); i++)
+        {
+          if (Glib::Unicode::isdigit(text[i]) == false)
+            return ;
+          // FIXME: display error
+        }
+
+      // Go to line
+      int line = std::stoi(text.c_str());
+      Glib::RefPtr<Gtk::TextBuffer> buf = m_document->get_buffer();
+      Gtk::TextBuffer::iterator iter = buf->get_iter_at_line(line);
+      m_document->scroll_to(iter);
+      // FIXME: highligth the line
     }
 }
 
