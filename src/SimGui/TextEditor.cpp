@@ -272,8 +272,8 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   m_textview.set_show_line_numbers(true);
   m_textview.set_show_right_margin(true);
   m_textview.set_highlight_current_line(true);
-  m_textview.set_tab_width(4U);
-  m_textview.set_indent_width(4U);
+  m_textview.set_tab_width(1U);
+  m_textview.set_indent_width(1U);
   m_textview.set_insert_spaces_instead_of_tabs(true);
   m_textview.set_auto_indent(true);
   m_buffer->signal_changed().connect(sigc::mem_fun(this, &TextDocument::onChanged));

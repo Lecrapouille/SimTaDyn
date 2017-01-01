@@ -1,27 +1,22 @@
-PANGO_UNDERLINE_ERROR et http://www.bravegnu.org/gtktext/x498.html pour rechercher un mot forth
-
-Racourci Ctr-S save Ctr-O open dans l'editeur de texte.
-Changer le titre en ajoutan ** quand un fichier est modifie.
-Surligner le mot forth KO (faire avant le go to line)
+Racourcis Ctr-S save Ctr-O open dans l'editeur de texte.
 Nettoyer open1() et public: dans Forth.
-Completion des mots forth
+Completion des mots forth: afficher la fenetre des possibilites + optimiser la fonction de recherche pour eviter qu'elle parcourt deux fois tout le dico.
+Faire des touches pour remonter dans l'history buffer du Forth
 De meme bouton droit sur un INCLUDE => ouvre le fichier
 De meme bouton droit sur un mot ==> ouvre la definition
 Quand qq modifie le fichier associe au notebook. Faire une popup: refresh.
-Coloroer en gris quand un fichier est en read only.
-
+Colorier en gris quand un fichier est en read only.
+Ameliorer les redirections des cout/cerr dans les notebook/statusbar et mieux repenser la position des notebooks
+Fenetre detachable entre opengl et Forth, dictionaire ?
+Boutons Forth et Map peuvent ils etre detachables comme les notebook ?
+Statusbar suxx + afficher colonne du fichier
+Finir l'affichage du dico forth dans la fenetre gtktreeview.
 Ajouter des mots ON_REALIZE ... Exemple: void SimTaDynWindow::onRealize() ajouter if (exists("ON_REALIZE") { exec("ON_REALIZE"); }
 qui permettront de lancer des petits scripts
-
-
 Ne pas effacer la fenetre sauf si fenetre interactive. On peut ajouter des widgets faire une sorte de QT console
 
-Faire le dico forth dans la fenetre gtktreeview.
-
 fontes X11 opengl
-
 gtkmm::ganv pour faire des widgets graph
-
 Faire des standalone (rtree, loader) pour verifier les fuites de memoires
 
 Test creer des gros fichiers textes et voir si mes std::string sont biens passes en argument dans mes fonctions c++ et non pas copies

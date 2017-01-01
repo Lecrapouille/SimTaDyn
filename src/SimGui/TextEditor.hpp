@@ -166,6 +166,9 @@ public:
   bool saveAs(std::string const& filename);
   bool load(std::string const& filename, bool clear = true);
   void cursorAt(const uint32_t line, const uint32_t index);
+  virtual void autoCompleteWord(__attribute__((unused)) int keyval)
+  {
+  }
   inline Glib::RefPtr<Gsv::Buffer> buffer()
   {
     return m_buffer;

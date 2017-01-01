@@ -1,5 +1,9 @@
 # SimTaDyn shortcuts #
 
+## Forth Editor ##
+
+TAB: the tabulator key auto-complete the Forth word currently typing.
+
 ## Mnemonics ##
 
 ### Menubar ###

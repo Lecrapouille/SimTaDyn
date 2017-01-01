@@ -284,14 +284,6 @@ const char* Forth::completion(std::string const& partial_name)
       m_last_completion = dictionary().last();
       complete_name = m_dictionary.completion(m_last_completion, partial_name);
     }
-  if (nullptr == complete_name)
-    {
-      std::cout << "No completion" << std::endl;
-    }
-  else
-    {
-      std::cout << "Completion:" << complete_name << std::endl;
-    }
   return complete_name;
 }
 

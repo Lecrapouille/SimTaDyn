@@ -5,7 +5,8 @@
 //
 // *************************************************************************************************
 ForthDocument::ForthDocument(Glib::RefPtr<Gsv::Language> language)
-  : TextDocument(language)
+  : TextDocument(language),
+    m_tab_sm(ForthAutoCompletSMBegin)
 {
   // Tag for Forth word not in dictionary
   m_tag_unknown_word = m_buffer->create_tag("error");
@@ -17,41 +18,71 @@ ForthDocument::ForthDocument(Glib::RefPtr<Gsv::Language> language)
   m_tag_immediate_word->property_foreground() = "#FFA000";
   m_tag_immediate_word->property_weight() = Pango::WEIGHT_BOLD;
 
-  // Signal for checking Forth word and autocompletion
-  add_events(Gdk::KEY_PRESS_MASK);
-  signal_key_press_event().connect(sigc::mem_fun(this, &ForthDocument::onKeyPressed));
-
   // Signal for highlighting unknow Forth words aor immediate words.
   m_buffer->signal_insert().connect(sigc::mem_fun(this, &ForthDocument::onInsertText));
 }
 
 // *************************************************************************************************
-//!
+//! \param keyval the value of the key pressed by the user when typing in the Forth editor
 // *************************************************************************************************
-bool ForthDocument::onKeyPressed(GdkEventKey* key_event)
+void ForthDocument::autoCompleteWord(const int keyval)
 {
-  std::cout << "Key pressed " << (int) key_event->keyval << std::endl;
-  if (GDK_KEY_Tab == key_event->keyval)
+  if (GDK_KEY_Tab == keyval)
     {
-      m_buffer->insert(m_buffer->end(), "QQQQQQQ");
+      // Get the iterator from the position of the cursor
+      Gtk::TextBuffer::iterator cursor = m_buffer->get_iter_at_mark(m_buffer->get_insert());
+      Gtk::TextBuffer::iterator start(cursor);
 
-        // Look for it in the Forth dictionary
-      /*SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-      const char* completed_word = simtadyn.m_forth.completion(partial_word);
-      if (nullptr != completed_word)
+      // Remove the space/tabulator inserted during the state ForthAutoCompletSMBegin
+      if (ForthAutoCompletSMEnd == m_tab_sm)
         {
-          m_buffer->erase(start, pos);
-          m_buffer->insert(pos, completed_word);
-          }*/
-      return true;
+          skipBackwardSpaces(start);
+        }
+
+      // The tabulator has not yet been inserted so no need to skip spaces
+      skipBackwardWord(start);
+      if (ForthAutoCompletSMBegin == m_tab_sm)
+        {
+          // Several space between the previous word: no completion allowed
+          if (start == cursor)
+            {
+              // but remove the space because it (keyval) will be inserted
+              m_buffer->erase(--start, cursor);
+              return ;
+            }
+          // Extract the word to be auto-completed
+          m_partial_word = m_buffer->get_text(start, cursor).raw();
+          // Next step
+          m_tab_sm = ForthAutoCompletSMEnd;
+        }
+
+      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+      const char* completed_word = simtadyn.m_forth.completion(m_partial_word);
+      if (NULL != completed_word)
+        {
+          // A Forth word has been found in the dictionary;
+          // Replace the word by the found one.
+          m_buffer->erase(start, cursor);
+          cursor = m_buffer->get_iter_at_mark(m_buffer->get_insert());
+          m_buffer->insert(cursor, completed_word);
+        }
+      else
+        {
+          // No Forth word found: restart the state machine
+          m_tab_sm = ForthAutoCompletSMBegin;
+        }
     }
-  return false;
+  else
+    {
+      // User did not press the tabulator: restart the state machine
+      m_tab_sm = ForthAutoCompletSMBegin;
+    }
 }
 
 // *************************************************************************************************
 //!
 // *************************************************************************************************
-void ForthDocument::skipWord(Gtk::TextBuffer::iterator& iter)
+void ForthDocument::skipBackwardWord(Gtk::TextBuffer::iterator& iter)
 {
   while (1)
     {
@@ -69,7 +100,7 @@ void ForthDocument::skipWord(Gtk::TextBuffer::iterator& iter)
 // *************************************************************************************************
 //!
 // *************************************************************************************************
-void ForthDocument::skipSpaces(Gtk::TextBuffer::iterator& iter)
+void ForthDocument::skipBackwardSpaces(Gtk::TextBuffer::iterator& iter)
 {
   while (1)
     {
@@ -94,18 +125,18 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
   // FIXME: enlever les tags
   // New char inserted
   std::string c = text_inserted.raw();
-  std::cout << "c: '" <<  text_inserted.raw() << "'" << std::endl;
+  // std::cout << "c: '" <<  text_inserted.raw() << "'" << std::endl;
 
   if (isspace(c[0])) // Pas bon !! il faut faire une boucle text_inserted peut etre un gros morceau de code
     {
       SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
 
       Gtk::TextBuffer::iterator pos(pos1);
-      skipSpaces(pos);
+      skipBackwardSpaces(pos);
       Gtk::TextBuffer::iterator start(pos);
-      skipWord(start);
+      skipBackwardWord(start);
       std::string partial_word = m_buffer->get_text(start, pos).raw();
-      std::cout << "WORD '" << partial_word << "'" << std::endl;
+      //std::cout << "WORD '" << partial_word << "'" << std::endl;
 
       // TODO: not in a comment
       {
@@ -126,9 +157,9 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
               {
                 // Check if not a definition
                 Gtk::TextBuffer::iterator p1(start);
-                skipSpaces(p1);
+                skipBackwardSpaces(p1);
                 Gtk::TextBuffer::iterator p2(p1);
-                skipWord(p1);
+                skipBackwardWord(p1);
                 partial_word = m_buffer->get_text(p1, p2).raw();
                 if (0 != partial_word.compare(":"))
                   {
@@ -287,6 +318,19 @@ ForthEditor::ForthEditor()
 ForthEditor::~ForthEditor()
 {
   // TODO: save the historic buffer
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ForthEditor::autoCompleteWord(const int keyval)
+{
+  TextDocument* doc = document();
+
+  if (nullptr != doc)
+    {
+      doc->autoCompleteWord(keyval);
+    }
 }
 
 // *************************************************************************************************

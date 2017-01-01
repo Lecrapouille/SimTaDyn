@@ -269,7 +269,6 @@ uint32_t SimTaDynWindow::addPluggin(const Glib::ustring& icon_name,
 
 void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
 {
-  std::cout << "SimTaDynWindow::onKeyPressed\n";
   switch (evenement->keyval)
     {
     case GDK_KEY_Escape:
@@ -301,6 +300,7 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
     default:
       break;
     }
+  m_fortheditor.autoCompleteWord(evenement->keyval);
 }
 
 void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)
