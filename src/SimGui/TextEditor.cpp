@@ -632,14 +632,14 @@ void TextEditor::open()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      TextEditor::open1(dialog.get_filename());
+      TextEditor::open(dialog.get_filename());
     }
 }
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::open1(std::string const& filename)
+void TextEditor::open(std::string const& filename)
 {
   // Already opened ? Switch the page
   for (int k = 0; k < m_notebook.get_n_pages(); ++k)

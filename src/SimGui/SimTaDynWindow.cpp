@@ -82,7 +82,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
       button->set_label("Open");
       button->set_stock_id(Gtk::Stock::NEW);
       button->set_tooltip_text("Open Forth document");
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::open));
+      m_toolbar[MapToolbar].append(*button, sigc::mem_fun0(m_fortheditor, &ForthEditor::open));
     }
   }
 

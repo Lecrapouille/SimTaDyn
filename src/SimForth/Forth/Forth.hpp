@@ -59,6 +59,12 @@ public:
   void abort(std::string const& msg);
   //! \brief Try converting a Forth word as a number.
   bool toNumber(std::string const& word, Cell32& number) const;
+  //! \brief Return the name of the stream which triggereg a fault.
+  inline const std::string& nameStreamInFault() const
+  {
+    return m_streams_stack[m_err_stream].name();
+  }
+
 protected:
   //! \brief Create the header of a Forth word in the dictionary.
   void create(std::string const& word);
@@ -91,9 +97,9 @@ protected:
   void isDStackUnderOverFlow() const;
   //! \brief Check if the return stack is not under/overflowing.
   int32_t isRStackUnderOverFlow() const;
-
   //! \brief Change the base of displayed numbers.
   bool changeDisplayBase(const uint8_t base);
+
 protected:
   TextColor &m_color;
   //! Data stack: store function parameters.
@@ -122,7 +128,6 @@ protected:
   Cell16  m_here_at_colon;   //! Save the last dictionary free slot before creating a new Forth word.
   std::string m_creating_word; //! The Forth word currently in creation.
   Cell32  m_saved_state; //! Save the interpreter state when enetring in a comment.
-public:
   ForthStream m_streams_stack[MAX_OPENED_STREAMS]; //! A stack of streams when script file include other files
   uint32_t m_opened_streams; //! Number of streams opened.
   ForthDictionary& m_dictionary; //! Forth dictionary.

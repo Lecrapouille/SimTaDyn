@@ -209,7 +209,7 @@ public:
   TextEditor();
   ~TextEditor();
   void open();
-  void open1(std::string const& filename); // FIXME ugly name: temporary
+  void open(std::string const& filename);
   void empty(std::string const& title = "New document");
   void save();
   void saveAs();

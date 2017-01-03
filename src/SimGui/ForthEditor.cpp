@@ -504,7 +504,8 @@ void ForthEditor::exec1(const std::string &script)
       m_statusbar.push("FAILED");
 
       // Show the faulty document
-      TextEditor::open1(simtadyn.m_forth.m_streams_stack[simtadyn.m_forth.m_err_stream].name());
+      TextEditor::open(simtadyn.m_forth.nameStreamInFault());
+      // TODO: select in red the faulty word
 
       // Show res (redirect sdout to gui)
       simtadyn.m_forth.ok(res);

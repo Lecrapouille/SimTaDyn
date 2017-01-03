@@ -1,5 +1,4 @@
 Racourcis Ctr-S save Ctr-O open dans l'editeur de texte.
-Nettoyer open1() et public: dans Forth.
 Completion des mots forth: afficher la fenetre des possibilites + optimiser la fonction de recherche pour eviter qu'elle parcourt deux fois tout le dico.
 Faire des touches pour remonter dans l'history buffer du Forth
 De meme bouton droit sur un INCLUDE => ouvre le fichier
