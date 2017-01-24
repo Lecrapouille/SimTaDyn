@@ -13,7 +13,7 @@
 
 Install dependencies:
 ```sh
-sudo apt-get install freeglut3 freeglut3-dev mesa-common-dev libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev libgtksourceviewmm-3.0-dev libglu1-mesa-dev libcppunit-dev gcov
+sudo apt-get install freeglut3 freeglut3-dev mesa-common-dev libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev libgtksourceviewmm-3.0-dev libglu1-mesa-dev libglew-dev libcppunit-dev gcovr
 ```
 
 It's highly recommanded to have the gtkmm-3.22 version and not the gtkm-3.18 due to a bug. See [here](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md)

@@ -1,6 +1,8 @@
 #ifndef OBSERVER_HPP_
 #  define OBSERVER_HPP_
 
+#  include <vector>
+
 template <typename T, class A> class Observable;
 
 // *************************************************************************************************
