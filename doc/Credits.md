@@ -36,16 +36,19 @@ The crashproof Forth
 
 * [ForthFreak](https://github.com/ForthHub/ForthFreak/wiki/Forthfreak-wiki)
 
-## Graph structure
+## Graph structure and Graph-Theory IDE
 
 * [Gephi](https://gephi.org/)
-The Open Graph Viz Platform
+The Open Graph Viz Platform.
 
 * [VivaGraphJS](https://github.com/anvaka/VivaGraphJS)
-Powerful graph vizualisation.
+Powerful graph vizualisation in JS and WebGL.
 
-* The Stanford cslib package
-(http://stanford.edu/~stepp/cppdoc/BasicGraph-class.html)
+* [The Stanford slib](http://stanford.edu/~stepp/cppdoc/BasicGraph-class.html)
+A complete class for graph written in C++.
+
+* [rocs](https://github.com/KDE/rocs)
+Is a graph IDE written in C++ and QT mixing a drawn interface with a scripting module manipulating the drawn graph. The script is QtScript Java Script. This IDE is the closest idea to SimTaDyn.
 
 ## RTree
 
