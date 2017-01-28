@@ -2,7 +2,7 @@
 #  define BASIC_GRAPH_HPP_
 
 //! Special container
-#include "GraphMemory.cpp"
+#include "GraphMemory.hpp"
 //! Node and Arc unique identifier
 #include "ClassCounter.hpp"
 
@@ -16,6 +16,8 @@ public:
     : m_fromNodeID(fromID), m_toNodeID(toID)
   {
   }
+
+  virtual ~BasicArc() {}
 
   //! \brief Return the unique identifier.
   inline Key id() const { return m_id; }
@@ -62,6 +64,8 @@ public:
     m_arcs.reserve(4);
     m_id = nodeID;
   }
+
+  virtual ~BasicNode() {}
 
   //! \brief Return the unique identifier.
   inline Key id() const

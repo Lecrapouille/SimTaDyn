@@ -1,3 +1,8 @@
+http://linuxfr.org/news/je-cree-mon-jeu-video-e01-les-systemes-a-entites
+Reprendre le tuto pour avoir une class Vector generique
+Forth dans une cellule: verifier que les piles n'ont pas changees de profondeur lors de l'execution d'une cellule ==> force a utiliser le resultat dans un champ d'une cellule
+Forth: idee de FreeForth de Lavaranne: pas d'execution mais compilation dans une fonction anonyme. Ce qui permettrait de pouvoir compiler du code dans des cellules.
+VivaGraph: a a jouter des signaux sur le graph: onAddNode, onChnaged... Idee pour appeller du code Forth ?
 Racourcis Ctr-S save Ctr-O open dans l'editeur de texte.
 Completion des mots forth: afficher la fenetre des possibilites + optimiser la fonction de recherche pour eviter qu'elle parcourt deux fois tout le dico.
 Faire des touches pour remonter dans l'history buffer du Forth
