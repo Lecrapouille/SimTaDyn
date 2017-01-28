@@ -8,7 +8,7 @@ Use Doxywizard and the Doxyfile file for generating the code documentation.
 
 Here is the simplified SimTaDyn Architecture
 
-![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Architecture.jpeg)
+![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Architecture.jpg)
 
 
 SimTaDynWindow is a Gtk window containing mainly a Forth editor and a geographic map editor.
