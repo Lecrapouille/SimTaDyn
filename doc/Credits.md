@@ -102,7 +102,11 @@ Fork of the previous link (better look)
 
 ## Drawing cities and streets
 
+* [glosm](https://github.com/AMDmi3/glosm)
+C++ and OpenGL legacy for displaying in 3D Openstreet map files.
+
 * [Curved Path](http://www.redblobgames.com/articles/curved-paths/)
+
 * [Smooth thick lines using geometry shader](https://forum.libcinder.org/topic/smooth-thick-lines-using-geometry-shader)
 
 ## OpenGL and 2D lib

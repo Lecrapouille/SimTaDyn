@@ -17,6 +17,10 @@ SimTaDyn (SIMulateur TAbleur DYNamique in french) is a geographic information sy
 * [SimTaDyn shortcuts](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Shortcuts.md)
 * [SimForth scripts](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/SimForth/Forth/doc/forth.md)
 
+## For developers
+
+* [SimTaDyn architecture](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Architecture.md)
+
 ## Credits
 
 [Credits](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Credits.md)
