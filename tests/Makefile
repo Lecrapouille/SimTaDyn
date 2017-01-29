@@ -1,4 +1,4 @@
-.PHONY: clean build
+.PHONY: clean build coverage gcov
 
 ###################################################
 # Color
@@ -16,35 +16,34 @@ print-link= \
 
 ###################################################
 # Path where to store *.o files. Default: ./build/
-ifeq ($(DEST),)
-DEST = build
+ifeq ($(BUILD),)
+BUILD = build
 endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -Icommon -I../src/common -Icells -I../src/cells
+INCLUDES = -I. -Icommon -Icells -I../src/Common -I../src/SimMap/Cells -I../src/SimMap/RTree
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(DEST):common:../src/common:cells:../src/cells
+VPATH=.:$(BUILD):common:cells:../src/Common:../src/SimMap/Cells:../src/SimMap/RTree
 
 ###################################################
 # Set objects architecture specific
 OBJECTS = Vector3D.o VectorTests.o \
 	Color.o ColorTests.o \
-	BoundingBox.o BoundingBoxTests.o \
-	SimTaDynCellsTests.o \
+	GraphMemoryTests.o \
+	BasicGraphTests.o \
 	main.o
+# BoundingBox.o BoundingBoxTests.o \
+
 TARGET = UnitTest
 
 ###################################################
 # Compil options
-#CC = gcc
-#CFLAGS = -W -Wall -Wextra -O2 -g `pkg-config --cflags gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
-#LDFLAGS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkglext-1.0 pango`
-CC=g++
-CFLAGS = -W -Wall -Wextra -O2 -g --coverage -std=c++11 `pkg-config --cflags gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2`
-LDFLAGS = --coverage `pkg-config --libs gtkmm-2.4 glibmm-2.4 gtkglextmm-1.2` -lcppunit
+CXX = g++
+CXXFLAGS = -W -Wall -Wextra -O2 -g --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES =
 
 ###################################################
@@ -52,33 +51,32 @@ DEFINES =
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo
+       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW -ldl
+
+###################################################
+# Files dependencies
+DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
+POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
 
 ###################################################
 # Main entry
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@$(call print-link,"Linking","$(TARGET)","$(DEST)/$@","")
-	@cd $(DEST) && $(CC) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
-
-%.o: %.cpp %.hpp
-	@$(call print-comp,"Compiling C","$(TARGET)","$<")
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
+	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 %.o: %.cpp
+%.o: %.cpp $(BUILD)/%.d
 	@$(call print-comp,"Compiling C","$(TARGET)","$<")
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
-
-%.o: %.cpp
-	@$(call print-comp,"Compiling C","$(TARGET)","$<")
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(DEST)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(POSTCOMPILE)
 
 ###################################################
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~ gcov gui/*~ cells/*~ common/*~ $(DEST) 2> /dev/null
+	@rm -fr *~ gcov gui/*~ cells/*~ common/*~ $(BUILD) 2> /dev/null
 
 ###################################################
 # Code coverage
@@ -86,10 +84,16 @@ coverage: $(TARGET) gcov
 	./build/$(TARGET)
 	gcovr -r ../. --html -o gcov/coverage.html --html-details
 
-###################################################
-# Create a temporary folder to store *.o
-$(OBJECTS): | $(DEST)
-$(DEST):
-	@mkdir -p $(DEST)
 gcov:
 	@mkdir -p gcov
+
+###################################################
+# Create a temporary folder to store *.o
+$(DEPFILES): | $(BUILD)
+$(OBJECTS): | $(BUILD)
+$(BUILD):
+	@mkdir -p $(BUILD)
+$(BUILD)/%.d: ;
+.PRECIOUS: $(BUILD)/%.d
+
+-include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJECTS)))

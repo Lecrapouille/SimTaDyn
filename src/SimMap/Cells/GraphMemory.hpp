@@ -1,4 +1,3 @@
-// -*- c++ -*- Coloration Syntaxique pour Emacs
 #ifndef GRAPHMEMORY_HPP_
 #  define GRAPHMEMORY_HPP_
 
@@ -34,7 +33,6 @@
   template<class T> class container
   {
   public:
-
     //! \class iterator allows to iterate on elements contained by \c
     //! container. Implements methods for compatibility with
     //! std::iterator.
@@ -52,13 +50,14 @@
 
       //! \brief Empty constructor.
       iterator() :
-        m_container(nullptr), m_itr(0)
+        m_container(nullptr), m_itr(0), m_begin(0), m_end(0)
       {
       }
       //! \brief Constructor by copy from an iterator.
       //! \param it the iterator to copy.
-      iterator(const iterator& it)
-        : m_container(it.m_container), m_itr(it.m_itr)
+      iterator(iterator const& it)
+        : m_container(it.m_container), m_itr(it.m_itr),
+          m_begin(it.m_begin), m_end(it.m_end)
       {
       }
       //! \brief Constructor by copy from a container.
@@ -69,40 +68,20 @@
       {
         if (container.empty())
           {
-            // it.begin() == it.end();
-            m_itr = 0;
+            m_itr = m_begin = m_end = 0;
           }
         else if (start_at_end)
           {
-            uint32_t index = container.m_pools.size();
-            uint32_t subindex;
-            while (index--)
-              {
-                subindex = container.emptyPoolE(index);
-                if (M != subindex)
-                  break;
-              }
-            assert(M != subindex);
-            m_itr = M * index + subindex + 1U;
+            m_itr = container.emptyPoolE();
             skipDec();
-            // TBD: ++m_itr permet de faire un for(it ... ; it != end()) mais ne permet d'acceder au dernier element
             ++m_itr;
+            m_end = m_itr;
           }
         else
           {
-            const uint32_t size = container.m_pools.size();
-            uint32_t index = 0;
-            uint32_t subindex;
-            while (index < size)
-              {
-                subindex = container.emptyPoolB(index);
-                if (M != subindex)
-                  break;
-                ++index;
-              }
-            assert(M != subindex);
-            m_itr = M * index + subindex - 1U;
+            m_itr = container.emptyPoolB();
             skipInc();
+            m_begin = m_itr;
           }
       }
       //! \brief
@@ -121,21 +100,42 @@
       iterator& operator++()
       {
         check_assertion();
-        skipInc();
+        if (!m_container->empty())
+          {
+            skipInc();
+          }
+        return *this;
+      }
+      //! \brief Iterate on the previous occupied element (empty slots are ignored).
+      inline iterator operator--(int)
+      {
+        iterator copy(*this);
+        operator--();
+        return copy;
+      }
+      //! \brief Iterate on the previous occupied element (empty slots are ignored).
+      iterator& operator--()
+      {
+        check_assertion();
+        if (!m_container->empty())
+          {
+            skipDec();
+          }
         return *this;
       }
       //! \brief Access to the content of the slot
       T const& operator*() const
       {
         check_assertion();
-        T* res = m_container->get(m_itr);
-        assert(nullptr != res && "Invalid iterator dereference");
-        return *res;
+        return m_container->get(m_itr / M, MODULO(m_itr, M));
+        //T* res = m_container->get(m_itr);
+        //assert(nullptr != res && "Invalid iterator dereference");
+        //return *res;
       }
       //! \brief Access to the content of the slot
       inline T const* operator->() const
       {
-        return m_container->get(m_itr);
+        return m_container->get(m_itr / M, MODULO(m_itr, M));
       }
       //! \brief compare iterators.
       inline bool operator==(const iterator& rhs) const
@@ -163,9 +163,7 @@
           {
             ++m_itr;
           }
-        while ((m_itr < M * m_container->allocated() - 1U) &&
-               (false == m_container->isOccupied(m_itr)));
-
+        while ((m_itr < m_end) && (false == m_container->isOccupied(m_itr)));
       }
       //! Skip non-occupied elements or halt if reached the end of the container.
       void skipDec()
@@ -174,12 +172,12 @@
           {
             --m_itr;
           }
-        while ((m_itr != 0) && (false == m_container->isOccupied(m_itr)));
+        while ((m_itr >= m_begin) && (false == m_container->isOccupied(m_itr)));
       }
       //! \brief the address of the container to explore.
       const container<T>* m_container;
       //! \brief the iterator.
-      uint32_t m_itr;
+      uint32_t m_itr, m_begin, m_end;
     };
 
   public:
@@ -256,7 +254,7 @@
         }
     }
     //! \brief Remove the last inserted element. Complexity is O(1).
-    void remove_last()
+    void remove()
     {
       if (m_index > 0)
         {
@@ -287,12 +285,16 @@
     }
     //! \brief Return the element stored at the given index. Complexity is O(1).
     //! \param id the location of the slot.
-    //! \return the address of the slot, return nullptr if the
-    //! location is erroneous or the slot empty.
-    T* get(const uint32_t id) const // FIXME: return shared_ptr
+    //! \return the content of the slot or throw an out_of_range exception if
+    //! the location is erroneous or the slot empty.
+    T& get(const uint32_t id) const
     {
       return get(id / M, MODULO(id, M));
     }
+    /*const T& get(const uint32_t id) const
+    {
+      return get(id / M, MODULO(id, M));
+      }*/
     //! \brief Return an iterator of the first element of the container.
     inline iterator begin() const
     {
@@ -310,7 +312,9 @@
     //! iterator on the last element.
     inline iterator back() const
     {
-      return iterator(*this, true) - 1U;
+      iterator it(*this, true);
+      --it.m_itr;
+      return it;
     }
     //! \brief Return the number of elements stored.
     inline uint32_t occupation() const
@@ -335,7 +339,7 @@
         {
           Index j = I; while (j--) { m_pools[i]->m_occupied[j] = 0; }
         }
-      m_index = 0;
+      m_index = m_occupation = 0;
     }
     //! \brief Pretty print the memory.
     void debug() const
@@ -374,53 +378,76 @@
     {
       return (index < m_allocated) && (subindex < M);
     }
-    //!
-    // No check on bounds
-    uint32_t emptyPoolB(const uint32_t index) const // FIXME Chnager nom
-    {
-      for (uint32_t subindex = 0; subindex < S; ++subindex)
-        {
-          if (0 != m_pools[index]->m_occupied[subindex])
-            {
-              return subindex;
-            }
-        }
-      return M;
-    }
-        //!
-    // No check on bounds
-    uint32_t emptyPoolE(const uint32_t index) const // FIXME Chnager nom
-    {
-      uint32_t subindex = S;
-      while (subindex--)
-        {
-          if (0 != m_pools[index]->m_occupied[subindex])
-            {
-              return subindex;
-            }
-        }
-      return M;
-    }
-    T* get(const uint32_t index, const uint32_t subindex) const
-    {
-      if (index < m_allocated)
-        {
-          // Occuped
-          if (0 != (m_pools[index]->m_occupied[subindex / S] &
-                    (1 << (MODULO(subindex, S)))))
-            {
-              return &(m_pools[index]->m_slots[subindex]);
-            }
-          // Not occuped
-          return nullptr;
-        }
-      // Out of bound
-      return nullptr;
-    }
+    //! \brief
     inline bool isOccupied(const uint32_t index, const uint32_t subindex) const
     {
       return 0 != (m_pools[index]->m_occupied[subindex / S] &
                    (1 << (MODULO(subindex, S))));
+    }
+    //! \brief
+    // No check on bounds
+    uint32_t emptyPoolB() const // FIXME Chnager nom
+    {
+      const uint32_t size = m_pools.size();
+      uint32_t index = 0;
+      while (index < size)
+        {
+          for (uint32_t subindex = 0; subindex < S; ++subindex)
+            {
+              if (0 != m_pools[index]->m_occupied[subindex])
+                {
+                  return M * index + subindex - 1U;
+                }
+            }
+          ++index;
+        }
+      return ((uint32_t) - 1U);
+    }
+    //!
+    // No check on bounds
+    uint32_t emptyPoolE() const // FIXME Chnager nom
+    {
+      uint32_t index = m_pools.size();
+      while (index--)
+        {
+          uint32_t subindex = S;
+          while (subindex--)
+            {
+              if (0 != m_pools[index]->m_occupied[subindex])
+                {
+                  return M * index + subindex + 1U;
+                }
+            }
+        }
+      return 1U;
+    }
+    // FIXME overloader operator[] pour acceder au slot sans passer par les securites de get()
+    /*inline const T& get(const uint32_t index, const uint32_t subindex) const
+    {
+      return get_(index, subindex);
+      }*/
+    inline T& get(const uint32_t index, const uint32_t subindex) const
+    {
+      return get_(index, subindex);
+    }
+    T& get_(const uint32_t index, const uint32_t subindex) const
+    {
+      if (isValidIndex(index, subindex) && isOccupied(index, subindex))
+        {
+          return m_pools[index]->m_slots[subindex];
+        }
+      // Launch an exception
+      std::string str;
+      if (isValidIndex(index, subindex))
+        {
+          str = "Invalid index";
+        }
+      else
+        {
+          str = "Removed element";
+        }
+      throw std::out_of_range(str + " (" + std::to_string(index) +
+                              ", " + std::to_string(subindex) + ')');
     }
     //!
     inline void insert(const uint32_t index,
