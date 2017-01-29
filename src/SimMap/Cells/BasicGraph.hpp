@@ -2,9 +2,11 @@
 #  define BASIC_GRAPH_HPP_
 
 //! Special container
-#include "GraphMemory.hpp"
-//! Node and Arc unique identifier
-#include "ClassCounter.hpp"
+#  include "GraphMemory.hpp"
+#  include "simtypes.hpp"
+
+class BasicNode;
+class BasicArc;
 
 // *************************************************************************************************
 //
@@ -12,41 +14,42 @@
 class BasicArc
 {
 public:
-  BasicArc(const Key fromID, const Key toID)
-    : m_fromNodeID(fromID), m_toNodeID(toID)
+  BasicArc(Key id, BasicNode *fromNode, BasicNode *toNode)
+    : m_id(id),
+      m_fromNode(fromNode),
+      m_toNode(toNode)
   {
+  }
+
+  /*BasicArc(BasicArc const& arc)
+    : m_id(arc.id),
+      m_fromNode(arc.m_fromNode),
+      m_toNode(arc.m_toNode)
+  {
+  }*/
+
+  BasicArc* clone() const
+  {
+    return new BasicArc(*this);
   }
 
   virtual ~BasicArc() {}
 
   //! \brief Return the unique identifier.
   inline Key id() const { return m_id; }
-  inline Key from() const { return m_fromNodeID; }
-  inline void from(const Key fromID) { m_fromNodeID = fromID; }
-  inline Key to() const { return m_toNodeID; }
-  inline void to(const Key toID) { m_toNodeID = toID; }
+  inline BasicNode *from() const { return m_fromNode; }
+  inline void from(BasicNode *fromNode) { m_fromNode = fromNode; }
+  inline BasicNode *to() const { return m_toNode; }
+  inline void to(BasicNode *toNode) { m_toNode = toNode; }
 
 protected:
   //! \brief Make an instance unique with this identifier.
   //! Used it for comparing element in a container.
   Key m_id;
 
-  // TBD: Key or shareptr<BasicNode> ?
-  Key m_fromNodeID;
-  Key m_toNodeID;
+  BasicNode *m_fromNode;
+  BasicNode *m_toNode;
 };
-
-inline std::ostream& operator<<(std::ostream& os, const BasicArc& e)
-{
-  os << "Edge(" << e.from() << ", " << e.to() << ")";
-  return os;
-}
-
-inline std::ostream& operator<<(std::ostream& os, const BasicArc *e)
-{
-  os << "Edge(" << e->from() << ", " << e->to() << ")";
-  return os;
-}
 
 // *************************************************************************************************
 //
@@ -54,15 +57,21 @@ inline std::ostream& operator<<(std::ostream& os, const BasicArc *e)
 class BasicNode
 {
 public:
-  BasicNode()
-  {
-    m_arcs.reserve(4);
-  }
-
   BasicNode(const Key nodeID)
   {
     m_arcs.reserve(4);
     m_id = nodeID;
+  }
+
+  BasicNode(BasicNode const& node)
+    : m_id(node.m_id), m_arcs(node.m_arcs)
+  {
+    m_arcs.reserve(4);
+  }
+
+  BasicNode* clone() const
+  {
+    return new BasicNode(*this);
   }
 
   virtual ~BasicNode() {}
@@ -73,22 +82,27 @@ public:
     return m_id;
   }
 
-  inline const std::vector<Key> &arcs() const
+  inline const std::vector<BasicArc*> &arcs() const
   {
     return m_arcs;
   }
 
-  inline void addArc(const Key arcID)
+  inline void addArc(BasicArc *arc)
   {
-    m_arcs.push_back(arcID);
+    m_arcs.push_back(arc);
   }
 
-  inline void removeArc(const Key arcID)
+  inline void removeArc(const uint32_t nth)
   {
-    m_arcs.erase(m_arcs.begin() + arcID);
+    m_arcs.erase(m_arcs.begin() + nth);
   }
 
-  inline Key at(const uint32_t i) const
+  inline BasicArc *neighbor(const uint32_t i)
+  {
+    return m_arcs.at(i);
+  }
+
+  inline const BasicArc *neighbor(const uint32_t i) const
   {
     return m_arcs.at(i);
   }
@@ -103,18 +117,36 @@ protected:
   //! Used it for comparing element in a container.
   Key m_id;
   //!
-  std::vector<Key> m_arcs;
+  std::vector<BasicArc*> m_arcs;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const BasicNode& n)
 {
-  os << "Node(" << n.id() << ")";
+  os << "Node(" << n.id() << "){ ";
+  uint32_t i = n.degree();
+  while (i--)
+    {
+      os << n.neighbor(i)->id() << " ";
+    }
+  os << "}";
   return os;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const BasicNode* n)
 {
-  os << "Node(" << n->id() << ")";
+  os << *n;
+  return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const BasicArc& e)
+{
+  os << "Arc(" << e.id() << "){" << e.from() << ", " << e.to() << "}";
+  return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const BasicArc *e)
+{
+  os << *e;
   return os;
 }
 
@@ -122,7 +154,6 @@ inline std::ostream& operator<<(std::ostream& os, const BasicNode* n)
 //
 // *************************************************************************************************
 template <class N, class A> class BasicGraph
-  : private ClassCounter<N>, private ClassCounter<A>
 {
 public:
 
@@ -132,15 +163,8 @@ public:
 
   virtual ~BasicGraph()
   {
-    auto end = m_nodes.end();
-    for (auto it = m_nodes.begin(); it != end; ++it)
-      {
-        removeNode((*it)->id());
-      }
-    for (auto it = m_arcs.begin(); it != m_arcs.end(); ++it)
-      {
-        removeArc((*it)->id());
-      }
+    clearNodes();
+    clearArcs();
   }
 
   // ---- NODES ------------------------------------------------------------------------------------
@@ -154,33 +178,38 @@ public:
       }
   }
 
+  //! Add a node created not using the graph method
+  void addNode(BasicNode const& n)
+  {
+    if (!hasNode(n.id()))
+      {
+        N *node = n.clone();
+        m_nodes.insert(node->id(), node);
+      }
+  }
+
   inline bool hasNode(const Key nodeID) const
   {
     return m_nodes.isValidIndex(nodeID) && m_nodes.isOccupied(nodeID);
   }
 
-  N* getNode(const Key nodeID) const // TODO shareptr
+  inline N* getNode(const Key nodeID) const
   {
-    N* node = nullptr;
-
-    if (hasNode(nodeID))
-      {
-        node = *(m_nodes.get(nodeID));
-        assert(nullptr != node);
-      }
-    return node;
+    return m_nodes.get(nodeID);
   }
 
   inline void removeNode(const Key nodeID)
   {
     if (hasNode(nodeID))
       {
-        N* node = *(m_nodes.get(nodeID)); // FIXME degeux
+        N* node = m_nodes.get(nodeID); // FIXME direct access c'est ok
+        assert(nullptr != node);
 
-        const std::vector<Key> &arcs = node->arcs();
-        for (auto it = arcs.begin(); it != arcs.end(); ++it)
+        const std::vector<A*> arcs = node->arcs();
+        auto end = arcs.end();
+        for (auto it = arcs.begin(); it != end; ++it)
           {
-            removeArc(*it);
+            removeArc((*it)->id());
           }
 
         delete node;
@@ -195,7 +224,11 @@ public:
 
   void clearNodes()
   {
-    ClassCounter<N>::reset();
+    auto end = m_nodes.end();
+    for (auto it = m_nodes.begin(); it != end; ++it)
+      {
+        //removeNode((*it)->id());
+      }
     m_nodes.clear();
   }
 
@@ -211,49 +244,42 @@ public:
   {
     addNode(fromID);
     addNode(toID);
+    private_addArc(getNode(fromID), getNode(toID));
+  }
 
-    A *arc = newArc(fromID, toID);
-    N* fromNode = *(m_nodes.get(fromID));
-    N* toNode = *(m_nodes.get(toID));
-
-    assert(nullptr != fromNode);
-    assert(nullptr != toNode);
-
-    m_arcs.append(arc);
-    fromNode->addArc(arc->id());
-    if (fromID != toID)
-      {
-        toNode->addArc(arc->id());
-      }
+  void addArc(BasicNode const& fromNode,
+              BasicNode const& toNode)
+  {
+    addNode(fromNode);
+    addNode(toNode);
+    private_addArc(fromNode, toNode);
   }
 
   inline bool hasArc(const Key arcID) const
   {
-    std::cout << "hasArc" << std::endl;
-    return m_arcs.isOccupied(arcID);
+    return m_arcs.isValidIndex(arcID) && m_arcs.isOccupied(arcID);
   }
 
-  A* getArc(const Key arcID) const
+  inline A* getArc(const Key arcID) const
   {
-    if (hasArc(arcID))
-      {
-        return *(m_arcs.get(arcID));
-      }
-    return nullptr;
+    return m_arcs.get(arcID);
   }
 
   A* getArc(const Key fromNodeID, const Key toNodeID) const
   {
-    N *node = getNode(fromNodeID);
-
+    N* node = m_nodes.get(fromNodeID);
     if (nullptr == node)
       return nullptr;
 
-    for (Key i = 0; i < node->degree(); ++i)
+    uint32_t i = node->degree();
+    while (i--)
       {
-        A *arc = getArc(node->at(i));
-        assert(nullptr != arc);
-        if ((arc->from() == fromNodeID) && (arc->to() == toNodeID))
+        A* arc = m_arcs.get(node->neighbor(i)->id());
+        if (nullptr == arc)
+          return nullptr;
+
+        if ((arc->from()->id() == fromNodeID) &&
+            (arc->to()->id() == toNodeID))
           {
             return arc;
           }
@@ -262,24 +288,21 @@ public:
   }
 
   // TBD: vector<Key> or vector<IArcs*>
-  const std::vector<Key> &getArcsfromNode(const Key nodeID) const
+  const std::vector<A*> *neighbors(const Key nodeID) const
   {
     N* node = getNode(nodeID);
     if (nullptr == node)
-      {
-        // FIXME throw exception
-      }
-    return node->arcs();
+      return nullptr;
+    return &node->arcs();
   }
 
   void removeArc(const Key arcID)
   {
-    std::cout << "removeArc" << std::endl;
     A *arc = getArc(arcID);
     if (nullptr != arc)
       {
-        N *fromNode = getNode(arc->from());
-        N *toNode = getNode(arc->to());
+        N *fromNode = getNode(arc->from()->id());
+        N *toNode = getNode(arc->to()->id());
 
         if (nullptr != fromNode)
           {
@@ -290,6 +313,9 @@ public:
           {
             toNode->removeArc(arcID);
           }
+
+        delete arc;
+        m_arcs.remove(arcID);
       }
   }
 
@@ -300,14 +326,33 @@ public:
 
   void clearArcs()
   {
-    ClassCounter<A>::reset();
-    m_arcs.clear();
+    auto end = m_arcs.end();
+    for (auto it = m_arcs.begin(); it != end; ++it)
+      {
+        //removeArc((*it)->id());
+      }
   }
 
   inline void debugArcs() const
   {
     std::cout << "List of arcs:" << std::endl;
     m_arcs.debug();
+  }
+
+private:
+
+  void private_addArc(BasicNode *fromNode, BasicNode *toNode)
+  {
+    assert(nullptr != fromNode);
+    assert(nullptr != toNode);
+
+    A *arc = newArc(fromNode, toNode);
+    m_arcs.append(arc);
+    fromNode->addArc(arc);
+    if (fromNode->id() != toNode->id())
+      {
+        toNode->addArc(arc);
+      }
   }
 
 protected:
@@ -322,13 +367,14 @@ protected:
     return new N(nodeID);
   }
 
-  A *newArc(const Key fromID, const Key toID)
+  A *newArc(BasicNode *fromNode, BasicNode *toNode)
   {
-    return new A(fromID, toID);
+    return new A(m_arc_unique++, fromNode, toNode);
   }
 
   container<N*> m_nodes;
   container<A*> m_arcs;
+  Key m_arc_unique = 0;
 };
 
 #endif /* BASIC_GRAPH_HPP_ */
