@@ -86,14 +86,14 @@ void BasicGraphTests::test()
   // Access to correct arc
   BasicArc *a1 = g1->getArc(5U, 2U);
   CPPUNIT_ASSERT_EQUAL(0U, a1->id());
-  CPPUNIT_ASSERT_EQUAL(5U, a1->from()->id());
-  CPPUNIT_ASSERT_EQUAL(2U, a1->to()->id());
+  CPPUNIT_ASSERT_EQUAL(5U, a1->from().id());
+  CPPUNIT_ASSERT_EQUAL(2U, a1->to().id());
 
   // Neighbors
   BasicArc *a2 = n1->neighbor(0);
   CPPUNIT_ASSERT_EQUAL(0U, a2->id());
-  CPPUNIT_ASSERT_EQUAL(5U, a2->from()->id());
-  CPPUNIT_ASSERT_EQUAL(2U, a2->to()->id());
+  CPPUNIT_ASSERT_EQUAL(5U, a2->from().id());
+  CPPUNIT_ASSERT_EQUAL(2U, a2->to().id());
   const std::vector<BasicArc*> *neighbors = g1->neighbors(5);
   CPPUNIT_ASSERT_EQUAL(true, 1 == neighbors->size());
 
@@ -120,18 +120,30 @@ void BasicGraphTests::test()
   CPPUNIT_ASSERT_EQUAL(2U, g1->howManyArcs());
   CPPUNIT_ASSERT_EQUAL(2U, n1->degree());
 
+  //std::cout << n1 << std::endl;
+  //n1->removeArc(0);
+  //std::cout << n1 << std::endl;
+
   //
   //g1->removeNode(5U);
-  std::cout << "Avant\n";
+  /*std::cout << "Avant\n";
   g1->debugNodes();
   g1->debugArcs();
 
-  std::cout << "\nApres\n";
+  std::cout << "============================\n";
+  std::cout << "\nRemoving Arc 0\n\n";
   g1->removeArc(0U);
+  g1->debugNodes();
+  std::cout << "\n\nRemoving Arc 1\n";
   g1->removeArc(1U);
   g1->debugNodes();
-  g1->debugArcs();
+  g1->debugArcs();*/
 
   // Delete graph
+
+  std::cout << "============================\n";
+  std::cout << "============================\n";
+  g1->debugNodes();
+  g1->debugArcs();
   delete g1;
 }

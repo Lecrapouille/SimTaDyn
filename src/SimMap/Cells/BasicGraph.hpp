@@ -14,19 +14,19 @@ class BasicArc;
 class BasicArc
 {
 public:
-  BasicArc(Key id, BasicNode *fromNode, BasicNode *toNode)
+  BasicArc(const Key id, BasicNode& fromNode, BasicNode& toNode)
     : m_id(id),
-      m_fromNode(fromNode),
-      m_toNode(toNode)
+      m_fromNode(&fromNode),
+      m_toNode(&toNode)
   {
   }
 
-  /*BasicArc(BasicArc const& arc)
-    : m_id(arc.id),
-      m_fromNode(arc.m_fromNode),
-      m_toNode(arc.m_toNode)
+  BasicArc(BasicArc const& arc)
+    : m_id(arc.id()),
+      m_fromNode(&arc.from()),
+      m_toNode(&arc.to())
   {
-  }*/
+  }
 
   BasicArc* clone() const
   {
@@ -37,10 +37,10 @@ public:
 
   //! \brief Return the unique identifier.
   inline Key id() const { return m_id; }
-  inline BasicNode *from() const { return m_fromNode; }
-  inline void from(BasicNode *fromNode) { m_fromNode = fromNode; }
-  inline BasicNode *to() const { return m_toNode; }
-  inline void to(BasicNode *toNode) { m_toNode = toNode; }
+  inline BasicNode &from() const { return *m_fromNode; }
+  inline void from(BasicNode& fromNode) { m_fromNode = &fromNode; }
+  inline BasicNode &to() const { return *m_toNode; }
+  inline void to(BasicNode& toNode) { m_toNode = &toNode; }
 
 protected:
   //! \brief Make an instance unique with this identifier.
@@ -58,9 +58,9 @@ class BasicNode
 {
 public:
   BasicNode(const Key nodeID)
+    : m_id(nodeID)
   {
     m_arcs.reserve(4);
-    m_id = nodeID;
   }
 
   BasicNode(BasicNode const& node)
@@ -82,19 +82,36 @@ public:
     return m_id;
   }
 
-  inline const std::vector<BasicArc*> &arcs() const
-  {
-    return m_arcs;
-  }
-
-  inline void addArc(BasicArc *arc)
+  inline void addNeighbor(BasicArc *arc)
   {
     m_arcs.push_back(arc);
   }
 
-  inline void removeArc(const uint32_t nth)
+  inline void removeNeighbor(const Key arcID)
   {
-    m_arcs.erase(m_arcs.begin() + nth);
+    struct isValue
+    {
+      Key m_id;
+      isValue(const Key id) : m_id(id) {}
+      bool operator()(const BasicArc *arc) const
+      {
+        return (arc->id() == m_id);
+      }
+    };
+    auto end = m_arcs.end();
+    auto it = std::find_if(m_arcs.begin(), end, isValue(arcID));
+    if (it != end)
+      {
+        remove(it);
+      }
+  }
+
+  inline void removeNthNeighbor(const uint32_t nth)
+  {
+    if (nth < m_arcs.size())
+      {
+        remove(m_arcs.begin() + nth);
+      }
   }
 
   inline BasicArc *neighbor(const uint32_t i)
@@ -107,12 +124,46 @@ public:
     return m_arcs.at(i);
   }
 
+  inline const std::vector<BasicArc*> &neighbors() const
+  {
+    return m_arcs;
+  }
+
   inline uint32_t degree() const
   {
-    return static_cast<uint32_t>(m_arcs.size());
+    return m_arcs.size();
+  }
+
+  inline bool operator==(const BasicNode& rhs) const
+  {
+    return m_id == rhs.m_id;
+  }
+
+  inline bool operator!=(const BasicNode& rhs) const
+  {
+    return !(*this == rhs);
+  }
+
+  inline bool operator==(const Key& rhs) const
+  {
+    return m_id == rhs;
+  }
+
+  inline bool operator!=(const Key& rhs) const
+  {
+    return !(*this == rhs);
   }
 
 protected:
+  //! \brief Swap element to be removed with the last element and then
+  //! remove the item at the end of the caontainer prevent moving all
+  //! items after the one removed.
+  void remove(std::vector<BasicArc*>::iterator const& it)
+  {
+    *it = m_arcs.back();
+    m_arcs.pop_back();
+  }
+
   //! \brief Make an instance unique with this identifier.
   //! Used it for comparing element in a container.
   Key m_id;
@@ -163,8 +214,8 @@ public:
 
   virtual ~BasicGraph()
   {
-    clearNodes();
     clearArcs();
+    clearNodes();
   }
 
   // ---- NODES ------------------------------------------------------------------------------------
@@ -205,7 +256,7 @@ public:
         N* node = m_nodes.get(nodeID); // FIXME direct access c'est ok
         assert(nullptr != node);
 
-        const std::vector<A*> arcs = node->arcs();
+        const std::vector<A*> arcs = node->neighbors();
         auto end = arcs.end();
         for (auto it = arcs.begin(); it != end; ++it)
           {
@@ -227,7 +278,7 @@ public:
     auto end = m_nodes.end();
     for (auto it = m_nodes.begin(); it != end; ++it)
       {
-        //removeNode((*it)->id());
+        delete (*it);
       }
     m_nodes.clear();
   }
@@ -244,7 +295,7 @@ public:
   {
     addNode(fromID);
     addNode(toID);
-    private_addArc(getNode(fromID), getNode(toID));
+    private_addArc(*getNode(fromID), *getNode(toID));
   }
 
   void addArc(BasicNode const& fromNode,
@@ -252,7 +303,7 @@ public:
   {
     addNode(fromNode);
     addNode(toNode);
-    private_addArc(fromNode, toNode);
+    private_addArc(*getNode(fromNode.id()), *getNode(toNode.id()));
   }
 
   inline bool hasArc(const Key arcID) const
@@ -278,8 +329,7 @@ public:
         if (nullptr == arc)
           return nullptr;
 
-        if ((arc->from()->id() == fromNodeID) &&
-            (arc->to()->id() == toNodeID))
+        if ((arc->from() == fromNodeID) && (arc->to() == toNodeID))
           {
             return arc;
           }
@@ -293,26 +343,18 @@ public:
     N* node = getNode(nodeID);
     if (nullptr == node)
       return nullptr;
-    return &node->arcs();
+    return &node->neighbors();
   }
 
   void removeArc(const Key arcID)
   {
-    A *arc = getArc(arcID);
-    if (nullptr != arc)
+    if (hasArc(arcID))
       {
-        N *fromNode = getNode(arc->from()->id());
-        N *toNode = getNode(arc->to()->id());
+        A *arc = getArc(arcID);
+        assert(nullptr != arc);
 
-        if (nullptr != fromNode)
-          {
-            fromNode->removeArc(arcID);
-          }
-
-        if (nullptr != toNode)
-          {
-            toNode->removeArc(arcID);
-          }
+        arc->from().removeNeighbor(arcID);
+        arc->to().removeNeighbor(arcID);
 
         delete arc;
         m_arcs.remove(arcID);
@@ -329,8 +371,9 @@ public:
     auto end = m_arcs.end();
     for (auto it = m_arcs.begin(); it != end; ++it)
       {
-        //removeArc((*it)->id());
+        delete (*it);
       }
+    m_arcs.clear();
   }
 
   inline void debugArcs() const
@@ -341,17 +384,14 @@ public:
 
 private:
 
-  void private_addArc(BasicNode *fromNode, BasicNode *toNode)
+  void private_addArc(BasicNode &fromNode, BasicNode &toNode)
   {
-    assert(nullptr != fromNode);
-    assert(nullptr != toNode);
-
     A *arc = newArc(fromNode, toNode);
     m_arcs.append(arc);
-    fromNode->addArc(arc);
-    if (fromNode->id() != toNode->id())
+    fromNode.addNeighbor(arc);
+    if (fromNode != toNode)
       {
-        toNode->addArc(arc);
+        toNode.addNeighbor(arc);
       }
   }
 
@@ -367,7 +407,7 @@ protected:
     return new N(nodeID);
   }
 
-  A *newArc(BasicNode *fromNode, BasicNode *toNode)
+  A *newArc(BasicNode &fromNode, BasicNode &toNode)
   {
     return new A(m_arc_unique++, fromNode, toNode);
   }
