@@ -181,13 +181,11 @@
     };
 
   public:
-    //! \brief Constructor. Allocate the X first pools of memory and set
-    //! them as empty.
-    //! \param no_pools the number of pool of memory to allocated.
-    container(const uint32_t no_pools = 1)
+    //! \brief Constructor. Reserve space for the specified number of elements.
+    container(const uint32_t no_elements = 1)
     {
       m_index = m_allocated = m_occupation = 0;
-      reserve(no_pools);
+      reserveNbElements(no_elements);
     }
     //! \brief Destructor. Release all allocated pool of memory.
     ~container()
@@ -201,7 +199,7 @@
     }
     //! \brief Allocate additional pool of memory.
     //! \param no_pools the additional number of pool of memory to allocated.
-    void reserve(const uint32_t no_pools)
+    void reservePools(const uint32_t no_pools)
     {
       uint32_t i = no_pools;
 
@@ -211,6 +209,11 @@
         }
       m_allocated += no_pools;
     }
+    inline void reserveNbElements(const uint32_t no_elements)
+    {
+      reservePools((no_elements + M - 1) / M);
+    }
+
     //! \brief Store an element at a given index. No check is made to
     //! verify if the memory is already used. Complexity is O(1).
     //! Several pool allocations can be called if index is greater
@@ -225,7 +228,7 @@
       // Ressources are full, create at least one new pool memory
       if (index >= m_allocated)
         {
-          reserve(1U + index - m_allocated);
+          reservePools(1U + index - m_allocated);
         }
       insert(index, subindex, elt);
     }
