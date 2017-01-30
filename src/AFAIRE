@@ -1,3 +1,4 @@
+Faire une class iterator sur le graph avec different type de parcours (long our larg) en indiquant ou pas le noeud ou arc de depart.
 http://linuxfr.org/news/je-cree-mon-jeu-video-e01-les-systemes-a-entites
 Reprendre le tuto pour avoir une class Vector generique
 Forth dans une cellule: verifier que les piles n'ont pas changees de profondeur lors de l'execution d'une cellule ==> force a utiliser le resultat dans un champ d'une cellule

@@ -14,8 +14,41 @@ void BasicGraphTests::tearDown()
 }
 
 //--------------------------------------------------------------------------
+static void checkVisited(BasicGraph<BasicNode, BasicArc> &g, Key nodeID)
+{
+  g.markVisitedNode(nodeID);
+  CPPUNIT_ASSERT_EQUAL(true, g.nodeHasBeenVisited(nodeID));
+  g.unmarkVisitedNode(nodeID);
+  CPPUNIT_ASSERT_EQUAL(false, g.nodeHasBeenVisited(nodeID));
+}
+
+//--------------------------------------------------------------------------
 void BasicGraphTests::test()
 {
+  BasicGraph<BasicNode, BasicArc> g(false);
+
+  g.addArc('A', 'B');
+  g.addArc('A', 'C');
+  g.addArc('A', 'E');
+
+  g.addArc('B', 'D');
+  g.addArc('B', 'F');
+  g.addArc('C', 'G');
+
+  g.addArc('E', 'F');
+
+  for (char i = 'A'; i < 'H'; ++i)
+    {
+      std::cout << g.getNode(i) << std::endl;
+    }
+
+
+ for (char i = 'A'; i < 'H'; ++i)
+     checkVisited(g, i);
+ //g.m_nodes.debug();
+  depthFirstSearch(&g, 'D');
+
+
   // Empty graph
   BasicGraph<BasicNode, BasicArc> *g1 = new BasicGraph<BasicNode, BasicArc>();
   CPPUNIT_ASSERT_EQUAL(1U, g1->m_nodes.allocated());
@@ -141,9 +174,13 @@ void BasicGraphTests::test()
 
   // Delete graph
 
-  std::cout << "============================\n";
-  std::cout << "============================\n";
-  g1->debugNodes();
-  g1->debugArcs();
-  delete g1;
+  //std::cout << "============================\n";
+  //std::cout << "============================\n";
+  //g1->debugNodes();
+  //g1->debugArcs();
+
+
+
+
+  //delete g1;
 }

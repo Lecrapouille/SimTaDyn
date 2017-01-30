@@ -166,11 +166,11 @@ public:
   //! \param nth the nth element of the list of neighbor.
   //! \return the address of the arc, else nullptr if the index is
   //! incorrect.
-  inline const BasicArc *neighbor(const uint32_t i) const
+  inline const BasicArc *neighbor(const uint32_t nth) const
   {
     if (nth < m_arcs.size())
       {
-        return m_arcs.at(i);
+        return m_arcs.at(nth);
       }
     return nullptr;
   }
@@ -237,13 +237,14 @@ protected:
 
 inline std::ostream& operator<<(std::ostream& os, const BasicNode& n)
 {
-  os << "Node(" << n.id() << "){ ";
-  uint32_t i = n.degree();
-  while (i--)
+  os << "Node " << (char) n.id() << ":" << std::endl;
+
+  for (uint32_t i = 0; i < n.degree(); ++i)
     {
-      os << n.neighbor(i)->id() << " ";
+      os << "  --" << n.neighbor(i)->id()
+         << "--> " << (char) n.neighbor(i)->to().id()
+         << std::endl;
     }
-  os << "}";
   return os;
 }
 
@@ -274,14 +275,17 @@ public:
 
   //! \brief Empty constructor. Reserve the memory with the
   //! default number of elements.
-  BasicGraph()
+  BasicGraph(const bool directed = true)
+    : m_directed(directed)
   {
   }
 
   //! \brief Constructor. Reserve memory for the given
   //! number of nodes and arcs.
-  BasicGraph(const uint32_t noNodes, const uint32_t noArcs)
-    : m_nodes(noNodes), m_arcs(noArcs)
+  BasicGraph(const uint32_t noNodes,
+             const uint32_t noArcs,
+             const bool directed = true)
+    : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed)
   {
   }
 
@@ -391,6 +395,35 @@ public:
         delete (*it);
       }
     m_nodes.clear();
+  }
+
+  //! \brief
+  //! Complexity is O(n).
+  inline void unmarkAllVisitedNodes()
+  {
+    m_nodes.unmarkAll();
+  }
+
+  //! \brief
+  //! Complexity is O(1).
+  inline void markVisitedNode(const Key nodeID)
+  {
+    m_nodes.mark(nodeID);
+  }
+
+  //! \brief
+  //! Complexity is O(1).
+  inline void unmarkVisitedNode(const Key nodeID)
+  {
+    m_nodes.unmark(nodeID);
+  }
+
+  //! \brief
+  //! Note: no security is made if arcID is invalid
+  //! Complexity is O(1).
+  inline bool nodeHasBeenVisited(const Key nodeID)
+  {
+    return m_nodes.isMarked(nodeID);
   }
 
   //! \brief Pretty print all the nodes constituing the graph.
@@ -526,6 +559,35 @@ public:
     m_arcs.clear();
   }
 
+  //! \brief
+  //! Complexity is O(n).
+  inline void unmarkAllVisitedArcs()
+  {
+    m_arcs.unmarkAll();
+  }
+
+  //! \brief
+  //! Note: no security is made if arcID is invalid
+  //! Complexity is O(1).
+  inline bool arcHasBeenVisited(const Key arcID)
+  {
+    return m_arcs.isMarked(arcID);
+  }
+
+  //! \brief
+  //! Complexity is O(1).
+  inline void markVisitedArc(const Key arcID)
+  {
+    m_arcs.mark(arcID);
+  }
+
+  //! \brief
+  //! Complexity is O(1).
+  inline void unmarkVisitedkArc(const Key arcID)
+  {
+    m_arcs.unmark(arcID);
+  }
+
   //! \brief Pretty print all the nodes constituing the graph.
   //! Complexity is O(n).
   inline void debugArcs() const
@@ -542,8 +604,11 @@ private:
     A *arc = newArc(fromNode, toNode);
     m_arcs.append(arc);
     fromNode.addNeighbor(arc);
-    if (fromNode != toNode)
+
+    if ((!m_directed) && (fromNode != toNode))
       {
+        arc = newArc(toNode, fromNode);
+        m_arcs.append(arc);
         toNode.addNeighbor(arc);
       }
   }
@@ -563,7 +628,7 @@ protected:
   }
 
   //! \brief Common function for allocating a new arc.
-  inline A *newArc(BasicNode &fromNode, BasicNode &toNode) const
+  inline A *newArc(BasicNode &fromNode, BasicNode &toNode)
   {
     return new A(m_arc_unique++, fromNode, toNode);
   }
@@ -572,6 +637,8 @@ protected:
   container<N*> m_nodes;
   //! \brief the list of arcs constituing the graph.
   container<A*> m_arcs;
+  //! \brief direct or not direct graph ?
+  bool m_directed;
   //! \brief create a unique identifier for arcs.
   Key m_arc_unique = 0;
 };

@@ -72,6 +72,10 @@
           }
         else if (start_at_end)
           {
+            m_itr = container.emptyPoolB();
+            skipInc();
+            m_begin = m_itr;
+
             m_itr = container.emptyPoolE();
             skipDec();
             ++m_itr;
@@ -79,6 +83,11 @@
           }
         else
           {
+            m_itr = container.emptyPoolE();
+            skipDec();
+            ++m_itr;
+            m_end = m_itr;
+
             m_itr = container.emptyPoolB();
             skipInc();
             m_begin = m_itr;
@@ -333,14 +342,58 @@
     {
       return m_occupation == (M * m_allocated);
     }
+    bool isMarked(const uint32_t id) const
+    {
+      const uint32_t index = id / M;
+      const uint32_t subindex = MODULO(id, M);
 
+      return 0 != (m_pools[index]->m_visited[subindex / S] &
+                   (1 << (MODULO(subindex, S))));
+    }
+    //! \brief visited
+    void mark(const uint32_t id)
+    {
+      const uint32_t index = id / M;
+      const uint32_t subindex = MODULO(id, M);
+
+      if ((index < m_allocated) && (subindex < M))
+        {
+          m_pools[index]->m_visited[subindex / S]
+            |= (1 << (MODULO(subindex, S)));
+        }
+    }
+    void unmark(const uint32_t id)
+    {
+      const uint32_t index = id / M;
+      const uint32_t subindex = MODULO(id, M);
+
+      if ((index < m_allocated) && (subindex < M))
+        {
+          m_pools[index]->m_visited[subindex / S]
+            &= ~(1 << (MODULO(subindex, S)));
+        }
+    }
+    //!
+    void unmarkAll()
+    {
+      Index i = m_allocated;
+      while (i--)
+        {
+          Index j = I; while (j--) { m_pools[i]->m_visited[j] = 0; }
+        }
+    }
     //! \brief Set all slots as empty. No memory desalocation is called.
     void clear()
     {
       uint32_t i = m_allocated;
       while (i--)
         {
-          Index j = I; while (j--) { m_pools[i]->m_occupied[j] = 0; }
+          Index j = I;
+          while (j--)
+            {
+              m_pools[i]->m_occupied[j] = 0;
+              m_pools[i]->m_visited[j] = 0;
+            }
         }
       m_index = m_occupation = 0;
     }
@@ -365,12 +418,12 @@
                 }
             }
 
-          // Show occupation
-          //std::cout << std::endl;
-          //for (uint32_t i = 0; i < M; ++i)
-          //  {
-          //    std::cout << " " << isOccupied(pool, i);
-          //  }
+          // Show marked
+          std::cout << std::endl;
+          for (uint32_t i = 0; i < M; ++i)
+            {
+              std::cout << " " << isMarked(pool * M + i);
+            }
           std::cout << std::endl;
         }
     }
@@ -507,13 +560,20 @@
       poolContainer()
       {
         // Set all slots are not occupied
-        Index i = I; while (i--) { m_occupied[i] = 0; }
+        Index i = I;
+        while (i--)
+          {
+            m_occupied[i] = 0;
+            m_visited[i] = 0;
+          }
       }
       //! Pool of elements: the array is never re-alloced.
       U m_slots[M];
-      //! Bit field grouped (into 32-bits) indicating which elements are
+      //! \brief Bit field grouped (into 32-bits) indicating which elements are
       //! occupied (true) or removed (false).
       Index m_occupied[I];
+      //! \brief FIXME. Devrait utiliser l'heritage pour ajouter ce champs
+      Index m_visited[I];
     };
 
     //! Index of pool memories which can be re-allocated because it
