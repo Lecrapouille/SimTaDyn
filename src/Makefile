@@ -1,4 +1,4 @@
-.PHONY: clean build install-datum
+.PHONY: clean build install-data
 
 ###################################################
 # Color
@@ -56,7 +56,7 @@ TARGET = SimTaDyn
 ###################################################
 # Compil options
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O3 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES =
 
@@ -97,8 +97,9 @@ clean:
 install-data:
 	@$(call print-link,"Copying","../data","$(PROJECT_DATA_PATH)","")
 	@rm -fr $(PROJECT_DATA_PATH)
-	@mkdir -p $(PROJECT_DATA_PATH)
+	@mkdir -p $(PROJECT_DATA_PATH)/forth
 	@cp -r ../data/* $(PROJECT_DATA_PATH)
+	@cp -r SimForth/Forth/core/system.fs $(PROJECT_DATA_PATH)/forth
 
 ###################################################
 # Create a temporary folder to store *.o

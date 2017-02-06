@@ -42,7 +42,11 @@ private:
   {
     // Start the Forth core
     s_SimTaDyn.m_forth.boot();
-    s_SimTaDyn.m_forth.interpreteFile("forth/core/system.fs");
+
+    //
+    std::pair<bool, std::string> res;
+    res = s_SimTaDyn.m_forth.interpreteFile(data_path("forth/system.fs"));
+    s_SimTaDyn.m_forth.ok(res);
   }
 
   ~SimTaDynContext()
