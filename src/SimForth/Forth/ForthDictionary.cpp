@@ -24,8 +24,17 @@ ForthDictionary::ForthDictionary()
 // **************************************************************
 void ForthDictionary::add(const Cell16 token, std::string const& name, const bool immediate)
 {
+  add(token, name.c_str(), name.size(), immediate);
+}
+
+void ForthDictionary::add(const Cell16 token, char const* name, const bool immediate)
+{
+  add(token, name, strlen(name), immediate);
+}
+
+void ForthDictionary::add(const Cell16 token, char const* name, const uint32_t length, const bool immediate)
+{
   // Forth words are max 31 bytes long
-  Cell32 length = name.size();
   if ((length > 31U) || (0U == length))
     {
       MalformedForthWord e(name); throw e;

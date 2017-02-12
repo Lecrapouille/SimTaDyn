@@ -182,14 +182,11 @@ bool ForthStream::split()
   if ((READ_FILE == m_mode) && (!m_infile.is_open()))
     return false;
 
-  // white-space characters (from isspace() doc)
-  const std::string delimiters = " \t\n\v\f\r";
-
-  // Skip delimiters at beginning
-  m_cursor_last = m_str.find_first_not_of(delimiters, m_cursor_last);
+  // Skip m_delimiters at beginning
+  m_cursor_last = m_str.find_first_not_of(m_delimiters, m_cursor_last);
 
   // Find first "non-delimiter"
-  m_cursor_next = m_str.find_first_of(delimiters, m_cursor_last);
+  m_cursor_next = m_str.find_first_of(m_delimiters, m_cursor_last);
 
   if ((std::string::npos != m_cursor_next) || (std::string::npos != m_cursor_last))
     {

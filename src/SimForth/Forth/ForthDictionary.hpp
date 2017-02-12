@@ -82,8 +82,10 @@ class ForthDictionary
 public:
   //! \brief Constructor.
   ForthDictionary();
+  void add(const Cell16 token, char const* name, const bool immediate);
   //! \brief Append a new Forth entry in the dictionary.
   void add(const Cell16 token, std::string const& word, const bool immediate);
+  void add(const Cell16 token, char const* name, const uint32_t length, const bool immediate);
   //! \brief Look for a word in the dictionary.
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
   //! \brief Interface for ForthDictionary::find but hiding output parameters.

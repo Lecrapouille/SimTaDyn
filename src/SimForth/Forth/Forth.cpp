@@ -537,7 +537,7 @@ std::pair<bool, std::string> Forth::parseStream()
         }
 
       // TODO: checker les piles
-      #warning " Warning: stack depth changed during include!"
+      #warning "TODO check if stack depth changed during include!"
 
       // Check Forth state shall be in execute mode at the end of the
       // stream.  Else this means the end of the stream is truncated

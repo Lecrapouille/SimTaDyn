@@ -4,23 +4,6 @@
 #  define LOGICAL_OP(op) { m_tos = -1 * (((int32_t) DDROP()) op ((int32_t) m_tos)); }
 
 // **************************************************************
-//! Called by Forth words needed to extract the next word. The
-//! stream shall contains at least one word else an exception is
-//! triggered.
-//! \return the next Forth word in the stream.
-//! \throw UnfinishedStream
-// **************************************************************
-std::string Forth::nextWord()
-{
-  if (!STREAM.hasMoreWords())
-    {
-      UnfinishedStream e(m_state);
-      throw e;
-    }
-  return STREAM.nextWord();
-}
-
-// **************************************************************
 //! \param idPrimitive the token of a primitive else an exception
 //! is triggered.
 //! UnknownForthPrimitive if idPrimitive is not the token of a
@@ -133,7 +116,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_SMUDGE:
       {
-        std::string word = nextWord();
+        std::string const& word = nextWord();
         if (false == m_dictionary.smudge(word))
           {
             m_color.yellow();
@@ -147,7 +130,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_TICK:
       {
-        std::string word = nextWord();
+        std::string const& word = nextWord();
         Cell16 token;
         bool immediate;
         if (false == m_dictionary.find(word, token, immediate))
@@ -174,7 +157,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
        {
          Cell16 token;
          bool immediate;
-         std::string word = nextWord();
+         std::string const& word = nextWord();
 
          //m_ip += 2;
          if (m_dictionary.find(word, token, immediate))
@@ -193,7 +176,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       {
         Cell16 token;
         bool immediate;
-        std::string word = nextWord();
+        std::string const& word = nextWord();
 
         if (m_dictionary.find(word, token, immediate))
           {
@@ -395,10 +378,10 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
     case FORTH_PRIMITIVE_1MINUS:
-      m_tos--;
+      --m_tos;
       break;
     case FORTH_PRIMITIVE_1PLUS:
-      m_tos++;
+      ++m_tos;
       break;
     case FORTH_PRIMITIVE_2MINUS:
       m_tos -= 2;
@@ -433,7 +416,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
             *dst-- = *src--;
           }
         m_tos = m_tos1;
-        m_dsp++;
+        ++m_dsp;
       }
       break;
 
@@ -638,6 +621,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     }
 }
 
+#define NAME(a) a, ((sizeof a) - 1U)
+
 // **************************************************************
 //! This method should be called after the contructor Forth()
 //! and has been separated from the constructor to load the
@@ -650,133 +635,137 @@ void Forth::boot()
   // charge pas plusieurs fois les memes primitives
 
   // Dummy word and comments
-  m_dictionary.add(FORTH_PRIMITIVE_NOP, "NOOP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_LPARENTHESIS, "(", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_RPARENTHESIS, ")", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_COMMENTARY, "\\", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_INCLUDE, "INCLUDE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NOP, NAME("NOOP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LPARENTHESIS, NAME("("), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_RPARENTHESIS, NAME(")"), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMENTARY, NAME("\\"), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_INCLUDE, NAME("INCLUDE"), 0);
 
   // Words for definitions
-  m_dictionary.add(FORTH_PRIMITIVE_COLON, ":", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_SEMICOLON, ";", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_PCREATE, "(CREATE)", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_CREATE, "CREATE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_BUILDS, "<BUILDS", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_DOES, "DOES>", FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_COLON, NAME(":"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_SEMICOLON, NAME(";"), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_PCREATE, NAME("(CREATE)"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CREATE, NAME("CREATE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_BUILDS, NAME("<BUILDS"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DOES, NAME("DOES>"), FLAG_IMMEDIATE);
 
-  m_dictionary.add(FORTH_PRIMITIVE_IMMEDIATE, "IMMEDIATE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_SMUDGE, "SMUDGE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_STATE, "STATE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_TRACE_ON, "TRACE.ON", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_TRACE_OFF, "TRACE.OFF", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_IMMEDIATE, NAME("IMMEDIATE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_SMUDGE, NAME("SMUDGE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STATE, NAME("STATE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TRACE_ON, NAME("TRACE.ON"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TRACE_OFF, NAME("TRACE.OFF"), 0);
 
   // Words
-  m_dictionary.add(FORTH_PRIMITIVE_TICK, "'", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_ABORT, "ABORT", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_EXECUTE, "EXECUTE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_COMPILE, "COMPILE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_ICOMPILE, "[COMPILE]", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_POSTPONE, "POSTPONE", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_LBRACKET, "[", FLAG_IMMEDIATE);
-  m_dictionary.add(FORTH_PRIMITIVE_RBRACKET, "]", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TICK, NAME("'"), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_ABORT, NAME("ABORT"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EXECUTE, NAME("EXECUTE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMPILE, NAME("COMPILE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ICOMPILE, NAME("[COMPILE]"), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_POSTPONE, NAME("POSTPONE"), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_LBRACKET, NAME("["), FLAG_IMMEDIATE);
+  m_dictionary.add(FORTH_PRIMITIVE_RBRACKET, NAME("]"), 0);
 
   // Dictionnary manipulation
-  m_dictionary.add(FORTH_PRIMITIVE_LAST, "LAST", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_HERE, "HERE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_ALLOT, "ALLOT", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_COMMA32, ",", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_COMMA16, "S,", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_COMMA8, "C,", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_FETCH, "@", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_STORE32, "!", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_STORE16, "S!", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_STORE8, "C!", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_CMOVE, "CMOVE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LAST, NAME("LAST"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_HERE, NAME("HERE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ALLOT, NAME("ALLOT"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMA32, NAME("),"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMA16, NAME("S,"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMA8, NAME("C,"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_FETCH, NAME("@"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STORE32, NAME("!"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STORE16, NAME("S!"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_STORE8, NAME("C!"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CMOVE, NAME("CMOVE"), 0);
 
   // Words changing IP
-  m_dictionary.add(FORTH_PRIMITIVE_EXIT, "EXIT", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_BRANCH, "BRANCH", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_0BRANCH, "0BRANCH", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EXIT, NAME("EXIT"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_BRANCH, NAME("BRANCH"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_0BRANCH, NAME("0BRANCH"), 0);
 
   // Return Stack
-  m_dictionary.add(FORTH_PRIMITIVE_TO_RSTACK, ">R", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_FROM_RSTACK, "R>", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2TO_RSTACK, "2>R", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2FROM_RSTACK, "2R>", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_I, "I", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_J, "J", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TO_RSTACK, NAME(">R"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_FROM_RSTACK, NAME("R>"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2TO_RSTACK, NAME("2>R"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2FROM_RSTACK, NAME("2R>"), 0);
+
+  // Loop
+  //m_dictionary.add(FORTH_PRIMITIVE_DO, NAME("(DO)"), 0);
+  //m_dictionary.add(FORTH_PRIMITIVE_LOOP, NAME("(LOOP)"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_I, NAME("I"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_J, NAME("J"), 0);
 
   // cell sizeof
-  m_dictionary.add(FORTH_PRIMITIVE_CELL, "CELL", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_CELLS, "CELLS", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CELL, NAME("CELL"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CELLS, NAME("CELLS"), 0);
 
   // Literals
-  m_dictionary.add(FORTH_PRIMITIVE_LITERAL_16, "LITERAL16", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_LITERAL_32, "LITERAL32", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LITERAL_16, NAME("LITERAL16"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LITERAL_32, NAME("LITERAL32"), 0);
 
   // Arithmetic
-  m_dictionary.add(FORTH_PRIMITIVE_ABS, "ABS", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_NEGATE, "NEGATE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_MIN, "MIN", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_MAX, "MAX", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_PLUS, "+", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_1PLUS, "1+", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2PLUS, "2+", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_MINUS, "-", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_1MINUS, "1-", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2MINUS, "2-", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_TIMES, "*", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_DIV, "/", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_RSHIFT, ">>", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_LSHIFT, "<<", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_RSHIFT, "RSHIFT", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_LSHIFT, "LSHIFT", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ABS, NAME("ABS"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NEGATE, NAME("NEGATE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_MIN, NAME("MIN"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_MAX, NAME("MAX"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_PLUS, NAME("+"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_1PLUS, NAME("1+"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2PLUS, NAME("2+"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_MINUS, NAME("-"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_1MINUS, NAME("1-"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2MINUS, NAME("2-"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TIMES, NAME("*"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DIV, NAME("/"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_RSHIFT, NAME(">>"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LSHIFT, NAME("<<"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_RSHIFT, NAME("RSHIFT"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LSHIFT, NAME("LSHIFT"), 0);
 
   // Base
-  m_dictionary.add(FORTH_PRIMITIVE_BINARY, "BIN", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_OCTAL, "OCTAL", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_HEXADECIMAL, "HEX", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_DECIMAL, "DECIMAL", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_BASE, "BASE", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_BINARY, NAME("BIN"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_OCTAL, NAME("OCTAL"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_HEXADECIMAL, NAME("HEX"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DECIMAL, NAME("DECIMAL"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_BASE, NAME("BASE"), 0);
 
   // Logic
-  m_dictionary.add(FORTH_PRIMITIVE_FALSE, "FALSE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_TRUE, "TRUE", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_GREATER, ">", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_GREATER_EQUAL, ">=", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_LOWER, "<", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_LOWER_EQUAL, "<=", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_EQUAL, "==", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_EQUAL, "=", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_0EQUAL, "0=", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_NOT_EQUAL, "<>", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_NOT_EQUAL, "!=", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_AND, "AND", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_OR, "OR", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_XOR, "XOR", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_FALSE, NAME("FALSE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TRUE, NAME("TRUE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_GREATER, NAME(">"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_GREATER_EQUAL, NAME(">="), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LOWER, NAME("<"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_LOWER_EQUAL, NAME("<="), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EQUAL, NAME("=="), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EQUAL, NAME("="), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_0EQUAL, NAME("0="), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NOT_EQUAL, NAME("<>"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NOT_EQUAL, NAME("!="), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_AND, NAME("AND"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_OR, NAME("OR"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_XOR, NAME("XOR"), 0);
 
   // Data Stack
-  m_dictionary.add(FORTH_PRIMITIVE_DEPTH, "DEPTH", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_ROLL, "ROLL", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_NIP, "NIP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_PICK, "PICK", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_DUP, "DUP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_QDUP, "?DUP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_DROP, "DROP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_SWAP, "SWAP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_OVER, "OVER", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_ROT, "ROT", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_TUCK, "TUCK", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2DUP, "2DUP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2DROP, "2DROP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2SWAP, "2SWAP", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_2OVER, "2OVER", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DEPTH, NAME("DEPTH"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ROLL, NAME("ROLL"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_NIP, NAME("NIP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_PICK, NAME("PICK"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DUP, NAME("DUP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_QDUP, NAME("?DUP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DROP, NAME("DROP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_SWAP, NAME("SWAP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_OVER, NAME("OVER"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ROT, NAME("ROT"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_TUCK, NAME("TUCK"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2DUP, NAME("2DUP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2DROP, NAME("2DROP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2SWAP, NAME("2SWAP"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_2OVER, NAME("2OVER"), 0);
 
   // Printf
-  m_dictionary.add(FORTH_PRIMITIVE_DISP, ".", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_UDISP, "U.", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, "CR", 0);
-  m_dictionary.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, ".S", 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DISP, NAME("."), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_UDISP, NAME("U."), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, NAME("CR"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, NAME(".S"), 0);
 
   // Hide some words to user
   m_dictionary.smudge("(CREATE)");

@@ -66,6 +66,9 @@ protected:
     READ_STRING
   };
 
+  // white-space characters (from isspace() doc)
+  const std::string m_delimiters = " \t\n\v\f\r";
+
   enum Mode m_mode;       // Read from file or from string
   std::ifstream m_infile; // Opened file
   std::string m_filename; // The file name to read

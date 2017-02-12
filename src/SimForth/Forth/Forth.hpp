@@ -69,7 +69,20 @@ protected:
   //! \brief Create the header of a Forth word in the dictionary.
   void create(std::string const& word);
   //! \brief Get the Forth word in the stream.
-  std::string nextWord();
+  //! Called by Forth words needed to extract the next word. The
+  //! stream shall contains at least one word else an exception is
+  //! triggered.
+  //! \return the next Forth word in the stream.
+  //! \throw UnfinishedStream
+  inline const std::string& nextWord()
+  {
+    if (!STREAM.hasMoreWords())
+    {
+      UnfinishedStream e(m_state);
+      throw e;
+    }
+    return STREAM.nextWord();
+  }
   //! \brief
   std::pair<bool, std::string> parseStream();
   //! \brief Parse an included file when parsing a Forth script.
