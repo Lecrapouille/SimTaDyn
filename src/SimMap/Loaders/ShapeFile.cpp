@@ -7,7 +7,7 @@ int32_t ShapefileLoader::readBigEndianInt()
 {
   char buf[4];
 
-  infile_.read(buf, 4);
+  m_infile.read(buf, 4);
   return (((buf[0] & 0xFF) << 24) | ((buf[1] & 0xFF) << 16) | ((buf[2] & 0xFF) << 8) | (buf[3] & 0xFF));
 }
 
@@ -15,7 +15,7 @@ int32_t ShapefileLoader::readLittleEndianInt()
 {
   char buf[4];
 
-  infile_.read(buf, 4);
+  m_infile.read(buf, 4);
   return (((buf[3] & 0xFF) << 24) | ((buf[2] & 0xFF) << 16) | ((buf[1] & 0xFF) << 8) | (buf[0] & 0xFF));
 }
 
@@ -27,7 +27,7 @@ float64_t ShapefileLoader::readDouble()
   } u;
   float64_t convert;
 
-  infile_.read(u.buf, 8);
+  m_infile.read(u.buf, 8);
   convert = u.value;
   return convert;
 }
@@ -40,8 +40,8 @@ float32_t ShapefileLoader::readDoubleCastedFloat()
 
 void ShapefileLoader::goToByte(const uint32_t offset)
 {
-  infile_.seekg(offset, ios::beg);
-  if (!infile_)
+  m_infile.seekg(offset, std::ios::beg);
+  if (!m_infile)
     {
       ShapefileLoaderException e(offset, "ShapefileLoader::goToByte");
       throw e;
@@ -49,17 +49,17 @@ void ShapefileLoader::goToByte(const uint32_t offset)
 }
 void ShapefileLoader::skypeNBytes(const uint32_t offset)
 {
-  infile_.seekg(offset, ios::cur);
-  if (!infile_)
+  m_infile.seekg(offset, std::ios::cur);
+  if (!m_infile)
     {
       ShapefileLoaderException e(offset, "ShapefileLoader::skypeNBytes");
       throw e;
     }
 }
 
-const string ShapefileLoader::shapeTypes(const int id)
+const std::string ShapefileLoader::shapeTypes(const int id)
 {
-  string shape;
+  std::string shape;
 
   switch (id)
     {
@@ -117,35 +117,35 @@ void ShapefileLoader::checkFileSize()
   uint32_t value32b;
 
   // Get the file size from the file system
-  infile_.seekg(0, ios::end);
-  file_length_ = (uint32_t)  infile_.tellg();
-  infile_.seekg(0, ios::beg);
+  m_infile.seekg(0, std::ios::end);
+  m_file_length = (uint32_t)  m_infile.tellg();
+  m_infile.seekg(0, std::ios::beg);
 
   // Get the file size stored inside the file
   goToByte(24);
   value32b = readBigEndianInt() * sizeof (uint16_t);
 
   // Expect to have same values
-  if (value32b == file_length_)
+  if (value32b == m_file_length)
     {
-      //cout << "File Length: " << file_length_ << endl;
+      //std::cout << "File Length: " << m_file_length << std::endl;
     }
   else
     {
-      ShapefileLoaderBadLength e(file_length_, value32b);
+      ShapefileLoaderBadLength e(m_file_length, value32b);
       throw e;
     }
 }
 
-void ShapefileLoader::openShapeFile(const string& filename)
+void ShapefileLoader::openShapeFile(const std::string& filename)
 {
   uint32_t value32b;
 
-  file_length_ = 0;
-  filename_ = filename;
+  m_file_length = 0;
+  m_filename = filename;
 
-  infile_.open(filename, ios::binary | ios::in);
-  if (!infile_)
+  m_infile.open(filename, std::ios::binary | std::ios::in);
+  if (!m_infile)
     {
       ShapefileLoaderOpenFailed e(errno);
       throw e;
@@ -196,7 +196,7 @@ void ShapefileLoader::getBoundingBox(AABB& bbox)
   bbox.bbmax.z = readDoubleCastedFloat();
 }
 
-uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offset)
+uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
 {
   uint32_t record_number, content_length, shape_type;
   Position3D p;
@@ -206,8 +206,8 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offse
   content_length = readBigEndianInt() * sizeof (uint16_t);
   shape_type = readLittleEndianInt();
 
-  //cout << "Record Number: " << record_number << ", Content Length: " << content_length << ":" << endl;
-  //cout << "  Shape " << record_number - 1U << " (" << shapeTypes(shape_type) << "): ";
+  //std::cout << "Record Number: " << record_number << ", Content Length: " << content_length << ":" << std::endl;
+  //std::cout << "  Shape " << record_number - 1U << " (" << shapeTypes(shape_type) << "): ";
   (void) record_number;
 
   switch (shape_type)
@@ -216,93 +216,104 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offse
       p.x = readDoubleCastedFloat();
       p.y = readDoubleCastedFloat();
       p.z = 0.0f;
-      //cout << p.x << " " << p.y << " " << p.z << " " << endl;
-      graph.addNode(p);
+      //std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
+      //map->addNode(p);
       break;
     case 11: // PointZ
       p.x = readDoubleCastedFloat();
       p.y = readDoubleCastedFloat();
       p.z = readDoubleCastedFloat();
-      //cout << p.x << " " << p.y << " " << p.z << " " << endl;
-      graph.addNode(p);
+      //std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
+      //map->addNode(p);
       break;
     default:
-      cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << endl;
+      std::cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << std::endl;
       skypeNBytes(content_length);
       break;
     }
   return content_length + 8U; // 8U: record header
 }
 
-void ShapefileLoader::getAllRecords(SimTaDynGraph& graph)
+void ShapefileLoader::getAllRecords(SimTaDynMap& map)
 {
   uint32_t content_length;
   uint32_t offset = 100U;
 
-  while (offset < file_length_)
+  while (offset < m_file_length)
     {
-      if (infile_.eof())
+      if (m_infile.eof())
         break;
 
-      content_length = getRecordAt(graph, offset);
+      content_length = getRecordAt(map, offset);
       offset += content_length;
-      //cout << "Total bytes read: " << offset << endl;
+      //std::cout << "Total bytes read: " << offset << std::endl;
     }
 }
 
-bool ShapefileLoader::load(const string& filename, SimTaDynGraph& graph)
-// new graph ?
+SimTaDynMap *ShapefileLoader::load(const std::string& filename, SimTaDynMap *oldmap)
 {
-  uint32_t value32b;
+  SimTaDynMap* map = oldmap;
 
   try // FIXME: comment faire undo en cas d'echec ?
     {
-      openShapeFile(filename);
+      uint32_t value32b;
 
+      openShapeFile(filename);
       value32b = getShapeVersion();
-      //cout << "Shapefile Version: " << value32b << endl;
       if (1000 != value32b)
         {
-          cerr << "Warning. Expected shapefile version 1000 not found. The file '" << filename << "' may be not fully interpreted" << endl;
-          return false;
+          std::cerr << "Warning. Expected shapefile version 1000 not found. The file '" << filename << "' may be not fully interpreted" << std::endl;
+
+          m_infile.close();
+          return nullptr;
+        }
+
+      if (nullptr == map)
+        {
+          map = new SimTaDynMap(filename);
         }
 
       value32b = getShapeType();
-      //cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << endl;
+      //std::cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << std::endl;
 
-      getBoundingBox(graph.bbox);
-      cout << "Map Bounding Box: " << graph.bbox << endl;
+      getBoundingBox(map->m_bbox);
+      std::cout << "Map Bounding Box: " << map->m_bbox << std::endl;
 
-      getAllRecords(graph);
-      graph.name += '_' + filename;
-      infile_.close();
-      return true;
+      getAllRecords(*map);
+      map->m_name += '_' + filename;
+      m_infile.close();
+
+      return map;
     }
   catch (const ShapefileLoaderBadLength& e)
     {
-      cerr << "Failed parsing the shapefile " << filename << ":" << endl;
-      cerr << "  The real file size is " << e.real_size << " ko but the extracted size information is "
-           << e.expected_size << " ko" << endl;
-      infile_.close();
-      return false;
+      m_error = "The real file size is " + std::to_string(e.m_real_size)
+        + " ko but the extracted size information is " + std::to_string(e.m_expected_size)
+        + " bytes.";
+      goto l_err;
     }
   catch (const ShapefileLoaderBadId& e)
     {
-      cerr << "Failed parsing the shapefile " << filename << ":" << endl;
-      cerr << "  The expected file identifier is " << e.expected_id << " but the identifier read is " << e.bad_id
-           << ". The file '" << filename_ << "' seems not to be a proper .shp file." << endl;
-      infile_.close();
-      return false;
+      m_error = "The expected file identifier is " + std::to_string(e.m_expected_id)
+        + " but the identifier read is " + std::to_string(e.m_bad_id)
+        + ". The file '" + m_filename + "' seems not to be a proper .shp file.";
+      goto l_err;
     }
   catch (const ShapefileLoaderOpenFailed& e)
     {
-      cerr << "Failed opening the shapefile " << filename << ":" << endl;
-      cerr << "  Reason is '" << strerror(e.error) << "'." << endl;
-      return false;
+      m_error = strerror(e.m_error) + '.';
+      return nullptr;
     }
+
+l_err:
+  if (nullptr != map)
+    delete map;
+  m_infile.close();
+  return nullptr;
 }
 
-ShapefileLoader::ShapefileLoader(const string& filename, SimTaDynGraph& graph)
+ShapefileLoader::ShapefileLoader(const std::string& filename, SimTaDynMap& map)
 {
-  load(filename, graph);
+  SimTaDynMap *m = &map;
+  m = load(filename, m);
 }

@@ -1,11 +1,10 @@
 #include "MapEditor.hpp"
-#include "MapLoaders.hpp"
+#include "ShapeFile.hpp"
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
 MapEditor::MapEditor()
-  : m_root(nullptr)
 {
   // Menus '_Map'
   {
@@ -31,6 +30,13 @@ MapEditor::MapEditor()
 // *************************************************************************************************
 MapEditor::~MapEditor()
 {
+  auto it = m_maps.begin();
+  auto end = m_maps.end();
+
+  for (; it != end; ++it)
+    {
+      delete (*it);
+    }
 }
 
 // *************************************************************************************************
@@ -65,24 +71,35 @@ void MapEditor::open()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      load(dialog.get_filename(), m_graph);
-      // FIXME return not taken into account
-      std::cout << m_graph.name << std::endl;
+      SimTaDynMap* map = load(dialog.get_filename());
+      if (nullptr == map)
+        {
+          Gtk::MessageDialog d("Could not load '" + dialog.get_filename() + "' as a map.",
+                               false, Gtk::MESSAGE_WARNING);
+          d.set_transient_for((Gtk::Window&) (*m_menu[0].get_toplevel()));
+          d.set_secondary_text("Reason was: " + error());
+          d.run();
+        }
+      else
+        {
+          m_maps.push_back(map);
+          std::cout << "Successfully loaded map '" << map->m_name << "'" << std::endl;
+        }
     }
 }
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-bool MapEditor::load(const std::string& filename, SimTaDynGraph& graph)
+SimTaDynMap *MapEditor::load(const std::string& filename, SimTaDynMap *map)
 {
-  bool res = false;
   std::string extension = filename.substr(filename.find_last_of(".") + 1);
+
   if (0 == extension.compare("shp"))
     {
       ShapefileLoader loader;
-      res = loader.load(filename, graph);
+      return loader.load(filename, map);
     }
-  // else if ... other extensions
-  return res;
+  m_error = "Unknown extension file";
+  return nullptr;
 }

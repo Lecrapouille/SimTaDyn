@@ -1,0 +1,56 @@
+1/ Corriger l'iterateur sur les containers. Nettoyer, ajouter des
+algos sur les graph afin de faire des iterators.
+
+2/ Ajouter la BDD au graphe. Idee:
+-- Ajouter une clef aux nodes/arcs pour acceder aux donnees.
+-- Ajouter des container<Position3D> positions; Faire uniquement des
+   append pour ajouter et quand on supprime, faire pour tous les
+   containers toogler l'element a supprimer avec le dernier. Comme ca
+   il n'y a pas de trous.
+
+3/ Ajouter un visiteur pour gerer la base de donnees ?
+http://blog.arkey.fr/2010/05/06/les-visiteurs-une-question-de-nommage-et-le-double-dispatch/
+
+3/ Dessiner le graphe en 2D (avec les iterateurs ?). Ajouter les
+layers par champs de la BDD et par types de cellules comme le SimTadyn
+legacy.
+
+4/ Finir does> puis ajouter les mots Forth qui gerent le graphe ==>
+simuler a la main le comportement de gforth pour linker un .so
+
+4/a) Ajouter des pils: alternatives, float et queue pour le parcours
+de graph.
+
+4/b) Faire au moins un generate grid.
+
+5/ Gerer l'editeur Forth: executer un fichier supprime son
+contenu. Ajouter un prompt, afficher un Gtk::Entry quand on veut
+ajouter un script forth aux noeuds. Afficher les piles.
+
+6/ Faire un exemple Excel du genre N1.population / Z1.densite
+Peut etre reprendre les idees de reforth avec les :: et les .
+
+7/ Faire des exemples comme vivagraph. J'aurai un probleme avec les
+RTree et le deplacement de cellules.
+
+8/ Refaire le gforth import .so pour charger plein de libs en C.
+Tenter de faire des scripts d'equilibre de Wardrop.
+
+9/ Finir d'importer/Exporter des fichiers shapefile. Faire mon propre
+format de fichier: graph et code Forth. Comment stocker des fichiers
+forth dedans ? Faire un zip ou reprendre le format pak de Half-Life ?
+
+10/ Ajouter des formats import/export: OpenStreetMap, MapInfo, Scilab.
+Sauvegarder dans un SQL.
+
+11/ Reprendre le dessinateur 3D d'openStreetMap, la demo webgl de
+traffic et faire un simcity.
+
+12/ Ajouter des taches a SimForth pour gerer plusieurs trucs en meme
+temps.
+
+13/ Gerer les zones, les trianguler, envelopper des nuages de points.
+Adapter les arcs pour faire des polypoints et beziers.
+
+14/ BenchMark: verifier tous les constructors implicites afin de
+minimiser le nombres de malloc/free.

@@ -110,6 +110,4 @@ protected:
   std::string m_word;
 };
 
-Forth *CellForth::m_forth = nullptr;
-
 #endif /* CELLFORTH_HPP_ */

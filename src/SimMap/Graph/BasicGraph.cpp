@@ -1,6 +1,6 @@
 #include "BasicGraph.hpp"
 
-static void depthFirstSearch_aux(BasicGraph<BasicNode, BasicArc> *const graph, BasicNode *node)
+/*static void depthFirstSearch_aux(BasicGraph<BasicNode, BasicArc> *const graph, BasicNode *node)
 {
   std::cout << (char) node->id() << std::endl;
   graph->markVisitedNode(node->id());
@@ -24,3 +24,4 @@ void depthFirstSearch(BasicGraph<BasicNode, BasicArc> *const graph, const Key sa
   depthFirstSearch_aux(graph, node);
   graph->unmarkAllVisitedNodes();
 }
+*/

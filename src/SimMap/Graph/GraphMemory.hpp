@@ -466,7 +466,7 @@
       uint32_t index = m_pools.size();
       while (index--)
         {
-          uint32_t subindex = S;
+          uint32_t subindex = I;
           while (subindex--)
             {
               if (0 != m_pools[index]->m_occupied[subindex])

@@ -3,8 +3,7 @@
 
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
-#  include "SimTaDynGraphs.hpp"
-#  include "RTree.hpp" // a inclure dans SimTaDynGraphs.hpp
+#  include "SimTaDynMap.hpp"
 
 /*
  * OpenGL renderer.

@@ -30,19 +30,19 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -ICommon -ICommon/SharedLibrary -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap/RTree -ISimMap/Cells -ISimMap/Loaders -ISimGui
+INCLUDES = -I. -ICommon -ICommon/SharedLibrary -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap -ISimMap/RTree -ISimMap/Graph -ISimMap/Loaders -ISimGui
 # -I/usr/include/mysql
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Cells:SimMap/Loaders:SimGui
+VPATH=.:$(BUILD):Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui
 
 ###################################################
 # Set objects architecture specific
 OBJECTS_COMMON   = Exception.o TextColor.o Color.o Vector3D.o Camera2D.o SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_OPENGL   = OpenGL.o Textures.o Fonts.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJECTS_MAP      = SimTaDynCells.o SimTaDynGraphs.o
+OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o
 OBJECTS_LOADER   = ShapeFile.o
 OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
 OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o MapEditor.o DrawingArea.o SimTaDynWindow.o
@@ -56,7 +56,7 @@ TARGET = SimTaDyn
 ###################################################
 # Compil options
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O3 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES =
 

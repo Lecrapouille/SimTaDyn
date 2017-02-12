@@ -22,7 +22,7 @@ void RTreeNode::initNode()
   count = 0;
   for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
-      branch[i].child = NULL;
+      branch[i].child = nullptr;
       // Implicit bounding box init:
       // box =  RTREE_DUMMY_BBOX;
     }
@@ -30,14 +30,13 @@ void RTreeNode::initNode()
 
 RTreeNode::~RTreeNode()
 {
-  /*if (IS_A_RTREE_LEAF(level))
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
-      LeafCount--;
+      if (nullptr != branch[i].child)
+        {
+          delete branch[i].child;
+        }
     }
-  else
-    {
-      NonLeafCount--;
-      }*/
 }
 
 void RTreeNode::debugNode(std::ostream& os) const
@@ -76,7 +75,7 @@ void RTreeNode::debugNode(std::ostream& os) const
 /*
  * Find the smallest rectangle that includes all rectangles in
  * branches of a node.
- * Return AABB:DUMMY if all child are NULL
+ * Return AABB:DUMMY if all child are nullptr
  */
 AABB RTreeNode::cover() const
 {
@@ -148,9 +147,9 @@ uint32_t RTreeNode::pickBranch(AABB const& bbox) const
  */
 bool RTreeNode::disconnectBranch(const uint32_t b)
 {
-  if ((b < RTREE_MAX_NODES) && (NULL != branch[b].child))
+  if ((b < RTREE_MAX_NODES) && (nullptr != branch[b].child))
     {
-      branch[b].child = NULL;
+      branch[b].child = nullptr;
       branch[b].box = RTREE_DUMMY_BBOX;
       count--;
       return true;
@@ -171,14 +170,14 @@ RTreeNode* RTreeNode::addBranch(RTreeBranch const& b)
     {
       for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
         {
-          if (NULL == branch[i].child)
+          if (nullptr == branch[i].child)
             {
               branch[i] = b;
               ++count;
               break;
             }
         }
-      return NULL;//this;
+      return nullptr;//this;
     }
   else
     {

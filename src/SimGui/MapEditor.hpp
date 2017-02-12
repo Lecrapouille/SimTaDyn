@@ -2,12 +2,12 @@
 #  define MAPEDITOR_HPP_
 
 #  include <gtkmm.h>
-#  include "SimTaDynGraphs.hpp"
+#  include "MapLoader.hpp"
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class MapEditor
+class MapEditor : protected MapLoader
 {
 public:
   MapEditor();
@@ -19,12 +19,11 @@ public:
   Gtk::ImageMenuItem  m_submenu[4];
   Gtk::Image          m_image[2];
   Gtk::SeparatorMenuItem m_menuseparator[2];
+  std::vector<SimTaDynMap*> m_maps;
 
 protected:
-  bool load(const std::string& filename, SimTaDynGraph& graph);
+  SimTaDynMap *load(const std::string& filename, SimTaDynMap *oldmap = nullptr) override;
 
-  RTreeNode* m_root; // FIXME: a attacher dans le graph
-  SimTaDynGraph m_graph; // FIXME: a renommer en maps
 };
 
 #endif /* MAPEDITOR_HPP_ */

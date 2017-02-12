@@ -197,18 +197,24 @@ protected:
 class RTree
 {
 public:
-  RTreeNode* root;
+  RTreeNode* m_root = nullptr;
 
   RTree()
   {
     leafCount = 0;
     nonLeafCount = 0;
 
-    root = new RTreeNode(RTREE_LEAF);
+    m_root = new RTreeNode(RTREE_LEAF);
     ++leafCount;
   }
 
-
+  ~RTree()
+  {
+    if (nullptr != m_root)
+      {
+        delete m_root;
+      }
+  }
 
   uint32_t howManyNodes()
   {
