@@ -142,7 +142,7 @@ protected:
       count[RTREE_PARTITION_0] = count[RTREE_PARTITION_1] = 0;
       cover[RTREE_PARTITION_0] = cover[RTREE_PARTITION_1] = AABB::DUMMY;
       volume[RTREE_PARTITION_0] = volume[RTREE_PARTITION_1] = 0.0f;
-      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; ++i)
         {
           taken[i] = false;
           partition[i] = RTREE_UNDEF_PARTITION;
@@ -205,7 +205,7 @@ public:
     nonLeafCount = 0;
 
     root = new RTreeNode(RTREE_LEAF);
-    leafCount++;
+    ++leafCount;
   }
 
 

@@ -20,7 +20,7 @@ void RTreeNode::initNode()
 {
   //nodeCount = ClassCounter<RTreeNode>::howMany();
   count = 0;
-  for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
       branch[i].child = NULL;
       // Implicit bounding box init:
@@ -59,7 +59,7 @@ void RTreeNode::debugNode(std::ostream& os) const
      << ", count: " << count
      << ", address: " << this;
 
-  for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
       os << "\n";
       for (uint32_t i = 0; i < level; ++i)
@@ -83,7 +83,7 @@ AABB RTreeNode::cover() const
   AABB bbox;
   bool flag = true;
 
-  for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
       if (branch[i].child)
         {
@@ -116,7 +116,7 @@ uint32_t RTreeNode::pickBranch(AABB const& bbox) const
   float32_t bestIncr = 0.0f; // init useless because of flag but stop compil warnings
   float32_t bestVolume = 0.0f; // idem
 
-  for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
       if (branch[i].child)
         {
@@ -169,12 +169,12 @@ RTreeNode* RTreeNode::addBranch(RTreeBranch const& b)
 
   if (count < RTREE_MAX_NODES)
     {
-      for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
         {
           if (NULL == branch[i].child)
             {
               branch[i] = b;
-              count++;
+              ++count;
               break;
             }
         }
@@ -186,11 +186,11 @@ RTreeNode* RTreeNode::addBranch(RTreeBranch const& b)
       newNode = splitNodeQuadratic(b, s);
       /*if (IS_LEAF(level))
         {
-          LeafCount++;
+          ++LeafCount;
         }
       else
         {
-          NonLeafCount++;
+          ++NonLeafCount;
         }*/
       return newNode;
     }

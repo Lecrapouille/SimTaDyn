@@ -190,14 +190,14 @@ public:
     whoAmI();
     typename std::vector<Observer<SimTaDynCell, const Event*> *>::const_iterator it;
     std::cout << "Observers list:" << std::endl;
-    for (it = observers_.begin(); it != observers_.end(); it++)
+    for (it = observers_.begin(); it != observers_.end(); ++it)
       {
         SimTaDynCell *cell = static_cast<SimTaDynCell *>(*it);
         std::cout << "  " << cell->name << std::endl;
 
         typename std::vector<Observable<SimTaDynCell, const Event*> *>::const_iterator it3;
         std::cout << "     Observables list:" << std::endl;
-        for (it3 = cell->observed_.begin(); it3 != cell->observed_.end(); it3++)
+        for (it3 = cell->observed_.begin(); it3 != cell->observed_.end(); ++it3)
           {
             std::cout << "       " << (static_cast<SimTaDynCell *>(*it3))->name << std::endl;
           }
@@ -205,7 +205,7 @@ public:
 
     typename std::vector<Observable<SimTaDynCell, const Event*> *>::const_iterator it4;
     std::cout << "Observables list:" << std::endl;
-    for (it4 = observed_.begin(); it4 != observed_.end(); it4++)
+    for (it4 = observed_.begin(); it4 != observed_.end(); ++it4)
       {
         std::cout << "  " << (static_cast<SimTaDynCell *>(*it4))->name << std::endl;
       }
@@ -213,7 +213,7 @@ public:
     /*
     typename std::vector<SimTaDynCell*>::const_iterator it2;
     std::cout << "Adjacence list:" << std::endl;
-    for (it2 = subjects_.begin(); it2 != subjects_.end(); it2++)
+    for (it2 = subjects_.begin(); it2 != subjects_.end(); ++it2)
       {
         std::cout << "  " << (*it2)->name << std::endl;
         }*/

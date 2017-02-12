@@ -28,7 +28,7 @@ RTreeNode *RTreeNode::splitNodeQuadratic(RTreeBranch const& b, RTreeSpliter& s)
   level = level_;
 
   // Load nodes (copy branches from the buffer into two nodes according to the partition)
-  for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; ++i)
     {
       if (RTREE_PARTITION_0 == p->partition[i])
         {
@@ -60,7 +60,7 @@ RTreeNode *RTreeNode::splitNodeQuadratic(RTreeBranch const& b, RTreeSpliter& s)
 bool RTreeNode::getBranches(RTreeBranch const& b, RTreeSpliter& s)
 {
   // Load the branch buffer
-  for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
       // Node should have every entry full
       if (NULL == branch[i].child)
@@ -74,7 +74,7 @@ bool RTreeNode::getBranches(RTreeBranch const& b, RTreeSpliter& s)
 
   // Calculate box containing all in the set
   s.CoverSplit = s.BranchBuf[0].box;
-  for (uint32_t i = 1; i < RTREE_MAX_NODES + 1U; i++)
+  for (uint32_t i = 1; i < RTREE_MAX_NODES + 1U; ++i)
     {
       s.CoverSplit = s.CoverSplit.merge(s.BranchBuf[i].box);
     }
@@ -83,7 +83,7 @@ bool RTreeNode::getBranches(RTreeBranch const& b, RTreeSpliter& s)
   // Init node
   count = 0;
   level = 0;
-  for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
       branch[i].child = NULL;
       branch[i].box = RTREE_DUMMY_BBOX;
@@ -120,7 +120,7 @@ void RTreeNode::PartitionVars::methodZero(RTreeSpliter& s)
          (count[RTREE_PARTITION_1] < RTREE_MAX_NODES + 1U - RTREE_MIN_FILL))
     {
       biggestDiff = -1.0f;
-      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; ++i)
         {
           if (!taken[i])
             {
@@ -163,7 +163,7 @@ void RTreeNode::PartitionVars::methodZero(RTreeSpliter& s)
         group = 1;
       else
         group = 0;
-      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; ++i)
         {
           if (!taken[i])
             {
@@ -205,15 +205,15 @@ void RTreeNode::PartitionVars::pickSeeds(RTreeSpliter& s)
   uint32_t seed0 = 0;
   uint32_t seed1 = 0;
 
-  for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES + 1U; ++i)
     {
       volume[i] = s.BranchBuf[i].box.volume();
     }
 
   worst = -s.CoverSplitVolume - 1.0f;
-  for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+  for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
     {
-      for (uint32_t j = i + 1U; j < RTREE_MAX_NODES + 1U; j++)
+      for (uint32_t j = i + 1U; j < RTREE_MAX_NODES + 1U; ++j)
         {
           waste = (s.BranchBuf[i].box.merge(s.BranchBuf[j].box)).volume();
           waste = waste - volume[i] - volume[j];

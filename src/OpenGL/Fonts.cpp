@@ -18,7 +18,7 @@ void SimTaDynFont::buildMappedTexture()
   else
     {
       glBindTexture(GL_TEXTURE_2D, texture_id_);
-      for (GLsizei loop = 0; loop < nb_fonts; loop++)
+      for (GLsizei loop = 0; loop < nb_fonts; ++loop)
         {
           float32_t cx = (float32_t) (loop % 16) / 16.0f;
           float32_t cy = (float32_t) (loop / 16) / 8.0f;

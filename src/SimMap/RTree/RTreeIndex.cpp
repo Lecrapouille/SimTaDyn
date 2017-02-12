@@ -13,7 +13,7 @@ void RTreeNode::debugIndex(std::ostream& os) const
   debugNode(os);
   if (!IS_A_RTREE_LEAF(level))
     {
-      for (i = 0; i < RTREE_MAX_NODES; i++)
+      for (i = 0; i < RTREE_MAX_NODES; ++i)
         {
           node = branch[i].child;
           if (NULL != node)
@@ -39,7 +39,7 @@ void RTreeNode::debugData(std::ostream& os) const
   else
     {
       // Internal node
-      for (i = 0; i < RTREE_MAX_NODES; i++)
+      for (i = 0; i < RTREE_MAX_NODES; ++i)
         {
           node = branch[i].child;
           if (NULL != node)
@@ -61,11 +61,11 @@ uint32_t RTreeNode::search_aux(AABB const& bbox) const
 
   if (IS_A_RTREE_LEAF(level)) // FIXME: faire if (is_leaf())
     {
-      for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
         {
           if ((branch[i].child) && bbox.collides(branch[i].box))
             {
-              hitCount++;
+              ++hitCount;
               // Colorize in green
               std::cout << "  found #" << hitCount << ": " << this << ", child " << i << std::endl;
             }
@@ -73,7 +73,7 @@ uint32_t RTreeNode::search_aux(AABB const& bbox) const
     }
   else // Internal node
     {
-      for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
         {
           if ((branch[i].child) && bbox.collides(branch[i].box))
             {
@@ -151,7 +151,7 @@ RTreeNode* RTreeNode::insert(const uint32_t tid, AABB const& bbox, uint32_t leve
     {
       RTreeNode* newroot = new RTreeNode(this->level + 1U);
       RTreeBranch b(cover(), this);
-      //NonLeafCount++;
+      //++NonLeafCount;
       newroot->addBranch(b);
 
       b.box = newnode->cover();
@@ -179,7 +179,7 @@ RTreeNode* RTreeNode::remove(const uint32_t tid, AABB const& bbox)
       while (NULL != list)
         {
           t = list->node;
-          for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+          for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
             {
               if (NULL != t->branch[i].child)
                 {
@@ -197,7 +197,7 @@ RTreeNode* RTreeNode::remove(const uint32_t tid, AABB const& bbox)
       // check for redundant root (not leaf, 1 child) and eliminate
       if (count == 1U)
         {
-          for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+          for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
             {
               if (t == branch[i].child)
                 break;
@@ -217,7 +217,7 @@ bool RTreeNode::remove_aux(const uint32_t tid, AABB const& bbox, RTreeNodeList* 
 {
   if (IS_A_RTREE_LEAF(level))
     {
-      for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
         {
           if ((NULL != branch[i].child) &&
               (tid == branch[i].tid))
@@ -231,7 +231,7 @@ bool RTreeNode::remove_aux(const uint32_t tid, AABB const& bbox, RTreeNodeList* 
     }
   else
     {
-      for (uint32_t i = 0; i < RTREE_MAX_NODES; i++)
+      for (uint32_t i = 0; i < RTREE_MAX_NODES; ++i)
         {
           if ((NULL != branch[i].child) && (bbox.collides(branch[i].box)))
             {

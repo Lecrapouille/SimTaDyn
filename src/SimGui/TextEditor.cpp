@@ -25,7 +25,7 @@ void GotoLineWindow::gotoLine()
     {
       // Allow only numbers to be entered
       Glib::ustring text = m_entry.get_text();
-      for (uint32_t i = 0; i < text.length(); i++)
+      for (uint32_t i = 0; i < text.length(); ++i)
         {
           if (Glib::Unicode::isdigit(text[i]) == false)
             return ;
@@ -675,7 +675,7 @@ void TextEditor::empty(std::string const& title)
 {
   TextDocument *doc = create();
 
-  m_nb_nonames++;
+  ++m_nb_nonames;
   doc->m_button.title(title + ' ' + std::to_string(m_nb_nonames));
   doc->m_button.link(&m_notebook, doc);
 
