@@ -1,6 +1,7 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
+#  include "Shader.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
 #  include "SimTaDynMap.hpp"
@@ -8,31 +9,42 @@
 /*
  * OpenGL renderer.
  */
-class Renderer
+class GLRenderer
 {
 public:
 
   enum RenderStyle { Fast2D, Medium2D, Low2D };
+  enum RenderAxis { X_AXIS, Y_AXIS, Z_AXIS, N_AXIS };
 
-  Renderer()
+  GLRenderer()
     : m_default_camera(),
       m_current_camera(),
       m_background_color(Color::Black),
-      m_render_style(Renderer::Fast2D),
+      m_render_style(GLRenderer::Fast2D),
       m_RotationAngles(N_AXIS, 0.0f)
   {
   }
 
-  ~Renderer()
+  //! \brief Delete buffers, textures and program.
+  ~GLRenderer();
+
+  virtual void setContext() = 0;
+
+  // \brief Same role than a constructor but here we are sure than
+  // and OpenGL context is created before.
+  bool init();
+
+  inline void begin()
   {
+    clearScreen();
+    m_shader.begin();
   }
 
-  /*
-   * Same role than a constructor but here we are sure than
-   * and OpenGL context is created before.
-   */
-  void start();
-  void end();
+  inline void end()
+  {
+    m_shader.end();
+    glFlush();
+  }
 
   /*
    * When camera states change, apply
@@ -118,7 +130,7 @@ public:
   /*
    * Draw a graph as friend function
    */
-  void render() const;
+  void draw() const;
 
   /*
    * Number of pixels of the opengl window
@@ -127,13 +139,14 @@ public:
   virtual uint32_t screenHeight() const = 0;
 
 protected:
-  enum { X_AXIS, Y_AXIS, Z_AXIS, N_AXIS };
+  //enum { X_AXIS, Y_AXIS, Z_AXIS, N_AXIS };
 
   Camera2D m_default_camera;
   Camera2D m_current_camera;
   Color m_background_color;
   SimTaDynFont font_list_[1];
   RenderStyle m_render_style;
+  GLShader m_shader;
 
 
   GLuint m_Vao {0};

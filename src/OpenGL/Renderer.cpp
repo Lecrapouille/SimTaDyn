@@ -1,5 +1,10 @@
 #include "Renderer.hpp"
 #include "SimTaDynContext.hpp"
+#include "GraphMemory.hpp"
+
+// https://github.com/progschj/OpenGL-Examples/blob/master/08map_buffer.cpp
+#include "Renderer.hpp"
+#include "SimTaDynContext.hpp"
 
 static const GLfloat vertex_data[] =
   {
@@ -8,7 +13,14 @@ static const GLfloat vertex_data[] =
     -0.5f, -0.366f, 0.f, 1.f,
   };
 
-void Renderer::start()
+GLRenderer::~GLRenderer()
+{
+  // Delete buffers and program
+  glDeleteBuffers(1, &m_Vao);
+  glDeleteProgram(m_Program);
+}
+
+bool GLRenderer::init()
 {
   // Configure OpenGL
   glClearDepth(1.0f);
@@ -38,19 +50,13 @@ void Renderer::start()
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  m_Program = simGL::createShaderProgram(SIMTADYN().data_path("vertex.glsl"),
-                                         SIMTADYN().data_path("fragment.glsl"));
+  m_Program = m_shader.createShaderProgram(SIMTADYN().data_path("vertex.glsl"),
+                                           SIMTADYN().data_path("fragment.glsl"));
   if (0 != m_Program)
     {
       m_Mvp = glGetUniformLocation(m_Program, "mvp");
     }
-}
-
-void Renderer::end()
-{
-  // Delete buffers and program
-  glDeleteBuffers(1, &m_Vao);
-  glDeleteProgram(m_Program);
+  return true;
 }
 
 static void compute_mvp(float *res,
@@ -92,7 +98,7 @@ static void compute_mvp(float *res,
   res[3] = 0.f;   res[7] = 0.f;           res[11] = 0.f;           res[15] = 1.f;
 }
 
-void Renderer::render() const
+void GLRenderer::draw() const
 {
   float mvp[16];
   enum { X_AXIS, Y_AXIS, Z_AXIS };

@@ -17,9 +17,6 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
 
   // Drawing area
   {
-    // Desired OpenGL context version 3.3
-    m_drawing_area.set_required_version(3, 3);
-
     m_drawing_area.set_hexpand(true);
     m_drawing_area.set_vexpand(true);
     m_drawing_area.set_auto_render(true);
@@ -133,71 +130,6 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   show_all_children();
 }
 
-// *************************************************************************************************
-// Initialize the OpenGL context
-// *************************************************************************************************
-void SimTaDynWindow::onRealize()
-{
-  m_drawing_area.make_current();
-  try
-    {
-      // GLArea only support Core profile.
-      glewExperimental = true;
-      if (GLEW_OK != glewInit())
-        {
-          std::cerr << "[FAILED] when initializing GLEW (Maybe the OpenGL context does not exist)." << std::endl;
-        }
-
-      m_drawing_area.throw_if_error();
-
-      m_drawing_area.start();
-      m_drawing_area.clearScreen();
-    }
-  catch (const Gdk::GLError& gle)
-    {
-      std::cerr << "[FAILED] An error occured making the context current during realize:" << std::endl;
-      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
-    }
-}
-
-// *************************************************************************************************
-// Clean up
-// *************************************************************************************************
-void SimTaDynWindow::onUnrealize()
-{
-  m_drawing_area.make_current();
-  try
-    {
-      m_drawing_area.throw_if_error();
-      m_drawing_area.end();
-    }
-  catch (const Gdk::GLError& gle)
-    {
-      std::cerr << "[FAILED] An error occured making the context current during unrealize" << std::endl;
-      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
-    }
-}
-
-// *************************************************************************************************
-// Draw the scene
-// *************************************************************************************************
-bool SimTaDynWindow::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
-{
-  try
-    {
-      m_drawing_area.throw_if_error();
-      m_drawing_area.render();
-
-      return true;
-    }
-  catch (const Gdk::GLError& gle)
-    {
-      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
-      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
-      return false;
-    }
-}
-
 // FIXME const Cell16 ForthToken)
 // **************************************************************
 // FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
@@ -280,22 +212,22 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
       }
       break;
     case GDK_KEY_Page_Up:
-      m_drawing_area.keyPressed(GlDrawingArea::Forward);
+      m_drawing_area.keyPressed(GLDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      m_drawing_area.keyPressed(GlDrawingArea::Backward);
+      m_drawing_area.keyPressed(GLDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      m_drawing_area.keyPressed(GlDrawingArea::Up);
+      m_drawing_area.keyPressed(GLDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      m_drawing_area.keyPressed(GlDrawingArea::Down);
+      m_drawing_area.keyPressed(GLDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      m_drawing_area.keyPressed(GlDrawingArea::Right);
+      m_drawing_area.keyPressed(GLDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      m_drawing_area.keyPressed(GlDrawingArea::Left);
+      m_drawing_area.keyPressed(GLDrawingArea::Left);
       break;
     default:
       break;
@@ -308,22 +240,22 @@ void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)
   switch (evenement->keyval)
     {
     case GDK_KEY_Page_Up:
-      m_drawing_area.keyReleased(GlDrawingArea::Forward);
+      m_drawing_area.keyReleased(GLDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      m_drawing_area.keyReleased(GlDrawingArea::Backward);
+      m_drawing_area.keyReleased(GLDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      m_drawing_area.keyReleased(GlDrawingArea::Up);
+      m_drawing_area.keyReleased(GLDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      m_drawing_area.keyReleased(GlDrawingArea::Down);
+      m_drawing_area.keyReleased(GLDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      m_drawing_area.keyReleased(GlDrawingArea::Right);
+      m_drawing_area.keyReleased(GLDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      m_drawing_area.keyReleased(GlDrawingArea::Left);
+      m_drawing_area.keyReleased(GLDrawingArea::Left);
       break;
     default:
       break;

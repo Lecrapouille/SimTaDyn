@@ -40,7 +40,7 @@ VPATH=.:$(BUILD):Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimM
 ###################################################
 # Set objects architecture specific
 OBJECTS_COMMON   = Exception.o TextColor.o Color.o Vector3D.o Camera2D.o SharedLibrary_UNIX.o SharedLibrary.o
-OBJECTS_OPENGL   = OpenGL.o Textures.o Fonts.o
+OBJECTS_OPENGL   = Shader.o Textures.o Fonts.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o
 OBJECTS_LOADER   = ShapeFile.o

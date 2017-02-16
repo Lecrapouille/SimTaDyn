@@ -16,10 +16,21 @@ public:
   {
   }
 
-  void onRealize();
-  void onUnrealize();
-  bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */);
-
+  //! \brief Initialize the OpenGL context
+  inline void onRealize()
+  {
+    m_drawing_area.onRealize();
+  }
+  //! \brief Clean up
+  void onUnrealize()
+  {
+    m_drawing_area.onUnrealize();
+  }
+  //! \brief Draw the scene
+  bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
+  {
+    return m_drawing_area.onRender();
+  }
   uint32_t addPluggin(const Glib::ustring& icon_name,
                       const std::string &script,
                       const std::string &help);
@@ -53,7 +64,7 @@ protected:
   Gtk::Toolbar m_toolbar[2];
   std::vector<Gtk::ToolButton> m_toolbuttons;
 
-  GlDrawingArea m_drawing_area;
+  GLDrawingArea m_drawing_area;
   FindWindow *m_findwin;
   ReplaceWindow *m_replacewin;
   GotoLineWindow *m_gotolinewindow;
