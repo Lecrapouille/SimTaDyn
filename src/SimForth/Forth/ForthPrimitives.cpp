@@ -669,7 +669,7 @@ void Forth::boot()
   m_dictionary.add(FORTH_PRIMITIVE_LAST, NAME("LAST"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_HERE, NAME("HERE"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_ALLOT, NAME("ALLOT"), 0);
-  m_dictionary.add(FORTH_PRIMITIVE_COMMA32, NAME("),"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_COMMA32, NAME(","), 0);
   m_dictionary.add(FORTH_PRIMITIVE_COMMA16, NAME("S,"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_COMMA8, NAME("C,"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_FETCH, NAME("@"), 0);

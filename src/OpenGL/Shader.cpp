@@ -84,9 +84,9 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
   if (nullptr == shader_filename)
     return 0;
 
-  assert((GL_FRAGMENT_SHADER != shader_type) &&
-         (GL_VERTEX_SHADER != shader_type) &&
-         (GL_GEOMETRY_SHADER != shader_type));
+  assert((GL_FRAGMENT_SHADER == shader_type) ||
+         (GL_VERTEX_SHADER == shader_type) ||
+         (GL_GEOMETRY_SHADER == shader_type));
 
   std::cout << "  * Compiling ";
   if (GL_FRAGMENT_SHADER == shader_type)
