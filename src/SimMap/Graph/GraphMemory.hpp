@@ -250,6 +250,13 @@
       insert(m_index, elt);
       ++m_index;
     }
+    //! \brief Same than append but jump to the next free element.
+    //! \param elt the element to store.
+    inline void appendSafe(T const& elt)
+    {
+      m_index = nextFree();
+      append(elt);
+    }
     //! \brief Remove an element at a given position. Complexity is
     //! O(1). Ignore the case where index > m_allocated. No
     //! desallocation/free is called.
@@ -274,6 +281,15 @@
         }
       remove(m_index);
     }
+    //! \brief commute position of two elements
+    void swap(const uint32_t id1, const uint32_t id2)
+    {
+      T* t1 = &(m_pools[id1 / M]->m_slots[MODULO(id1, M)]);
+      T* t2 = &(m_pools[id2 / M]->m_slots[MODULO(id2, M)]);
+
+      T tmp = *t1; *t1 = *t2; *t2 = tmp;
+    }
+
     //! \brief Check if the slot is occupied.
     //! \param id the location of the slot.
     //! \return true if the slot is occupied. Return false if empty.
@@ -287,6 +303,18 @@
           return isOccupied(index, subindex);
         }
       return true;
+    }
+    //! \brief return the next free element
+    inline uint32_t nextFree() const
+    {
+      uint32_t i = m_index;
+      const uint32_t limit = M * m_allocated;
+      while (isOccupied(i) && (i < limit))
+        {
+          std::cout << i << " is occupied\n";
+          ++i;
+        }
+      return i;
     }
     //! \brief Check if the location of the slot belongs to the container.
     //! \param id the location of the slot.
@@ -427,6 +455,21 @@
           std::cout << std::endl;
         }
     }
+    const T* slot(const uint32_t index) const
+    {
+      if (index < m_allocated)
+        return m_pools[index]->m_slots;
+      return nullptr;
+    }
+    //!
+    inline uint32_t poolSizeAllocation() const
+    {
+      return M;
+    }
+    inline uint32_t allocated() const
+    {
+      return m_allocated;
+    }
 
   private:
     //! \brief
@@ -544,15 +587,6 @@
     enum _M { M = 4U };
     //! Size of the index indicating which slots are occupied.
     enum _I { I = M / S };
-    //!
-    inline uint32_t poolSizeAllocation() const
-    {
-      return M;
-    }
-    inline uint32_t allocated() const
-    {
-      return m_allocated;
-    }
     //! Private class for storing elements in a large array.
     template<class U> class poolContainer
     {

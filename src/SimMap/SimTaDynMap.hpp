@@ -2,6 +2,7 @@
 #  define SIMTADYN_MAP_HPP_
 
 #  include "SimTaDynGraph.hpp"
+#  include "Color.hpp"
 //#  include "RTree.hpp"
 
 class SimTaDynMap
@@ -22,7 +23,14 @@ public:
     return m_bbox;
   }
 
+  SimTaDynNode *addNode(Vector3D const& p);
+  bool removeNode(const Key nodeID);
 
+  // FIXME: faire un
+  // enum DataField { Position, Color };
+  // std::vector<containers*> m_datum
+  container<Vector3D> m_positions;
+  container<Color> m_colors;
 
   //protected:
 

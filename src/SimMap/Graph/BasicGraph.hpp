@@ -303,6 +303,26 @@ public:
     return m_nodes.empty();
   }
 
+  //! \brief
+  inline N *addNode()
+  {
+    const Key id = m_nodes.nextFree();
+    N *node = newNode(id);
+    m_nodes.append(node);
+    return node;
+  }
+
+  N *addAndGetNode(const Key nodeID)
+  {
+    N *node = getNode(nodeID);
+    if (nullptr == node)
+      {
+        node = newNode(nodeID);
+        m_nodes.insert(node->id(), node);
+      }
+    return node;
+  }
+
   //! \brief Add a node to the graph with the given identifier.
   //! If a node with the same identifier already exists nothing
   //! is made; else a new node is allocated. Complexity is O(1).
@@ -616,19 +636,13 @@ private:
 protected:
 
   //! \brief Common function for allocating a new node.
-  inline N *newNode() const
-  {
-    return new N();
-  }
-
-  //! \brief Common function for allocating a new node.
-  inline N *newNode(const Key nodeID) const
+  inline virtual N *newNode(const Key nodeID)
   {
     return new N(nodeID);
   }
 
   //! \brief Common function for allocating a new arc.
-  inline A *newArc(BasicNode &fromNode, BasicNode &toNode)
+  inline virtual A *newArc(BasicNode &fromNode, BasicNode &toNode)
   {
     return new A(m_arc_unique++, fromNode, toNode);
   }
@@ -642,5 +656,7 @@ protected:
   //! \brief create a unique identifier for arcs.
   Key m_arc_unique = 0;
 };
+
+void depthFirstSearch(BasicGraph<BasicNode, BasicArc> *const graph, const Key satrtNodeID);
 
 #endif /* BASIC_GRAPH_HPP_ */

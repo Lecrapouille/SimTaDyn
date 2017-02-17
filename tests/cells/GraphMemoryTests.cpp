@@ -87,10 +87,25 @@ void GraphMemoryTests::test()
       CPPUNIT_ASSERT_EQUAL(((i + 1U) >= c1.poolSizeAllocation()), c1.full());
     }
   CPPUNIT_ASSERT_EQUAL(true, c1.full());
-  c1.append(i);
+  c1.appendSafe(i);
   CPPUNIT_ASSERT_EQUAL(2U, c1.allocated());
   CPPUNIT_ASSERT_EQUAL(i + 1U, c1.occupation());
   CPPUNIT_ASSERT_EQUAL(i, c1.get(i));
+
+  // Swap 2 elts
+  CPPUNIT_ASSERT_EQUAL(1U, c1.get(1U));
+  CPPUNIT_ASSERT_EQUAL(3U, c1.get(3U));
+  c1.swap(1U, 3U);
+  CPPUNIT_ASSERT_EQUAL(3U, c1.get(1U));
+  CPPUNIT_ASSERT_EQUAL(1U, c1.get(3U));
+  c1.swap(1U, 3U);
+  CPPUNIT_ASSERT_EQUAL(1U, c1.get(1U));
+  CPPUNIT_ASSERT_EQUAL(3U, c1.get(3U));
+
+  // Swap itself
+  CPPUNIT_ASSERT_EQUAL(2U, c1.get(2U));
+  c1.swap(2U, 2U);
+  CPPUNIT_ASSERT_EQUAL(2U, c1.get(2U));
 
   // Remove element
   c1.remove();
@@ -127,6 +142,7 @@ void GraphMemoryTests::test()
   CPPUNIT_ASSERT_EQUAL(false, c1.full());
   CPPUNIT_ASSERT_EQUAL(2U, c1.allocated());
   CPPUNIT_ASSERT_EQUAL(0U, c1.occupation());
+  CPPUNIT_ASSERT_EQUAL(0U, c1.m_index);
 
   // Insert
   c1.insert(4 * c1.poolSizeAllocation(), 42U);
@@ -135,6 +151,17 @@ void GraphMemoryTests::test()
   CPPUNIT_ASSERT_EQUAL(5U, c1.allocated());
   CPPUNIT_ASSERT_EQUAL(1U, c1.occupation());
   CPPUNIT_ASSERT_EQUAL(42U, c1.get(4 * c1.poolSizeAllocation()));
+  CPPUNIT_ASSERT_EQUAL(0U, c1.m_index);
+
+  // InserSafe
+  CPPUNIT_ASSERT_EQUAL(43U, c1.nextFree());
+  CPPUNIT_ASSERT_EQUAL(0U, c1.m_index);
+  c1.appendSafe(43U);
+  CPPUNIT_ASSERT_EQUAL(43U, c1.m_index);
+  CPPUNIT_ASSERT_EQUAL(43U, c1.get(43));
+  c1.appendSafe(44U);
+  CPPUNIT_ASSERT_EQUAL(44U, c1.m_index);
+  CPPUNIT_ASSERT_EQUAL(44U, c1.get(44U));
 
   // Accessor
   c1.insert(2, 66U);

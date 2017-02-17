@@ -31,18 +31,13 @@ public:
 protected:
   inline void setName()
   {
-    m_name = "Node" + std::to_string(m_id);
+    m_name = "N#" + std::to_string(m_id);
   }
 
   std::string m_name;
 
-  //! \brief The following pointer can point to any extra data needed by the
-  //! cell. This field is used by Forth to extend the implementation.
-  void *m_data;
-
-  //! \brief Position in the map/view (pixel). Set as protected to be sure to
-  //! use accessors which can prevent other cells that this cell moved.
-  Position3D m_position;
+public:
+  Key dataID;
 };
 
 // **************************************************************
@@ -71,10 +66,13 @@ public:
 protected:
   inline void setName()
   {
-    m_name = "Arc" + std::to_string(m_id);
+    m_name = "A#" + std::to_string(m_id);
   }
 
   std::string m_name;
+
+public:
+  Key dataID;
 };
 
 // **************************************************************
@@ -95,6 +93,48 @@ public:
     : BasicGraph<N,A>(noNodes, noArcs, directed)
   {
   }
+
+  //! Return the last inserted node.
+  inline N *node() const
+  {
+    return m_last_node;
+  }
+
+  //! Return the last inserted arc
+  inline A *arc() const
+  {
+    return m_last_arc;
+  }
+
+protected:
+
+  //! \brief Common function for allocating a new node.
+  inline virtual N *newNode(const Key nodeID)
+  {
+    std::cout << "newNode" << std::endl;
+    N *n = new N(nodeID);
+    m_last_node = n;
+    return n;
+  }
+
+  /* removeNode() {
+   * positions.swap(current, lastElement)
+   * nodes.last.key(current.key)
+   * nodes.swap(current, lastElement)
+   */
+
+  //! \brief Common function for allocating a new arc.
+  inline virtual A *newArc(BasicNode &fromNode, BasicNode &toNode)
+  {
+    std::cout << "newArc" << std::endl;
+    A *a = new A(m_arc_unique++, fromNode, toNode);
+    m_last_arc = a;
+    return a;
+  }
+
+  N* m_last_node = nullptr;
+  A* m_last_arc = nullptr;
+  Key m_arc_unique = 0;
 };
 
 typedef SimTaDynGraph<SimTaDynNode, SimTaDynArc> SimTaDynGraph_t;

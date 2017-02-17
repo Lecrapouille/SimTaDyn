@@ -31,18 +31,18 @@ int main(void)
   suite3->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testCopy", &BoundingBoxTests::testCopy));
   suite3->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testOperations", &BoundingBoxTests::testOperations));
   */
-  //CppUnit::TestSuite* suite4 = new CppUnit::TestSuite("GraphMemoryTests");
-  //suite4->addTest(new CppUnit::TestCaller<GraphMemoryTests>("test", &GraphMemoryTests::test));
+  CppUnit::TestSuite* suite4 = new CppUnit::TestSuite("GraphMemoryTests");
+  suite4->addTest(new CppUnit::TestCaller<GraphMemoryTests>("test", &GraphMemoryTests::test));
 
-  CppUnit::TestSuite* suite5 = new CppUnit::TestSuite("BasicGraphTests");
-  suite5->addTest(new CppUnit::TestCaller<BasicGraphTests>("test", &BasicGraphTests::test));
+  //CppUnit::TestSuite* suite5 = new CppUnit::TestSuite("BasicGraphTests");
+  //suite5->addTest(new CppUnit::TestCaller<BasicGraphTests>("test", &BasicGraphTests::test));
 
   CppUnit::TextUi::TestRunner runner;
-  //runner.addTest(suite1);
-  //runner.addTest(suite2);
+  runner.addTest(suite1);
+  runner.addTest(suite2);
   //runner.addTest(suite3);
-  //runner.addTest(suite4);
-  runner.addTest(suite5);
+  runner.addTest(suite4);
+  //runner.addTest(suite5);
   runner.run();
 
   return 0;
