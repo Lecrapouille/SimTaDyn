@@ -269,7 +269,7 @@ void CloseLabel::asterisk(const bool asterisk)
 // *************************************************************************************************
 TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   : Gtk::ScrolledWindow(),
-    m_button(""),
+    m_button(""), // FIXME a passer en param
     m_filename("")
 {
   Gtk::ScrolledWindow::add(m_textview);
@@ -292,7 +292,7 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   m_buffer->signal_changed().connect(sigc::mem_fun(this, &TextDocument::onChanged));
 }
 
-// *************************************************************************************************
+// *******************************²******************************************************************
 // Erase all text in the document
 // *************************************************************************************************
 void TextDocument::clear()
@@ -346,8 +346,7 @@ bool TextDocument::save()
         {
           outfile << m_buffer->get_text();
           outfile.close();
-          m_buffer->set_modified(false);
-          m_button.asterisk(false);
+          modified(false);
           m_button.set_tooltip_text(m_filename);
         }
       else
@@ -402,8 +401,7 @@ bool TextDocument::load(std::string const& filename, bool clear)
 
   if (clear)
     {
-      m_buffer->set_modified(false);
-      m_button.asterisk(false);
+      modified(false);
     }
 
   return true;
@@ -689,10 +687,34 @@ void TextEditor::empty(std::string const& title)
 // *************************************************************************************************
 //
 // *************************************************************************************************
+TextDocument *TextEditor::tab(std::string const& title)
+{
+  for (int k = 0; k < m_notebook.get_n_pages(); ++k)
+    {
+      // TBD: compare title ou filename ou les deux ?
+      if (0 == document(k)->title().compare(title))
+        {
+          // Found
+          return document(k);
+        }
+    }
+
+  // Not found
+  return nullptr;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
 TextDocument *TextEditor::addTab(std::string const& title)
 {
-  TextDocument *doc = addTab();
+  TextDocument *doc = tab(title);
+  if (nullptr == doc)
+    {
+      doc = addTab();
+    }
   doc->title(title);
+  //doc->filename(title);
   return doc;
 }
 

@@ -201,10 +201,14 @@ public:
   {
     m_buffer->insert(m_buffer->end(), text);
   }
-
   inline void appendText(std::string const& text)
   {
     m_buffer->insert(m_buffer->end(), text);
+  }
+  inline void modified(const bool b)
+  {
+    m_buffer->set_modified(b);
+    m_button.asterisk(b);
   }
 
 protected:
@@ -238,6 +242,7 @@ public:
   void gotoLine();
   TextDocument *addTab(std::string const& title);
   TextDocument *addTab();
+  TextDocument *tab(std::string const& title);
 
   Gtk::Notebook m_notebook;
   FindWindow m_findwindow;

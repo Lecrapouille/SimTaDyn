@@ -177,8 +177,8 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
 //
 // *************************************************************************************************
 ForthEditor::ForthEditor()
-  : m_cout(std::cout, m_results.get_buffer()),
-    m_cerr(std::cerr, m_messages.get_buffer())
+//: m_cout(std::cout, m_results.get_buffer()),
+//    m_cerr(std::cerr, m_messages.get_buffer())
 {
   // Menus '_Forth Scripts'
   {
@@ -214,7 +214,7 @@ ForthEditor::ForthEditor()
     m_submenu[3].set_label("Open Script");
     m_image[3].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
     m_submenu[3].set_image(m_image[3]);
-    m_submenu[3].signal_activate().connect(sigc::mem_fun0(*this, &TextEditor::open));
+    //FIXME    m_submenu[3].signal_activate().connect(sigc::mem_fun0<bool>(*this, &ForthEditor::open));
     m_menu[1].append(m_submenu[3]);
 
     //
@@ -459,6 +459,8 @@ std::string ForthEditor::elapsedTime()
 // *************************************************************************************************
 bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 {
+  std::cerr << "Exec_ " << script << " " << filename << std::endl;
+
   typedef std::chrono::nanoseconds ns;
   typedef std::chrono::high_resolution_clock Time;
   std::pair<bool, std::string> res;
@@ -474,8 +476,8 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
   auto t1 = Time::now();
 
   // Flush the std::cout in the textview
-  m_cout.flush();
-  m_cerr.flush();
+  //m_cout.flush();
+  //m_cerr.flush();
 
   if (res.first)
     {
@@ -509,12 +511,39 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 // *************************************************************************************************
 void ForthEditor::execButton(Gtk::ToolButton* button)
 {
+  // FIXME: ajouter le numero du bouton dans le nom pour eviter
   const char *name = "button";
+
+  // Forbid to exec the script if it is currently modified by the user
+  // and not saved.
+  TextDocument *doc = tab(name);
+  if ((nullptr != doc) && (doc->isModified()))
+    {
+      Gtk::MessageDialog dialog((Gtk::Window&) (*m_notebook.get_toplevel()),
+                                "The document '" + doc->title() +
+                                "' has been modified. Do you want to save it now before running its script ?",
+                                false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO);
+
+      int result = dialog.run();
+      if (Gtk::RESPONSE_YES == result)
+        {
+          button->set_label(doc->utext());
+          button->set_tooltip_text(doc->utext());
+          doc->modified(false);
+        }
+      else
+        {
+          // Do not exec the script forth while in edition
+          m_statusbar.push("Use ignored saving the Forth script button"); // FIXME: inutile car ecrase par le resultat de l'exec
+        }
+    }
+
   if (ForthEditor::exec_(button->get_label().raw(), name))
     {
       TextDocument *doc = TextEditor::addTab(name);
       doc->clear();
-      doc->appendText(button->get_label().raw());
+      doc->appendText(button->get_label());
+      doc->modified(false);
     }
   // FIXME: quand on sauvegarde ne pas stocker dans un fichier mais dans le bouton
 }

@@ -1,3 +1,5 @@
+Pouvoir changer le titre d'un onglet Forth. Tout comme pour les boutons Forth (bouton droit ==> change_title). Les boutons ne sont pas sauves dans un fichier texte du coup on perd les modifs.
+
 Est ce utile de faire correspondre le nombre d'elements d'un noeud RTree avec celle d'un slots d'un container de graphe ?
 Ca permettrait de stocker uniquement un noeud de rtree dans la carte graphique ? Je pense que c'est une mauvaise ideee mais en gros:
 Iterator sur RTree ==> load index dans la carte graphique. Mais il faudrait lui donner un boolean pour prendre en compte ou pas le champ au shader.
