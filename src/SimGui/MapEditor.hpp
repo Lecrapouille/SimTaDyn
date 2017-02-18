@@ -22,7 +22,7 @@ public:
   std::vector<SimTaDynMap*> m_maps;
 
 protected:
-  SimTaDynMap *load(const std::string& filename, SimTaDynMap *oldmap = nullptr) override;
+  virtual bool load(const std::string& filename, SimTaDynMap *oldmap = nullptr) override;
 
 };
 

@@ -1,3 +1,7 @@
+Est ce utile de faire correspondre le nombre d'elements d'un noeud RTree avec celle d'un slots d'un container de graphe ?
+Ca permettrait de stocker uniquement un noeud de rtree dans la carte graphique ? Je pense que c'est une mauvaise ideee mais en gros:
+Iterator sur RTree ==> load index dans la carte graphique. Mais il faudrait lui donner un boolean pour prendre en compte ou pas le champ au shader.
+
 Faire une class iterator sur le graph avec different type de parcours (long our larg) en indiquant ou pas le noeud ou arc de depart.
 http://linuxfr.org/news/je-cree-mon-jeu-video-e01-les-systemes-a-entites
 Reprendre le tuto pour avoir une class Vector generique

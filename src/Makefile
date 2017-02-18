@@ -30,15 +30,16 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -ICommon -ICommon/SharedLibrary -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap -ISimMap/RTree -ISimMap/Graph -ISimMap/Loaders -ISimGui
+INCLUDES = -I. -I../tools -ICommon -ICommon/SharedLibrary -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap -ISimMap/RTree -ISimMap/Graph -ISimMap/Loaders -ISimGui
 # -I/usr/include/mysql
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui
+VPATH=.:$(BUILD):../tools:Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui
 
 ###################################################
 # Set objects architecture specific
+OBJECTS_TOOL     = Backward.o
 OBJECTS_COMMON   = Exception.o TextColor.o Color.o Vector3D.o Camera2D.o SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_OPENGL   = Shader.o Textures.o Fonts.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
@@ -48,16 +49,16 @@ OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimit
 OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJECTS_SIMTADYN = Renderer.o SimForth.o main.o
 
-OBJECTS         = $(OBJECTS_COMMON) $(OBJECTS_OPENGL) $(OBJECTS_RTREE) \
-                  $(OBJECTS_MAP) $(OBJECTS_LOADER) $(OBJECTS_FORTH)    \
-                  $(OBJECTS_GUI) $(OBJECTS_SIMTADYN)
+OBJECTS         = $(OBJECTS_TOOL) $(OBJECTS_COMMON) $(OBJECTS_OPENGL) $(OBJECTS_RTREE) \
+                  $(OBJECTS_MAP) $(OBJECTS_LOADER) $(OBJECTS_FORTH) $(OBJECTS_GUI) \
+                  $(OBJECTS_SIMTADYN)
 TARGET = SimTaDyn
 
 ###################################################
 # Compil options
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -ldw
 DEFINES =
 
 ###################################################

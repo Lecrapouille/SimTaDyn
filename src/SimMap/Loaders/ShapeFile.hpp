@@ -56,7 +56,6 @@ public:
 class ShapefileLoader : public MapLoader
 {
 public:
-  ShapefileLoader(const std::string& filename, SimTaDynMap& map);
   ShapefileLoader()
   {
   }
@@ -64,7 +63,7 @@ public:
   {
   }
 
-  SimTaDynMap *load(const std::string& filename, SimTaDynMap *oldmap = nullptr) override;
+  virtual bool load(std::string const& filename, SimTaDynMap *map) override;
 
   // FIXME: protected:
 

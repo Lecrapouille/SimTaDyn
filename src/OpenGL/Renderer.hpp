@@ -139,7 +139,6 @@ public:
   virtual uint32_t screenHeight() const = 0;
 
 protected:
-  //enum { X_AXIS, Y_AXIS, Z_AXIS, N_AXIS };
 
   Camera2D m_default_camera;
   Camera2D m_current_camera;

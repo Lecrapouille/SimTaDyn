@@ -1,0 +1,2 @@
+bouton Forth => exec1 qui efface la fenetre (pas cool)
+Et si la feb=netre n'exitse pas: segfault.

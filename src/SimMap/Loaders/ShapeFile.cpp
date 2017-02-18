@@ -248,9 +248,9 @@ void ShapefileLoader::getAllRecords(SimTaDynMap& map)
     }
 }
 
-SimTaDynMap *ShapefileLoader::load(const std::string& filename, SimTaDynMap *oldmap)
+bool ShapefileLoader::load(std::string const& filename, SimTaDynMap *map)
 {
-  SimTaDynMap* map = oldmap;
+  bool ret = false;
 
   try // FIXME: comment faire undo en cas d'echec ?
     {
@@ -261,9 +261,7 @@ SimTaDynMap *ShapefileLoader::load(const std::string& filename, SimTaDynMap *old
       if (1000 != value32b)
         {
           std::cerr << "Warning. Expected shapefile version 1000 not found. The file '" << filename << "' may be not fully interpreted" << std::endl;
-
-          m_infile.close();
-          return nullptr;
+          goto l_err;
         }
 
       if (nullptr == map)
@@ -279,39 +277,28 @@ SimTaDynMap *ShapefileLoader::load(const std::string& filename, SimTaDynMap *old
 
       getAllRecords(*map);
       map->m_name += '_' + filename;
-      m_infile.close();
-
-      return map;
+      m_error = "no error";
+      ret = true;
     }
   catch (const ShapefileLoaderBadLength& e)
     {
       m_error = "The real file size is " + std::to_string(e.m_real_size)
         + " ko but the extracted size information is " + std::to_string(e.m_expected_size)
         + " bytes.";
-      goto l_err;
     }
   catch (const ShapefileLoaderBadId& e)
     {
       m_error = "The expected file identifier is " + std::to_string(e.m_expected_id)
         + " but the identifier read is " + std::to_string(e.m_bad_id)
         + ". The file '" + m_filename + "' seems not to be a proper .shp file.";
-      goto l_err;
     }
   catch (const ShapefileLoaderOpenFailed& e)
     {
       m_error = strerror(e.m_error) + '.';
-      return nullptr;
+      return ret;
     }
 
 l_err:
-  if (nullptr != map)
-    delete map;
   m_infile.close();
-  return nullptr;
-}
-
-ShapefileLoader::ShapefileLoader(const std::string& filename, SimTaDynMap& map)
-{
-  SimTaDynMap *m = &map;
-  m = load(filename, m);
+  return ret;
 }

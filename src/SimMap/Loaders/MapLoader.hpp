@@ -16,17 +16,19 @@ class MapLoaderException // TBD: : public Exception
 class MapLoader
 {
 public:
-  virtual SimTaDynMap *load(const std::string& filename, SimTaDynMap *map = nullptr) = 0;
-  virtual const std::string &error()
+  MapLoader()
+    : m_error("no error")
+  {
+  }
+
+  virtual bool load(std::string const& filename, SimTaDynMap *map) = 0;
+  virtual const std::string error()
   {
     return m_error;
   }
 
 protected:
-  std::string   m_error = c_no_error;
-
-private:
-  const char   *c_no_error = "no error";
+  std::string m_error;
 };
 
 #endif /* MAP_LOADER_HPP_ */

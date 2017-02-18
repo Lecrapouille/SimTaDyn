@@ -101,7 +101,6 @@ static void compute_mvp(float *res,
 void GLRenderer::draw() const
 {
   float mvp[16];
-  enum { X_AXIS, Y_AXIS, Z_AXIS };
 
   clearScreen();
 

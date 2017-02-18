@@ -53,7 +53,7 @@ Is a graph IDE written in C++ and QT mixing a drawn interface with a scripting m
 ## RTree
 
 * [RTree](http://web.archive.org/web/20030625161805/http:/www.es.ucsc.edu/~tonig/)
-The inventor's page (C code and PDF). 
+The inventor's page (C code and PDF).
 
 * RTree explanation in [postgis tutorial](http://www.postgis.fr/chrome/site/docs/workshop-foss4g/doc/introduction.html)
 
@@ -79,7 +79,7 @@ OpenStreetMap formalism
 ## Traffic and transportation
 
 * [Ciudadsim](https://www.rocq.inria.fr/metalau/ciudadsim/)
-Scilab Traffic Assignment Toolboxes. [PDF](https://www.rocq.inria.fr/metalau/ciudadsim/ftp/CS5/manual/manual.pdf) 
+Scilab Traffic Assignment Toolboxes. [PDF](https://www.rocq.inria.fr/metalau/ciudadsim/ftp/CS5/manual/manual.pdf)
 
 * [AequilibraE](http://www.aequilibrae.com)
 A transportation modeling toolbox for QGIS
@@ -169,12 +169,14 @@ Modern, powerful open source C++ class libraries for building network- and inter
 
 * (https://www.ibm.com/developerworks/aix/tutorials/au-memorymanager/)
 
+# Trace function calls when segfault
+
+* [Backward-cpp](https://github.com/bombela/backward-cpp)
+Abeautiful stack trace pretty printer for C++. Used with success for this project.
+
+* [Stacktrace](https://panthema.net/2008/0901-stacktrace-demangled/)
+A light tool made in few line.
+
 # cout redirection
 
 * (http://gtk.10911.n7.nabble.com/Redirecting-cout-to-a-TextBuffer-td42437.html)
-
-
-
-
-
-

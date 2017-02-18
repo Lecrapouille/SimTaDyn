@@ -5,6 +5,7 @@
 //
 // *************************************************************************************************
 MapEditor::MapEditor()
+  : MapLoader()
 {
   // Menus '_Map'
   {
@@ -42,7 +43,7 @@ MapEditor::~MapEditor()
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void MapEditor::open()
+void MapEditor::open() // FIXME: bool: true == charge une map dans un ancienne
 {
   Gtk::FileChooserDialog dialog("Choose a binary file to save Forth dictionary",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -71,8 +72,9 @@ void MapEditor::open()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimTaDynMap* map = load(dialog.get_filename());
-      if (nullptr == map)
+      SimTaDynMap* map = nullptr; // FIXME map = (bool) ? getCurrentMap() : nullptr;
+      bool ret = load(dialog.get_filename(), map);
+      if (false == ret)
         {
           Gtk::MessageDialog d("Could not load '" + dialog.get_filename() + "' as a map.",
                                false, Gtk::MESSAGE_WARNING);
@@ -84,6 +86,8 @@ void MapEditor::open()
         {
           m_maps.push_back(map);
           std::cout << "Successfully loaded map '" << map->m_name << "'" << std::endl;
+          //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
+          //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }
         }
     }
 }
@@ -91,7 +95,7 @@ void MapEditor::open()
 // *************************************************************************************************
 //
 // *************************************************************************************************
-SimTaDynMap *MapEditor::load(const std::string& filename, SimTaDynMap *map)
+bool MapEditor::load(std::string const& filename, SimTaDynMap *map)
 {
   std::string extension = filename.substr(filename.find_last_of(".") + 1);
 
@@ -101,5 +105,5 @@ SimTaDynMap *MapEditor::load(const std::string& filename, SimTaDynMap *map)
       return loader.load(filename, map);
     }
   m_error = "Unknown extension file";
-  return nullptr;
+  return false;
 }
