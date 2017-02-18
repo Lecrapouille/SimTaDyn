@@ -457,7 +457,7 @@ std::string ForthEditor::elapsedTime()
 // Get all text in the current text editor and give it to the Forth interpreter
 // Return true if the code was interpreted correctly, else return false.
 // *************************************************************************************************
-void ForthEditor::exec1(const std::string &script)
+bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 {
   typedef std::chrono::nanoseconds ns;
   typedef std::chrono::high_resolution_clock Time;
@@ -470,7 +470,7 @@ void ForthEditor::exec1(const std::string &script)
 
   // Exec the Forth script and  measure the execution time
   auto t0 = Time::now();
-  res = simtadyn.m_forth.interpreteString(script, document()->filename());
+  res = simtadyn.m_forth.interpreteString(script, filename);
   auto t1 = Time::now();
 
   // Flush the std::cout in the textview
@@ -490,26 +490,48 @@ void ForthEditor::exec1(const std::string &script)
       buf->insert(buf->end(), script);
       buf->insert(buf->end(), "\n\n");
 
-      // Clear the text editor if and only if we are in an interactive mode
-      //if (m_interactive)
-      {
-        ForthEditor::clear();
-      }
-
       // TODO: inserer nouveau mot dans tree
+      return false;
     }
   else
     {
       // Text view: indiquer ligne ko
       m_statusbar.push("FAILED");
 
-      // Show the faulty document
-      TextEditor::open(simtadyn.m_forth.nameStreamInFault());
-      // TODO: select in red the faulty word
-
       // Show res (redirect sdout to gui)
       simtadyn.m_forth.ok(res);
+      return true;
     }
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ForthEditor::execButton(Gtk::ToolButton* button)
+{
+  const char *name = "button";
+  if (ForthEditor::exec_(button->get_label().raw(), name))
+    {
+      TextDocument *doc = TextEditor::addTab(name);
+      doc->clear();
+      doc->appendText(button->get_label().raw());
+    }
+  // FIXME: quand on sauvegarde ne pas stocker dans un fichier mais dans le bouton
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void ForthEditor::execMenu(std::string const& script)
+{
+  const char *name = "menu";
+  if (ForthEditor::exec_(script, name))
+    {
+      TextDocument *doc = TextEditor::addTab(name);
+      doc->clear();
+      doc->appendText(script);
+    }
+  // FIXME: quand on sauvegarde ne pas stocker dans un fichier mais dans le menu
 }
 
 // *************************************************************************************************
@@ -521,10 +543,20 @@ void ForthEditor::exec()
 
   if (nullptr != doc)
     {
-      ForthEditor::exec1(ForthEditor::text().raw());
+      bool ret = ForthEditor::exec_(doc->text(), doc->filename());
+
+      // FIXME: Clear the text editor if and only if we are in an interactive mode
+      if (!ret /*&& (m_interactive)*/)
+      {
+        doc->clear();
+      }
     }
   else
     {
+      // Show the faulty document
+      TextEditor::open(SIMTADYN().m_forth.nameStreamInFault());
+      // TODO: select in red the faulty word
+
       m_statusbar.push("Please, feed me with a Forth script !");
     }
 }

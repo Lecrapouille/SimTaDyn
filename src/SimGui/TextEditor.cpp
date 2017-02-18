@@ -313,6 +313,7 @@ bool TextDocument::isModified() const
 // *************************************************************************************************
 void TextDocument::onChanged()
 {
+  // FIXM: if (!read_only)
   m_button.asterisk(true);
 }
 
@@ -601,7 +602,7 @@ bool TextEditor::saveAs(TextDocument *doc)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::open()
+bool TextEditor::open()
 {
   Gtk::FileChooserDialog dialog("Please choose a file to open", Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
@@ -632,14 +633,15 @@ void TextEditor::open()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      TextEditor::open(dialog.get_filename());
+      return TextEditor::open(dialog.get_filename());
     }
+  return false;
 }
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::open(std::string const& filename)
+bool TextEditor::open(std::string const& filename)
 {
   // Already opened ? Switch the page
   for (int k = 0; k < m_notebook.get_n_pages(); ++k)
@@ -648,10 +650,10 @@ void TextEditor::open(std::string const& filename)
         {
           //std::cout << "'" << filename << "' already opened\n"; // TODO statusbar
           m_notebook.set_current_page(k);
-          return ;
+          return true;
         }
     }
-  newLoadedDocument(filename);
+  return load(filename);
 }
 
 // *************************************************************************************************
@@ -687,17 +689,35 @@ void TextEditor::empty(std::string const& title)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::newLoadedDocument(std::string const& filename)
+TextDocument *TextEditor::addTab(std::string const& title)
+{
+  TextDocument *doc = addTab();
+  doc->title(title);
+  return doc;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+TextDocument *TextEditor::addTab()
 {
   TextDocument *doc = create();
-
-  doc->load(filename);
-  doc->m_button.link(&m_notebook, doc);
-
   m_notebook.append_page(*doc, doc->m_button);
   m_notebook.show_all();
   m_notebook.set_current_page(-1);
+  doc->m_button.link(&m_notebook, doc);
+  return doc;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool TextEditor::load(std::string const& filename)
+{
+  TextDocument *doc = addTab(filename);
+  //assert(nullptr != doc);
   // FIXME: mettre en gris le fond si le document est en read-only
+  return doc->load(filename);
 }
 
 // *************************************************************************************************
@@ -742,7 +762,7 @@ Glib::ustring TextEditor::text()
 
   if (nullptr != doc)
     {
-      return doc->m_buffer->get_text();
+      return doc->utext();
     }
   else
     {

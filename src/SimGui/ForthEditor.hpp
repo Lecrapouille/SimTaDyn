@@ -48,8 +48,9 @@ public:
   ~ForthEditor();
   void empty();
   void templated();
-  void exec1(const std::string &script);
   void exec();
+  void execMenu(std::string const& script);
+  void execButton(Gtk::ToolButton* button); // FIXME nom
   std::string elapsedTime();
   void loadDictionary();
   void dumpDictionary();
@@ -68,6 +69,8 @@ public:
   //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
 
 protected:
+  bool exec_(std::string const& script, std::string const& filename);
+
   inline virtual TextDocument *create() override
   {
     return new ForthDocument(m_language);

@@ -13,6 +13,7 @@ public:
   MapEditor();
   ~MapEditor();
   void open();
+  // TODO newpage()
 
   Gtk::MenuItem       m_menuitem[2];
   Gtk::Menu           m_menu[2];
@@ -22,7 +23,7 @@ public:
   std::vector<SimTaDynMap*> m_maps;
 
 protected:
-  virtual bool load(const std::string& filename, SimTaDynMap *oldmap = nullptr) override;
+  virtual bool load(const std::string& filename, SimTaDynMap *oldmap) override;
 
 };
 

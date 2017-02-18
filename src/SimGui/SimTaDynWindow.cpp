@@ -70,7 +70,8 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
       Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
       button->set_label("New");
       button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("New Forth document");
+      button->set_tooltip_text("Create a new map");
+      // FIXME: ForthEditor -> MapEditor
       m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::empty));
     }
 
@@ -78,8 +79,8 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
       Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
       button->set_label("Open");
       button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Open Forth document");
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun0(m_fortheditor, &ForthEditor::open));
+      button->set_tooltip_text("Load a map file");
+      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_mapeditor, &MapEditor::open));
     }
   }
 
@@ -149,9 +150,8 @@ Gtk::ToolButton *SimTaDynWindow::addForthButon(enum ToolBarNames toolbar,
       button->set_label(script);
       button->set_stock_id(icon);
       button->set_tooltip_text(help);
-      // FIXME: exec1 est trop violent: ca efface le script en cours d'edition
       m_toolbar[toolbar].append(*button,
-                                sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::exec1), script));
+        sigc::bind<Gtk::ToolButton*>(sigc::mem_fun(m_fortheditor, &ForthEditor::execButton), button));
       m_toolbar[toolbar].show_all_children();
     }
   else
@@ -192,7 +192,8 @@ uint32_t SimTaDynWindow::addPluggin(const Glib::ustring& icon_name,
   m_plugins_submenu[m_nb_plugins].set_label(help);
   m_plugins_image[m_nb_plugins].set_from_icon_name(icon_name, Gtk::ICON_SIZE_MENU);
   m_plugins_submenu[m_nb_plugins].set_image(m_plugins_image[m_nb_plugins]);
-  m_plugins_submenu[m_nb_plugins].signal_activate().connect(sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::exec1), script));
+  m_plugins_submenu[m_nb_plugins].signal_activate().connect(
+    sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::execMenu), script));
   m_menu[PlugginsMenu].append(m_plugins_submenu[m_nb_plugins]);
   ++m_nb_plugins;
   return m_nb_plugins - 1U;

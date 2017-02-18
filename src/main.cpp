@@ -16,6 +16,7 @@ int main(int argc, char** argv)
   SimTaDyn.m_window->addForthScriptButon(Gtk::Stock::YES, "TRACE.ON", "TRACE.ON ( -- )");
   SimTaDyn.m_window->addForthScriptButon(Gtk::Stock::NO, "TRACE.OFF", "TRACE.OFF ( -- )");
   SimTaDyn.m_window->addMapScriptButon(Gtk::Stock::NO, "42 42 FOO", "42 42 FOO");
+  SimTaDyn.m_window->addMapScriptButon(Gtk::Stock::NO, "42 .", "42 .");
 
   kit.run(*(SimTaDyn.m_window));
   return 0;

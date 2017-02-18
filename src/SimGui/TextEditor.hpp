@@ -177,7 +177,7 @@ public:
   {
     m_button.title(text);
   }
-  inline Glib::ustring title()
+  inline Glib::ustring title() const
   {
     return m_button.title();
   }
@@ -188,6 +188,23 @@ public:
   inline const std::string& filename() const
   {
     return m_filename;
+  }
+  inline std::string text() const
+  {
+    return m_buffer->get_text().raw();
+  }
+  inline Glib::ustring utext() const
+  {
+    return m_buffer->get_text();
+  }
+  inline void appendText(Glib::ustring const& text)
+  {
+    m_buffer->insert(m_buffer->end(), text);
+  }
+
+  inline void appendText(std::string const& text)
+  {
+    m_buffer->insert(m_buffer->end(), text);
   }
 
 protected:
@@ -208,8 +225,8 @@ class TextEditor
 public:
   TextEditor();
   ~TextEditor();
-  void open();
-  void open(std::string const& filename);
+  bool open();
+  bool open(std::string const& filename);
   void empty(std::string const& title = "New document");
   void save();
   void saveAs();
@@ -219,6 +236,8 @@ public:
   void find();
   void replace();
   void gotoLine();
+  TextDocument *addTab(std::string const& title);
+  TextDocument *addTab();
 
   Gtk::Notebook m_notebook;
   FindWindow m_findwindow;
@@ -240,7 +259,7 @@ protected:
   TextDocument* document(const uint32_t i);
   bool dialogSave(TextDocument *doc);
   bool saveAs(TextDocument *doc);
-  void newLoadedDocument(std::string const& filename);
+  bool load(std::string const& filename);
   void onPageSwitched(Gtk::Widget* page, guint page_num);
 
   int m_nb_nonames;
