@@ -8,8 +8,13 @@
 class SimTaDynMap
 {
 public:
-  SimTaDynMap(std::string const name)
-    : m_name(name), m_graph()
+  SimTaDynMap()
+    : m_name(""), m_graph()
+  {
+  }
+
+  SimTaDynMap(std::string const& name)
+    : m_name(SimTaDynMap::shortName(name)), m_graph()
   {
   }
 
@@ -25,6 +30,12 @@ public:
 
   SimTaDynNode *addNode(Vector3D const& p);
   bool removeNode(const Key nodeID);
+
+  //! \brief give the file name from a pathe
+  static std::string shortName(std::string const& path)
+  {
+    return path.substr(path.find_last_of("/") + 1);
+  }
 
   // FIXME: faire un
   // enum DataField { Position, Color };

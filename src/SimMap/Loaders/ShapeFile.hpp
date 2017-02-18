@@ -63,7 +63,7 @@ public:
   {
   }
 
-  virtual bool load(std::string const& filename, SimTaDynMap *map) override;
+  virtual bool load(std::string const& filename, SimTaDynMap* &map) override;
 
   // FIXME: protected:
 

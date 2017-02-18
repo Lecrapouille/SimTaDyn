@@ -292,6 +292,11 @@ public:
   //! \brief Destructor. Release allocated nodes and arcs.
   virtual ~BasicGraph()
   {
+    reset();
+  }
+
+  inline void reset()
+  {
     clearArcs();
     clearNodes();
   }

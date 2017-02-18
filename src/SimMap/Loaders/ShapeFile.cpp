@@ -248,7 +248,7 @@ void ShapefileLoader::getAllRecords(SimTaDynMap& map)
     }
 }
 
-bool ShapefileLoader::load(std::string const& filename, SimTaDynMap *map)
+bool ShapefileLoader::load(std::string const& filename, SimTaDynMap* &map)
 {
   bool ret = false;
 
@@ -268,6 +268,12 @@ bool ShapefileLoader::load(std::string const& filename, SimTaDynMap *map)
         {
           map = new SimTaDynMap(filename);
         }
+      else
+        {
+          // Concat the old map name with the new one
+          std::string shortname = SimTaDynMap::shortName(filename);
+          map->m_name += '_' + shortname;
+        }
 
       value32b = getShapeType();
       //std::cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << std::endl;
@@ -276,7 +282,6 @@ bool ShapefileLoader::load(std::string const& filename, SimTaDynMap *map)
       std::cout << "Map Bounding Box: " << map->m_bbox << std::endl;
 
       getAllRecords(*map);
-      map->m_name += '_' + filename;
       m_error = "no error";
       ret = true;
     }

@@ -70,9 +70,8 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
       Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
       button->set_label("New");
       button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Create a new map");
-      // FIXME: ForthEditor -> MapEditor
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::empty));
+      button->set_tooltip_text("Load and add a map to the current map");
+      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_mapeditor, &MapEditor::addMap));
     }
 
     {
@@ -80,7 +79,7 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
       button->set_label("Open");
       button->set_stock_id(Gtk::Stock::NEW);
       button->set_tooltip_text("Load a map file");
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_mapeditor, &MapEditor::open));
+      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_mapeditor, &MapEditor::openMap));
     }
   }
 

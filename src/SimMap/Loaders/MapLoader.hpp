@@ -21,8 +21,8 @@ public:
   {
   }
 
-  virtual bool load(std::string const& filename, SimTaDynMap *map) = 0;
-  virtual const std::string error()
+  virtual bool load(std::string const& filename, SimTaDynMap* &map) = 0;
+  virtual const std::string& error()
   {
     return m_error;
   }
