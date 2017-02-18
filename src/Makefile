@@ -41,7 +41,7 @@ VPATH=.:$(BUILD):../tools:Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/F
 # Set objects architecture specific
 OBJECTS_TOOL     = Backward.o
 OBJECTS_COMMON   = Exception.o TextColor.o Color.o Vector3D.o Camera2D.o SharedLibrary_UNIX.o SharedLibrary.o
-OBJECTS_OPENGL   = Shader.o Textures.o Fonts.o
+OBJECTS_OPENGL   = OpenGL.o Shader.o Textures.o Fonts.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o
 OBJECTS_LOADER   = ShapeFile.o
@@ -59,7 +59,7 @@ TARGET = SimTaDyn
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -ldw
-DEFINES =
+DEFINES = -DCHECK_OPENGL
 
 ###################################################
 # Set Libraries

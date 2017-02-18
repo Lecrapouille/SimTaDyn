@@ -105,9 +105,9 @@ public:
 
   inline void clearScreen() const
   {
-    glClearColor(m_background_color.r, m_background_color.g,
-                 m_background_color.b, m_background_color.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glCheck(glClearColor(m_background_color.r, m_background_color.g,
+                         m_background_color.b, m_background_color.a));
+    glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
   }
 
   /*

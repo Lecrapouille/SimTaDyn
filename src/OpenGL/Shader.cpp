@@ -9,13 +9,13 @@
 // **************************************************************
 void GLShader::cleanShader(GLuint vertex, GLuint fragment, GLuint geometry)
 {
-  glDetachShader(m_program, vertex);
-  glDetachShader(m_program, fragment);
-  glDetachShader(m_program, geometry);
+  glCheck(glDetachShader(m_program, vertex));
+  glCheck(glDetachShader(m_program, fragment));
+  glCheck(glDetachShader(m_program, geometry));
 
-  glDeleteShader(vertex);
-  glDeleteShader(fragment);
-  glDeleteShader(geometry);
+  glCheck(glDeleteShader(vertex));
+  glCheck(glDeleteShader(fragment));
+  glCheck(glDeleteShader(geometry));
 }
 
 // **************************************************************
@@ -25,7 +25,7 @@ void GLShader::cleanProgram()
 {
   if (0 != m_program)
     {
-      glDeleteProgram(m_program);
+      glCheck(glDeleteProgram(m_program));
       m_program = 0;
     }
 }
@@ -38,14 +38,14 @@ bool GLShader::checkShaderCompileStatus(GLuint obj)
 {
   GLint status;
 
-  glGetShaderiv(obj, GL_COMPILE_STATUS, &status);
+  glCheck(glGetShaderiv(obj, GL_COMPILE_STATUS, &status));
   if (GL_FALSE == status)
     {
       GLint length;
-      glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length);
+      glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length));
       std::vector<char> log(length);
-      glGetShaderInfoLog(obj, length, &length, &log[0]);
-      std::cerr << "[FAILED] " << &log[0];
+      glCheck(glGetShaderInfoLog(obj, length, &length, &log[0]));
+      std::cerr << "[FAILED] " << std::endl << &log[0];
       return false;
     }
 
@@ -60,14 +60,14 @@ bool GLShader::checkProgramLinkStatus(GLuint obj)
 {
   GLint status;
 
-  glGetProgramiv(obj, GL_LINK_STATUS, &status);
+  glCheck(glGetProgramiv(obj, GL_LINK_STATUS, &status));
   if (GL_FALSE == status)
     {
       GLint length;
-      glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length);
+      glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
       std::vector<char> log(length);
-      glGetProgramInfoLog(obj, length, &length, &log[0]);
-      std::cerr << "[FAILED] " << &log[0];
+      glCheck(glGetProgramInfoLog(obj, length, &length, &log[0]));
+      std::cerr << "[FAILED] " << std::endl << &log[0];
       return false;
     }
   std::cout << "[DONE]" << std::endl;
@@ -96,7 +96,7 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
   else
     std::cout << "geometry";
 
-  std::cout << " shader '" << shader_filename << "':" << std::endl;
+  std::cout << " shader '" << shader_filename << "': ";
   std::string shader_code;
   std::ifstream infile;
 
@@ -112,16 +112,17 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
     }
   else
     {
-      std::cerr << "[FAILED] Cannot open this file" << std::endl;
+      std::cerr << "[FAILED] " << std::endl
+                << "Cannot open this file" << std::endl;
       return 0;
     }
 
   // Create and compile the shader
   char const *source = shader_code.c_str();
   int length = shader_code.size();
-  GLuint shader = glCreateShader(shader_type);
-  glShaderSource(shader, 1, &source, &length);
-  glCompileShader(shader);
+  GLuint shader = glCheck(glCreateShader(shader_type);)
+    glCheck(glShaderSource(shader, 1, &source, &length));
+  glCheck(glCompileShader(shader));
   if (!checkShaderCompileStatus(shader))
     {
       return 0;
@@ -144,35 +145,38 @@ GLuint GLShader::createShaderProgram(const char* vertex_shader_filename,
                                      const char* geometry_shader_filename)
 {
   GLuint vertex;
-  GLuint fragment = 0;
+  GLuint fragment;
   GLuint geometry = 0;
 
   cleanProgram();
   std::cout << "Linking shaders '" << vertex_shader_filename
-            << "' with '" << fragment_shader_filename
-            << "and '" << geometry_shader_filename
-            << "':" << std::endl;
+            << "' with '" << fragment_shader_filename;
+  if (nullptr != geometry_shader_filename)
+    {
+      std::cout << "' and '" << geometry_shader_filename;
+    }
+  std::cout << "' :" << std::endl;
 
   vertex = createShader(GL_VERTEX_SHADER, vertex_shader_filename);
   fragment = createShader(GL_FRAGMENT_SHADER, fragment_shader_filename);
   if ((0 == vertex) || (0 == fragment))
     goto l_end;
 
-  m_program = glCreateProgram();
-  glAttachShader(m_program, vertex);
-  glAttachShader(m_program, fragment);
+  m_program = glCheck(glCreateProgram());
+  glCheck(glAttachShader(m_program, vertex));
+  glCheck(glAttachShader(m_program, fragment));
 
   // FIXME: je ne suis pas trop sur de ce code
-  glBindFragDataLocation(m_program, 0, "outColor");
+  glCheck(glBindFragDataLocation(m_program, 0, "outColor"));
 
   // Geometry is optional
   if (nullptr != geometry_shader_filename)
     {
       geometry = createShader(GL_GEOMETRY_SHADER, geometry_shader_filename);
-      glAttachShader(m_program, geometry);
+      glCheck(glAttachShader(m_program, geometry));
     }
 
-  glLinkProgram(m_program);
+  glCheck(glLinkProgram(m_program));
   checkProgramLinkStatus(m_program);
 
 l_end:
