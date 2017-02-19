@@ -29,10 +29,12 @@ public:
   ~GLRenderer();
 
   virtual void setContext() = 0;
+  virtual void activateTransparency() = 0;
+  virtual void activateDepthBuffer() = 0;
 
   // \brief Same role than a constructor but here we are sure than
   // and OpenGL context is created before.
-  bool init();
+  bool setupGraphics();
 
   inline void begin()
   {
@@ -42,7 +44,6 @@ public:
 
   inline void end()
   {
-    m_shader.end();
     glFlush();
   }
 
@@ -139,19 +140,21 @@ public:
   virtual uint32_t screenHeight() const = 0;
 
 protected:
-
   Camera2D m_default_camera;
   Camera2D m_current_camera;
   Color m_background_color;
-  SimTaDynFont font_list_[1];
+  SimTaDynFont m_fonts[1];
   RenderStyle m_render_style;
   GLShader m_shader;
-
-
-  GLuint m_Vao {0};
-  GLuint m_Buffer {0};
-  GLuint m_Program {0};
-  GLuint m_Mvp {0};
+  //! \brief Vertex buffer pointer
+  GLuint m_vbo[32];
+  //! \brief vertex array pointer
+  GLuint m_vao;
+  uint32_t m_nb_vbo = 0;
+  //float m_matrix_mvp[16];
+  GLint m_mvpAttrib = 0;
+  GLint m_posAttrib = 0;
+  GLint m_colAttrib = 0;
   std::vector<float> m_RotationAngles;
 };
 

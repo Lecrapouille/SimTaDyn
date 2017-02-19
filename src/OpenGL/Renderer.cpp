@@ -3,60 +3,101 @@
 #include "GraphMemory.hpp"
 
 // https://github.com/progschj/OpenGL-Examples/blob/master/08map_buffer.cpp
-#include "Renderer.hpp"
-#include "SimTaDynContext.hpp"
 
-static const GLfloat vertex_data[] =
-  {
-     0.0f,  0.5f,   0.f, 1.f,
-     0.5f, -0.366f, 0.f, 1.f,
-    -0.5f, -0.366f, 0.f, 1.f,
-  };
+static container<Vector3D> con;
+const Vector3D* vec;
 
 GLRenderer::~GLRenderer()
 {
-  // Delete buffers and program
-  glDeleteBuffers(1, &m_Vao);
-  glDeleteProgram(m_Program);
+  glCheck(glDeleteVertexArrays(1, &m_vao));
+  glCheck(glDeleteBuffers(1, &m_vbo[0]));
 }
 
-bool GLRenderer::init()
+bool GLRenderer::setupGraphics()
 {
+  bool res = true;
+
+  // FIXME: this is an awful hack but this is to be sure to flush
+  // OpenGL errors before using this function on real OpenGL routines
+  // else a fake error is returned on the first OpenGL routines while
+  // valid.
+  glGetError();
+
+  // FIXME temporary
+  con.append(Vector3D(0.0f,  0.5f));
+  con.append(Vector3D(0.5f, -0.366f));
+  con.append(Vector3D(-0.5f, -0.366f));
+  con.append(Vector3D(0.2f,  0.7f));
+  con.append(Vector3D(0.7f, -0.166f));
+  con.append(Vector3D(-0.3f, -0.166f));
+
   // Configure OpenGL
-  glClearDepth(1.0f);
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-  glLineWidth(1.0f);
-  glEnable(GL_ALPHA_TEST);
+  activateTransparency();
+  activateDepthBuffer();
 
-  // Camera
-  m_default_camera.lookAt(static_cast<float32_t>(screenWidth()) / 2.0f,
-                          static_cast<float32_t>(screenHeight()) / 2.0f,
-                          static_cast<float32_t>(screenWidth()),
-                          static_cast<float32_t>(screenHeight()));
-  m_current_camera = m_default_camera;
+  glCheck(glClearDepth(1.0f));
+  glCheck(glEnable(GL_LINE_SMOOTH));
+  glCheck(glEnable(GL_BLEND));
+  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+  glCheck(glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE));
+  glCheck(glLineWidth(10.0f));
+  glCheck(glPointSize(10.0f));
+  glCheck(glEnable(GL_ALPHA_TEST));
 
-  // Models, textures and fonts
-  //font_list_[0].open(SimTaDynFont::MappedTexture, "../data/Font.tga");
-  //font_list_[0].open(SimTaDynFont::SystemFont, "fixed");
-
-  // Shaders, vertex array objects
-  glGenVertexArrays(1, &m_Vao);
-  glBindVertexArray(m_Vao);
-  glGenBuffers(1, &m_Buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  m_Program = m_shader.createShaderProgram(SIMTADYN().data_path("vertex.glsl"),
-                                           SIMTADYN().data_path("fragment.glsl"));
-  if (0 != m_Program)
+  // Shader program
+  GLuint program = m_shader.createShaderProgram(SIMTADYN().data_path("node.vertex"),
+                                                SIMTADYN().data_path("node.fragment"));
+  if (0 != program)
     {
-      m_Mvp = glGetUniformLocation(m_Program, "mvp");
+      // Create Vertex Array Object
+      glCheck(glGenVertexArrays(1, &m_vao));
+      glCheck(glBindVertexArray(m_vao));
+
+      // Create a Vertex Buffer Object and copy the vertex data to it
+      glCheck(glGenBuffers(1, &m_vbo[0]));
+      glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]));
+      glCheck(glBufferData(GL_ARRAY_BUFFER, con.poolSizeAllocation() * sizeof (Vector3D), con.slot(0), GL_DYNAMIC_DRAW));
+
+      m_shader.begin();
+
+      //
+      m_mvpAttrib = glCheck(glGetUniformLocation(program, "mvp"));
+      if (-1 == m_mvpAttrib)
+        {
+          std::cerr << "[FAILED] getting shader location for mvp" << std::endl;
+        }
+
+      // Specify the layout of the vertex data
+      m_posAttrib = glCheck(glGetAttribLocation(program, "position"));
+      if (-1 == m_posAttrib)
+        {
+          std::cerr << "[FAILED] getting shader location for position" << std::endl;
+        }
+      glEnableVertexAttribArray(m_posAttrib);
+      glCheck(glVertexAttribPointer(m_posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
+
+      // Get the location of the color uniform
+      // ...
+
+      //m_shader.end();
+
+      // Models, textures and fonts
+      //m_fonts[0].open(SimTaDynFont::MappedTexture, "../data/Font.tga");
+      //m_fonts[0].open(SimTaDynFont::SystemFont, "fixed");
+
+      // Camera
+      m_default_camera.lookAt(static_cast<float32_t>(screenWidth()) / 2.0f,
+                              static_cast<float32_t>(screenHeight()) / 2.0f,
+                              static_cast<float32_t>(screenWidth()),
+                              static_cast<float32_t>(screenHeight()));
+      m_current_camera = m_default_camera;
     }
-  return true;
+  else
+    {
+      res = false;
+      std::cerr << "[FAILED] Init OpenGL renderer" << std::endl;
+    }
+  return res;
 }
 
 static void compute_mvp(float *res,
@@ -98,26 +139,31 @@ static void compute_mvp(float *res,
   res[3] = 0.f;   res[7] = 0.f;           res[11] = 0.f;           res[15] = 1.f;
 }
 
-void GLRenderer::draw() const
+void GLRenderer::draw(/*SimTaDynGraph_t const& graph*/) const
 {
-  float mvp[16];
+  static float m_matrix_mvp[16];
 
-  clearScreen();
-
-  compute_mvp(mvp,
+  // FIXME ajouter un flag pour eviter de faire des calculs
+  // if (mvp_need_refresh)
+  // {
+  // mvp_need_refresh = false;
+  compute_mvp(m_matrix_mvp,
               m_RotationAngles[X_AXIS],
               m_RotationAngles[Y_AXIS],
               m_RotationAngles[Z_AXIS]);
+  // }
 
-  glUseProgram(m_Program);
-  glUniformMatrix4fv(m_Mvp, 1, GL_FALSE, &mvp[0]);
-  glBindBuffer(GL_ARRAY_BUFFER, m_Vao);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-  glDisableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glUseProgram(0);
+  m_shader.begin();
+  glCheck(glUniformMatrix4fv(m_mvpAttrib, 1, GL_FALSE, &m_matrix_mvp[0]));
 
-  glFlush();
+  //glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_vao));
+  //glCheck(glEnableVertexAttribArray(0));
+
+  // if () {
+  glCheck(glDrawArrays(GL_POINTS, 0, con.poolSizeAllocation()));
+  // }
+
+  //glCheck(glDisableVertexAttribArray(0));
+  glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  m_shader.end();
 }

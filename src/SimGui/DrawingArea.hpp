@@ -45,6 +45,16 @@ public:
     set_required_version(3, 3);
   }
 
+  inline void activateTransparency() override
+  {
+    set_has_alpha(true);
+  }
+
+  inline void activateDepthBuffer() override
+  {
+    set_has_depth_buffer();
+  }
+
   inline uint32_t screenWidth() const override
   {
     return Gtk::GLArea::get_width();

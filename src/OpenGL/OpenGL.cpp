@@ -6,14 +6,14 @@ namespace OpenGL
 
   void glCheckError(const char *file, uint32_t line, const char* expression)
   {
-    GLenum err;
+    GLenum id;
 
-    while ((err = glGetError()) != GL_NO_ERROR)
+    while ((id = glGetError()) != GL_NO_ERROR)
       {
-        std::string error;
+        const char* error;
         std::string fileString = file;
 
-        switch (err)
+        switch (id)
           {
           case GL_INVALID_OPERATION:
             error = "GL_INVALID_OPERATION";
@@ -31,14 +31,14 @@ namespace OpenGL
             error = "GL_INVALID_FRAMEBUFFER_OPERATION";
             break;
           default:
-            error = "Unknown error (" + std::to_string(err) + ")";
+            error = "UNKNOWN";
             break;
           }
 
-        std::cerr << "[ERROR] "
+        std::cerr << "[ERROR][OPENGL][" << error << "] "
                   << fileString.substr(fileString.find_last_of("\\/") + 1)
                   << ":" << line
-                  << " OpenGL failed executing " << expression
+                  << " failed executing " << expression
                   << std::endl;
       }
   }

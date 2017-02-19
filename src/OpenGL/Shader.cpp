@@ -9,13 +9,19 @@
 // **************************************************************
 void GLShader::cleanShader(GLuint vertex, GLuint fragment, GLuint geometry)
 {
-  glCheck(glDetachShader(m_program, vertex));
-  glCheck(glDetachShader(m_program, fragment));
-  glCheck(glDetachShader(m_program, geometry));
+  if (0 != vertex)
+    glCheck(glDetachShader(m_program, vertex));
+  if (0 != fragment)
+    glCheck(glDetachShader(m_program, fragment));
+  if (0 != geometry)
+    glCheck(glDetachShader(m_program, geometry));
 
-  glCheck(glDeleteShader(vertex));
-  glCheck(glDeleteShader(fragment));
-  glCheck(glDeleteShader(geometry));
+  if (0 != vertex)
+    glCheck(glDeleteShader(vertex));
+  if (0 != fragment)
+    glCheck(glDeleteShader(fragment));
+  if (0 != geometry)
+    glCheck(glDeleteShader(geometry));
 }
 
 // **************************************************************

@@ -1,4 +1,18 @@
 #include "DrawingArea.hpp"
+#include <exception>
+
+//! \brief GLArea only support Core profile.
+static void initializeGLEW()
+{
+  glewExperimental = true;
+  GLenum err = glewInit();
+  if (err != GLEW_OK)
+    {
+      const GLubyte* msg = glewGetErrorString(err);
+      const char *m = reinterpret_cast<const char*>(msg);
+      throw Gdk::GLError(Gdk::GLError::NOT_AVAILABLE, Glib::ustring(m));
+    }
+}
 
 bool GLDrawingArea::keyboard()
 {
@@ -46,16 +60,9 @@ void GLDrawingArea::onRealize()
   Gtk::GLArea::make_current();
   try
     {
-      // GLArea only support Core profile.
-      glewExperimental = true;
-      if (GLEW_OK != glewInit())
-        {
-          std::cerr << "[FAILED] when initializing GLEW (Maybe the OpenGL context does not exist)." << std::endl;
-          return ;
-        }
-
+      initializeGLEW();
       Gtk::GLArea::throw_if_error();
-      GLRenderer::init();
+      GLRenderer::setupGraphics();
       GLRenderer::clearScreen();
     }
   catch (const Gdk::GLError& gle)
@@ -71,7 +78,7 @@ void GLDrawingArea::onUnrealize()
   try
     {
       Gtk::GLArea::throw_if_error();
-      //GLRenderer::release();
+      //FIXME: GLRenderer::release();
     }
   catch (const Gdk::GLError& gle)
     {
