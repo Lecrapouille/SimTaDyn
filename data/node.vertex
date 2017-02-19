@@ -1,0 +1,14 @@
+#version 330 core
+
+in vec3 position;
+in vec4 color;
+uniform mat4 mvp;
+out vec4 fragmentColor;
+uniform float time;
+
+void main()
+{
+  gl_Position = mvp * vec4(position, 1.0);
+  gl_PointSize = 3.0 * (1.0 + sin(time));
+  fragmentColor = color;
+}

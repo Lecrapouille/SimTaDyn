@@ -1,0 +1,8 @@
+#version 330 core
+
+in vec4 fragmentColor; // from node.vertex
+
+void main()
+{
+  gl_FragColor = fragmentColor;
+}

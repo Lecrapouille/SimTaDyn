@@ -4,13 +4,14 @@
 
 // https://github.com/progschj/OpenGL-Examples/blob/master/08map_buffer.cpp
 
-static container<Vector3D> con;
+static container<Vector3D> P;
+static container<Color> C;
 const Vector3D* vec;
 
 GLRenderer::~GLRenderer()
 {
   glCheck(glDeleteVertexArrays(1, &m_vao));
-  glCheck(glDeleteBuffers(1, &m_vbo[0]));
+  glCheck(glDeleteBuffers(2, m_vbo));
 }
 
 bool GLRenderer::setupGraphics()
@@ -23,13 +24,24 @@ bool GLRenderer::setupGraphics()
   // valid.
   glGetError();
 
-  // FIXME temporary
-  con.append(Vector3D(0.0f,  0.5f));
-  con.append(Vector3D(0.5f, -0.366f));
-  con.append(Vector3D(-0.5f, -0.366f));
-  con.append(Vector3D(0.2f,  0.7f));
-  con.append(Vector3D(0.7f, -0.166f));
-  con.append(Vector3D(-0.3f, -0.166f));
+  // FIXME temporary nodes positions
+  P.append(Vector3D(0.0f,  0.5f));
+  P.append(Vector3D(0.5f, -0.366f));
+  P.append(Vector3D(-0.5f, -0.366f));
+  P.append(Vector3D(0.2f,  0.7f));
+  P.append(Vector3D(0.7f, -0.166f));
+  P.append(Vector3D(-0.3f, -0.166f));
+
+  // FIXME temporary nodes colors
+  C.append(Color(1.0f, 0.0f, 0.0f));
+  C.append(Color(0.0f, 1.0f, 0.0f));
+  C.append(Color(0.0f, 0.0f, 1.0f));
+  C.append(Color(1.0f, 0.5f, 0.0f));
+  C.append(Color(0.0f, 1.0f, 0.5f));
+  C.append(Color(0.5f, 0.0f, 1.0f));
+
+  // FIXME temporary nodes sizes
+  // ...
 
   // Configure OpenGL
   activateTransparency();
@@ -40,9 +52,11 @@ bool GLRenderer::setupGraphics()
   glCheck(glEnable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   glCheck(glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE));
-  glCheck(glLineWidth(10.0f));
-  glCheck(glPointSize(10.0f));
-  glCheck(glEnable(GL_ALPHA_TEST));
+  //glCheck(glLineWidth(10.0f));
+  //glCheck(glPointSize(10.0f));
+  //glCheck(glEnable(GL_POINT_SPRITE));
+  glCheck(glEnable(GL_VERTEX_PROGRAM_POINT_SIZE));
+  //glCheck(glEnable(GL_ALPHA_TEST));
 
   // Shader program
   GLuint program = m_shader.createShaderProgram(SIMTADYN().data_path("node.vertex"),
@@ -54,17 +68,28 @@ bool GLRenderer::setupGraphics()
       glCheck(glBindVertexArray(m_vao));
 
       // Create a Vertex Buffer Object and copy the vertex data to it
+      glCheck(glGenBuffers(1, &m_vbo[1]));
+      glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_vbo[1]));
+      glCheck(glBufferData(GL_ARRAY_BUFFER, C.poolSizeAllocation() * sizeof (Color), C.slot(0), GL_DYNAMIC_DRAW));
+
       glCheck(glGenBuffers(1, &m_vbo[0]));
       glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]));
-      glCheck(glBufferData(GL_ARRAY_BUFFER, con.poolSizeAllocation() * sizeof (Vector3D), con.slot(0), GL_DYNAMIC_DRAW));
+      glCheck(glBufferData(GL_ARRAY_BUFFER, P.poolSizeAllocation() * sizeof (Vector3D), P.slot(0), GL_DYNAMIC_DRAW));
 
       m_shader.begin();
 
+      #warning "faire une fonction static, utiliser u_ et a_ faire m_attribs[x], utiliser des enums"
       //
       m_mvpAttrib = glCheck(glGetUniformLocation(program, "mvp"));
       if (-1 == m_mvpAttrib)
         {
           std::cerr << "[FAILED] getting shader location for mvp" << std::endl;
+        }
+
+      m_timeAttrib = glCheck(glGetUniformLocation(program, "time"));
+      if (-1 == m_mvpAttrib)
+        {
+          std::cerr << "[FAILED] getting shader location for time" << std::endl;
         }
 
       // Specify the layout of the vertex data
@@ -73,12 +98,13 @@ bool GLRenderer::setupGraphics()
         {
           std::cerr << "[FAILED] getting shader location for position" << std::endl;
         }
-      glEnableVertexAttribArray(m_posAttrib);
-      glCheck(glVertexAttribPointer(m_posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
 
       // Get the location of the color uniform
-      // ...
-
+      m_colAttrib = glCheck(glGetAttribLocation(program, "color"));
+      if (-1 == m_colAttrib)
+        {
+          std::cerr << "[FAILED] getting shader location for color" << std::endl;
+        }
       //m_shader.end();
 
       // Models, textures and fonts
@@ -91,6 +117,8 @@ bool GLRenderer::setupGraphics()
                               static_cast<float32_t>(screenWidth()),
                               static_cast<float32_t>(screenHeight()));
       m_current_camera = m_default_camera;
+
+      gettimeofday(&t1, NULL);
     }
   else
     {
@@ -139,9 +167,13 @@ static void compute_mvp(float *res,
   res[3] = 0.f;   res[7] = 0.f;           res[11] = 0.f;           res[15] = 1.f;
 }
 
-void GLRenderer::draw(/*SimTaDynGraph_t const& graph*/) const
+void GLRenderer::draw(/*SimTaDynGraph_t const& graph*/) //const
 {
   static float m_matrix_mvp[16];
+
+  std::cout << "GLRenderer::draw\n";
+
+  m_shader.begin();
 
   // FIXME ajouter un flag pour eviter de faire des calculs
   // if (mvp_need_refresh)
@@ -151,19 +183,25 @@ void GLRenderer::draw(/*SimTaDynGraph_t const& graph*/) const
               m_RotationAngles[X_AXIS],
               m_RotationAngles[Y_AXIS],
               m_RotationAngles[Z_AXIS]);
+  glCheck(glUniformMatrix4fv(m_mvpAttrib, 1, GL_FALSE, &m_matrix_mvp[0])); // dans le if
   // }
 
-  m_shader.begin();
-  glCheck(glUniformMatrix4fv(m_mvpAttrib, 1, GL_FALSE, &m_matrix_mvp[0]));
+  gettimeofday(&t2, NULL);
+  double deltaTime = (t2.tv_sec - t1.tv_sec) * 1000.0f;// sec to ms
+  deltaTime += (t2.tv_usec - t1.tv_usec) / 1000.0;// us to ms
+  glCheck(glUniform1f(m_timeAttrib, deltaTime));
 
-  //glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_vao));
-  //glCheck(glEnableVertexAttribArray(0));
+  glCheck(glEnableVertexAttribArray(m_posAttrib));
+  glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]));
+  glCheck(glVertexAttribPointer(m_posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
+  glCheck(glDrawArrays(GL_POINTS, 0, P.poolSizeAllocation()));
 
-  // if () {
-  glCheck(glDrawArrays(GL_POINTS, 0, con.poolSizeAllocation()));
-  // }
+  glCheck(glEnableVertexAttribArray(m_colAttrib));
+  glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_vbo[1]));
+  glCheck(glVertexAttribPointer(m_colAttrib, 4, GL_FLOAT, GL_FALSE, 0, nullptr));
 
-  //glCheck(glDisableVertexAttribArray(0));
+  //
   glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  glCheck(glDisableVertexAttribArray(0));
   m_shader.end();
 }

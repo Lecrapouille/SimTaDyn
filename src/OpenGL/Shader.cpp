@@ -73,7 +73,7 @@ bool GLShader::checkProgramLinkStatus(GLuint obj)
       glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
       std::vector<char> log(length);
       glCheck(glGetProgramInfoLog(obj, length, &length, &log[0]));
-      std::cerr << "[FAILED] " << std::endl << &log[0];
+      std::cerr << "[FAILED] " << &log[0];
       return false;
     }
   std::cout << "[DONE]" << std::endl;

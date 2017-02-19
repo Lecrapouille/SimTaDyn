@@ -5,6 +5,7 @@
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
 #  include "SimTaDynMap.hpp"
+#include <sys/time.h>   //FIXME
 
 /*
  * OpenGL renderer.
@@ -131,7 +132,7 @@ public:
   /*
    * Draw a graph as friend function
    */
-  void draw() const;
+  void draw();// const;
 
   /*
    * Number of pixels of the opengl window
@@ -153,9 +154,11 @@ protected:
   uint32_t m_nb_vbo = 0;
   //float m_matrix_mvp[16];
   GLint m_mvpAttrib = 0;
+  GLint m_timeAttrib = 0;
   GLint m_posAttrib = 0;
   GLint m_colAttrib = 0;
   std::vector<float> m_RotationAngles;
+  struct timeval t1, t2;
 };
 
 #endif /* RENDERER_HPP_ */
