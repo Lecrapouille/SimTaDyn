@@ -10,6 +10,8 @@ int main(int argc, char** argv)
 
   SimTaDynWindow main_window("SimTaDyn");
   SimTaDynContext& SimTaDyn = SIMTADYN();
+
+  main_window.set_icon_from_file(SimTaDyn.data_path("icons/SimTaDyn.png"));
   SimTaDyn.m_window = &main_window;
 
   // FIXME: temporary, just for testing
