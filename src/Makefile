@@ -43,21 +43,21 @@ OBJECTS_TOOL     = Backward.o
 OBJECTS_COMMON   = Exception.o TextColor.o Color.o Vector3D.o Camera2D.o SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_OPENGL   = OpenGL.o Shader.o Textures.o Fonts.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o
+OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o MapEditor.o
 OBJECTS_LOADER   = ShapeFile.o
-OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o MapEditor.o DrawingArea.o SimTaDynWindow.o
-OBJECTS_SIMTADYN = Renderer.o SimForth.o main.o
+OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o SimForth.o
+OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o DrawingArea.o SimTaDynWindow.o
+OBJECTS_SIMTADYN = Renderer.o main.o
 
 OBJECTS         = $(OBJECTS_TOOL) $(OBJECTS_COMMON) $(OBJECTS_OPENGL) $(OBJECTS_RTREE) \
-                  $(OBJECTS_MAP) $(OBJECTS_LOADER) $(OBJECTS_FORTH) $(OBJECTS_GUI) \
+                  $(OBJECTS_LOADER) $(OBJECTS_MAP) $(OBJECTS_FORTH) $(OBJECTS_GUI) \
                   $(OBJECTS_SIMTADYN)
 TARGET = SimTaDyn
 
 ###################################################
 # Compil options
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -ldw
 DEFINES = -DCHECK_OPENGL
 

@@ -1,5 +1,6 @@
 #include "ForthEditor.hpp"
-#include "SimTaDynContext.hpp" // FIXME quand on compile OpenGL ca recompile ce fichier
+#include "SimTaDyn.hpp"
+#include "Context.hpp" // FIXME quand on compile OpenGL ca recompile ce fichier
 
 // *************************************************************************************************
 //
@@ -56,8 +57,8 @@ void ForthDocument::autoCompleteWord(const int keyval)
           m_tab_sm = ForthAutoCompletSMEnd;
         }
 
-      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-      const char* completed_word = simtadyn.m_forth.completion(m_partial_word);
+      SimForth& forth = SimTaDynContext::forth();
+      const char* completed_word = forth.completion(m_partial_word);
       if (NULL != completed_word)
         {
           // A Forth word has been found in the dictionary;
@@ -129,7 +130,7 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
 
   if (isspace(c[0])) // Pas bon !! il faut faire une boucle text_inserted peut etre un gros morceau de code
     {
-      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+      SimForth& forth = SimTaDynContext::forth();
 
       Gtk::TextBuffer::iterator pos(pos1);
       skipBackwardSpaces(pos);
@@ -143,7 +144,7 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
         // Mark unknown word. FIXME underline IMMEDIATE words
         Cell16 token;
         bool immediate;
-        if (simtadyn.m_forth.dictionary().find(partial_word, token, immediate))
+        if (forth.dictionary().find(partial_word, token, immediate))
           {
             if (immediate)
               {
@@ -153,7 +154,7 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
         else
           {
             Cell32 val;
-            if (false == simtadyn.m_forth.toNumber(partial_word, val))
+            if (false == forth.toNumber(partial_word, val))
               {
                 // Check if not a definition
                 Gtk::TextBuffer::iterator p1(start);
@@ -177,76 +178,96 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
 //
 // *************************************************************************************************
 ForthEditor::ForthEditor()
-//: m_cout(std::cout, m_results.get_buffer()),
-//    m_cerr(std::cerr, m_messages.get_buffer())
+  : m_cout(std::cout, m_results.get_buffer()),
+    m_cerr(std::cerr, m_messages.get_buffer()),
+    m_nb_plugins(0)
 {
-  // Menus '_Forth Scripts'
+  // Forth toolbar (horizontal)
   {
-    m_menuitem[1].set_label("_Forth");
-    m_menuitem[1].set_use_underline(true);
-    m_menuitem[1].set_submenu(m_menu[1]);
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("Exec");
+      button->set_stock_id(Gtk::Stock::EXECUTE);
+      button->set_tooltip_text("Run Forth script");
+      m_toolbar.append(*button, sigc::mem_fun(*this, &ForthEditor::exec));
+    }
+    m_toolbar.append(m_separator[1]);
+  }
+
+  // Menu '_Plugins'
+  {
+    m_menuitem[simtadyn::PlugginsMenu].set_label("_Plugins");
+    m_menuitem[simtadyn::PlugginsMenu].set_use_underline(true);
+    m_menuitem[simtadyn::PlugginsMenu].set_submenu(m_menu[simtadyn::PlugginsMenu]);
+  }
+
+  // Menu '_Forth'
+  {
+    m_menuitem[simtadyn::ForthMenu].set_label("_Forth");
+    m_menuitem[simtadyn::ForthMenu].set_use_underline(true);
+    m_menuitem[simtadyn::ForthMenu].set_submenu(m_menu[simtadyn::ForthMenu]);
 
     //
     m_submenu[0].set_label("New Script");
     m_image[0].set_from_icon_name("document-new", Gtk::ICON_SIZE_MENU);
     m_submenu[0].set_image(m_image[0]);
     m_submenu[0].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::empty));
-    m_menu[1].append(m_submenu[0]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[0]);
 
     //
     m_submenu[1].set_label("New Templated Script");
     m_image[1].set_from_icon_name("text-x-generic-template", Gtk::ICON_SIZE_MENU);
     m_submenu[1].set_image(m_image[1]);
     m_submenu[1].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::templated));
-    m_menu[1].append(m_submenu[1]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[1]);
 
     //
     m_submenu[2].set_label("Interactive");
     m_image[2].set_from_icon_name("utilities-terminal", Gtk::ICON_SIZE_MENU);
     m_submenu[2].set_image(m_image[2]);
     m_submenu[2].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::empty));// TODO
-    m_menu[1].append(m_submenu[2]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[2]);
 
     //
-    m_menu[1].append(m_menuseparator[0]);
+    m_menu[simtadyn::ForthMenu].append(m_menuseparator[0]);
 
     //
     m_submenu[3].set_label("Open Script");
     m_image[3].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
     m_submenu[3].set_image(m_image[3]);
     //FIXME    m_submenu[3].signal_activate().connect(sigc::mem_fun0<bool>(*this, &ForthEditor::open));
-    m_menu[1].append(m_submenu[3]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[3]);
 
     //
     m_submenu[4].set_label("Save Script");
     m_image[4].set_from_icon_name("document-save", Gtk::ICON_SIZE_MENU);
     m_submenu[4].set_image(m_image[4]);
     m_submenu[4].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::save));
-    m_menu[1].append(m_submenu[4]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[4]);
 
     //
     m_submenu[5].set_label("Save As Script");
     m_image[5].set_from_icon_name("document-save-as", Gtk::ICON_SIZE_MENU);
     m_submenu[5].set_image(m_image[5]);
     m_submenu[5].signal_activate().connect(sigc::mem_fun0(*this, &ForthEditor::saveAs));
-    m_menu[1].append(m_submenu[5]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[5]);
 
     //
-    m_menu[1].append(m_menuseparator[1]);
+    m_menu[simtadyn::ForthMenu].append(m_menuseparator[1]);
 
     //
     m_submenu[9].set_label("Load Dictionary");
     m_image[9].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
     m_submenu[9].set_image(m_image[9]);
     m_submenu[9].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::loadDictionary));
-    m_menu[1].append(m_submenu[9]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[9]);
 
     //
     m_submenu[10].set_label("Save As Dictionary");
     m_image[10].set_from_icon_name("document-save-as", Gtk::ICON_SIZE_MENU);
     m_submenu[10].set_image(m_image[10]);
     m_submenu[10].signal_activate().connect(sigc::mem_fun(*this, &ForthEditor::dumpDictionary));
-    m_menu[1].append(m_submenu[10]);
+    m_menu[simtadyn::ForthMenu].append(m_submenu[10]);
   }
 
   // Forth dictionary display
@@ -270,31 +291,31 @@ ForthEditor::ForthEditor()
   // Forth text view for storing results, debug, historic
   {
     // FIXME: mettre les text view en read-only
-    m_scrolledwindow[ForthResTab].add(m_results);
-    m_scrolledwindow[ForthResTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[ForthHistoryTab].add(m_history);
-    m_scrolledwindow[ForthHistoryTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[ForthDicoTab].add(m_dico);
-    m_scrolledwindow[ForthDicoTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[ForthMsgTab].add(m_messages);
-    m_scrolledwindow[ForthMsgTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[simtadyn::ForthResTab].add(m_results);
+    m_scrolledwindow[simtadyn::ForthResTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[simtadyn::ForthHistoryTab].add(m_history);
+    m_scrolledwindow[simtadyn::ForthHistoryTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[simtadyn::ForthDicoTab].add(m_dico);
+    m_scrolledwindow[simtadyn::ForthDicoTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[simtadyn::ForthMsgTab].add(m_messages);
+    m_scrolledwindow[simtadyn::ForthMsgTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   }
 
   // Forth detachable notebook
   {
     m_hpaned.pack1(m_res_notebooks[0]);
     m_res_notebooks[0].set_group_name("forth_res_notebooks");
-    m_res_notebooks[0].append_page(m_scrolledwindow[ForthResTab], "_Result", true);
-    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[ForthResTab], true);
-    m_res_notebooks[0].append_page(m_scrolledwindow[ForthHistoryTab], "H_istory", true);
-    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[ForthHistoryTab], true);
-    m_res_notebooks[0].append_page(m_scrolledwindow[ForthDicoTab], "_Dico", true);
-    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[ForthDicoTab], true);
+    m_res_notebooks[0].append_page(m_scrolledwindow[simtadyn::ForthResTab], "_Result", true);
+    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[simtadyn::ForthResTab], true);
+    m_res_notebooks[0].append_page(m_scrolledwindow[simtadyn::ForthHistoryTab], "H_istory", true);
+    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[simtadyn::ForthHistoryTab], true);
+    m_res_notebooks[0].append_page(m_scrolledwindow[simtadyn::ForthDicoTab], "_Dico", true);
+    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[simtadyn::ForthDicoTab], true);
 
     m_hpaned.pack2(m_res_notebooks[1]);
     m_res_notebooks[1].set_group_name("forth_res_notebooks");
-    m_res_notebooks[1].append_page(m_scrolledwindow[ForthMsgTab], "_Messages", true);
-    m_res_notebooks[1].set_tab_detachable(m_scrolledwindow[ForthMsgTab], true);
+    m_res_notebooks[1].append_page(m_scrolledwindow[simtadyn::ForthMsgTab], "_Messages", true);
+    m_res_notebooks[1].set_tab_detachable(m_scrolledwindow[simtadyn::ForthMsgTab], true);
 
     // Scroll to the end of the document when inserting text
     // TBD: ouvrir l'onglet concerne ?
@@ -377,8 +398,8 @@ void ForthEditor::dumpDictionary()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-      simtadyn.m_forth.dictionary().dump(dialog.get_filename());
+      SimForth& forth = SimTaDynContext::forth();
+      forth.dictionary().dump(dialog.get_filename());
       // FIXME return not taken into account
     }
 }
@@ -410,8 +431,8 @@ void ForthEditor::loadDictionary()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-      simtadyn.m_forth.dictionary().load(dialog.get_filename());
+      SimForth& forth = SimTaDynContext::forth();
+      forth.dictionary().load(dialog.get_filename());
       // FIXME return not taken into account
     }
 }
@@ -464,7 +485,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
   typedef std::chrono::nanoseconds ns;
   typedef std::chrono::high_resolution_clock Time;
   std::pair<bool, std::string> res;
-  SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
+  SimForth& forth = SimTaDynContext::forth();
 
   // Clear the old text in the "Result" tab of the notebook
   Glib::RefPtr<Gtk::TextBuffer> buf = m_results.get_buffer();
@@ -472,7 +493,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 
   // Exec the Forth script and  measure the execution time
   auto t0 = Time::now();
-  res = simtadyn.m_forth.interpreteString(script, filename);
+  res = forth.interpreteString(script, filename);
   auto t1 = Time::now();
 
   // Flush the std::cout in the textview
@@ -501,7 +522,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
       m_statusbar.push("FAILED");
 
       // Show res (redirect sdout to gui)
-      simtadyn.m_forth.ok(res);
+      forth.ok(res);
       return true;
     }
 }
@@ -583,9 +604,55 @@ void ForthEditor::exec()
   else
     {
       // Show the faulty document
-      TextEditor::open(SIMTADYN().m_forth.nameStreamInFault());
+      TextEditor::open(SimTaDynContext::forth().nameStreamInFault());
       // TODO: select in red the faulty word
 
       m_statusbar.push("Please, feed me with a Forth script !");
     }
+}
+
+// FIXME const Cell16 ForthToken)
+// **************************************************************
+// FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
+// FIXME: ajouter le postip avec la definiton du mot "WORD ( n1 n2 -- n3 n4 )"
+// FIXME ne pas autoriser a compiler
+// **************************************************************
+Gtk::ToolButton *ForthEditor::addButon(const Gtk::BuiltinStockID icon,
+                                       const std::string &script,
+                                       const std::string &help)
+{
+  Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+
+  if (nullptr != button)
+    {
+      button->set_label(script);
+      button->set_stock_id(icon);
+      button->set_tooltip_text(help);
+      m_toolbar.append(*button, sigc::bind<Gtk::ToolButton*>
+        (sigc::mem_fun(*this, &ForthEditor::execButton), button));
+      m_toolbar.show_all_children();
+    }
+  else
+    {
+      //FIXME Gtk::MessageDialog dialog(*this, "Failed creating a Forth button");
+      //dialog.run();
+    }
+  return button;
+}
+
+// **************************************************************
+//
+// **************************************************************
+uint32_t ForthEditor::addPluggin(const Glib::ustring& icon_name,
+                                 const std::string &script,
+                                 const std::string &help)
+{
+  m_plugins_submenu[m_nb_plugins].set_label(help);
+  m_plugins_image[m_nb_plugins].set_from_icon_name(icon_name, Gtk::ICON_SIZE_MENU);
+  m_plugins_submenu[m_nb_plugins].set_image(m_plugins_image[m_nb_plugins]);
+  m_plugins_submenu[m_nb_plugins].signal_activate().connect(
+    sigc::bind<const std::string>(sigc::mem_fun(*this, &ForthEditor::execMenu), script));
+  m_menu[simtadyn::PlugginsMenu].append(m_plugins_submenu[m_nb_plugins]);
+  ++m_nb_plugins;
+  return m_nb_plugins - 1U;
 }

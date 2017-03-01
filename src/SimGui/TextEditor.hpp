@@ -4,6 +4,7 @@
 #  include <gtkmm.h>
 #  include <gtksourceviewmm.h>
 #  include "simtypes.hpp"
+#  include "Namespaces.hpp"
 
 class TextDocument;
 class FindWindow;
@@ -249,10 +250,10 @@ public:
   ReplaceWindow m_replacewindow;
   GotoLineWindow m_gotolinewindow;
 
-  Gtk::MenuItem       m_menuitem[2];
-  Gtk::Menu           m_menu[2];
-  Gtk::ImageMenuItem  m_submenu[16];
-  Gtk::Image          m_image[16];
+  Gtk::MenuItem          m_menuitem[simtadyn::MaxForthMenuNames + 1];
+  Gtk::Menu              m_menu[simtadyn::MaxForthMenuNames + 1];
+  Gtk::ImageMenuItem     m_submenu[16];
+  Gtk::Image             m_image[16];
   Gtk::SeparatorMenuItem m_menuseparator[4];
 
 protected:

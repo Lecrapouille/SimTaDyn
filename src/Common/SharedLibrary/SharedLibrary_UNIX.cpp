@@ -14,9 +14,9 @@
 #define RTLD_LOCAL 0
 #endif
 
-POCO_IMPLEMENT_EXCEPTION(NotFoundException, SimTaDyn::Exception, "NotFoundException")
-POCO_IMPLEMENT_EXCEPTION(LibraryLoadException, SimTaDyn::Exception, "LibraryLoadException")
-POCO_IMPLEMENT_EXCEPTION(LibraryAlreadyLoadedException, SimTaDyn::Exception, "LibraryAlreadyLoadedException")
+POCO_IMPLEMENT_EXCEPTION(NotFoundException, simtadyn::Exception, "NotFoundException")
+POCO_IMPLEMENT_EXCEPTION(LibraryLoadException, simtadyn::Exception, "LibraryLoadException")
+POCO_IMPLEMENT_EXCEPTION(LibraryAlreadyLoadedException, simtadyn::Exception, "LibraryAlreadyLoadedException")
 
 //FastMutex SharedLibraryImpl::_mutex;
 

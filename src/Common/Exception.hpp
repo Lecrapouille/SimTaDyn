@@ -13,7 +13,7 @@
 #include "simtypes.hpp"
 #include <typeinfo>
 
-namespace SimTaDyn {
+namespace simtadyn {
 
 class Exception: public std::exception
 /// This is the base class for all exceptions defined
@@ -133,13 +133,13 @@ inline int Exception::code() const
     CLS(int code = CODE);                                               \
     CLS(const std::string& msg, int code = CODE);                       \
     CLS(const std::string& msg, const std::string& arg, int code = CODE); \
-    CLS(const std::string& msg, const SimTaDyn::Exception& exc, int code = CODE); \
+    CLS(const std::string& msg, const simtadyn::Exception& exc, int code = CODE); \
     CLS(const CLS& exc);                                                \
     ~CLS() throw();                                                     \
     CLS& operator = (const CLS& exc);                                   \
     const char* name() const throw();                                   \
     const char* className() const throw();                              \
-    SimTaDyn::Exception* clone() const;                                 \
+    simtadyn::Exception* clone() const;                                 \
     void rethrow() const;                                               \
   };
 
@@ -158,7 +158,7 @@ inline int Exception::code() const
     : BASE(msg, arg, code)                                              \
   {                                                                     \
   }                                                                     \
-  CLS::CLS(const std::string& msg, const SimTaDyn::Exception& exc, int code)\
+  CLS::CLS(const std::string& msg, const simtadyn::Exception& exc, int code)\
     : BASE(msg, exc, code)                                              \
   {                                                                     \
   }                                                                     \
@@ -181,7 +181,7 @@ inline int Exception::code() const
   {                                                                     \
     return typeid(*this).name();                                        \
   }                                                                     \
-  SimTaDyn::Exception* CLS::clone() const                               \
+  simtadyn::Exception* CLS::clone() const                               \
   {                                                                     \
     return new CLS(*this);                                              \
   }                                                                     \
@@ -190,6 +190,6 @@ inline int Exception::code() const
     throw *this;                                                        \
   }
 
-} // namespace SimTaDyn
+} // namespace simtadyn
 
-#endif // Foundation_Exception_INCLUDED
+#endif // EXCEPTION_HPP_

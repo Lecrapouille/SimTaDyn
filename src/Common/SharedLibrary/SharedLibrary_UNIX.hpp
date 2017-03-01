@@ -11,9 +11,9 @@
 
 #include "Exception.hpp"
 
-POCO_DECLARE_EXCEPTION(NotFoundException, SimTaDyn::Exception)
-POCO_DECLARE_EXCEPTION(LibraryLoadException, SimTaDyn::Exception)
-POCO_DECLARE_EXCEPTION(LibraryAlreadyLoadedException, SimTaDyn::Exception)
+POCO_DECLARE_EXCEPTION(NotFoundException, simtadyn::Exception)
+POCO_DECLARE_EXCEPTION(LibraryLoadException, simtadyn::Exception)
+POCO_DECLARE_EXCEPTION(LibraryAlreadyLoadedException, simtadyn::Exception)
 
 class SharedLibraryImpl
 {

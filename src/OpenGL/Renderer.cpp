@@ -1,5 +1,5 @@
 #include "Renderer.hpp"
-#include "SimTaDynContext.hpp"
+#include "Context.hpp"
 #include "GraphMemory.hpp"
 
 // https://github.com/progschj/OpenGL-Examples/blob/master/08map_buffer.cpp
@@ -59,8 +59,8 @@ bool GLRenderer::setupGraphics()
   //glCheck(glEnable(GL_ALPHA_TEST));
 
   // Shader program
-  GLuint program = m_shader.createShaderProgram(SIMTADYN().data_path("node.vertex"),
-                                                SIMTADYN().data_path("node.fragment"));
+  GLuint program = m_shader.createShaderProgram(SimTaDynContext::data_path("node.vertex"),
+                                                SimTaDynContext::data_path("node.fragment"));
   if (0 != program)
     {
       // Create Vertex Array Object
@@ -171,7 +171,8 @@ void GLRenderer::draw(/*SimTaDynGraph_t const& graph*/) //const
 {
   static float m_matrix_mvp[16];
 
-  std::cout << "GLRenderer::draw\n";
+  if (0 == m_shader.id())
+    return ;
 
   m_shader.begin();
 

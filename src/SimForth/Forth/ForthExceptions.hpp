@@ -9,8 +9,8 @@
 #  include "ForthHelper.hpp"
 
 //! This macro (from the library POCO) will declare a class
-//! ForthException derived from SimTaDyn::Exception.
-POCO_DECLARE_EXCEPTION(ForthException, SimTaDyn::Exception);
+//! ForthException derived from simtadyn::Exception.
+POCO_DECLARE_EXCEPTION(ForthException, simtadyn::Exception);
 
 // **************************************************************
 //
@@ -46,7 +46,7 @@ public:
   TooManyOpenedStreams()
     : ForthException(41)
   {
-    m_msg = "too many opened streams";
+    m_msg = "Including nested files too deeply: too many opened streams";
   }
 };
 

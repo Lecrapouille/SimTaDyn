@@ -13,6 +13,8 @@
 #  include <algorithm>
 #  include <assert.h>
 
+#  include "Namespaces.hpp"
+
 // **************************************************************
 //
 // Virtual machine

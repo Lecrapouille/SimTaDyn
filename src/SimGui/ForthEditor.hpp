@@ -42,7 +42,6 @@ protected:
 class ForthEditor : public TextEditor
 {
 public:
-  enum ForthTabNames { ForthResTab, ForthHistoryTab, ForthDicoTab, ForthMsgTab };
 
   ForthEditor();
   ~ForthEditor();
@@ -57,14 +56,25 @@ public:
   //! Call the auto-completion on the current document.
   void autoCompleteWord(const int keyval);
 
-  Gtk::Notebook       m_res_notebooks[2]; // FIXME: attention collision de noms TextEditor::m_notebook
-  Gtk::ScrolledWindow m_scrolledwindow[4];
-  Gtk::TextView       m_results;
-  Gtk::TextView       m_history;
-  Gtk::TextView       m_messages;
-  Gtk::TreeView       m_dico;
-  Gtk::Statusbar      m_statusbar;
-  Gtk::HPaned         m_hpaned;
+  uint32_t addPluggin(const Glib::ustring& icon_name,
+                      const std::string &script,
+                      const std::string &help);
+  Gtk::ToolButton *addButon(const Gtk::BuiltinStockID icon,
+                            const std::string &script,
+                            const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
+
+  Gtk::Notebook          m_res_notebooks[2]; // FIXME: attention collision de noms TextEditor::m_notebook
+  Gtk::ScrolledWindow    m_scrolledwindow[4];
+  Gtk::ImageMenuItem     m_plugins_submenu[8];
+  Gtk::Image             m_plugins_image[8];
+  Gtk::SeparatorToolItem m_separator[2];
+  Gtk::TextView          m_results;
+  Gtk::TextView          m_history;
+  Gtk::TextView          m_messages;
+  Gtk::TreeView          m_dico;
+  Gtk::Statusbar         m_statusbar;
+  Gtk::HPaned            m_hpaned;
+  Gtk::Toolbar           m_toolbar;
 
   //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
 
@@ -93,6 +103,7 @@ protected:
   std::chrono::nanoseconds m_elapsed_time;
   streamgui m_cout; // std::cout redirected inside the GUI
   streamgui m_cerr; // std::cerr redirected inside the GUI
+  uint32_t m_nb_plugins;
 };
 
 #endif /* FORTHEDITOR_HPP_ */

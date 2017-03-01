@@ -10,7 +10,7 @@
 #include "Exception.hpp"
 #include <typeinfo>
 
-namespace SimTaDyn {
+namespace simtadyn {
 
 Exception::Exception(int code)
   : m_pNested(0), m_code(code)

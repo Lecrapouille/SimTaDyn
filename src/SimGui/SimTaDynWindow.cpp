@@ -1,18 +1,18 @@
 #include "SimTaDynWindow.hpp"
-#include "SimTaDynContext.hpp"
+#include "Context.hpp"
 
 // *************************************************************************************************
 // SimTaDyn main window
 // *************************************************************************************************
-SimTaDynWindow::SimTaDynWindow(const std::string& title)
-  : Gtk::Window(),
-    m_nb_plugins(0)
+SimTaDynWindow::SimTaDynWindow()
+  : Gtk::Window()
 {
   // Main window
   {
-    set_title(title);
+    set_title(m_title);
     set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
+    set_icon_from_file(data_path("icons/SimTaDyn.png"));
   }
 
   // Drawing area
@@ -36,63 +36,26 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   // Menus:
   // * _Map: Import/export/save/load/... geographic maps.
   // * _Forth: Import/export/save/load/... Forth scripts
+  // * _Text: search, replace, goto line
   // * _Plugins: TBD: Let the user to add an menu calling it's on fprth scripts.
   // * _Help: TBD: add About/help/interactive tutorials
   {
     // Menu '_Map'
-    m_menubar.append(m_mapeditor.m_menuitem[0]);
+    m_menubar.append(m_mapeditor.m_menuitem[simtadyn::MapMenu]);
 
     // Menu '_Forth'
-    m_menubar.append(m_fortheditor.m_menuitem[1]);
-    m_menubar.append(m_fortheditor.m_menuitem[0]);
+    m_menubar.append(m_fortheditor.m_menuitem[simtadyn::ForthMenu]);
+    m_menubar.append(m_fortheditor.m_menuitem[simtadyn::TextMenu]);
+    m_menubar.append(m_fortheditor.m_menuitem[simtadyn::PlugginsMenu]);
+    m_fortheditor.addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
-    // Menu '_Plugins'
-    m_menuitem[PlugginsMenu].set_label("_Plugins");
-    m_menuitem[PlugginsMenu].set_use_underline(true);
-    m_menubar.append(m_menuitem[PlugginsMenu]);
-    m_menuitem[PlugginsMenu].set_submenu(m_menu[PlugginsMenu]);
-    addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
     // Menu '_Help'
     // TODO: submenus Tuto, Help, Example, About
-    m_menuitem[HelpMenu].set_label("_Help");
-    m_menuitem[HelpMenu].set_use_underline(true);
-    m_menubar.append(m_menuitem[HelpMenu]);
-    m_menuitem[HelpMenu].set_submenu(m_menu[HelpMenu]);
-  }
-
-  // Map toolbar (vertical)
-  {
-    m_toolbar[MapToolbar].set_property("orientation", Gtk::ORIENTATION_VERTICAL);
-    m_toolbar[MapToolbar].set_property("toolbar-style", Gtk::TOOLBAR_ICONS);
-
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("New");
-      button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Load and add a map to the current map");
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_mapeditor, &MapEditor::addMap));
-    }
-
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("Open");
-      button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Load a map file");
-      m_toolbar[MapToolbar].append(*button, sigc::mem_fun(m_mapeditor, &MapEditor::openMap));
-    }
-  }
-
-  // Forth toolbar (horizontal)
-  {
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("Exec");
-      button->set_stock_id(Gtk::Stock::EXECUTE);
-      button->set_tooltip_text("Run Forth script");
-      m_toolbar[ForthToolbar].append(*button, sigc::mem_fun(m_fortheditor, &ForthEditor::exec));
-    }
-    m_toolbar[ForthToolbar].append(m_separator[1]);
+    m_menuitem[simtadyn::HelpMenu].set_label("_Help");
+    m_menuitem[simtadyn::HelpMenu].set_use_underline(true);
+    m_menubar.append(m_menuitem[simtadyn::HelpMenu]);
+    m_menuitem[simtadyn::HelpMenu].set_submenu(m_menu[simtadyn::HelpMenu]);
   }
 
   // Split verticaly the main window
@@ -111,12 +74,12 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
     m_vbox[0].pack_start(m_fortheditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
 
     //
-    m_vbox[1].pack_start(m_toolbar[ForthToolbar], Gtk::PACK_SHRINK);
+    m_vbox[1].pack_start(m_fortheditor.m_toolbar, Gtk::PACK_SHRINK);
     m_vbox[1].pack_start(m_fortheditor.m_statusbar, Gtk::PACK_SHRINK);
     m_vbox[1].pack_start(m_fortheditor.m_hpaned, Gtk::PACK_EXPAND_WIDGET);
 
     //
-    m_hbox[0].pack_start(m_toolbar[MapToolbar], Gtk::PACK_SHRINK);
+    m_hbox[0].pack_start(m_mapeditor.m_toolbar, Gtk::PACK_SHRINK);
     m_hbox[0].pack_start(m_vpaned[0]);
 
     //
@@ -129,75 +92,6 @@ SimTaDynWindow::SimTaDynWindow(const std::string& title)
   //Gtk::Main::signal_quit().connect(sigc::mem_fun(this, &SimTaDynWindow::onQuit));
   show_all_children();
 }
-
-// FIXME const Cell16 ForthToken)
-// **************************************************************
-// FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
-// FIXME: ajouter le postip avec la definiton du mot "WORD ( n1 n2 -- n3 n4 )"
-// FIXME ne pas autoriser a compiler
-// **************************************************************
-Gtk::ToolButton *SimTaDynWindow::addForthButon(enum ToolBarNames toolbar,
-                                               const Gtk::BuiltinStockID icon,
-                                               const std::string &script,
-                                               const std::string &help)
-
-{
-  Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-
-  if (nullptr != button)
-    {
-      button->set_label(script);
-      button->set_stock_id(icon);
-      button->set_tooltip_text(help);
-      m_toolbar[toolbar].append(*button,
-        sigc::bind<Gtk::ToolButton*>(sigc::mem_fun(m_fortheditor, &ForthEditor::execButton), button));
-      m_toolbar[toolbar].show_all_children();
-    }
-  else
-    {
-      Gtk::MessageDialog dialog(*this, "Failed creating a Forth button");
-      dialog.run();
-    }
-  return button;
-}
-
-// **************************************************************
-// Interface
-// **************************************************************
-Gtk::ToolButton *SimTaDynWindow::addForthScriptButon(const Gtk::BuiltinStockID icon,
-                                                     const std::string &script,
-                                                     const std::string &help)
-{
-  return addForthButon(ForthToolbar, icon, script, help);
-}
-
-// **************************************************************
-// Interface
-// **************************************************************
-Gtk::ToolButton *SimTaDynWindow::addMapScriptButon(const Gtk::BuiltinStockID icon,
-                                                   const std::string &script,
-                                                   const std::string &help)
-{
-  return addForthButon(MapToolbar, icon, script, help);
-}
-
-// **************************************************************
-//
-// **************************************************************
-uint32_t SimTaDynWindow::addPluggin(const Glib::ustring& icon_name,
-                                    const std::string &script,
-                                    const std::string &help)
-{
-  m_plugins_submenu[m_nb_plugins].set_label(help);
-  m_plugins_image[m_nb_plugins].set_from_icon_name(icon_name, Gtk::ICON_SIZE_MENU);
-  m_plugins_submenu[m_nb_plugins].set_image(m_plugins_image[m_nb_plugins]);
-  m_plugins_submenu[m_nb_plugins].signal_activate().connect(
-    sigc::bind<const std::string>(sigc::mem_fun(m_fortheditor, &ForthEditor::execMenu), script));
-  m_menu[PlugginsMenu].append(m_plugins_submenu[m_nb_plugins]);
-  ++m_nb_plugins;
-  return m_nb_plugins - 1U;
-}
-
 
 void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
 {
@@ -232,7 +126,7 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
     default:
       break;
     }
-  m_fortheditor.autoCompleteWord(evenement->keyval);
+  SimTaDynContext::forthEditor().autoCompleteWord(evenement->keyval);
 }
 
 void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)

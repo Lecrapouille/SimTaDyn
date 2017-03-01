@@ -1,25 +1,25 @@
-#include "SimTaDynContext.hpp"
+#include "Context.hpp"
 
-// Create the context as singleton
-SimTaDynContext SimTaDynContext::s_SimTaDyn = SimTaDynContext();
+SimTaDynWindow *SimTaDynContext::s_itself = nullptr;
 
 int main(int argc, char** argv)
 {
   const Gtk::Main kit(argc, argv);
   Gsv::init();
 
-  SimTaDynWindow main_window("SimTaDyn");
-  SimTaDynContext& SimTaDyn = SIMTADYN();
+  SimTaDynWindow *window = SimTaDynContext::mainWindow();
+  assert(nullptr != window);
 
-  main_window.set_icon_from_file(SimTaDyn.data_path("icons/SimTaDyn.png"));
-  SimTaDyn.m_window = &main_window;
 
-  // FIXME: temporary, just for testing
-  SimTaDyn.m_window->addForthScriptButon(Gtk::Stock::YES, "TRACE.ON", "TRACE.ON ( -- )");
-  SimTaDyn.m_window->addForthScriptButon(Gtk::Stock::NO, "TRACE.OFF", "TRACE.OFF ( -- )");
-  SimTaDyn.m_window->addMapScriptButon(Gtk::Stock::NO, "42 42 FOO", "42 42 FOO");
-  SimTaDyn.m_window->addMapScriptButon(Gtk::Stock::NO, "42 .", "42 .");
+    // FIXME: temporary, just for testing
+  ForthEditor& fortheditor = SimTaDynContext::forthEditor();
+    fortheditor.addButon(Gtk::Stock::YES, "TRACE.ON", "TRACE.ON ( -- )");
+    fortheditor.addButon(Gtk::Stock::NO, "TRACE.OFF", "TRACE.OFF ( -- )");
+    /*MapEditor& mapeditor = SimTaDynContext::mapEditor();
+    mapeditor.addButon(Gtk::Stock::NO, "42 42 FOO", "42 42 FOO");
+    mapeditor.addButon(Gtk::Stock::NO, "42 42 TOTO", "42 42 TOTO");
+    mapeditor.addButon(Gtk::Stock::NO, "42 .", "42 .");*/
 
-  kit.run(*(SimTaDyn.m_window));
+  kit.run(*window);
   return 0;
 }

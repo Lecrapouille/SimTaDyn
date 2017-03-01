@@ -1,5 +1,6 @@
 #include "MapEditor.hpp"
 #include "ShapeFile.hpp"
+#include "Namespaces.hpp"
 
 // *************************************************************************************************
 //
@@ -7,63 +8,85 @@
 MapEditor::MapEditor()
   : MapLoader(), m_current_map(-1)
 {
-  // Menus '_Map'
+  // Map toolbar (vertical)
   {
-    m_menuitem[0].set_label("_Map");
-    m_menuitem[0].set_use_underline(true);
-    m_menuitem[0].set_submenu(m_menu[0]);
+    m_toolbar.set_property("orientation", Gtk::ORIENTATION_VERTICAL);
+    m_toolbar.set_property("toolbar-style", Gtk::TOOLBAR_ICONS);
+
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("New");
+      button->set_stock_id(Gtk::Stock::NEW);
+      button->set_tooltip_text("Load and add a map to the current map");
+      m_toolbar.append(*button, sigc::mem_fun(*this, &MapEditor::addMap));
+    }
+
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("Open");
+      button->set_stock_id(Gtk::Stock::NEW);
+      button->set_tooltip_text("Load a map file");
+      m_toolbar.append(*button, sigc::mem_fun(*this, &MapEditor::openMap));
+    }
+  }
+
+  // Menu '_Map'
+  {
+    m_menuitem[simtadyn::MapMenu].set_label("_Map");
+    m_menuitem[simtadyn::MapMenu].set_use_underline(true);
+    m_menuitem[simtadyn::MapMenu].set_submenu(m_menu[simtadyn::MapMenu]);
 
     //
     m_submenu[1].set_label("New Map");
     m_image[1].set_from_icon_name("document-new", Gtk::ICON_SIZE_MENU);
     m_submenu[1].set_image(m_image[1]);
     m_submenu[1].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::newEmptyMap));
-    m_menu[0].append(m_submenu[1]);
+    m_menu[simtadyn::MapMenu].append(m_submenu[1]);
 
     //
     m_submenu[2].set_label("Open Map");
     m_image[2].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
     m_submenu[2].set_image(m_image[2]);
     m_submenu[2].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::openMap));
-    m_menu[0].append(m_submenu[2]);
+    m_menu[simtadyn::MapMenu].append(m_submenu[2]);
 
     //
     m_submenu[3].set_label("Save Map");
     m_image[3].set_from_icon_name("document-save", Gtk::ICON_SIZE_MENU);
     m_submenu[3].set_image(m_image[3]);
     m_submenu[3].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::saveMap));
-    m_menu[0].append(m_submenu[3]);
+    m_menu[simtadyn::MapMenu].append(m_submenu[3]);
 
     //
     m_submenu[4].set_label("Save As Map");
     m_image[4].set_from_icon_name("document-save-as", Gtk::ICON_SIZE_MENU);
     m_submenu[4].set_image(m_image[4]);
     m_submenu[4].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::saveAsMap));
-    m_menu[0].append(m_submenu[4]);
+    m_menu[simtadyn::MapMenu].append(m_submenu[4]);
 
     //
-    m_menu[0].append(m_menuseparator[0]);
+    m_menu[simtadyn::MapMenu].append(m_menuseparator[0]);
 
     //
     m_submenu[5].set_label("Replace Map");
     m_image[5].set_from_icon_name("document-import", Gtk::ICON_SIZE_MENU);
     m_submenu[5].set_image(m_image[5]);
     m_submenu[5].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::replaceMap));
-    m_menu[0].append(m_submenu[5]);
+    m_menu[simtadyn::MapMenu].append(m_submenu[5]);
 
     //
     m_submenu[6].set_label("Add Map");
     m_image[6].set_from_icon_name("document-import", Gtk::ICON_SIZE_MENU);
     m_submenu[6].set_image(m_image[6]);
     m_submenu[6].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::addMap));
-    m_menu[0].append(m_submenu[6]);
+    m_menu[simtadyn::MapMenu].append(m_submenu[6]);
 
     //
     m_submenu[7].set_label("Clear Map");
     m_image[7].set_from_icon_name("user_trash", Gtk::ICON_SIZE_MENU);
     m_submenu[7].set_image(m_image[7]);
     m_submenu[7].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::clearMap));
-    m_menu[0].append(m_submenu[7]);
+    m_menu[simtadyn::MapMenu].append(m_submenu[7]);
   }
 }
 
@@ -88,7 +111,7 @@ void MapEditor::open(const bool new_map, const bool reset_map)
 {
   Gtk::FileChooserDialog dialog("Choose a binary file to save Forth dictionary",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
-  dialog.set_transient_for((Gtk::Window&) (*m_menu[0].get_toplevel()));
+  dialog.set_transient_for((Gtk::Window&) (*m_menu[simtadyn::MapMenu].get_toplevel()));
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -126,7 +149,7 @@ void MapEditor::open(const bool new_map, const bool reset_map)
         {
           Gtk::MessageDialog d("Could not load '" + dialog.get_filename() + "' as a map.",
                                false, Gtk::MESSAGE_WARNING);
-          d.set_transient_for((Gtk::Window&) (*m_menu[0].get_toplevel()));
+          d.set_transient_for((Gtk::Window&) (*m_menu[simtadyn::MapMenu].get_toplevel()));
           d.set_secondary_text("Reason was: " + error());
           d.run();
         }
@@ -174,3 +197,13 @@ SimTaDynMap* MapEditor::map()
     return nullptr;
   return m_maps[m_current_map];
 }
+
+// **************************************************************
+// Interface
+// **************************************************************
+/*Gtk::ToolButton *MapEditor::addButon(const Gtk::BuiltinStockID icon,
+                                     const std::string &script,
+                                     const std::string &help)
+{
+  return addForthButon(MapToolbar, icon, script, help);
+  }*/

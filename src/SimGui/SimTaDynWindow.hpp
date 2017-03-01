@@ -2,19 +2,16 @@
 #  define SIMTADYNWINDOW_HPP_
 
 #  include "DrawingArea.hpp"
-#  include "ForthEditor.hpp"
-#  include "MapEditor.hpp"
+#  include "SimTaDyn.hpp"
 
-class SimTaDynWindow: public Gtk::Window
+class SimTaDynWindow: public SimTaDyn, public Gtk::Window
 {
 public:
-  enum ToolBarNames { MapToolbar, ForthToolbar };
-  enum MenuNames { MapMenu, ForthMenu, PlugginsMenu, HelpMenu };
 
-  SimTaDynWindow(const std::string& title);
-  virtual ~SimTaDynWindow()
-  {
-  }
+  //! \brief Constructor.
+  SimTaDynWindow();
+
+protected:
 
   //! \brief Initialize the OpenGL context
   inline void onRealize()
@@ -22,53 +19,36 @@ public:
     m_drawing_area.onRealize();
   }
   //! \brief Clean up
-  void onUnrealize()
+  inline void onUnrealize()
   {
     m_drawing_area.onUnrealize();
   }
   //! \brief Draw the scene
-  bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
+  inline bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
   {
     return m_drawing_area.onRender();
   }
-  uint32_t addPluggin(const Glib::ustring& icon_name,
-                      const std::string &script,
-                      const std::string &help);
-  Gtk::ToolButton *addForthButon(enum ToolBarNames toolbar,
-                                 const Gtk::BuiltinStockID icon,
-                                 const std::string &script,
-                                 const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
-  Gtk::ToolButton *addForthScriptButon(const Gtk::BuiltinStockID icon,
-                                       const std::string &script,
-                                       const std::string &help);
-  Gtk::ToolButton *addMapScriptButon(const Gtk::BuiltinStockID icon,
-                                     const std::string &script,
-                                     const std::string &help);
-
-protected:
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
-  ForthEditor m_fortheditor;
-  MapEditor m_mapeditor;
-  Gtk::HPaned m_hpaned[1];
-  Gtk::VPaned m_vpaned[1];
-  Gtk::VBox m_vbox[2];
-  Gtk::HBox m_hbox[1];
-  Gtk::MenuBar m_menubar;
-  Gtk::Menu     m_menu[4];
-  Gtk::MenuItem m_menuitem[4];
-  Gtk::ImageMenuItem  m_plugins_submenu[8];
-  Gtk::Image          m_plugins_image[8];
-  Gtk::SeparatorToolItem m_separator[2];
-  Gtk::Toolbar m_toolbar[2];
-  std::vector<Gtk::ToolButton> m_toolbuttons;
+protected:
 
-  GLDrawingArea m_drawing_area;
-  FindWindow *m_findwin;
-  ReplaceWindow *m_replacewin;
-  GotoLineWindow *m_gotolinewindow;
-  uint32_t m_nb_plugins;
+  Gtk::HPaned                  m_hpaned[1];
+  Gtk::VPaned                  m_vpaned[1];
+  Gtk::VBox                    m_vbox[2];
+  Gtk::HBox                    m_hbox[1];
+  Gtk::MenuBar                 m_menubar;
+  Gtk::Menu                    m_menu[simtadyn::MaxMapMenuNames +
+                                      simtadyn::MaxForthMenuNames +
+                                      simtadyn::MaxGeneralMenuNames + 1];
+  Gtk::MenuItem                m_menuitem[simtadyn::MaxMapMenuNames +
+                                          simtadyn::MaxForthMenuNames +
+                                          simtadyn::MaxGeneralMenuNames + 1];
+  std::vector<Gtk::ToolButton> m_toolbuttons; // FIXME resize
+  GLDrawingArea                m_drawing_area;
+  FindWindow                  *m_findwin = nullptr;
+  ReplaceWindow               *m_replacewin = nullptr;
+  GotoLineWindow              *m_gotolinewindow = nullptr;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

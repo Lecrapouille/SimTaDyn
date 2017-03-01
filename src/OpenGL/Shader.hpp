@@ -80,14 +80,19 @@ public:
   //! the new one.
   inline GLuint createShaderProgram(std::string const& vertex_shader_filename,
                                     std::string const& fragment_shader_filename,
-                                    std::string const& geometry_shader_filename = "")
+                                    std::string const& geometry_shader_filename)
   {
-    const char *geo = geometry_shader_filename.c_str();
-    if (geo[0] == '\0') geo = nullptr;
-
     return createShaderProgram(vertex_shader_filename.c_str(),
                                fragment_shader_filename.c_str(),
-                               geo);
+                               geometry_shader_filename.c_str());
+  }
+
+  inline GLuint createShaderProgram(std::string const& vertex_shader_filename,
+                                    std::string const& fragment_shader_filename)
+  {
+    return createShaderProgram(vertex_shader_filename.c_str(),
+                               fragment_shader_filename.c_str(),
+                               nullptr);
   }
 
   //! \brief Open, read, compile and load a fragment, a vertex shader

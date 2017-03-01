@@ -7,7 +7,7 @@
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class MapEditor : protected MapLoader
+class MapEditor: protected MapLoader
 {
 public:
   MapEditor();
@@ -37,19 +37,23 @@ public:
         map->m_graph.reset();
       }
   }
-
+  /*Gtk::ToolButton *addMapScriptButon(const Gtk::BuiltinStockID icon,
+                                     const std::string &script,
+                                     const std::string &help);
+  */
   void saveMap() {};
   void saveAsMap() {};
   //void saveAll();
   //void find();
 
 
-  Gtk::MenuItem       m_menuitem[2];
-  Gtk::Menu           m_menu[2];
-  Gtk::ImageMenuItem  m_submenu[8];
-  Gtk::Image          m_image[8];
+  Gtk::MenuItem          m_menuitem[simtadyn::MaxMapMenuNames + 1];
+  Gtk::Menu              m_menu[simtadyn::MaxMapMenuNames + 1];
+  Gtk::ImageMenuItem     m_submenu[8];
+  Gtk::Image             m_image[8];
   Gtk::SeparatorMenuItem m_menuseparator[2];
-
+  Gtk::SeparatorToolItem m_separator[2];
+  Gtk::Toolbar           m_toolbar;
 protected:
   void open(const bool new_map, const bool reset_map);
 
