@@ -8,7 +8,7 @@
 // **************************************************************
 Forth::Forth(ForthDictionary& dictionary, TextColor &color)
   : m_color(color),
-    m_state(INTERPRETER_STATE),
+    m_state(forth::Interprete),
     m_dictionary(dictionary)
 {
   m_err_stream = 0;
@@ -22,16 +22,16 @@ Forth::Forth(ForthDictionary& dictionary, TextColor &color)
 // **************************************************************
 void Forth::abort()
 {
-  if ((COMPILATION_STATE == m_state) ||
-      ((COMMENT_STATE == m_state) &&
-       (COMPILATION_STATE == m_saved_state)))
+  if ((forth::Compile == m_state) ||
+      ((forth::Comment == m_state) &&
+       (forth::Compile == m_saved_state)))
     {
       // Drop the Forth word not totaly compiled
       m_dictionary.m_last = m_last_at_colon;
       m_dictionary.m_here = m_here_at_colon;
     }
 
-  m_state = INTERPRETER_STATE;
+  m_state = forth::Interprete;
   m_data_stack = m_data_stack_ + STACK_UNDERFLOW_MARGIN;
   m_alternative_stack = m_alternative_stack_ + STACK_UNDERFLOW_MARGIN;
   m_return_stack = m_return_stack_ + STACK_UNDERFLOW_MARGIN;
@@ -48,7 +48,6 @@ void Forth::abort()
 // **************************************************************
 void Forth::abort(std::string const& msg)
 {
-  Forth::abort();
   AbortForth e(msg);
   throw e;
 }
@@ -62,12 +61,12 @@ void Forth::isDStackUnderOverFlow() const
   if (depth < -1)
     {
       // Underflow
-      OutOfBoundStack e(DATA_STACK, depth); throw e;
+      OutOfBoundStack e(forth::DataStack, depth); throw e;
     }
   else if (depth >= (int32_t) (STACK_SIZE - STACK_UNDERFLOW_MARGIN))
     {
       // Overflow
-      OutOfBoundStack e(DATA_STACK, depth); throw e;
+      OutOfBoundStack e(forth::DataStack, depth); throw e;
     }
 }
 
@@ -80,12 +79,12 @@ int32_t Forth::isRStackUnderOverFlow() const
   if (depth < -1)
     {
       // Underflow
-      OutOfBoundStack e(RETURN_STACK, depth); throw e;
+      OutOfBoundStack e(forth::ReturnStack, depth); throw e;
     }
   else if (depth >= (int32_t) (STACK_SIZE - STACK_UNDERFLOW_MARGIN))
     {
       // Overflow
-      OutOfBoundStack e(RETURN_STACK, depth); throw e;
+      OutOfBoundStack e(forth::ReturnStack, depth); throw e;
     }
   return depth;
 }
@@ -409,7 +408,7 @@ void Forth::interpreteWord(std::string const& word)
   Cell16 token;
   bool immediate;
 
-  if (INTERPRETER_STATE == m_state)
+  if (forth::Interprete == m_state)
     {
       if (m_dictionary.find(word, token, immediate))
         {
@@ -427,7 +426,7 @@ void Forth::interpreteWord(std::string const& word)
           UnknownForthWord e(word); throw e;
         }
     }
-  else if (COMPILATION_STATE == m_state)
+  else if (forth::Compile == m_state)
     {
       if (m_dictionary.find(word, token, immediate))
         {
@@ -543,7 +542,7 @@ std::pair<bool, std::string> Forth::parseStream()
       // stream.  Else this means the end of the stream is truncated
       // with a non finished function definition or non finished
       // commentary.
-      if (INTERPRETER_STATE != m_state)
+      if (forth::Interprete != m_state)
         {
           // FIXME: the stream colum information is erroneous because
           // a ForthReader::refill() has been called before. But I like
@@ -598,13 +597,15 @@ void Forth::ok(std::pair<bool, std::string> const& res)
 // **************************************************************
 void Forth::includeFile(std::string const& filename)
 {
-  // FIXME memoriser m_base
-
   // Reached maximum depth of include file including file including ... etc
   if (m_opened_streams >= MAX_OPENED_STREAMS - 1U)
     {
       TooManyOpenedStreams e; throw e;
     }
+
+  // Save the current base in the stream before 'stack'ing it
+  STREAM.m_base = m_base;
+  m_base = 10;
 
   // Save the current stream in a stack
   ++m_opened_streams;
@@ -622,6 +623,7 @@ void Forth::includeFile(std::string const& filename)
       assert(m_opened_streams > 0);
       STREAM.close();
       --m_opened_streams;
+      m_base = STREAM.m_base;
     }
   else
     {

@@ -81,6 +81,10 @@ protected:
   bool m_eol;             // End of line reached ?
   bool m_eof;             // End of file reached ?
   bool m_word_picked;     // The current word has been picked by the caller
+
+public:
+
+  int32_t m_base;         // Save the base (octal, decimal, hexa) for displaying numbers
 };
 
 #endif /* FORTH_READER_HPP_ */

@@ -3,53 +3,64 @@
 
 #  include "MapLoader.hpp"
 
-class ShapefileLoaderException : public MapLoaderException
+// **************************************************************
+//
+// **************************************************************
+class ShapefileLoaderException: public MapLoaderException
 {
- public:
+public:
+
   uint32_t m_offset;
   std::string m_funcName;
 
-  ShapefileLoaderException(const uint32_t offset, const std::string funcName)
+  ShapefileLoaderException(const uint32_t offset, std::string const& funcName)
+    : MapLoaderException(41), m_offset(offset), m_funcName(funcName)
   {
-    m_offset = offset;
-    m_funcName = funcName;
+    m_msg = "Shapefile Loader Exception at offset " + std::to_string(offset)
+      + " in file '" + funcName + "'";
   }
 };
 
 class ShapefileLoaderOpenFailed : public MapLoaderException
 {
 public:
+
   int m_error;
 
-  ShapefileLoaderOpenFailed(int e)
+  ShapefileLoaderOpenFailed(const int error)
+    : MapLoaderException(42), m_error(error)
   {
-    m_error = e;
+    m_msg = "Shapefile Loader Exception: failed opening with error code " + std::to_string(error) + "'";
   }
 };
 
 class ShapefileLoaderBadId : public MapLoaderException
 {
 public:
+
   int m_bad_id;
   int m_expected_id;
 
-  ShapefileLoaderBadId(int b, int e)
+  ShapefileLoaderBadId(int bad_id, int expected_id)
+    : MapLoaderException(43), m_bad_id(bad_id), m_expected_id(expected_id)
   {
-    m_bad_id = b;
-    m_expected_id = e;
+    m_msg = "Shapefile Loader Exception: Read bad id " + std::to_string(bad_id)
+      + " while expected id " + std::to_string(expected_id);
   }
 };
 
 class ShapefileLoaderBadLength : public MapLoaderException
 {
 public:
+
   int m_real_size;
   int m_expected_size;
 
-  ShapefileLoaderBadLength(int r, int e)
+  ShapefileLoaderBadLength(int real_size, int expected_size)
+    : MapLoaderException(44), m_real_size(real_size), m_expected_size(expected_size)
   {
-     m_real_size = r;
-     m_expected_size = e;
+     m_msg = "Shapefile Loader Exception: File size is " + std::to_string(real_size)
+       + " while indicating " + std::to_string(expected_size);
   }
 };
 
@@ -65,7 +76,7 @@ public:
 
   virtual bool load(std::string const& filename, SimTaDynMap* &map) override;
 
-  // FIXME: protected:
+protected:
 
   int32_t      readBigEndianInt();
   int32_t      readLittleEndianInt();
@@ -83,7 +94,6 @@ public:
   uint32_t     getRecordAt(SimTaDynMap& map, const uint32_t offset);
   void         getAllRecords(SimTaDynMap& map);
 
-private:
   std::ifstream m_infile;
   std::string   m_filename;
   uint32_t      m_file_length;

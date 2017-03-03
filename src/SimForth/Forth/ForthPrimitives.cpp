@@ -33,7 +33,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // Begin of commentary
     case FORTH_PRIMITIVE_LPARENTHESIS:
       m_saved_state = m_state;
-      m_state = COMMENT_STATE;
+      m_state = forth::Comment;
       break;
 
       // End of commentary
@@ -49,13 +49,13 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       // Begin the definition of a new word
     case FORTH_PRIMITIVE_COLON:
       create(nextWord());
-      m_state = COMPILATION_STATE;
+      m_state = forth::Compile;
       break;
 
       // End the definition of a new word
     case FORTH_PRIMITIVE_SEMICOLON:
       m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT);
-      m_state = INTERPRETER_STATE;
+      m_state = forth::Interprete;
       if (m_depth_at_colon != DStackDepth())
         {
           m_dictionary.m_last = m_last_at_colon;
@@ -206,11 +206,11 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
        break;
 
      case FORTH_PRIMITIVE_LBRACKET:
-       m_state = INTERPRETER_STATE;
+       m_state = forth::Interprete;
        break;
 
     case FORTH_PRIMITIVE_RBRACKET:
-       m_state = COMPILATION_STATE;
+       m_state = forth::Compile;
        break;
 
     case FORTH_PRIMITIVE_HERE:
@@ -511,13 +511,12 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_DECIMAL:
       changeDisplayBase(10U);
       break;
-    case FORTH_PRIMITIVE_BASE:
-      if (DStackDepth() < 0)
-        {
-          DPUSH(m_tos);
-          m_tos = m_base;
-        }
-      else if (false == changeDisplayBase(m_tos))
+    case FORTH_PRIMITIVE_GET_BASE:
+      DPUSH(m_tos);
+      m_tos = m_base;
+      break;
+    case FORTH_PRIMITIVE_SET_BASE:
+      if (false == changeDisplayBase(m_tos))
         {
           m_color.yellow();
           std::cerr << m_color << "[WARNING] '"
@@ -726,7 +725,8 @@ void Forth::boot()
   m_dictionary.add(FORTH_PRIMITIVE_OCTAL, NAME("OCTAL"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_HEXADECIMAL, NAME("HEX"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_DECIMAL, NAME("DECIMAL"), 0);
-  m_dictionary.add(FORTH_PRIMITIVE_BASE, NAME("BASE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_GET_BASE, NAME("BASE"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_SET_BASE, NAME("BASE!"), 0);
 
   // Logic
   m_dictionary.add(FORTH_PRIMITIVE_FALSE, NAME("FALSE"), 0);

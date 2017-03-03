@@ -10,7 +10,7 @@
 
 //! This macro (from the library POCO) will declare a class
 //! ForthException derived from simtadyn::Exception.
-POCO_DECLARE_EXCEPTION(ForthException, simtadyn::Exception);
+POCO_DECLARE_EXCEPTION(ForthException, simtadyn::Exception)
 
 // **************************************************************
 //
@@ -23,12 +23,13 @@ public:
   {
     switch (Forthstate)
       {
-      case COMPILATION_STATE:
+      case forth::Compile:
         m_msg = "Word definition not terminated when reaching the end of the stream";
         break;
-      case COMMENT_STATE:
+      case forth::Comment:
         m_msg = "Commentary not terminated when reaching the end of the stream";
         break;
+      case forth::Interprete:
       default:
         // This case is not possible
         assert(1);
@@ -123,36 +124,12 @@ public:
 class OutOfBoundStack: public ForthException
 {
 public:
-  // FIXME SimForth::StackId au lieu de uint32_t
-  OutOfBoundStack(const uint32_t stack_id, const int32_t depth)
-    : ForthException(36)
-  {
-    m_stack_id = stack_id;
-    switch (m_stack_id)
-      {
-      case DATA_STACK:
-        m_msg = "Data Stack";
-        break;
-      case RETURN_STACK:
-        m_msg = "Return Stack";
-        break;
-      default:
-        m_msg = "";
-        break;
-      }
 
-    if (depth < 0)
-      {
-        m_msg += " underflow";
-      }
-    else
-      {
-        m_msg += " overflow";
-      }
-  }
+  OutOfBoundStack(const forth::StackID stack_id, const int32_t depth);
 
   uint32_t m_stack_id;
 };
+
 
 // **************************************************************
 //
@@ -161,7 +138,7 @@ class UnknownForthPrimitive: public ForthException
 {
 public:
   UnknownForthPrimitive(const Cell16 badToken, std::string const& funcName)
-    : ForthException(35)
+    : ForthException(36)
   {
     m_msg = "Exception from SimTaDynForth: try to execute an unknown primitive "
       + std::to_string((uint32_t) badToken) + " in " + funcName;
@@ -175,7 +152,7 @@ class UnknownForthWord: public ForthException
 {
 public:
   UnknownForthWord(std::string const& word)
-    : ForthException(34)
+    : ForthException(35)
   {
     m_msg = "Unrecognized word '" + word + "'";
   }

@@ -107,20 +107,18 @@ typedef uint8_t        Cell8;
 
 // **************************************************************
 //
-// Forth mode
+// Enums
 //
 // **************************************************************
-#  define INTERPRETER_STATE  (0U)
-#  define COMPILATION_STATE  (1U)
-#  define COMMENT_STATE      (2U)
 
-// **************************************************************
-//
-// Enum used when an exception occured
-//
-// **************************************************************
-#  define DATA_STACK         (0U)
-#  define RETURN_STACK       (1U)
+namespace forth
+{
+  //! \brief Stack names: primary and secondary parameter stack, CFA stack, floating point stack.
+  enum StackID { DataStack, ReturnStack, AuxStack, FloatStack, MaxStackID = FloatStack };
+  //! \brief Forth interpreter mode
+  enum ForthState { Interprete, Compile, Comment, MaxForthStates = Comment };
+}
+
 
 // **************************************************************
 // Stream

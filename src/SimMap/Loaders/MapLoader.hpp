@@ -1,14 +1,12 @@
 #ifndef MAP_LOADER_HPP_
 #  define MAP_LOADER_HPP_
 
+#  include "Exception.hpp"
 #  include "SimTaDynMap.hpp"
 
-// *************************************************************************************************
-//
-// *************************************************************************************************
-class MapLoaderException // TBD: : public Exception
-{
-};
+//! This macro (from the library POCO) will declare a class
+//! MapLoaderException derived from simtadyn::Exception.
+POCO_DECLARE_EXCEPTION(MapLoaderException, simtadyn::Exception)
 
 // *************************************************************************************************
 // Abstract class

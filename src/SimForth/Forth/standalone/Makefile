@@ -22,7 +22,7 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I.. -I../../../Common -I../../../Common/SharedLibrary
+INCLUDES = -I. -I.. -I../../.. -I../../../Common -I../../../Common/SharedLibrary
 
 ###################################################
 # Path for Makefile to find *.o

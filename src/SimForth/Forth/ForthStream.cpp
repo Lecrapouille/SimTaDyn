@@ -13,6 +13,7 @@ ForthStream::ForthStream()
   init();
   m_str = "";
   m_filename = "";
+  m_base = 10; // Useless but safer
 }
 
 // **************************************************************
