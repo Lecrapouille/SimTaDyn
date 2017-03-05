@@ -167,12 +167,34 @@ public:
     return color;
   }
 
-  uint32_t toInteger() const
+  uint32_t toARGB() const
   {
-    return ((uint32_t) (a * 255.0f)) |
-      (((uint32_t) (r * 255.0f)) << 24) |
-      (((uint32_t) (g * 255.0f)) << 16) |
-      (((uint32_t) (b * 255.0f)) << 8);
+    uint32_t ur = static_cast<uint32_t>(r * 255.0f);
+    uint32_t ug = static_cast<uint32_t>(g * 255.0f);
+    uint32_t ub = static_cast<uint32_t>(b * 255.0f);
+    uint32_t ua = static_cast<uint32_t>(a * 255.0f);
+
+    return (ua << 24) | (ur << 16) | (ug << 8) | (ub << 0);
+  }
+
+  uint32_t toABGR() const
+  {
+    uint32_t ur = static_cast<uint32_t>(r * 255.0f);
+    uint32_t ug = static_cast<uint32_t>(g * 255.0f);
+    uint32_t ub = static_cast<uint32_t>(b * 255.0f);
+    uint32_t ua = static_cast<uint32_t>(a * 255.0f);
+
+    return (ua << 24) | (ub << 16) | (ug << 8) | (ur << 0);
+  }
+
+  uint32_t toRGBA() const
+  {
+    uint32_t ur = static_cast<uint32_t>(r * 255.0f);
+    uint32_t ug = static_cast<uint32_t>(g * 255.0f);
+    uint32_t ub = static_cast<uint32_t>(b * 255.0f);
+    uint32_t ua = static_cast<uint32_t>(a * 255.0f);
+
+    return (ur << 24) | (ug << 16) | (ub << 8) | (ua << 0);
   }
 
   static const Color Black;
