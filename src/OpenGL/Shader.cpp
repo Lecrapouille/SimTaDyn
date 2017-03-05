@@ -190,3 +190,30 @@ l_end:
   cleanShader(vertex, fragment, geometry);
   return m_program;
 }
+
+GLint GLShader::locate(const char *name)
+{
+  int res = -1;
+
+  // Correct shader variable name shall start either by a_ for
+  // attribute or u_ for uniform.
+  if ((nullptr != name) && ('\0' != name[0]) && ('_' == name[1]))
+    {
+      if (('a' == name[0]) || ('i' == name[0]))
+        {
+          res = glCheck(glGetAttribLocation(m_program, name));
+        }
+      else if ('u' == name[0])
+        {
+          res = glCheck(glGetUniformLocation(m_program, name));
+        }
+    }
+
+  // Failed loaction shader variable
+  if (-1 == res)
+    {
+      std::cerr << "[FAILED] getting shader location for '"
+                << name << "'" << std::endl;
+    }
+  return res;
+}

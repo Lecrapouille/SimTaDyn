@@ -1,8 +1,8 @@
 #version 330 core
 
-in vec4 fragmentColor; // from node.vertex
+in vec4 a_fragmentColor; // given by node.vertex
 
 void main()
 {
-  gl_FragColor = fragmentColor;
+  gl_FragColor = a_fragmentColor;
 }

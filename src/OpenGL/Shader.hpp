@@ -103,6 +103,12 @@ public:
                              const char* fragment_shader_filename,
                              const char* geometry_shader_filename = nullptr);
 
+  //! \brief Find in the shader program a variable name.
+  //! \param name the attribute or uniform shader variable to look for.
+  //! \return the id of the variable or -1 if not found or the given name
+  //! is erroneous.
+  GLint locate(const char *name);
+
 private:
 
   //! \brief Check and display for shader compiler errors.
