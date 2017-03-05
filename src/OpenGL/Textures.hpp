@@ -2,7 +2,8 @@
 #  define TEXTURES_HPP_
 
 #  include "OpenGL.hpp"
-#  include "simtypes.hpp"
+#  include <cstring>
+#  include <iostream>
 
 class Texture
 {

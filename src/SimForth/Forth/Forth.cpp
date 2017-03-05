@@ -5,6 +5,7 @@
 //! Initialize the Forth interpretor context. The
 //! dictionary is given as reference to allow the inheritance.
 //! \param dictionary the reference of (an empty) Forth dictionary.
+//! \param color is a class for rendering words with ansi color.
 // **************************************************************
 Forth::Forth(ForthDictionary& dictionary, TextColor &color)
   : m_color(color),
@@ -495,6 +496,8 @@ std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 
 // **************************************************************
 //! \param code_forth the forth script stored as char*.
+//! \param name give a name to the Foth script code_forth. When
+//! an error occures the name is displayed.
 //! \return See Forth::interpreteFile
 // FIXME: convert char* --> string can be consumns lot of memory ?!
 // **************************************************************

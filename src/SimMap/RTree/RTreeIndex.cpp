@@ -1,4 +1,5 @@
 #include "RTree.hpp"
+#include <iostream>
 
 /*
  * Print out all the nodes in an index. For graphics output, displays

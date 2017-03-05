@@ -1,9 +1,10 @@
 #ifndef SIMTADYNGRAPH_HPP_
 #  define SIMTADYNGRAPH_HPP_
 
-#include "CellForth.hpp"
-#include "BasicGraph.hpp"
-#include "BoundingBox.hpp"
+#  include "CellForth.hpp"
+#  include "BasicGraph.hpp"
+#  include "BoundingBox.hpp"
+#  include "ClassCounter.hpp"
 
 // **************************************************************
 //

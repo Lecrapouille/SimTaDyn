@@ -1,4 +1,5 @@
 #include "ForthDictionary.hpp"
+#include <fstream>
 
 // **************************************************************
 //! Initialize dictionary states to obtain an empty dictionary
@@ -291,9 +292,9 @@ bool ForthDictionary::dump(std::string const& filename) // FIXME const
 
 // **************************************************************
 //! Load a dictionnary from a binary file.
-//! \param the filename containing a dictionary. Note: no verification
-//! is made for checking if the dictionary image is well formed or is
-//! a real dictionary file.
+//! \param filename the filename containing a dictionary. Note: no
+//! verification is made for checking if the dictionary image is well
+//! formed or is a real dictionary file.
 //! \param replace if true the old dictionary is smashed else the
 //! new dictionary is appened to the old one.
 //! \return a boolean indicating if the process succeeded.

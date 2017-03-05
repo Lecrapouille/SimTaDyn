@@ -1,4 +1,5 @@
 #include "BoundingBox.hpp"
+#include <limits>
 
 const AABB AABB::DUMMY(Vector3D::DUMMY, Vector3D::DUMMY);
 const AABB AABB::ZERO(Vector3D::ZERO, Vector3D::ZERO);

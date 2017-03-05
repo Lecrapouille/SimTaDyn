@@ -1,6 +1,4 @@
 #include "Renderer.hpp"
-#include "Context.hpp"
-#include "GraphMemory.hpp"
 
 // https://github.com/progschj/OpenGL-Examples/blob/master/08map_buffer.cpp
 

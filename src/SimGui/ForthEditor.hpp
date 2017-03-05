@@ -16,7 +16,7 @@ public:
 
 protected:
   // FIXME changer le nom de cette fonction
-  //! \breif Slot called when text has been inserted. Use it for checking unknown words
+  //! \brief Slot called when text has been inserted. Use it for checking unknown words
   void onInsertText(const Gtk::TextBuffer::iterator& pos, const Glib::ustring& text_inserted, int bytes);
   //! \brief Skip the previous word.
   void skipBackwardWord(Gtk::TextBuffer::iterator& iter);

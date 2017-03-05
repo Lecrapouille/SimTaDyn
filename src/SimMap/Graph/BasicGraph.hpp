@@ -3,7 +3,8 @@
 
 //! Special container
 #  include "GraphMemory.hpp"
-#  include "simtypes.hpp"
+#  include "Types.hpp"
+#  include <algorithm>
 
 class BasicNode;
 class BasicArc;
@@ -70,8 +71,8 @@ protected:
 class BasicNode
 {
 public:
-  //! \brief! Constructor.
-  //! \param id the unique indentifier.
+  //! \brief Constructor.
+  //! \param nodeID the unique indentifier.
   BasicNode(const Key nodeID)
     : m_id(nodeID)
   {

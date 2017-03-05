@@ -1,7 +1,9 @@
 #ifndef COLOR_HPP_
 #  define COLOR_HPP_
 
-#  include "simtypes.hpp"
+#  include "Types.hpp"
+#  include <utility>
+#  include <ostream>
 
 #  define CONSTRAIN(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 

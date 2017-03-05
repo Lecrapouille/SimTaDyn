@@ -1,4 +1,5 @@
 #include "RTree.hpp"
+#include <iostream>
 
 /*
  * Split a node.

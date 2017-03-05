@@ -6,6 +6,7 @@
 #  include "ForthExceptions.hpp"
 #  include "ForthPrimitives.hpp"
 #  include "TextColor.hpp"
+#  include <cstring>
 
 //! \class ForthDictionary
 //!

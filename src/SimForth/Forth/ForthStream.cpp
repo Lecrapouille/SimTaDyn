@@ -53,7 +53,7 @@ void ForthStream::init()
 }
 
 // **************************************************************
-//! \param str the script Forth stored in an ascii file.
+//! \param filename the script Forth stored in an ascii file.
 //! \return a boolean indicating if the file could be opned with success.
 // **************************************************************
 bool ForthStream::loadFile(std::string const& filename)
@@ -74,6 +74,8 @@ bool ForthStream::loadFile(std::string const& filename)
 
 // **************************************************************
 //! \param str the script Forth stored as a string.
+//! \param name gives a name to the forth script. It's used for
+//! example when diplaying an error.
 // **************************************************************
 void ForthStream::loadString(std::string const& str,
                              std::string const& name)

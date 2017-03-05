@@ -1,6 +1,7 @@
 #include "Shader.hpp"
-#include "simtypes.hpp"
-#include <assert.h>
+#include <vector>
+#include <cassert>
+#include <fstream>
 
 // **************************************************************
 //! \param vertex the identifer of the loaded vertex shader.

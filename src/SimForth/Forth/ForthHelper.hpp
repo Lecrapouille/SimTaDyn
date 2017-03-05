@@ -1,33 +1,16 @@
 #ifndef FORTH_HELPER_HPP_
 #  define FORTH_HELPER_HPP_
 
-#  include <fstream>
-#  include <sstream>
-#  include <iostream>
-#  include <stdexcept>
-#  include <exception>
-#  include <cstring>
+#  include "Types.hpp"
+#  include <cassert>
 #  include <string>
 #  include <iomanip>
-#  include <utility>
-#  include <algorithm>
-#  include <assert.h>
-
-#  include "Namespaces.hpp"
 
 // **************************************************************
 //
 // Virtual machine
 //
 // **************************************************************
-
-// Architecture independent type
-typedef unsigned int   uint32_t;
-typedef signed int     int32_t;
-typedef unsigned short uint16_t;
-typedef signed short   int16_t;
-typedef unsigned char  uint8_t;
-typedef signed char    int8_t;
 
 // Forth Type
 typedef uint32_t       Cell32;

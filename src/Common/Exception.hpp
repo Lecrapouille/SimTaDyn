@@ -10,7 +10,7 @@
 #ifndef EXCEPTION_HPP_
 #define EXCEPTION_HPP_
 
-#include "simtypes.hpp"
+#include <string>
 #include <typeinfo>
 
 namespace simtadyn {

@@ -1,7 +1,7 @@
 #ifndef CLASSCOUNTER_HPP_
 #  define CLASSCOUNTER_HPP_
 
-#  include "simtypes.hpp"
+#  include <cstddef>
 
 // *************************************************************************************************
 //! \brief This class allows to count the number of created

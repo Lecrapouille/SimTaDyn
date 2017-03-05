@@ -8,7 +8,6 @@
 
 
 #include "Exception.hpp"
-#include <typeinfo>
 
 namespace simtadyn {
 

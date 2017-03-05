@@ -228,7 +228,7 @@
     //! Several pool allocations can be called if index is greater
     //! than the current limit of the container.
     //! \param elt the element to store.
-    //! \param index location of the slot to store (see like an array).
+    //! \param id location of the slot to store (see like an array).
     void insert(const uint32_t id, T const& elt)
     {
       const uint32_t index = id / M;
@@ -260,7 +260,7 @@
     //! \brief Remove an element at a given position. Complexity is
     //! O(1). Ignore the case where index > m_allocated. No
     //! desallocation/free is called.
-    //! \param index the location of the slot to set as free (see like
+    //! \param id the location of the slot to set as free (see like
     //! an array).
     void remove(const uint32_t id)
     {

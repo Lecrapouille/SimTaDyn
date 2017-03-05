@@ -1,9 +1,11 @@
 #ifndef VECTOR3D_HPP_
 #  define VECTOR3D_HPP_
 
-#  include "simtypes.hpp"
+#  include "Types.hpp"
+#  include <cmath>
+#  include <utility>
+#  include <stdexcept>
 #  include <ostream>
-#  include <math.h>
 
 // *************************************************************************************************
 // Position in space (needed by nodes for example)
