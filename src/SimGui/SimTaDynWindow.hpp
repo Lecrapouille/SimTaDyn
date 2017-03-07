@@ -1,10 +1,11 @@
 #ifndef SIMTADYNWINDOW_HPP_
 #  define SIMTADYNWINDOW_HPP_
 
+#  include "Namespaces.hpp"
 #  include "DrawingArea.hpp"
-#  include "SimTaDyn.hpp"
+#  include "TextEditor.hpp"
 
-class SimTaDynWindow: public SimTaDyn, public Gtk::Window
+class SimTaDynWindow: public Gtk::Window
 {
 public:
 

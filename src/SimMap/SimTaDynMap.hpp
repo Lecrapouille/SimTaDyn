@@ -1,60 +1,113 @@
 #ifndef SIMTADYN_MAP_HPP_
 #  define SIMTADYN_MAP_HPP_
 
+#  include "Vertex.hpp"
+#  include "File.hpp"
+#  include "Resources.hpp"
+#  include "RTree.hpp"
 #  include "SimTaDynGraph.hpp"
-#  include "Color.hpp"
-//#  include "RTree.hpp"
+#  include "Renderable.hpp"
+#  include "Renderer.hpp"
+//#  include "MapEditor.hpp"
+
+// FIXME: faut creer une class helper pour charger une seule fois les
+// shader commun a tous les cartes (ou alors 1 carte == 1 shader meme
+// s'il doit etre mis N fois dans le GPU
 
 class SimTaDynMap
+  : private ClassCounter<SimTaDynMap>,
+    public IResource,
+    public IRenderable
 {
+  friend class MapEditor;
+
 public:
+
   SimTaDynMap()
-    : m_name(""), m_graph()
+    : IResource(howMany()),
+      m_graph()
   {
+    m_name = "Map_" + std::to_string(id());
   }
 
   SimTaDynMap(std::string const& name)
-    : m_name(SimTaDynMap::shortName(name)), m_graph()
+    : IResource(howMany()),
+      m_graph(),
+      m_name(File::shortNameWithExtension(name))
   {
   }
 
   ~SimTaDynMap()
   {
+    m_graph.BasicGraph::reset();
+    //FIXME MapEditor::instance().remove(id());
   }
 
-  // FIXME: a faire par la suite m_spatial_index.root.bbox()
-  AABB const& bbox() const
+  //! \brief
+  SimTaDynNode *addNode(Vertex const& p);
+
+  //! \brief
+  bool removeNode(const Key nodeID);
+
+  //! \brief
+  SimTaDynNode *getNode(const Key nodeID);
+
+  //! \brief Instances counter.
+  static Key howMany()
   {
+    return ClassCounter<SimTaDynMap>::howMany();
+  }
+
+  inline AABB const& bbox() const
+  {
+    // FIXME: a faire par la suite m_spatial_index.root.bbox()
     return m_bbox;
   }
 
-  SimTaDynNode *addNode(Vector3D const& p);
-  bool removeNode(const Key nodeID);
-
-  //! \brief give the file name from a pathe
-  static std::string shortName(std::string const& path)
+  void drawnBy(IRenderer const& renderer) const override
   {
-    return path.substr(path.find_last_of("/") + 1);
+    (void) renderer;
+    //renderer.draw(m_vertices);
   }
 
-  // FIXME: faire un
-  // enum DataField { Position, Color };
-  // std::vector<containers*> m_datum
-  container<Vector3D> m_positions;
-  container<Color> m_colors;
+  //! \brief For debug purpose.
+  virtual void debug()
+  {
+    std::cout << "I am SimTaDynMap #" << id() << " named '" << m_name << "':"
+              << bbox()
+      // << m_graph
+              << std::endl;
+  }
 
-  //protected:
+public:
 
-  // FIXME: TEMPORAIRE a supprimer.
-  AABB m_bbox;
-
-  //public: // FIXME: a repenser
-
-  std::string m_name;
-  //RTreeNode m_spatial_index;
+  //! \brief the map structured as a graph.
   SimTaDynGraph_t m_graph;
+
   // TODO liste de scripts Forth
   // Et qui dit script dit qu'il faudra les gerer dans l'IHM (sorte speedbar)
+
+  //! \brief Spatial index FIXME: drawble rtree
+  RTreeNode* m_rtree;
+
+  //! \brief Axis Align Bounding box of the map
+  //! FIXME: TEMPORAIRE car sera donner par Rtree.bbox()
+  AABB m_bbox;
+
+  //! \brief Give a name to the element which will be displayed in the
+  //! GUI.  Contrary to id_ several cells can have the same name. By
+  //! default the name is unique.
+  std::string m_name;
+
+  //! \brief database FIXME TBD:
+  // enum DataField { Position, Color };
+  // std::vector<containers*> m_datum
+  // or:
+  // std::map(string, containers)
+  // or:
+  // BTree sur des fichiers + convertion(char, type_de_la_colonne)
+  // or: clef MySQL
+  container<Vertex> m_vertices;
 };
 
 #endif /* SIMTADYN_MAP_HPP_ */

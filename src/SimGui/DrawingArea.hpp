@@ -2,7 +2,8 @@
 #  define DRAWINGAREA_HPP_
 
 #  include "Renderer.hpp"
-#  include <gtkmm.h>
+#  include <gtkmm/glarea.h>
+#  include <glibmm.h>
 
 // *************************************************************************************************
 //! \brief Class for OpenGL renderer area

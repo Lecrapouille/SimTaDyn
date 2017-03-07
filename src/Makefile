@@ -30,28 +30,33 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../tools -ICommon -ICommon/SharedLibrary -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap -ISimMap/RTree -ISimMap/Graph -ISimMap/Loaders -ISimGui
+INCLUDES = -I. -I../tools -IUtils -ICommon/SharedLibrary -ICommon  \
+	   -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap  \
+	   -ISimMap/RTree -ISimMap/Graph -ISimMap/Loaders -ISimGui \
+	   -ISimTaDyn
 # -I/usr/include/mysql
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../tools:Common:Common/SharedLibrary:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui
+VPATH=.:$(BUILD):../tools:Utils:Common/SharedLibrary:Common:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui:SimTaDyn
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_TOOL     = Backward.o
-OBJECTS_COMMON   = Exception.o TextColor.o Color.o Vector3D.o Camera2D.o SharedLibrary_UNIX.o SharedLibrary.o
-OBJECTS_OPENGL   = OpenGL.o Shader.o Textures.o Fonts.o
+OBJECTS_TOOL     = Backward.o Logger.o SimTaDynLogger.o
+OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o  SharedLibrary_UNIX.o SharedLibrary.o
+OBJECTS_COMMON   = File.o Color.o Vector3D.o Camera2D.o
+OBJECTS_FORTH    = TextColor.o ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o MapEditor.o
+OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o
 OBJECTS_LOADER   = MapLoader.o ShapeFile.o
-OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o SimForth.o
-OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o DrawingArea.o SimTaDynWindow.o
-OBJECTS_SIMTADYN = Renderer.o main.o
+OBJECTS_OPENGL   = OpenGL.o Shader.o Textures.o Fonts.o Renderer.o #Renderable.o
+OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o MapEditor.o DrawingArea.o SimTaDynWindow.o
+OBJECTS_SIMTADYN =
 
-OBJECTS         = $(OBJECTS_TOOL) $(OBJECTS_COMMON) $(OBJECTS_OPENGL) $(OBJECTS_RTREE) \
-                  $(OBJECTS_LOADER) $(OBJECTS_MAP) $(OBJECTS_FORTH) $(OBJECTS_GUI) \
-                  $(OBJECTS_SIMTADYN)
+OBJECTS         = $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_COMMON) $(OBJECTS_FORTH) $(OBJECTS_RTREE) \
+                  $(OBJECTS_MAP) $(OBJECTS_LOADER) $(OBJECTS_OPENGL) $(OBJECTS_GUI) $(OBJECTS_SIMTADYN) \
+                  main.o
+
 TARGET = SimTaDyn
 
 ###################################################
@@ -83,7 +88,7 @@ $(TARGET): $(OBJECTS)
 
 %.o: %.cpp
 %.o: %.cpp $(BUILD)/%.d
-	@$(call print-comp,"Compiling C","$(TARGET)","$<")
+	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 

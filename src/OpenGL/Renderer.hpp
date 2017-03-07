@@ -1,16 +1,26 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
+#  include "Vertex.hpp"
 #  include "Shader.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
-#  include "SimTaDynMap.hpp"
-#include <sys/time.h>   //FIXME
+#  include "Renderable.hpp"
+#  include "GraphMemory.hpp"
+
+class IRenderable;
+
+class IRenderer
+{
+public:
+
+  virtual void draw(IRenderable const& renderable) const = 0;
+};
 
 /*
  * OpenGL renderer.
  */
-class GLRenderer
+class GLRenderer: public IRenderer
 {
 public:
 
@@ -40,7 +50,6 @@ public:
   inline void begin()
   {
     clearScreen();
-    m_shader.begin();
   }
 
   inline void end()
@@ -132,7 +141,16 @@ public:
   /*
    * Draw a graph as friend function
    */
-  void draw();// const;
+  void draw(IRenderable const& renderable) const override
+  {
+    (void) renderable;
+    //renderable.drawnBy(*this);
+  }
+
+  void draw(container<Vertex> const& m_vertices) const
+  {
+    (void) m_vertices;
+  }
 
   /*
    * Number of pixels of the opengl window

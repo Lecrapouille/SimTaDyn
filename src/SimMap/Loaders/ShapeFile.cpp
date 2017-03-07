@@ -1,4 +1,5 @@
 #include "ShapeFile.hpp"
+#include "File.hpp"
 
 // ESRI Shapefile Technical Description:
 // https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
@@ -199,7 +200,7 @@ void ShapefileLoader::getBoundingBox(AABB& bbox)
 uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
 {
   uint32_t record_number, content_length, shape_type;
-  Position3D p;
+  Vector3D p;
 
   goToByte(offset);
   record_number = readBigEndianInt();
@@ -216,13 +217,13 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
       p.x = readDoubleCastedFloat();
       p.y = readDoubleCastedFloat();
       p.z = 0.0f;
-      map.addNode(p);
+      map.addNode(Vertex(p));
       break;
     case 11: // PointZ
       p.x = readDoubleCastedFloat();
       p.y = readDoubleCastedFloat();
       p.z = readDoubleCastedFloat();
-      map.addNode(p);
+      map.addNode(Vertex(p));
       break;
     default:
       std::cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << std::endl;
@@ -271,7 +272,7 @@ bool ShapefileLoader::load(std::string const& filename, SimTaDynMap* &map)
       else
         {
           // Concat the old map name with the new one
-          std::string shortname = SimTaDynMap::shortName(filename);
+          std::string shortname = File::shortNameWithExtension(filename);
           map->m_name += '_' + shortname;
         }
 

@@ -6,7 +6,7 @@
 //
 // *************************************************************************************************
 MapEditor::MapEditor()
-  : MapLoader(), m_current_map(-1)
+  : MapLoader()
 {
   // Map toolbar (vertical)
   {
@@ -100,14 +100,99 @@ MapEditor::~MapEditor()
 
   for (; it != end; ++it)
     {
-      delete (*it);
+      // FIXME: popup for saving maps ?
+      //delete (*it);
+    }
+}
+
+void MapEditor::closeMap()
+{
+  if (nullptr == m_current_map)
+    return ;
+
+  if (false == m_current_map->release())
+    return ;
+
+  if (m_maps.empty())
+    {
+      m_current_map = nullptr;
+    }
+  else
+    {
+      m_current_map = static_cast<SimTaDynMap*>(m_maps.begin()->second);
+    }
+}
+
+bool MapEditor::selectMap(const Key id)
+{
+  auto it = m_maps.find(id);
+  if (it != m_maps.end())
+    {
+      m_current_map = static_cast<SimTaDynMap*>(it->second);
+      return true;
+    }
+  return false;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool MapEditor::load(std::string const& filename, SimTaDynMap* &map)
+{
+  std::string extension = File::extension(filename);
+
+  if (0 == extension.compare("shp"))
+    {
+      ShapefileLoader loader;
+      return loader.load(filename, map);
+    }
+
+  m_error = "Unknown extension file";
+  return false;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+void MapEditor::doOpen(std::string const& filename, const bool new_map, const bool reset_map)
+{
+  SimTaDynMap* map = (new_map) ? nullptr : m_current_map;
+  SimTaDynMap* oldmap = map;
+
+  if ((reset_map) && (nullptr != map))
+    {
+      map->m_graph.BasicGraph::reset();
+    }
+
+  bool ret = load(filename, map);
+  if (false == ret)
+    {
+      Gtk::MessageDialog d("Could not load '" + filename + "' as a map.",
+                           false, Gtk::MESSAGE_WARNING);
+      d.set_transient_for((Gtk::Window&) (*m_menu[simtadyn::MapMenu].get_toplevel()));
+      d.set_secondary_text("Reason was: " + error());
+      d.run();
+    }
+  else
+    {
+      if (reset_map)
+        {
+          map->m_name = File::shortName(filename);
+        }
+      if (nullptr == oldmap)
+        {
+          m_maps.add(map->id(), map);
+        }
+      std::cerr << "Successfully loaded map '" << map->m_name << "'" << std::endl;
+      //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
+      //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }
     }
 }
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void MapEditor::open(const bool new_map, const bool reset_map)
+void MapEditor::openDialog(const bool new_map, const bool reset_map)
 {
   Gtk::FileChooserDialog dialog("Choose a binary file to save Forth dictionary",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -136,66 +221,8 @@ void MapEditor::open(const bool new_map, const bool reset_map)
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimTaDynMap* map = (new_map) ? nullptr : MapEditor::map();
-      SimTaDynMap* oldmap = map;
-
-      if ((reset_map) && (nullptr != map))
-        {
-          map->m_graph.reset();
-        }
-
-      bool ret = load(dialog.get_filename(), map);
-      if (false == ret)
-        {
-          Gtk::MessageDialog d("Could not load '" + dialog.get_filename() + "' as a map.",
-                               false, Gtk::MESSAGE_WARNING);
-          d.set_transient_for((Gtk::Window&) (*m_menu[simtadyn::MapMenu].get_toplevel()));
-          d.set_secondary_text("Reason was: " + error());
-          d.run();
-        }
-      else
-        {
-          if (reset_map)
-            {
-              map->m_name = SimTaDynMap::shortName(dialog.get_filename());
-            }
-          if (nullptr == oldmap)
-            {
-              m_maps.push_back(map);
-              m_current_map = m_maps.size() - 1;
-            }
-          std::cerr << "Successfully loaded map '" << map->m_name << "'" << std::endl;
-          //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
-          //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }
-        }
+      doOpen(dialog.get_filename(), new_map, reset_map);
     }
-}
-
-// *************************************************************************************************
-//
-// *************************************************************************************************
-bool MapEditor::load(std::string const& filename, SimTaDynMap* &map)
-{
-  std::string extension = filename.substr(filename.find_last_of(".") + 1);
-
-  if (0 == extension.compare("shp"))
-    {
-      ShapefileLoader loader;
-      return loader.load(filename, map);
-    }
-
-  m_error = "Unknown extension file";
-  return false;
-}
-
-// *************************************************************************************************
-//
-// *************************************************************************************************
-SimTaDynMap* MapEditor::map()
-{
-  if (m_current_map < 0)
-    return nullptr;
-  return m_maps[m_current_map];
 }
 
 // **************************************************************

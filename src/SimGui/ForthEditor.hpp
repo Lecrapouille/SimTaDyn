@@ -1,10 +1,11 @@
 #ifndef FORTHEDITOR_HPP_
 #  define FORTHEDITOR_HPP_
 
+#  include "Singleton.hpp"
 #  include "TextEditor.hpp"
 #  include "SimForth.hpp"
-#  include <chrono>
 #  include "Redirection.hpp"
+#  include <chrono>
 
 // *************************************************************************************************
 //
@@ -39,8 +40,10 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class ForthEditor : public TextEditor
+class ForthEditor: public TextEditor, public Singleton<ForthEditor>
 {
+  friend class Singleton<ForthEditor>;
+
 public:
 
   ForthEditor();

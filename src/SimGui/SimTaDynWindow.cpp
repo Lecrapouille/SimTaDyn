@@ -1,5 +1,7 @@
 #include "SimTaDynWindow.hpp"
-#include "Context.hpp"
+#include "MapEditor.hpp"
+#include "ForthEditor.hpp"
+#include "Config.hpp"
 
 // *************************************************************************************************
 // SimTaDyn main window
@@ -9,10 +11,10 @@ SimTaDynWindow::SimTaDynWindow()
 {
   // Main window
   {
-    set_title(m_title);
+    set_title(Config::instance().m_title);
     set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
-    set_icon_from_file(data_path("icons/SimTaDyn.png"));
+    set_icon_from_file(Config::instance().data_path("icons/SimTaDyn.png"));
   }
 
   // Drawing area
@@ -41,13 +43,13 @@ SimTaDynWindow::SimTaDynWindow()
   // * _Help: TBD: add About/help/interactive tutorials
   {
     // Menu '_Map'
-    m_menubar.append(m_mapeditor.m_menuitem[simtadyn::MapMenu]);
+    m_menubar.append(MapEditor::instance().m_menuitem[simtadyn::MapMenu]);
 
     // Menu '_Forth'
-    m_menubar.append(m_fortheditor.m_menuitem[simtadyn::ForthMenu]);
-    m_menubar.append(m_fortheditor.m_menuitem[simtadyn::TextMenu]);
-    m_menubar.append(m_fortheditor.m_menuitem[simtadyn::PlugginsMenu]);
-    m_fortheditor.addPluggin("text-x-generic-template", "41 1 + . CR", "test");
+    m_menubar.append(ForthEditor::instance().m_menuitem[simtadyn::ForthMenu]);
+    m_menubar.append(ForthEditor::instance().m_menuitem[simtadyn::TextMenu]);
+    m_menubar.append(ForthEditor::instance().m_menuitem[simtadyn::PlugginsMenu]);
+    ForthEditor::instance().addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
 
     // Menu '_Help'
@@ -71,15 +73,15 @@ SimTaDynWindow::SimTaDynWindow()
   {
     //
     m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
-    m_vbox[0].pack_start(m_fortheditor.m_notebook, Gtk::PACK_EXPAND_WIDGET);
+    m_vbox[0].pack_start(ForthEditor::instance().m_notebook, Gtk::PACK_EXPAND_WIDGET);
 
     //
-    m_vbox[1].pack_start(m_fortheditor.m_toolbar, Gtk::PACK_SHRINK);
-    m_vbox[1].pack_start(m_fortheditor.m_statusbar, Gtk::PACK_SHRINK);
-    m_vbox[1].pack_start(m_fortheditor.m_hpaned, Gtk::PACK_EXPAND_WIDGET);
+    m_vbox[1].pack_start(ForthEditor::instance().m_toolbar, Gtk::PACK_SHRINK);
+    m_vbox[1].pack_start(ForthEditor::instance().m_statusbar, Gtk::PACK_SHRINK);
+    m_vbox[1].pack_start(ForthEditor::instance().m_hpaned, Gtk::PACK_EXPAND_WIDGET);
 
     //
-    m_hbox[0].pack_start(m_mapeditor.m_toolbar, Gtk::PACK_SHRINK);
+    m_hbox[0].pack_start(MapEditor::instance().m_toolbar, Gtk::PACK_SHRINK);
     m_hbox[0].pack_start(m_vpaned[0]);
 
     //
@@ -126,7 +128,7 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
     default:
       break;
     }
-  SimTaDynContext::forthEditor().autoCompleteWord(evenement->keyval);
+  ForthEditor::instance().autoCompleteWord(evenement->keyval);
 }
 
 void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)

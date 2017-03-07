@@ -28,7 +28,7 @@ void GLShader::cleanShader(GLuint vertex, GLuint fragment, GLuint geometry)
 // **************************************************************
 //!
 // **************************************************************
-void GLShader::cleanProgram()
+void GLShader::abort()
 {
   if (0 != m_program)
     {
@@ -155,7 +155,7 @@ GLuint GLShader::createShaderProgram(const char* vertex_shader_filename,
   GLuint fragment;
   GLuint geometry = 0;
 
-  cleanProgram();
+  abort();
   std::cout << "Linking shaders '" << vertex_shader_filename
             << "' with '" << fragment_shader_filename;
   if (nullptr != geometry_shader_filename)

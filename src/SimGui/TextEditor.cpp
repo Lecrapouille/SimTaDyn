@@ -1,6 +1,8 @@
 #include "TextEditor.hpp"
 #include <gtkmm/cssprovider.h>
 #include <ctype.h>
+#include <fstream>
+#include <iostream>
 
 GotoLineWindow::GotoLineWindow(Gsv::View* document)
   : m_label("Line number:"),

@@ -121,4 +121,37 @@ namespace forth
 #define SWAP32(x) (((x) & 0xff) << 24 | ((x) & 0xff00) << 8 | ((x) & 0xff0000) >> 8 | ((x) >> 24) & 0xff)
 #define SWAP16(x) (((x) & 0xff) << 8 | (((x) & 0xff00) >> 8))
 
+class SimString : public std::string
+{
+public:
+  SimString()
+    : std::string()
+    { printf("STRING::STRING empty ctr\n"); }
+
+  SimString(const std::string& str)
+    : std::string(str)
+    { printf("STRING::STRING copy '%s'\n", str.c_str()); }
+
+  SimString(const std::string& str, size_t pos, size_t len = npos)
+    : std::string(str, pos, len)
+    { printf("STRING::STRING 3\n"); }
+
+  SimString(const char* s)
+    : std::string(s)
+    { printf("STRING::STRING copy char '%s'\n", s); }
+
+  SimString(const char* s, size_t n)
+    : std::string(s, n)
+    { printf("STRING::STRING 5\n"); }
+
+  SimString(size_t n, char c)
+    : std::string(n, c)
+    { printf("STRING::STRING 6\n"); }
+
+  template <class InputIterator>
+  SimString(InputIterator first, InputIterator last)
+    : std::string(first, last)
+  { printf("STRING::STRING 7\n"); }
+};
+
 #endif /* FORTH_HELPER_HPP_ */

@@ -2,6 +2,8 @@
 #  define SIMFORTH_HPP_
 
 #  include "Forth.hpp"
+#  include "Singleton.hpp"
+//#  include <list> of dictionaries ?
 
 class SimForthDictionary : public ForthDictionary
 {
@@ -12,11 +14,21 @@ public:
   }
 };
 
-class SimForth : public Forth
+class SimForth : public Forth, public Singleton<SimForth>
 {
+  friend class Singleton<SimForth>;
+
 public:
-  SimForth(ForthDictionary& dictionary, TextColor& color)
-    : Forth(dictionary, color)
+
+  virtual void boot() override;
+
+  SimForthDictionary m_dictionaries;
+  NoColor m_color;
+
+private:
+
+  SimForth()
+    : Forth(m_dictionaries, m_color)
   {
   }
 };

@@ -68,7 +68,7 @@ $(TARGET): $(OBJECTS)
 
 %.o: %.cpp
 %.o: %.cpp $(BUILD)/%.d
-	@$(call print-comp,"Compiling C","$(TARGET)","$<")
+	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 

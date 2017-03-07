@@ -2,6 +2,7 @@
 #define OPENGL_HPP
 
 #  include <GL/glew.h>
+#  include <iostream>
 
 namespace OpenGL
 {

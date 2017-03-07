@@ -5,7 +5,6 @@
 ///! read, compile, load into the GPU.
 
 #  include "OpenGL.hpp"
-#  include <iostream>
 
 //! \class GLShader
 //!
@@ -47,12 +46,16 @@ public:
   //! \brief Destructor. The program (if loaded) is removed from the GPU.
   ~GLShader()
   {
-    cleanProgram();
+    abort();
   }
+
+  //! \brief Once program is no longer used, release it from the GPU
+  //! memory. Can be used to abort the shader.
+  void abort();
 
   //! \brief A program can be activated if and only if shaders have
   //! been loaded into a program (else nothing is done).
-  inline void begin() const
+  inline void on() const
   {
     if (0 != m_program)
       {
@@ -62,7 +65,7 @@ public:
 
   //! \brief A program can be desactivated if and only if shaders have
   //! been loaded into a program (else nothing is done).
-  inline void end() const
+  inline void off() const
   {
     glUseProgram(0);
   }
@@ -76,8 +79,8 @@ public:
 
   //! \brief Open, read, compile and load a fragment, a vertex shader
   //! and optionaly a geometry shader an link them as a program. The
-  //! older program is released from GPU memory before replacing by
-  //! the new one.
+  //! older program, if present, is released from GPU memory before
+  //! being replacing by the new one.
   inline GLuint createShaderProgram(std::string const& vertex_shader_filename,
                                     std::string const& fragment_shader_filename,
                                     std::string const& geometry_shader_filename)
@@ -124,10 +127,6 @@ private:
   //! \brief Once shaders are loaded as unique program, release the
   //! GPU memory.
   void cleanShader(GLuint vertex, GLuint fragment, GLuint geometry);
-
-  //! \brief Once program is no longer used, release it from the GPU
-  //! memory.
-  void cleanProgram();
 
   //! \brief the program identifier.
   GLuint m_program = 0;

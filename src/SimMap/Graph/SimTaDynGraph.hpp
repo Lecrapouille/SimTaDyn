@@ -80,19 +80,21 @@ public:
 //
 // **************************************************************
 template <class N, class A>
-class SimTaDynGraph : public BasicGraph<N,A>
+class SimTaDynGraph : public BasicGraph<N,A>, private ClassCounter<SimTaDynGraph<N,A>>
 {
 public:
   SimTaDynGraph(const bool directed = true)
-    : BasicGraph<N,A>(directed)
+    : BasicGraph<N,A>(directed), m_id(howMany())
   {
+    m_name = "Graph_" + std::to_string(id());
   }
 
   SimTaDynGraph(const uint32_t noNodes,
                 const uint32_t noArcs,
                 const bool directed = true)
-    : BasicGraph<N,A>(noNodes, noArcs, directed)
+    : BasicGraph<N,A>(noNodes, noArcs, directed), m_id(howMany())
   {
+    m_name = "Graph_" + std::to_string(id());
   }
 
   //! Return the last inserted node.
@@ -105,6 +107,24 @@ public:
   inline A *arc() const
   {
     return m_last_arc;
+  }
+
+  //! \brief Instances counter.
+  static Key howMany()
+  {
+    return ClassCounter<SimTaDynGraph>::howMany();
+  }
+
+  //! \brief For debug purpose.
+  virtual void debug()
+  {
+    std::cout << "I am SimTaDynGraph #" << id() << " named '" << m_name << "'"
+              << std::endl;
+  }
+
+  inline Key id() const
+  {
+    return m_id;
   }
 
 protected:
@@ -136,8 +156,20 @@ protected:
   N* m_last_node = nullptr;
   A* m_last_arc = nullptr;
   Key m_arc_unique = 0;
+  Key m_id;
+
+public:
+
+  std::string m_name;
 };
 
+//
 typedef SimTaDynGraph<SimTaDynNode, SimTaDynArc> SimTaDynGraph_t;
+
+inline std::ostream& operator<<(std::ostream& os, const SimTaDynGraph_t& g)
+{
+  os << "Graph(" << g.id() << ':' << g.m_name << ')';
+  return os;
+}
 
 #endif /* SIMTADYNGRAPH_HPP_ */

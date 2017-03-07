@@ -1,51 +1,54 @@
 #ifndef MAPEDITOR_HPP_
 #  define MAPEDITOR_HPP_
 
-#  include <gtkmm.h>
 #  include "MapLoader.hpp"
+#  include "ResourceManager.hpp"
+#  include "Namespaces.hpp"
+#  include <gtkmm.h>
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class MapEditor: protected MapLoader
+class MapEditor: protected MapLoader, public Singleton<MapEditor>
 {
+  friend class Singleton<MapEditor>;
+
 public:
-  MapEditor();
-  ~MapEditor();
+
   inline void newEmptyMap()
   {
-    m_maps.push_back(new SimTaDynMap());
-    m_current_map = m_maps.size() - 1;
+    SimTaDynMap *map = new SimTaDynMap();
+    m_maps.add(map->id(), map);
   }
   inline void openMap()
   {
-    open(true, false);
+    openDialog(true, false);
   }
   inline void addMap()
   {
-    open(false, false);
+    openDialog(false, false);
   }
   inline void replaceMap()
   {
-    open(false, true);
+    openDialog(false, true);
   }
   inline void clearMap()
   {
-    SimTaDynMap* map = MapEditor::map();
-    if (nullptr != map)
+    if (nullptr != m_current_map)
       {
-        map->m_graph.reset();
+        m_current_map->m_graph.BasicGraph::reset();
       }
   }
-  /*Gtk::ToolButton *addMapScriptButon(const Gtk::BuiltinStockID icon,
-                                     const std::string &script,
-                                     const std::string &help);
-  */
-  void saveMap() {};
-  void saveAsMap() {};
-  //void saveAll();
-  //void find();
-
+  inline void saveMap()
+  {
+    // TODO
+  }
+  inline void saveAsMap()
+  {
+    // TODO
+  }
+  void closeMap();
+  bool selectMap(const Key id);
 
   Gtk::MenuItem          m_menuitem[simtadyn::MaxMapMenuNames + 1];
   Gtk::Menu              m_menu[simtadyn::MaxMapMenuNames + 1];
@@ -54,17 +57,23 @@ public:
   Gtk::SeparatorMenuItem m_menuseparator[2];
   Gtk::SeparatorToolItem m_separator[2];
   Gtk::Toolbar           m_toolbar;
-protected:
-  void open(const bool new_map, const bool reset_map);
 
-  //! \brief Return the current map document
-  SimTaDynMap* map();
-  //SimTaDynMap* document(const uint32_t i);
+protected:
 
   virtual bool load(const std::string& filename, SimTaDynMap* &oldmap) override;
+  void doOpen(std::string const& filename, const bool new_map, const bool reset_map);
+  void openDialog(const bool new_map, const bool reset_map);
+  void add(const Key id, SimTaDynMap* map);
+  void remove(const Key id);
+  //SimTaDynMap* map();
 
-  std::vector<SimTaDynMap*> m_maps;
-  int m_current_map;
+  ResourceManager<Key> m_maps;
+  SimTaDynMap* m_current_map = nullptr;
+
+private:
+
+  MapEditor();
+  ~MapEditor();
 };
 
 #endif /* MAPEDITOR_HPP_ */

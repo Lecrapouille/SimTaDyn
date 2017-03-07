@@ -1,7 +1,7 @@
 #ifndef RED_HPP_
 #  define RED_HPP_
 
-#  include "simtypes.hpp"
+#  include "Types.hpp"
 #  include <gtkmm/textview.h>
 
 // http://gtk.10911.n7.nabble.com/Redirecting-cout-to-a-TextBuffer-td42437.html

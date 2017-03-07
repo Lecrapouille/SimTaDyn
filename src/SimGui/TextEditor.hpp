@@ -3,7 +3,7 @@
 
 #  include <gtkmm.h>
 #  include <gtksourceviewmm.h>
-#  include "simtypes.hpp"
+#  include "Types.hpp"
 #  include "Namespaces.hpp"
 
 class TextDocument;

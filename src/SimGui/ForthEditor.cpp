@@ -1,6 +1,5 @@
 #include "ForthEditor.hpp"
-#include "SimTaDyn.hpp"
-#include "Context.hpp" // FIXME quand on compile OpenGL ca recompile ce fichier
+#include "Config.hpp"
 
 // *************************************************************************************************
 //
@@ -57,7 +56,7 @@ void ForthDocument::autoCompleteWord(const int keyval)
           m_tab_sm = ForthAutoCompletSMEnd;
         }
 
-      SimForth& forth = SimTaDynContext::forth();
+      SimForth& forth = SimForth::instance();
       const char* completed_word = forth.completion(m_partial_word);
       if (NULL != completed_word)
         {
@@ -130,7 +129,7 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
 
   if (isspace(c[0])) // Pas bon !! il faut faire une boucle text_inserted peut etre un gros morceau de code
     {
-      SimForth& forth = SimTaDynContext::forth();
+      SimForth& forth = SimForth::instance();
 
       Gtk::TextBuffer::iterator pos(pos1);
       skipBackwardSpaces(pos);
@@ -398,7 +397,7 @@ void ForthEditor::dumpDictionary()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimForth& forth = SimTaDynContext::forth();
+      SimForth& forth = SimForth::instance();
       forth.dictionary().dump(dialog.get_filename());
       // FIXME return not taken into account
     }
@@ -431,7 +430,7 @@ void ForthEditor::loadDictionary()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimForth& forth = SimTaDynContext::forth();
+      SimForth& forth = SimForth::instance();
       forth.dictionary().load(dialog.get_filename());
       // FIXME return not taken into account
     }
@@ -485,7 +484,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
   typedef std::chrono::nanoseconds ns;
   typedef std::chrono::high_resolution_clock Time;
   std::pair<bool, std::string> res;
-  SimForth& forth = SimTaDynContext::forth();
+  SimForth& forth = SimForth::instance();
 
   // Clear the old text in the "Result" tab of the notebook
   Glib::RefPtr<Gtk::TextBuffer> buf = m_results.get_buffer();
@@ -604,7 +603,7 @@ void ForthEditor::exec()
   else
     {
       // Show the faulty document
-      TextEditor::open(SimTaDynContext::forth().nameStreamInFault());
+      TextEditor::open(SimForth::instance().nameStreamInFault());
       // TODO: select in red the faulty word
 
       m_statusbar.push("Please, feed me with a Forth script !");

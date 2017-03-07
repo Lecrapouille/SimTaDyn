@@ -94,7 +94,7 @@ bool GLDrawingArea::onRender()
       Gtk::GLArea::throw_if_error();
 
       GLRenderer::begin();
-      GLRenderer::draw();
+      //GLRenderer::draw();
       GLRenderer::end();
 
       return true;
