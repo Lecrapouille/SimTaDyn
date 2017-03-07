@@ -7,6 +7,16 @@
 class Vertex
 {
 public:
+  Vertex() { }
+
+  Vertex(Vector3D const& position,
+         Color const& color = Color::White,
+         float32_t const size = 5.0f)
+    : m_position(position),
+      m_color(color),
+      m_size(size)
+  {
+  }
 
   Vector3D  m_position;
   Color     m_color;

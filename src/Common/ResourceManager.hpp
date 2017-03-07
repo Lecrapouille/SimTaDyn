@@ -5,35 +5,94 @@
 #  include "Resources.hpp"
 #  include <map>
 
-class ResourceManager : public Singleton<ResourceManager>
+template <class K> class IResourceManager
 {
-  friend class Singleton<ResourceManager>;
-
 public:
-  template <class T> T* get(const Key id) const;
-  void add(IResource* Resource);
-  void remove(const Key id);
 
+  //virtual ~IResourceManager() = 0;
+
+  typedef std::map<K, IResource*> map_resources;
+  typedef typename map_resources::iterator map_resources_it;
+
+  template <class T> T* get(K const& id) const
+  {
+    auto it = m_resources.find(id);
+    if (it != m_resources.end())
+      {
+        it->second->take();
+        return static_cast<T*>(it->second);
+      }
+    return nullptr;
+  }
+
+  void add(K const& id, IResource* resource)
+  {
+    if (nullptr == resource)
+      return ;
+
+    if (m_resources.find(id) != m_resources.end())
+      return ;
+
+    m_resources[id] = resource;
+  }
+
+
+  void remove(K const& id)
+  {
+    auto it = m_resources.find(id);
+    if (it != m_resources.end())
+      {
+        m_resources.erase(it);
+      }
+  }
+
+  inline bool empty() const
+  {
+    return m_resources.empty();
+  }
+
+  inline map_resources_it begin()
+  {
+    return m_resources.begin();
+  }
+
+  inline map_resources_it end()
+  {
+    return m_resources.end();
+  }
+
+  inline map_resources_it find(const K& id)
+  {
+    return m_resources.find(id);
+  }
+
+protected:
+
+  std::map<K, IResource*> m_resources;
+};
+
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+template <class K> class SResourceManager
+  : public IResourceManager<K>, Singleton<SResourceManager<K>>
+{
 private:
-  ResourceManager();
-  ~ResourceManager();
 
-  std::map<Key, IResource*> m_resources;
+  SResourceManager();
+  ~SResourceManager();
 };
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-template <class T>
-inline T* ResourceManager::get(const Key id) const
+template <class K> class ResourceManager : public IResourceManager<K>
 {
-  auto it = m_resources.find(id);
-  if (it != m_resources.end())
-    {
-      it->second->take();
-      return static_cast<T*>(it->second);
-    }
-  return nullptr;
-}
+public:
+
+  ResourceManager() {}
+  virtual ~ResourceManager() {}
+};
 
 #endif /* RESOURCE_MANAGER_HPP_ */

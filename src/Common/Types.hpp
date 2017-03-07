@@ -1,6 +1,8 @@
 #ifndef TYPES_HPP_
 #  define TYPES_HPP_
 
+#  include "SimTaDynLogger.hpp"
+
 typedef double         float64_t;
 typedef float          float32_t;
 typedef unsigned int   uint32_t;

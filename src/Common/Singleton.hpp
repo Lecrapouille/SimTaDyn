@@ -36,4 +36,6 @@ private:
   void operator=(Singleton);
 };
 
+template <class T> T* Singleton<T>::s_instance = nullptr;
+
 #endif /* SINGLETON_HPP_ */
