@@ -60,7 +60,7 @@ void SimTaDynLogger::write(const char *message, const int /*length*/)
 
 void SimTaDynLogger::beginLine()
 {
-  currentDate();
+  currentTime();
   write(m_buffer_time);
   write(c_str_severity[m_severity]);
 }
