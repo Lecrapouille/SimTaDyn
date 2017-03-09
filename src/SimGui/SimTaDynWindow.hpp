@@ -32,6 +32,10 @@ protected:
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
+private:
+
+  void setTitleIcon();
+
 protected:
 
   Gtk::HPaned                  m_hpaned[1];

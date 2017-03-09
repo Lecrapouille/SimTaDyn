@@ -14,7 +14,7 @@ SimTaDynWindow::SimTaDynWindow()
     set_title(Config::instance().m_title);
     set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
-    set_icon_from_file(Config::instance().data_path("icons/SimTaDyn.png"));
+    setTitleIcon();
   }
 
   // Drawing area
@@ -93,6 +93,20 @@ SimTaDynWindow::SimTaDynWindow()
   // When terminating the SimTaDyn application
   //Gtk::Main::signal_quit().connect(sigc::mem_fun(this, &SimTaDynWindow::onQuit));
   show_all_children();
+}
+
+void SimTaDynWindow::setTitleIcon()
+{
+  std::string path = Config::instance().data_path("icons/SimTaDyn.png");
+
+  if (File::exist(path))
+    {
+      set_icon_from_file(path);
+    }
+  else
+    {
+      LOGW("SimTaDynWindow: Icon '%s' does not exist\n", path.c_str());
+    }
 }
 
 void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)

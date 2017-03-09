@@ -2,6 +2,7 @@
 #  define FILE_HPP_
 
 #  include <string>
+#  include <sys/stat.h>
 
 class File
 {
@@ -22,6 +23,12 @@ public:
   inline static std::string extension(std::string const& filename)
   {
     return filename.substr(filename.find_last_of(".") + 1);
+  }
+
+  inline static bool exist(std::string const& path)
+  {
+    struct stat buffer;
+    return 0 == stat(path.c_str(), &buffer);
   }
 };
 
