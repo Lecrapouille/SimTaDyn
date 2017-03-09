@@ -4,11 +4,11 @@ static const char *c_str_severity[logger::MaxLoggerSeverity + 1] =
   {
     [logger::None] = "",
     [logger::Info] = "[INFO]",
-    [logger::Debug] = "[DBUG]",
-    [logger::Warning] = "[WARN]",
-    [logger::Failed] = "[FAIL]",
-    [logger::Error] = "[ERRO]",
-    [logger::Fatal] = "[DEAD]"
+    [logger::Debug] = "[DEBUG]",
+    [logger::Warning] = "[WARNI]",
+    [logger::Failed] = "[FAILU]",
+    [logger::Error] = "[ERROR]",
+    [logger::Fatal] = "[FATAL]"
   };
 
 SimTaDynLogger::SimTaDynLogger(std::string const& filename)
@@ -43,8 +43,14 @@ void SimTaDynLogger::close()
   m_file.close();
 }
 
-void SimTaDynLogger::write(const char *message)
+void SimTaDynLogger::write(const char *message, const int /*length*/)
 {
+  if (nullptr != m_stream)
+    {
+      (*m_stream) << message;
+      m_stream->flush();
+    }
+
   if (!m_file.is_open())
     return ;
 
@@ -64,7 +70,7 @@ void SimTaDynLogger::header()
   currentDate();
   log("===============================================\n"
       "  SimTaDyn %u.%u - Event log - %s\n"
-      "===============================================\n",
+      "===============================================\n\n",
       Config::instance().m_major_version,
       Config::instance().m_minor_version,
       m_buffer_time);
@@ -73,7 +79,7 @@ void SimTaDynLogger::header()
 void SimTaDynLogger::footer()
 {
   currentTime();
-  log("===============================================\n"
+  log("\n===============================================\n"
       "  SimTaDyn closed at %s\n"
       "===============================================\n\n",
       m_buffer_time);

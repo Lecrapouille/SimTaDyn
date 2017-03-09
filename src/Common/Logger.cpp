@@ -15,7 +15,7 @@ void ILogger::currentTime()
   strftime(m_buffer_time, sizeof (m_buffer_time), "[%H:%M:%S]", localtime(&current_time));
 }
 
-void ILogger::log(enum logger::LoggerSeverity severity, const char* format, ...)
+void ILogger::log(std::ostream *stream, enum logger::LoggerSeverity severity, const char* format, ...)
 {
   int n;
   va_list params;
@@ -23,15 +23,22 @@ void ILogger::log(enum logger::LoggerSeverity severity, const char* format, ...)
   m_mutex.lock();
 
   m_severity = severity;
+  m_stream = stream;
   beginLine();
   va_start(params, format);
-  n = vsnprintf(m_buffer, c_buffer_size, format, params);
+  n = vsnprintf(m_buffer, c_buffer_size - 2, format, params);
   va_end(params);
+
+  // Add a '\n' if missing
+  if ('\n' != m_buffer[n - 1])
+    {
+      m_buffer[n] = '\n';
+      m_buffer[n + 1] = '\0';
+    }
+
   write(m_buffer);
 
-  if ('\n' != m_buffer[n - 1])
-    write("\n");
-
+  m_stream = nullptr;
   m_mutex.unlock();
 }
 
