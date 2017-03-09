@@ -31,8 +31,8 @@ class CellForth
 {
 public:
   CellForth()
-    : m_word("")
   {
+    clearForthWord();
   }
 
   //! \brief Change the Forth interpreter for all CellForth
@@ -56,7 +56,7 @@ public:
   //! \brief Clear the current Forth word
   inline void clearForthWord()
   {
-    m_word = "";
+    m_word.clear();
   }
 
   //! \brief Update the Forth word by the one given as param and
@@ -70,6 +70,10 @@ public:
   //! Interprete the current Forth word.
   bool interpreteWord()
   {
+
+    if (m_word.empty())
+      return true;
+
     if (nullptr == m_forth)
       {
         std::cerr << "[ERROR] Forth Interpreter not defined for Graph cells" << std::endl;
@@ -106,6 +110,7 @@ public:
   static Forth *m_forth; // FIXME share_ptr
 
 protected:
+
   //! \brief the Forth word to interprete
   std::string m_word;
 };
