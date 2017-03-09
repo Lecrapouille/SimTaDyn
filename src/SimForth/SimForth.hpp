@@ -11,6 +11,7 @@ public:
   SimForthDictionary()
     : ForthDictionary()
   {
+    LOGI("Creating SimForthDictionary");
   }
 };
 
@@ -30,6 +31,12 @@ private:
   SimForth()
     : Forth(m_dictionaries, m_color)
   {
+    LOGI("Creating SimForth");
+  }
+
+  virtual ~SimForth()
+  {
+    LOGI("Destroying SimForth");
   }
 };
 

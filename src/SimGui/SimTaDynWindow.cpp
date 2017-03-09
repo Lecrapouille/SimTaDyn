@@ -9,6 +9,8 @@
 SimTaDynWindow::SimTaDynWindow()
   : Gtk::Window()
 {
+  LOGI("Creating the SimTaDynWindow");
+
   // Main window
   {
     set_title(Config::instance().m_title);

@@ -28,6 +28,7 @@ public:
       m_graph()
   {
     m_name = "Map_" + std::to_string(id());
+    LOGI("New SimTaDynMap with generic name '%s'\n", m_name.c_str());
   }
 
   SimTaDynMap(std::string const& name)
@@ -35,10 +36,12 @@ public:
       m_graph(),
       m_name(File::shortNameWithExtension(name))
   {
+    LOGI("New SimTaDynMap named '%s'\n", m_name.c_str());
   }
 
   ~SimTaDynMap()
   {
+    LOGI("Deleting SimTaDynMap named '%s'\n", m_name.c_str());
     m_graph.BasicGraph::reset();
     //FIXME MapEditor::instance().remove(id());
   }

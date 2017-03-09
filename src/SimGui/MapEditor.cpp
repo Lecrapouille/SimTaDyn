@@ -8,6 +8,8 @@
 MapEditor::MapEditor()
   : MapLoader()
 {
+  LOGI("Creating MapEditor");
+
   // Map toolbar (vertical)
   {
     m_toolbar.set_property("orientation", Gtk::ORIENTATION_VERTICAL);
@@ -95,6 +97,9 @@ MapEditor::MapEditor()
 // *************************************************************************************************
 MapEditor::~MapEditor()
 {
+  LOGI("Destroying MapEditor");
+  // TODO: be sure no Forth script is running on the map before destroying
+
   auto it = m_maps.begin();
   auto end = m_maps.end();
 

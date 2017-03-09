@@ -70,13 +70,14 @@ public:
   //! Interprete the current Forth word.
   bool interpreteWord()
   {
+    LOGI("CellForth: interpreting the word '%s'", m_word.c_str());
 
     if (m_word.empty())
       return true;
 
     if (nullptr == m_forth)
       {
-        std::cerr << "[ERROR] Forth Interpreter not defined for Graph cells" << std::endl;
+        LOGES("Forth Interpreter for CellForth has not been given");
         return false;
       }
 
@@ -101,6 +102,7 @@ public:
 
     // FIXME ne pas laisser faire un std::cout
     m_forth->ok(res);
+    LOGI("Result (%u): %s", res.first, res.second);
     return res.first;
   }
 

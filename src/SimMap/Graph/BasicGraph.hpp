@@ -76,6 +76,7 @@ public:
   BasicNode(const Key nodeID)
     : m_id(nodeID)
   {
+    LOGI("New BasicNode with ID %u\n", m_id);
     m_arcs.reserve(4);
   }
 
@@ -84,6 +85,7 @@ public:
   BasicNode(BasicNode const& node)
     : m_id(node.m_id), m_arcs(node.m_arcs)
   {
+    LOGI("Copy BasicNode with ID %u\n", m_id);
     m_arcs.reserve(4);
   }
 
@@ -105,6 +107,7 @@ public:
   //! \brief add a new node neighbor refered by its link
   inline void addNeighbor(BasicArc *arc)
   {
+    LOGI("Node ID %u: Add the arc ID %u as neighbor\n", m_id, arc->id());
     m_arcs.push_back(arc);
   }
 
@@ -115,6 +118,8 @@ public:
   //! \param arcID the unique identifier of the arc to be removed.
   inline void removeNeighbor(const Key arcID)
   {
+    LOGI("Node ID %u: Remove the arc ID %u as neighbor\n", m_id, arcID);
+
     // Temporary structure for comparing uniques identifiers.
     struct isValue
     {
@@ -142,6 +147,7 @@ public:
   //! \param nth the nth element of the list of neighbor.
   inline void removeNthNeighbor(const uint32_t nth)
   {
+    LOGI("Node ID %u: Remove its %u'nth ID neighbor\n", nth);
     if (nth < m_arcs.size())
       {
         remove(m_arcs.begin() + nth);

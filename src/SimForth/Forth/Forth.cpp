@@ -480,6 +480,7 @@ void Forth::interpreteWord(std::string const& word)
 // **************************************************************
 std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 {
+  LOGI("Forth interpreting the file '%s'", filename.c_str());
   if (m_trace) std::cout << "eating File " << filename << std::endl;
   if (STREAM.loadFile(filename))
     {
@@ -487,6 +488,7 @@ std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
     }
   else
     {
+      LOGE("Failed interpreting the file '%s'", filename.c_str());
       std::string msg("failed opening this file. Reason is '");
       msg += strerror(errno);
       msg += "'";

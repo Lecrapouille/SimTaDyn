@@ -659,6 +659,8 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 // **************************************************************
 void Forth::boot()
 {
+  LOGI("Forth booting ...");
+
   // TODO: Les ranger par ordre lexico ?
   // FIXME: init m_last et m_here pour etre sur que le client ne
   // charge pas plusieurs fois les memes primitives

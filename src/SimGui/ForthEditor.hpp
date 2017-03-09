@@ -47,7 +47,7 @@ class ForthEditor: public TextEditor, public Singleton<ForthEditor>
 public:
 
   ForthEditor();
-  ~ForthEditor();
+  virtual ~ForthEditor();
   void empty();
   void templated();
   void exec();

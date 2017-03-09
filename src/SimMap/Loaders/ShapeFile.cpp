@@ -44,6 +44,7 @@ void ShapefileLoader::goToByte(const uint32_t offset)
   m_infile.seekg(offset, std::ios::beg);
   if (!m_infile)
     {
+      LOGF("ShapefileLoaderException");
       ShapefileLoaderException e(offset, "ShapefileLoader::goToByte");
       throw e;
     }
@@ -53,6 +54,7 @@ void ShapefileLoader::skypeNBytes(const uint32_t offset)
   m_infile.seekg(offset, std::ios::cur);
   if (!m_infile)
     {
+      LOGF("ShapefileLoaderException");
       ShapefileLoaderException e(offset, "ShapefileLoader::skypeNBytes");
       throw e;
     }
@@ -133,6 +135,7 @@ void ShapefileLoader::checkFileSize()
     }
   else
     {
+      LOGF("ShapefileLoaderException");
       ShapefileLoaderBadLength e(m_file_length, value32b);
       throw e;
     }
@@ -148,6 +151,7 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   m_infile.open(filename, std::ios::binary | std::ios::in);
   if (!m_infile)
     {
+      LOGF("ShapefileLoaderException");
       ShapefileLoaderOpenFailed e(errno);
       throw e;
     }
@@ -158,6 +162,7 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   value32b = readBigEndianInt();
   if (9994 != value32b)
     {
+      LOGF("ShapefileLoaderException");
       ShapefileLoaderBadId e(value32b, 9994);
       throw e;
     }
@@ -253,6 +258,7 @@ bool ShapefileLoader::load(std::string const& filename, SimTaDynMap* &map)
 {
   bool ret = false;
 
+  LOGI("Loading the shapefile '%s' in an %s", filename.c_str(), ((nullptr == map) ? "empty map" : "already opened map"));
   try // FIXME: comment faire undo en cas d'echec ?
     {
       uint32_t value32b;
@@ -261,7 +267,8 @@ bool ShapefileLoader::load(std::string const& filename, SimTaDynMap* &map)
       value32b = getShapeVersion();
       if (1000 != value32b)
         {
-          std::cerr << "Warning. Expected shapefile version 1000 not found. The file '" << filename << "' may be not fully interpreted" << std::endl;
+          LOGIS("Expected shapefile version 1000 not found. The file '%s' may be not fully interpreted",
+                filename.c_str());
           goto l_err;
         }
 

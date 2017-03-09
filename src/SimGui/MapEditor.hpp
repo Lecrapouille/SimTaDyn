@@ -73,7 +73,7 @@ protected:
 private:
 
   MapEditor();
-  ~MapEditor();
+  virtual ~MapEditor();
 };
 
 #endif /* MAPEDITOR_HPP_ */

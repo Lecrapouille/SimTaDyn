@@ -7,8 +7,14 @@
 // **************************************************************
 ForthDictionary::ForthDictionary()
 {
+  LOGI("Creating Forth dictionnary");
   m_here = 0U;
   m_last = 0U;
+}
+
+ForthDictionary::~ForthDictionary()
+{
+  LOGI("Destroying Forth dictionnary");
 }
 
 // **************************************************************

@@ -83,6 +83,7 @@ class ForthDictionary
 public:
   //! \brief Constructor.
   ForthDictionary();
+  ~ForthDictionary();
   void add(const Cell16 token, char const* name, const bool immediate);
   //! \brief Append a new Forth entry in the dictionary.
   void add(const Cell16 token, std::string const& word, const bool immediate);
@@ -177,6 +178,7 @@ protected:
   Cell16  m_last;
   //! Address of the first free location in the dictionary (Forth word: HERE, DP).
   Cell16  m_here;
+  // FIXME std::string m_name;
 };
 
 #endif /* FORTH_DICTIONARY_HPP_ */

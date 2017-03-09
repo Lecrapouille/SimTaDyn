@@ -181,6 +181,8 @@ ForthEditor::ForthEditor()
     m_cerr(std::cerr, m_messages.get_buffer()),
     m_nb_plugins(0)
 {
+  LOGI("Creating ForthEditor");
+
   // Forth toolbar (horizontal)
   {
     {
@@ -337,6 +339,8 @@ ForthEditor::ForthEditor()
 // *************************************************************************************************
 ForthEditor::~ForthEditor()
 {
+  LOGI("Destroying ForthEditor");
+  // TODO: be sure no script is running on the map before destroying
   // TODO: save the historic buffer
 }
 
