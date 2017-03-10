@@ -483,7 +483,7 @@ std::string ForthEditor::elapsedTime()
 // *************************************************************************************************
 bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 {
-  std::cerr << "Exec_ " << script << " " << filename << std::endl;
+  LOGI("ForthEditor executing script '%s': '%s'", filename.c_str(), script.c_str());
 
   typedef std::chrono::nanoseconds ns;
   typedef std::chrono::high_resolution_clock Time;
@@ -500,11 +500,13 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
   auto t1 = Time::now();
 
   // Flush the std::cout in the textview
-  //m_cout.flush();
-  //m_cerr.flush();
+  m_cout.flush();
+  m_cerr.flush();
 
   if (res.first)
     {
+      LOGE("Failed executing script '%s'", filename);
+
       m_elapsed_time = std::chrono::duration_cast<ns>(t1 - t0);
       m_statusbar.push(elapsedTime());
 
@@ -521,6 +523,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
     }
   else
     {
+      LOGI("Succeeded executing script '%s'", filename);
       // Text view: indiquer ligne ko
       m_statusbar.push("FAILED");
 

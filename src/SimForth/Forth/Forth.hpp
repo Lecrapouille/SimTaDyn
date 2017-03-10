@@ -6,6 +6,7 @@
 
 #  include "ForthStream.hpp"
 #  include "ForthDictionary.hpp"
+#  include <ostream>
 
 // **************************************************************
 // When Forth reads a number which does not fit in the expected
@@ -50,12 +51,11 @@ public:
   //! \brief Complete the name a forth word from the dictionary.
   const char* completion(std::string const& partial_name);
   //! \brief Display the data stack.
-  virtual void displayDStack() const;
-  //! \brief Display the return stack.
-  virtual void displayRStack() const;
+  virtual void displayStack(std::ostream& stream, const forth::StackID id) const;
   //! \brief restore the Forth context to its initial state.
   void abort();
-  //! \brief restore the Forth context to its initial state and throw an exception.
+  //! \brief restore the Forth context to its initial state and throw
+  //! an exception.
   void abort(std::string const& msg);
   //! \brief Try converting a Forth word as a number.
   bool toNumber(std::string const& word, Cell32& number) const;
@@ -121,11 +121,13 @@ protected:
   Cell32  *m_data_stack;
   //! Alternative data stack (secondary stack).
   Cell32  m_alternative_stack_[STACK_SIZE];
-  //! Alternative stack with a marging of security to prevent against stack underflow.
+  //! Alternative stack with a marging of security to prevent against
+  //! stack underflow.
   Cell32  *m_alternative_stack;
   //! Return stack: store word tokens (function addresses)
   Cell32  m_return_stack_[STACK_SIZE];
-  //! Return stack with a marging of security to prevent against stack underflow.
+  //! Return stack with a marging of security to prevent against stack
+  //! underflow.
   Cell32  *m_return_stack;
   //! Top of Stack
   Cell32  m_tos, m_tos1, m_tos2, m_tos3, m_tos4;
@@ -148,5 +150,23 @@ protected:
   Cell16 m_last_completion;
   int32_t m_err_stream;
 };
+
+class ForthStackDiplayer
+{
+public:
+  ForthStackDiplayer(const Forth *const forth, const forth::StackID id)
+    : m_forth(forth), m_id(id)
+  {
+  }
+
+  const Forth *const m_forth;
+  forth::StackID m_id;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const ForthStackDiplayer& s)
+{
+  s.m_forth->displayStack(os, s.m_id);
+  return os;
+}
 
 #endif /* FORTH_INNER_HPP_ */

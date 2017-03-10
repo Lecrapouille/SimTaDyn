@@ -369,18 +369,21 @@ bool ForthDictionary::load(std::string const& filename, const bool replace)
 // **************************************************************
 //! \param token
 // **************************************************************
-void ForthDictionary::displayToken(const Cell16 token) const
+std::string ForthDictionary::displayToken(const Cell16 token) const
 {
+  std::ostringstream stream;
   std::pair<bool, int32_t> res = find(token);
   if (res.first)
     {
-      std::cout << "'" << (char *) &m_dictionary[res.second + 1U] << "' ("
-                << std::hex << (int) token << ')';
+      stream << "'" << (char *) &m_dictionary[res.second + 1U] << "' ("
+             << std::hex << (int) token << ')';
     }
   else
     {
-      std::cout << "Bad token (" << std::setfill('0') << std::setw(4) << std::hex << token << ") ";
+      stream << "Bad token (" << std::setfill('0') << std::setw(4)
+             << std::hex << token << ") ";
     }
+  return stream.str();
 }
 
 // **************************************************************

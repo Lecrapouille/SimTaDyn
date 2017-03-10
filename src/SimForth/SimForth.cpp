@@ -3,6 +3,7 @@
 
 void SimForth::boot()
 {
+  LOGI("Booting SimForth");
   // Start the Forth core
   Forth::boot();
 
@@ -11,6 +12,7 @@ void SimForth::boot()
   // Initialize basic Forth system
   std::pair<bool, std::string> res;
 
+  LOGI("Loading minimal SimForth");
   res = interpreteFile(Config::instance().data_path("forth/system.fs"));
   ok(res);
 }

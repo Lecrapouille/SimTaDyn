@@ -159,7 +159,7 @@ public:
 
 protected:
   //! \brief Pretty print a Forth token in std::cout.
-  virtual void displayToken(const Cell16 token) const;
+  virtual std::string displayToken(const Cell16 token) const;
   //! \brief Store a byte at given address in the dictionnary. Endianess is hiden.
   void write8at(const uint32_t addr, const Cell32 data);
   //! \brief Store two consecutive bytes at given address in the dictionnary. Endianess is hiden.

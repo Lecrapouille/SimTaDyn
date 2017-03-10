@@ -628,8 +628,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       m_tos = ((int32_t) m_tos > (int32_t) m_tos1) ? m_tos : m_tos1;
       break;
     case FORTH_PRIMITIVE_DISP:
-      std::cout << "jjjjj";
-      std::cerr << std::setbase(m_base) << (int32_t) m_tos << " ";
+      std::cout << std::setbase(m_base) << (int32_t) m_tos << " ";
       DPOP(m_tos);
       break;
     case FORTH_PRIMITIVE_UDISP:
@@ -641,7 +640,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
     case FORTH_PRIMITIVE_DISPLAY_DSTACK:
       DPUSH(m_tos);
-      displayDStack();
+      displayStack(std::cout, forth::DataStack);
       DPOP(m_tos);
       break;
     default:

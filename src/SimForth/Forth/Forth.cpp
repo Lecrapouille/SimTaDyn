@@ -12,6 +12,7 @@ Forth::Forth(ForthDictionary& dictionary, TextColor &color)
     m_state(forth::Interprete),
     m_dictionary(dictionary)
 {
+  LOGI("Creating Forth");
   m_err_stream = 0;
   m_base = 10U;
   abort();
@@ -110,29 +111,35 @@ bool Forth::changeDisplayBase(const uint8_t base)
 // **************************************************************
 //! Used for trace and debug.
 // **************************************************************
-void Forth::displayDStack() const
+void Forth::displayStack(std::ostream& stream, const forth::StackID id) const
 {
-  int32_t depth = m_dsp - m_data_stack;
+  int32_t depth;
+  Cell32 *ptr;
+
+  switch (id)
+    {
+    case forth::DataStack:
+      depth = m_dsp - m_data_stack;
+      ptr = m_data_stack;
+      break;
+    case forth::ReturnStack:
+      depth = m_rsp - m_return_stack;
+      ptr = m_return_stack;
+      break;
+    case forth::AuxStack:
+      depth = m_asp - m_alternative_stack;
+      ptr = m_alternative_stack;
+      break;
+    default:
+      LOGES("Pretty print this stack %u is not yet implemented", id);
+      return ;
+    }
 
   for (int32_t s = 0; s < depth; ++s)
     {
-      std::cout << std::setbase(m_base) << m_data_stack[s] << ' ';
+      stream << std::setbase(m_base) << ptr[s] << ' ';
     }
-  std::cout << std::endl;
-}
-
-// **************************************************************
-//! Used for trace and debug.
-// **************************************************************
-void Forth::displayRStack() const
-{
-  int32_t depth = m_rsp - m_return_stack;
-
-  for (int32_t s = 0; s < depth; ++s)
-    {
-      std::cout << std::hex << m_return_stack[s] << ' ';
-    }
-  std::cout << std::endl;
+  stream << std::endl;
 }
 
 // **************************************************************
@@ -150,7 +157,7 @@ void Forth::create(std::string const& word)
   else
     {
       if (m_trace) {
-        std::cout << "Append new word definition '" << word << "' in dictionary" << std::endl;
+        LOGD("Append new word definition '%s' in dictionary", word.c_str());
       }
     }
 
@@ -178,10 +185,12 @@ void Forth::execToken(const Cell16 tx)
   m_ip = 65535U;
 
   if (m_trace) {
-    std::cout << "================ Etat initial ==================" << std::endl;
-    std::cout << "DStack: "; displayDStack();
-    std::cout << "RStack: "; displayRStack();
-    std::cout << "Execute token " << std::hex << token << std::endl << std::endl;
+    LOGI("Execute Forth token %u", tx);
+    CPP_LOG(logger::Debug)
+      << "================ Initial Stack ==================\n"
+      << "DStack: " << ForthStackDiplayer(this, forth::DataStack)
+      << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack)
+      << "Execute token " << std::hex << (uint32_t) token << "\n\n";// << std::endl << std::endl;
   }
 
   // Always eat the top of the stack and store the value in a working register.
@@ -201,39 +210,47 @@ void Forth::execToken(const Cell16 tx)
             } */
 
           if (m_trace) {
-            std::cout << "Token "; m_dictionary.displayToken(token);
-            std::cout << " is not a primitive " << std::endl;
+            CPP_LOG(logger::Debug)
+              << "Token " << m_dictionary.displayToken(token)
+              << " is not a primitive " << "\n\n";//<< std::endl;
           }
 
           // Save the next token to exec after the end of the definition
-          Cell32 c = m_ip; RPUSH(c);
+          Cell32 c = m_ip;
+          RPUSH(c);
           if (m_trace) {
-            std::cout << "PUSH "; m_dictionary.displayToken(m_ip);
-            std::cout << std::endl;
+            CPP_LOG(logger::Debug)
+              << "PUSH "
+              << m_dictionary.displayToken(m_ip)
+              << "\n";//<< std::endl;
           }
 
           m_ip = m_dictionary.read16at(token);
           m_ip += 2U;
           token = m_dictionary.read16at(m_ip);
           if (m_trace) {
-            std::cout << "Next token is "; m_dictionary.displayToken(token);
-            std::cout << std::endl << std::endl;
+            CPP_LOG(logger::Debug)
+              << "Next token is "
+              << m_dictionary.displayToken(token)
+              << "\n\n";//<< std::endl << std::endl;
           }
         }
 
       //
       if (m_trace) {
-        std::cout << "Token "; m_dictionary.displayToken(token);
-        std::cout <<" is a primitive. Consum it"
-                  << std::endl;
+        CPP_LOG(logger::Debug)
+          << "Token " << m_dictionary.displayToken(token)
+          <<" is a primitive. Consum it" << "\n";//<< std::endl;
       }
       execPrimitive(token);
 
       if (m_trace) {
-        DPUSH(m_tos); std::cout << "DStack: ";
-        displayDStack(); DPOP(m_tos);
-        std::cout << "RStack: "; displayRStack();
-        std::cout << std::endl;
+        DPUSH(m_tos);
+        CPP_LOG(logger::Debug)
+          << "DStack: " << ForthStackDiplayer(this, forth::DataStack)
+          << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack)
+          << "\n";//<< std::endl;
+        DPOP(m_tos);
       }
 
       // Data stack under/overflow ?
@@ -247,15 +264,17 @@ void Forth::execToken(const Cell16 tx)
           m_ip += 2U;
           token = m_dictionary.read16at(m_ip);
           if (m_trace) {
-            std::cout << "Next token is "; m_dictionary.displayToken(token);
-            std::cout << std::endl;
+            CPP_LOG(logger::Debug)
+              << "Next token is "
+              << m_dictionary.displayToken(token)
+              << "\n";//<< std::endl;
           }
         }
 
       // Return stack under/overflow ?
       depth = isRStackUnderOverFlow();
       if (m_trace) {
-        std::cout << "RStack: "; displayRStack();
+        CPP_LOG(logger::Debug) << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack);
       }
     } while (depth > 0);
 
@@ -263,8 +282,8 @@ void Forth::execToken(const Cell16 tx)
   DPUSH(m_tos);
 
   if (m_trace) {
-    std::cout << "================ Etat final ===================="
-              << std::endl << std::endl;
+    CPP_LOG(logger::Debug)
+      << "================ Etat final ====================\n\n";
   }
 }
 
@@ -345,7 +364,8 @@ bool Forth::toNumber(std::string const& word, Cell32& number) const
           return false;
         }
     }
-  // numeric value (e.g., ASCII code) an optional ' may be present after the character
+  // numeric value (e.g., ASCII code) an optional ' may be present
+  // after the character
   else if ('\'' == word[i])
     {
       int s = word.size();
@@ -409,16 +429,24 @@ void Forth::interpreteWord(std::string const& word)
   Cell16 token;
   bool immediate;
 
+  if (m_trace) {
+    LOGI("Forth interprete word '%s'", word.c_str());
+  }
   if (forth::Interprete == m_state)
     {
       if (m_dictionary.find(word, token, immediate))
         {
-          if (m_trace) std::cout << std::endl << "Execute word '" << word << "'" << std::endl;
+          if (m_trace) std::cout << std::endl << "Execute word '"
+                                 << word << "'" << "\n"; //<< std::endl;
           execToken(token);
         }
       else if (toNumber(word, number))
         {
-          if (m_trace) std::cout << "PUSH number " << word << std::endl;
+          if (m_trace) {
+            CPP_LOG(logger::Debug)
+              << "PUSH number " << word
+              << "\n"; // << std::endl;
+          }
           DPUSH(number);
           isDStackUnderOverFlow();
         }
@@ -433,18 +461,32 @@ void Forth::interpreteWord(std::string const& word)
         {
           if (immediate)
             {
-              if (m_trace) std::cout << std::endl << "Execute immediate word '" << word << "'" << std::endl;
+              if (m_trace) {
+                CPP_LOG(logger::Debug)
+                  << "\n" //<< std::endl
+                  << "Execute immediate word '"
+                  << word << "'" << "\n"; //<< std::endl;
+              }
               execToken(token);
             }
           else
             {
-              if (m_trace) std::cout << "Append new word '" << word << "' in dictionary" << std::endl;
+              if (m_trace) {
+                CPP_LOG(logger::Debug)
+                  << "Append new word '" << word
+                  << "' in dictionary" << "\n"; //<< std::endl;
+              }
               m_dictionary.appendCell16(token);
             }
         }
       else if (toNumber(word, number))
         {
-          if (m_trace) std::cout << "Append literal " << number << "' in dictionary" << std::endl;
+          if (m_trace) {
+            CPP_LOG(logger::Debug)
+              << "Append literal " << number
+              << "' in dictionary" << "\n"; //<< std::endl;
+          }
+
           if (number <= 65535U)
             {
               m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_16);
@@ -481,7 +523,6 @@ void Forth::interpreteWord(std::string const& word)
 std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 {
   LOGI("Forth interpreting the file '%s'", filename.c_str());
-  if (m_trace) std::cout << "eating File " << filename << std::endl;
   if (STREAM.loadFile(filename))
     {
       return parseStream();
