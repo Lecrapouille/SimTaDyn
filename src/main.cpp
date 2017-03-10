@@ -14,7 +14,7 @@ int main(int argc, char** argv)
   Gsv::init();
 
   SimTaDynLogger::instance();
-  SimForth::instance();
+  SimForth::instance().boot();
   ForthEditor::instance();
   MapEditor::instance();
 
@@ -28,3 +28,5 @@ int main(int argc, char** argv)
   SimTaDynLogger::destroy();
   return 0;
 }
+
+// FIXME: faire une classe avec une methode pure pour lancer les trucs de 'utilsateur
