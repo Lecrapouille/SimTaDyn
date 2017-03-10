@@ -11,20 +11,35 @@ public:
   //! \brief give the file name with its extension from a given path
   inline static std::string shortNameWithExtension(std::string const& path)
   {
-    return path.substr(path.find_last_of("/") + 1);
+    std::string::size_type pos = path.find_last_of("\\/");
+    if (pos != std::string::npos)
+      return path.substr(pos + 1, std::string::npos);
+    return path;
   }
 
+  //! \brief give the file name without its extension from a given path
   inline static std::string shortName(std::string const& path)
   {
-    return path.substr(path.find_last_of("/") + 1,
-                       path.find_last_of("."));
+    std::string filename = shortNameWithExtension(path);
+    return filename.substr(0, filename.find_last_of("."));
   }
 
-  inline static std::string extension(std::string const& filename)
+  //! \brief give the file extension
+  inline static std::string extension(std::string const& path)
   {
-    return filename.substr(filename.find_last_of(".") + 1);
+    std::string::size_type pos = path.find_last_of(".");
+    if (pos != std::string::npos)
+      return path.substr(pos + 1, std::string::npos);
+    return "";
   }
 
+  //! \brief Check if a file exits.
+  //!
+  //! Beware of race condition ! Do not use this function for opening
+  //! a file but use instead the open() function and check the error
+  //! code. Indeed, the file may be deleted between this function and
+  //! the open() function because theses two functions will not be
+  //! atomic.
   inline static bool exist(std::string const& path)
   {
     struct stat buffer;
