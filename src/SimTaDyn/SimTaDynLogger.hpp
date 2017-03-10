@@ -38,12 +38,23 @@ private:
   std::ofstream m_file;
 };
 
-#define LOGN(...)         SimTaDynLogger::instance().log(nullptr, logger::None, __VA_ARGS__)
+//! \brief Log C++ like. Example:  CPP_LOG(logger::Fatal) << "test\n";
+#define CPP_LOG(severity, ...) SimTaDynLogger::instance() << severity << '[' << __FILE__ << "::" << __LINE__ << ']'
+
+
+//! \brief Basic log without severity or file and line information. 'B' for Basic.
+#define LOGB(...)         SimTaDynLogger::instance().log(nullptr, logger::None, __VA_ARGS__)
+//! \brief Information Log.
 #define LOGI(format, ...) SimTaDynLogger::instance().log(nullptr, logger::Info, "[%s::%d] " format, __FILE__, __LINE__, ##__VA_ARGS__)
+//! \brief Debug Log.
 #define LOGD(format, ...) SimTaDynLogger::instance().log(nullptr, logger::Debug, "[%s::%d] " format, __FILE__, __LINE__, ##__VA_ARGS__)
+//! \brief Warning Log.
 #define LOGW(format, ...) SimTaDynLogger::instance().log(nullptr, logger::Warning, "[%s::%d] " format, __FILE__, __LINE__, ##__VA_ARGS__)
+//! \brief Failure Log.
 #define LOGF(format, ...) SimTaDynLogger::instance().log(nullptr, logger::Failed, "[%s::%d] " format, __FILE__, __LINE__, ##__VA_ARGS__)
+//! \brief Error Log.
 #define LOGE(format, ...) SimTaDynLogger::instance().log(nullptr, logger::Error, "[%s::%d] " format, __FILE__, __LINE__, ##__VA_ARGS__)
+//! \brief Fatal Log.
 #define LOGX(format, ...) SimTaDynLogger::instance().log(nullptr, logger::Fatal, "[%s::%d] " format, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define LOGIS(format, ...) SimTaDynLogger::instance().log(&std::cout, logger::Info, "[%s::%d] " format, __FILE__, __LINE__, ##__VA_ARGS__)

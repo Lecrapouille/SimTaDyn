@@ -55,12 +55,3 @@ void ILogger::log(const char* format, ...)
 
   m_mutex.unlock();
 }
-
-template <class T> ILogger& ILogger::operator <<(const T& to_log)
-{
-  std::ostringstream stream;
-  stream << to_log;
-  write(stream.str());
-
-  return *this;
-}
