@@ -1,46 +1,99 @@
 #ifndef RESOURCE_MANAGER_HPP_
 #  define RESOURCE_MANAGER_HPP_
 
-#  include "Singleton.hpp"
 #  include "Resources.hpp"
+#  include "SimTaDynLogger.hpp"
 #  include <map>
+#  include <mutex>
 
-template <class K> class IResourceManager
+template <class K> class IResource;
+
+template <class K> class ResourceManager
 {
 public:
 
-  //virtual ~IResourceManager() = 0;
-
-  typedef std::map<K, IResource*> map_resources;
+  typedef std::map<K, IResource<K>*> map_resources;
   typedef typename map_resources::iterator map_resources_it;
 
-  template <class T> T* get(K const& id) const
+  ResourceManager()
   {
-    auto it = m_resources.find(id);
-    if (it != m_resources.end())
-      {
-        it->second->take();
-        return static_cast<T*>(it->second);
-      }
-    return nullptr;
+    LOGI("Creating the ResourceManager");
   }
 
-  void add(K const& id, IResource* resource)
+  ~ResourceManager()
+  {
+    LOGI("Destroying the ResourceManager");
+    if (!m_resources.empty())
+    {
+      auto it = m_resources.begin();
+      auto end = m_resources.end();
+
+      for (; it != end; ++it)
+        {
+          IResource<K> *resource = it->second;
+          uint32_t n = resource->owners();
+          if (0 == n)
+            {
+              resource->dispose();
+            }
+          else
+            {
+              CPP_LOG(logger::Error) << "  ==> The resource ID " << resource->id()
+                                     << " is still aquired by " << n << " owners\n";
+            }
+        }
+    }
+  }
+
+
+  //! \brief Insert an allocated reource in the list of resources.
+  void insert(IResource<K>* resource)
   {
     if (nullptr == resource)
       return ;
 
-    if (m_resources.find(id) != m_resources.end())
-      return ;
+    std::lock_guard<std::mutex> lock(m_mutex);
 
-    m_resources[id] = resource;
+    if (m_resources.find(resource->id()) != m_resources.end())
+      {
+        LOGF("Trying to add a resource already present in the ResourceManager");
+        return ;
+      }
+
+    resource->ownBy(this);
+    m_resources[resource->id()] = resource;
   }
 
-
-  void remove(K const& id)
+  //! \brief Get the resource referenced by its unique identifer from
+  //! the list of reources.
+  //! FIXME: not safe against delete.
+  template <class T> T* acquire(K const& id) const
   {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     auto it = m_resources.find(id);
-    if (it != m_resources.end())
+    if (it == m_resources.end())
+      {
+        LOGF("Trying to take a resource already present in the ResourceManager");
+        return nullptr;
+      }
+
+    it->second->acquire();
+    return static_cast<T*>(it->second);
+  }
+
+  //! \brief The resource is no longer
+  void dispose(K const& id)
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    auto it = m_resources.find(id);
+    if (it == m_resources.end())
+      {
+        LOGF("Trying to dispose from a resource not present in the ResourceManager");
+        return ;
+      }
+    if (0 == it->second->dispose())
       {
         m_resources.erase(it);
       }
@@ -68,31 +121,8 @@ public:
 
 protected:
 
-  std::map<K, IResource*> m_resources;
-};
-
-
-// *************************************************************************************************
-//
-// *************************************************************************************************
-template <class K> class SResourceManager
-  : public IResourceManager<K>, Singleton<SResourceManager<K>>
-{
-private:
-
-  SResourceManager();
-  ~SResourceManager();
-};
-
-// *************************************************************************************************
-//
-// *************************************************************************************************
-template <class K> class ResourceManager : public IResourceManager<K>
-{
-public:
-
-  ResourceManager() {}
-  virtual ~ResourceManager() {}
+  std::map<K, IResource<K>*> m_resources;
+  std::mutex m_mutex;
 };
 
 #endif /* RESOURCE_MANAGER_HPP_ */

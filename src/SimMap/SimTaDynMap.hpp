@@ -8,7 +8,6 @@
 #  include "SimTaDynGraph.hpp"
 #  include "Renderable.hpp"
 #  include "Renderer.hpp"
-//#  include "MapEditor.hpp"
 
 // FIXME: faut creer une class helper pour charger une seule fois les
 // shader commun a tous les cartes (ou alors 1 carte == 1 shader meme
@@ -16,7 +15,7 @@
 
 class SimTaDynMap
   : private ClassCounter<SimTaDynMap>,
-    public IResource,
+    public IResource<Key>,
     public IRenderable
 {
   friend class MapEditor;
@@ -24,24 +23,28 @@ class SimTaDynMap
 public:
 
   SimTaDynMap()
-    : IResource(howMany()),
+    : IResource(),
       m_graph()
   {
-    m_name = "Map_" + std::to_string(id());
-    LOGI("New SimTaDynMap with generic name '%s'\n", m_name.c_str());
+    m_id = howMany();
+    m_name = "Map_" + std::to_string(m_id);
+    LOGI("New SimTaDynMap with generic name '%s' and Id %u\n",
+         m_name.c_str(), m_id);
   }
 
   SimTaDynMap(std::string const& name)
-    : IResource(howMany()),
+    : IResource(),
       m_graph(),
       m_name(File::shortNameWithExtension(name))
   {
-    LOGI("New SimTaDynMap named '%s'\n", m_name.c_str());
+    m_id = howMany();
+    LOGI("New SimTaDynMap named '%s' and ID %u\n", m_name.c_str(),
+         m_id);
   }
 
   ~SimTaDynMap()
   {
-    LOGI("Deleting SimTaDynMap named '%s'\n", m_name.c_str());
+    LOGI("Deleting SimTaDynMap %u named '%s'\n", m_id, m_name.c_str());
     m_graph.BasicGraph::reset();
     //FIXME MapEditor::instance().remove(id());
   }
@@ -54,6 +57,12 @@ public:
 
   //! \brief
   SimTaDynNode *getNode(const Key nodeID);
+
+  //! \brief
+  virtual Key id() const override
+  {
+    return m_id;
+  }
 
   //! \brief Instances counter.
   static Key howMany()
@@ -111,6 +120,12 @@ public:
   // BTree sur des fichiers + convertion(char, type_de_la_colonne)
   // or: clef MySQL
   container<Vertex> m_vertices;
+
+protected:
+
+  //! \brief Unique identifier. We did not use \m m_name as id because
+  //! we want the posibility to change its name.
+  Key m_id;
 };
 
 #endif /* SIMTADYN_MAP_HPP_ */

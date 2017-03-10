@@ -98,16 +98,7 @@ MapEditor::MapEditor()
 MapEditor::~MapEditor()
 {
   LOGI("Destroying MapEditor");
-  // TODO: be sure no Forth script is running on the map before destroying
-
-  auto it = m_maps.begin();
-  auto end = m_maps.end();
-
-  for (; it != end; ++it)
-    {
-      // FIXME: popup for saving maps ?
-      //delete (*it);
-    }
+  // TODO: be sure no Forth script is running on the map before destroying mapq
 }
 
 void MapEditor::closeMap()
@@ -115,7 +106,7 @@ void MapEditor::closeMap()
   if (nullptr == m_current_map)
     return ;
 
-  if (false == m_current_map->release())
+  if (false == m_current_map->dispose())
     return ;
 
   if (m_maps.empty())
@@ -186,7 +177,7 @@ void MapEditor::doOpen(std::string const& filename, const bool new_map, const bo
         }
       if (nullptr == oldmap)
         {
-          m_maps.add(map->id(), map);
+          m_maps.insert(map);
         }
       std::cerr << "Successfully loaded map '" << map->m_name << "'" << std::endl;
       //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }

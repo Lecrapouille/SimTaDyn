@@ -18,7 +18,7 @@ public:
   inline void newEmptyMap()
   {
     SimTaDynMap *map = new SimTaDynMap();
-    m_maps.add(map->id(), map);
+    m_maps.insert(map);
   }
   inline void openMap()
   {
