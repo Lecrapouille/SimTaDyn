@@ -80,7 +80,7 @@ void SimTaDynLogger::footer()
 {
   currentTime();
   log("\n===============================================\n"
-      "  SimTaDyn closed at %s\n"
+      "  SimTaDyn log closed at %s\n"
       "===============================================\n\n",
       m_buffer_time);
 }

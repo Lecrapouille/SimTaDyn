@@ -10,18 +10,29 @@
 
 int main(int argc, char** argv)
 {
+  std::cout << "Welcome to SimTaDyn version "
+            << Config::instance().m_major_version
+            << '.'
+            << Config::instance().m_minor_version
+            << std::endl;
+  SimTaDynLogger::instance();
+
+  LOGI("** Init GTK");
   const Gtk::Main kit(argc, argv);
   Gsv::init();
 
-  SimTaDynLogger::instance();
-  SimForth::instance().boot();
+  LOGI("** Init SimTaDyn");
+  SimForth::instance();
   ForthEditor::instance();
   MapEditor::instance();
 
   SimTaDynWindow window;
+  SimForth::instance().boot();
 
+  LOGI("** End of the init. Starting the runtime");
   kit.run(window);
 
+  LOGI("** End of the runtime. Releasing the memory");
   ForthEditor::destroy();
   MapEditor::destroy();
   SimForth::destroy();

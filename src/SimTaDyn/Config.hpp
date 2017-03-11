@@ -23,11 +23,16 @@ public:
     return m_data_path + path;
   }
 
+  inline const char *char_data_path() const
+  {
+    return m_data_path.c_str();
+  }
+
   std::string m_data_path;
   std::string m_title = "SimTaDyn";
   std::string m_log_path = data_path("SimTaDyn.log");
-  const uint8_t m_major_version = 0;
-  const uint8_t m_minor_version = 2;
+  const uint32_t m_major_version = 0;
+  const uint32_t m_minor_version = 2;
 
 private:
 
