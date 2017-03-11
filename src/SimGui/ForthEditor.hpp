@@ -14,6 +14,7 @@ class ForthDocument: public TextDocument
 {
 public:
   ForthDocument(Glib::RefPtr<Gsv::Language> language);
+  ~ForthDocument();
 
 protected:
   // FIXME changer le nom de cette fonction

@@ -35,6 +35,7 @@ SimTaDynWindow::SimTaDynWindow()
     add_events(Gdk::KEY_RELEASE_MASK);
     signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
     signal_key_release_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyReleased));
+    signal_delete_event().connect(sigc::mem_fun(this, &SimTaDynWindow::onExitClicked));
   }
 
   // Menus:
@@ -97,6 +98,20 @@ SimTaDynWindow::SimTaDynWindow()
   show_all_children();
 }
 
+// *************************************************************************************************
+//! \return a boolean to allow destroying the main windows or not in the case some documents have
+//! not been saved.
+// *************************************************************************************************
+bool SimTaDynWindow::onExitClicked(GdkEventAny*)
+{
+  // FIXME: do the same for MapEditor
+  bool res = ForthEditor::instance().closeAll();
+  return !res;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
 void SimTaDynWindow::setTitleIcon()
 {
   std::string path = Config::instance().data_path("icons/SimTaDyn.png");
@@ -111,6 +126,9 @@ void SimTaDynWindow::setTitleIcon()
     }
 }
 
+// *************************************************************************************************
+//
+// *************************************************************************************************
 void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
 {
   switch (evenement->keyval)
@@ -147,6 +165,9 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
   ForthEditor::instance().autoCompleteWord(evenement->keyval);
 }
 
+// *************************************************************************************************
+//
+// *************************************************************************************************
 void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)
 {
   switch (evenement->keyval)

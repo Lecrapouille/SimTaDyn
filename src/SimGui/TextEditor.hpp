@@ -107,9 +107,9 @@ class CloseLabel : public Gtk::Box
 public:
   CloseLabel(std::string const& text);
   //! Kind of button.signal_clicked().connect(sigc::bind<T>(sigc::mem_fun(*this, &CloseLabel::onClicked), T));
-  inline void link(Gtk::Notebook *notebook, Gtk::Widget *widget)
+  inline void link(TextEditor *editor, Gtk::Widget *widget)
   {
-    m_notebook = notebook;
+    m_editor = editor;
     m_widget = widget;
   }
   //! Return the text of the button (here the filename of the
@@ -129,11 +129,14 @@ public:
   {
     return m_asterisk;
   }
+  //! Close the notebook tab.
+  //! A check is made to be sure the document
+  void close();
 
 protected:
   inline void onClicked()
   {
-    m_notebook->remove_page(*m_widget);
+    close();
   }
 
   // Use the middle button to close the document
@@ -147,7 +150,7 @@ protected:
   Gtk::Label m_label;
   Gtk::Button m_button;
   Gtk::Image m_image;
-  Gtk::Notebook *m_notebook;
+  TextEditor *m_editor;
   Gtk::Widget *m_widget;
   bool m_asterisk;
   std::string m_title;
@@ -160,6 +163,7 @@ class TextDocument : public Gtk::ScrolledWindow
 {
 public:
   TextDocument(Glib::RefPtr<Gsv::Language> language);
+  ~TextDocument();
   void clear();
   bool isModified() const;
   void onChanged();
@@ -167,6 +171,8 @@ public:
   bool saveAs(std::string const& filename);
   bool load(std::string const& filename, bool clear = true);
   void cursorAt(const uint32_t line, const uint32_t index);
+  bool close();
+
   virtual void autoCompleteWord(__attribute__((unused)) int keyval)
   {
   }
@@ -227,7 +233,10 @@ protected:
 // *************************************************************************************************
 class TextEditor
 {
+  friend class CloseLabel;
+
 public:
+
   TextEditor();
   ~TextEditor();
   bool open();
@@ -235,7 +244,9 @@ public:
   void empty(std::string const& title = "New document");
   void save();
   void saveAs();
-  void saveAll();
+  bool saveAll();
+  bool close();
+  bool closeAll();
   Glib::ustring text();
   void clear();
   void find();
@@ -257,13 +268,14 @@ public:
   Gtk::SeparatorMenuItem m_menuseparator[4];
 
 protected:
+
   inline virtual TextDocument* create()
   {
     return new TextDocument(m_language);
   }
   TextDocument* document();
   TextDocument* document(const uint32_t i);
-  bool dialogSave(TextDocument *doc);
+  bool dialogSave(TextDocument *doc, const bool closing = false);
   bool saveAs(TextDocument *doc);
   bool load(std::string const& filename);
   void onPageSwitched(Gtk::Widget* page, guint page_num);

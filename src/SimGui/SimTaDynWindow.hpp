@@ -3,7 +3,7 @@
 
 #  include "Namespaces.hpp"
 #  include "DrawingArea.hpp"
-#  include "TextEditor.hpp"
+#  include "ForthEditor.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -13,6 +13,8 @@ public:
   SimTaDynWindow();
 
 protected:
+
+  bool onExitClicked(GdkEventAny* event);
 
   //! \brief Initialize the OpenGL context
   inline void onRealize()

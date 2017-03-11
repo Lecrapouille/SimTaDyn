@@ -8,6 +8,8 @@ ForthDocument::ForthDocument(Glib::RefPtr<Gsv::Language> language)
   : TextDocument(language),
     m_tab_sm(ForthAutoCompletSMBegin)
 {
+  LOGI("Creating ForthDocument");
+
   // Tag for Forth word not in dictionary
   m_tag_unknown_word = m_buffer->create_tag("error");
   m_tag_unknown_word->property_underline() = Pango::UNDERLINE_ERROR;
@@ -20,6 +22,14 @@ ForthDocument::ForthDocument(Glib::RefPtr<Gsv::Language> language)
 
   // Signal for highlighting unknow Forth words aor immediate words.
   m_buffer->signal_insert().connect(sigc::mem_fun(this, &ForthDocument::onInsertText));
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+ForthDocument::~ForthDocument()
+{
+  LOGI("Destroying ForthDocument");
 }
 
 // *************************************************************************************************
@@ -236,7 +246,7 @@ ForthEditor::ForthEditor()
     m_submenu[3].set_label("Open Script");
     m_image[3].set_from_icon_name("document-open", Gtk::ICON_SIZE_MENU);
     m_submenu[3].set_image(m_image[3]);
-    //FIXME    m_submenu[3].signal_activate().connect(sigc::mem_fun0<bool>(*this, &ForthEditor::open));
+    m_submenu[3].signal_activate().connect([this]{open();});
     m_menu[simtadyn::ForthMenu].append(m_submenu[3]);
 
     //
@@ -383,6 +393,9 @@ void ForthEditor::dumpDictionary()
                                 Gtk::FILE_CHOOSER_ACTION_SAVE);
   dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
 
+  // Set to the SimTaDyn path while no longer the GTK team strategy.
+  dialog.set_current_folder(Config::instance().m_data_path);
+
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
   dialog.add_button(Gtk::Stock::SAVE_AS, Gtk::RESPONSE_OK);
@@ -415,6 +428,9 @@ void ForthEditor::loadDictionary()
   Gtk::FileChooserDialog dialog("Choose a binary file to save Forth dictionary",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
+
+  // Set to the SimTaDyn path while no longer the GTK team strategy.
+  dialog.set_current_folder(Config::instance().m_data_path);
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

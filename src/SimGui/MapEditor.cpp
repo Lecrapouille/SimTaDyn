@@ -194,6 +194,9 @@ void MapEditor::openDialog(const bool new_map, const bool reset_map)
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.set_transient_for((Gtk::Window&) (*m_menu[simtadyn::MapMenu].get_toplevel()));
 
+  // Set to the SimTaDyn path while no longer the GTK team strategy.
+  dialog.set_current_folder(Config::instance().m_data_path);
+
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
   dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);

@@ -269,11 +269,32 @@ void CloseLabel::asterisk(const bool asterisk)
 // *************************************************************************************************
 //
 // *************************************************************************************************
+void CloseLabel::close()
+{
+  if (m_asterisk)
+    {
+      int page = m_editor->m_notebook.page_num(*m_widget);
+      Gtk::Widget *widget = m_editor->m_notebook.get_nth_page(page);
+      if (NULL != widget)
+        {
+          TextDocument* doc = dynamic_cast<TextDocument*>(widget);
+          if (!m_editor->dialogSave(doc))
+            return ;
+        }
+    }
+  m_editor->m_notebook.remove_page(*m_widget);
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
 TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   : Gtk::ScrolledWindow(),
     m_button(""), // FIXME a passer en param
     m_filename("")
 {
+  LOGI("Creating TextDocument");
+
   Gtk::ScrolledWindow::add(m_textview);
   Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   // Create the text buffer with syntax coloration
@@ -292,6 +313,14 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   m_textview.set_insert_spaces_instead_of_tabs(true);
   m_textview.set_auto_indent(true);
   m_buffer->signal_changed().connect(sigc::mem_fun(this, &TextDocument::onChanged));
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+TextDocument::~TextDocument()
+{
+  LOGI("Destroying TextDocument");
 }
 
 // *******************************²******************************************************************
@@ -336,6 +365,7 @@ void TextDocument::onChanged()
 // *************************************************************************************************
 bool TextDocument::save()
 {
+  LOGI("TextDocument saving '%s'", m_filename);
   bool res = true;
 
   if (TextDocument::isModified())
@@ -353,6 +383,14 @@ bool TextDocument::save()
         }
       else
         {
+          std::string why = strerror(errno);
+          LOGF("could not save the file '%s' reason was '%s'",
+               m_filename, why.c_str());
+          Gtk::MessageDialog dialog((Gtk::Window&) (*m_textview.get_toplevel()),
+                                    "Could not save '" + m_filename + "'",
+                                    false, Gtk::MESSAGE_WARNING);
+          dialog.set_secondary_text("Reason was: " + why);
+          dialog.run();
           res = false;
         }
     }
@@ -364,10 +402,29 @@ bool TextDocument::save()
 // *************************************************************************************************
 bool TextDocument::saveAs(std::string const& filename)
 {
+  LOGI("TextDocument saving as '%s'", m_filename);
   std::string title = filename.substr(filename.find_last_of("/") + 1);
   m_button.title(title);
   m_filename = filename;
   return TextDocument::save();
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool TextDocument::close()
+{
+  bool res = true;
+
+  if (isModified())
+    {
+      res = save();
+    }
+  if (res)
+    {
+      m_button.close();
+    }
+  return res;
 }
 
 // *************************************************************************************************
@@ -390,7 +447,17 @@ bool TextDocument::load(std::string const& filename, bool clear)
 
   infile.open(filename, std::fstream::in);
   if (!infile)
-    return false;
+    {
+      std::string why = strerror(errno);
+      LOGF("could not open the file '%s' reason was '%s'",
+           filename, why.c_str());
+      Gtk::MessageDialog dialog((Gtk::Window&) (*m_textview.get_toplevel()),
+                                "Could not load '" + filename + "'",
+                                false, Gtk::MESSAGE_WARNING);
+      dialog.set_secondary_text("Reason was: " + why);
+      dialog.run();
+      return false;
+    }
 
   while (std::getline(infile, line))
     {
@@ -418,6 +485,8 @@ TextEditor::TextEditor()
     m_gotolinewindow(nullptr),
     m_nb_nonames(0)
 {
+  LOGI("Creating TextEditor");
+
   // Menus '_Documents'
   {
     m_menuitem[simtadyn::TextMenu].set_label("Text _Editor");
@@ -472,24 +541,62 @@ TextEditor::TextEditor()
 // *************************************************************************************************
 TextEditor::~TextEditor()
 {
-  TextEditor::saveAll();
+  LOGI("Destroying TextEditor");
+  TextEditor::closeAll();
 }
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void TextEditor::saveAll()
+bool TextEditor::saveAll()
 {
+  bool all_saved = true;
+
   for (int k = 0; k < m_notebook.get_n_pages(); ++k)
     {
       m_notebook.set_current_page(k);
       TextDocument *doc = TextEditor::document();
-      if (nullptr != doc)
+      if ((nullptr != doc) && (doc->isModified()))
         {
-          if (doc->isModified())
-            dialogSave(doc);
+          all_saved &= dialogSave(doc);
         }
     }
+
+  return all_saved;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool TextEditor::close()
+{
+  bool res = false;
+  TextDocument *doc = TextEditor::document();
+
+  if ((nullptr != doc) && (doc->isModified()))
+    {
+      res = dialogSave(doc, true);
+    }
+  return res;
+}
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool TextEditor::closeAll()
+{
+  bool all_closed = true;
+
+  for (int k = 0; k < m_notebook.get_n_pages(); ++k)
+    {
+      m_notebook.set_current_page(k);
+      TextDocument *doc = TextEditor::document();
+      if ((nullptr != doc) && (doc->isModified()))
+        {
+          all_closed &= dialogSave(doc, true);
+        }
+    }
+  return all_closed;
 }
 
 // *************************************************************************************************
@@ -524,7 +631,7 @@ TextDocument* TextEditor::document(const uint32_t i)
 // to prevent the user and depending on the user choice save or not the document.
 // Return a bool if the document has been correctly saved.
 // *************************************************************************************************
-bool TextEditor::dialogSave(TextDocument *doc)
+bool TextEditor::dialogSave(TextDocument *doc, const bool closing)
 {
   // FIXME: faire apparaitre avant de tuer la fenetre principale sinon le dialog peut etre cache par d'autres fentres
   Gtk::MessageDialog dialog((Gtk::Window&) (*m_notebook.get_toplevel()),
@@ -551,6 +658,11 @@ bool TextEditor::dialogSave(TextDocument *doc)
     }
   else // other button
     {
+      if (closing)
+        {
+          doc->modified(false);
+          return true;
+        }
       return !doc->isModified();
     }
 }
@@ -562,6 +674,9 @@ bool TextEditor::saveAs(TextDocument *doc)
 {
   Gtk::FileChooserDialog dialog("Please choose a file to save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
   dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
+
+  // Set to the SimTaDyn path while no longer the GTK team strategy.
+  dialog.set_current_folder(Config::instance().m_data_path);
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -606,6 +721,9 @@ bool TextEditor::open()
 {
   Gtk::FileChooserDialog dialog("Please choose a file to open", Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
+
+  // Set to the SimTaDyn path while no longer the GTK team strategy.
+  dialog.set_current_folder(Config::instance().m_data_path);
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -679,7 +797,7 @@ void TextEditor::empty(std::string const& title)
 
   ++m_nb_nonames;
   doc->m_button.title(title + ' ' + std::to_string(m_nb_nonames));
-  doc->m_button.link(&m_notebook, doc);
+  doc->m_button.link(this, doc);
 
   m_notebook.append_page(*doc, doc->m_button);
   m_notebook.show_all();
@@ -729,7 +847,7 @@ TextDocument *TextEditor::addTab()
   m_notebook.append_page(*doc, doc->m_button);
   m_notebook.show_all();
   m_notebook.set_current_page(-1);
-  doc->m_button.link(&m_notebook, doc);
+  doc->m_button.link(this, doc);
   return doc;
 }
 
