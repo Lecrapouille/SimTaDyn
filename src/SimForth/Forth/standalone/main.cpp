@@ -121,7 +121,7 @@ int main(int argc,char *argv[])
 
         // Pretty print the dictionary
       case 'p':
-        forth.dictionary().display(*color);
+        forth.displayDictionary(*color);
         break;
 
         // Interactive mode

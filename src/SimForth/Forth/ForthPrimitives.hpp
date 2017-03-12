@@ -1,6 +1,8 @@
 #ifndef FORTH_PRIMITIVES_HPP_
 #  define FORTH_PRIMITIVES_HPP_
 
+#define FORTH_DICO_ENTRY(a) a, ((sizeof a) - 1U)
+
 enum ForthPrimitives
   {
     // Dummy word and comments
@@ -137,9 +139,7 @@ enum ForthPrimitives
     // Files
     FORTH_PRIMITIVE_INCLUDE,
 
-    NUM_PRIMITIVES
+    FORTH_MAX_PRIMITIVES
   };
-
-// TODO: ASSERT_COMPILE_TIME(NUM_PRIMITIVES < sizeof (Cell16))
 
 #endif /* FORTH_PRIMITIVES_HPP_ */

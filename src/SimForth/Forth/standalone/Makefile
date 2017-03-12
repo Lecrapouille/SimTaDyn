@@ -22,15 +22,15 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I.. -I../../.. -I../../../Common -I../../../Common/SharedLibrary
+INCLUDES = -I. -I.. -I../../.. -I../../../Common -I../../../SimTaDyn -I../../../Common/SharedLibrary -I../../../../tools
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):..:../../../Common:../../../Common/SharedLibrary
+VPATH=.:$(BUILD):..:../../../Common:../../../SimTaDyn:../../../Common/SharedLibrary:../../../../tools
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_POCO       = Exception.o SharedLibrary_UNIX.o SharedLibrary.o
+OBJECTS_POCO       = Backward.o Logger.o SimTaDynLogger.o Exception.o SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
 OBJECTS_STANDALONE = TextColor.o
 OBJECTS            = $(OBJECTS_POCO) $(OBJECTS_FORTH) $(OBJECTS_STANDALONE) main.o
@@ -40,7 +40,7 @@ TARGET             = SimForth
 # Compil options
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11
-LDFLAGS = -ldl
+LDFLAGS = -ldl -ldw
 DEFINES =
 
 ###################################################

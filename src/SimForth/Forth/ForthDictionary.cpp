@@ -389,7 +389,7 @@ std::string ForthDictionary::displayToken(const Cell16 token) const
 // **************************************************************
 //
 // **************************************************************
-void ForthDictionary::display(TextColor& color) const
+void ForthDictionary::display(TextColor& color, const int max_primitives) const
 {
   int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping, skip;
   bool smudge, immediate;
@@ -428,7 +428,7 @@ void ForthDictionary::display(TextColor& color) const
         color.yellow();
       else if (smudge)
         color.grey();
-      else if (code < NUM_PRIMITIVES)
+      else if (code < max_primitives)
         color.blue();
       else
         color.red();
@@ -446,7 +446,7 @@ void ForthDictionary::display(TextColor& color) const
       def_length = prev - ptr - length - 3U;
 
       // primitive
-      if (code < NUM_PRIMITIVES)
+      if (code < max_primitives)
         {
           color.white();
           std::cout << color << "primitive" << std::endl;
@@ -505,7 +505,7 @@ void ForthDictionary::display(TextColor& color) const
               dd += 2U;
 
               // Not a primitive: display the name
-              if (token >= NUM_PRIMITIVES)
+              if (token >= max_primitives)
                 {
                   std::pair<bool, int32_t> res = find(token, true);
                   if (!res.first)
@@ -665,7 +665,7 @@ void ForthDictionary::checkBounds(const uint32_t addr, const int32_t nb_bytes) c
 //! address.
 //! \param addr the desired dictionary address.
 //! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// FIXME: au lieu de addr >= &m_dictionary[NUM_PRIMITIVES]
+// FIXME: au lieu de addr >= &m_dictionary[maxPrimitives()]
 // faire addr >= &m_dictionary[m_last + m_last_def_size]
 // **************************************************************
 void ForthDictionary::write8at(const uint32_t addr, const Cell32 data)

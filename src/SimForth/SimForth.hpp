@@ -2,6 +2,7 @@
 #  define SIMFORTH_HPP_
 
 #  include "Forth.hpp"
+#  include "SimForthPrimitives.hpp"
 #  include "Singleton.hpp"
 //#  include <list> of dictionaries ?
 
@@ -25,6 +26,26 @@ public:
 
   SimForthDictionary m_dictionaries;
   NoColor m_color;
+
+protected:
+
+  virtual inline uint32_t maxPrimitives() const
+  {
+    return SIMFORTH_MAX_PRIMITIVES;
+  }
+
+  virtual void execPrimitive(const Cell16 idPrimitive) override
+  {
+    switch (idPrimitive)
+      {
+      case SIMFORTH_PRIMITIVE_TOTO:
+        std::cout << "TOTOTOTOTO\n";
+        break;
+      default:
+        Forth::execPrimitive(idPrimitive);
+        break;
+      }
+  }
 
 private:
 

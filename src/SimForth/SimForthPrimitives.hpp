@@ -1,0 +1,12 @@
+#ifndef SIMFORTHPRIMITIVES_HPP_
+#  define SIMFORTHPRIMITIVES_HPP_
+
+#  include "ForthPrimitives.hpp"
+
+enum SimForthPrimitives
+  {
+    SIMFORTH_PRIMITIVE_TOTO = FORTH_MAX_PRIMITIVES,
+    SIMFORTH_MAX_PRIMITIVES
+  };
+
+#endif /* SIMFORTHPRIMITIVES_HPP_ */

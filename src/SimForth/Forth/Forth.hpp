@@ -36,7 +36,7 @@ public:
   std::pair<bool, std::string> interpreteString(std::string const& code_fort,
                                                 std::string const& name = "<string>");
   //! \brief interprete a Forth script stored as a char*.
-  std::pair<bool, std::string> interpreteString(const char* const code_forth,
+  virtual std::pair<bool, std::string> interpreteString(const char* const code_forth,
                                                 std::string const& name = "<string>");
   //! \brief interprete a Forth script stored in an ascii file.
   std::pair<bool, std::string> interpreteFile(std::string const& filename);
@@ -64,7 +64,11 @@ public:
   {
     return m_streams_stack[m_err_stream].name();
   }
-
+  //!
+  void displayDictionary(TextColor& color)
+  {
+    dictionary().display(color, maxPrimitives());
+  }
 protected:
   //! \brief Create the header of a Forth word in the dictionary.
   void create(std::string const& word);
@@ -88,9 +92,9 @@ protected:
   //! \brief Parse an included file when parsing a Forth script.
   void includeFile(std::string const& filename);
   //! \brief Perform the action of a Forth primitive.
-  void execPrimitive(const Cell16 idPrimitive);
+  virtual void execPrimitive(const Cell16 idPrimitive);
   //! \brief Perform the action of a Forth token (byte code).
-  void execToken(const Cell16 token);
+  virtual void execToken(const Cell16 token);
   //! \brief Return the depth of the return stack.
   inline int32_t RStackDepth() const
   {
@@ -101,10 +105,14 @@ protected:
   {
     return m_dsp - m_data_stack;
   }
-  //! \brief Return the token is a Forth primitive (or a user defined word).
-  inline bool isPrimitive(const Cell16 token) const
+  virtual inline uint32_t maxPrimitives() const
   {
-    return /*(token >= 0) &&*/ (token < NUM_PRIMITIVES);
+    return FORTH_MAX_PRIMITIVES;
+  }
+  //! \brief Return the token is a Forth primitive (or a user defined word).
+  virtual inline bool isPrimitive(const Cell16 token) const
+  {
+    return /*(token >= 0) &&*/ (token < maxPrimitives());
   }
   //! \brief Check if the data stack is not under/overflowing.
   void isDStackUnderOverFlow() const;
