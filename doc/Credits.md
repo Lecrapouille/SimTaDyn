@@ -2,13 +2,22 @@
 
 SimTaDyn got its inspiration from the following documents:
 
-## Spreadsheet GIS
+## GIS as Spreadsheet
 
 * [Excel GIS](http://scholarworks.umb.edu/cgi/viewcontent.cgi?article=1004&context=management_wp)
 The project with the closest idea to my project but here used as rasterized map.
 
 * [Map Algebra](https://www.nrem.iastate.edu/files/w11-MapAlgebra_presentation5.pdf)
 The algebra used in rasterized maps.
+
+## Spreadsheet
+
+* https://github.com/rohitsinha54/Spreadsheet-Calculator
+A simple textual spreadsheet calculator in Java.
+
+* http://www.cs.sjsu.edu/~pearce/modules/cases/ss/ss.htm
+A simple spreasheet made for explaining how observers work.
+
 
 ## Forth
 
@@ -46,6 +55,9 @@ Powerful graph vizualisation in JS and WebGL.
 
 * [The Stanford slib](http://stanford.edu/~stepp/cppdoc/BasicGraph-class.html)
 A complete class for graph written in C++.
+
+* [graphosaurus](https://github.com/frewsxcv/graphosaurus)
+D graph viewer powered by WebGL with three.js
 
 * [rocs](https://github.com/KDE/rocs)
 Is a graph IDE written in C++ and QT mixing a drawn interface with a scripting module manipulating the drawn graph. The script is QtScript Java Script. This IDE is the closest idea to SimTaDyn.
@@ -102,25 +114,28 @@ Fork of the previous link (better look)
 
 ## Drawing cities and streets
 
-* [glosm](https://github.com/AMDmi3/glosm)
-C++ and OpenGL legacy for displaying in 3D Openstreet map files.
+* [City Building](https://www.binpress.com/tutorial/creating-a-city-building-game-with-sfml/137) and the [github](https://github.com/dbMansfield/citybuilder)
+Creating a City Building Game with SFML
+
+* [glosm](https://github.com/Dimitri1/glosm)
+C++ and OpenGL legacy for displaying in 3D Openstreet map files with french pdf docs.
 
 * [Curved Path](http://www.redblobgames.com/articles/curved-paths/)
 
 * [Smooth thick lines using geometry shader](https://forum.libcinder.org/topic/smooth-thick-lines-using-geometry-shader)
 
-## OpenGL and 2D lib
+## OpenGL tutorials and 2D libraries
 
 * [SFML](http://www.sfml-dev.org/index-fr.php)
-Simple and Fast Multimedia Library:
+Simple and Fast Multimedia Library.
 
-## GTK
+* http://loulou.developpez.com/tutoriels/moteur3d/
 
-* [Ganv](http://drobilla.net/software/ganv)
-Gtk widget for interactive graph-like environments.
+* http://opengl.developpez.com/tutoriels/open_gl/
 
-* [jucipp](https://github.com/cppit/jucipp)
-Code source Editor with gtksourceviewmm.
+* https://learnopengl.com/
+
+* http://www.opengl-tutorial.org/
 
 ## Forth and OpenGL, GTK, SQL
 
@@ -129,6 +144,14 @@ Code source Editor with gtksourceviewmm.
 * Forth and Legacy OpenGL [tutorials](https://groups.google.com/forum/#!topic/comp.lang.forth/NzgOg9ljXQQ)
 
 * PDF [Forth and SQL](http://www.complang.tuwien.ac.at/anton/euroforth/ef13/papers/nelson.pdf) and [sources](https://groups.google.com/forum/#!topic/comp.lang.forth/EsC4u6cNX-I)
+
+## GTK
+
+* [Ganv](http://drobilla.net/software/ganv)
+Gtk widget for interactive graph-like environments.
+
+* [jucipp](https://github.com/cppit/jucipp)
+Code source Editor with gtksourceviewmm.
 
 ## Code
 
@@ -141,9 +164,6 @@ Modern, powerful open source C++ class libraries for building network- and inter
 
 * Mutual Registration: A Pattern for Ensuring Referential Integrity in Bidirectional Object Relationships:
 (http://hillside.net/europlop/HillsideEurope/Papers/EuroPLoP1999/1999_Henney_MutualRegistration.pdf)
-
-* A simple spreasheet with observer but unfortunatly
-(http://www.cs.sjsu.edu/~pearce/modules/cases/ss/ss.htm)
 
 * GameDev:
 (http://www.gamedev.net/page/resources/_/technical/game-programming/effective-event-handling-in-c-r2459)
