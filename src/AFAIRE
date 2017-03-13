@@ -1,61 +1,116 @@
-Pouvoir changer le titre d'un onglet Forth. Tout comme pour les boutons Forth (bouton droit ==> change_title). Les boutons ne sont pas sauves dans un fichier texte du coup on perd les modifs.
+======================================================
+GENERAL:
 
-Est ce utile de faire correspondre le nombre d'elements d'un noeud RTree avec celle d'un slots d'un container de graphe ?
+[HIGH] Cas pathologique a tester: executer un gros script Forth qui prend du temps. Pendant l'execution: cliquer sur un tab du notebook ou alors ajouter du code dans le script. Normalement ca doit crasher: car changer le note faite changer le buffer a lire donc pas coole e pleine interpretation. Idee: figer le notebook et mettre le code en read-only (changer de couleur: passer en gris). Meme probleme pour la carte avec les references: carte -POINTE--> SimForth -POINTE-->carte.
+
+[MEDIUM] Ameliorer les redirections des cout/cerr dans les notebook/statusbar. Idee! dans Forth faire une virtual methode my_cout() pour le mot FORTH . et dans SimForth on redefini my_cout() pour afficher dans un notebook.
+
+[MEDIUM] gtkmm::ganv pour faire des widgets graph
+
+[LOW] Faire des standalone (rtree, loader) pour verifier les fuites de memoires
+
+[LOW] Faire une liste chainee de logger pour afficher a l'ecran une erreur (pour l'instant le hack actuel suffit pour afficher dans le log et a l'ecran)
+
+======================================================
+FILE:
+[HIGH] Se faire son propore fichier SimTaDyn (extension pak).
+[HIGH] Shapefile: exporter et import gerer leur formet de BDD et gerer les autres champs (lines ...)
+[MEDIUM] Ajouter des formats import/export: OpenStreetMap, MapInfo, Scilab. Sauvegarder dans SQL.
+
+======================================================
+GUI:
+[MEDIUM] Il manque les racourcis Ctr-S save Ctr-O open ... (on a que les accelerateurs)
+[MEDIUM] Repenser l'interface (deux fenetres: map et forth). Repnser les notebooks: peut pratiques. Statusbar inutile. Fenetre detachable entre opengl et Forth, dictionaire ?
+[LOW] Afficher colonne et lignes des fichiers textes
+[LOW] Boutons Forth et Map peuvent ils etre detachables comme les notebook ?
+[MEDIUM] Boutons Forth: bouton droit ==> ouvre une popup pour modifier les champs (noms, script, help)
+[MEDIUM] Bouton Forth doivent etre sauvegardes dans un script sinon ils seront perdus lors de la femruture de SimTaDyn.
+
+======================================================
+FORTH EDITOR
+[MEDIUM] bouton droit sur un INCLUDE => ouvre le fichier
+[MEDIUM] bouton droit sur un mot ==> ouvre la definition
+[MEDIUM] Faire l'history et gerer des touches pour remonter dans l'history buffer du Forth
+[MEDIUM] Colorier en gris quand un fichier est en read only.
+[MEDIUM] Quand un autre editeur de texte modifie le fichier texte ouvert dans simtadyn. Faire une popup: refresh.
+[MEDIUM] Ne pas effacer la fenetre sauf si fenetre interactive. On peut ajouter des widgets faire une sorte de QT console/python jupiter
+[MEDIUM] Finir l'affichage du dico forth dans la fenetre gtktreeview.
+[MEDIUM] Finir l'affichage de la pile forth
+[MEDIUM] Auto-Completion des mots forth: afficher la fenetre des possibilites
+[MEDIUM] Auto-Completion des mots forth: optimiser la fonction de recherche car pour le moment elle parcourt deux fois tout le dico.
+[MEDIUM] Corriger le code de l'event on_text_inserted pour colorier le code Forth car ca ne colorie que le dernier mot.
+
+======================================================
+FORTH:
+[CRITICAL] Optimiser les boucles gagner un facteur 30 sur la vitesse.
+[HIGH] Idee de FreeForth: pas d'execution mais compilation dans une fonction anonyme. Ce qui permettrait de pouvoir compiler du code dans des cellules.
+[HIGH] Donner un nom aux dico
+[HIGH] Finir le DOES> puis faire struct, string
+[HIGH] Ajouter des piles: alternatives, float (et queue pour le parcours de graph ?)
+[HIGH] Utiliser les :: de reforth ? Forth Objet ?
+
+======================================================
+SIMFORTH:
+[LOW] ko sur les couleurs avec les noms des cellules (elles sont non reconnues).
+[LOW] Ne pas faire de recherche de mots forth connus dans un commentaire Forth
+[HIGH] Utiliser glibmm/Modules pour charger des .so et ajouter des lib externes a Forth. Faire les mots Forth pour charger/decharger.
+[HIGH] faire des mots Forth sur le grap: select/add/remove graph/node/arcs. 
+[HIGH] Faire des mots Forth SQL: select, where ...
+[HIGH] Ajuter des mots de creation de maps: grid, vonoid
+
+======================================================
+GRAPH:
+[CRITICAL] Corriger les containers: les iterateurs marchent mals. Faire des iterators style ParcoursProfondeur.
+[HIGH] Faire une class iterator sur le graph avec different type de parcours (long our larg) en indiquant ou pas le noeud ou arc de depart.
+http://linuxfr.org/news/je-cree-mon-jeu-video-e01-les-systemes-a-entites
+[MEDIUM] Interfacer traffic routier
+[HIGH] RTree est un index statique pas dynamique: comment faire si l'on fait bouger un graph ?
+[TBD] Est ce utile de faire correspondre le nombre d'elements d'un noeud RTree avec celle d'un slots d'un container de graphe ?
 Ca permettrait de stocker uniquement un noeud de rtree dans la carte graphique ? Je pense que c'est une mauvaise ideee mais en gros:
 Iterator sur RTree ==> load index dans la carte graphique. Mais il faudrait lui donner un boolean pour prendre en compte ou pas le champ au shader.
 
-Faire une class iterator sur le graph avec different type de parcours (long our larg) en indiquant ou pas le noeud ou arc de depart.
-http://linuxfr.org/news/je-cree-mon-jeu-video-e01-les-systemes-a-entites
-Reprendre le tuto pour avoir une class Vector generique
-Forth dans une cellule: verifier que les piles n'ont pas changees de profondeur lors de l'execution d'une cellule ==> force a utiliser le resultat dans un champ d'une cellule
-Forth: idee de FreeForth de Lavaranne: pas d'execution mais compilation dans une fonction anonyme. Ce qui permettrait de pouvoir compiler du code dans des cellules.
-VivaGraph: a a jouter des signaux sur le graph: onAddNode, onChnaged... Idee pour appeller du code Forth ?
-Racourcis Ctr-S save Ctr-O open dans l'editeur de texte.
-Completion des mots forth: afficher la fenetre des possibilites + optimiser la fonction de recherche pour eviter qu'elle parcourt deux fois tout le dico.
-Faire des touches pour remonter dans l'history buffer du Forth
-De meme bouton droit sur un INCLUDE => ouvre le fichier
-De meme bouton droit sur un mot ==> ouvre la definition
-Quand qq modifie le fichier associe au notebook. Faire une popup: refresh.
-Colorier en gris quand un fichier est en read only.
-Ameliorer les redirections des cout/cerr dans les notebook/statusbar et mieux repenser la position des notebooks
-Fenetre detachable entre opengl et Forth, dictionaire ?
-Boutons Forth et Map peuvent ils etre detachables comme les notebook ?
-Statusbar suxx + afficher colonne du fichier
-Finir l'affichage du dico forth dans la fenetre gtktreeview.
-Ajouter des mots ON_REALIZE ... Exemple: void SimTaDynWindow::onRealize() ajouter if (exists("ON_REALIZE") { exec("ON_REALIZE"); }
-qui permettront de lancer des petits scripts
-Ne pas effacer la fenetre sauf si fenetre interactive. On peut ajouter des widgets faire une sorte de QT console
+======================================================
+BDD
+[HIGH]Ajouter un visiteur pour gerer la base de donnees ? http://blog.arkey.fr/2010/05/06/les-visiteurs-une-question-de-nommage-et-le-double-dispatch/
 
-fontes X11 opengl
-gtkmm::ganv pour faire des widgets graph
-Faire des standalone (rtree, loader) pour verifier les fuites de memoires
+======================================================
+OPENGL
+[MEDIUM] fontes X11 et textures opengl a refaire
+[LOW] Reprendre le tuto pour avoir une class Vector 2d/3d templated + union avec un tableau
 
-Test creer des gros fichiers textes et voir si mes std::string sont biens passes en argument dans mes fonctions c++ et non pas copies
-Fichier de 100 lignes de 4 mots
-ruby -e 'a=STDIN.readlines;100.times do;b=[];4.times do; b << a[rand(a.size)].chomp end; puts b.join(" "); end' < /usr/share/dict/words > file.txt
+======================================================
+MAP EDITOR
+[HIGH] Faire des layers/feuilles comme pour Excel: un layer = 1 champ de la BDD 
+[HIGH] Changement de base: Souris to Camera
+[HIGH] Gestion de la camera: zoom, deplacement.
+[HIGH] Faire les boutons ajouter/supprimer/selectionner noeuds/arcs.
+[HIGH] Ajouter le entryText a la Excel pour ajouter du code Forth dans les cellules. Idee: au lieu d'un simple text faire une grille de la base de donnee <nom du champ><type><entry text>. Exemple:
+<Nombre d'habitant><int><1000>
+<Code forth><string><"1 1 +">
 
-ii  libgtk-3-0:i386                         3.18.9-1ubuntu3.1        i386                     GTK+ graphical user interface library
-ii  libgtk2.0-0:i386                        2.24.30-1ubuntu1         i386                     GTK+ graphical user interface library
+[HIGH] Afficher en rouge les scripts forths ko dans la map. ForthEditor affiche une erreur et on peut cliquer sur l'erreur ca zoom sur la cellule ko (ou alors on ouvre un notebook pour editoer le code).
+[HIGHG] Le type d'erreur CellForth a gerer: pile non vide a la fin du script. Circular reference, unknown word/cell.
 
+======================================================
+MAPS
+[MEDIUM] Ajouter des mots ON_REALIZE ON_NODE_ADDED, ON_NODE_MOVED... Exemple: void SimTaDynWindow::onRealize() ajouter if (exists("ON_REALIZE") { exec("ON_REALIZE"); }
+qui permettront de lancer des petits scripts utilisateurs.
+[MEDIUM] Gerer les zones, les trianguler, envelopper des nuages de points. Adapter les arcs pour faire des polypoints et beziers.
+
+======================================================
+APPLICATIF
+[LOW] Reprendre le dessinateur 3D d'openStreetMap, mon projet de voiture, la demo webgl de traffic, le tutoriel de SimCity en SMFL, les slides de SimCity et faire un simcity.
 
 
-==9985== 232 bytes in 1 blocks are definitely lost in loss record 20,379 of 21,291
-==9985==    at 0x402D6BC: operator new(unsigned int) (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==9985==    by 0x807FE64: SimTaDynGraph::SimTaDynGraph() (SimTaDynGraphs.hpp:34)
-==9985==    by 0x807F035: MapEditor::MapEditor() (MapEditor.cpp:8)
-==9985==    by 0x808251F: SimTaDynWindow::SimTaDynWindow(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (SimTaDynWindow.cpp:10)
-==9985==    by 0x8087A40: main (main.cpp:13)
 
-==9985== 6 bytes in 1 blocks are definitely lost in loss record 701 of 21,291
-==9985==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==9985==    by 0x5806228: g_malloc (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
-==9985==    by 0x581F67D: g_strdup (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
-==9985==    by 0x5CA2C20: ??? (in /usr/lib/i386-linux-gnu/libgio-2.0.so.0.4800.1)
-==9985==    by 0x5C9203E: ??? (in /usr/lib/i386-linux-gnu/libgio-2.0.so.0.4800.1)
-==9985==    by 0x57FD5FF: ??? (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
-==9985==    by 0x5800D8A: g_main_context_dispatch (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
-==9985==    by 0x5801178: ??? (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
-==9985==    by 0x5801528: g_main_loop_run (in /lib/i386-linux-gnu/libglib-2.0.so.0.4800.1)
-==9985==    by 0x50AF412: gtk_dialog_run (in /usr/lib/i386-linux-gnu/libgtk-3.so.0.1800.9)
-==9985==    by 0x43848F0: Gtk::Dialog::run() (in /usr/lib/i386-linux-gnu/libgtkmm-3.0.so.1.1.0)
-==9985==    by 0x8074354: TextEditor::open() (TextEditor.cpp:630)
+
+
+
+
+
+
+
+
+
+
+

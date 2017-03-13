@@ -1,4 +1,4 @@
-### Credits
+# Credits
 
 SimTaDyn got its inspiration from the following documents:
 
