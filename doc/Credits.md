@@ -1,4 +1,4 @@
-# Credits
+### Credits
 
 SimTaDyn got its inspiration from the following documents:
 
@@ -153,14 +153,24 @@ Gtk widget for interactive graph-like environments.
 * [jucipp](https://github.com/cppit/jucipp)
 Code source Editor with gtksourceviewmm.
 
-## Code
+## Libraries
 
-# Lib
+### General lib
 
 * [POCO](https://pocoproject.org/)
 Modern, powerful open source C++ class libraries for building network- and internet-based applications that run on desktop, server, mobile and embedded systems.
 
-# Observer / Event handler
+### Trace function calls when segfault
+
+* [Backward-cpp](https://github.com/bombela/backward-cpp)
+Abeautiful stack trace pretty printer for C++. Used with success for this project.
+
+* [Stacktrace](https://panthema.net/2008/0901-stacktrace-demangled/)
+A light tool made in few line.
+
+## Design and coding
+
+### Observer / Event handler
 
 * Mutual Registration: A Pattern for Ensuring Referential Integrity in Bidirectional Object Relationships:
 (http://hillside.net/europlop/HillsideEurope/Papers/EuroPLoP1999/1999_Henney_MutualRegistration.pdf)
@@ -180,23 +190,15 @@ Modern, powerful open source C++ class libraries for building network- and inter
 * Link:
 (http://stackoverflow.com/questions/26833920/observer-pattern-with-different-notifications)
 
-# Counting Instances
+### Counting Instances
 
 * DrDobb's:
 (http://www.drdobbs.com/cpp/counting-objects-in-c/)
 
-# Memory
+### Memory
 
 * (https://www.ibm.com/developerworks/aix/tutorials/au-memorymanager/)
 
-# Trace function calls when segfault
-
-* [Backward-cpp](https://github.com/bombela/backward-cpp)
-Abeautiful stack trace pretty printer for C++. Used with success for this project.
-
-* [Stacktrace](https://panthema.net/2008/0901-stacktrace-demangled/)
-A light tool made in few line.
-
-# cout redirection
+### cout redirection
 
 * (http://gtk.10911.n7.nabble.com/Redirecting-cout-to-a-TextBuffer-td42437.html)
