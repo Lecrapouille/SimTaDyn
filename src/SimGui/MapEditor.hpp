@@ -17,8 +17,8 @@ public:
 
   inline void newEmptyMap()
   {
-    SimTaDynMap *map = new SimTaDynMap();
-    m_maps.insert(map);
+    SimTaDynMap *m_current_map = new SimTaDynMap();
+    m_maps.insert(m_current_map);
   }
   inline void openMap()
   {
@@ -49,6 +49,11 @@ public:
   }
   void closeMap();
   bool selectMap(const Key id);
+
+  SimTaDynMap* map()
+  {
+    return m_current_map;
+  }
 
   Gtk::MenuItem          m_menuitem[simtadyn::MaxMapMenuNames + 1];
   Gtk::Menu              m_menu[simtadyn::MaxMapMenuNames + 1];

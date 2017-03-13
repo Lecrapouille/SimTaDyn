@@ -180,6 +180,7 @@ void MapEditor::doOpen(std::string const& filename, const bool new_map, const bo
           m_maps.insert(map);
         }
       std::cerr << "Successfully loaded map '" << map->m_name << "'" << std::endl;
+      m_current_map = map;
       //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
       //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }
     }
