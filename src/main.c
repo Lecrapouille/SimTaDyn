@@ -232,7 +232,7 @@ main (int argc, char *argv[])
 
      printf("*==========================*\n");
      printf("|                          |\n");
-     printf("|   SIMTADYN Version 0.1   |\n");
+     printf("|   SIMTADYN Version 1.0   |\n");
      printf("|                          |\n");
      printf("*==========================*\n\n");
 

@@ -445,7 +445,7 @@ on_bt_execute_clicked                  (GtkButton       *button,
 
           secondes = g_timer_elapsed(guts.chrono, &microsecondes);
           buf = (gchar*) xmalloc(60*sizeof(gchar));
-          sprintf(buf, "Terminé en %g s (%lu ms)", secondes, microsecondes);
+          sprintf(buf, "Terminé en %g", secondes);
           gtk_statusbar_pop (GTK_STATUSBAR (statusbar), 1);
           gtk_statusbar_push (GTK_STATUSBAR (statusbar), 1, buf);
           g_free(buf);
