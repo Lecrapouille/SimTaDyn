@@ -56,7 +56,10 @@ public:
   bool removeNode(const Key nodeID);
 
   //! \brief
-  SimTaDynNode *getNode(const Key nodeID);
+  inline SimTaDynNode *getNode(const Key nodeID) const
+  {
+    return m_graph.getNode(nodeID);
+  }
 
   //! \brief
   virtual Key id() const override

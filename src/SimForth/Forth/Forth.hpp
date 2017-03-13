@@ -31,7 +31,7 @@ public:
   //! \brief Load all Forth primitives in the dictionary.
   virtual void boot();
   //! \brief interprete a new forth word extracted from a stream.
-  void interpreteWord(std::string const& word);
+  virtual void interpreteWord(std::string const& word);
   //! \brief interprete a Forth script stored as a string.
   std::pair<bool, std::string> interpreteString(std::string const& code_fort,
                                                 std::string const& name = "<string>");
@@ -70,6 +70,8 @@ public:
     dictionary().display(color, maxPrimitives());
   }
 protected:
+  virtual void interpreteWordCaseInterprete(std::string const& word);
+  virtual void interpreteWordCaseCompile(std::string const& word);
   //! \brief Create the header of a Forth word in the dictionary.
   void create(std::string const& word);
   //! \brief Get the Forth word in the stream.

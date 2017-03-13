@@ -419,91 +419,114 @@ bool Forth::toNumber(std::string const& word, Cell32& number) const
 }
 
 // **************************************************************
+//!
+// **************************************************************
+void Forth::interpreteWordCaseInterprete(std::string const& word)
+{
+  Cell32 number;
+  Cell16 token;
+  bool immediate;
+
+  if (m_dictionary.find(word, token, immediate))
+    {
+      if (m_trace) {
+        CPP_LOG(logger::Debug)
+          <<"\nExecute word '"
+          << word << "'" << "\n"; //<< std::endl;
+      }
+      execToken(token);
+    }
+  else if (toNumber(word, number))
+    {
+      if (m_trace) {
+        CPP_LOG(logger::Debug)
+          << "PUSH number " << word
+          << "\n"; // << std::endl;
+      }
+      DPUSH(number);
+      isDStackUnderOverFlow();
+    }
+  else
+    {
+      UnknownForthWord e(word); throw e;
+    }
+}
+
+// **************************************************************
+//!
+// **************************************************************
+void Forth::interpreteWordCaseCompile(std::string const& word)
+{
+  Cell32 number;
+  Cell16 token;
+  bool immediate;
+
+  if (m_dictionary.find(word, token, immediate))
+    {
+      if (immediate)
+        {
+          if (m_trace) {
+            CPP_LOG(logger::Debug)
+              << "\n" //<< std::endl
+              << "Execute immediate word '"
+              << word << "'" << "\n"; //<< std::endl;
+          }
+          execToken(token);
+        }
+      else
+        {
+          if (m_trace) {
+            CPP_LOG(logger::Debug)
+              << "Append new word '" << word
+              << "' in dictionary" << "\n"; //<< std::endl;
+          }
+          m_dictionary.appendCell16(token);
+        }
+    }
+  else if (toNumber(word, number))
+    {
+      if (m_trace) {
+        CPP_LOG(logger::Debug)
+          << "Append literal " << number
+          << "' in dictionary" << "\n"; //<< std::endl;
+      }
+
+      if (number <= 65535U)
+        {
+          m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_16);
+          m_dictionary.appendCell16(number);
+        }
+      else
+        {
+          m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_32);
+          m_dictionary.appendCell32(number);
+        }
+    }
+  else
+    {
+      UnknownForthWord e(word); throw e;
+    }
+}
+
+// **************************************************************
 //! \param word the Forth word extracted from the stream.
 //! \throw UnknownForthWord if the word does not exist in the
 //! dictionary and is not a number.
 // **************************************************************
 void Forth::interpreteWord(std::string const& word)
 {
-  Cell32 number;
-  Cell16 token;
-  bool immediate;
-
   if (m_trace) {
     LOGI("Forth interprete word '%s'", word.c_str());
   }
   if (forth::Interprete == m_state)
     {
-      if (m_dictionary.find(word, token, immediate))
-        {
-          if (m_trace) std::cout << std::endl << "Execute word '"
-                                 << word << "'" << "\n"; //<< std::endl;
-          execToken(token);
-        }
-      else if (toNumber(word, number))
-        {
-          if (m_trace) {
-            CPP_LOG(logger::Debug)
-              << "PUSH number " << word
-              << "\n"; // << std::endl;
-          }
-          DPUSH(number);
-          isDStackUnderOverFlow();
-        }
-      else
-        {
-          UnknownForthWord e(word); throw e;
-        }
+      interpreteWordCaseInterprete(word);
     }
   else if (forth::Compile == m_state)
     {
-      if (m_dictionary.find(word, token, immediate))
-        {
-          if (immediate)
-            {
-              if (m_trace) {
-                CPP_LOG(logger::Debug)
-                  << "\n" //<< std::endl
-                  << "Execute immediate word '"
-                  << word << "'" << "\n"; //<< std::endl;
-              }
-              execToken(token);
-            }
-          else
-            {
-              if (m_trace) {
-                CPP_LOG(logger::Debug)
-                  << "Append new word '" << word
-                  << "' in dictionary" << "\n"; //<< std::endl;
-              }
-              m_dictionary.appendCell16(token);
-            }
-        }
-      else if (toNumber(word, number))
-        {
-          if (m_trace) {
-            CPP_LOG(logger::Debug)
-              << "Append literal " << number
-              << "' in dictionary" << "\n"; //<< std::endl;
-          }
-
-          if (number <= 65535U)
-            {
-              m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_16);
-              m_dictionary.appendCell16(number);
-            }
-          else
-            {
-              m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_32);
-              m_dictionary.appendCell32(number);
-            }
-        }
-      else
-        {
-          UnknownForthWord e(word); throw e;
-        }
+      interpreteWordCaseCompile(word);
     }
-  else // COMMENT_STATE == m_state
+  else // forth::Comment == m_state
     {
       // Nothing to do ignore the word except end of comment
       if (0 == word.compare(")"))

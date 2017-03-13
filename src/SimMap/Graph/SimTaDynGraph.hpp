@@ -29,6 +29,9 @@ public:
     return m_name;
   }
 
+  // FIXME: temporary
+  Cell32 m_cost = 42;
+
 protected:
   inline void setName()
   {
@@ -63,6 +66,9 @@ public:
   {
     return m_name;
   }
+
+  // FIXME: temporary
+  Cell32 m_cost = 24;
 
 protected:
   inline void setName()
