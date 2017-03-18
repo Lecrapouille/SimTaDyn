@@ -27,8 +27,11 @@ bool SimForth::isACell(std::string const& word, Cell32& number)
   if (nullptr == map)
     return false;
 
-  // Forth word starting by A or N or Z
+  // Forth word starting by A# or N# or Z#
   if (('A' != word[0]) && ('N' != word[0]) && ('Z' != word[0]))
+    return false;
+
+  if ('#' != word[1])
     return false;
 
   // Get the unique ID
@@ -36,8 +39,8 @@ bool SimForth::isACell(std::string const& word, Cell32& number)
   try
     {
       std::size_t sz;
-      id = std::stoul(word.substr(1, word.length() - 1), &sz);
-      if (sz + 1 != word.length())
+      id = std::stoul(word.substr(2, word.length() - 2), &sz);
+      if (sz + 2 != word.length())
         return false;
     }
   catch (const std::invalid_argument& ia)
@@ -80,7 +83,7 @@ void SimForth::interpreteWordCaseInterprete(std::string const& word)
   if (isACell(word, number))
     {
       DPUSH(number);
-      isDStackUnderOverFlow();
+      isStackUnderOverFlow(forth::DataStack);
     }
   else
     {
@@ -110,4 +113,59 @@ void SimForth::interpreteWordCaseCompile(std::string const& word)
     {
       Forth::interpreteWordCaseInterprete(word);
     }
+}
+
+std::pair<bool, std::string> SimForth::interpreteCell(std::string const& code_forth,
+                                                      std::string const& name,
+                                                      Cell32& tos)
+{
+  m_err_stream = 0;
+  STREAM.loadString(code_forth, name);
+
+  // FIXME: should be called outside each cell: optimisation
+  // Disable compilation mode
+  //dictionary().smudge(":");
+  //dictionary().smudge("INCLUDE");
+
+LOGD("Avant Depth: %d", stackDepth(forth::DataStack));
+
+  // Run the Forth interpreter
+  int32_t depth_before = stackDepth(forth::DataStack);
+  auto res = parseStream();
+
+  // Enable compilation mode
+  //dictionary().smudge("INCLUDE");
+  //dictionary().smudge(":");
+
+  // Check the data stack depth does not change or is 1 after the
+  // end of the execution of the script.
+  if (res.first)
+    {
+LOGD("Apres Depth: %d", stackDepth(forth::DataStack));
+
+      int32_t depth_after = stackDepth(forth::DataStack);
+      int32_t depth = depth_after;// - depth_before;
+      if (1 == depth)
+        {
+          DPOP(tos);
+        }
+      else
+        {
+          std::string msg = "Stack depth changed during the interpretation of the cell '" + name;
+          if (depth > 0)
+            {
+              msg += "' probably you forget to store the result in the cell field";
+            }
+          else
+            {
+              msg += "' probably you poped the data stack too much";
+            }
+
+          res = std::make_pair(false, msg);
+        }
+    }
+
+  // FIXME ne pas laisser faire un std::cout
+  //ok(res);
+  return res;//.first;
 }

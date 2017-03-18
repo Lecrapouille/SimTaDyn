@@ -63,9 +63,9 @@ public:
   uint32_t addPluggin(const Glib::ustring& icon_name,
                       const std::string &script,
                       const std::string &help);
-  Gtk::ToolButton *addButon(const Gtk::BuiltinStockID icon,
-                            const std::string &script,
-                            const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
+  Gtk::ToolButton *addButton(const Gtk::BuiltinStockID icon,
+                             const std::string &script,
+                             const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
 
   Gtk::Notebook          m_res_notebooks[2]; // FIXME: attention collision de noms TextEditor::m_notebook
   Gtk::ScrolledWindow    m_scrolledwindow[4];

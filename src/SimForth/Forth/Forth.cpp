@@ -57,36 +57,18 @@ void Forth::abort(std::string const& msg)
 // **************************************************************
 //! \throw OutOfBoundStack is data stack underflows or overflows
 // **************************************************************
-void Forth::isDStackUnderOverFlow() const
+int32_t Forth::isStackUnderOverFlow(const forth::StackID id) const
 {
-  int32_t depth = DStackDepth();
+  int32_t depth = stackDepth(id);
   if (depth < -1)
     {
       // Underflow
-      OutOfBoundStack e(forth::DataStack, depth); throw e;
+      OutOfBoundStack e(id, depth); throw e;
     }
   else if (depth >= (int32_t) (STACK_SIZE - STACK_UNDERFLOW_MARGIN))
     {
       // Overflow
-      OutOfBoundStack e(forth::DataStack, depth); throw e;
-    }
-}
-
-// **************************************************************
-//! \throw OutOfBoundStack is data stack underflows or overflows
-// **************************************************************
-int32_t Forth::isRStackUnderOverFlow() const
-{
-  int32_t depth = RStackDepth();
-  if (depth < -1)
-    {
-      // Underflow
-      OutOfBoundStack e(forth::ReturnStack, depth); throw e;
-    }
-  else if (depth >= (int32_t) (STACK_SIZE - STACK_UNDERFLOW_MARGIN))
-    {
-      // Overflow
-      OutOfBoundStack e(forth::ReturnStack, depth); throw e;
+      OutOfBoundStack e(id, depth); throw e;
     }
   return depth;
 }
@@ -166,7 +148,7 @@ void Forth::create(std::string const& word)
   m_creating_word = word;
   m_last_at_colon = m_dictionary.m_last;
   m_here_at_colon = m_dictionary.m_here;
-  m_depth_at_colon = DStackDepth();
+  m_depth_at_colon = stackDepth(forth::DataStack);
 
   // Add it in the dictionary
   Cell16 token = m_dictionary.here() + word.size() + 3U; // 3U: flags + NFA
@@ -254,7 +236,7 @@ void Forth::execToken(const Cell16 tx)
       }
 
       // Data stack under/overflow ?
-      isDStackUnderOverFlow();
+      isStackUnderOverFlow(forth::DataStack);
 
       // Do not forget than non-primitive words have the
       // token EXIT to pop the return stack to get back
@@ -272,7 +254,7 @@ void Forth::execToken(const Cell16 tx)
         }
 
       // Return stack under/overflow ?
-      depth = isRStackUnderOverFlow();
+      depth = isStackUnderOverFlow(forth::ReturnStack);
       if (m_trace) {
         CPP_LOG(logger::Debug) << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack);
       }
@@ -444,7 +426,7 @@ void Forth::interpreteWordCaseInterprete(std::string const& word)
           << "\n"; // << std::endl;
       }
       DPUSH(number);
-      isDStackUnderOverFlow();
+      isStackUnderOverFlow(forth::DataStack);
     }
   else
     {

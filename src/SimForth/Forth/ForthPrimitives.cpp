@@ -56,7 +56,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_SEMICOLON:
       m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT);
       m_state = forth::Interprete;
-      if (m_depth_at_colon != DStackDepth())
+      if (m_depth_at_colon != stackDepth(forth::DataStack))
         {
           m_dictionary.m_last = m_last_at_colon;
           m_dictionary.m_here = m_here_at_colon;
@@ -426,7 +426,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_DEPTH:
       DPUSH(m_tos);
-      m_tos = DStackDepth();
+      m_tos = stackDepth(forth::DataStack);
       break;
 
       // nip ( a b -- b ) swap drop ;

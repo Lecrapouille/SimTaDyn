@@ -431,21 +431,21 @@ public:
 
   //! \brief
   //! Complexity is O(n).
-  inline void unmarkAllVisitedNodes()
+  inline void unmarkAll()
   {
     m_nodes.unmarkAll();
   }
 
   //! \brief
   //! Complexity is O(1).
-  inline void markVisitedNode(const Key nodeID)
+  inline void mark(const Key nodeID)
   {
     m_nodes.mark(nodeID);
   }
 
   //! \brief
   //! Complexity is O(1).
-  inline void unmarkVisitedNode(const Key nodeID)
+  inline void unmark(const Key nodeID)
   {
     m_nodes.unmark(nodeID);
   }
@@ -453,7 +453,7 @@ public:
   //! \brief
   //! Note: no security is made if arcID is invalid
   //! Complexity is O(1).
-  inline bool nodeHasBeenVisited(const Key nodeID)
+  inline bool alreadyMarked(const Key nodeID)
   {
     return m_nodes.isMarked(nodeID);
   }
@@ -668,7 +668,5 @@ protected:
   //! \brief create a unique identifier for arcs.
   Key m_arc_unique = 0;
 };
-
-void depthFirstSearch(BasicGraph<BasicNode, BasicArc> *const graph, const Key satrtNodeID);
 
 #endif /* BASIC_GRAPH_HPP_ */

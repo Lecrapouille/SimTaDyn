@@ -521,7 +521,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 
   if (res.first)
     {
-      LOGE("Failed executing script '%s'", filename);
+      LOGI("Succeeded executing script '%s'", filename);
 
       m_elapsed_time = std::chrono::duration_cast<ns>(t1 - t0);
       m_statusbar.push(elapsedTime());
@@ -539,7 +539,8 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
     }
   else
     {
-      LOGI("Succeeded executing script '%s'", filename);
+      LOGE("Failed executing script '%s'", filename);
+
       // Text view: indiquer ligne ko
       m_statusbar.push("FAILED");
 
@@ -639,9 +640,9 @@ void ForthEditor::exec()
 // FIXME: ajouter le postip avec la definiton du mot "WORD ( n1 n2 -- n3 n4 )"
 // FIXME ne pas autoriser a compiler
 // **************************************************************
-Gtk::ToolButton *ForthEditor::addButon(const Gtk::BuiltinStockID icon,
-                                       const std::string &script,
-                                       const std::string &help)
+Gtk::ToolButton *ForthEditor::addButton(const Gtk::BuiltinStockID icon,
+                                        const std::string &script,
+                                        const std::string &help)
 {
   Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
 

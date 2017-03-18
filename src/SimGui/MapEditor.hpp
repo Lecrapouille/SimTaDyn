@@ -47,6 +47,8 @@ public:
   {
     // TODO
   }
+  bool execMap();
+  void execMap2() { execMap(); } // FIXME temporary
   void closeMap();
   bool selectMap(const Key id);
 

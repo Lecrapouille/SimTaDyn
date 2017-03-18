@@ -23,6 +23,9 @@ class SimForth : public Forth, public Singleton<SimForth>
 public:
 
   virtual void boot() override;
+  std::pair<bool, std::string> interpreteCell(std::string const& code_forth,
+                                              std::string const& name,
+                                              Cell32& tos);
 
   SimForthDictionary m_dictionaries;
   NoColor m_color;

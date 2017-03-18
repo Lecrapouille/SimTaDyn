@@ -98,15 +98,23 @@ protected:
   //! \brief Perform the action of a Forth token (byte code).
   virtual void execToken(const Cell16 token);
   //! \brief Return the depth of the return stack.
-  inline int32_t RStackDepth() const
+public: // FIXME
+  inline int32_t stackDepth(const forth::StackID id) const
   {
-    return m_rsp - m_return_stack;
+    switch (id)
+      {
+      case forth::DataStack:
+        return m_dsp - m_data_stack;
+      case forth::ReturnStack:
+        return m_rsp - m_return_stack;
+      case forth::AuxStack:
+        return m_asp - m_alternative_stack;
+      default:
+        LOGES("Pretty print this stack %u is not yet implemented", id);
+        return 0;
+      }
   }
-  //! \brief Return the depth of the data stack.
-  inline int32_t DStackDepth() const
-  {
-    return m_dsp - m_data_stack;
-  }
+protected:
   virtual inline uint32_t maxPrimitives() const
   {
     return FORTH_MAX_PRIMITIVES;
@@ -117,9 +125,7 @@ protected:
     return /*(token >= 0) &&*/ (token < maxPrimitives());
   }
   //! \brief Check if the data stack is not under/overflowing.
-  void isDStackUnderOverFlow() const;
-  //! \brief Check if the return stack is not under/overflowing.
-  int32_t isRStackUnderOverFlow() const;
+  int32_t isStackUnderOverFlow(const forth::StackID id) const; // FIXME: a renommer en checkStack
   //! \brief Change the base of displayed numbers.
   bool changeDisplayBase(const uint8_t base);
 

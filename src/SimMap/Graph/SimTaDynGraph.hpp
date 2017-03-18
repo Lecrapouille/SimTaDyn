@@ -9,19 +9,22 @@
 // **************************************************************
 //
 // **************************************************************
-class SimTaDynNode : public BasicNode, public CellForth
+class SimTaDynNode: public BasicNode, public CellForth
 {
 public:
+
   SimTaDynNode(BasicNode const& node)
     : BasicNode(node), CellForth()
   {
     setName();
+    m_cost = m_id; // FIXME: temporary
   }
 
   SimTaDynNode(const Key nodeID)
     : BasicNode(nodeID), CellForth()
   {
     setName();
+    m_cost = m_id; // FIXME: temporary
   }
 
   const std::string& name() const
@@ -29,13 +32,11 @@ public:
     return m_name;
   }
 
-  // FIXME: temporary
-  Cell32 m_cost = 42;
-
 protected:
+
   inline void setName()
   {
-    m_name = "N#" + std::to_string(m_id);
+    m_name = "Node" + std::to_string(m_id);
   }
 
   std::string m_name;
@@ -47,18 +48,21 @@ public:
 // **************************************************************
 //
 // **************************************************************
-class SimTaDynArc : public BasicArc, public CellForth
+class SimTaDynArc: public BasicArc, public CellForth
 {
 public:
+
   SimTaDynArc(const Key id, BasicNode& fromNode, BasicNode& toNode)
     : BasicArc(id, fromNode, toNode), CellForth()
   {
+    m_cost = m_id; // FIXME: temporary
     setName();
   }
 
   SimTaDynArc(BasicArc const& arc)
     : BasicArc(arc), CellForth()
   {
+    m_cost = m_id; // FIXME: temporary
     setName();
   }
 
@@ -67,18 +71,17 @@ public:
     return m_name;
   }
 
-  // FIXME: temporary
-  Cell32 m_cost = 24;
-
 protected:
+
   inline void setName()
   {
-    m_name = "A#" + std::to_string(m_id);
+    m_name = "Arc" + std::to_string(m_id);
   }
 
   std::string m_name;
 
 public:
+
   Key dataID;
 };
 
@@ -86,9 +89,10 @@ public:
 //
 // **************************************************************
 template <class N, class A>
-class SimTaDynGraph : public BasicGraph<N,A>, private ClassCounter<SimTaDynGraph<N,A>>
+class SimTaDynGraph: public BasicGraph<N,A>, private ClassCounter<SimTaDynGraph<N,A>>
 {
 public:
+
   SimTaDynGraph(const bool directed = true)
     : BasicGraph<N,A>(directed), m_id(howMany())
   {
