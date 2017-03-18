@@ -10,28 +10,6 @@ MapEditor::MapEditor()
 {
   LOGI("Creating MapEditor");
 
-  // Map toolbar (vertical)
-  {
-    m_toolbar.set_property("orientation", Gtk::ORIENTATION_VERTICAL);
-    m_toolbar.set_property("toolbar-style", Gtk::TOOLBAR_ICONS);
-
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("New");
-      button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Load and add a map to the current map");
-      m_toolbar.append(*button, sigc::mem_fun(this, &MapEditor::execMap2));
-    }
-
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("Open");
-      button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Load a map file");
-      m_toolbar.append(*button, sigc::mem_fun(*this, &MapEditor::openMap));
-    }
-  }
-
   // Menu '_Map'
   {
     m_menuitem[simtadyn::MapMenu].set_label("_Map");
@@ -89,6 +67,45 @@ MapEditor::MapEditor()
     m_submenu[7].set_image(m_image[7]);
     m_submenu[7].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::clearMap));
     m_menu[simtadyn::MapMenu].append(m_submenu[7]);
+  }
+
+  // Map toolbar (vertical)
+  {
+    m_toolbar.set_property("orientation", Gtk::ORIENTATION_VERTICAL);
+    m_toolbar.set_property("toolbar-style", Gtk::TOOLBAR_ICONS);
+
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("New");
+      button->set_stock_id(Gtk::Stock::NEW);
+      button->set_tooltip_text("Load and add a map to the current map");
+      m_toolbar.append(*button, sigc::mem_fun(this, &MapEditor::execMap2));
+    }
+
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("Open");
+      button->set_stock_id(Gtk::Stock::NEW);
+      button->set_tooltip_text("Load a map file");
+      m_toolbar.append(*button, sigc::mem_fun(*this, &MapEditor::openMap));
+    }
+
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("Open");
+      button->set_stock_id(Gtk::Stock::NEW);
+      button->set_tooltip_text("+1");
+      m_toolbar.append(*button, sigc::mem_fun(*this, &MapEditor::foo));
+    }
+  }
+
+  // Pack all stuffs together
+  {
+    m_vbox.pack_start(m_inspector.m_scrolledwindow, Gtk::PACK_SHRINK);
+    // FIXME m_vbox.pack_start(m_drawing_area);
+
+    m_hbox.pack_start(m_vbox);
+    m_hbox.pack_start(m_toolbar, Gtk::PACK_SHRINK);
   }
 }
 

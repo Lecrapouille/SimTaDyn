@@ -1,10 +1,10 @@
 #ifndef MAPEDITOR_HPP_
 #  define MAPEDITOR_HPP_
 
+#  include "Namespaces.hpp"
 #  include "MapLoader.hpp"
 #  include "ResourceManager.hpp"
-#  include "Namespaces.hpp"
-#  include <gtkmm.h>
+#  include "Inspector.hpp"
 
 // *************************************************************************************************
 //
@@ -48,7 +48,9 @@ public:
     // TODO
   }
   bool execMap();
-  void execMap2() { execMap(); } // FIXME temporary
+  void execMap2() { execMap(); }
+  void foo() { m_inspector.showCell(m_foo); ++m_foo; }
+
   void closeMap();
   bool selectMap(const Key id);
 
@@ -64,6 +66,10 @@ public:
   Gtk::SeparatorMenuItem m_menuseparator[2];
   Gtk::SeparatorToolItem m_separator[2];
   Gtk::Toolbar           m_toolbar;
+  Inspector              m_inspector;
+  Gtk::HBox              m_hbox;
+  Gtk::VBox              m_vbox;
+  Key m_foo = 0; // FIXME
 
 protected:
 

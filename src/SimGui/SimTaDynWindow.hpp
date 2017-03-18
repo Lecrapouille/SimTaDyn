@@ -40,10 +40,8 @@ private:
 
 protected:
 
-  Gtk::HPaned                  m_hpaned[1];
-  Gtk::VPaned                  m_vpaned[1];
-  Gtk::VBox                    m_vbox[2];
-  Gtk::HBox                    m_hbox[1];
+  Gtk::HPaned                  m_hpaned;
+  Gtk::VBox                    m_box;
   Gtk::MenuBar                 m_menubar;
   Gtk::Menu                    m_menu[simtadyn::MaxMapMenuNames +
                                       simtadyn::MaxForthMenuNames +

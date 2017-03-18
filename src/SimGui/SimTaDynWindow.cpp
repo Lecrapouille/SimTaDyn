@@ -17,6 +17,12 @@ SimTaDynWindow::SimTaDynWindow()
     set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
     setTitleIcon();
+
+    // Connect signals
+    add_events(Gdk::KEY_RELEASE_MASK);
+    signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
+    signal_key_release_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyReleased));
+    signal_delete_event().connect(sigc::mem_fun(this, &SimTaDynWindow::onExitClicked));
   }
 
   // Drawing area
@@ -24,18 +30,11 @@ SimTaDynWindow::SimTaDynWindow()
     m_drawing_area.set_hexpand(true);
     m_drawing_area.set_vexpand(true);
     m_drawing_area.set_auto_render(true);
-    //m_drawing_area.set_halign(Gtk::ALIGN_FILL);
-    //m_drawing_area.set_valign(Gtk::ALIGN_FILL);
 
     // Connect drawing area signals
     m_drawing_area.signal_realize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRealize));
     m_drawing_area.signal_unrealize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onUnrealize), false);
     m_drawing_area.signal_render().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRender));
-
-    add_events(Gdk::KEY_RELEASE_MASK);
-    signal_key_press_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyPressed));
-    signal_key_release_event().connect_notify(sigc::mem_fun(*this, &SimTaDynWindow::onKeyReleased));
-    signal_delete_event().connect(sigc::mem_fun(this, &SimTaDynWindow::onExitClicked));
   }
 
   // Menus:
@@ -63,38 +62,24 @@ SimTaDynWindow::SimTaDynWindow()
     m_menuitem[simtadyn::HelpMenu].set_submenu(m_menu[simtadyn::HelpMenu]);
   }
 
-  // Split verticaly the main window
+  // Split verticaly the main window:
+  // -- On the left: the map editor
+  // -- On the right: the menubar and Forth editor
   {
-    add(m_hpaned[0]);
-    m_hpaned[0].set_position(800);
-    m_hpaned[0].pack1(m_drawing_area);
-    m_hpaned[0].pack2(m_hbox[0]); // Forth editor
+    // Left:
+    MapEditor::instance().m_vbox.pack_start(m_drawing_area);
+    m_hpaned.pack1(MapEditor::instance().m_hbox);
+
+    // Right:
+    m_box.pack_start(m_menubar, Gtk::PACK_SHRINK);
+    m_box.pack_start(ForthEditor::instance().m_vpaned);
+    m_hpaned.pack2(m_box);
+
+    //
+    add(m_hpaned);
+    m_hpaned.set_position(800);
   }
 
-  // Rigth side of the main window: Forth editor
-  // From top to bottom: menubar, notebook, toolbar, statusbat, notebook
-  {
-    //
-    m_vbox[0].pack_start(m_menubar, Gtk::PACK_SHRINK);
-    m_vbox[0].pack_start(ForthEditor::instance().m_notebook, Gtk::PACK_EXPAND_WIDGET);
-
-    //
-    m_vbox[1].pack_start(ForthEditor::instance().m_toolbar, Gtk::PACK_SHRINK);
-    m_vbox[1].pack_start(ForthEditor::instance().m_statusbar, Gtk::PACK_SHRINK);
-    m_vbox[1].pack_start(ForthEditor::instance().m_hpaned, Gtk::PACK_EXPAND_WIDGET);
-
-    //
-    m_hbox[0].pack_start(MapEditor::instance().m_toolbar, Gtk::PACK_SHRINK);
-    m_hbox[0].pack_start(m_vpaned[0]);
-
-    //
-    m_vpaned[0].pack1(m_vbox[0]);
-    m_vpaned[0].pack2(m_vbox[1]);
-    m_vpaned[0].set_position(350);
-  }
-
-  // When terminating the SimTaDyn application
-  //Gtk::Main::signal_quit().connect(sigc::mem_fun(this, &SimTaDynWindow::onQuit));
   show_all_children();
 }
 

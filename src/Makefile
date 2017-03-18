@@ -50,7 +50,7 @@ OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
 OBJECTS_LOADER   = MapLoader.o ShapeFile.o
 OBJECTS_OPENGL   = OpenGL.o Shader.o Textures.o Fonts.o Renderer.o #Renderable.o
-OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o MapEditor.o DrawingArea.o SimTaDynWindow.o
+OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJECTS_SIMTADYN =
 
 OBJECTS         = $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_COMMON) $(OBJECTS_FORTH) $(OBJECTS_RTREE) \

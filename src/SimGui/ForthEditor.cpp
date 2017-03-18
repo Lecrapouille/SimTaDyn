@@ -193,18 +193,6 @@ ForthEditor::ForthEditor()
 {
   LOGI("Creating ForthEditor");
 
-  // Forth toolbar (horizontal)
-  {
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("Exec");
-      button->set_stock_id(Gtk::Stock::EXECUTE);
-      button->set_tooltip_text("Run Forth script");
-      m_toolbar.append(*button, sigc::mem_fun(*this, &ForthEditor::exec));
-    }
-    m_toolbar.append(m_separator[1]);
-  }
-
   // Menu '_Plugins'
   {
     m_menuitem[simtadyn::PlugginsMenu].set_label("_Plugins");
@@ -281,6 +269,23 @@ ForthEditor::ForthEditor()
     m_menu[simtadyn::ForthMenu].append(m_submenu[10]);
   }
 
+  // Forth toolbar (horizontal)
+  {
+    {
+      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      button->set_label("Exec");
+      button->set_stock_id(Gtk::Stock::EXECUTE);
+      button->set_tooltip_text("Run Forth script");
+      m_toolbar.append(*button, sigc::mem_fun(*this, &ForthEditor::exec));
+    }
+    m_toolbar.append(m_separator[1]);
+  }
+
+  // Statusbar
+  {
+    m_statusbar.push("Welcome to SimTaDyn !");
+  }
+
   // Forth dictionary display
   {
     m_ref_tree_model = Gtk::ListStore::create(m_columns);
@@ -338,9 +343,20 @@ ForthEditor::ForthEditor()
       });
   }
 
-  // Statusbar
+  // Pack all stuffs together
   {
-    m_statusbar.push("Welcome to SimTaDyn !");
+    // Top:
+    m_vbox[0].pack_start(m_notebook, Gtk::PACK_EXPAND_WIDGET);
+    m_vbox[0].pack_start(m_toolbar, Gtk::PACK_SHRINK);
+    m_vbox[0].pack_start(m_statusbar, Gtk::PACK_SHRINK);
+
+    // Bottom:
+    m_vbox[1].pack_start(m_hpaned, Gtk::PACK_EXPAND_WIDGET);
+
+    // Split Forth Editor horizontaly
+    m_vpaned.pack1(m_vbox[0]); // top
+    m_vpaned.pack2(m_vbox[1]); // bottom
+    m_vpaned.set_position(350);
   }
 }
 

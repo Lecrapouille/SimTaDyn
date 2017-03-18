@@ -77,12 +77,13 @@ public:
   Gtk::TextView          m_messages;
   Gtk::TreeView          m_dico;
   Gtk::Statusbar         m_statusbar;
-  Gtk::HPaned            m_hpaned;
   Gtk::Toolbar           m_toolbar;
-
-  //SimForth* m_forth; // FIXME: utile si on gere plusieurs cartes
+  Gtk::HPaned            m_hpaned;
+  Gtk::VPaned            m_vpaned;
+  Gtk::VBox              m_vbox[2];
 
 protected:
+
   bool exec_(std::string const& script, std::string const& filename);
 
   inline virtual TextDocument *create() override
