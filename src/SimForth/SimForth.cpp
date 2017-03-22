@@ -111,7 +111,7 @@ void SimForth::interpreteWordCaseCompile(std::string const& word)
     }
   else
     {
-      Forth::interpreteWordCaseInterprete(word);
+      Forth::interpreteWordCaseCompile(word);
     }
 }
 

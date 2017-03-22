@@ -527,6 +527,7 @@ void Forth::interpreteWord(std::string const& word)
 // **************************************************************
 std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 {
+  std::cout << "Forth interpreting the file '" << filename << "'\n";
   LOGI("Forth interpreting the file '%s'", filename.c_str());
   if (STREAM.loadFile(filename))
     {
