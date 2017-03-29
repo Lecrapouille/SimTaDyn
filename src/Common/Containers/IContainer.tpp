@@ -6,25 +6,41 @@
 #  include <iterator>
 #  include <iostream>
 #  include <vector>
+#  include <cassert>
 
 // **************************************************************
-//! \brief Idee au lieu de M=8 faire M=2^3
+//! \brief\
 // **************************************************************
 typedef uint32_t ContainerBitField;
 
 // **************************************************************
-// FIXME heritage pour ajouter des algo: visited, marked, etc ..
+//! \brief this class defines a block of M elements of type T. M
+//! shall be a powered of two number and E is the length of the
+//! bitfield indicating which elements are stored in the block.
+//! By block we mean a contigious memory of elements liek an array.
 // **************************************************************
-template<typename T, const uint32_t M, const uint32_t S>
+template<typename T, const uint32_t M, const uint32_t E>
 class Block
 {
 public:
 
-  Block() { clear(); }
+  //! \brief Default constructor to create an empty block.
+  Block()
+  {
+    clear();
+  }
 
+  //! \brief Virtual destructor. Do nothing. Elements are
+  //! not deleted from the memory because it's the container
+  //! job to do it.
+  virtual ~Block()
+  {
+  }
+
+  //! \brief clear the bitfield to have an empty block.
   virtual void clear()
   {
-    ContainerBitField i = S;
+    ContainerBitField i = E;
 
     while (i--)
       {
@@ -32,56 +48,75 @@ public:
       }
   }
 
-  // FIXME: fonction destroy all elements iif pointers. Attention une case libre ne veut pas dire non vide
+public:
 
   //! Pre-allocated block
-  T                  m_block[M];
+  T                 m_block[M];
   //! Indicate which elements are occupied.
-  ContainerBitField m_occupied[S];
+  ContainerBitField m_occupied[E];
 };
 
 // **************************************************************
+//! \brief An abstract class of indexed of Block classes. This class
+//! can be seen has a dynamic array but with miminising allocations
+//! and deallocations overhead and minimising defragementation of the
+//! memory. T is the type of element we want to store. 2^N is the
+//! number of elements by block.
 //!
+//! Principe: inserting elements is similar to inserting in an
+//! array. If the container is too small an other array is created and
+//! arrays are managed by an index. Accessing to the index is made in
+//! constant time. Removing element just clear a flag and do not
+//! delete the block, so it's made in constant time. Empty blocks
+//! can be all garbage in once by a specific command.
 // **************************************************************
-template<typename T, const uint32_t M>
+template<typename T, const uint32_t N>
 class IContainer
 {
 protected:
 
-  enum { S = sizeof (ContainerBitField) };
-  typedef Block<T, M, M / S> block_t;
+  //! \brief Number of elements by block: 2^N
+  enum { M = (1U << N) };
+  //! \brief Number of bytes by integer: 4 for uint32_t, 8 for uint64_t
+  enum { B = sizeof (ContainerBitField) };
+  //! \brief Number of bits by integer: 32 bits for uint32_t
+  enum { S = B * 8U };
+  //! \brief Precompute round(M / S)
+  enum { E = (M + S - 1U) / S };
+  //! \brief Typedef
+  typedef Block<T, M, E> block_t;
 
 public:
 
-  //! \brief Constructor and reserve memory corresponding to the
-  //! given number of elements of type T.
+  //! \brief Constructor: allocate the given number of elements of
+  //! type T.
   IContainer(const uint32_t reserve_elements = 1);
 
-  inline virtual block_t *newBlock()
+  //! \brief Allocate a new block. Use virtual to allow inheritance
+  //! of the class Block.
+  inline virtual block_t *newBlock() const
   {
     return new block_t;
   }
 
-  //! \brief Reserve memory corresponding to the given number of
-  //! elements of Type T.
+  //! \brief Allocate the given number of elements of type T.
   void reserve(const uint32_t reserve_elements);
 
-  //! \brief Check if the given index is outisde the index of th last
-  //! inserted element.
-  //! \return false if nth is before is inside, else return true.
+  //! \brief Check if the given index is incorrect (outside the
+  //! definition range of the container). Complexity is O(1) in
+  //! number of elements.
   virtual bool outofbound(const uint32_t nth) const = 0;
 
-  //! \brief Check if the n'th slot is occupied or not
-  bool occupied(const uint32_t nth);
+  //! \brief Check if the given index is occupied by an element.
+  //! Complexity is O(1) in number of elements.
+  bool occupied(const uint32_t nth) const;
 
-  //! \brief Set the n'th element as removed. Complexity is O(1) of
-  //! elements iteration. Note: no deallocation is made (this will be
-  //! done by the destructor). Note: Nothing is made if nth is
-  //! incorrect or if the element has already been removed.
-  //void empty(const uint32_t nth);
-
-  //! \brief get the n'th element of the container.
+  //! \brief get the n'th element of the container. Complexity
+  //! is O(1) in number of elements.
   virtual T& get(const uint32_t nth);
+
+  //! \brief get the n'th element of the container. Complexity
+  //! is O(1) in number of elements.
   virtual T const& get(const uint32_t nth) const;
 
   //! \brief Return the number of elements currently stored.
@@ -90,10 +125,16 @@ public:
     return m_stored_elements;
   }
 
+  //! \brief Return the number of allocated blocks
+  inline uint32_t blocks() const
+  {
+    return m_allocated_blocks;
+  }
+
   //! \brief Return the number of elements currently empty.
   inline uint32_t remaining() const
   {
-    return M * m_allocated_blocks - m_stored_elements;
+    return (m_allocated_blocks << N) - m_stored_elements;
   }
 
   //! \brief Check if the container is empty.
@@ -105,19 +146,27 @@ public:
   //! \brief Check if the container is full.
   inline bool full() const
   {
-    return (M * m_allocated_blocks) == m_stored_elements;
+    return (m_allocated_blocks << N) == m_stored_elements;
   }
 
-  //! \brief
-  inline uint32_t blocks() const
+  //! \brief Empty all the container. Complexity is O(n)
+  //! where n is number of allocated blocks. Note: blocks
+  //! are not deleted from memory.
+  inline void clear(const bool release)
   {
-    return m_allocated_blocks;
+    uint32_t i = m_allocated_blocks;
+    while (i--)
+      {
+        m_blocks[i]->clear(release);
+      }
   }
 
-  // FIXME pending_data() et clear_pending_data()
+  //! \brief Empty blocks will have their memory deleted.
+  //! Call this routine is memory ressources are limited.
+  void garbage();
 
-  // FIXME: rework m_vectors for removing empty blocks
-
+  //! \brief Call this method for debugging the content of
+  //! the container.
   void debug() const;
 
 protected:

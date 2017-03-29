@@ -3,8 +3,8 @@
 // **************************************************************
 //! \param elt is the element of type T to insert.
 // **************************************************************
-template<typename T, const uint32_t M>
-void Set<T,M>::append(T const& elt)
+template<typename T, const uint32_t N>
+void Set<T,N>::append(T const& elt)
 {
   // Next element
   m_subindex = MODULO(m_subindex + 1U, M);
@@ -13,23 +13,23 @@ void Set<T,M>::append(T const& elt)
 
   // Reserve a new block of elements if all current blocks are
   // occupied.
-  if (m_index >= IContainer<T,M>::m_allocated_blocks)
+  if (m_index >= IContainer<T,N>::m_allocated_blocks)
     {
-      IContainer<T,M>::reserveBlocks(1U);
+      IContainer<T,N>::reserveBlocks(1U);
     }
 
   // Insert element and add the 'Occupied' flag
-  IContainer<T,M>::m_blocks[m_index]->m_block[m_subindex] = elt;
+  IContainer<T,N>::m_blocks[m_index]->m_block[m_subindex] = elt;
   SET_OCCUPIED(m_index, m_subindex);
-  ++IContainer<T,M>::m_stored_elements;
+  ++IContainer<T,N>::m_stored_elements;
 }
 
 // **************************************************************
 //! \param nth the n'th element (index) of the IContainer we want
 //! to remove.
 // **************************************************************
-template<typename T, const uint32_t M>
-void Set<T,M>::remove(const uint32_t nth)
+template<typename T, const uint32_t N>
+void Set<T,N>::remove(const uint32_t nth)
 {
   if (outofbound(nth))
     return ;
@@ -40,7 +40,7 @@ void Set<T,M>::remove(const uint32_t nth)
   if (IS_OCCUPIED(id, sid))
     {
       // Replace the nth 'th element by the last inserted element
-      IContainer<T,M>::m_blocks[id]->m_block[sid] = (uint32_t) -1;
+      IContainer<T,N>::m_blocks[id]->m_block[sid] = (uint32_t) -1;
       removeLast();
     }
 }
@@ -48,8 +48,8 @@ void Set<T,M>::remove(const uint32_t nth)
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t M>
-void Set<T,M>::removeLast()
+template<typename T, const uint32_t N>
+void Set<T,N>::removeLast()
 {
   // Empty the last inserted element
   CLEAR_OCCUPIED(m_index, m_subindex);
@@ -66,15 +66,15 @@ void Set<T,M>::removeLast()
       m_subindex = MODULO(m_last, M);
     }
 
-  --IContainer<T,M>::m_stored_elements;
+  --IContainer<T,N>::m_stored_elements;
 }
 
 // **************************************************************
 //! \param index1 index of the 1st element to swap.
 //! \param index2 index of the 2nd element to swap.
 // **************************************************************
-template<typename T, const uint32_t M>
-void Set<T,M>::swap(const uint32_t index1, const uint32_t index2)
+template<typename T, const uint32_t N>
+void Set<T,N>::swap(const uint32_t index1, const uint32_t index2)
 {
   // Do not swapt itself
   if (index1 == index2)
@@ -89,9 +89,9 @@ void Set<T,M>::swap(const uint32_t index1, const uint32_t index2)
   const uint32_t id2 = index2 / M;
   const uint32_t sid2 = MODULO(index2, M);
 
-  T elt = IContainer<T,M>::m_blocks[id2]->m_block[sid2];
-  IContainer<T,M>::m_blocks[id2]->m_block[sid2] = IContainer<T,M>::m_blocks[id1]->m_block[sid1];
-  IContainer<T,M>::m_blocks[id1]->m_block[sid1] = elt;
+  T elt = IContainer<T,N>::m_blocks[id2]->m_block[sid2];
+  IContainer<T,N>::m_blocks[id2]->m_block[sid2] = IContainer<T,N>::m_blocks[id1]->m_block[sid1];
+  IContainer<T,N>::m_blocks[id1]->m_block[sid1] = elt;
 
   // Note: does not need swap occupied bits because holes are not
   // possible.

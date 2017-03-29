@@ -34,7 +34,7 @@ public:
   //! \brief Constructor by copy from a container.
   //! \param container the container to copy.
   //! \param start_at_end set it to true for starting at the end.
-  iterator(Set<T, M> const& container, const bool start_at_end)
+  iterator(Set<T, N> const& container, const bool start_at_end)
     : m_container(&container)
   {
     if (start_at_end)
@@ -104,7 +104,7 @@ public:
 protected:
 
   //! \brief the address of the container to explore.
-  const Set<T, M>* m_container;
+  const Set<T, N>* m_container;
 
   //! \brief the iterator.
   uint32_t m_itr;

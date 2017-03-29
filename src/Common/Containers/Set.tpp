@@ -6,22 +6,38 @@
 #  include "IContainer.tpp"
 
 // **************************************************************
-//
+//! \brief A set is similar to the std::vector and it's push_back()
+//! method but the difference is that this containers does not allow
+//! holes and when it's full and user add a new element, instead of
+//! creating a new vector with the double size of the previous and
+//! copying the older into the newer, the Set only alloc a new memory
+//! block and index it. No copy on containers is needed with a
+//! temporary 3x memory used (old and newer vector). Finally, acceding
+//! on elements has a complexity of O(2). This container is used for
+//! storing set of datum where position between them in the container
+//! is not important. A case is to transfer datum to the GPU of for
+//! SGBD.
 // **************************************************************
-template<typename T, const uint32_t M>
-class Set: public IContainer<T, M>
+template<typename T, const uint32_t N>
+class Set: public IContainer<T, N>
 {
 protected:
 
-  enum { S = sizeof (ContainerBitField) };
-  typedef Block<T, M, M / S> block_t;
+  //! \brief Number of elements by block: 2^N
+  enum { M = (1U << N) };
+  //! \brief Number of bytes by integer: 4 for uint32_t, 8 for uint64_t
+  enum { B = sizeof (ContainerBitField) };
+  //! \brief Number of bits by integer: 32 bits for uint32_t
+  enum { S = B * 8U };
+  //! \brief Precompute round(M / S)
+  enum { E = (M + S - 1U) / S };
 
 public:
 
-  //! \brief Constructor and reserve memory corresponding to the
-  //! given number of elements of type T.
+  //! \brief Constructor: allocate the given number of elements of
+  //! type T.
   Set(const uint32_t reserve_elements = 1)
-    : IContainer<T, M>(reserve_elements)
+    : IContainer<T, N>(reserve_elements)
   {
     m_index = m_subindex = m_last = (uint32_t) -1;
   }
@@ -30,8 +46,9 @@ public:
   //! is O(1) of elements iteration.
   void append(T const& elt);
 
-  //! \brief Check if the given index is outisde the index of th last
-  //! inserted element.
+  //! \brief Check if the given index is incorrect (outside the
+  //! definition range of the container). Complexity is O(1) in
+  //! number of elements.
   //! \return false if nth is before is inside, else return true.
   virtual inline bool outofbound(const uint32_t nth) const override
   {
@@ -50,7 +67,7 @@ public:
   //! \brief Remove the last inserted element.
   inline void remove()
   {
-    if (IContainer<T,M>::empty())
+    if (IContainer<T,N>::empty())
       return ;
     removeLast();
   }
@@ -67,39 +84,41 @@ public:
     return m_last;
   }
 
+  //! Include iterators
 #include "SetIterator.ipp"
 
+  //! \brief Create an iterator on the begining of the container.
+  //! Note: begin() refers on the first element of the container.
   inline iterator begin() const
   {
     return iterator(*this, false);
   }
 
+  //! \brief Create an iterator on the end of the container.
+  //! Note: end() does not refer on the last element of the container
+  //! but the element after it.
   inline iterator end() const
   {
     return iterator(*this, true);
   }
 
-  // FIXME: bool pending_data(start, end)
+  // TODO: bool pending_data(start, end)
 
 protected:
 
-  //! \brief Remove the last inserted element
+  //! \brief Remove the last inserted element.
   void removeLast();
 
 protected:
 
+  //! \brief Iter on allocated blocks.
   uint32_t              m_index;
+  //! \brief Iter on elements of the block.
   uint32_t              m_subindex;
+  //! \brief Refer the last inserted element.
   uint32_t              m_last;
 };
 
 #  include "Set.ipp"
-
-/*#undef MODULO
-#undef OCCUPIED
-#undef OP_OCCUPIED
-#undef SET_OCCUPIED
-#undef CLEAR_OCCUPIED
-#undef IS_OCCUPIED*/
 
 #endif /* SET_HPP_ */
