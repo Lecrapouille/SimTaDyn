@@ -35,6 +35,7 @@ IContainer<T,N>::IContainer(const uint32_t nb_elts)
 template<typename T, const uint32_t N>
 void IContainer<T,N>::reserve(const uint32_t nb_elts)
 {
+  // std::cout << "Reserving (" << nb_elts << " + " << M << " - 1) >> " << N << " blocks\n";
   reserveBlocks((nb_elts + M - 1) >> N);
 }
 
@@ -45,7 +46,6 @@ void IContainer<T,N>::reserve(const uint32_t nb_elts)
 template<typename T, const uint32_t N>
 void IContainer<T,N>::reserveBlocks(const uint32_t nb_blocks)
 {
-  std::cout << "Reserving " << nb_blocks << " blocks\n";
   m_blocks.reserve(m_blocks.capacity() + nb_blocks);
 
   uint32_t i = nb_blocks;

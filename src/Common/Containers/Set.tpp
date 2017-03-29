@@ -5,6 +5,8 @@
 
 #  include "IContainer.tpp"
 
+#  define INITIAL_INDEX ((uint32_t) -1)
+
 // **************************************************************
 //! \brief A set is similar to the std::vector and it's push_back()
 //! method but the difference is that this containers does not allow
@@ -39,7 +41,7 @@ public:
   Set(const uint32_t reserve_elements = 1)
     : IContainer<T, N>(reserve_elements)
   {
-    m_index = m_subindex = m_last = (uint32_t) -1;
+    m_index = m_subindex = m_last = INITIAL_INDEX;
   }
 
   //! \brief Insert an element at first empty location. Complexity
@@ -52,7 +54,7 @@ public:
   //! \return false if nth is before is inside, else return true.
   virtual inline bool outofbound(const uint32_t nth) const override
   {
-    return (nth > m_last) || (((uint32_t) -1) == m_last);
+    return (nth > m_last) || (INITIAL_INDEX == m_last);
   }
 
   //! \brief Remove the n'th element. Complexity is O(1) of elements
@@ -81,6 +83,8 @@ public:
   //! \brief Return the current position of the index.
   inline uint32_t index() const
   {
+    if (INITIAL_INDEX == m_last)
+      return 0;
     return m_last;
   }
 
@@ -120,5 +124,6 @@ protected:
 };
 
 #  include "Set.ipp"
+#  undef INITIAL_INDEX
 
 #endif /* SET_HPP_ */

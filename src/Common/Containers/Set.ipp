@@ -34,15 +34,18 @@ void Set<T,N>::remove(const uint32_t nth)
   if (outofbound(nth))
     return ;
 
-  const uint32_t id = nth / M;
-  const uint32_t sid = MODULO(nth, M);
-
-  if (IS_OCCUPIED(id, sid))
-    {
       // Replace the nth 'th element by the last inserted element
-      IContainer<T,N>::m_blocks[id]->m_block[sid] = (uint32_t) -1;
-      removeLast();
+  if (nth != m_last)
+    {
+      const uint32_t id = nth / M;
+      const uint32_t sid = MODULO(nth, M);
+
+      IContainer<T,N>::m_blocks[id]->m_block[sid] =
+        IContainer<T,N>::m_blocks[m_index]->m_block[m_subindex];
     }
+
+  // And remove the last element
+  removeLast();
 }
 
 // **************************************************************
@@ -55,9 +58,9 @@ void Set<T,N>::removeLast()
   CLEAR_OCCUPIED(m_index, m_subindex);
 
   // Restore index
-  if ((0 == m_last) || (((uint32_t) -1) == m_last))
+  if ((0 == m_last) || (INITIAL_INDEX == m_last))
     {
-      m_index = m_subindex = m_last = (uint32_t) -1; // FIXME mettre macro
+      m_index = m_subindex = m_last = INITIAL_INDEX;
     }
   else
     {
@@ -65,8 +68,10 @@ void Set<T,N>::removeLast()
       m_index = m_last / M;
       m_subindex = MODULO(m_last, M);
     }
-
-  --IContainer<T,N>::m_stored_elements;
+  if (IContainer<T,N>::m_stored_elements)
+    {
+      --IContainer<T,N>::m_stored_elements;
+    }
 }
 
 // **************************************************************

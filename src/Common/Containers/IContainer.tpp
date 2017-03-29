@@ -9,7 +9,7 @@
 #  include <cassert>
 
 // **************************************************************
-//! \brief\
+//! \brief
 // **************************************************************
 typedef uint32_t ContainerBitField;
 
@@ -152,12 +152,12 @@ public:
   //! \brief Empty all the container. Complexity is O(n)
   //! where n is number of allocated blocks. Note: blocks
   //! are not deleted from memory.
-  inline void clear(const bool release)
+  inline void clear()
   {
     uint32_t i = m_allocated_blocks;
     while (i--)
       {
-        m_blocks[i]->clear(release);
+        m_blocks[i]->clear();
       }
   }
 
