@@ -22,21 +22,23 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -Icommon -Icells -I../src/Common -I../src/SimMap/Graph -I../src/SimMap/RTree
+INCLUDES = -I. -Icommon -Icells -I../src/Common -I../src/Common/Containers -I../src/SimTaDyn -I../src/SimMap/Graph -I../src/SimMap/RTree
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):common:cells:../src/Common:../src/SimMap/Graph:../src/SimMap/RTree
+VPATH=.:$(BUILD):common:cells:../src/Common:../src/Common/Containers:../src/SimTaDyn:../src/SimMap/Graph:../src/SimMap/RTree
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = Vector3D.o VectorTests.o \
+OBJECTS = \
+	File.o FileTests.o \
+	Vector3D.o VectorTests.o \
 	Color.o ColorTests.o \
-	GraphMemoryTests.o \
-	BasicGraph.o BasicGraphTests.o \
+	SetTests.o \
 	main.o
-# BoundingBox.o BoundingBoxTests.o \
+#	BoundingBox.o BoundingBoxTests.o
 
+#
 TARGET = UnitTest
 
 ###################################################
