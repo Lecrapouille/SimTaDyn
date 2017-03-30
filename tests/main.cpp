@@ -3,6 +3,7 @@
 //#include "BoundingBoxTests.hpp"
 #include "ColorTests.hpp"
 #include "SetTests.hpp"
+#include "CollectionTests.hpp"
 /*#include "GraphMemoryTests.hpp"
   #include "BasicGraphTests.hpp"*/
 
@@ -17,6 +18,12 @@ int main(void)
   suite2->addTest(new CppUnit::TestCaller<SetTests>("SetDummy", &SetTests::testDummy));
   suite2->addTest(new CppUnit::TestCaller<SetTests>("SetInsert", &SetTests::testInsert));
   suite2->addTest(new CppUnit::TestCaller<SetTests>("SetRemove", &SetTests::testRemove));
+
+  CppUnit::TestSuite* suite6 = new CppUnit::TestSuite("CollectionTests");
+  suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionDummy", &CollectionTests::testDummy));
+  suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionAppend", &CollectionTests::testAppend));
+  suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionRemove", &CollectionTests::testRemove));
+  suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionInsert", &CollectionTests::testInsert));
 
   CppUnit::TestSuite* suite3 = new CppUnit::TestSuite("VectorTests");
   suite3->addTest(new CppUnit::TestCaller<VectorTests>("testCreator", &VectorTests::testCreator));
@@ -51,6 +58,7 @@ int main(void)
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(suite1);
   runner.addTest(suite2);
+  runner.addTest(suite6);
   runner.addTest(suite3);
   //runner.addTest(suite4);
   runner.addTest(suite5);

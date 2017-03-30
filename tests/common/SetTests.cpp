@@ -4,10 +4,10 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SetTests);
 
 // A container of 2^2 elements by block with 0 block pre-allocated
-Set<int, 2U> set1(0);
+static Set<int, 2U> set1(0);
 // A container of 2^2 elements by block with 5/4 blocks pre-allocated
-Set<int, 2U> set2(5);
-Set<int, 2U>::iterator it1;
+static Set<int, 2U> set2(5);
+static Set<int, 2U>::iterator it1;
 
 //--------------------------------------------------------------------------
 void SetTests::setUp()
@@ -46,6 +46,18 @@ void SetTests::testDummy()
 
   // Useless operations
   set1.remove();
+  CPPUNIT_ASSERT_EQUAL(0U, set1.used());
+  CPPUNIT_ASSERT_EQUAL(0U, set1.blocks());
+  CPPUNIT_ASSERT_EQUAL(0U, set1.remaining());
+  CPPUNIT_ASSERT_EQUAL(true, set1.empty());
+  CPPUNIT_ASSERT_EQUAL(true, set1.full());
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(0U));
+  CPPUNIT_ASSERT_THROW(set1.occupied(0U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(0U, set1.index());
+  CPPUNIT_ASSERT_THROW(set1.get(0U), std::out_of_range);
+
+  // Useless operations
+  set1.remove(1U);
   CPPUNIT_ASSERT_EQUAL(0U, set1.used());
   CPPUNIT_ASSERT_EQUAL(0U, set1.blocks());
   CPPUNIT_ASSERT_EQUAL(0U, set1.remaining());
@@ -348,7 +360,7 @@ void SetTests::testRemove()
       CPPUNIT_ASSERT_EQUAL(45, (*it1));
     }
 
-  set1.remove(0U);
+  set1.remove();
   CPPUNIT_ASSERT_EQUAL(0U, set1.used());
   CPPUNIT_ASSERT_EQUAL(2U, set1.blocks());
   CPPUNIT_ASSERT_EQUAL(8U, set1.remaining());
@@ -430,4 +442,56 @@ void SetTests::testRemove()
     {
       CPPUNIT_FAIL("Not supposed to iterate");
     }
+
+  set1.append(41);
+  set1.append(42);
+  CPPUNIT_ASSERT_EQUAL(2U, set1.used());
+  CPPUNIT_ASSERT_EQUAL(1U, set1.blocks());
+  CPPUNIT_ASSERT_EQUAL(2U, set1.remaining());
+  CPPUNIT_ASSERT_EQUAL(false, set1.empty());
+  CPPUNIT_ASSERT_EQUAL(false, set1.full());
+  CPPUNIT_ASSERT_EQUAL(false, set1.outofbound(0U));
+  CPPUNIT_ASSERT_EQUAL(false, set1.outofbound(1U));
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(2U));
+  CPPUNIT_ASSERT_EQUAL(true, set1.occupied(0U));
+  CPPUNIT_ASSERT_EQUAL(true, set1.occupied(1U));
+  CPPUNIT_ASSERT_THROW(set1.occupied(2U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(1U, set1.index());
+  CPPUNIT_ASSERT_EQUAL(41, set1.get(0U));
+  CPPUNIT_ASSERT_EQUAL(42, set1.get(1U));
+  CPPUNIT_ASSERT_THROW(set1.get(2U), std::out_of_range);
+
+  set1.clear();
+  CPPUNIT_ASSERT_EQUAL(0U, set1.used());
+  CPPUNIT_ASSERT_EQUAL(1U, set1.blocks());
+  CPPUNIT_ASSERT_EQUAL(4U, set1.remaining());
+  CPPUNIT_ASSERT_EQUAL(true, set1.empty());
+  CPPUNIT_ASSERT_EQUAL(false, set1.full());
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(0U));
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(1U));
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(2U));
+  CPPUNIT_ASSERT_THROW(set1.occupied(0U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.occupied(1U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.occupied(2U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(0U, set1.index());
+  CPPUNIT_ASSERT_THROW(set1.get(0U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.get(1U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.get(2U), std::out_of_range);
+
+  set1.garbage();
+  CPPUNIT_ASSERT_EQUAL(0U, set1.used());
+  CPPUNIT_ASSERT_EQUAL(0U, set1.blocks());
+  CPPUNIT_ASSERT_EQUAL(0U, set1.remaining());
+  CPPUNIT_ASSERT_EQUAL(true, set1.empty());
+  CPPUNIT_ASSERT_EQUAL(true, set1.full());
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(0U));
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(1U));
+  CPPUNIT_ASSERT_EQUAL(true, set1.outofbound(2U));
+  CPPUNIT_ASSERT_THROW(set1.occupied(0U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.occupied(1U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.occupied(2U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(0U, set1.index());
+  CPPUNIT_ASSERT_THROW(set1.get(0U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.get(1U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(set1.get(2U), std::out_of_range);
 }

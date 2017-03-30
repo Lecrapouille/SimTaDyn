@@ -5,6 +5,8 @@
 
 #  include "IContainer.tpp"
 
+#  define INITIAL_INDEX ((uint32_t) -1)
+
 // **************************************************************
 //! \brief A set is similar to the class Set but holes in elements
 //! are allowed. This class can be used for storing huge number of
@@ -36,7 +38,7 @@ public:
   Collection(const uint32_t reserve_elements = 1)
     : IContainer<T, N>(reserve_elements)
   {
-    m_begin = (uint32_t) - 1;
+    m_begin = INITIAL_INDEX;
     m_end = 0;
   }
 
@@ -59,6 +61,16 @@ public:
   virtual inline bool outofbound(const uint32_t nth) const override
   {
     return (nth + 1) > (IContainer<T, N>::m_allocated_blocks << N);
+  }
+
+  //! \brief Empty all the container. Complexity is O(n)
+  //! where n is number of allocated blocks. Note: blocks
+  //! are not deleted from memory.
+  virtual inline void clear()
+  {
+    IContainer<T, N>::clear();
+    m_begin = INITIAL_INDEX;
+    m_end = 0;
   }
 
   //! Include iterators
@@ -88,5 +100,6 @@ protected:
 };
 
 #  include "Collection.ipp"
+#  undef INITIAL_INDEX
 
 #endif /* COLLECTION_HPP_ */

@@ -152,13 +152,14 @@ public:
   //! \brief Empty all the container. Complexity is O(n)
   //! where n is number of allocated blocks. Note: blocks
   //! are not deleted from memory.
-  inline void clear()
+  virtual inline void clear()
   {
     uint32_t i = m_allocated_blocks;
     while (i--)
       {
         m_blocks[i]->clear();
       }
+    m_stored_elements = 0;
   }
 
   //! \brief Empty blocks will have their memory deleted.

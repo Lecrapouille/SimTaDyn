@@ -34,7 +34,7 @@ OBJECTS = \
 	File.o FileTests.o \
 	Vector3D.o VectorTests.o \
 	Color.o ColorTests.o \
-	SetTests.o \
+	SetTests.o CollectionTests.o \
 	main.o
 #	BoundingBox.o BoundingBoxTests.o
 
@@ -44,7 +44,7 @@ TARGET = UnitTest
 ###################################################
 # Compil options
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O2 -g --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O3 --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES =
 

@@ -88,6 +88,15 @@ public:
     return m_last;
   }
 
+  //! \brief Empty all the container. Complexity is O(n)
+  //! where n is number of allocated blocks. Note: blocks
+  //! are not deleted from memory.
+  virtual inline void clear()
+  {
+    IContainer<T, N>::clear();
+    m_index = m_subindex = m_last = INITIAL_INDEX;
+  }
+
   //! Include iterators
 #include "SetIterator.ipp"
 
