@@ -22,11 +22,11 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -Icommon -Icells -I../src/Common -I../src/Common/Containers -I../src/SimTaDyn -I../src/SimMap/Graph -I../src/SimMap/RTree
+INCLUDES = -I. -Icommon -Icells -Iopengl -I../src/Common -I../src/Common/Containers -I../src/OpenGL -I../src/SimTaDyn -I../src/SimMap/Graph -I../src/SimMap/RTree
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):common:cells:../src/Common:../src/Common/Containers:../src/SimTaDyn:../src/SimMap/Graph:../src/SimMap/RTree
+VPATH=.:$(BUILD):common:cells:opengl:../src/Common:../src/Common/Containers:-I../src/OpenGL:../src/SimTaDyn:../src/SimMap/Graph:../src/SimMap/RTree
 
 ###################################################
 # Set objects architecture specific
@@ -35,6 +35,7 @@ OBJECTS = \
 	Vector3D.o VectorTests.o \
 	Color.o ColorTests.o \
 	SetTests.o CollectionTests.o \
+	GLBufferTests.o \
 	main.o
 #	BoundingBox.o BoundingBoxTests.o
 

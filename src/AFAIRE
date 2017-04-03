@@ -1,4 +1,17 @@
+[CRITICAL] Graph container: Enlever le * de N et de A. Faire un constructeur avec les bons numeros d'ID des cellules. Faire le code container.replace(nth)
+container.append_list(liste ou vector). Faire des TU sur tout le graphe.
+[CRITICAL] TU GLBuffer et surtout les pending_data()
+
+======================================================
+BUGS:
+[HIGH] Logger les valeurs des piles KO
+
+======================================================
+[HIGH] Ameliorer le systeme de trace et de debug SimForth
 [CRITICAL] Mettre un ancetre commun aux cellules par exemple fct m_cost ce qui evite de faire des switc case sur est ce un noeud ou un arc ...
+[CRITICAL] Ajouter les observers sur les codes forth des cellule comme pour Excel
+[HIGH] Circular references comme pour Excel.
+[HIGH] Pas de discretisation problematique: si on met une boucle for dans une cellule on a plus u_n = f(u_{n-1}). Mettre un compteur sur le nombre de fois que u_n est mise a jour ?
 
 ======================================================
 GENERAL:
@@ -11,7 +24,8 @@ GENERAL:
 
 [LOW] Faire des standalone (rtree, loader) pour verifier les fuites de memoires
 
-[LOW] Faire une liste chainee de logger pour afficher a l'ecran une erreur (pour l'instant le hack actuel suffit pour afficher dans le log et a l'ecran)
+[HIGH] Faire une liste chainee de logger pour afficher a l'ecran une erreur (pour l'instant le hack actuel suffit pour afficher dans le log et a l'ecran)
+Par exemple faire LOGIS() va afficher dans la fenetre de SimTaDyn un [heure][INFO][file] ce qui est genant
 
 ======================================================
 FILE:

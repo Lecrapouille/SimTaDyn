@@ -129,6 +129,9 @@ C++ and OpenGL legacy for displaying in 3D Openstreet map files with french pdf 
 * [SFML](http://www.sfml-dev.org/index-fr.php)
 Simple and Fast Multimedia Library.
 
+* [glumpy](https://github.com/glumpy/glumpy)
+Python + Numpy + modern OpenGL: fast, scalable and beautiful scientific visualization.
+
 * http://loulou.developpez.com/tutoriels/moteur3d/
 
 * http://opengl.developpez.com/tutoriels/open_gl/

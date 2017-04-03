@@ -4,6 +4,7 @@
 #include "ColorTests.hpp"
 #include "SetTests.hpp"
 #include "CollectionTests.hpp"
+#include "GLBufferTests.hpp"
 /*#include "GraphMemoryTests.hpp"
   #include "BasicGraphTests.hpp"*/
 
@@ -24,6 +25,11 @@ int main(void)
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionAppend", &CollectionTests::testAppend));
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionRemove", &CollectionTests::testRemove));
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionInsert", &CollectionTests::testInsert));
+
+  CppUnit::TestSuite* suite7 = new CppUnit::TestSuite("GLBufferTests");
+  suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferDummy", &GLBufferTests::testDummy));
+  suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferPendingData", &GLBufferTests::testPendingData));
+  suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferInsert", &GLBufferTests::testInsert));
 
   CppUnit::TestSuite* suite3 = new CppUnit::TestSuite("VectorTests");
   suite3->addTest(new CppUnit::TestCaller<VectorTests>("testCreator", &VectorTests::testCreator));
@@ -59,6 +65,7 @@ int main(void)
   runner.addTest(suite1);
   runner.addTest(suite2);
   runner.addTest(suite6);
+  runner.addTest(suite7);
   runner.addTest(suite3);
   //runner.addTest(suite4);
   runner.addTest(suite5);
