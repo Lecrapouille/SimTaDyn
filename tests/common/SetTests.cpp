@@ -4,10 +4,10 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SetTests);
 
 // A container of 2^2 elements by block with 0 block pre-allocated
-static Set<int, 2U> set1(0);
+static Set<int, 2U, Block> set1(0);
 // A container of 2^2 elements by block with 5/4 blocks pre-allocated
-static Set<int, 2U> set2(5);
-static Set<int, 2U>::iterator it1;
+static Set<int, 2U, Block> set2(5);
+static Set<int, 2U, Block>::iterator it1;
 
 //--------------------------------------------------------------------------
 void SetTests::setUp()

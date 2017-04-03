@@ -20,26 +20,20 @@
 //! is not important. A case is to transfer datum to the GPU of for
 //! SGBD.
 // **************************************************************
-template<typename T, const uint32_t N>
-class Set: public IContainer<T, N>
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+class Set: public IContainer<T, N, Block>
 {
 protected:
 
-  //! \brief Number of elements by block: 2^N
-  enum { M = (1U << N) };
-  //! \brief Number of bytes by integer: 4 for uint32_t, 8 for uint64_t
-  enum { B = sizeof (ContainerBitField) };
-  //! \brief Number of bits by integer: 32 bits for uint32_t
-  enum { S = B * 8U };
-  //! \brief Precompute round(M / S)
-  enum { E = (M + S - 1U) / S };
+#  include "ContainerEnums.ipp"
 
 public:
 
   //! \brief Constructor: allocate the given number of elements of
   //! type T.
   Set(const uint32_t reserve_elements = 1)
-    : IContainer<T, N>(reserve_elements)
+    : IContainer<T, N, Block>(reserve_elements)
   {
     m_index = m_subindex = m_last = INITIAL_INDEX;
   }
@@ -69,7 +63,7 @@ public:
   //! \brief Remove the last inserted element.
   inline void remove()
   {
-    if (IContainer<T,N>::empty())
+    if (IContainer<T, N, Block>::empty())
       return ;
     removeLast();
   }
@@ -93,7 +87,7 @@ public:
   //! are not deleted from memory.
   virtual inline void clear()
   {
-    IContainer<T, N>::clear();
+    IContainer<T, N, Block>::clear();
     m_index = m_subindex = m_last = INITIAL_INDEX;
   }
 
@@ -114,8 +108,6 @@ public:
   {
     return iterator(*this, true);
   }
-
-  // TODO: bool pending_data(start, end)
 
 protected:
 

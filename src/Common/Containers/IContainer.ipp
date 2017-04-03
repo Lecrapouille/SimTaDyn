@@ -3,7 +3,7 @@
 // Perform a % b but works if and only if M is a power of two number.
 #define MODULO(a, b)             ((a) & ((b) - 1U))
 // Accessor to the bitfield indicationg which elements are stored.
-#define OCCUPIED(id, sid)        (IContainer<T,N>::m_blocks[id]->m_occupied[sid / S])
+#define OCCUPIED(id, sid)        (IContainer<T,N,Block>::m_blocks[id]->m_occupied[sid / S])
 // Perform a generic operation on the bitfield.
 #define OP_OCCUPIED(op, id, sid) (OCCUPIED(id, sid) op (1 << (MODULO(sid, S))))
 // Set the 'occupied' flag in the bitfield.
@@ -19,8 +19,9 @@
 //! least one block of elements created. Note: 0 is a possible value
 //! in this case no blocks are allocated. Default value is 1.
 // **************************************************************
-template<typename T, const uint32_t N>
-IContainer<T,N>::IContainer(const uint32_t nb_elts)
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+IContainer<T,N,Block>::IContainer(const uint32_t nb_elts)
 {
   m_stored_elements = 0;
   m_allocated_blocks = 0;
@@ -32,8 +33,9 @@ IContainer<T,N>::IContainer(const uint32_t nb_elts)
 //! pre-allocate. This value is automaticly rounded up to have at
 //! least one block of elements created.
 // **************************************************************
-template<typename T, const uint32_t N>
-void IContainer<T,N>::reserve(const uint32_t nb_elts)
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void IContainer<T,N,Block>::reserve(const uint32_t nb_elts)
 {
   // std::cout << "Reserving (" << nb_elts << " + " << M << " - 1) >> " << N << " blocks\n";
   reserveBlocks((nb_elts + M - 1) >> N);
@@ -43,8 +45,9 @@ void IContainer<T,N>::reserve(const uint32_t nb_elts)
 //! \param nb_blocks is the number of blocks of elements of type T
 //! we want to pre-allocate.
 // **************************************************************
-template<typename T, const uint32_t N>
-void IContainer<T,N>::reserveBlocks(const uint32_t nb_blocks)
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void IContainer<T,N,Block>::reserveBlocks(const uint32_t nb_blocks)
 {
   m_blocks.reserve(m_blocks.capacity() + nb_blocks);
 
@@ -65,8 +68,9 @@ void IContainer<T,N>::reserveBlocks(const uint32_t nb_blocks)
 //! the position of the last insereted element) or if the element
 //! has been removed.
 // **************************************************************
-template<typename T, const uint32_t N>
-T& IContainer<T,N>::get(const uint32_t nth)
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+T& IContainer<T,N,Block>::get(const uint32_t nth)
 {
   if (outofbound(nth))
     {
@@ -86,8 +90,9 @@ T& IContainer<T,N>::get(const uint32_t nth)
 // **************************************************************
 // FIXME code in double with previous code
 // **************************************************************
-template<typename T, const uint32_t N>
-T const& IContainer<T,N>::get(const uint32_t nth) const
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+T const& IContainer<T,N,Block>::get(const uint32_t nth) const
 {
   if (outofbound(nth))
     {
@@ -109,8 +114,9 @@ T const& IContainer<T,N>::get(const uint32_t nth) const
 //! to check.
 //! \return true if an element is present, else return false.
 // **************************************************************
-template<typename T, const uint32_t N>
-bool IContainer<T,N>::occupied(const uint32_t nth) const
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+bool IContainer<T,N,Block>::occupied(const uint32_t nth) const
 {
   if (outofbound(nth))
     {
@@ -126,8 +132,9 @@ bool IContainer<T,N>::occupied(const uint32_t nth) const
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t N>
-void IContainer<T,N>::garbage()
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void IContainer<T,N,Block>::garbage()
 {
   // Important: start by the end
   uint32_t index = m_allocated_blocks;
@@ -152,8 +159,9 @@ void IContainer<T,N>::garbage()
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t N>
-void IContainer<T,N>::debug() const
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void IContainer<T,N,Block>::debug() const
 {
   if (empty())
     {

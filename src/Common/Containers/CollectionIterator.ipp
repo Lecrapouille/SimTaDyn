@@ -34,16 +34,16 @@ public:
   //! \brief Constructor by copy from a container.
   //! \param container the container to copy.
   //! \param start_at_end set it to true for starting at the end.
-  iterator(Set<T, N, Block> const& container, const bool start_at_end)
+  iterator(Collection<T, N, Block> const& container, const bool start_at_end)
     : m_container(&container)
   {
-    if (start_at_end)
+    if (container.empty() || start_at_end)
       {
-        m_itr = container.index();
+        m_itr = container.m_end;
       }
     else
       {
-        m_itr = 0;
+        m_itr = container.m_begin;
       }
   }
 
@@ -58,7 +58,9 @@ public:
   //! \brief Iterate on the next occupied element (empty slots are ignored).
   iterator& operator++()
   {
-    ++m_itr;
+    do {
+      ++m_itr;
+    } while ((m_itr < m_container->m_end) && (!m_container->occupied(m_itr)));
     return *this;
   }
 
@@ -73,7 +75,9 @@ public:
   //! \brief Iterate on the previous occupied element (empty slots are ignored).
   iterator& operator--()
   {
-    --m_itr;
+    do {
+      --m_itr;
+    } while (m_itr && (!IContainer<T,N,Block>::occupied(m_itr)));
     return *this;
   }
 
@@ -104,7 +108,7 @@ public:
 protected:
 
   //! \brief the address of the container to explore.
-  const Set<T, N, Block>* m_container;
+  const Collection<T, N, Block>* m_container;
 
   //! \brief the iterator.
   uint32_t m_itr;

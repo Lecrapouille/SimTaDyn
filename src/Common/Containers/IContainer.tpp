@@ -19,9 +19,16 @@ typedef uint32_t ContainerBitField;
 //! bitfield indicating which elements are stored in the block.
 //! By block we mean a contigious memory of elements liek an array.
 // **************************************************************
-template<typename T, const uint32_t M, const uint32_t E>
+template<typename T, const uint32_t N>
 class Block
 {
+protected:
+
+#  include "ContainerEnums.ipp"
+
+  //! \brief Typedef
+  typedef Block<T, N> block_t;
+
 public:
 
   //! \brief Default constructor to create an empty block.
@@ -44,8 +51,14 @@ public:
 
     while (i--)
       {
-        m_occupied[i] = 0;
+        m_occupied[i] = 0U;
       }
+  }
+
+  //! \brief Return the number of elements a block can store
+  inline uint32_t elements() const
+  {
+    return M;
   }
 
 public:
@@ -70,9 +83,13 @@ public:
 //! delete the block, so it's made in constant time. Empty blocks
 //! can be all garbage in once by a specific command.
 // **************************************************************
-template<typename T, const uint32_t N>
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
 class IContainer
 {
+private:
+  typedef Block<T, N> block_t;
+
 protected:
 
   //! \brief Number of elements by block: 2^N
@@ -81,10 +98,6 @@ protected:
   enum { B = sizeof (ContainerBitField) };
   //! \brief Number of bits by integer: 32 bits for uint32_t
   enum { S = B * 8U };
-  //! \brief Precompute round(M / S)
-  enum { E = (M + S - 1U) / S };
-  //! \brief Typedef
-  typedef Block<T, M, E> block_t;
 
 public:
 

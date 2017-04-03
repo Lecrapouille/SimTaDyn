@@ -4,10 +4,10 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(CollectionTests);
 
 // A container of 2^2 elements by block with 0 block pre-allocated
-static Collection<int, 2U> collection1(0);
+static Collection<int, 2U, Block> collection1(0);
 // A container of 2^2 elements by block with 5/4 blocks pre-allocated
-static Collection<int, 2U> collection2(5);
-static Collection<int, 2U>::iterator it1;
+static Collection<int, 2U, Block> collection2(5);
+static Collection<int, 2U, Block>::iterator it1;
 
 //--------------------------------------------------------------------------
 void CollectionTests::collectionUp()

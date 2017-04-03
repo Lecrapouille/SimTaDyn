@@ -3,8 +3,9 @@
 // **************************************************************
 //! \param elt is the element of type T to insert.
 // **************************************************************
-template<typename T, const uint32_t N>
-void Set<T,N>::append(T const& elt)
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void Set<T,N,Block>::append(T const& elt)
 {
   // Next element
   m_subindex = MODULO(m_subindex + 1U, M);
@@ -13,23 +14,24 @@ void Set<T,N>::append(T const& elt)
 
   // Reserve a new block of elements if all current blocks are
   // occupied.
-  if (m_index >= IContainer<T,N>::m_allocated_blocks)
+  if (m_index >= IContainer<T,N,Block>::m_allocated_blocks)
     {
-      IContainer<T,N>::reserveBlocks(1U);
+      IContainer<T,N,Block>::reserveBlocks(1U);
     }
 
   // Insert element and add the 'Occupied' flag
-  IContainer<T,N>::m_blocks[m_index]->m_block[m_subindex] = elt;
+  IContainer<T,N,Block>::m_blocks[m_index]->m_block[m_subindex] = elt;
   SET_OCCUPIED(m_index, m_subindex);
-  ++IContainer<T,N>::m_stored_elements;
+  ++IContainer<T,N,Block>::m_stored_elements;
 }
 
 // **************************************************************
 //! \param nth the n'th element (index) of the IContainer we want
 //! to remove.
 // **************************************************************
-template<typename T, const uint32_t N>
-void Set<T,N>::remove(const uint32_t nth)
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void Set<T,N,Block>::remove(const uint32_t nth)
 {
   if (outofbound(nth))
     return ;
@@ -40,8 +42,8 @@ void Set<T,N>::remove(const uint32_t nth)
       const uint32_t id = nth / M;
       const uint32_t sid = MODULO(nth, M);
 
-      IContainer<T,N>::m_blocks[id]->m_block[sid] =
-        IContainer<T,N>::m_blocks[m_index]->m_block[m_subindex];
+      IContainer<T,N,Block>::m_blocks[id]->m_block[sid] =
+        IContainer<T,N,Block>::m_blocks[m_index]->m_block[m_subindex];
     }
 
   // And remove the last element
@@ -51,8 +53,9 @@ void Set<T,N>::remove(const uint32_t nth)
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t N>
-void Set<T,N>::removeLast()
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void Set<T,N,Block>::removeLast()
 {
   // Empty the last inserted element
   CLEAR_OCCUPIED(m_index, m_subindex);
@@ -68,9 +71,9 @@ void Set<T,N>::removeLast()
       m_index = m_last / M;
       m_subindex = MODULO(m_last, M);
     }
-  if (IContainer<T,N>::m_stored_elements)
+  if (IContainer<T,N,Block>::m_stored_elements)
     {
-      --IContainer<T,N>::m_stored_elements;
+      --IContainer<T,N,Block>::m_stored_elements;
     }
 }
 
@@ -78,8 +81,9 @@ void Set<T,N>::removeLast()
 //! \param index1 index of the 1st element to swap.
 //! \param index2 index of the 2nd element to swap.
 // **************************************************************
-template<typename T, const uint32_t N>
-void Set<T,N>::swap(const uint32_t index1, const uint32_t index2)
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void Set<T,N,Block>::swap(const uint32_t index1, const uint32_t index2)
 {
   // Do not swapt itself
   if (index1 == index2)
@@ -94,9 +98,9 @@ void Set<T,N>::swap(const uint32_t index1, const uint32_t index2)
   const uint32_t id2 = index2 / M;
   const uint32_t sid2 = MODULO(index2, M);
 
-  T elt = IContainer<T,N>::m_blocks[id2]->m_block[sid2];
-  IContainer<T,N>::m_blocks[id2]->m_block[sid2] = IContainer<T,N>::m_blocks[id1]->m_block[sid1];
-  IContainer<T,N>::m_blocks[id1]->m_block[sid1] = elt;
+  T elt = IContainer<T,N,Block>::m_blocks[id2]->m_block[sid2];
+  IContainer<T,N,Block>::m_blocks[id2]->m_block[sid2] = IContainer<T,N,Block>::m_blocks[id1]->m_block[sid1];
+  IContainer<T,N,Block>::m_blocks[id1]->m_block[sid1] = elt;
 
   // Note: does not need swap occupied bits because holes are not
   // possible.

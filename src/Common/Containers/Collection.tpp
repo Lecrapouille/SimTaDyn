@@ -13,19 +13,13 @@
 //! elements like a graph without getting too much overhead due to
 //! memory allocation and minimising defragementation of the memory.
 // **************************************************************
-template<typename T, const uint32_t N>
-class Collection: public IContainer<T, N>
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+class Collection: public IContainer<T, N, Block>
 {
 protected:
 
-  //! \brief Number of elements by block: 2^N
-  enum { M = (1U << N) };
-  //! \brief Number of bytes by integer: 4 for uint32_t, 8 for uint64_t
-  enum { B = sizeof (ContainerBitField) };
-  //! \brief Number of bits by integer: 32 bits for uint32_t
-  enum { S = B * 8U };
-  //! \brief Precompute round(M / S)
-  enum { E = (M + S - 1U) / S };
+#  include "ContainerEnums.ipp"
 
 public:
 
@@ -36,7 +30,7 @@ public:
   //! least one block of elements created. Note: 0 is a possible value
   //! in this case no blocks are allocated. Default value is 1.
   Collection(const uint32_t reserve_elements = 1)
-    : IContainer<T, N>(reserve_elements)
+    : IContainer<T, N, Block>(reserve_elements)
   {
     m_begin = INITIAL_INDEX;
     m_end = 0;
@@ -60,7 +54,7 @@ public:
   //! \return false if nth is before is inside, else return true.
   virtual inline bool outofbound(const uint32_t nth) const override
   {
-    return (nth + 1) > (IContainer<T, N>::m_allocated_blocks << N);
+    return (nth + 1) > (IContainer<T, N, Block>::m_allocated_blocks << N);
   }
 
   //! \brief Empty all the container. Complexity is O(n)
@@ -68,7 +62,7 @@ public:
   //! are not deleted from memory.
   virtual inline void clear()
   {
-    IContainer<T, N>::clear();
+    IContainer<T, N, Block>::clear();
     m_begin = INITIAL_INDEX;
     m_end = 0;
   }
