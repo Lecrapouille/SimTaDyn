@@ -36,7 +36,7 @@ public:
   {
     if (nullptr != m_current_map)
       {
-        m_current_map->m_graph.BasicGraph::reset();
+        m_current_map->clear();
       }
   }
   inline void saveMap()
@@ -48,8 +48,8 @@ public:
     // TODO
   }
   bool execMap();
-  void execMap2() { execMap(); }
-  void foo() { m_inspector.showCell(m_foo); ++m_foo; }
+  void execMap2() { execMap(); } // FIXME
+  void foo() { m_inspector.showCell(m_foo); ++m_foo; } //FIXME
 
   void closeMap();
   bool selectMap(const Key id);

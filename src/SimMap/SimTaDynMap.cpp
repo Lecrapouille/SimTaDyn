@@ -1,8 +1,8 @@
 #include "SimTaDynMap.hpp"
 
 // FIXME: temporaire
-static container<Vector3D> P;
-static container<Color> C;
+/*static Set<Vector3D> P;
+  static Set<Color> C;*/
 const Vector3D* vec;
 
 SimTaDynNode *SimTaDynMap::addNode(Vertex const& p)
@@ -10,9 +10,11 @@ SimTaDynNode *SimTaDynMap::addNode(Vertex const& p)
   SimTaDynNode *node = m_graph.addNode();
   if (nullptr != node)
     {
-      node->dataID = m_vertices.occupation();
       m_vertices.append(p);
       //m_colors.append();
+      //assert(m_vertices.index() == m_colors.index());
+
+      node->dataID = m_vertices.index();
     }
   return node;
 }

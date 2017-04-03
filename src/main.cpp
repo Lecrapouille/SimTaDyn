@@ -11,9 +11,9 @@
 int main(int argc, char** argv)
 {
   std::cout << "Welcome to SimTaDyn version "
-            << Config::instance().m_major_version
+            << simtadyn::m_major_version
             << '.'
-            << Config::instance().m_minor_version
+            << simtadyn::m_minor_version
             << std::endl;
   SimTaDynLogger::instance();
 

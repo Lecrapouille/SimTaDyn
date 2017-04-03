@@ -6,7 +6,7 @@
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
 #  include "Renderable.hpp"
-#  include "GraphMemory.hpp"
+//#  include "GraphMemory.hpp"
 
 class IRenderable;
 
@@ -147,10 +147,10 @@ public:
     //renderable.drawnBy(*this);
   }
 
-  void draw(container<Vertex> const& m_vertices) const
+  /*void draw(container<Vertex> const& m_vertices) const
   {
     (void) m_vertices;
-  }
+    }*/
 
   /*
    * Number of pixels of the opengl window

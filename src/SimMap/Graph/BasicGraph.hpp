@@ -2,7 +2,7 @@
 #  define BASIC_GRAPH_HPP_
 
 //! Special container
-#  include "GraphMemory.hpp"
+#  include "GraphContainer.tpp"
 #  include "Types.hpp"
 #  include <algorithm>
 
@@ -318,9 +318,9 @@ public:
   //! \brief
   inline N *addNode()
   {
-    const Key id = m_nodes.nextFree();
-    N *node = newNode(id);
-    m_nodes.append(node);
+    N *node = newNode(m_node_unique);
+    m_nodes.insert(m_node_unique, node);
+    ++m_node_unique;
     return node;
   }
 
@@ -343,6 +343,8 @@ public:
   {
     if (!hasNode(nodeID))
       {
+// FIXME eviter les new: changeNode(nodeID) { m_nodes[nodeID]. xx = .. } au lieu de new et insert
+// FIXME par contre on perd le polymorphisme ancestre->xxx
         N *node = newNode(nodeID);
         m_nodes.insert(node->id(), node);
       }
@@ -660,13 +662,15 @@ protected:
   }
 
   //! \brief the list of nodes constituing the graph.
-  container<N*> m_nodes;
+  GraphContainer<N*, simtadyn::graph_container_nb_elements, GraphBlock> m_nodes; // FIXME shared_ptr<N> ? //FIXME: virer le * du N
   //! \brief the list of arcs constituing the graph.
-  container<A*> m_arcs;
+  GraphContainer<A*, simtadyn::graph_container_nb_elements, GraphBlock> m_arcs;
   //! \brief direct or not direct graph ?
   bool m_directed;
   //! \brief create a unique identifier for arcs.
   Key m_arc_unique = 0;
+  //! \brief create a unique identifier for nodes.
+  Key m_node_unique = 0;
 };
 
 #endif /* BASIC_GRAPH_HPP_ */

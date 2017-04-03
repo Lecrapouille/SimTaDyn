@@ -8,6 +8,7 @@
 #  include "SimTaDynGraph.hpp"
 #  include "Renderable.hpp"
 #  include "Renderer.hpp"
+#  include "Set.tpp"
 
 // FIXME: faut creer une class helper pour charger une seule fois les
 // shader commun a tous les cartes (ou alors 1 carte == 1 shader meme
@@ -94,6 +95,11 @@ public:
               << std::endl;
   }
 
+  inline void clear()
+  {
+    m_graph.BasicGraph::reset();
+  }
+
 public:
 
   //! \brief the map structured as a graph.
@@ -122,7 +128,7 @@ public:
   // or:
   // BTree sur des fichiers + convertion(char, type_de_la_colonne)
   // or: clef MySQL
-  container<Vertex> m_vertices;
+  Set<Vertex, 8U, Block> m_vertices; // FIXME: BLock --> GPUdata
 
 protected:
 

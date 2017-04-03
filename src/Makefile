@@ -30,7 +30,7 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../tools -IUtils -ICommon/SharedLibrary -ICommon  \
+INCLUDES = -I. -I../tools -IUtils -ICommon/SharedLibrary -ICommon/Containers -ICommon  \
 	   -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap  \
 	   -ISimMap/RTree -ISimMap/Graph -ISimMap/Loaders -ISimGui \
 	   -ISimTaDyn
@@ -38,7 +38,7 @@ INCLUDES = -I. -I../tools -IUtils -ICommon/SharedLibrary -ICommon  \
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../tools:Utils:Common/SharedLibrary:Common:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui:SimTaDyn
+VPATH=.:$(BUILD):../tools:Utils:Common/SharedLibrary:Common/Containers:Common:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui:SimTaDyn
 
 ###################################################
 # Set objects architecture specific
@@ -49,7 +49,7 @@ OBJECTS_FORTH    = TextColor.o ForthExceptions.o ForthStream.o ForthDictionary.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
 OBJECTS_LOADER   = MapLoader.o ShapeFile.o
-OBJECTS_OPENGL   = OpenGL.o Shader.o Textures.o Fonts.o Renderer.o #Renderable.o
+OBJECTS_OPENGL   = OpenGL.o GLObject.o GLBuffer.o GLShader.o Textures.o Fonts.o Renderer.o #Renderable.o
 OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJECTS_SIMTADYN =
 
