@@ -1,5 +1,5 @@
-#ifndef SHADER_HPP_
-#  define SHADER_HPP_
+#ifndef GLSHADER_HPP_
+#  define GLSHADER_HPP_
 
 ///! \brief This file contains the class managing OpenGL shaders :
 ///! read, compile, load into the GPU.
@@ -26,7 +26,7 @@ public:
   }
 
   //! \brief Constructor with the path of shader scripts. Compile and
-  //! load them into the GPU as a program (createShaderProgram() is
+  //! load them into the GPU as a program (load() is
   //! called).
   //! \param vertex_shader_filename the path of the file containing
   //! the vertex shader script.
@@ -38,9 +38,9 @@ public:
            const char* fragment_shader_filename,
            const char* geometry_shader_filename = nullptr)
   {
-    m_program = createShaderProgram(vertex_shader_filename,
-                                    fragment_shader_filename,
-                                    geometry_shader_filename);
+    m_program = load(vertex_shader_filename,
+                     fragment_shader_filename,
+                     geometry_shader_filename);
   }
 
   //! \brief Destructor. The program (if loaded) is removed from the GPU.
@@ -72,7 +72,7 @@ public:
 
   //! \brief Accessor. Return the program identifier. Return 0 if the
   //! shaders have not been loaded intot the GPU.
-  inline GLuint id() const
+  inline GLuint program() const
   {
     return m_program;
   }
@@ -81,30 +81,30 @@ public:
   //! and optionaly a geometry shader an link them as a program. The
   //! older program, if present, is released from GPU memory before
   //! being replacing by the new one.
-  inline GLuint createShaderProgram(std::string const& vertex_shader_filename,
-                                    std::string const& fragment_shader_filename,
-                                    std::string const& geometry_shader_filename)
+  inline GLuint load(std::string const& vertex_shader_filename,
+                     std::string const& fragment_shader_filename,
+                     std::string const& geometry_shader_filename)
   {
-    return createShaderProgram(vertex_shader_filename.c_str(),
-                               fragment_shader_filename.c_str(),
-                               geometry_shader_filename.c_str());
+    return load(vertex_shader_filename.c_str(),
+                fragment_shader_filename.c_str(),
+                geometry_shader_filename.c_str());
   }
 
-  inline GLuint createShaderProgram(std::string const& vertex_shader_filename,
-                                    std::string const& fragment_shader_filename)
+  inline GLuint load(std::string const& vertex_shader_filename,
+                     std::string const& fragment_shader_filename)
   {
-    return createShaderProgram(vertex_shader_filename.c_str(),
-                               fragment_shader_filename.c_str(),
-                               nullptr);
+    return load(vertex_shader_filename.c_str(),
+                fragment_shader_filename.c_str(),
+                nullptr);
   }
 
   //! \brief Open, read, compile and load a fragment, a vertex shader
   //! and optionaly a geometry shader an link them as a program. The
   //! older program is released from GPU memory before replacing by
   //! the new one.
-  GLuint createShaderProgram(const char* vertex_shader_filename,
-                             const char* fragment_shader_filename,
-                             const char* geometry_shader_filename = nullptr);
+  GLuint load(const char* vertex_shader_filename,
+              const char* fragment_shader_filename,
+              const char* geometry_shader_filename = nullptr);
 
   //! \brief Find in the shader program a variable name.
   //! \param name the attribute or uniform shader variable to look for.

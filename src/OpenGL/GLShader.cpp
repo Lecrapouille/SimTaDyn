@@ -1,4 +1,4 @@
-#include "Shader.hpp"
+#include "GLShader.hpp"
 #include <vector>
 #include <cassert>
 #include <fstream>
@@ -127,8 +127,8 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
   // Create and compile the shader
   char const *source = shader_code.c_str();
   int length = shader_code.size();
-  GLuint shader = glCheck(glCreateShader(shader_type);)
-    glCheck(glShaderSource(shader, 1, &source, &length));
+  GLuint shader = glCheck(glCreateShader(shader_type));
+  glCheck(glShaderSource(shader, 1, &source, &length));
   glCheck(glCompileShader(shader));
   if (!checkShaderCompileStatus(shader))
     {
@@ -147,9 +147,9 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
 //! the vertex geometry script.
 //! \return the program identifier or 0 if a failure occured.
 // **************************************************************
-GLuint GLShader::createShaderProgram(const char* vertex_shader_filename,
-                                     const char* fragment_shader_filename,
-                                     const char* geometry_shader_filename)
+GLuint GLShader::load(const char* vertex_shader_filename,
+                      const char* fragment_shader_filename,
+                      const char* geometry_shader_filename)
 {
   GLuint vertex;
   GLuint fragment;

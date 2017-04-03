@@ -31,8 +31,6 @@ public:
   std::string m_data_path;
   std::string m_title = "SimTaDyn";
   std::string m_log_path = data_path("SimTaDyn.log");
-  const uint32_t m_major_version = 0;
-  const uint32_t m_minor_version = 2;
 
 private:
 
@@ -41,5 +39,16 @@ private:
   {
   }
 };
+
+namespace simtadyn
+{
+  //! \brief Major version of SimTaDyn
+  const uint32_t m_major_version = 0U;
+  //! \brief Minor version of SimTaDyn
+  const uint32_t m_minor_version = 2U;
+  //! \brief Number of elements by pool in containers
+  //! used for storing nodes and arcs in a graph
+  const uint32_t graph_container_nb_elements = 8U;
+}
 
 #endif /* CONFIG_HPP_ */

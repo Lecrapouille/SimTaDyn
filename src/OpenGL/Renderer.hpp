@@ -2,7 +2,7 @@
 #  define RENDERER_HPP_
 
 #  include "Vertex.hpp"
-#  include "Shader.hpp"
+#  include "GLShader.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
 #  include "Renderable.hpp"

@@ -71,8 +71,8 @@ void SimTaDynLogger::header()
   log("===============================================\n"
       "  SimTaDyn %u.%u - Event log - %s\n"
       "===============================================\n\n",
-      Config::instance().m_major_version,
-      Config::instance().m_minor_version,
+      simtadyn::m_major_version,
+      simtadyn::m_minor_version,
       m_buffer_time);
 }
 
