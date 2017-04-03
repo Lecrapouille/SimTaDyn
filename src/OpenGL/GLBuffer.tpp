@@ -1,5 +1,7 @@
-#ifndef GLBUFFER_HPP_
-#  define GLBUFFER_HPP_
+// -*- c++ -*- Coloration Syntaxique pour Emacs
+
+#ifndef GLBUFFER_TPP_
+#  define GLBUFFER_TPP_
 
 //! \file This class get its inspiration from the code of the Glumpy
 //! project (Python + Numpy + modern OpenGL: a fast, scalable and
@@ -167,4 +169,36 @@ public:
   }
 };
 
-#endif /* GLBUFFER_HPP_ */
+// **************************************************************
+//! \brief
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block = GLBlockBuffer>
+class GLBuffer: public Set<T, N, Block>
+{
+public:
+
+  GLBuffer(const uint32_t reserve_elements = 1)
+    : Set<T,N,Block>(reserve_elements)
+  {
+  }
+};
+
+// **************************************************************
+//! \brief
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block = GLVertexBlockBuffer>
+class GLVertexBuffer: public GLBuffer<T, N, Block>
+{
+public:
+
+  GLVertexBuffer(const uint32_t reserve_elements = 1)
+    : GLBuffer<T,N,Block>(reserve_elements)
+  {
+  }
+};
+
+//#  include "GLBuffer.ipp"
+
+#endif /* GLBUFFER_TPP_ */
