@@ -3,12 +3,12 @@
 in vec3 a_position;
 in vec4 a_color;
 uniform mat4 u_mvp;
-out vec4 o_fragmentColor;
+out vec4 a_fragmentColor;
 uniform float u_time;
 
 void main()
 {
   gl_Position = u_mvp * vec4(a_position, 1.0);
   gl_PointSize = 3.0 * (1.0 + sin(u_time));
-  o_fragmentColor = a_color;
+  a_fragmentColor = a_color;
 }

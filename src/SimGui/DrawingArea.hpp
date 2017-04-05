@@ -82,6 +82,7 @@ public:
   void onUnrealize();
 
 private:
+  bool m_success_init = false;
   bool m_direction[DirectionIterEnd + 1] = {0};
 };
 

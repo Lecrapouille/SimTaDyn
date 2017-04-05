@@ -41,13 +41,13 @@ public:
 
   virtual inline bool needDelete() const
   {
-    return m_need_delete;
+    return false == m_need_create;
   }
 
   //! \brief Return the GPU reference of the object.
   inline GLenum gpuID() const
   {
-    return m_gpu_id;
+    return m_handle;
   }
 
   //! \brief Return the CPU reference of the object.
@@ -65,7 +65,7 @@ public:
   //! \brief Activate the object on the GPU.
   virtual void begin()
   {
-    if (needUpdate())
+    if (needCreate())
       {
         create();
         m_need_create = false;
@@ -95,12 +95,14 @@ public:
   //! \brief Delete the object from GPU memory.
   virtual void destroy()
   {
+    if (!needDelete())
+      return ;
+
     release();
-    m_gpu_id = -1;
+    m_handle = 0U;
     m_need_setup = true;
     m_need_create = true;
     m_need_update = true;
-    m_need_delete = false;
   }
 
 protected:
@@ -117,14 +119,14 @@ protected:
   //! \brief Update the object on the GPU
   virtual void update() = 0;
 
-  GLenum m_gpu_id = 0U;
+  GLenum m_handle = 0U;
   GLenum m_target = 0U;
+
+private:
+
   bool m_need_setup = true;
   bool m_need_create = true;
   bool m_need_update = true;
-  bool m_need_delete = false;
-
-private:
 
   //! \brief Track the
   static Key howMany()

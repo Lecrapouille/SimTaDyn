@@ -10,7 +10,10 @@ static GLVertexBlockBuffer<int, 2U> block2(GL_DYNAMIC_DRAW);
 // An index Buffer block of data
 static GLIndexBlockBuffer<int, 2U> block3(GL_STATIC_DRAW);
 //
-static GLVertexBuffer<int, 2U> buf1;
+static GLIndexBuffer<int, 2U> buf1(0U);
+//
+static GLVertexBuffer<int, 2U> buf2;
+
 
 //--------------------------------------------------------------------------
 void GLBufferTests::setUp()
@@ -29,8 +32,8 @@ void GLBufferTests::testDummy()
   // GLObject
   CPPUNIT_ASSERT_EQUAL(true, GL_ARRAY_BUFFER == block1.m_target);
   CPPUNIT_ASSERT_EQUAL(true, GL_DYNAMIC_DRAW == block1.m_usage);
-  CPPUNIT_ASSERT_EQUAL(0U, block1.m_cpu_id);
-  CPPUNIT_ASSERT_EQUAL(true, 0U == block1.m_gpu_id);
+  CPPUNIT_ASSERT_EQUAL(0U, block1.cpuID());
+  CPPUNIT_ASSERT_EQUAL(true, 0U == block1.gpuID());
   CPPUNIT_ASSERT_EQUAL(true, block1.m_need_setup);
   CPPUNIT_ASSERT_EQUAL(true, block1.m_need_create);
   CPPUNIT_ASSERT_EQUAL(true, block1.m_need_update);
@@ -39,8 +42,8 @@ void GLBufferTests::testDummy()
   // GLObject
   CPPUNIT_ASSERT_EQUAL(true, GL_ARRAY_BUFFER == block2.m_target);
   CPPUNIT_ASSERT_EQUAL(true, GL_DYNAMIC_DRAW == block2.m_usage);
-  CPPUNIT_ASSERT_EQUAL(1U, block2.m_cpu_id);
-  CPPUNIT_ASSERT_EQUAL(true, 0U == block2.m_gpu_id);
+  CPPUNIT_ASSERT_EQUAL(1U, block2.cpuID());
+  CPPUNIT_ASSERT_EQUAL(true, 0U == block2.gpuID());
   CPPUNIT_ASSERT_EQUAL(true, block2.m_need_setup);
   CPPUNIT_ASSERT_EQUAL(true, block2.m_need_create);
   CPPUNIT_ASSERT_EQUAL(true, block2.m_need_update);
@@ -49,8 +52,8 @@ void GLBufferTests::testDummy()
   // GLObject
   CPPUNIT_ASSERT_EQUAL(true, GL_ELEMENT_ARRAY_BUFFER == block3.m_target);
   CPPUNIT_ASSERT_EQUAL(true, GL_STATIC_DRAW == block3.m_usage);
-  CPPUNIT_ASSERT_EQUAL(2U, block3.m_cpu_id);
-  CPPUNIT_ASSERT_EQUAL(true, 0U == block3.m_gpu_id);
+  CPPUNIT_ASSERT_EQUAL(2U, block3.cpuID());
+  CPPUNIT_ASSERT_EQUAL(true, 0U == block3.gpuID());
   CPPUNIT_ASSERT_EQUAL(true, block3.m_need_setup);
   CPPUNIT_ASSERT_EQUAL(true, block3.m_need_create);
   CPPUNIT_ASSERT_EQUAL(true, block3.m_need_update);
@@ -73,6 +76,36 @@ void GLBufferTests::testDummy()
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(41U, pos_end);
   CPPUNIT_ASSERT_EQUAL(false, block1.needUpdate());
+
+  // Dummy Set
+  CPPUNIT_ASSERT_EQUAL(0U, buf1.used());
+  CPPUNIT_ASSERT_EQUAL(0U, buf1.blocks());
+  CPPUNIT_ASSERT_EQUAL(0U, buf1.remaining());
+  CPPUNIT_ASSERT_EQUAL(true, buf1.empty());
+  CPPUNIT_ASSERT_EQUAL(true, buf1.full());
+  CPPUNIT_ASSERT_EQUAL(true, buf1.outofbound(0U));
+  CPPUNIT_ASSERT_THROW(buf1.occupied(0U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(0U, buf1.index());
+  CPPUNIT_ASSERT_THROW(buf1.get(0U), std::out_of_range);
+
+  // Dummy Set
+  CPPUNIT_ASSERT_EQUAL(0U, buf2.used());
+  CPPUNIT_ASSERT_EQUAL(1U, buf2.blocks());
+  CPPUNIT_ASSERT_EQUAL(4U, buf2.remaining());
+  CPPUNIT_ASSERT_EQUAL(true, buf2.empty());
+  CPPUNIT_ASSERT_EQUAL(false, buf2.full());
+  CPPUNIT_ASSERT_EQUAL(true, buf2.outofbound(0U));
+  CPPUNIT_ASSERT_THROW(buf2.occupied(0U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(0U, buf2.index());
+  CPPUNIT_ASSERT_THROW(buf2.get(0U), std::out_of_range);
+
+  buf2.m_blocks[0]->addPendingData(pos_start, pos_end);
+  pos_start = 0U;
+  pos_end = 1U;
+  CPPUNIT_ASSERT_EQUAL(true, buf2.m_blocks[0]->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(40U, pos_start);
+  CPPUNIT_ASSERT_EQUAL(41U, pos_end);
+  CPPUNIT_ASSERT_EQUAL(true, buf2.m_blocks[0]->needUpdate());
 }
 
 //--------------------------------------------------------------------------

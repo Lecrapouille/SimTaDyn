@@ -62,7 +62,11 @@ void GLDrawingArea::onRealize()
     {
       initializeGLEW();
       Gtk::GLArea::throw_if_error();
-      GLRenderer::setupGraphics();
+      m_success_init = GLRenderer::setupGraphics();
+      if (!m_success_init)
+        {
+          std::cerr << "[FAILED] setup graphics" << std::endl;
+        }
       GLRenderer::clearScreen();
     }
   catch (const Gdk::GLError& gle)
@@ -93,9 +97,12 @@ bool GLDrawingArea::onRender()
     {
       Gtk::GLArea::throw_if_error();
 
-      GLRenderer::begin();
-      //GLRenderer::draw();
-      GLRenderer::end();
+      if (m_success_init)
+        {
+          GLRenderer::begin();
+          GLRenderer::draw();
+          GLRenderer::end();
+        }
 
       return true;
     }

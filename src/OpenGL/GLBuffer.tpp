@@ -40,7 +40,7 @@ public:
   //! \brief Delete the object from GPU memory.
   ~GLBlockBuffer()
   {
-    destroy();
+    GLObject::destroy();
   }
 
 protected:
@@ -49,9 +49,9 @@ protected:
   virtual void create() override
   {
     // Total size of the container
-    const uint32_t bytes = M * sizeof (T);
+    const uint32_t bytes = Block<T, N>::elements() * sizeof (T);
 
-    glCheck(glGenBuffers(1, &m_gpu_id));
+    glCheck(glGenBuffers(1, &m_handle));
     activate();
     glCheck(glBufferData(m_target, bytes, nullptr, m_usage));
     deactivate();
@@ -60,13 +60,17 @@ protected:
   //! \brief Delete the object from GPU memory.
   virtual inline void release() override
   {
-    glCheck(glDeleteBuffers(1, &m_gpu_id));
+    GLboolean res = glCheck(glIsBuffer(m_handle));
+    if (res)
+      {
+        glCheck(glDeleteBuffers(1, &m_handle));
+      }
   }
 
   //! \brief Bind the buffer to some target.
   virtual inline void activate() override
   {
-    glCheck(glBindBuffer(m_target, m_gpu_id));
+    glCheck(glBindBuffer(m_target, m_handle));
   }
 
   //! \brief Unbind the current bound buffer.
@@ -78,8 +82,9 @@ protected:
   //! \brief Whether object needs to be updated.
   virtual inline bool needUpdate() override
   {
-    uint32_t pos_start, pos_end;
-    bool b = hasPendingData(pos_start, pos_end);
+    uint32_t pos_start = 0; // FIXME
+    uint32_t pos_end = 6; // FIXME
+    static bool b = true; //hasPendingData(pos_start, pos_end); //FIXME
     if (b)
       {
         m_offset = sizeof (T) * pos_start;
@@ -89,7 +94,7 @@ protected:
   }
 
   //! \brief Upload all pending data to GPU.
-  virtual void update() override
+  virtual inline void update() override
   {
     glCheck(glBufferSubData(m_target, m_offset, m_nbytes, Block<T, N>::m_block));
     clearPending();
@@ -194,6 +199,21 @@ class GLVertexBuffer: public GLBuffer<T, N, Block>
 public:
 
   GLVertexBuffer(const uint32_t reserve_elements = 1)
+    : GLBuffer<T,N,Block>(reserve_elements)
+  {
+  }
+};
+
+// **************************************************************
+//! \brief
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block = GLIndexBlockBuffer>
+class GLIndexBuffer: public GLBuffer<T, N, Block>
+{
+public:
+
+  GLIndexBuffer(const uint32_t reserve_elements = 1)
     : GLBuffer<T,N,Block>(reserve_elements)
   {
   }

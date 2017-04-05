@@ -2,6 +2,7 @@
 #  define RENDERER_HPP_
 
 #  include "Vertex.hpp"
+#  include "GLBuffer.tpp"
 #  include "GLShader.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
@@ -20,7 +21,7 @@ public:
 /*
  * OpenGL renderer.
  */
-class GLRenderer: public IRenderer
+class GLRenderer//: public IRenderer
 {
 public:
 
@@ -138,6 +139,8 @@ public:
     return m_render_style;
   }
 
+  void draw();
+#if 0
   /*
    * Draw a graph as friend function
    */
@@ -151,6 +154,7 @@ public:
   {
     (void) m_vertices;
     }*/
+#endif
 
   /*
    * Number of pixels of the opengl window

@@ -4,8 +4,28 @@
 ///! \brief This file contains the class managing OpenGL shaders :
 ///! read, compile, load into the GPU.
 
-#  include "OpenGL.hpp"
+#  include "Exception.hpp"
+#  include "GLObject.hpp"
 
+//! This macro (from the library POCO) will declare a class
+//! MapLoaderException derived from simtadyn::Exception.
+POCO_DECLARE_EXCEPTION(GLShaderException, simtadyn::Exception)
+
+// **************************************************************
+//!
+// **************************************************************
+class GLShaderNotLoadedException: public GLShaderException
+{
+public:
+
+  GLShaderNotLoadedException(const uint32_t id)
+  {
+    m_msg = "No vertex and fragment shaders have been given for GLObject "
+      + std::to_string(id);
+  }
+};
+
+// **************************************************************
 //! \class GLShader
 //!
 //! Shaders are scripts running in the GPU manipulating vertices,
@@ -16,7 +36,8 @@
 //!
 //! This class loads into the GPU a pair of vertex and fragment shader
 //! and optionaly a geometry shader.
-class GLShader
+// **************************************************************
+class GLShader: public GLObject
 {
 public:
 
@@ -38,43 +59,59 @@ public:
            const char* fragment_shader_filename,
            const char* geometry_shader_filename = nullptr)
   {
-    m_program = load(vertex_shader_filename,
-                     fragment_shader_filename,
-                     geometry_shader_filename);
+    load(vertex_shader_filename, fragment_shader_filename,
+         geometry_shader_filename);
   }
 
   //! \brief Destructor. The program (if loaded) is removed from the GPU.
   ~GLShader()
   {
-    abort();
+    destroy();
+  }
+
+  virtual void create() override
+  {
+    if (0U == m_handle)
+      {
+        GLShaderNotLoadedException e(cpuID());
+        throw e;
+      }
+  }
+
+  virtual inline void setup() override
+  {
+  }
+
+  virtual inline void update() override
+  {
   }
 
   //! \brief Once program is no longer used, release it from the GPU
   //! memory. Can be used to abort the shader.
-  void abort();
+  virtual void release() override;
 
   //! \brief A program can be activated if and only if shaders have
   //! been loaded into a program (else nothing is done).
-  inline void on() const
+  virtual inline void activate() override
   {
-    if (0 != m_program)
+    if (0U != m_handle)
       {
-        glUseProgram(m_program);
+        glUseProgram(m_handle);
       }
   }
 
   //! \brief A program can be desactivated if and only if shaders have
   //! been loaded into a program (else nothing is done).
-  inline void off() const
+  virtual inline void deactivate() override
   {
-    glUseProgram(0);
+    glUseProgram(0U);
   }
 
   //! \brief Accessor. Return the program identifier. Return 0 if the
   //! shaders have not been loaded intot the GPU.
   inline GLuint program() const
   {
-    return m_program;
+    return m_handle;
   }
 
   //! \brief Open, read, compile and load a fragment, a vertex shader
@@ -127,9 +164,6 @@ private:
   //! \brief Once shaders are loaded as unique program, release the
   //! GPU memory.
   void cleanShader(GLuint vertex, GLuint fragment, GLuint geometry);
-
-  //! \brief the program identifier.
-  GLuint m_program = 0;
 };
 
 #endif /* SHADERHPP_ */
