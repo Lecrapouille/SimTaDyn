@@ -1,6 +1,6 @@
 [CRITICAL] Graph container: Enlever le * de N et de A. Faire un constructeur avec les bons numeros d'ID des cellules. Faire le code container.replace(nth)
 container.append_list(liste ou vector). Faire des TU sur tout le graphe.
-[CRITICAL] TU GLBuffer et surtout les pending_data()
+[CRITICAL] OpenGL Attributes: on doit pour le moment passer la taille et le type de l'attribute dans setup(). Il faudrait simplement parser la ligne du shader et en deduire le type. Par exemple vec4 = 4 GL_FLOAT. Le probleme est qu'on a pas acces au code du shader (il faudt l'ouvrir etc.
 
 ======================================================
 BUGS:

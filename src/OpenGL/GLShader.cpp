@@ -3,9 +3,6 @@
 #include <cassert>
 #include <fstream>
 
-//! This macro (from the library POCO) will generate code for members.
-POCO_IMPLEMENT_EXCEPTION(GLShaderException, simtadyn::Exception, "OpenGL Shader Exception")
-
 // **************************************************************
 //! \param vertex the identifer of the loaded vertex shader.
 //! \param fragment the identifer of the loaded fragment shader.
@@ -33,7 +30,7 @@ void GLShader::cleanShader(GLuint vertex, GLuint fragment, GLuint geometry)
 // **************************************************************
 void GLShader::release()
 {
-  if (0U != m_handle)
+  if (isActivable())
     {
       glCheck(glDeleteProgram(m_handle));
       m_handle = 0U;
@@ -194,7 +191,7 @@ l_end:
   return m_handle;
 }
 
-GLint GLShader::locate(const char *name)
+GLint GLShader::locate(const char *name) const
 {
   int res = -1;
 

@@ -109,6 +109,7 @@ void SetTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(0U, set1.index());
   CPPUNIT_ASSERT_EQUAL(41, set1.get(0U));
   CPPUNIT_ASSERT_THROW(set1.get(1U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0]->occupation());
 
   set1.append(42);
   CPPUNIT_ASSERT_EQUAL(2U, set1.used());
@@ -126,6 +127,7 @@ void SetTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(41, set1.get(0U));
   CPPUNIT_ASSERT_EQUAL(42, set1.get(1U));
   CPPUNIT_ASSERT_THROW(set1.get(2U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(2U, set1.m_blocks[0]->occupation());
 
   set1.append(43);
   CPPUNIT_ASSERT_EQUAL(3U, set1.used());

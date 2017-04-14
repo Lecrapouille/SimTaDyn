@@ -1,8 +1,8 @@
 #include "Renderer.hpp"
 
 // FIXME Temporary example
-static GLVertexBuffer<Vector3D, 8U> pos;
-static GLVertexBuffer<Color, 8U> col;
+static GLVertexBuffer<Vector3D, 1U> pos;
+static GLVertexBuffer<Color, 1U> col;
 
 static void compute_mvp(float32_t *res,
                         float32_t phi,
@@ -45,7 +45,6 @@ static void compute_mvp(float32_t *res,
 
 GLRenderer::~GLRenderer()
 {
-  glDeleteVertexArrays(1, &m_vao);
 }
 
 bool GLRenderer::setupGraphics()
@@ -82,11 +81,15 @@ bool GLRenderer::setupGraphics()
   pos.append(Vector3D(0.2f,  0.7f));
   pos.append(Vector3D(0.7f, -0.166f));
   pos.append(Vector3D(-0.3f, -0.166f));
+  pos.append(Vector3D(0.9f,  0.9f));
+  pos.append(Vector3D(-0.9f,  -0.9f));
 
   col.append(Color(1.0f, 0.0f, 0.0f));
   col.append(Color(0.0f, 1.0f, 0.0f));
   col.append(Color(0.0f, 0.0f, 1.0f));
   col.append(Color(1.0f, 0.5f, 0.0f));
+  col.append(Color(0.0f, 1.0f, 0.5f));
+  col.append(Color(0.5f, 0.0f, 1.0f));
   col.append(Color(0.0f, 1.0f, 0.5f));
   col.append(Color(0.5f, 0.0f, 1.0f));
 
@@ -95,26 +98,16 @@ bool GLRenderer::setupGraphics()
   if (0U == program)
     return false;
 
-  glGenVertexArrays(1, &m_vao);
-  glBindVertexArray(m_vao);
-
+  m_vao.begin();
   m_shader.begin();
-  m_posAttrib = m_shader.locate("a_position");
-  m_colAttrib = m_shader.locate("a_color");
-  m_timeAttrib = m_shader.locate("u_time");
-  m_mvpAttrib = m_shader.locate("u_mvp");
+
+  m_posAttrib.setup(m_shader, "a_position", 3, GL_FLOAT);
+  m_colAttrib.setup(m_shader, "a_color", 4, GL_FLOAT);
+  m_timeAttrib.setup(m_shader, "u_time");
+  m_mvpAttrib.setup(m_shader, "u_mvp");
 
   glCheck(glUniform1f(m_timeAttrib, 1.0f));
   m_shader.end();
-
-  if (-1 == m_posAttrib)
-    return false;
-  if (-1 == m_colAttrib)
-    return false;
-  if (-1 == m_timeAttrib)
-    return false;
-  if (-1 == m_mvpAttrib)
-    return false;
   return true;
 }
 
@@ -122,6 +115,8 @@ void GLRenderer::draw()
 {
   // FIXME: a fusionner avec la camera
   static float32_t m_matrix_mvp[16];
+
+  assert(pos.blocks() == col.blocks());
 
   // FIXME ajouter un flag pour eviter de faire des calculs
   // if (mvp_need_refresh)
@@ -134,24 +129,20 @@ void GLRenderer::draw()
   // }
 
   m_shader.begin();
-  {
-    // if (mvp_need_refresh)
-    glCheck(glUniformMatrix4fv(m_mvpAttrib, 1, GL_FALSE, &m_matrix_mvp[0]));
 
-    // Color
-    glCheck(glEnableVertexAttribArray(m_colAttrib));
-    col.m_blocks[0]->begin();
-    glCheck(glVertexAttribPointer(m_colAttrib, 4, GL_FLOAT, GL_FALSE, 0, nullptr));
-    col.m_blocks[0]->end();
-    glCheck(glDisableVertexAttribArray(0));
+  // if (mvp_need_refresh)
+  glCheck(glUniformMatrix4fv(m_mvpAttrib, 1, GL_FALSE, &m_matrix_mvp[0]));
 
-    // Position
-    glCheck(glEnableVertexAttribArray(m_posAttrib));
-    pos.m_blocks[0]->begin();
-    glCheck(glVertexAttribPointer(m_posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
-    glCheck(glDrawArrays(GL_POINTS, 0, 6));
-    pos.m_blocks[0]->end();
-    glCheck(glDisableVertexAttribArray(0));
-  }
+  uint32_t i = pos.blocks();
+  while (i--)
+    {
+      col[i].begin();
+      m_colAttrib.begin();
+
+      pos[i].begin();
+      m_posAttrib.begin();
+      pos[i].draw(GL_POINTS, m_posAttrib);
+    }
+
   m_shader.end();
 }

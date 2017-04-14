@@ -49,7 +49,7 @@ OBJECTS_FORTH    = TextColor.o ForthExceptions.o ForthStream.o ForthDictionary.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
 OBJECTS_LOADER   = MapLoader.o ShapeFile.o
-OBJECTS_OPENGL   = OpenGL.o GLObject.o GLBuffer.o GLShader.o Textures.o Fonts.o Renderer.o #Renderable.o
+OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o Textures.o Fonts.o Renderer.o
 OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJECTS_SIMTADYN =
 

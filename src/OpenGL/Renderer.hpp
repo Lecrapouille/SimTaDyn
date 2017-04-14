@@ -2,12 +2,12 @@
 #  define RENDERER_HPP_
 
 #  include "Vertex.hpp"
-#  include "GLBuffer.tpp"
 #  include "GLShader.hpp"
+#  include "GLVertexArray.hpp"
+#  include "GLVertexBuffer.tpp"
+#  include "GLAttrib.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
-#  include "Renderable.hpp"
-//#  include "GraphMemory.hpp"
 
 class IRenderable;
 
@@ -33,6 +33,12 @@ public:
       m_current_camera(),
       m_background_color(Color::Black),
       m_render_style(GLRenderer::Fast2D),
+      m_shader("ProgShader"),
+      //m_vao("VAO"),
+      //m_mvpAttrib("MVP attrib"),
+      //m_timeAttrib("time attrib"),
+      //m_posAttrib("Position attrib"),
+      //m_colAttrib("Color attrib"),
       m_RotationAngles(N_AXIS, 0.0f)
   {
   }
@@ -169,18 +175,13 @@ protected:
   SimTaDynFont m_fonts[1];
   RenderStyle m_render_style;
   GLShader m_shader;
-  //! \brief Vertex buffer pointer
-  GLuint m_vbo[32];
-  //! \brief vertex array pointer
-  GLuint m_vao;
-  uint32_t m_nb_vbo = 0;
-  //float m_matrix_mvp[16];
-  GLint m_mvpAttrib = 0;
-  GLint m_timeAttrib = 0;
-  GLint m_posAttrib = 0;
-  GLint m_colAttrib = 0;
+  GLVertexArray m_vao;
+  GLAttrib m_mvpAttrib;
+  GLAttrib m_timeAttrib;
+  GLAttrib m_posAttrib;
+  GLAttrib m_colAttrib;
+  float m_matrix_mvp[16];
   std::vector<float> m_RotationAngles;
-  struct timeval t1, t2;
 };
 
 #endif /* RENDERER_HPP_ */

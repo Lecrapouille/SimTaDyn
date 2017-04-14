@@ -56,10 +56,50 @@ public:
   }
 
   //! \brief Return the number of elements a block can store
-  inline uint32_t elements() const
+  inline uint32_t size() const
   {
     return M;
   }
+
+  //! \brief Return the number of elements currently stored
+  uint32_t occupation() const
+  {
+    ContainerBitField i;
+    ContainerBitField total = 0U;
+    const ContainerBitField full = (ContainerBitField) -1;
+
+    for (i = 0; i < E; ++i)
+      {
+        if (full == m_occupied[i])
+          {
+            total += S;
+          }
+        else
+          {
+            for (; i < E; ++i)
+              {
+                total += hammingWeight(m_occupied[i]);
+              }
+          }
+      }
+    return total;
+  }
+
+private:
+
+  ContainerBitField hammingWeight(const ContainerBitField val) const
+  {
+    ContainerBitField bitCount = 0;
+    ContainerBitField value = val;
+
+    while (value > 0)
+      {
+        if (1U == (value & 1U))
+          ++bitCount;
+        value >>= 1U;
+      }
+    return bitCount;
+}
 
 public:
 
@@ -175,9 +215,18 @@ public:
     m_stored_elements = 0;
   }
 
+  block_t& operator[](size_t index)
+  {
+    return *(m_blocks[index]);
+  }
+  const block_t& operator[](size_t index) const
+  {
+    return *(m_blocks[index]);
+  }
+
   //! \brief Empty blocks will have their memory deleted.
   //! Call this routine is memory ressources are limited.
-  void garbage();
+  virtual void garbage();
 
   //! \brief Call this method for debugging the content of
   //! the container.

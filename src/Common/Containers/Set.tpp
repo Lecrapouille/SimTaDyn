@@ -40,7 +40,7 @@ public:
 
   //! \brief Insert an element at first empty location. Complexity
   //! is O(1) of elements iteration.
-  void append(T const& elt);
+  virtual void append(T const& elt);
 
   //! \brief Check if the given index is incorrect (outside the
   //! definition range of the container). Complexity is O(1) in
@@ -58,10 +58,10 @@ public:
   //! element. Note: no deallocation is made (this will be done by the
   //! destructor). Note: Nothing is made if nth is incorrect or if the
   //! element has already been removed.
-  void remove(const uint32_t nth);
+  virtual void remove(const uint32_t nth);
 
   //! \brief Remove the last inserted element.
-  inline void remove()
+  virtual inline void remove()
   {
     if (IContainer<T, N, Block>::empty())
       return ;
@@ -85,7 +85,7 @@ public:
   //! \brief Empty all the container. Complexity is O(n)
   //! where n is number of allocated blocks. Note: blocks
   //! are not deleted from memory.
-  virtual inline void clear()
+  inline void clear()
   {
     IContainer<T, N, Block>::clear();
     m_index = m_subindex = m_last = INITIAL_INDEX;
@@ -109,7 +109,7 @@ public:
     return iterator(*this, true);
   }
 
-protected:
+private:
 
   //! \brief Remove the last inserted element.
   void removeLast();

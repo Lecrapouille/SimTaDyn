@@ -1,7 +1,7 @@
 // -*- c++ -*- Coloration Syntaxique pour Emacs
 
-#ifndef GLBUFFER_TPP_
-#  define GLBUFFER_TPP_
+#ifndef GLVERTEX_BUFFER_TPP_
+#  define GLVERTEX_BUFFER_TPP_
 
 //! \file This class get its inspiration from the code of the Glumpy
 //! project (Python + Numpy + modern OpenGL: a fast, scalable and
@@ -11,7 +11,7 @@
 //! Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
 //! Distributed under the (new) BSD License.
 
-#  include "GLObject.hpp"
+#  include "GLAttrib.hpp"
 #  include "Set.tpp"
 #  include <algorithm>
 
@@ -37,10 +37,32 @@ public:
     clearPending();
   }
 
+  GLBlockBuffer(std::string const& name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLObject(name), Block<T, N>()
+  {
+    m_target = target;
+    m_usage = usage;
+    clearPending();
+  }
+
+  GLBlockBuffer(const char *name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLObject(name), Block<T, N>()
+  {
+    m_target = target;
+    m_usage = usage;
+    clearPending();
+  }
+
   //! \brief Delete the object from GPU memory.
   ~GLBlockBuffer()
   {
     GLObject::destroy();
+  }
+
+  void draw(const GLenum mode, GLAttrib const& attrib)
+  {
+    // FIXME: attrib.size() peut etre 0 ici ?
+    glCheck(glDrawArrays(mode, 0, Block<T, N>::occupation()/* / attrib.size()*/));
   }
 
 protected:
@@ -49,7 +71,7 @@ protected:
   virtual void create() override
   {
     // Total size of the container
-    const uint32_t bytes = Block<T, N>::elements() * sizeof (T);
+    const uint32_t bytes = Block<T, N>::size() * sizeof (T);
 
     glCheck(glGenBuffers(1, &m_handle));
     activate();
@@ -82,9 +104,10 @@ protected:
   //! \brief Whether object needs to be updated.
   virtual inline bool needUpdate() override
   {
-    uint32_t pos_start = 0; // FIXME
-    uint32_t pos_end = 6; // FIXME
-    static bool b = true; //hasPendingData(pos_start, pos_end); //FIXME
+    uint32_t pos_start;
+    uint32_t pos_end;
+    bool b = hasPendingData(pos_start, pos_end);
+
     if (b)
       {
         m_offset = sizeof (T) * pos_start;
@@ -109,6 +132,13 @@ private:
 
   bool hasPendingData(uint32_t &pos_start, uint32_t &pos_end) const
   {
+    // FIXME begin
+    #warning "A finir"
+    pos_start = 0;
+    pos_end = Block<T,N>::occupation();
+    return true;
+    // FIXME end
+
     if ((uint32_t) -1 == m_pending_start)
       return false;
 
@@ -158,6 +188,16 @@ public:
     : GLBlockBuffer<T, N>(GL_ARRAY_BUFFER, usage)
   {
   }
+
+  GLVertexBlockBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(name, GL_ARRAY_BUFFER, usage)
+  {
+  }
+
+  GLVertexBlockBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(name, GL_ARRAY_BUFFER, usage)
+  {
+  }
 };
 
 // **************************************************************
@@ -170,6 +210,16 @@ public:
 
   GLIndexBlockBuffer(const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBlockBuffer<T, N>(GL_ELEMENT_ARRAY_BUFFER, usage)
+  {
+  }
+
+  GLIndexBlockBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
+  {
+  }
+
+  GLIndexBlockBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
 };
@@ -219,6 +269,6 @@ public:
   }
 };
 
-//#  include "GLBuffer.ipp"
+//#  include "GLVertexBuffer.ipp"
 
-#endif /* GLBUFFER_TPP_ */
+#endif /* GLVERTEX_BUFFER_TPP_ */

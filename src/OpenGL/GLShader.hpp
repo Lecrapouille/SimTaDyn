@@ -4,29 +4,24 @@
 ///! \brief This file contains the class managing OpenGL shaders :
 ///! read, compile, load into the GPU.
 
-#  include "Exception.hpp"
 #  include "GLObject.hpp"
-
-//! This macro (from the library POCO) will declare a class
-//! MapLoaderException derived from simtadyn::Exception.
-POCO_DECLARE_EXCEPTION(GLShaderException, simtadyn::Exception)
 
 // **************************************************************
 //!
 // **************************************************************
-class GLShaderNotLoadedException: public GLShaderException
+class GLShaderNotLoadedException: public GLObjectException
 {
 public:
 
-  GLShaderNotLoadedException(const uint32_t id)
+  GLShaderNotLoadedException(std::string const& name)
   {
-    m_msg = "No vertex and fragment shaders have been given for GLObject "
-      + std::to_string(id);
+    m_msg = "No vertex and fragment shaders have been given for the GLShader '" + name + "'";
   }
 };
 
 // **************************************************************
-//! \class GLShader
+//! \class GLShader is a class for managing OpenGL shader scripts
+//! (like loading them into the GPU).
 //!
 //! Shaders are scripts running in the GPU manipulating vertices,
 //! pixels and geometry. There are respectively named vertex shader,
@@ -43,24 +38,20 @@ public:
 
   //! \brief Empty constructor. Do nothing.
   GLShader()
+    : GLObject()
   {
   }
 
-  //! \brief Constructor with the path of shader scripts. Compile and
-  //! load them into the GPU as a program (load() is
-  //! called).
-  //! \param vertex_shader_filename the path of the file containing
-  //! the vertex shader script.
-  //! \param fragement_shader_filename the path of the file containing
-  //! the vertex fragment script.
-  //! \param geometry_shader_filename the path of the file containing
-  //! the vertex geometry script.
-  GLShader(const char* vertex_shader_filename,
-           const char* fragment_shader_filename,
-           const char* geometry_shader_filename = nullptr)
+  //! \brief Constructor with the object name
+  GLShader(std::string const& name)
+    : GLObject(name)
   {
-    load(vertex_shader_filename, fragment_shader_filename,
-         geometry_shader_filename);
+  }
+
+  //! \brief Constructor with the object name
+  GLShader(const char *name)
+    : GLObject(name)
+  {
   }
 
   //! \brief Destructor. The program (if loaded) is removed from the GPU.
@@ -69,19 +60,25 @@ public:
     destroy();
   }
 
+protected:
+
+  //! \brief Ideally would call the load() method but not possible due
+  //! to parameters.
   virtual void create() override
   {
-    if (0U == m_handle)
+    if (!isActivable() && m_throw_enable)
       {
-        GLShaderNotLoadedException e(cpuID());
+        GLShaderNotLoadedException e(m_name);
         throw e;
       }
   }
 
+  //! \brief Empty method.
   virtual inline void setup() override
   {
   }
 
+  //! \brief Empty method.
   virtual inline void update() override
   {
   }
@@ -94,7 +91,7 @@ public:
   //! been loaded into a program (else nothing is done).
   virtual inline void activate() override
   {
-    if (0U != m_handle)
+    if (isActivable())
       {
         glUseProgram(m_handle);
       }
@@ -104,8 +101,13 @@ public:
   //! been loaded into a program (else nothing is done).
   virtual inline void deactivate() override
   {
-    glUseProgram(0U);
+    if (isActivable())
+      {
+        glUseProgram(0U);
+      }
   }
+
+public:
 
   //! \brief Accessor. Return the program identifier. Return 0 if the
   //! shaders have not been loaded intot the GPU.
@@ -118,6 +120,12 @@ public:
   //! and optionaly a geometry shader an link them as a program. The
   //! older program, if present, is released from GPU memory before
   //! being replacing by the new one.
+  //! \param vertex_shader_filename the path of the file containing
+  //! the vertex shader script.
+  //! \param fragement_shader_filename the path of the file containing
+  //! the vertex fragment script.
+  //! \param geometry_shader_filename the path of the file containing
+  //! the vertex geometry script.
   inline GLuint load(std::string const& vertex_shader_filename,
                      std::string const& fragment_shader_filename,
                      std::string const& geometry_shader_filename)
@@ -147,7 +155,7 @@ public:
   //! \param name the attribute or uniform shader variable to look for.
   //! \return the id of the variable or -1 if not found or the given name
   //! is erroneous.
-  GLint locate(const char *name);
+  GLint locate(const char *name) const;
 
 private:
 
