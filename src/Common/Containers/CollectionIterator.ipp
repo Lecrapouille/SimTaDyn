@@ -34,7 +34,7 @@ public:
   //! \brief Constructor by copy from a container.
   //! \param container the container to copy.
   //! \param start_at_end set it to true for starting at the end.
-  iterator(Collection<T, N, Block> const& container, const bool start_at_end)
+  iterator(Collection<T, N, Block>& container, const bool start_at_end)
     : m_container(&container)
   {
     if (container.empty() || start_at_end)
@@ -93,6 +93,18 @@ public:
     return m_container->get(m_itr);
   }
 
+  //! \brief Access to the content of the slot
+  T& operator*()
+  {
+    return m_container->get(m_itr);
+  }
+
+  //! \brief Access to the content of the slot
+  inline T* operator->()
+  {
+    return m_container->get(m_itr);
+  }
+
   //! \brief compare iterators.
   inline bool operator==(const iterator& rhs) const
   {
@@ -108,7 +120,7 @@ public:
 protected:
 
   //! \brief the address of the container to explore.
-  const Collection<T, N, Block>* m_container;
+  Collection<T, N, Block>* m_container;
 
   //! \brief the iterator.
   uint32_t m_itr;

@@ -13,6 +13,11 @@ class SimTaDynNode: public BasicNode, public CellForth
 {
 public:
 
+  SimTaDynNode()
+    : BasicNode(), CellForth()
+  {
+  }
+
   SimTaDynNode(BasicNode const& node)
     : BasicNode(node), CellForth()
   {
@@ -51,6 +56,11 @@ public:
 class SimTaDynArc: public BasicArc, public CellForth
 {
 public:
+
+  SimTaDynArc()
+    : BasicArc(), CellForth()
+  {
+  }
 
   SimTaDynArc(const Key id, BasicNode& fromNode, BasicNode& toNode)
     : BasicArc(id, fromNode, toNode), CellForth()

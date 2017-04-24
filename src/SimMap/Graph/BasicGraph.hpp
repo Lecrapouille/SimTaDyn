@@ -2,6 +2,7 @@
 #  define BASIC_GRAPH_HPP_
 
 //! Special container
+#  include "ClassCounter.hpp"
 #  include "GraphContainer.tpp"
 #  include "Types.hpp"
 #  include <algorithm>
@@ -12,9 +13,12 @@ class BasicArc;
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class BasicArc
+class BasicArc: private ClassCounter<BasicArc>
 {
 public:
+
+  BasicArc();
+
   //! \brief! Constructor.
   //! \param id the unique indentifier.
   //! \param fromNode the reference of an existing node for the tail.
@@ -29,7 +33,8 @@ public:
   //! \brief Constructor by copy.
   //! \param arc the reference of an existing arc.
   BasicArc(BasicArc const& arc)
-    : m_id(arc.id()),
+    : ClassCounter<BasicArc>(),
+      m_id(arc.id()),
       m_fromNode(&arc.from()),
       m_toNode(&arc.to())
   {
@@ -46,46 +51,88 @@ public:
 
   //! \brief Return the unique identifier.
   inline Key id() const { return m_id; }
+
+  //! \brief Return the unique identifier.
+  operator int() { return m_id; }
+
   //! \brief Return the reference of the tail of the arc.
   inline BasicNode &from() const { return *m_fromNode; }
+
   //! \brief Change the tail of the arc.
-  inline void from(BasicNode& fromNode) { m_fromNode = &fromNode; }
+  void from(BasicNode& fromNode);
+
   //! \brief Return the reference of the head of the arc.
   inline BasicNode &to() const { return *m_toNode; }
+
   //! \brief Change the head of the arc.
-  inline void to(BasicNode& toNode) { m_toNode = &toNode; }
+  void to(BasicNode& toNode);
+
+  //! \brief Compare the unique identifier of this node with the unique
+  // identifier of another node.
+  inline bool operator==(const BasicArc& rhs) const
+  {
+    return (m_id == rhs.m_id) && (m_fromNode == rhs.m_fromNode) &&
+      (m_toNode == rhs.m_toNode);
+  }
+
+  //! \brief Compare the unique identifier of this node with the unique
+  // identifier of another node.
+  inline bool operator!=(const BasicArc& rhs) const
+  {
+    return !(*this == rhs);
+  }
+
+  //! \brief Compare the unique identifier of this node with a given
+  // identifier.
+  inline bool operator==(const Key& rhs) const
+  {
+    return m_id == rhs;
+  }
+
+  //! \brief Compare the unique identifier of this node with a given
+  // identifier.
+  inline bool operator!=(const Key& rhs) const
+  {
+    return !(*this == rhs);
+  }
 
 protected:
+
   //! \brief Make an instance unique with this identifier.
   //! Used it for comparing element in a container.
   Key m_id;
   //! \brief the tail of the arc.
-  BasicNode *m_fromNode;
+  BasicNode* m_fromNode;
   //! \brief the head of the arc.
-  BasicNode *m_toNode;
+  BasicNode* m_toNode;
 };
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class BasicNode
+class BasicNode: private ClassCounter<BasicNode>
 {
 public:
+
+  BasicNode();
+
   //! \brief Constructor.
   //! \param nodeID the unique indentifier.
   BasicNode(const Key nodeID)
     : m_id(nodeID)
   {
-    LOGI("New BasicNode with ID %u\n", m_id);
+    //LOGIS("New BasicNode with ID %u\n", m_id);
     m_arcs.reserve(4);
   }
 
   //! \brief Constructor by copy.
   //! \param node the reference of an existing node.
   BasicNode(BasicNode const& node)
-    : m_id(node.m_id), m_arcs(node.m_arcs)
+    : ClassCounter<BasicNode>(),
+      m_id(node.m_id),
+      m_arcs(node.m_arcs)
   {
-    LOGI("Copy BasicNode with ID %u\n", m_id);
+    //LOGIS("Copy BasicNode with ID %u\n", m_id);
     m_arcs.reserve(4);
   }
 
@@ -99,16 +146,21 @@ public:
   virtual ~BasicNode() {}
 
   //! \brief Return the unique identifier.
-  inline Key id() const
-  {
-    return m_id;
-  }
+  inline Key id() const { return m_id; }
+  //! \brief Return the unique identifier.
+  operator int() { return m_id; }
 
   //! \brief add a new node neighbor refered by its link
-  inline void addNeighbor(BasicArc *arc)
+  inline void addNeighbor(BasicArc& arc)
   {
-    LOGI("Node ID %u: Add the arc ID %u as neighbor\n", m_id, arc->id());
-    m_arcs.push_back(arc);
+    //LOGI("Node ID %u: Add the arc ID %u as neighbor\n", m_id, arc);
+    m_arcs.push_back(&arc);
+  }
+
+  //! \brief Remove all neighbors
+  inline void removeAllNeighbors()
+  {
+    m_arcs.clear();
   }
 
   //! \brief Remove the arc neighbor of a node refered by its unique
@@ -118,7 +170,7 @@ public:
   //! \param arcID the unique identifier of the arc to be removed.
   inline void removeNeighbor(const Key arcID)
   {
-    LOGI("Node ID %u: Remove the arc ID %u as neighbor\n", m_id, arcID);
+    LOGIS("Node ID %u: Remove the arc ID %u as neighbor\n", m_id, arcID);
 
     // Temporary structure for comparing uniques identifiers.
     struct isValue
@@ -147,7 +199,7 @@ public:
   //! \param nth the nth element of the list of neighbor.
   inline void removeNthNeighbor(const uint32_t nth)
   {
-    LOGI("Node ID %u: Remove its %u'nth ID neighbor\n", nth);
+    LOGIS("Node ID %u: Remove its %u'nth ID neighbor\n", nth);
     if (nth < m_arcs.size())
       {
         remove(m_arcs.begin() + nth);
@@ -180,6 +232,16 @@ public:
         return m_arcs.at(nth);
       }
     return nullptr;
+  }
+
+  inline const BasicArc &nthNeighbor(const uint32_t nth) const
+  {
+    return *(m_arcs[nth]);
+  }
+
+  inline BasicArc &nthNeighbor(const uint32_t nth)
+  {
+    return *(m_arcs[nth]);
   }
 
   //! \brief Return the list of neighbors.
@@ -223,6 +285,7 @@ public:
   }
 
 protected:
+
   //! \brief Swap element to be removed with the last element and then
   //! remove the item at the end of the container. This prevents
   //! moving all items after the one removed (complexity
@@ -244,14 +307,18 @@ protected:
 
 inline std::ostream& operator<<(std::ostream& os, const BasicNode& n)
 {
-  os << "Node " << (char) n.id() << ":" << std::endl;
+  os << "Node " << n.id();
 
-  for (uint32_t i = 0; i < n.degree(); ++i)
+  uint32_t deg = n.degree();
+  if (0 == deg)
+    return os;
+
+  os << " { ";
+  for (uint32_t i = 0; i < deg; ++i)
     {
-      os << "  --" << n.neighbor(i)->id()
-         << "--> " << (char) n.neighbor(i)->to().id()
-         << std::endl;
+      os << n.nthNeighbor(i)/*.to()*/.id() << ' ';
     }
+  os << '}';
   return os;
 }
 
@@ -263,7 +330,7 @@ inline std::ostream& operator<<(std::ostream& os, const BasicNode* n)
 
 inline std::ostream& operator<<(std::ostream& os, const BasicArc& e)
 {
-  os << "Arc(" << e.id() << "){" << e.from() << ", " << e.to() << "}";
+  os << "Arc " << e.id() << ": From" << e.from() << ", To" << e.to();
   return os;
 }
 
@@ -285,6 +352,8 @@ public:
   BasicGraph(const bool directed = true)
     : m_directed(directed)
   {
+    ClassCounter<BasicNode>::reset();
+    ClassCounter<BasicArc>::reset();
   }
 
   //! \brief Constructor. Reserve memory for the given
@@ -294,6 +363,8 @@ public:
              const bool directed = true)
     : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed)
   {
+    ClassCounter<BasicNode>::reset();
+    ClassCounter<BasicArc>::reset();
   }
 
   //! \brief Destructor. Release allocated nodes and arcs.
@@ -304,8 +375,14 @@ public:
 
   inline void reset()
   {
-    clearArcs();
-    clearNodes();
+    m_nodes.clear();
+    m_arcs.clear();
+  }
+
+  void garbage()
+  {
+    m_nodes.garbage();
+    m_arcs.garbage();
   }
 
   //! \brief Return if the graph has zero nodes.
@@ -316,59 +393,29 @@ public:
   }
 
   //! \brief
-  inline N *addNode()
+  /*FIXME inline N& addNode()
   {
-    N *node = newNode(m_node_unique);
-    m_nodes.insert(m_node_unique, node);
-    ++m_node_unique;
-    return node;
+    return addNode(m_nodes.last() + 1U);
+    }*/
+
+  N& addNode(BasicNode const& nodeID)
+  {
+    m_nodes.insert(nodeID.id(), nodeID);
+    return getNode(nodeID.id());
   }
 
-  N *addAndGetNode(const Key nodeID)
+  N& addNode(const Key nodeID)
   {
-    N *node = getNode(nodeID);
-    if (nullptr == node)
+    if (m_nodes.outofbound(nodeID))
       {
-        node = newNode(nodeID);
-        m_nodes.insert(node->id(), node);
+        // call BasicNode::BasicNode(Key)
+        m_nodes.insert(nodeID, nodeID);
       }
-    return node;
-  }
-
-  //! \brief Add a node to the graph with the given identifier.
-  //! If a node with the same identifier already exists nothing
-  //! is made; else a new node is allocated. Complexity is O(1).
-  //! \param nodeID the unique identifier of the future node.
-  void addNode(const Key nodeID)
-  {
-    if (!hasNode(nodeID))
+    else
       {
-// FIXME eviter les new: changeNode(nodeID) { m_nodes[nodeID]. xx = .. } au lieu de new et insert
-// FIXME par contre on perd le polymorphisme ancestre->xxx
-        N *node = newNode(nodeID);
-        m_nodes.insert(node->id(), node);
+        m_nodes.occupy(nodeID);
       }
-  }
-
-  //! \brief Add a node to the graph. This methode assumes that the
-  //! client has already created the node and simply adds it to the
-  //! graph. Complexity is O(1).
-  //! \param node the reference of existing node.
-  //! \param clone boolean to duplicate the node.
-  void addNode(BasicNode& node, const bool clone=false)
-  {
-    if (!hasNode(node.id()))
-      {
-        if (clone)
-          {
-            N *n = node.clone();
-            m_nodes.insert(n->id(), n);
-          }
-        else
-          {
-            m_nodes.insert(node.id(), &node);
-          }
-      }
+    return getNode(nodeID);
   }
 
   //! \brief Return if the node exists in the graph. Complexity is
@@ -376,17 +423,23 @@ public:
   //! \param nodeID the unique identifier of the node to test.
   inline bool hasNode(const Key nodeID) const
   {
-    return m_nodes.isValidIndex(nodeID) &&
-      m_nodes.isOccupied(nodeID);
+    if (m_nodes.outofbound(nodeID))
+      return false;
+    return m_nodes.occupied(nodeID);
   }
 
   //! \brief Return the address of the node given its unique
   //! identifier. Complexity is O(1).
   //! \param nodeID the unique identifier of the node to find.
   //! \return the address of the node if it exists else nullptr.
-  inline N* getNode(const Key nodeID) const
+  inline const N& getNode(const Key nodeID) const
   {
-    return m_nodes.get(nodeID);
+    return m_nodes[nodeID];
+  }
+
+  inline N& getNode(const Key nodeID)
+  {
+    return m_nodes[nodeID];
   }
 
   //! \brief Remove from the graph the node specified by its unique
@@ -398,17 +451,7 @@ public:
   {
     if (hasNode(nodeID))
       {
-        N* node = m_nodes.get(nodeID); // FIXME direct access c'est ok
-        assert(nullptr != node);
-
-        const std::vector<A*> &neighbors = node->neighbors();
-        auto end = neighbors.end();
-        for (auto it = neighbors.begin(); it != end; ++it)
-          {
-            removeArc((*it)->id());
-          }
-
-        delete node;
+        m_nodes[nodeID].removeAllNeighbors();
         m_nodes.remove(nodeID);
       }
   }
@@ -417,18 +460,7 @@ public:
   //! graph. Complexity is O(1).
   inline uint32_t howManyNodes() const
   {
-    return m_nodes.occupation();
-  }
-
-  //! \brief Remove all nodes from the graph. Complexity is O(n).
-  void clearNodes()
-  {
-    auto end = m_nodes.end();
-    for (auto it = m_nodes.begin(); it != end; ++it)
-      {
-        delete (*it);
-      }
-    m_nodes.clear();
+    return m_nodes.used();
   }
 
   //! \brief
@@ -455,9 +487,9 @@ public:
   //! \brief
   //! Note: no security is made if arcID is invalid
   //! Complexity is O(1).
-  inline bool alreadyMarked(const Key nodeID)
+  inline bool marked(const Key nodeID)
   {
-    return m_nodes.isMarked(nodeID);
+    return m_nodes.marked(nodeID);
   }
 
   //! \brief Pretty print all the nodes constituing the graph.
@@ -477,9 +509,10 @@ public:
   //! \param toID the unique identifier of the head of the arc.
   void addArc(const Key fromID, const Key toID)
   {
+    std::cout << "AddArc " << fromID << " --> " << toID << "\n";
     addNode(fromID);
     addNode(toID);
-    private_addArc(*getNode(fromID), *getNode(toID));
+    private_addArc(getNode(fromID), getNode(toID));
   }
 
   //! \brief Create a link between two nodes in the graph. This
@@ -493,9 +526,10 @@ public:
   void addArc(BasicNode const& fromNode,
               BasicNode const& toNode)
   {
+    std::cout << "AddArc " << fromNode << " --> " << toNode << "\n";
     addNode(fromNode);
     addNode(toNode);
-    private_addArc(*getNode(fromNode.id()), *getNode(toNode.id()));
+    private_addArc(getNode(fromNode.id()), getNode(toNode.id()));
   }
 
   //! \brief Return if the arc refered by the given unique identifer
@@ -504,13 +538,41 @@ public:
   //! \return true if the arc exists, else false.
   inline bool hasArc(const Key arcID) const
   {
-    return m_arcs.isValidIndex(arcID) && m_arcs.isOccupied(arcID);
+    if (m_arcs.outofbound(arcID))
+      return false;
+    return m_arcs.occupied(arcID);
+  }
+
+  //! \brief
+  bool hasArc(const Key fromNodeID, const Key toNodeID) const
+  {
+    if (!hasNode(fromNodeID))
+      return false;
+
+    N const& node = m_nodes[fromNodeID];
+    uint32_t i = node.degree();
+    while (i--)
+      {
+        A const& arc = m_arcs[node.neighbor(i)->id()];
+        if ((arc.from() == fromNodeID) && (arc.to() == toNodeID))
+          {
+            return true;
+          }
+      }
+    return false;
   }
 
   //! \brief Return the arc refered by the given unique identifer.
+  //! No safe guards are applied so call the method hasArc() to be
+  //! sure that arcID exists.
   //! \return the address of the arc class if it was found in the
   //! graph, else return nullptr.
-  inline A* getArc(const Key arcID) const
+  inline const A& getArc(const Key arcID) const
+  {
+    return m_arcs.get(arcID);
+  }
+
+  inline A& getArc(const Key arcID)
   {
     return m_arcs.get(arcID);
   }
@@ -523,22 +585,19 @@ public:
   //! \param toNodeID the unique identifier of the node serving of head.
   //! \return the address of the arc class if it was found in the
   //! graph, else return nullptr.
-  A* getArc(const Key fromNodeID, const Key toNodeID) const
+  A* getArc(const Key fromNodeID, const Key toNodeID)
   {
-    N* node = m_nodes.get(fromNodeID);
-    if (nullptr == node)
+    if (!hasNode(fromNodeID))
       return nullptr;
 
-    uint32_t i = node->degree();
+    N const& node = m_nodes[fromNodeID];
+    uint32_t i = node.degree();
     while (i--)
       {
-        A* arc = m_arcs.get(node->neighbor(i)->id());
-        if (nullptr == arc)
-          return nullptr;
-
-        if ((arc->from() == fromNodeID) && (arc->to() == toNodeID))
+        A& arc = m_arcs[node.neighbor(i)->id()];
+        if ((arc.from() == fromNodeID) && (arc.to() == toNodeID))
           {
-            return arc;
+            return &arc;
           }
       }
     return nullptr;
@@ -551,10 +610,11 @@ public:
   //! \return the address of the vector else return nullptr.
   const std::vector<A*> *neighbors(const Key nodeID) const
   {
-    N* node = getNode(nodeID);
-    if (nullptr == node)
+    if (!hasNode(nodeID))
       return nullptr;
-    return &node->neighbors();
+
+    N const& node = getNode(nodeID);
+    return &node.neighbors();
   }
 
   //! Remove an arc from the graph refered by its unique identifeir.
@@ -564,13 +624,9 @@ public:
   {
     if (hasArc(arcID))
       {
-        A *arc = getArc(arcID);
-        assert(nullptr != arc);
-
-        arc->from().removeNeighbor(arcID);
-        arc->to().removeNeighbor(arcID);
-
-        delete arc;
+        A& arc = m_arcs[arcID];
+        arc.from().removeNeighbor(arcID);
+        arc.to().removeNeighbor(arcID);
         m_arcs.remove(arcID);
       }
   }
@@ -579,18 +635,7 @@ public:
   //! graph. Complexity is O(1).
   Key howManyArcs() const
   {
-    return m_arcs.occupation();
-  }
-
-  //! \brief Remove all arcss from the graph. Complexity is O(n).
-  void clearArcs()
-  {
-    auto end = m_arcs.end();
-    for (auto it = m_arcs.begin(); it != end; ++it)
-      {
-        delete (*it);
-      }
-    m_arcs.clear();
+    return m_arcs.used();
   }
 
   //! \brief
@@ -605,7 +650,7 @@ public:
   //! Complexity is O(1).
   inline bool arcHasBeenVisited(const Key arcID)
   {
-    return m_arcs.isMarked(arcID);
+    return m_arcs.marked(arcID);
   }
 
   //! \brief
@@ -635,42 +680,28 @@ private:
   //! Shared function by two public fucntions.
   void private_addArc(BasicNode &fromNode, BasicNode &toNode)
   {
-    A *arc = newArc(fromNode, toNode);
-    m_arcs.append(arc);
-    fromNode.addNeighbor(arc);
+    uint32_t last = m_arcs.last() + 1U;// FIXME degeux car Collection est non pas Set
+    m_arcs.insert(A(last, fromNode, toNode)); // FIXME degeux: faire Set.append
+    A& arc = m_arcs.get(last);// FIXME degeux
 
+    fromNode.addNeighbor(arc);
     if ((!m_directed) && (fromNode != toNode))
       {
-        arc = newArc(toNode, fromNode);
-        m_arcs.append(arc);
         toNode.addNeighbor(arc);
       }
   }
 
 protected:
 
-  //! \brief Common function for allocating a new node.
-  inline virtual N *newNode(const Key nodeID)
-  {
-    return new N(nodeID);
-  }
-
-  //! \brief Common function for allocating a new arc.
-  inline virtual A *newArc(BasicNode &fromNode, BasicNode &toNode)
-  {
-    return new A(m_arc_unique++, fromNode, toNode);
-  }
+  typedef GraphContainer<N, simtadyn::graph_container_nb_elements, GraphBlock> blocknodes_t;
+  typedef GraphContainer<A, simtadyn::graph_container_nb_elements, GraphBlock> blockarcs_t; // FIXME should be a Set not a Collection
 
   //! \brief the list of nodes constituing the graph.
-  GraphContainer<N*, simtadyn::graph_container_nb_elements, GraphBlock> m_nodes; // FIXME shared_ptr<N> ? //FIXME: virer le * du N
+  blocknodes_t m_nodes;
   //! \brief the list of arcs constituing the graph.
-  GraphContainer<A*, simtadyn::graph_container_nb_elements, GraphBlock> m_arcs;
+  blockarcs_t m_arcs;
   //! \brief direct or not direct graph ?
   bool m_directed;
-  //! \brief create a unique identifier for arcs.
-  Key m_arc_unique = 0;
-  //! \brief create a unique identifier for nodes.
-  Key m_node_unique = 0;
 };
 
 #endif /* BASIC_GRAPH_HPP_ */

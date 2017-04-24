@@ -222,13 +222,15 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
       p.x = readDoubleCastedFloat();
       p.y = readDoubleCastedFloat();
       p.z = 0.0f;
-      map.addNode(Vertex(p));
+      //map.addNode(Vertex(p));
+      std::cerr << "map.addNode() not yet implemented\n";
       break;
     case 11: // PointZ
       p.x = readDoubleCastedFloat();
       p.y = readDoubleCastedFloat();
       p.z = readDoubleCastedFloat();
-      map.addNode(Vertex(p));
+      //map.addNode(Vertex(p));
+      std::cerr << "map.addNode() not yet implemented\n";
       break;
     default:
       std::cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << std::endl;

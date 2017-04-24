@@ -37,7 +37,7 @@ template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block>
 void IContainer<T,N,Block>::reserve(const uint32_t nb_elts)
 {
-  // std::cout << "Reserving (" << nb_elts << " + " << M << " - 1) >> " << N << " blocks\n";
+  std::cout << "Reserving (" << nb_elts << " + " << M << " - 1) >> " << N << " blocks\n";
   reserveBlocks((nb_elts + M - 1) >> N);
 }
 
@@ -49,7 +49,9 @@ template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block>
 void IContainer<T,N,Block>::reserveBlocks(const uint32_t nb_blocks)
 {
-  m_blocks.reserve(m_blocks.capacity() + nb_blocks);
+  std::cout << "Reserving " << nb_blocks << " blocks\n";
+  assert(nb_blocks < 16U);
+  m_blocks.reserve(nb_blocks);
 
   uint32_t i = nb_blocks;
   while (i--)
@@ -110,6 +112,32 @@ T const& IContainer<T,N,Block>::get(const uint32_t nth) const
 }
 
 // **************************************************************
+//
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+const T& IContainer<T,N,Block>::operator[](size_t nth) const
+{
+  const uint32_t id = nth >> N;
+  const uint32_t sid = MODULO(nth, M);
+
+  return m_blocks[id]->m_block[sid];
+}
+
+// **************************************************************
+//
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+T& IContainer<T,N,Block>::operator[](size_t nth)
+{
+  const uint32_t id = nth >> N;
+  const uint32_t sid = MODULO(nth, M);
+
+  return m_blocks[id]->m_block[sid];
+}
+
+// **************************************************************
 //! \param nth the n'th element (index) of the container we want
 //! to check.
 //! \return true if an element is present, else return false.
@@ -127,6 +155,29 @@ bool IContainer<T,N,Block>::occupied(const uint32_t nth) const
   const uint32_t sid = MODULO(nth, M);
 
   return !(!(IS_OCCUPIED(id, sid)));
+}
+
+// **************************************************************
+//! \param nth the n'th element (index) of the container we want
+//! to be not empty.
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void IContainer<T,N,Block>::occupy(const uint32_t nth)
+{
+  if (outofbound(nth))
+    {
+      throw std::out_of_range("Out of range index " + std::to_string(nth));
+    }
+
+  const uint32_t id = nth >> N;
+  const uint32_t sid = MODULO(nth, M);
+
+  if (!IS_OCCUPIED(id, sid))
+    {
+      SET_OCCUPIED(id, sid);
+      ++m_stored_elements;
+    }
 }
 
 // **************************************************************
@@ -177,11 +228,12 @@ void IContainer<T,N,Block>::debug() const
         {
           if (IS_OCCUPIED(index, subindex))
             {
-              std::cout << " " << m_blocks[index]->m_block[subindex];
+              std::cout << " " << m_blocks[index]->m_block[subindex]
+                        << std::endl;
             }
           else
             {
-              std::cout << " <empty>";
+              std::cout << '<' << subindex << ": empty> ";
             }
         }
       std::cout << std::endl;

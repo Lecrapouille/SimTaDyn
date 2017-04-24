@@ -62,7 +62,7 @@ public:
   }
 
   //! \brief Return the number of elements currently stored
-  uint32_t occupation() const
+  uint32_t occupation() const // FIXME renommer en used()
   {
     ContainerBitField i;
     ContainerBitField total = 0U;
@@ -164,6 +164,10 @@ public:
   //! Complexity is O(1) in number of elements.
   bool occupied(const uint32_t nth) const;
 
+  //! \brief Force the given index to be not empty.
+  //! Complexity is O(1) in number of elements.
+  virtual void occupy(const uint32_t nth);
+
   //! \brief get the n'th element of the container. Complexity
   //! is O(1) in number of elements.
   virtual T& get(const uint32_t nth);
@@ -215,14 +219,17 @@ public:
     m_stored_elements = 0;
   }
 
-  block_t& operator[](size_t index)
-  {
-    return *(m_blocks[index]);
-  }
-  const block_t& operator[](size_t index) const
-  {
-    return *(m_blocks[index]);
-  }
+  //! \brief Get the nth element of the container but
+  //! without protections (out of bound index, accessing
+  //! to an empty element. If safe guards are needed call
+  //! the get() method instead.
+  inline T& operator[](size_t nth);
+
+  //! \brief Get the nth element of the container but
+  //! without protections (out of bound index, accessing
+  //! to an empty element. If safe guards are needed call
+  //! the get() method instead.
+  inline const T& operator[](size_t nth) const;
 
   //! \brief Empty blocks will have their memory deleted.
   //! Call this routine is memory ressources are limited.

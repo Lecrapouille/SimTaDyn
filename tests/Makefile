@@ -22,20 +22,26 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -Icommon -Icells -Iopengl -I../src/Common -I../src/Common/Containers -I../src/OpenGL -I../src/SimTaDyn -I../src/SimMap/Graph -I../src/SimMap/RTree
+INCLUDES = -I. -I../tools \
+           -Icommon -I../src/Common -I../src/Common/Containers \
+           -Iopengl -I../src/OpenGL \
+           -Isimmap -I../src/SimMap/Graph \
+           -I../src/SimTaDyn
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):common:cells:opengl:../src/Common:../src/Common/Containers:../src/OpenGL:../src/SimTaDyn:../src/SimMap/Graph:../src/SimMap/RTree
+VPATH=.:$(BUILD):../tools:common:../src/Common:../src/Common/Containers:opengl:../src/OpenGL:simmap:../src/SimMap/Graph:../src/SimTaDyn
 
 ###################################################
 # Set objects architecture specific
 OBJECTS = \
+	Backward.o Logger.o SimTaDynLogger.o \
 	File.o FileTests.o \
 	Vector3D.o VectorTests.o \
 	Color.o ColorTests.o \
 	SetTests.o CollectionTests.o \
 	Exception.o GLObject.o GLBufferTests.o \
+	BasicGraph.o BasicArcTests.o BasicNodeTests.o BasicGraphTests.o \
 	main.o
 #	BoundingBox.o BoundingBoxTests.o
 
@@ -45,7 +51,7 @@ TARGET = UnitTest
 ###################################################
 # Compil options
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O3 --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O0 --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES =
 
@@ -54,7 +60,7 @@ DEFINES =
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW -ldl
+       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW -ldl -ldw
 
 ###################################################
 # Files dependencies

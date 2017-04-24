@@ -36,21 +36,21 @@ void Inspector::showCell(const Key nodeID)
   if (nullptr == map)
     return ;
 
-  SimTaDynNode *node = map->m_graph.getNode(nodeID);
-  if (nullptr == node)
+  if (!map->m_graph.hasNode(nodeID))
     return ;
+  SimTaDynNode& node = map->m_graph.getNode(nodeID);
 
   m_ref_tree_model->clear();
 
   Gtk::TreeModel::Row row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Name";
-  row[m_columns.m_token] = node->name();
+  row[m_columns.m_token] = node.name();
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Forth";
-  row[m_columns.m_token] = node->forthWord();
+  row[m_columns.m_token] = node.forthWord();
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Cost";
-  row[m_columns.m_token] = std::to_string(node->m_cost);
+  row[m_columns.m_token] = std::to_string(node.m_cost);
 }

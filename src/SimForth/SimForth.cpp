@@ -52,20 +52,13 @@ bool SimForth::isACell(std::string const& word, Cell32& number)
       return false;
     }
 
-  // If exists on the map, get the cost value
-  // FIXME: let try to get an ancestor
-  // FIXME: temporaire car on ne va pas que gerer la fonction cout
-  SimTaDynNode *node;
-
   switch (word[0])
     {
       // Node
     case 'N':
-      map->removeNode(id);
-      node = map->getNode(id);
-      if (nullptr == node)
+      if (!map->m_graph.hasNode(id))
         return false;
-      number = node->m_cost;
+      number = map->getNode(id).m_cost;
       break;
 
       // Not a SimTaDyn cell

@@ -5,8 +5,9 @@
 #include "SetTests.hpp"
 #include "CollectionTests.hpp"
 #include "GLBufferTests.hpp"
-/*#include "GraphMemoryTests.hpp"
-  #include "BasicGraphTests.hpp"*/
+#include "BasicNodeTests.hpp"
+#include "BasicArcTests.hpp"
+#include "BasicGraphTests.hpp"
 
 #include <cppunit/ui/text/TestRunner.h>
 
@@ -55,11 +56,13 @@ int main(void)
   suite5->addTest(new CppUnit::TestCaller<ColorTests>("testCopy", &ColorTests::testCopy));
   suite5->addTest(new CppUnit::TestCaller<ColorTests>("testOperations", &ColorTests::testOperations));
 
-  /*
-  CppUnit::TestSuite* suite4 = new CppUnit::TestSuite("GraphMemoryTests");
-  suite4->addTest(new CppUnit::TestCaller<GraphMemoryTests>("test", &GraphMemoryTests::test));
-  CppUnit::TestSuite* suite5 = new CppUnit::TestSuite("BasicGraphTests");
-  suite5->addTest(new CppUnit::TestCaller<BasicGraphTests>("test", &BasicGraphTests::test));*/
+  CppUnit::TestSuite* suite8 = new CppUnit::TestSuite("BasicArcTests");
+  suite8->addTest(new CppUnit::TestCaller<BasicArcTests>("test", &BasicArcTests::test));
+  CppUnit::TestSuite* suite9 = new CppUnit::TestSuite("BasicNodeTests");
+  suite9->addTest(new CppUnit::TestCaller<BasicNodeTests>("test", &BasicNodeTests::dummy));
+  suite9->addTest(new CppUnit::TestCaller<BasicNodeTests>("test", &BasicNodeTests::neighbor));
+  CppUnit::TestSuite* suite10 = new CppUnit::TestSuite("BasicGraphTests");
+  suite10->addTest(new CppUnit::TestCaller<BasicGraphTests>("test", &BasicGraphTests::test));
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(suite1);
@@ -69,6 +72,9 @@ int main(void)
   runner.addTest(suite3);
   //runner.addTest(suite4);
   runner.addTest(suite5);
+  runner.addTest(suite8);
+  runner.addTest(suite9);
+  runner.addTest(suite10);
   runner.run();
 
   return 0;

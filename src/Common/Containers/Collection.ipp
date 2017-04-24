@@ -29,7 +29,45 @@ void Collection<T,N,Block>::insert(const uint32_t nth, T const& elt)
         m_end = nth + 1;
       if (nth < m_begin)
         m_begin = nth;
-      //std::cout << "after inserted ==> Min: " << m_begin << "  Max: " << m_end << "\n";
+    }
+}
+
+// **************************************************************
+//! \param elt is the element of type T to insert.
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void Collection<T,N,Block>::insert(T const& elt)
+{
+  insert(m_end, elt);
+}
+
+// **************************************************************
+//! \param nth the n'th element (index) of the container we want
+//! to be not empty.
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
+void Collection<T,N,Block>::occupy(const uint32_t nth)
+{
+  if (outofbound(nth))
+    {
+      throw std::out_of_range("Out of range index " + std::to_string(nth));
+    }
+
+  const uint32_t id = nth >> N;
+  const uint32_t sid = MODULO(nth, M);
+
+  if (!IS_OCCUPIED(id, sid))
+    {
+      SET_OCCUPIED(id, sid);
+      ++IContainer<T,N,Block>::m_stored_elements;
+
+      // Update min and max bounding box used for iterators
+      if (nth >= m_end)
+        m_end = nth + 1;
+      if (nth < m_begin)
+        m_begin = nth;
     }
 }
 

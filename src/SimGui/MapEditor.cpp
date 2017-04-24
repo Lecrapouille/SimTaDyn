@@ -211,15 +211,15 @@ bool MapEditor::execMap() // FIXME: Exec(typeCell, nodeID)
   bool res;
 
   SimForth &forth = SimForth::instance();
-  SimTaDynNode *n1 = map()->m_graph.getNode(1); // FIXME far all cells + faire un ancetre commun aux cell pour eviter de faire un switch
-  n1->forthWord("N#1 N#2 N#3 + +");
+  SimTaDynNode& n1 = map()->m_graph.getNode(1); // FIXME far all cells + faire un ancetre commun aux cell pour eviter de faire un switch
+  n1.forthWord("N#1 N#2 N#3 + +");
 
   // FIXME: should be called outside each cell: optimisation
   // Disable compilation mode
   forth.dictionary().smudge(":");
   forth.dictionary().smudge("INCLUDE");
 
-  res = n1->interprete(forth);
+  res = n1.interprete(forth);
 
   // Enable compilation mode
   forth.dictionary().smudge("INCLUDE");

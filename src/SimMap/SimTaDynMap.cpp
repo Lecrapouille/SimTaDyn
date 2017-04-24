@@ -5,17 +5,15 @@
   static Set<Color> C;*/
 const Vector3D* vec;
 
-SimTaDynNode *SimTaDynMap::addNode(Vertex const& p)
+/*SimTaDynNode& SimTaDynMap::addNode(Vertex const& p)
 {
-  SimTaDynNode *node = m_graph.addNode();
-  if (nullptr != node)
-    {
-      m_vertices.append(p);
-      //m_colors.append();
-      //assert(m_vertices.index() == m_colors.index());
+  SimTaDynNode& node = m_graph.addNode();
 
-      node->dataID = m_vertices.index();
-    }
+  m_vertices.append(p);
+  //m_colors.append();
+  //assert(m_vertices.index() == m_colors.index());
+
+  node.dataID = m_vertices.index();
   return node;
 }
 
@@ -33,5 +31,5 @@ bool SimTaDynMap::removeNode(const Key nodeID)
   the_last->dataID = to_remove->dataID;
   //m_graph.removeNode(nodeID);
 #warning "fixme 02"
-  return true;
-}
+return true;
+}*/

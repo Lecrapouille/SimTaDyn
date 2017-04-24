@@ -51,13 +51,13 @@ public:
   }
 
   //! \brief
-  SimTaDynNode *addNode(Vertex const& p);
+  //FIXME SimTaDynNode& addNode(Vertex const& p);
 
   //! \brief
-  bool removeNode(const Key nodeID);
+  //FIXME bool removeNode(const Key nodeID);
 
   //! \brief
-  inline SimTaDynNode *getNode(const Key nodeID) const
+  inline SimTaDynNode& getNode(const Key nodeID) //const
   {
     return m_graph.getNode(nodeID);
   }

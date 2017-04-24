@@ -24,17 +24,23 @@ public:
   {
   }
 
-  void clearVisited()
+  void clearMarks()
   {
     ContainerBitField i = S;
 
     while (i--)
       {
-        m_visited[i] = 0;
+        m_marked[i] = 0;
       }
   }
 
-  ContainerBitField m_visited[S];
+  void clear() override
+  {
+    Block<T, N>::clear();
+    clearMarks();
+  }
+
+  ContainerBitField m_marked[S];
 };
 
 
@@ -51,20 +57,21 @@ protected:
 
 public:
 
-  GraphContainer()
+  GraphContainer(const uint32_t reserve_elements = 1)
+    : Collection<T, N, Block>(reserve_elements)
   {
   }
 
-  //! \brief Check if the element have been visited
-  bool isMarked(const uint32_t nth) const
+  //! \brief Check if the element have been marked
+  bool marked(const uint32_t nth) const
   {
     const uint32_t index = nth / M;
     const uint32_t subindex = MODULO(nth, M);
 
-    return 0 != (Collection<T, N, Block>::m_blocks[index]->m_visited[subindex / S] & (1 << (MODULO(subindex, S))));
+    return 0 != (Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S] & (1 << (MODULO(subindex, S))));
   }
 
-  //! \brief Mark an element as visited
+  //! \brief Mark an element as marked
   void mark(const uint32_t nth)
   {
     if (Collection<T, N, Block>::outofbound(nth))
@@ -73,7 +80,7 @@ public:
     const uint32_t index = nth / M;
     const uint32_t subindex = MODULO(nth, M);
 
-    Collection<T, N, Block>::m_blocks[index]->m_visited[subindex / S] |= (1 << (MODULO(subindex, S)));
+    Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S] |= (1 << (MODULO(subindex, S)));
   }
 
   void unmark(const uint32_t nth)
@@ -86,7 +93,7 @@ public:
 
     if ((index < Collection<T, N, Block>::blocks()) && (subindex < M))
       {
-        Collection<T, N, Block>::m_blocks[index]->m_visited[subindex / S] &= ~(1 << (MODULO(subindex, S)));
+        Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S] &= ~(1 << (MODULO(subindex, S)));
       }
   }
 
@@ -96,7 +103,7 @@ public:
     uint32_t index = Collection<T, N, Block>::blocks();
     while (index--)
       {
-        Collection<T, N, Block>::m_blocks[index]->clearVisited();
+        Collection<T, N, Block>::m_blocks[index]->clearMarks();
       }
   }
 };

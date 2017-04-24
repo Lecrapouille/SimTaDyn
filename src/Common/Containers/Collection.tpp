@@ -39,6 +39,7 @@ public:
   //! \brief Insert an element at the given index. Complexity
   //! is O(1) of elements iteration.
   void insert(const uint32_t index, T const& elt);
+  void insert(T const& elt);
 
   //! \brief Remove the n'th element. Complexity is O(1) of elements
   //! iteration while updating the internal state of the class
@@ -67,12 +68,18 @@ public:
     m_end = 0;
   }
 
+  //! \brief Force the given index to be not empty.
+  //! Complexity is O(1) in number of elements.
+  virtual void occupy(const uint32_t nth) override;
+
+  inline uint32_t last() { return m_end - 1U; }
+
   //! Include iterators
 #include "CollectionIterator.ipp"
 
   //! \brief Create an iterator on the begining of the container.
   //! Note: begin() refers on the first element of the container.
-  inline iterator begin() const
+  inline iterator begin()
   {
     return iterator(*this, false);
   }
@@ -80,7 +87,7 @@ public:
   //! \brief Create an iterator on the end of the container.
   //! Note: end() does not refer on the last element of the container
   //! but the element after it.
-  inline iterator end() const
+  inline iterator end()
   {
     return iterator(*this, true);
   }
