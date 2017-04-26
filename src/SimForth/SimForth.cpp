@@ -58,7 +58,7 @@ bool SimForth::isACell(std::string const& word, Cell32& number)
     case 'N':
       if (!map->m_graph.hasNode(id))
         return false;
-      number = map->getNode(id).m_cost;
+      number = map->m_graph.getNode(id).m_cost;
       break;
 
       // Not a SimTaDyn cell

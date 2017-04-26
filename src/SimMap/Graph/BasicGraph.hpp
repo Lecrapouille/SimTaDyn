@@ -347,10 +347,27 @@ template <class N, class A> class BasicGraph
 {
 public:
 
+  typedef GraphContainer<N, simtadyn::graph_container_nb_elements, GraphBlock> blocknodes_t;
+  typedef GraphContainer<A, simtadyn::graph_container_nb_elements, GraphBlock> blockarcs_t; // FIXME should be a Set not a Collection
+
   //! \brief Empty constructor. Reserve the memory with the
   //! default number of elements.
   BasicGraph(const bool directed = true)
     : m_directed(directed)
+  {
+    ClassCounter<BasicNode>::reset();
+    ClassCounter<BasicArc>::reset();
+  }
+
+  BasicGraph(const char* name, const bool directed = true)
+    : m_directed(directed), m_name(name)
+  {
+    ClassCounter<BasicNode>::reset();
+    ClassCounter<BasicArc>::reset();
+  }
+
+  BasicGraph(std::string const& name, const bool directed = true)
+    : m_directed(directed), m_name(name)
   {
     ClassCounter<BasicNode>::reset();
     ClassCounter<BasicArc>::reset();
@@ -362,6 +379,26 @@ public:
              const uint32_t noArcs,
              const bool directed = true)
     : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed)
+  {
+    ClassCounter<BasicNode>::reset();
+    ClassCounter<BasicArc>::reset();
+  }
+
+  BasicGraph(std::string const& name,
+             const uint32_t noNodes,
+             const uint32_t noArcs,
+             const bool directed = true)
+    : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed), m_name(name)
+  {
+    ClassCounter<BasicNode>::reset();
+    ClassCounter<BasicArc>::reset();
+  }
+
+  BasicGraph(const char* name,
+             const uint32_t noNodes,
+             const uint32_t noArcs,
+             const bool directed = true)
+    : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed), m_name(name)
   {
     ClassCounter<BasicNode>::reset();
     ClassCounter<BasicArc>::reset();
@@ -385,6 +422,11 @@ public:
     m_arcs.garbage();
   }
 
+  inline bool directed() const
+  {
+    return m_directed;
+  }
+
   //! \brief Return if the graph has zero nodes.
   //! \return true if the graph is empty, else false.
   inline bool empty() const
@@ -393,10 +435,12 @@ public:
   }
 
   //! \brief
-  /*FIXME inline N& addNode()
+  N& addNode()
   {
-    return addNode(m_nodes.last() + 1U);
-    }*/
+    const uint32_t last = m_nodes.last() + 1U;
+    m_nodes.insert(last);
+    return getNode(last);
+  }
 
   N& addNode(BasicNode const& nodeID)
   {
@@ -465,21 +509,21 @@ public:
 
   //! \brief
   //! Complexity is O(n).
-  inline void unmarkAll()
+  inline void unmarkAllNodes()
   {
     m_nodes.unmarkAll();
   }
 
   //! \brief
   //! Complexity is O(1).
-  inline void mark(const Key nodeID)
+  inline void markNode(const Key nodeID)
   {
     m_nodes.mark(nodeID);
   }
 
   //! \brief
   //! Complexity is O(1).
-  inline void unmark(const Key nodeID)
+  inline void unmarkNode(const Key nodeID)
   {
     m_nodes.unmark(nodeID);
   }
@@ -487,7 +531,7 @@ public:
   //! \brief
   //! Note: no security is made if arcID is invalid
   //! Complexity is O(1).
-  inline bool marked(const Key nodeID)
+  inline bool markedNode(const Key nodeID)
   {
     return m_nodes.marked(nodeID);
   }
@@ -640,7 +684,7 @@ public:
 
   //! \brief
   //! Complexity is O(n).
-  inline void unmarkAllVisitedArcs()
+  inline void unmarkAllArcs()
   {
     m_arcs.unmarkAll();
   }
@@ -648,21 +692,21 @@ public:
   //! \brief
   //! Note: no security is made if arcID is invalid
   //! Complexity is O(1).
-  inline bool arcHasBeenVisited(const Key arcID)
+  inline bool markedArc(const Key arcID)
   {
     return m_arcs.marked(arcID);
   }
 
   //! \brief
   //! Complexity is O(1).
-  inline void markVisitedArc(const Key arcID)
+  inline void markArc(const Key arcID)
   {
     m_arcs.mark(arcID);
   }
 
   //! \brief
   //! Complexity is O(1).
-  inline void unmarkVisitedkArc(const Key arcID)
+  inline void unmarkArc(const Key arcID)
   {
     m_arcs.unmark(arcID);
   }
@@ -675,26 +719,35 @@ public:
     m_arcs.debug();
   }
 
+  inline blockarcs_t& arcs()//FIXME const
+  {
+    return m_arcs;
+  }
+
+  inline blocknodes_t& nodes()//FIXME const
+  {
+    return m_nodes;
+  }
+
 private:
 
   //! Shared function by two public fucntions.
   void private_addArc(BasicNode &fromNode, BasicNode &toNode)
   {
-    uint32_t last = m_arcs.last() + 1U;// FIXME degeux car Collection est non pas Set
+    const uint32_t last = m_arcs.last() + 1U;// FIXME degeux car Collection est non pas Set
     m_arcs.insert(A(last, fromNode, toNode)); // FIXME degeux: faire Set.append
     A& arc = m_arcs.get(last);// FIXME degeux
 
     fromNode.addNeighbor(arc);
     if ((!m_directed) && (fromNode != toNode))
       {
-        toNode.addNeighbor(arc);
+        toNode.addNeighbor(arc); // FIXME: il faudrait inverser l'arc mais en n'ajoutant pas un nouveau arc.
+                                 // FIXME: car on perd le fait de savoir qui vaut to et qui vaut from
+                                 // FIXME: ducoup depthFirstSearch a efet de bord: les noeuds tentent de revenir vers eux memes
       }
   }
 
 protected:
-
-  typedef GraphContainer<N, simtadyn::graph_container_nb_elements, GraphBlock> blocknodes_t;
-  typedef GraphContainer<A, simtadyn::graph_container_nb_elements, GraphBlock> blockarcs_t; // FIXME should be a Set not a Collection
 
   //! \brief the list of nodes constituing the graph.
   blocknodes_t m_nodes;
@@ -702,6 +755,25 @@ protected:
   blockarcs_t m_arcs;
   //! \brief direct or not direct graph ?
   bool m_directed;
+
+public:
+
+  std::string m_name;
 };
+
+typedef BasicGraph<BasicNode, BasicArc> BasicGraph_t;
+
+/*inline std::ostream& operator<<(std::ostream& os, const BasicGraph<N,A>& g)
+{
+  os << "List of nodes:" <<  std::endl << g.m_nodes << std::endl
+     << "List of arcs:" <<  std::endl << g.m_arcs << std::endl;
+  return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const BasicGraph<N,A>* g)
+{
+  os << *g;
+  return os;
+  }*/
 
 #endif /* BASIC_GRAPH_HPP_ */

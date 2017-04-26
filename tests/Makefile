@@ -42,6 +42,7 @@ OBJECTS = \
 	SetTests.o CollectionTests.o \
 	Exception.o GLObject.o GLBufferTests.o \
 	BasicGraph.o BasicArcTests.o BasicNodeTests.o BasicGraphTests.o \
+        GraphAlgorithm.o GraphAlgoTests.o \
 	main.o
 #	BoundingBox.o BoundingBoxTests.o
 

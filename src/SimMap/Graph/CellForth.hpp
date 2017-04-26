@@ -11,26 +11,33 @@ class CellForth
 public:
 
   CellForth()
+     : m_cost(0)
   {
-    clearForthWord();
   }
 
   //! \brief Accessor. Update the Forth word
+  // FIXME: forth.compile(":" + m_name + " " + m_word);
+  // FIXME dans un autre dico ?
+  // FIXME: peut etre retarder la compile
   inline void forthWord(std::string const& word)
   {
     m_word = word;
+    // m_compiled = false;
+    // Marquer smudged l'ancienne def dans le dico ? Je ne pense pas
   }
 
   //! \brief Accessor. Update the Forth word
   inline void forthWord(const char *word)
   {
     m_word = word;
+    // m_compiled = false;
   }
 
   //! \brief Accessor. Return the current Forth word.
   inline const std::string& forthWord() const
   {
     return m_word;
+    // m_compiled = false;
   }
 
   //! \brief Clear the current Forth word
@@ -48,6 +55,7 @@ public:
     if (m_word.empty())
       return true;
 
+    // FIXME: compiler le script dans le dico ?
     auto res = forth.interpreteCell(m_word, name(), m_cost);
     forth.ok(res);
 
@@ -55,20 +63,45 @@ public:
     return res.first;
   }
 
-  /*inline bool operator()()
+  //virtual bool compile(SimForth& forth)
+  //{
+  //  forth.compile(":" + m_name + " " + m_word);
+  //  m_compiled = true;
+  //}
+
+  //inline bool operator()()
+  //{
+  //  return interpreteWord();
+  //}
+
+  //! \brief Return the name of the cell.
+  const std::string& name() const
   {
-    return interpreteWord();
-    }*/
+    return m_name;
+  }
 
-  //! \brief Accessor. Virtual. Return the name of the cell
-  virtual const std::string& name() const = 0;
+  // TODO: Ajouter dans le dictionnaire un alias sur l'ancien nom
+  // (penser au cas particulier
+  virtual void name(std::string const& name)
+  {
+    m_name = name;
+  }
 
-  Cell32 m_cost = 0;
+protected:
+
+  virtual void setName() = 0;
+
+public:
+
+  Cell32 m_cost;
 
 protected:
 
   //! \brief the Forth word to interprete
   std::string m_word;
+  // FIXME: Cell32 m_token = FORTH_PRIMITIVE_NOP;
+  //! \brief Forth name of the cell
+  std::string m_name;
 };
 
 #endif /* CELLFORTH_HPP_ */

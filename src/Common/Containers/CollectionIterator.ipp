@@ -90,7 +90,7 @@ public:
   //! \brief Access to the content of the slot
   inline T const* operator->() const
   {
-    return m_container->get(m_itr);
+    return &m_container->get(m_itr);
   }
 
   //! \brief Access to the content of the slot
@@ -102,7 +102,7 @@ public:
   //! \brief Access to the content of the slot
   inline T* operator->()
   {
-    return m_container->get(m_itr);
+    return &m_container->get(m_itr);
   }
 
   //! \brief compare iterators.

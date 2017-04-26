@@ -1,17 +1,37 @@
 #ifndef GRAPHALGORITHM_HPP_
 #  define GRAPHALGORITHM_HPP_
 
-#  include "SimTaDynGraph.hpp"
+#  include "BasicGraph.hpp"
 
+// *************************************************************************************************
+//
+// *************************************************************************************************
 class GraphAlgorithm
 {
 public:
 
-  void depthFirstSearch(SimTaDynGraph_t& graph, const Key startNodeID);
+  //! \brief Empty constuctor.
+  GraphAlgorithm()
+    : m_graph(nullptr)
+  {
+  }
+
+  //! \brief Recursive Depth First Search algorithm
+  void depthFirstSearch(BasicGraph_t& graph, const Key startNodeID);
 
 private:
 
-  void depthFirstSearch_aux(SimTaDynGraph_t& graph, SimTaDynNode const& node);
+  //! \brief Auxillary method for the recursive Depth First Search
+  //! algorithm.
+  void depthFirstSearch_aux(BasicNode const& node);
+
+  //! \brief the graph to perform algorithm.
+  BasicGraph_t *m_graph;
+
+public:
+
+  //! \brief Store results here.
+  std::vector<Key> m_result;
 };
 
 #endif /* GRAPHALGORITHM_HPP_ */

@@ -26,6 +26,8 @@ void BasicGraphTests::test()
   BasicGraph<BasicNode, BasicArc> g(2U, 2U, oriented);
   BasicNode n6(6U);
 
+  CPPUNIT_ASSERT_EQUAL(oriented, g.directed());
+
   // Check empty graph with pre-allocated blocks.
   CPPUNIT_ASSERT_EQUAL(true, g.empty());
   CPPUNIT_ASSERT_EQUAL(256U, g.m_nodes.remaining());

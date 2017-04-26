@@ -188,6 +188,14 @@ public:
     return m_allocated_blocks;
   }
 
+  //! \brief Return the nth block
+  inline block_t *block(const uint32_t nth) const
+  {
+    if (nth < m_allocated_blocks)
+      return m_blocks[nth];
+    return nullptr;
+  }
+
   //! \brief Return the number of elements currently empty.
   inline uint32_t remaining() const
   {

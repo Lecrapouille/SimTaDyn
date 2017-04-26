@@ -8,6 +8,7 @@
 #include "BasicNodeTests.hpp"
 #include "BasicArcTests.hpp"
 #include "BasicGraphTests.hpp"
+#include "GraphAlgoTests.hpp"
 
 #include <cppunit/ui/text/TestRunner.h>
 
@@ -63,6 +64,8 @@ int main(void)
   suite9->addTest(new CppUnit::TestCaller<BasicNodeTests>("test", &BasicNodeTests::neighbor));
   CppUnit::TestSuite* suite10 = new CppUnit::TestSuite("BasicGraphTests");
   suite10->addTest(new CppUnit::TestCaller<BasicGraphTests>("test", &BasicGraphTests::test));
+  CppUnit::TestSuite* suite11 = new CppUnit::TestSuite("GraphAlgoTests");
+  suite11->addTest(new CppUnit::TestCaller<GraphAlgoTests>("test", &GraphAlgoTests::test));
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(suite1);
@@ -75,6 +78,7 @@ int main(void)
   runner.addTest(suite8);
   runner.addTest(suite9);
   runner.addTest(suite10);
+  runner.addTest(suite11);
   runner.run();
 
   return 0;
