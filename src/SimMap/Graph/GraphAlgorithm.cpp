@@ -31,7 +31,8 @@ void GraphAlgorithm::depthFirstSearch(BasicGraph_t& graph, const Key startNodeID
   // Reset states and results
   graph.unmarkAllNodes();
   m_result.clear();
-  m_result.reserve(std::max(0U, graph.howManyNodes() - m_result.capacity()));
+  uint32_t reserving = graph.howManyNodes() - m_result.capacity();
+  m_result.reserve(std::max(0U, reserving));
   m_graph = &graph;
 
   // Do the algorithm
