@@ -1,0 +1,19 @@
+language: cpp
+
+sudo: required
+dist: trusty
+
+compiler:
+  - gcc
+
+os:
+  - linux
+#  - osx
+
+before_install:
+  - if [ $TRAVIS_OS_NAME == linux ]; then ./travis-before-install-linux.sh ; fi
+#  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install gtkmm3 && brew link --force gtkmm3 ; fi
+
+script:
+  - cd tests && make
+  - ./build/UnitTest

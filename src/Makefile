@@ -93,6 +93,11 @@ $(TARGET): $(OBJECTS)
 	@$(POSTCOMPILE)
 
 ###################################################
+# Check yaml syntax
+check-travis:
+	@travis lint ../.travis.yml
+
+###################################################
 # Clean Target
 clean:
 	@echo "*** Cleaning"
