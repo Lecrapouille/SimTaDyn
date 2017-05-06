@@ -40,7 +40,7 @@ OBJECTS = \
 	Vector3D.o VectorTests.o \
 	Color.o ColorTests.o \
 	SetTests.o CollectionTests.o \
-	Exception.o GLObject.o GLBufferTests.o \
+	Exception.o OpenGL.o GLObject.o GLBufferTests.o \
 	BasicGraph.o BasicArcTests.o BasicNodeTests.o BasicGraphTests.o \
         GraphAlgorithm.o GraphAlgoTests.o \
 	main.o
