@@ -3,6 +3,7 @@
 
 #  include "OpenGL.hpp"
 #  include <cstring>
+#  include <iostream>
 
 class Texture
 {

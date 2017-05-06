@@ -1,9 +1,5 @@
 #include "Renderer.hpp"
 
-// FIXME Temporary example
-static GLVertexBuffer<Vector3D, 1U> pos;
-static GLVertexBuffer<Color, 1U> col;
-
 static void compute_mvp(float32_t *res,
                         float32_t phi,
                         float32_t theta,
@@ -75,24 +71,6 @@ bool GLRenderer::setupGraphics()
                           static_cast<float32_t>(screenHeight()));
   m_current_camera = m_default_camera;
 
-  pos.append(Vector3D(0.0f,  0.5f));
-  pos.append(Vector3D(0.5f, -0.366f));
-  pos.append(Vector3D(-0.5f, -0.366f));
-  pos.append(Vector3D(0.2f,  0.7f));
-  pos.append(Vector3D(0.7f, -0.166f));
-  pos.append(Vector3D(-0.3f, -0.166f));
-  pos.append(Vector3D(0.9f,  0.9f));
-  pos.append(Vector3D(-0.9f,  -0.9f));
-
-  col.append(Color(1.0f, 0.0f, 0.0f));
-  col.append(Color(0.0f, 1.0f, 0.0f));
-  col.append(Color(0.0f, 0.0f, 1.0f));
-  col.append(Color(1.0f, 0.5f, 0.0f));
-  col.append(Color(0.0f, 1.0f, 0.5f));
-  col.append(Color(0.5f, 0.0f, 1.0f));
-  col.append(Color(0.0f, 1.0f, 0.5f));
-  col.append(Color(0.5f, 0.0f, 1.0f));
-
   GLuint program = m_shader.load(Config::instance().data_path("node.vertex"),
                                  Config::instance().data_path("node.fragment"));
   if (0U == program)
@@ -111,12 +89,10 @@ bool GLRenderer::setupGraphics()
   return true;
 }
 
-void GLRenderer::draw()
+void GLRenderer::begin()
 {
-  // FIXME: a fusionner avec la camera
-  static float32_t m_matrix_mvp[16];
-
-  assert(pos.blocks() == col.blocks());
+  clearScreen();
+  m_shader.begin();
 
   // FIXME ajouter un flag pour eviter de faire des calculs
   // if (mvp_need_refresh)
@@ -126,23 +102,22 @@ void GLRenderer::draw()
               m_RotationAngles[X_AXIS],
               m_RotationAngles[Y_AXIS],
               m_RotationAngles[Z_AXIS]);
-  // }
-
-  m_shader.begin();
-
-  // if (mvp_need_refresh)
   glCheck(glUniformMatrix4fv(m_mvpAttrib, 1, GL_FALSE, &m_matrix_mvp[0]));
+  // }
+}
 
-  uint32_t i = pos.blocks();
-  while (i--)
+void GLRenderer::draw()
+{
+  LOGI("GLRenderer::draw()");
+  // FIXME: vider la queue
+  if (nullptr != m_model)
     {
-      col[i].begin();
-      m_colAttrib.begin();
-
-      pos[i].begin();
-      m_posAttrib.begin();
-      pos[i].draw(GL_POINTS, m_posAttrib);
+      m_model->drawnBy(*this);
     }
+}
 
+void GLRenderer::end()
+{
   m_shader.end();
+  glFlush();
 }

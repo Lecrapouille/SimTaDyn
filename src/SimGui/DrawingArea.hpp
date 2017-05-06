@@ -66,6 +66,8 @@ public:
     return Gtk::GLArea::get_height();
   }
 
+  virtual void drawThat(Renderable& renderable) override;
+
   //! \brief
   inline void keyPressed(Direction d) { m_direction[d] = true; }
   //! \brief
@@ -82,6 +84,7 @@ public:
   void onUnrealize();
 
 private:
+
   bool m_success_init = false;
   bool m_direction[DirectionIterEnd + 1] = {0};
 };

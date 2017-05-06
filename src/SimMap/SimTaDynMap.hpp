@@ -6,39 +6,69 @@
 #  include "RTree.hpp"
 #  include "SimTaDynGraph.hpp"
 #  include "Set.tpp"
-#  include "Renderer.hpp"
+#  include "Renderable.hpp"
 
 // FIXME: faut creer une class helper pour charger une seule fois les
 // shader commun a tous les cartes (ou alors 1 carte == 1 shader meme
 // s'il doit etre mis N fois dans le GPU
 
+//! \brief Abstract class for inheritance: drawable by an OpenGL renderer.
+class ISimTaDynMap: public Renderable
+{
+};
+
+// *************************************************************************************************
+//! \brief This class defines a SimTaDyn geographic map. It contains, nodes, arcs, Forth scripts,
+//! OpenGL datum for the display. It immplements the observable (aka listenable) design pattern:
+//! When the map changes, it notifies to all observers which have subscribed to this map (for example
+//! the MVC design pattern, where SimTaDynMap is the model).
+// *************************************************************************************************
 class SimTaDynMap
-  : public IResource<Key>,
+  : public ISimTaDynMap,
+    public IResource<Key>,
     private ClassCounter<SimTaDynMap>
-    //public IRenderable
 {
   friend class MapEditor;
 
 public:
 
+  // ***********************************************************************************************
+  //! \brief This interface is used to define methods
+  // ***********************************************************************************************
+  class ISimTaDynMapListener
+  {
+  public:
+
+    //! \brief
+    ISimTaDynMapListener() { };
+
+    //! \brief Callback when the map changed (loaded, graph modified, etc)
+    virtual void onChanged(SimTaDynMap*) = 0;
+  };
+
+public:
+
+  //! \brief Empty constructor.
   SimTaDynMap()
     : IResource(),
       m_id(ClassCounter<SimTaDynMap>::count()),
       m_name("Map_" + std::to_string(m_id)),
       m_graph("graph_01")
   {
-    LOGI("New SimTaDynMap with generic name '%s' and Id %u\n", m_name.c_str(), m_id);
+    LOGI("New SimTaDynMap with generic name '%s' and ID #%u\n", m_name.c_str(), m_id);
   }
 
+  //! \brief Constructor with the desired name for the map.
   SimTaDynMap(std::string const& name)
     : IResource(),
       m_id(ClassCounter<SimTaDynMap>::count()),
       m_name(name),
       m_graph("graph_01")
   {
-    LOGI("New SimTaDynMap named '%s' and ID %u\n", m_name.c_str(), m_id);
+    LOGI("New SimTaDynMap named '%s' and ID #%u\n", m_name.c_str(), m_id);
   }
 
+  //! \brief Destructor.
   ~SimTaDynMap()
   {
     LOGI("Deleting SimTaDynMap %u named '%s'\n", m_id, m_name.c_str());
@@ -57,6 +87,7 @@ public:
     return m_id;
   }
 
+  //! \brief Return the Axis Aligned Bounding Box containing all elements of the map.
   inline AABB const& bbox() const
   {
     // FIXME: a faire par la suite m_spatial_index.root.bbox()
@@ -83,14 +114,63 @@ public:
     std::cout << "}" << std::endl;
   }
 
+  inline void add(Vector3D const& p)
+  {
+    LOGI("Add a new node to SimTaDynMap #%u %s\n", m_id, m_name.c_str());
+    m_graph.addNode();
+    pos.append(p / 10.0f + 0.1f * id());
+    col.append(Color(1.0f, 0.0f, 0.0f));
+    notify();
+  }
+
+  //! \brief Reset all states concerning the map.
   inline void clear()
   {
     m_graph.reset();
+    notify();
   }
 
-  /*
-  void drawnBy(GLRenderer const& renderer)
+  //! \brief Attach a new listener to map events.
+  void addListener(ISimTaDynMapListener& listener)
   {
+    m_listeners.push_back(&listener);
+    LOGI("Attaching a listener to the SimTaDynMap #%u %s\n", m_id, m_name.c_str());
+  }
+
+  //! \brief Remove the given listener of map events.
+  void removeListener(ISimTaDynMapListener& listener)
+  {
+    LOGI("Detaching a listener from the SimTaDynMap #%u %s\n", m_id, m_name.c_str());
+    auto it = std::find(m_listeners.begin(), m_listeners.end(), &listener);
+    if (it != m_listeners.end())
+      {
+        m_listeners.erase(it);
+      }
+  }
+
+  //! \brief Notify all listeners that the map changed.
+  void notify()
+  {
+    uint32_t i = m_listeners.size();
+    LOGI("SimTaDynMap #%u %s has changed and notifies %u listener%s\n",
+         m_id, m_name.c_str(), i, (i > 1 ? "s" : ""));
+    while (i--)
+      {
+        m_listeners[i]->onChanged(this);
+      }
+  }
+
+  virtual void drawnBy(GLRenderer& renderer) const override
+  {
+    LOGI("SimTaDynMap.drawnBy 0x%x", this);
+    LOGI("SimTaDynMap #%u %s drawnBy renderer",  m_id, m_name.c_str());
+
+    if (pos.blocks() != col.blocks())
+      {
+        LOGI("Incompatible number of elements in VBO");
+        return ;
+      }
+
     // Draw nodes
     uint32_t i = pos.blocks();
     while (i--)
@@ -103,15 +183,15 @@ public:
         pos.block(i)->draw(GL_POINTS, renderer.m_posAttrib);
       }
   }
-  */
 
 protected:
-
-  // TODO: liste observer + notify() avec notify() === hasPendingData() ?
 
   //! \brief Unique identifier. We did not use \m m_name as id because
   //! we want the posibility to change its name.
   Key m_id;
+
+  //! \brief List of observers attached to this map events.
+  std::vector<ISimTaDynMapListener*> m_listeners;
 
 public:
 
@@ -144,6 +224,37 @@ public:
   //Set<Vertex, 8U, Block> m_vertices;
   GLVertexBuffer<Vector3D, simtadyn::graph_container_nb_elements> pos;
   GLVertexBuffer<Color, simtadyn::graph_container_nb_elements> col;
+};
+
+class CurrentSimTaDynMap
+{
+public:
+
+  CurrentSimTaDynMap()
+  {
+    m_map = nullptr;
+  }
+
+  void set(SimTaDynMap* p)
+  {
+    if (m_map != p)
+      {
+        m_map = p;
+        if (nullptr != p)
+          {
+            p->notify();
+          }
+      }
+  }
+
+  SimTaDynMap* get()
+  {
+    return m_map;
+  }
+
+protected:
+
+  SimTaDynMap* m_map;
 };
 
 #endif /* SIMTADYN_MAP_HPP_ */

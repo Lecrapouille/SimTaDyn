@@ -85,6 +85,9 @@ public:
   //! if needed.
   virtual void begin()
   {
+    if (!SimTaDyn::glIsFunctional())
+       return ;
+
     if (needCreate())
       {
         create();

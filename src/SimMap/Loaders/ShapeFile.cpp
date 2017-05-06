@@ -205,8 +205,6 @@ void ShapefileLoader::getBoundingBox(AABB& bbox)
 uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
 {
   uint32_t record_number, content_length, shape_type;
-  Vector3D p;
-  Color c(1.0f, 0.0f, 0.0f);
 
   goToByte(offset);
   record_number = readBigEndianInt();
@@ -220,22 +218,16 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
   switch (shape_type)
     {
     case 1: // Point
-      p.x = readDoubleCastedFloat();
-      p.y = readDoubleCastedFloat();
-      p.z = 0.0f;
-      map.m_graph.addNode();
-      map.pos.append(p);
-      map.col.append(c);
-      //std::cout << "Point: " << p << "\n";
+      m_point.x = readDoubleCastedFloat();
+      m_point.y = readDoubleCastedFloat();
+      m_point.z = 0.0f;
+      map.add(m_point);
       break;
     case 11: // PointZ
-      p.x = readDoubleCastedFloat();
-      p.y = readDoubleCastedFloat();
-      p.z = readDoubleCastedFloat();
-      map.m_graph.addNode();
-      map.pos.append(p);
-      map.col.append(c);
-      //std::cout << "PointZ: " << p << "\n";
+      m_point.x = readDoubleCastedFloat();
+      m_point.y = readDoubleCastedFloat();
+      m_point.z = readDoubleCastedFloat();
+      map.add(m_point);
       break;
     default:
       std::cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << std::endl;
@@ -287,7 +279,9 @@ bool ShapefileLoader::load(std::string const& filename, SimTaDynMap* &map)
       else
         {
           // Concat the old map name with the new one
-          map->m_name += '_' + shortname;
+          if (map->m_name != "")
+            map->m_name += "_";
+          map->m_name += shortname;
         }
 
       value32b = getShapeType();

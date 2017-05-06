@@ -1,27 +1,20 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
-#  include "Vertex.hpp"
 #  include "GLShader.hpp"
 #  include "GLVertexArray.hpp"
 #  include "GLVertexBuffer.tpp"
 #  include "GLAttrib.hpp"
 #  include "Camera2D.hpp"
 #  include "Fonts.hpp"
+#  include "Renderable.hpp"
 
-class IRenderable;
-
-class IRenderer
-{
-public:
-
-  virtual void draw(IRenderable const& renderable) const = 0;
-};
+class Renderable;
 
 /*
  * OpenGL renderer.
  */
-class GLRenderer//: public IRenderer
+class GLRenderer
 {
 public:
 
@@ -54,15 +47,18 @@ public:
   // and OpenGL context is created before.
   bool setupGraphics();
 
-  inline void begin()
+  inline bool needRefresh() const
   {
-    clearScreen();
+    return true;//!m_queue.empty();
   }
 
-  inline void end()
+  inline void attachModel(Renderable& model)
   {
-    glFlush();
+    m_model = &model;
   }
+
+  void begin();
+  void end();
 
   /*
    * When camera states change, apply
@@ -145,22 +141,7 @@ public:
     return m_render_style;
   }
 
-  void draw();
-#if 0
-  /*
-   * Draw a graph as friend function
-   */
-  void draw(IRenderable const& renderable) const override
-  {
-    (void) renderable;
-    //renderable.drawnBy(*this);
-  }
-
-  /*void draw(container<Vertex> const& m_vertices) const
-  {
-    (void) m_vertices;
-    }*/
-#endif
+  virtual void drawThat(Renderable& renderable) = 0;
 
   /*
    * Number of pixels of the opengl window
@@ -169,6 +150,12 @@ public:
   virtual uint32_t screenHeight() const = 0;
 
 protected:
+
+  void draw();
+
+public:
+  //FIXME protected:
+
   Camera2D m_default_camera;
   Camera2D m_current_camera;
   Color m_background_color;
@@ -180,8 +167,10 @@ protected:
   GLAttrib m_timeAttrib;
   GLAttrib m_posAttrib;
   GLAttrib m_colAttrib;
-  float m_matrix_mvp[16];
+  float m_matrix_mvp[16];// FIXME: a fusionner avec la camera
   std::vector<float> m_RotationAngles;
+  Renderable *m_model = nullptr;
+  //ConcurrencyQueue<Renderable*> m_queue;
 };
 
 #endif /* RENDERER_HPP_ */

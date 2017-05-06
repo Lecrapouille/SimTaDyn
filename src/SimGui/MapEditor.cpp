@@ -6,7 +6,7 @@
 //
 // *************************************************************************************************
 MapEditor::MapEditor()
-  : MapLoader()
+  : MapLoader(), m_listener(*this)
 {
   LOGI("Creating MapEditor");
 
@@ -20,7 +20,7 @@ MapEditor::MapEditor()
     m_submenu[1].set_label("New Map");
     m_image[1].set_from_icon_name("document-new", Gtk::ICON_SIZE_MENU);
     m_submenu[1].set_image(m_image[1]);
-    m_submenu[1].signal_activate().connect(sigc::mem_fun(*this, &MapEditor::newEmptyMap));
+    m_submenu[1].signal_activate().connect([this](){MapEditor::newMap();});
     m_menu[simtadyn::MapMenu].append(m_submenu[1]);
 
     //
@@ -79,7 +79,7 @@ MapEditor::MapEditor()
       button->set_label("New");
       button->set_stock_id(Gtk::Stock::NEW);
       button->set_tooltip_text("Load and add a map to the current map");
-      m_toolbar.append(*button, sigc::mem_fun(this, &MapEditor::execMap2));
+      m_toolbar.append(*button, [this](){ MapEditor::execMap(); });
     }
 
     {
@@ -90,22 +90,20 @@ MapEditor::MapEditor()
       m_toolbar.append(*button, sigc::mem_fun(*this, &MapEditor::openMap));
     }
 
-    {
+    /*{
       Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
       button->set_label("Open");
       button->set_stock_id(Gtk::Stock::NEW);
       button->set_tooltip_text("+1");
       m_toolbar.append(*button, sigc::mem_fun(*this, &MapEditor::foo));
-    }
+      }*/
   }
 
   // Pack all stuffs together
   {
     m_vbox.pack_start(m_inspector.m_scrolledwindow, Gtk::PACK_SHRINK);
-    // FIXME m_vbox.pack_start(m_drawing_area);
-
-    m_hbox.pack_start(m_vbox);
-    m_hbox.pack_start(m_toolbar, Gtk::PACK_SHRINK);
+    pack_start(m_vbox);
+    pack_start(m_toolbar, Gtk::PACK_SHRINK);
   }
 }
 
@@ -120,20 +118,18 @@ MapEditor::~MapEditor()
 
 void MapEditor::closeMap()
 {
-  if (nullptr == m_current_map)
+  if (nullptr == m_current_map.get())
     return ;
 
-  if (false == m_current_map->dispose())
+  if (false == m_current_map.get()->dispose())
     return ;
 
-  if (m_maps.empty())
+  SimTaDynMap* map = nullptr;
+  if (!m_maps.empty())
     {
-      m_current_map = nullptr;
+      map = static_cast<SimTaDynMap*>(m_maps.begin()->second);
     }
-  else
-    {
-      m_current_map = static_cast<SimTaDynMap*>(m_maps.begin()->second);
-    }
+  m_current_map.set(map);
 }
 
 bool MapEditor::selectMap(const Key id)
@@ -141,7 +137,7 @@ bool MapEditor::selectMap(const Key id)
   auto it = m_maps.find(id);
   if (it != m_maps.end())
     {
-      m_current_map = static_cast<SimTaDynMap*>(it->second);
+      m_current_map.set(static_cast<SimTaDynMap*>(it->second));
       return true;
     }
   return false;
@@ -153,6 +149,11 @@ bool MapEditor::selectMap(const Key id)
 bool MapEditor::load(std::string const& filename, SimTaDynMap* &map)
 {
   std::string extension = File::extension(filename);
+
+  if (nullptr == map)
+    {
+      map = newMap();
+    }
 
   if (0 == extension.compare("shp"))
     {
@@ -169,7 +170,7 @@ bool MapEditor::load(std::string const& filename, SimTaDynMap* &map)
 // *************************************************************************************************
 void MapEditor::doOpen(std::string const& filename, const bool new_map, const bool reset_map)
 {
-  SimTaDynMap* map = (new_map) ? nullptr : m_current_map;
+  SimTaDynMap* map = (new_map) ? nullptr : m_current_map.get();
   SimTaDynMap* oldmap = map;
 
   if ((reset_map) && (nullptr != map))
@@ -197,7 +198,7 @@ void MapEditor::doOpen(std::string const& filename, const bool new_map, const bo
           m_maps.insert(map);
         }
       std::cerr << "Successfully loaded map '" << map->m_name << "'" << std::endl;
-      m_current_map = map;
+      m_current_map.set(map);
 
       //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
       //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }

@@ -67,8 +67,8 @@ SimTaDynWindow::SimTaDynWindow()
   // -- On the right: the menubar and Forth editor
   {
     // Left:
-    MapEditor::instance().m_vbox.pack_start(m_drawing_area);
-    m_hpaned.pack1(MapEditor::instance().m_hbox);
+    MapEditor::instance().attachView(m_drawing_area);
+    m_hpaned.pack1(MapEditor::instance());
 
     // Right:
     m_box.pack_start(m_menubar, Gtk::PACK_SHRINK);

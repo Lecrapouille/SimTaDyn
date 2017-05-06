@@ -2,19 +2,20 @@
 #define OPENGL_HPP
 
 #  include <GL/glew.h>
-#  include <iostream>
 
-namespace OpenGL
+namespace SimTaDyn
 {
 
 #  ifdef CHECK_OPENGL
-#    define glCheck(expr) expr; OpenGL::glCheckError(__FILE__, __LINE__, #expr);
+#    define glCheck(expr) expr; SimTaDyn::glCheckError(__FILE__, __LINE__, #expr);
 #  else
 #    define glCheck(expr) expr;
 #  endif
 
-void glCheckError(const char* file, uint32_t line, const char* expression);
+  void glCheckError(const char* file, uint32_t line, const char* expression);
+  void glStartContext();
+  bool glIsFunctional();
 
-} // namespace simGL Configure OpenGL
+} // namespace
 
 #endif

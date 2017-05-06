@@ -97,6 +97,10 @@ protected:
   std::ifstream m_infile;
   std::string   m_filename;
   uint32_t      m_file_length;
+
+private:
+
+  Vector3D      m_point;
 };
 
 #endif /* SHAPEFILE_HPP_ */
