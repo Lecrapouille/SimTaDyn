@@ -1,67 +1,109 @@
-# SimTaDyn
-SIMulateur TAbleur DYNamique
+# Introduction to SimTaDyn
 
+SimTaDyn: a dynamical spreadsheet for geographic simulation
+(SIMulateur TAbleur DYNamique in french). This page has is translated
+in the following languages:
+
+* [English version](#English)
+* [French version](#French)
+
+See also the [french PDF manual](https://github.com/Lecrapouille/SimTaDyn/blob/Original-Version-EPITA-2004/doc/Simtadyn-Manuel.pdf)
+made in 2007 (badly written because this project was at the origin a
+student engineering school project).
+
+_The following figure is a screenshot of the legacy version of SimTaDyn._
 ![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.jpg)
 
 ## English
 
-SimTaDyn is a geographic information system (GIS) allowing to draw
-geographic maps, to edit them like we do with a spreadsheet page.
+### State of Art
+SimTaDyn is a proof of concept for a geographic information system
+(GIS) allowing to draw geographic maps, to edit their information like
+if they were spreadsheet pages, and run computations on them.
 
 A spreadsheet, like Excel, edits pages of regular and rectangular
-pavement. Cells contain either data or computation function which
-performing actions on itself or on the content of other cells.
+pavement. Cells contain either data or a computation function which
+perform actions on the cell itself or on the content of other cells.
 
-A GIS is an editor manipulating geographic databases and draw
-them. Datum are usually static (in the way modifying one set over time
-will dynamically change other datum).
+A Geographic Information System (GIS) is an editor manipulating
+geographic databases and draw them. Datum are usually static (in the
+way modifying one set over time will dynamically change other datum).
 
-The idea of SimTaDyn is to couple GIS with a spreadsheet in a single tool:
+The idea of SimTaDyn is to couple in a single tool a GIS with a
+spreadsheet :
 
-* the map editor draws and manipulates, in 2D, different kinds of cells:
-  nodes (aka vertices), arcs (aka edges) and zones (aka areas), add
-  datum to them and scripts in language Forth.
+1. The idea of the classic spreadsheet is extended. In SimTaDyn the
+pavement is more general and contains different kind of editable
+cells :
 
-* the Forth editor allows to write and run scripts. Scripts couple
-  datum together dynamically. A script can run over all cells in the
-  map or be stored and run inside a cell. Forth has been choose
-  because it's light to implement and is very powerful: stack
-  language, manage it's own memory, no syntax by using reverse polish
-  notation and the syntax can evolves by itself.
+* Polygonal cells (like a geographic area) extend the regular and
+  rectangular pavement of classic spreadsheets.
+* Edge cells (like roads) extend the pavement of classic spreadsheets
+  by allowing edges to be interactive as well polygonal cells.
+* Node cells (like road crossings) extend the pavement of classic
+  spreadsheets by allowing corners to be interactive.
 
-* Finally we can display result of script in 3D map.
+This idea is summarize by the following picture:
+![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/pavement.png)
 
-Application with this SimTaDyn is not limited to GIS, we can image the
+2. Like classic spreadsheet, SimTaDyn has a script language for
+"gluing" cells together by formulas. When once has its value changed,
+other cells are notified through their relation given by the
+formula. Instead of using a Visual Basic, SimTaDyn uses the [Forth
+language](https://en.wikipedia.org/wiki/Forth_(programming_language))
+which is a stack language (reverse polish notation), embedding its
+virtual machine (managing it's own memory, dictionary, byte code) and
+its own interpreter (compiler). Forth is very powerful because it's a
+self-evoluting language: the interpreter evolves dynamically and can
+modify its own syntax.
+
+3. The Forth editor allows to write and run two kind of scripts:
+* Global scripts are applied to the map, modifying it and it cells.
+* Local scripts are stored inside the cell like the classic spreadsheet.
+
+4. The idea of GIS is also extended. Classic GIS manipulates two kind of geographic maps.
+* [Rasterized map](http://desktop.arcgis.com/en/arcmap/10.3/manage-data/raster-and-images/what-is-raster-data.htm)
+  used for computations with a [map algebra](https://www.nrem.iastate.edu/files/w11-MapAlgebra_presentation5.pdf),
+* [Vectorized map](http://gisgeography.com/spatial-data-types-vector-raster/) used
+  for displaying static informations from databases.  SimTaDyn can be
+  seen as a vectorized map manipulated like a rasterized map. Each
+  cell is a either a polygon, a polyline or dots but are at the same
+  time a script forth and an element of the database.
+
+* Because SimTaDyn uses OpenGL and a evolutive scripting language, we can display results of a script in 3D instead of 2D.
+
+### Typical SimTaDyn applications
+Application with this SimTaDyn is not limited to GIS application, we can image the
 following applications:
 
-* A pure spreadsheet (nodes and arcs have no effects, zones are
-  rectangular).
+* A pure classic spreadsheet where nodes and arcs have no effects, zones are
+  rectangular.
 
-* A flowchart in the same idea of Lego Mindsorms (nodes are Forth code
-  and edges the order sequences). Or blocks schematics for flow
+* A game engine for making a clone of the SimCity game. Or more serious for resolving problem of traffic jam/congestion and [Wardrop's equilibrium](https://en.wikipedia.org/wiki/John_Glen_Wardrop).
+
+* Solving partial differential equation like the video showing [SpaceX simulations](https://www.youtube.com/watch?v=vYA0f6R5KAI).
+
+* A flowchart in the same idea of Lego Mindstorms: nodes are Forth code
+  and edges the order sequences. Or blocks schematics for flow
   control like Simulink or Scicos.
 
-* Solving partial differential equation.
+As said previously, SimTaDyn is still a proof of concept and is still looking for its way.
 
-* Resolving problem of traffic jam/congestion in a city (see Wardrop's
-  equilibrium).
-
-* Redo the SimCity game.
-
-SimTaDyn is a school project made in 2003-2004 where the name is a
-joke mixing words SIM (for SimCity, SIMulation), TA (for tableur or
-spreadsheet in french), DYN (for dynamic) sounding close to the word
-citadine (female noun for a city-dweller in french).
+### Origin of the project
+SimTaDyn was at this origin a school project made in 2003-2004 for learning coding. Its name comes from a
+joke mixing words SIM (for SimCity, SIMulation), TA (for TABleur:
+spreadsheet in French), DYN (for DYNamic) and sounding close to the project Sytadin
+a traffic jam application where the name is also a joke to the French word citadine (meaning city-dweller).
 
 The initial code is available on the git branch
 Original-Version-EPITA-2004. The project was not finalized (from
-specification document) but functional. The master branch is empty
-because in 2016 I decided to develop it back from scratch with cleaner
-code (I hope).
+specification document) but functional. To compile it you will need to install lib like MySQL,
+OpenGL (the old version), GTK, gtkglext, ncurses and worked for OSX with X11 and still working on Linux.
 
-To compile the old project you will need to install lib like mysql,
-opengl (the old version), gtk, gtkglext, ncurses. That's easy on
-Ubuntu. The project could run on Mac OSX.
+The project reborn in 2016, after a talk with a co-worker and I decided to develop "from scratch" in C++ with cleaner
+code (I hope) because the original code was coded very messy. You can get it on the master branch.
+ Note: this project is
+still in development and still is a proof of concept.
 
 ## French
 
@@ -131,3 +173,5 @@ Pour compiler le vieux projet vous aurez besoin d'un gcc et des
 bibliothèques gtk, glib, une vieille version d'opengl, gtkglext,
 mysql, ncurses que l'on peut facilement installer avec Ubuntu (et à
 l'époque sur un Mac OSX).
+
+
