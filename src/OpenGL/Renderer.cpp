@@ -71,8 +71,8 @@ bool GLRenderer::setupGraphics()
                           static_cast<float32_t>(screenHeight()));
   m_current_camera = m_default_camera;
 
-  GLuint program = m_shader.load(Config::instance().data_path("node.vertex"),
-                                 Config::instance().data_path("node.fragment"));
+  GLuint program = m_shader.load(Config::instance().data_path("shaders/node.vertex"),
+                                 Config::instance().data_path("shaders/node.fragment"));
   if (0U == program)
     return false;
 
