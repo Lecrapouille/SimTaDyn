@@ -1,112 +1,202 @@
-#ifndef TEXTURES_HPP_
-#  define TEXTURES_HPP_
+#ifndef GLTEXTURES_HPP_
+#  define GLTEXTURES_HPP_
 
-#  include "OpenGL.hpp"
-#  include <cstring>
-#  include <iostream>
+#  include "GLObject.hpp"
+#  include <SOIL/SOIL.h>
 
-class Texture
+// **************************************************************
+//! FIXME: should inherit from a GPUdata
+// **************************************************************
+class GLTexture: public GLObject
 {
 public:
-  // *************************************************************************************************
-  // Constructor: load a texture from a file (tga ...)
-  // *************************************************************************************************
-  Texture(std::string const& filename)
-    : texture_loaded_(false)
+
+  GLTexture(const GLenum target)
+    : GLObject()
   {
-    open(filename);
+    m_target = target;
   }
 
-  // *************************************************************************************************
-  // Constructor
-  // *************************************************************************************************
-  Texture()
-    : texture_loaded_(false)
+  GLTexture(std::string const& name, const GLenum target)
+    : GLObject(name)
   {
+    m_target = target;
   }
 
-  // *************************************************************************************************
-  // Destructor
-  // *************************************************************************************************
-  ~Texture()
+  void interpolation(const float min_filter, const float  mag_filter)
   {
-    dropTexture();
+    m_min_filter = min_filter;
+    m_mag_filter = mag_filter;
+    m_need_setup = true;
   }
 
-  // *************************************************************************************************
-  // Constructor: load a texture from a file (tga ...)
-  // TODO: tester 2 chargement textures a la suite avec/sans echec
-  // *************************************************************************************************
-  virtual bool open(std::string const& filename)
+  void interpolation(const float min_filter)
   {
-    std::string::size_type idx = filename.rfind('.');
-    if (std::string::npos != idx)
-      {
-        std::string extension = filename.substr(idx + 1);
-
-        if ("tga" == extension)
-          {
-            dropTexture();
-            texture_loaded_ = LoadTGA(filename);
-          }
-        else
-          {
-            std::cerr << "[ERROR]: loading '" << extension << "' files is not yet managed" << std::endl;
-          }
-      }
-    else
-      {
-        std::cerr << "[ERROR]: the file '" << filename << "' need an extension" << std::endl;
-      }
-
-    if (!texture_loaded_)
-      {
-        std::cerr << "[ERROR]: Failed loading texture from '" << filename << "'" << std::endl;
-      }
-    return texture_loaded_;
+    m_min_filter = min_filter;
+    m_mag_filter = min_filter;
+    m_need_setup = true;
   }
 
-  // *************************************************************************************************
-  // Return if a font has been succesfully loaded
-  // *************************************************************************************************
-  virtual inline bool isLoaded() const
+  void wrapping(const float wrap)
   {
-    return texture_loaded_;
-  }
-
-  // *************************************************************************************************
-  // FIXME: useful ? Never used !
-  // *************************************************************************************************
-  virtual inline GLuint getId() const
-  {
-    if (!texture_loaded_)
-      {
-        std::cerr << "[WARN]: Trying to get texture id from a non loaded texture. " << std::endl;
-      }
-    return texture_id_;
+    m_wrapping = wrap;
+    m_need_setup = true;
   }
 
 protected:
 
-  // *************************************************************************************************
-  // Delete OpenGL display lists
-  // *************************************************************************************************
-  inline void dropTexture()
+  virtual void create() override
   {
-    if (texture_loaded_)
+    glCheck(glGenTextures(1U, &m_handle));
+  }
+
+  virtual void release() override
+  {
+    if (isActivable())
       {
-        glDeleteTextures(1, &texture_id_);
-        texture_loaded_ = false;
+        glCheck(glDeleteTextures(1U, &m_handle));
       }
   }
 
-  // *************************************************************************************************
-  //
-  // *************************************************************************************************
-  bool LoadTGA(std::string const& filename);
+  virtual void activate() override
+  {
+    glCheck(glBindTexture(m_target, m_handle));
+    if (needSetup())
+      {
+        setup();
+      }
+  }
 
-  GLuint texture_id_;
-  bool texture_loaded_;
+  virtual void deactivate() override
+  {
+    glCheck(glBindTexture(m_target, 0U));
+  }
+
+  virtual void setup() override
+  {
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, m_min_filter));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, m_mag_filter));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_S, m_wrapping));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_T, m_wrapping));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+    m_need_setup = false;
+  }
+
+  float m_min_filter = GL_NEAREST;
+  float m_mag_filter = GL_NEAREST;
+  float m_wrapping = GL_CLAMP_TO_EDGE;
 };
 
-#endif /* TEXTURE_HPP_ */
+// **************************************************************
+//!
+// **************************************************************
+class GLTexture2D: public GLTexture
+{
+public:
+
+  GLTexture2D()
+    : GLTexture(GL_TEXTURE_2D)
+  {
+  }
+
+  GLTexture2D(std::string const& name)
+    : GLTexture(name, GL_TEXTURE_2D)
+  {
+  }
+
+  inline void load(std::string const& filename, const bool rename = true)
+  {
+    load(filename.c_str(), rename);
+  }
+
+  // FIXME: m_buffer should be a container for automatic update
+  void load(const char *const filename, const bool rename = true)
+  {
+    int width, height;
+
+    LOGI("Loading texture '%s'", filename);
+    if (nullptr != m_buffer)
+      {
+        SOIL_free_image_data(m_buffer);
+      }
+    m_buffer = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
+
+    // Success
+    if (nullptr != m_buffer)
+      {
+        m_width = width;
+        m_height = height;
+        if (rename || m_name.empty())
+          {
+            m_name = filename;
+          }
+        LOGI("Successfuly load picture file '%s'", filename);
+      }
+    else
+      {
+        LOGES("Failed loading picture file '%s'", filename);
+      }
+    m_need_update = (nullptr != m_buffer);
+  }
+
+  inline uint32_t width() const
+  {
+    return m_width;
+  }
+
+  inline uint32_t height() const
+  {
+    return m_height;
+  }
+
+protected:
+
+  virtual void setup() override
+  {
+    GLTexture::setup();
+    glCheck(glBindTexture(m_target, m_handle));
+    glCheck(glTexImage2D(m_target, 0, m_gpu_format, m_width, m_height,
+                         0, m_cpu_format, m_type, nullptr));
+    m_need_setup = false;
+  }
+
+  virtual void update() override
+  {
+    if (isActivable())
+      {
+        glCheck(glBindTexture(m_target, m_handle));
+        glCheck(glTexSubImage2D(m_target, 0, 0, 0, m_width, m_height,
+                                m_cpu_format, m_type, nullptr));
+        m_need_update = false;
+      }
+  };
+
+  uint32_t m_width = 0;
+  uint32_t m_height = 0;
+  GLint m_cpu_format = GL_RGB;
+  GLenum m_gpu_format = GL_RGB;
+  GLenum m_type = GL_UNSIGNED_BYTE;
+  unsigned char* m_buffer = nullptr;
+};
+
+// **************************************************************
+//!
+// **************************************************************
+class GLTextureDepth2D: public GLTexture2D
+{
+  GLTextureDepth2D()
+    : GLTexture2D()
+  {
+    m_gpu_format = GL_DEPTH_COMPONENT;
+    m_cpu_format = GL_DEPTH_COMPONENT;
+  }
+
+  GLTextureDepth2D(std::string const& name)
+    : GLTexture2D(name)
+  {
+    m_gpu_format = GL_DEPTH_COMPONENT;
+    m_cpu_format = GL_DEPTH_COMPONENT;
+  }
+};
+
+#endif /* GLTEXTURES_HPP_ */
