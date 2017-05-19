@@ -1,12 +1,17 @@
 # SimTaDyn Installation Guide
 
+This page explains how to compile the code source of the master branch. See other install files given on other git branches (specially the Original-Version-EPITA-2004 branch).
+
+SimTaDyn is based on C++11, Modern OpenGL (>= 3.0), The C++ version of GTK+, the C++ version of GtkSourceView. In addition it needs the gtkmm >= 3.22 to work correctly. This choice was due to thee fact that on 2004 I enjoyed programming GTK+ and OpenGL was well integrated (with GtkGLExt) but in 2016, I get bored of C and decide to pass to C++ and after 12 years of absence, I did not realized soon that GTK+ stopped not maintaining correctly OpenGL.
+
 - Installation
   - Linux
     - [Ubuntu](#ubuntu)
-  - OS X
-    - Not yet in developpement
+  - Mac OSX
+    - [OS X](#os-x)
   - Windows
-    - Not yet in developpement
+    - [Not yet in development](#other-architecture)
+- [Compilation](#compilation)
 - [Run](#run)
 
 ## Ubuntu
@@ -16,14 +21,26 @@ Install dependencies:
 sudo apt-get install freeglut3 freeglut3-dev mesa-common-dev libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev libgtksourceviewmm-3.0-dev libglu1-mesa-dev libglew-dev libcppunit-dev gcovr libdw-dev
 ```
 
-It's recommanded to install the gtkmm version 3.22 (I'm not totally sure but this version is given with Ubuntu 16.10) and not the gtkm-3.18 (present with Ubuntu 16.04) due to this [bug](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md). 
+It's mandatory to install the gtkmm version 3.22 due to a major bug with the OpenGL widget breaking the OpenGL context when using inheritance. See this [bug](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md). for more informations. This version is not present on Ubuntu older than 17.04. On current Ubuntu version (16.04, 16.11) you’ll have to install it by compiling sources (need long time to compile but the process compiles well).   
 
-If needed, for fixing some disgracious messages Gtk-Message: Failed to load module "overlay-scrollbar":
+If needed, for fixing some Gtk-Message: Failed to load module "overlay-scrollbar":
 ```sh
 sudo apt-get install overlay-scrollbar*
 ```
 
-Get SimTaDyn source, compile, install:
+## Mac OS X
+
+SimTaDyn compiles on a MacBook Air and Mac OS X 10.9.5. To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. however the Gtk::GlArea is not implemented on this architecture and the OpenGL context is not created.
+
+## Other architecture
+
+Not yet tested/done. No development scheduled yet.
+
+Because Cygwin stopped being ported on Windows XP, you need higher Window version.
+
+## Compilation
+
+Get the SimTaDyn source, compile them and install resources:
 ```sh
 git clone https://github.com/Lecrapouille/SimTaDyn.git
 cd SimTaDyn/src
@@ -31,14 +48,10 @@ make
 make install-data
 ```
 
-Explainations:
+Explanations:
 * the make command will create the SimTaDyn/build directory and compile the executable on here.
-* the make install is not yet implemented. So, for the moment call SimTaDyn from the sources.
+* the make install is not yet implemented (because this project is still in developement). So, for the moment call SimTaDyn from the sources.
 * thee make install-data will create a hidden directory at $HOME/.SimTaDyn and copy some needed files.
-
-## Other architecture
-
-Not yet done. No developement scheduled yet.
 
 ## Run
 
@@ -47,9 +60,6 @@ To launch SimTaDyn once compiled:
 cd SimTaDyn/build
 ./SimTaDyn
 ```
+
 Note:
-* Be sure you type make install-data before launching the excutable. SimTaDyn needs these files installed.
-
-## Bugs
-
-See [here](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md).
+* Be sure you typed ``make install-data`` before launching the executable. SimTaDyn needs these files installed.

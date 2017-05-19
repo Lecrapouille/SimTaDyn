@@ -21,6 +21,14 @@ BUILD = ../build
 endif
 
 ###################################################
+# Operating system detection
+ifeq ($(OS),Windows_NT)
+ARCHI := Windows
+else
+ARCHI := $(shell uname -s)
+endif
+
+###################################################
 # Where to install project datum
 # FIXME: do not change this location (for the moment)
 # ifeq ($(PROJECT_DATA_ROOT),)
@@ -42,14 +50,14 @@ VPATH=.:$(BUILD):../tools:Utils:Common/SharedLibrary:Common/Containers:Common:Op
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_TOOL     = Backward.o Logger.o SimTaDynLogger.o
+OBJECTS_TOOL     = Backward.o Logger.o SimTaDynLogger.o 
 OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o  SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_COMMON   = File.o Color.o Vector3D.o Camera2D.o
 OBJECTS_FORTH    = TextColor.o ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
 OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
 OBJECTS_LOADER   = MapLoader.o ShapeFile.o
-OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o Textures.o Fonts.o Renderer.o
+OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o Renderer.o
 OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJECTS_SIMTADYN =
 
@@ -61,17 +69,25 @@ TARGET = SimTaDyn
 
 ###################################################
 # Compil options
-CXX = g++
+CXX = clang++
 CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -ldw
+LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES = -DCHECK_OPENGL
 
 ###################################################
 # Set Libraries
+
+ifeq ($(ARCHI),Darwin)
+LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib -I/opt/X11/lib -framework OpenGL -lglew
+else ifeq ($(ARCHI),Linux)
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW -ldl
+       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
+       -lGLEW -ldl -ldw
+else
+$(error Unknown architecture)
+endif
 
 ###################################################
 # Files dependencies
@@ -86,9 +102,12 @@ $(TARGET): $(OBJECTS)
 	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
-%.o: %.cpp
-%.o: %.cpp $(BUILD)/%.d
+%.o: %.cpp Makefile
+%.o: %.cpp $(BUILD)/%.d Makefile
 	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
+ifeq ($(ARCHI),Darwin)
+	@mkdir -p $(BUILD)
+endif
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
@@ -113,12 +132,14 @@ install-data:
 	@cp -r SimForth/Forth/core/system.fs $(PROJECT_DATA_PATH)/forth
 
 ###################################################
-# Create a temporary folder to store *.o
+# Create a temporary folder to store *.o and *.d files
 $(DEPFILES): | $(BUILD)
 $(OBJECTS): | $(BUILD)
 $(BUILD):
 	@mkdir -p $(BUILD)
 
+###################################################
+# Auto-Dependency Generation
 $(BUILD)/%.d: ;
 .PRECIOUS: $(BUILD)/%.d
 
