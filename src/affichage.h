@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #ifdef __APPLE__
 #   include <GLUT/glut.h> /* pour Mac OS X */
-#   include "/sw/include/mysql/mysql.h"
+#   include <mysql/mysql.h>
 #   include <OpenGL/gl.h>
 #   include <OpenGL/glu.h>
 #else
