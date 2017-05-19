@@ -537,7 +537,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 
   if (res.first)
     {
-      LOGI("Succeeded executing script '%s'", filename);
+      LOGI("Succeeded executing script '%s'", filename.c_str());
 
       m_elapsed_time = std::chrono::duration_cast<ns>(t1 - t0);
       m_statusbar.push(elapsedTime());
@@ -555,7 +555,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
     }
   else
     {
-      LOGE("Failed executing script '%s'", filename);
+      LOGE("Failed executing script '%s'", filename.c_str());
 
       // Text view: indiquer ligne ko
       m_statusbar.push("FAILED");

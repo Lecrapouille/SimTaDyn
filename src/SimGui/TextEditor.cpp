@@ -365,7 +365,7 @@ void TextDocument::onChanged()
 // *************************************************************************************************
 bool TextDocument::save()
 {
-  LOGI("TextDocument saving '%s'", m_filename);
+  LOGI("TextDocument saving '%s'", m_filename.c_str());
   bool res = true;
 
   if (TextDocument::isModified())
@@ -385,7 +385,7 @@ bool TextDocument::save()
         {
           std::string why = strerror(errno);
           LOGF("could not save the file '%s' reason was '%s'",
-               m_filename, why.c_str());
+               m_filename.c_str(), why.c_str());
           Gtk::MessageDialog dialog((Gtk::Window&) (*m_textview.get_toplevel()),
                                     "Could not save '" + m_filename + "'",
                                     false, Gtk::MESSAGE_WARNING);
@@ -402,7 +402,7 @@ bool TextDocument::save()
 // *************************************************************************************************
 bool TextDocument::saveAs(std::string const& filename)
 {
-  LOGI("TextDocument saving as '%s'", m_filename);
+  LOGI("TextDocument saving as '%s'", m_filename.c_str());
   std::string title = filename.substr(filename.find_last_of("/") + 1);
   m_button.title(title);
   m_filename = filename;
@@ -450,7 +450,7 @@ bool TextDocument::load(std::string const& filename, bool clear)
     {
       std::string why = strerror(errno);
       LOGF("could not open the file '%s' reason was '%s'",
-           filename, why.c_str());
+           filename.c_str(), why.c_str());
       Gtk::MessageDialog dialog((Gtk::Window&) (*m_textview.get_toplevel()),
                                 "Could not load '" + filename + "'",
                                 false, Gtk::MESSAGE_WARNING);

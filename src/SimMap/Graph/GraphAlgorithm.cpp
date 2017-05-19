@@ -24,7 +24,7 @@ void GraphAlgorithm::depthFirstSearch(BasicGraph_t& graph, const Key startNodeID
 
   if (!graph.hasNode(startNodeID))
     {
-      LOGE("The node %u does not exist on the graph '%s'", startNodeID, graph.m_name);
+      LOGE("The node %u does not exist on the graph '%s'", startNodeID, graph.m_name.c_str());
       return ;
     }
 
