@@ -23,6 +23,9 @@ void Set<T,N,Block>::append(T const& elt)
   IContainer<T,N,Block>::m_blocks[m_index]->m_block[m_subindex] = elt;
   SET_OCCUPIED(m_index, m_subindex);
   ++IContainer<T,N,Block>::m_stored_elements;
+
+  // Mark elements that changed; useful for update() routine.
+  IContainer<T,N,Block>::m_blocks[m_index]->addPendingData(m_subindex);
 }
 
 // **************************************************************
@@ -36,7 +39,7 @@ void Set<T,N,Block>::remove(const uint32_t nth)
   if (outofbound(nth))
     return ;
 
-      // Replace the nth 'th element by the last inserted element
+  // Replace the nth 'th element by the last inserted element
   if (nth != m_last)
     {
       const uint32_t id = nth / M;
@@ -44,6 +47,9 @@ void Set<T,N,Block>::remove(const uint32_t nth)
 
       IContainer<T,N,Block>::m_blocks[id]->m_block[sid] =
         IContainer<T,N,Block>::m_blocks[m_index]->m_block[m_subindex];
+
+      // Mark elements that changed; useful for update() routine.
+      IContainer<T,N,Block>::m_blocks[id]->addPendingData(sid);
     }
 
   // And remove the last element
@@ -59,6 +65,9 @@ void Set<T,N,Block>::removeLast()
 {
   // Empty the last inserted element
   CLEAR_OCCUPIED(m_index, m_subindex);
+
+  // Possible behavior:
+  // IContainer<T,N,Block>::m_blocks[m_index]->addPendingData(m_subindex, m_subindex);
 
   // Restore index
   if ((0 == m_last) || (INITIAL_INDEX == m_last))
@@ -83,15 +92,15 @@ void Set<T,N,Block>::removeLast()
 // **************************************************************
 template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block>
-void Set<T,N,Block>::swap(const uint32_t index1, const uint32_t index2)
+bool Set<T,N,Block>::swap(const uint32_t index1, const uint32_t index2)
 {
   // Do not swapt itself
   if (index1 == index2)
-    return ;
+    return false;
   if (outofbound(index1))
-    return ;
+    return false;
   if (outofbound(index2))
-    return ;
+    return false;
 
   const uint32_t id1 = index1 / M;
   const uint32_t sid1 = MODULO(index1, M);
@@ -104,4 +113,9 @@ void Set<T,N,Block>::swap(const uint32_t index1, const uint32_t index2)
 
   // Note: does not need swap occupied bits because holes are not
   // possible.
+
+  // Possible behavior:
+  //IContainer<T,N,Block>::m_blocks[id2]->addPendingData(sid2);
+  //IContainer<T,N,Block>::m_blocks[id1]->addPendingData(sid1);
+  return true;
 }

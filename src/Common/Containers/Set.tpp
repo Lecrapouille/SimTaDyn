@@ -42,6 +42,28 @@ public:
   //! is O(1) of elements iteration.
   virtual void append(T const& elt);
 
+  //! \brief Append elements from a given array.
+  //! \param array an not nullptr address of the array.
+  //! \param size the number of elements of the array.
+  virtual void append(const T *array, const uint32_t size)
+  {
+    for (uint32_t i = 0; i < size; ++i)
+      {
+        append(array[i]);
+      }
+  }
+
+  //! \brief Append elements from a given vector.
+  //! \param vect
+  virtual void append(std::vector<T> &vect)
+  {
+    const uint32_t size = vect.size();
+    for (uint32_t i = 0; i < size; ++i)
+      {
+        append(vect[i]);
+      }
+  }
+
   //! \brief Check if the given index is incorrect (outside the
   //! definition range of the container). Complexity is O(1) in
   //! number of elements.
@@ -72,7 +94,9 @@ public:
   //! Nothing is made if nth is incorrect or if the element has
   //! already been removed. Note: Nothing is made if indexes are
   //! incorrect or indexes have the same value.
-  void swap(const uint32_t index1, const uint32_t index2);
+  //! \return true is case of sucess, else return false if one given
+  //! index is incorrect.
+  bool swap(const uint32_t index1, const uint32_t index2);
 
   //! \brief Return the current position of the index.
   inline uint32_t index() const

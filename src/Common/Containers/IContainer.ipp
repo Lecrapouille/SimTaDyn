@@ -116,6 +116,29 @@ T const& IContainer<T,N,Block>::get(const uint32_t nth) const
 // **************************************************************
 template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block>
+void IContainer<T,N,Block>::modify(const uint32_t nth, T const& e) const
+{
+  if (outofbound(nth))
+    {
+      throw std::out_of_range("Out of range index " + std::to_string(nth));
+    }
+
+  const uint32_t id = nth >> N;
+  const uint32_t sid = MODULO(nth, M);
+
+  if (!IS_OCCUPIED(id, sid))
+    {
+      throw std::out_of_range("Empty element at index " + std::to_string(nth));
+    }
+  m_blocks[id]->m_block[sid] = e;
+  m_blocks[id]->addPendingData(sid);
+}
+
+// **************************************************************
+//
+// **************************************************************
+template<typename T, const uint32_t N,
+         template<typename X, const uint32_t Y> class Block>
 const T& IContainer<T,N,Block>::operator[](size_t nth) const
 {
   const uint32_t id = nth >> N;
