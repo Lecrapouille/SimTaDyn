@@ -54,8 +54,8 @@ public:
   {
   }
 
-  //! \brief Destructor. The program (if loaded) is removed from the GPU.
-  ~GLShader()
+  //! \brief Destructor: release data from the GPU and CPU memory.
+  virtual ~GLShader()
   {
     destroy();
   }
@@ -64,23 +64,32 @@ protected:
 
   //! \brief Ideally would call the load() method but not possible due
   //! to parameters.
-  virtual void create() override
+  virtual bool create() override
   {
-    if (!isActivable() && m_throw_enable)
+    //LOGI("GLShader named '%s' create", m_name.c_str());
+    if (!isValid())
       {
-        GLShaderNotLoadedException e(m_name);
-        throw e;
+        if (m_throw_enable)
+          {
+            GLShaderNotLoadedException e(m_name);
+            throw e;
+          }
+        //LOGI("GLShader named '%s' failed", m_name.c_str());
+        return true;
       }
+    return false;
   }
 
   //! \brief Empty method.
-  virtual inline void setup() override
+  virtual inline bool setup() override
   {
+    return false;
   }
 
   //! \brief Empty method.
-  virtual inline void update() override
+  virtual inline bool update() override
   {
+    return false;
   }
 
   //! \brief Once program is no longer used, release it from the GPU
@@ -91,20 +100,16 @@ protected:
   //! been loaded into a program (else nothing is done).
   virtual inline void activate() override
   {
-    if (isActivable())
-      {
-        glUseProgram(m_handle);
-      }
+    //LOGI("GLShader named '%s' activate", m_name.c_str());
+    glUseProgram(m_handle);
   }
 
   //! \brief A program can be desactivated if and only if shaders have
   //! been loaded into a program (else nothing is done).
   virtual inline void deactivate() override
   {
-    if (isActivable())
-      {
-        glUseProgram(0U);
-      }
+    //LOGI("GLShader named '%s' deactivate", m_name.c_str());
+    glUseProgram(0U);
   }
 
 public:
@@ -156,6 +161,14 @@ public:
   //! \return the id of the variable or -1 if not found or the given name
   //! is erroneous.
   GLint locate(const char *name) const;
+  inline GLint locateAttrib(const char *name) const
+  {
+    assert(nullptr != name);
+    GLint res = glCheck(glGetAttribLocation(m_handle, name));
+    //LOGI("GLShader named '%s' locating attribute '%s': %d", 
+    //m_name.c_str(), name, res);
+    return res;
+  }
 
 private:
 

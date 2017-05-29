@@ -114,20 +114,20 @@ void IGLWindow::update()
   try
     {
       do
-	{
-	  FPS();	 
-	  if (false == draw())
-	    {
-	      std::cerr << "Aborting" << std::endl;
-	      return ;
-	    }
-	  // Swap buffers
-	  glfwSwapBuffers(m_window);
-	  glfwPollEvents();
-	}
+        {
+          FPS();
+          if (false == draw())
+            {
+              std::cerr << "Aborting" << std::endl;
+              return ;
+            }
+          // Swap buffers
+          glfwSwapBuffers(m_window);
+          glfwPollEvents();
+        }
       // Check if the ESC key was pressed or the window was closed
       while ((GLFW_PRESS != glfwGetKey(m_window, GLFW_KEY_ESCAPE)) &&
-	     (0 == glfwWindowShouldClose(m_window)));
+             (0 == glfwWindowShouldClose(m_window)));
     }
   catch (const GLObjectException& e)
     {

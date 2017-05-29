@@ -30,11 +30,7 @@ void GLShader::cleanShader(GLuint vertex, GLuint fragment, GLuint geometry)
 // **************************************************************
 void GLShader::release()
 {
-  if (isActivable())
-    {
-      glCheck(glDeleteProgram(m_handle));
-      m_handle = 0U;
-    }
+  glCheck(glDeleteProgram(m_handle));
 }
 
 // **************************************************************
@@ -119,7 +115,7 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
     }
   else
     {
-      std::cerr << "[FAILED] " << std::endl
+      std::cerr << "[FAILED] "
                 << "Cannot open this file" << std::endl;
       return 0U;
     }
@@ -155,6 +151,10 @@ GLuint GLShader::load(const char* vertex_shader_filename,
   GLuint fragment;
   GLuint geometry = 0U;
 
+  //LOGI("GLShader named '%s' will load shaders '%s' '%s' '%s'",
+  //     m_name.c_str(), vertex_shader_filename,
+  //     fragment_shader_filename, geometry_shader_filename);
+
   release();
   std::cout << "Linking shaders '" << vertex_shader_filename
             << "' with '" << fragment_shader_filename;
@@ -174,7 +174,7 @@ GLuint GLShader::load(const char* vertex_shader_filename,
   glCheck(glAttachShader(m_handle, fragment));
 
   // FIXME: je ne suis pas trop sur de ce code
-  glCheck(glBindFragDataLocation(m_handle, 0U, "outColor"));
+  //glCheck(glBindFragDataLocation(m_handle, 0U, "outColor"));
 
   // Geometry is optional
   if (nullptr != geometry_shader_filename)

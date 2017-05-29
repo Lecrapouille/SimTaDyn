@@ -23,6 +23,12 @@ public:
     m_target = target;
   }
 
+  //! \brief Destructor: release data from the GPU and CPU memory.
+  virtual ~GLTexture()
+  {
+    destroy();
+  }
+
   void interpolation(const float min_filter, const float  mag_filter)
   {
     m_min_filter = min_filter;
@@ -45,41 +51,41 @@ public:
 
 protected:
 
-  virtual void create() override
+  virtual bool create() override
   {
+    LOGI("TEX::creeate");
     glCheck(glGenTextures(1U, &m_handle));
+    return false;
   }
 
   virtual void release() override
   {
-    if (isActivable())
-      {
-        glCheck(glDeleteTextures(1U, &m_handle));
-      }
+    LOGI("TEX::release");
+    glCheck(glDeleteTextures(1U, &m_handle));
   }
 
   virtual void activate() override
   {
+    LOGI("TEX::activate");
     glCheck(glBindTexture(m_target, m_handle));
-    if (needSetup())
-      {
-        setup();
-      }
   }
 
   virtual void deactivate() override
   {
+    LOGI("TEX::deactivate");
     glCheck(glBindTexture(m_target, 0U));
   }
 
-  virtual void setup() override
+  virtual bool setup() override
   {
+LOGI("TEX::setup");
+    activate();
     glCheck(glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, m_min_filter));
     glCheck(glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, m_mag_filter));
     glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_S, m_wrapping));
     glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_T, m_wrapping));
     glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-    m_need_setup = false;
+    return false;
   }
 
   float m_min_filter = GL_NEAREST;
@@ -104,22 +110,23 @@ public:
   {
   }
 
-  inline void load(std::string const& filename, const bool rename = true)
+  inline bool load(std::string const& filename, const bool rename = false)
   {
-    load(filename.c_str(), rename);
+    return load(filename.c_str(), rename);
   }
 
   // FIXME: m_buffer should be a container for automatic update
-  void load(const char *const filename, const bool rename = true)
+  bool load(const char *const filename, const bool rename = true)
   {
     int width, height;
+    bool res;
 
     LOGI("Loading texture '%s'", filename);
     if (nullptr != m_buffer)
       {
         SOIL_free_image_data(m_buffer);
       }
-    m_buffer = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
+    m_buffer = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA);
 
     // Success
     if (nullptr != m_buffer)
@@ -131,12 +138,15 @@ public:
             m_name = filename;
           }
         LOGI("Successfuly load picture file '%s'", filename);
+        res = true;
       }
     else
       {
         LOGES("Failed loading picture file '%s'", filename);
+        res = false;
       }
     m_need_update = (nullptr != m_buffer);
+    return res;
   }
 
   inline uint32_t width() const
@@ -151,30 +161,33 @@ public:
 
 protected:
 
-  virtual void setup() override
+  virtual bool setup() override
   {
-    GLTexture::setup();
-    glCheck(glBindTexture(m_target, m_handle));
+    bool b = GLTexture::setup();
+    LOGI("TEXTURE setup %u", nullptr != m_buffer);
     glCheck(glTexImage2D(m_target, 0, m_gpu_format, m_width, m_height,
-                         0, m_cpu_format, m_type, nullptr));
-    m_need_setup = false;
+                         0, m_cpu_format, m_type, m_buffer));
+    return b;
   }
 
-  virtual void update() override
+  virtual bool update() override
   {
-    if (isActivable())
+    LOGI("TEXTURE update");
+    //return false; // FIXME
+    //if (isValid())
       {
         glCheck(glBindTexture(m_target, m_handle));
         glCheck(glTexSubImage2D(m_target, 0, 0, 0, m_width, m_height,
-                                m_cpu_format, m_type, nullptr));
-        m_need_update = false;
+                                m_cpu_format, m_type, m_buffer));
+        return false;
       }
+    return true;
   };
 
   uint32_t m_width = 0;
   uint32_t m_height = 0;
-  GLint m_cpu_format = GL_RGB;
-  GLenum m_gpu_format = GL_RGB;
+  GLint m_cpu_format = GL_RGBA;
+  GLenum m_gpu_format = GL_RGBA;
   GLenum m_type = GL_UNSIGNED_BYTE;
   unsigned char* m_buffer = nullptr;
 };

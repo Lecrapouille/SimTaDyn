@@ -10,6 +10,8 @@ namespace SimTaDyn
   //! \brief GLArea only support Core profile.
   void glStartContext()
   {
+    LOGI("Starting OpenGL context");
+
     try
       {
         glewExperimental = true;
@@ -21,6 +23,7 @@ namespace SimTaDyn
             throw Gdk::GLError(Gdk::GLError::NOT_AVAILABLE, Glib::ustring(m));
           }
         _context_started = true;
+	LOGI("OpenGL context created with success");
       }
     catch (const Gdk::GLError& gle)
       {
@@ -31,6 +34,7 @@ namespace SimTaDyn
 
   bool glIsFunctional()
   {
+    LOGI("glIsFunctional ? %u", _context_started);
     return _context_started;
   }
 
@@ -65,11 +69,7 @@ namespace SimTaDyn
             break;
           }
 
-        std::cerr << "[ERROR][OPENGL][" << error << "] "
-                  << fileString.substr(fileString.find_last_of("\\/") + 1)
-                  << ":" << line
-                  << " failed executing " << expression
-                  << std::endl;
+	LOGES("Failed executing '%s'. Reason is %s", expression, error);
       }
   }
 } // namespace

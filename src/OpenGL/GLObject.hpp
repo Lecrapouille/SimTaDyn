@@ -2,9 +2,9 @@
 #  define GLOBJECT_HPP_
 
 // **************************************************************
-//! \file This class get its inspiration from the code of the Glumpy
-//! project (Python + Numpy + modern OpenGL: a fast, scalable and
-//! beautiful scientific visualization). https://github.com/glumpy/glumpy
+//! \file This class get its inspiration from the Glumpy project
+//! code (Python + Numpy + modern OpenGL: a fast, scalable and
+//! beautiful scientific visualization): https://github.com/glumpy/glumpy
 //!
 //! Original Copyright from Glumpy project's Python code:
 //! Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
@@ -39,68 +39,61 @@ public:
 //! \brief \class GLObject is an interface for managing a generic
 //! OpenGL object.
 // **************************************************************
-class GLObject: private ClassCounter<GLObject>
+class GLObject
 {
 public:
 
-  //! \brief Empty constructor without name
+  //! \brief Empty constructor with no name.
+  //! Note: name is public and is used for debug purpose.
   GLObject()
   {
+    //LOGI("New GLObject with no name");
   }
 
-  //! \brief Constrcutor with the name of the object
+  //! \brief Constructor with the name of the object.
+  //! Note: name is public and is used for debug purpose.
   GLObject(std::string const& name)
     : m_name(name)
   {
+    //LOGI("New GLObject with name '%s'", name.c_str());
   }
 
-  //! \brief Constrcutor with the name of the object
+  //! \brief Constuctor with the name of the object.
+  //! Note: name is public and is used for debug purpose.
   GLObject(const char *name)
     : m_name(name)
   {
     assert(nullptr != name);
-  }
-
-  //! \brief Return the GPU reference of the object.
-  inline GLenum id() const
-  {
-    return m_handle;
+    //LOGI("New GLObject with name '%s'", name);
   }
 
   //! \brief Return the GPU reference of the object.
   operator int()
   {
-    return id();
-  }
-
-  //! \brief Return the GPU type of the object (i.e.
-  //! GL_ARRAY_BUFFER, ...)
-  inline GLenum target() const
-  {
-    return m_target;
+    return m_handle;
   }
 
   //! \brief Activate the object on the GPU. Perform
   //! some pending operations (cretion setup, update)
   //! if needed.
-  virtual void begin()
+  virtual void start()
   {
-    if (!SimTaDyn::glIsFunctional())
-       return ;
+    //LOGI("Starting GLObject named '%s'", m_name.c_str());
+
+    //if (!SimTaDyn::glIsFunctional())
+    //   return ;
 
     if (needCreate())
       {
-        create();
-        m_need_create = false;
+        m_need_create = create();
       }
 
     if (needSetup())
       {
-        setup();
-        m_need_setup = false;
+        m_need_setup = setup();
       }
 
-    if (isActivable())
+    if (isValid())
       {
         activate();
       }
@@ -112,21 +105,39 @@ public:
 
     if (needUpdate())
       {
-        update();
-        m_need_update = false;
+        m_need_update = update();
       }
   }
 
   //! \brief Deactivate the object on the GPU.
-  virtual void end()
+  virtual void stop()
   {
+    //LOGI("Stoping GLObject named '%s'", m_name.c_str());
+
+    //if (!SimTaDyn::glIsFunctional())
+    //   return ;
+
     deactivate();
   }
 
-  //! \brief Delete the object from GPU memory.
+  //! \brief
+  virtual inline bool isValid() const
+  {
+    //LOGI("GLObject named '%s' is valid ? %u", m_name.c_str(), m_handle > 0U);
+    return m_handle > 0U;
+  }
+
+protected:
+
+  //! \brief Delete the object from GPU and CPU memory.
   virtual void destroy()
   {
-    if (!needDelete())
+    //LOGI("Destroying GLObject named '%s'", m_name.c_str());
+
+    if (!canBeReleased())
+      return ;
+
+    if (!isValid())
       return ;
 
     release();
@@ -136,20 +147,8 @@ public:
     m_need_update = true;
   }
 
-  //! \brief Track the
-  static Key howMany()
-  {
-    return ClassCounter<GLObject>::howMany();
-  }
-
-public:
-
-  std::string m_name;
-
-protected:
-
   //! \brief Pure virtual. Allocate ressources on the GPU.
-  virtual void create() = 0;
+  virtual bool create() = 0;
   //! \brief Pure virtual. Delete the object from GPU memory.
   virtual void release() = 0;
   //! \brief Pure virtual. Activate the object on the GPU.
@@ -157,38 +156,36 @@ protected:
   //! \brief Pure virtual. Deactivate the object on the GPU.
   virtual void deactivate() = 0;
   //! \brief Pure virtual. Configure the object on the GPU.
-  virtual void setup() = 0;
+  virtual bool setup() = 0;
   //! \brief Pure virtual. Update the object on the GPU.
-  virtual void update() = 0;
+  virtual bool update() = 0;
 
   //! \brief
   virtual inline bool needSetup() const
   {
+    //LOGI("GLObject named '%s' need setup ? %u", m_name.c_str(), m_need_setup);
     return m_need_setup;
   }
 
   //! \brief
   virtual inline bool needCreate() const
   {
+    //LOGI("GLObject named '%s' need be created ? %u", m_name.c_str(), m_need_create);
     return m_need_create;
   }
 
   //! \brief
-  virtual inline bool needUpdate() //FIXME const
+  virtual inline bool needUpdate() const
   {
+    //LOGI("GLObject named '%s' need be updated ? %u", m_name.c_str(), m_need_update);
     return m_need_update;
   }
 
   //! \brief
-  virtual inline bool needDelete() const
+  virtual inline bool canBeReleased() const
   {
+    //LOGI("GLObject named '%s' can be released ? %u", m_name.c_str(), false == m_need_create);
     return false == m_need_create;
-  }
-
-  //! \brief
-  virtual bool isActivable()
-  {
-    return m_handle > 0U;
   }
 
   //! \brief OpenGL object identifer GPU side.
@@ -202,6 +199,11 @@ protected:
   //! \brief
   bool m_need_update = true;
   bool m_throw_enable = true;
+
+public:
+
+  //! Object name for debug purpose.
+  std::string m_name;
 };
 
 #endif /* GLOBJECT_HPP_ */

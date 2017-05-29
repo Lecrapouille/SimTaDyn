@@ -25,49 +25,46 @@ public:
   {
   }
 
-  //! \brief Destructor. The program (if loaded) is removed from the GPU.
-  ~GLVertexArray()
+  //! \brief Destructor: release data from the GPU and CPU memory.
+  virtual ~GLVertexArray()
   {
     destroy();
   }
 
 protected:
 
-  virtual void create() override
+  virtual bool create() override
   {
+    //LOGI("GLVertexArray named '%s' reserving GPU memory", m_name.c_str());
     glCheck(glGenVertexArrays(1, &m_handle));
+    return false;
   }
 
   virtual void release() override
   {
-    if (isActivable())
-      {
-        glCheck(glDeleteVertexArrays(1, &m_handle));
-      }
+    glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
   virtual void activate() override
   {
-    if (isActivable())
-      {
-        glCheck(glBindVertexArray(m_handle));
-      }
+    //LOGI("GLVertexArray named '%s' activated: %d", m_name.c_str(), (GLint) m_handle);
+    glCheck(glBindVertexArray(m_handle));
   }
 
   virtual void deactivate() override
   {
-    if (isActivable())
-      {
-        glCheck(glBindVertexArray(0U));
-      }
+    //LOGI("GLVertexArray named '%s' deactivated", m_name.c_str());
+    glCheck(glBindVertexArray(0U));
   }
 
-  virtual void setup() override
+  virtual bool setup() override
   {
+    return false;
   }
 
-  virtual void update() override
+  virtual bool update() override
   {
+    return false;
   }
 };
 

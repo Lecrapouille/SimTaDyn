@@ -3,12 +3,26 @@
 
 #  include "GLShader.hpp"
 
-class GLAttrib: public GLObject
+// **************************************************************
+//! \brief
+// **************************************************************
+class GLObjectExceptionNotLocated: public GLObjectException
 {
 public:
 
-  //! \brief
-  enum AttribType { Attribute, Uniform, Unknown };
+  GLObjectExceptionNotLocated(std::string const& GLObject_name, std::string const& GLShader_name)
+  {
+    m_msg = "The OpenGL attribute '" + GLObject_name + "' has not been correctly located in the shader program '" 
+      + GLShader_name + "'";
+  }
+};
+
+// **************************************************************
+//! \brief
+// **************************************************************
+class GLAttrib: public GLObject
+{
+public:
 
   //! \brief Empty constructor without name
   GLAttrib()
@@ -28,106 +42,18 @@ public:
   {
   }
 
-  //! \brief Setup Uniform
-  void setup(GLShader& program, std::string const& identifier)
-  {
-    setup(program, identifier.c_str());
-  }
-
-  //! \brief Setup Uniform
-  void setup(GLShader& program, const char *identifier)
-  {
-    m_program = &program;
-    m_identifier = identifier;
-
-    // FIXME: look into the shader code to determine it
-    m_gender = Uniform;
-
-    //
-    m_need_setup = true;
-    private_setup();
-  }
-
-  //! \brief Setup attributes
-  void setup(GLShader& program, std::string const& identifier, const GLint size, const GLenum type, const GLboolean normalized = GL_FALSE)
-  {
-    setup(program, identifier.c_str(), size, type, normalized);
-  }
-
-  //! \brief Setup attributes
-  void setup(GLShader& program, const char *identifier, const GLint size, const GLenum type, const GLboolean normalized = GL_FALSE)
-  {
-    m_program = &program;
-    m_identifier = identifier;
-    m_normalized = normalized;
-
-    // FIXME: look into the shader code (ie. vec3 ==> size = 3 type = float) and only for attributes
-    m_size = size;
-    m_type = type;
-    // FIXME: look into the shader code to determine it
-    m_gender = Attribute;
-
-    //
-    m_need_setup = true;
-    private_setup(); // FIXME: yes or not ?
-  }
-
-  ~GLAttrib()
+  //! \brief Destructor: release data from the GPU and CPU memory.
+  virtual ~GLAttrib()
   {
     destroy();
   }
 
-  inline GLint size() const
+  //! \brief Setup attributes
+  virtual void setup(GLShader& program, const GLint size, const GLenum type, const GLboolean normalized = GL_FALSE)
   {
-    return m_size;
-  }
-
-protected:
-
-  virtual bool isActivable() override
-  {
-    return ((GLint) m_handle) != -1;
-  }
-  virtual void create() override
-  {
-  }
-  virtual void release() override
-  {
-  }
-  virtual void activate() override
-  {
-    if (isActivable() && (Attribute == m_gender))
-      {
-        glCheck(glEnableVertexAttribArray((GLint) m_handle));
-        glCheck(glVertexAttribPointer((GLint) m_handle, m_size, m_type, m_normalized, 0, nullptr));
-      }
-  }
-  virtual void deactivate() override
-  {
-    if (isActivable())
-      {
-        glCheck(glEnableVertexAttribArray(0));
-      }
-  }
-  virtual void setup() override
-  {
-    m_need_setup = !private_setup();
-  }
-
-  virtual void update() override
-  {
-  }
-
-private:
-
-  bool private_setup()
-  {
-    if (nullptr == m_program)
-      return false;
-
-    m_handle = (GLenum) m_program->locate(m_identifier.c_str());
-    if (!isActivable())
-      return false;
+    LOGI("GLAttrib named '%s': seting-up attributes", m_name.c_str());
+    m_program = &program;
+    m_normalized = normalized;
 
     // FIXME: look into the shader code (ie. vec3 ==> size = 3 type =
     // float) and only for attributes and replace param given in the
@@ -135,17 +61,86 @@ private:
     //if ('a' != m_identifier[0]) return true;
     //if (!m_program.getTypeOf(m_identifier.c_str(), &m_size, &m_type)) {
     //  m_handle = (GLenum) -1; return false; }
-    return true;
+    m_size = size;
+    m_type = type;
+
+    m_need_setup = true;
+    //m_need_setup = setup();
+  }
+
+  virtual bool isValid() const override
+  {
+    LOGI("GLAttrib named '%s' is valid ? %u", m_name.c_str(), ((GLint) m_handle) != -1);
+    return ((GLint) m_handle) != -1;
+  }
+
+protected:
+
+  virtual bool create() override
+  {
+    return false;
+  }
+
+  virtual void release() override
+  {
+  }
+
+  virtual void activate() override
+  {
+    LOGI("GLAttrib named '%s' activated: %d", m_name.c_str(), (GLint) m_handle);
+    glCheck(glEnableVertexAttribArray((GLint) m_handle));
+    glCheck(glVertexAttribPointer((GLint) m_handle, m_size, m_type, m_normalized, 0, nullptr));
+  }
+
+  virtual void deactivate() override
+  {
+    LOGI("GLAttrib named '%s' deactivated", m_name.c_str());
+    glCheck(glEnableVertexAttribArray(0));
+  }
+
+  // Note: VBO needs to be activated before calling this function, then deactivated
+  virtual bool setup() override
+  {
+    if (nullptr == m_program)
+      {
+        LOGES("GLAttrib named '%s' failed setup because no shader program was given", m_name.c_str());
+        return true;
+      }
+
+    LOGI("GLAttrib named '%s' setting up", m_name.c_str());
+    m_handle = (GLenum) m_program->locateAttrib(m_name.c_str());
+    if (isValid())
+      {
+        activate();
+        glCheck(glVertexAttribPointer((GLint) m_handle, m_size, m_type, m_normalized, 0, nullptr));
+        //deactivate();
+
+        return false;
+      }
+    else if (m_throw_enable)
+      {
+        GLObjectExceptionNotLocated e(m_name, m_program->m_name);
+        throw e;
+      }
+    else
+      {
+        LOGES("The OpenGL attribute '%s' has not been correctly located in the shader program '%s'",
+              m_name.c_str(), m_program->m_name.c_str());
+        return true;
+      }
+  }
+
+  virtual bool update() override
+  {
+    return false;
   }
 
 protected:
 
   GLShader *m_program = nullptr;
-  std::string m_identifier;
   GLint m_size;
   GLenum m_type;
   GLboolean m_normalized;
-  enum AttribType m_gender = Unknown;
 };
 
 #endif /* GLATTRIB_HPP_ */
