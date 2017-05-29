@@ -21,6 +21,14 @@ BUILD = build
 endif
 
 ###################################################
+# Operating system detection
+ifeq ($(OS),Windows_NT)
+ARCHI := Windows
+else
+ARCHI := $(shell uname -s)
+endif
+
+###################################################
 # Set include paths
 INCLUDES = -I. -I../tools \
            -Icommon -I../src/Common -I../src/Common/Containers \
@@ -34,16 +42,12 @@ VPATH=.:$(BUILD):../tools:common:../src/Common:../src/Common/Containers:opengl:.
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = \
-	Backward.o Logger.o SimTaDynLogger.o \
-	File.o FileTests.o \
-	Vector3D.o VectorTests.o \
-	Color.o ColorTests.o \
-	SetTests.o CollectionTests.o \
-	Exception.o OpenGL.o GLObject.o GLBufferTests.o \
-	BasicGraph.o BasicArcTests.o BasicNodeTests.o BasicGraphTests.o \
-        GraphAlgorithm.o GraphAlgoTests.o \
-	main.o
+OBJECTS = Backward.o Logger.o SimTaDynLogger.o File.o FileTests.o	\
+	Vector3D.o VectorTests.o Color.o ColorTests.o SetTests.o	\
+	CollectionTests.o Exception.o OpenGL.o GLObject.o		\
+	BasicGraph.o BasicArcTests.o BasicNodeTests.o			\
+	BasicGraphTests.o GraphAlgorithm.o GraphAlgoTests.o		\
+	GLBufferTests.o main.o
 #	BoundingBox.o BoundingBoxTests.o
 
 #
@@ -52,16 +56,25 @@ TARGET = UnitTest
 ###################################################
 # Compil options
 CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O0 --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES =
 
 ###################################################
 # Set Libraries
+ifeq ($(ARCHI),Darwin)
+CXXFLAGS = -W -Wall -Wextra -O0 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
+LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib -I/opt/X11/lib -framework OpenGL -lglew
+else ifeq ($(ARCHI),Linux)
+CXXFLAGS = -W -Wall -Wextra -O0 --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW -ldl -ldw
+       -lcairo -lXrandr -lXi -lXxf86vm -pthread      \
+       -lX11 -lGLEW -ldl -ldw
+else
+$(error Unknown architecture)
+endif
 
 ###################################################
 # Files dependencies
@@ -72,7 +85,7 @@ POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
 # Main entry
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
+$(TARGET): $(OBJECTS) Makefile
 	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 

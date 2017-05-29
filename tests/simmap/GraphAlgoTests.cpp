@@ -80,7 +80,7 @@ void GraphAlgoTests::test()
   Key expected_nodes[7U] = { 'A', 'B', 'D', 'F', 'E', 'C', 'G' };
   gA.depthFirstSearch(g, 'A');
   CPPUNIT_ASSERT_EQUAL(7U, g.howManyNodes());
-  CPPUNIT_ASSERT_EQUAL(g.howManyNodes(), gA.m_result.capacity());
+  CPPUNIT_ASSERT_EQUAL(true, g.howManyNodes() == static_cast<uint32_t>(gA.m_result.capacity()));
   for (uint32_t i = 0; i < g.howManyArcs(); ++i)
     {
       CPPUNIT_ASSERT_EQUAL(expected_nodes[i], gA.m_result[i]);

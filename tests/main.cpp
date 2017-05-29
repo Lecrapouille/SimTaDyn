@@ -29,9 +29,13 @@ int main(void)
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionInsert", &CollectionTests::testInsert));
 
   CppUnit::TestSuite* suite7 = new CppUnit::TestSuite("GLBufferTests");
+  suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("createOpenGLContext", &GLBufferTests::createOpenGLContext));
   suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferDummy", &GLBufferTests::testDummy));
   suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferPendingData", &GLBufferTests::testPendingData));
   suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferInsert", &GLBufferTests::testInsert));
+  suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSuppress", &GLBufferTests::testSuppress));
+  suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSwap", &GLBufferTests::testSwap));
+  suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("deleteOpenGLContext", &GLBufferTests::deleteOpenGLContext));
 
   CppUnit::TestSuite* suite3 = new CppUnit::TestSuite("VectorTests");
   suite3->addTest(new CppUnit::TestCaller<VectorTests>("testCreator", &VectorTests::testCreator));
@@ -49,6 +53,7 @@ int main(void)
   suite4->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testCopy", &BoundingBoxTests::testCopy));
   suite4->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testOperations", &BoundingBoxTests::testOperations));
   */
+
   CppUnit::TestSuite* suite5 = new CppUnit::TestSuite("ColorTests");
   suite5->addTest(new CppUnit::TestCaller<ColorTests>("testCreator", &ColorTests::testCreator));
   suite5->addTest(new CppUnit::TestCaller<ColorTests>("testSwap", &ColorTests::testSwap));
@@ -70,11 +75,11 @@ int main(void)
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(suite1);
   runner.addTest(suite2);
+  runner.addTest(suite3);
+  runner.addTest(suite5);
   runner.addTest(suite6);
   runner.addTest(suite7);
-  runner.addTest(suite3);
   //runner.addTest(suite4);
-  runner.addTest(suite5);
   runner.addTest(suite8);
   runner.addTest(suite9);
   runner.addTest(suite10);
