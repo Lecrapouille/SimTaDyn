@@ -134,6 +134,8 @@ Python + Numpy + modern OpenGL: fast, scalable and beautiful scientific visualiz
 
 * http://loulou.developpez.com/tutoriels/moteur3d/
 
+* http://www.tomdalling.com/blog/modern-opengl/01-getting-started-in-xcode-and-visual-cpp/
+
 * http://opengl.developpez.com/tutoriels/open_gl/
 
 * https://learnopengl.com/
