@@ -63,6 +63,9 @@ void CollectionTests::testDummy()
   CPPUNIT_ASSERT_EQUAL(0U, collection1.m_end);
 
   // Useless operations
+  CPPUNIT_ASSERT_THROW(collection1.modify(0, 42), std::out_of_range);
+
+  // Useless operations
   collection1.garbage();
   CPPUNIT_ASSERT_EQUAL(0U, collection1.used());
   CPPUNIT_ASSERT_EQUAL(0U, collection1.blocks());
@@ -89,6 +92,43 @@ void CollectionTests::testDummy()
   CPPUNIT_ASSERT_THROW(collection1.get(0U), std::out_of_range);
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, collection1.m_begin);
   CPPUNIT_ASSERT_EQUAL(0U, collection1.m_end);
+
+  // Try occupy an empty block. Check this is not possible
+  CPPUNIT_ASSERT_THROW(collection1.occupy(0), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL(0U, collection1.used());
+}
+
+//--------------------------------------------------------------------------
+void CollectionTests::testOccupy()
+{
+  // Try occupy an empty block. Check this is not possible
+  /* collection1.insert(0, 41); collection1.clear();
+  CPPUNIT_ASSERT_EQUAL(1U, collection1.blocks());
+  CPPUNIT_ASSERT_EQUAL(0U, collection1.used());
+  CPPUNIT_ASSERT_EQUAL(false, collection1.occupied(0U));
+  collection1.occupy(1);
+  CPPUNIT_ASSERT_EQUAL(1U, collection1.used());
+  CPPUNIT_ASSERT_EQUAL(false, collection1.occupied(0U));
+  CPPUNIT_ASSERT_EQUAL(true, collection1.occupied(1U));
+  collection1.occupy(0);
+  CPPUNIT_ASSERT_EQUAL(2U, collection1.used());
+  CPPUNIT_ASSERT_EQUAL(true, collection1.occupied(0U));
+  CPPUNIT_ASSERT_EQUAL(true, collection1.occupied(1U));
+
+  // Clear
+  collection1.clear();
+  collection1.garbage();
+  CPPUNIT_ASSERT_EQUAL(0U, collection1.used());
+  CPPUNIT_ASSERT_EQUAL(0U, collection1.blocks());
+  CPPUNIT_ASSERT_EQUAL(0U, collection1.remaining());
+  CPPUNIT_ASSERT_EQUAL(true, collection1.empty());
+  CPPUNIT_ASSERT_EQUAL(true, collection1.full());
+  CPPUNIT_ASSERT_EQUAL(true, collection1.outofbound(0U));
+  CPPUNIT_ASSERT_EQUAL(false, collection2.occupied(0U));
+  CPPUNIT_ASSERT_THROW(collection1.occupied(8U), std::out_of_range);
+  CPPUNIT_ASSERT_THROW(collection1.get(0U), std::out_of_range);
+  CPPUNIT_ASSERT_EQUAL((uint32_t) -1, collection1.m_begin);
+  CPPUNIT_ASSERT_EQUAL(0U, collection1.m_end);*/
 }
 
 //--------------------------------------------------------------------------

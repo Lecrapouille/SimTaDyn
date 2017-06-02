@@ -109,8 +109,6 @@ int IGLWindow::create()
 
 void IGLWindow::update()
 {
-  bool res;
-
   try
     {
       do
@@ -132,7 +130,6 @@ void IGLWindow::update()
   catch (const GLObjectException& e)
     {
       LOGIS("%s", e.message().c_str());
-      res = false;
     }
 }
 

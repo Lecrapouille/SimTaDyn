@@ -18,6 +18,7 @@ class SetTests : public CppUnit::TestFixture
   CPPUNIT_TEST(testDummy);
   CPPUNIT_TEST(testInsert);
   CPPUNIT_TEST(testRemove);
+  CPPUNIT_TEST(testInsertArr);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -27,6 +28,7 @@ public:
   void testDummy();
   void testInsert();
   void testRemove();
+  void testInsertArr();
 };
 
 

@@ -21,6 +21,12 @@ BUILD = build
 endif
 
 ###################################################
+# Path where to store the generated coverage docs
+DOC = ../doc/coverage
+# Path where to store lcov rapport
+RAPPORT = build/rapport.info
+
+###################################################
 # Operating system detection
 ifeq ($(OS),Windows_NT)
 ARCHI := Windows
@@ -44,10 +50,11 @@ VPATH=.:$(BUILD):../tools:common:../src/Common:../src/Common/Containers:opengl:.
 # Set objects architecture specific
 OBJECTS = Backward.o Logger.o SimTaDynLogger.o File.o FileTests.o	\
 	Vector3D.o VectorTests.o Color.o ColorTests.o SetTests.o	\
-	CollectionTests.o Exception.o OpenGL.o GLObject.o		\
+	CollectionTests.o Exception.o OpenGL.o GLObject.o GLShader.o	\
+	GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o		\
 	BasicGraph.o BasicArcTests.o BasicNodeTests.o			\
 	BasicGraphTests.o GraphAlgorithm.o GraphAlgoTests.o		\
-	GLBufferTests.o main.o
+	GLBufferTests.o OpenGLTests.o main.o
 #	BoundingBox.o BoundingBoxTests.o
 
 #
@@ -63,7 +70,7 @@ DEFINES =
 ifeq ($(ARCHI),Darwin)
 CXXFLAGS = -W -Wall -Wextra -O0 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
-LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib -I/opt/X11/lib -framework OpenGL -lglew
+LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib -I/opt/X11/lib -framework OpenGL -lglew -lglfw -lSOIL
 else ifeq ($(ARCHI),Linux)
 CXXFLAGS = -W -Wall -Wextra -O0 --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
@@ -71,7 +78,7 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread      \
-       -lX11 -lGLEW -ldl -ldw
+       -lX11 -lGLEW  -lglfw -lSOIL -ldl -ldw
 else
 $(error Unknown architecture)
 endif
@@ -99,16 +106,17 @@ $(TARGET): $(OBJECTS) Makefile
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~ gcov gui/*~ cells/*~ common/*~ $(BUILD) 2> /dev/null
+	@rm -fr *~ $(DOC) gui/*~ cells/*~ common/*~ $(BUILD) 2> /dev/null
 
 ###################################################
 # Code coverage
-coverage: $(TARGET) gcov
+coverage: $(TARGET)
+	@$(call print-link,"Running","$(TARGET)","$(RAPPORT)","")
 	./build/$(TARGET)
-	gcovr -r ../. --html -o gcov/coverage.html --html-details
-
-gcov:
-	@mkdir -p gcov
+	@$(call print-link,"Documentation","$(RAPPORT)","$(DOC)","")
+	@lcov --quiet --directory .. -c -o $(RAPPORT)
+	@lcov --quiet --remove $(RAPPORT) '/usr*' -o $(RAPPORT)
+	@genhtml --quiet -o $(DOC) -t "SimTaDyn Unit Tests" $(RAPPORT)
 
 ###################################################
 # Create a temporary folder to store *.o

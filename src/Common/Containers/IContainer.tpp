@@ -67,13 +67,13 @@ public:
   {
     ContainerBitField i;
     ContainerBitField total = 0U;
-    const ContainerBitField full = (ContainerBitField) -1;
+    const ContainerBitField full = (1U << B) - 1U;
 
     for (i = 0; i < E; ++i)
       {
         if (full == m_occupied[i])
           {
-            total += S;
+            total += B;
           }
         else
           {

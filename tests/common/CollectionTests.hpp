@@ -16,6 +16,7 @@ class CollectionTests : public CppUnit::TestFixture
   // CppUnit macros for collectionting up the test suite
   CPPUNIT_TEST_SUITE(CollectionTests);
   CPPUNIT_TEST(testDummy);
+  CPPUNIT_TEST(testOccupy);
   CPPUNIT_TEST(testAppend);
   CPPUNIT_TEST(testRemove);
   CPPUNIT_TEST(testInsert);
@@ -26,6 +27,7 @@ public:
   void tearDown();
 
   void testDummy();
+  void testOccupy();
   void testAppend();
   void testRemove();
   void testInsert();

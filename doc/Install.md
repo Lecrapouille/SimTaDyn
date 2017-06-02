@@ -18,7 +18,7 @@ SimTaDyn is based on C++11, Modern OpenGL (>= 3.0), The C++ version of GTK+, the
 
 Install dependencies:
 ```sh
-sudo apt-get install freeglut3 freeglut3-dev mesa-common-dev libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev libgtksourceviewmm-3.0-dev libglu1-mesa-dev libglew-dev libcppunit-dev gcovr libdw-dev
+sudo apt-get install freeglut3 freeglut3-dev mesa-common-dev libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev libgtksourceviewmm-3.0-dev libglu1-mesa-dev libglew-dev libcppunit-dev gcovr libdw-dev libglfw3-dev
 ```
 
 It's mandatory to install the gtkmm version 3.22 due to a major bug with the OpenGL widget breaking the OpenGL context when using inheritance. See this [bug](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md). for more informations. This version is not present on Ubuntu older than 17.04. On current Ubuntu version (16.04, 16.11) you’ll have to install it by compiling sources (need long time to compile but the process compiles well).   

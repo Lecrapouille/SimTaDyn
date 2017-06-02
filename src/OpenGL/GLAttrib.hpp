@@ -12,8 +12,23 @@ public:
 
   GLObjectExceptionNotLocated(std::string const& GLObject_name, std::string const& GLShader_name)
   {
-    m_msg = "The OpenGL attribute '" + GLObject_name + "' has not been correctly located in the shader program '" 
+    m_msg = "The OpenGL attribute '" + GLObject_name + "' has not been correctly located in the shader program '"
       + GLShader_name + "'";
+  }
+};
+
+// **************************************************************
+//! \brief
+// **************************************************************
+class GLObjectExceptionNoShader: public GLObjectException
+{
+public:
+
+  GLObjectExceptionNoShader(std::string const& GLObject_name)
+  {
+    m_msg = "The OpenGL attribute '" + GLObject_name + "' failed because no shader program was given. "
+      "Call setup((GLShader& program, const GLint size, const GLenum type, const GLboolean) before calling"
+      "start() method";
   }
 };
 
@@ -28,18 +43,21 @@ public:
   GLAttrib()
     : GLObject()
   {
+    m_handle = (GLenum) -1;
   }
 
   //! \brief Constructor with the object name
   GLAttrib(std::string const& name)
     : GLObject(name)
   {
+    m_handle = (GLenum) -1;
   }
 
   //! \brief Constructor with the object name
   GLAttrib(const char *name)
     : GLObject(name)
   {
+    m_handle = (GLenum) -1;
   }
 
   //! \brief Destructor: release data from the GPU and CPU memory.
@@ -103,8 +121,16 @@ protected:
   {
     if (nullptr == m_program)
       {
-        LOGES("GLAttrib named '%s' failed setup because no shader program was given", m_name.c_str());
-        return true;
+        if (m_throw_enable)
+          {
+            GLObjectExceptionNoShader e(m_name);
+            throw e;
+          }
+        else
+          {
+            LOGES("GLAttrib named '%s' failed setup because no shader program was given", m_name.c_str());
+            return true;
+          }
       }
 
     LOGI("GLAttrib named '%s' setting up", m_name.c_str());

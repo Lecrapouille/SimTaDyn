@@ -50,7 +50,7 @@ VPATH=.:$(BUILD):../tools:Utils:Common/SharedLibrary:Common/Containers:Common:Op
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_TOOL     = Backward.o Logger.o SimTaDynLogger.o 
+OBJECTS_TOOL     = Backward.o Logger.o SimTaDynLogger.o
 OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o  SharedLibrary_UNIX.o SharedLibrary.o
 OBJECTS_COMMON   = File.o Color.o Vector3D.o Camera2D.o
 OBJECTS_FORTH    = TextColor.o ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
@@ -69,7 +69,7 @@ TARGET = SimTaDyn
 
 ###################################################
 # Compil options
-CXX = clang++
+CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES = -DCHECK_OPENGL

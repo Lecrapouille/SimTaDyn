@@ -133,13 +133,13 @@ protected:
   virtual void destroy()
   {
     //LOGI("Destroying GLObject named '%s'", m_name.c_str());
-
     if (!canBeReleased())
       return ;
 
     if (!isValid())
       return ;
 
+    deactivate();
     release();
     m_handle = 0U;
     m_need_setup = true;

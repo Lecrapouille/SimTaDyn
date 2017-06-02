@@ -48,8 +48,8 @@ VPATH=.:$(BUILD):..:../../SimTaDyn:../../Common:../../Common/Containers:../../..
 # Set objects architecture specific
 OBJECTS_TOOL     = Logger.o SimTaDynLogger.o
 OBJECTS_UTILS    = Exception.o
-OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o GLTextures.o
-OBJECTS          = Backward.o $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_OPENGL) GLWindow.o \
+OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o
+OBJECTS          = Backward.o $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_OPENGL) \
                    Example01.o Example02.o main.o
 TARGET = Simple
 
@@ -64,13 +64,13 @@ DEFINES = -DCHECK_OPENGL
 # Set Libraries
 ifeq ($(ARCHI),Darwin)
 INCLUDES += -I/opt/local/include -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
-LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL -lbfd
+LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL
 else ifeq ($(ARCHI),Linux)
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
-       -lGLEW -ldl -ldw -lSOIL
+       -lGLEW -lglfw -ldl -ldw -lSOIL -lbfd
 else
 $(error Unknown architecture)
 endif

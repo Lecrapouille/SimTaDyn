@@ -4,12 +4,12 @@
 #include "ColorTests.hpp"
 #include "SetTests.hpp"
 #include "CollectionTests.hpp"
-#include "GLBufferTests.hpp"
 #include "BasicNodeTests.hpp"
 #include "BasicArcTests.hpp"
 #include "BasicGraphTests.hpp"
 #include "GraphAlgoTests.hpp"
-
+#include "GLBufferTests.hpp"
+#include "OpenGLTests.hpp"
 #include <cppunit/ui/text/TestRunner.h>
 
 int main(void)
@@ -21,9 +21,11 @@ int main(void)
   suite2->addTest(new CppUnit::TestCaller<SetTests>("SetDummy", &SetTests::testDummy));
   suite2->addTest(new CppUnit::TestCaller<SetTests>("SetInsert", &SetTests::testInsert));
   suite2->addTest(new CppUnit::TestCaller<SetTests>("SetRemove", &SetTests::testRemove));
+  suite2->addTest(new CppUnit::TestCaller<SetTests>("SetInsertArr", &SetTests::testInsertArr));
 
   CppUnit::TestSuite* suite6 = new CppUnit::TestSuite("CollectionTests");
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionDummy", &CollectionTests::testDummy));
+  suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionOccupy", &CollectionTests::testOccupy));
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionAppend", &CollectionTests::testAppend));
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionRemove", &CollectionTests::testRemove));
   suite6->addTest(new CppUnit::TestCaller<CollectionTests>("CollectionInsert", &CollectionTests::testInsert));
@@ -36,6 +38,9 @@ int main(void)
   suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSuppress", &GLBufferTests::testSuppress));
   suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSwap", &GLBufferTests::testSwap));
   suite7->addTest(new CppUnit::TestCaller<GLBufferTests>("deleteOpenGLContext", &GLBufferTests::deleteOpenGLContext));
+
+  CppUnit::TestSuite* suite12 = new CppUnit::TestSuite("OpenGLTests");
+  suite12->addTest(new CppUnit::TestCaller<OpenGLTests>("GLObject", &OpenGLTests::testOpenGL));
 
   CppUnit::TestSuite* suite3 = new CppUnit::TestSuite("VectorTests");
   suite3->addTest(new CppUnit::TestCaller<VectorTests>("testCreator", &VectorTests::testCreator));
@@ -79,6 +84,7 @@ int main(void)
   runner.addTest(suite5);
   runner.addTest(suite6);
   runner.addTest(suite7);
+  runner.addTest(suite12);
   //runner.addTest(suite4);
   runner.addTest(suite8);
   runner.addTest(suite9);
