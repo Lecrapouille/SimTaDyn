@@ -1,5 +1,5 @@
-#ifndef BOUNDINGBOXTESTS_HPP_
-#  define BOUNDINGBOXTESTS_HPP_
+#ifndef MATRIXTESTS_HPP_
+#  define MATRIXTESTS_HPP_
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestResult.h>
@@ -7,14 +7,14 @@
 
 #define protected public
 #define private public
-#include "BoundingBox.tpp"
+#include "Matrix.tpp"
 #undef protected
 #undef private
 
-class BoundingBoxTests : public CppUnit::TestFixture
+class MatrixTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(BoundingBoxTests);
+  CPPUNIT_TEST_SUITE(MatrixTests);
   CPPUNIT_TEST(testCreator);
   CPPUNIT_TEST(testSwap);
   CPPUNIT_TEST(testEquality);
@@ -34,4 +34,4 @@ public:
   void testOperations();
 };
 
-#endif /* BOUNDINGBOXTESTS_HPP_ */
+#endif /* MATRIXTESTS_HPP_ */

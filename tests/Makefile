@@ -1,3 +1,4 @@
+
 .PHONY: clean build coverage gcov
 
 ###################################################
@@ -36,26 +37,24 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../tools \
-           -Icommon -I../src/Common -I../src/Common/Containers \
-           -Iopengl -I../src/OpenGL \
-           -Isimmap -I../src/SimMap/Graph \
-           -I../src/SimTaDyn
+INCLUDES = -I. -I../tools -I../tools/glm -Icommon -I../src/Common		 \
+-I../src/Common/Maths -I../src/Common/Containers -Iopengl	 \
+-I../src/OpenGL -Isimmap -I../src/SimMap/Graph -I../src/SimTaDyn
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../tools:common:../src/Common:../src/Common/Containers:opengl:../src/OpenGL:simmap:../src/SimMap/Graph:../src/SimTaDyn
+VPATH=.:$(BUILD):../tools:common:../src/Common:../src/Common/Containers:../src/Common/Maths/:opengl:../src/OpenGL:simmap:../src/SimMap/Graph:../src/SimTaDyn
 
 ###################################################
 # Set objects architecture specific
 OBJECTS = Backward.o Logger.o SimTaDynLogger.o File.o FileTests.o	\
-	Vector3D.o VectorTests.o Color.o ColorTests.o SetTests.o	\
-	CollectionTests.o Exception.o OpenGL.o GLObject.o GLShader.o	\
-	GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o		\
+	Maths.o VectorTests.o MatrixTests.o TransformationTests.o	\
+	BoundingBoxTests.o FilteringTests.o Color.o ColorTests.o	\
+	SetTests.o CollectionTests.o Exception.o OpenGL.o GLObject.o	\
+	GLShader.o GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o	\
 	BasicGraph.o BasicArcTests.o BasicNodeTests.o			\
 	BasicGraphTests.o GraphAlgorithm.o GraphAlgoTests.o		\
 	GLBufferTests.o OpenGLTests.o main.o
-#	BoundingBox.o BoundingBoxTests.o
 
 #
 TARGET = UnitTest

@@ -7,7 +7,7 @@
 
 #define protected public
 #define private public
-#include "Vector3D.hpp"
+#include "Vector.tpp"
 #undef protected
 #undef private
 

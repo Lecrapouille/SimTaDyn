@@ -1,18 +1,22 @@
-#ifndef BOUNDINGBOX_HPP_
-#  define BOUNDINGBOX_HPP_
+#ifndef BOUNDINGBOX_TPP_
+#  define BOUNDINGBOX_TPP_
 
-#  include "Vector3D.hpp"
+#  include "Vector3D.tpp"
+#  include <limits>
 
-// Axis Aligned Bounding Box
+// *************************************************************************************************
+//! \brief Axis Aligned Bounding Box
+// *************************************************************************************************
+template <typename T, uint32_t n>
 class AABB
 {
 public:
   inline AABB()
-    : bbmin(Vector3D::DUMMY), bbmax(Vector3D::DUMMY)
+    : bbmin(NAN), bbmax(NAN)
   {
   }
 
-  inline AABB(const Position3D& pmin, const Position3D& pmax)
+  inline AABB(const Vector<T, n>& pmin, const Vector<T, n>& pmax)
     : bbmin(pmin), bbmax(pmax)
   {
     std::string msg = "";
@@ -22,9 +26,8 @@ public:
       }
   }
 
-  inline AABB(const float32_t xmin, const float32_t ymin, const float32_t zmin,
-              const float32_t xmax, const float32_t ymax, const float32_t zmax)
-    : bbmin(xmin, ymin, zmin), bbmax(xmax, ymax, zmax)
+  inline AABB(std::initializer_list<T> initMinList, std::initializer_list<T> initMaxList)
+    : bbmin(initMinList), bbmax(initMaxList)
   {
     std::string msg = "";
     if (false == isWellFormed(msg))
@@ -33,7 +36,7 @@ public:
       }
   }
 
-  inline void setBox(const Position3D& pmin, const Position3D& pmax)
+  inline void setBox(const Vector<T, n>& pmin, const Vector<T, n>& pmax)
   {
     bbmin = pmin;
     bbmax = pmax;
@@ -45,45 +48,40 @@ public:
       }
   }
 
-  inline void setBox(const float32_t xmin, const float32_t ymin, const float32_t zmin,
-                     const float32_t xmax, const float32_t ymax, const float32_t zmax)
+  /*inline void setBox(const T xmin, const T ymin, const T zmin,
+                     const T xmax, const T ymax, const T zmax)
   {
-    bbmin = Vector3D(xmin, ymin, zmin);
-    bbmax = Vector3D(xmax, ymax, zmax);
+    bbmin = Vector<T, n>(xmin, ymin, zmin);
+    bbmax = Vector<T, n>(xmax, ymax, zmax);
 
     std::string msg = "";
     if (false == isWellFormed(msg))
       {
         throw std::out_of_range(std::string(__PRETTY_FUNCTION__) + ": " + msg);
       }
-  }
+      }*/
 
   inline bool isWellFormed(std::string& msg)
   {
-    bool res = true;
+    char c = 'X';
+    const uint32_t d = bbmin.dimension();
 
-    if (bbmin.x > bbmax.x)
+    for (uint32_t i = 0U; i < d; ++i)
       {
-        msg = msg + "The minimum X-axis corner of the box must be less than or equal to maximum corner\n";
-        res = false;
+        if (bbmin[i] > bbmax[i])
+          {
+            ++c;
+            msg = msg + "The minimum " + c + "-axis corner of the box must be less than or equal to maximum corner";
+            return false;
+          }
       }
-    if (bbmin.y > bbmax.y)
-      {
-        msg = msg + "The minimum Y-axis corner of the box must be less than or equal to maximum corner\n";
-        res = false;
-      }
-    if (bbmin.z > bbmax.z)
-      {
-        msg = msg + "The minimum Y-axis corner of the box must be less than or equal to maximum corner\n";
-        res = false;
-      }
-    return res;
+    return true;
   }
 
   inline void swap(AABB& other)
   {
-    bbmin.swap(other.bbmin);
-    bbmax.swap(other.bbmax);
+    swap(bbmin, other.bbmin);
+    swap(bbmax, other.bbmax);
   }
 
   inline bool operator==(const AABB& other) const
@@ -101,17 +99,17 @@ public:
     return merge(other);
   }
 
-  inline AABB operator+(const float32_t scalar) const
+  inline AABB operator+(const T scalar) const
   {
     return AABB(bbmin + scalar, bbmax + scalar);
   }
 
-  inline AABB operator+(const Vector3D vector) const
+  inline AABB operator+(const Vector<T, n> vector) const
   {
     return AABB(bbmin + vector, bbmax + vector);
   }
 
-  inline const AABB operator*(const float32_t scalar) const
+  inline const AABB operator*(const T scalar) const
   {
     return AABB(bbmin * scalar, bbmax * scalar);
   }
@@ -126,17 +124,17 @@ public:
     return intersection(other);
   }
 
-  inline AABB operator-(const float32_t scalar) const
+  inline AABB operator-(const T scalar) const
   {
     return AABB(bbmin - scalar, bbmax - scalar);
   }
 
-  inline AABB operator-(const Vector3D vector) const
+  inline AABB operator-(const Vector<T, n> vector) const
   {
     return AABB(bbmin - vector, bbmax - vector);
   }
 
-  inline const AABB operator/(const float32_t scalar) const
+  inline const AABB operator/(const T scalar) const
   {
     return AABB(bbmin / scalar, bbmax / scalar);
   }
@@ -156,21 +154,21 @@ public:
     return *this;
   }
 
-  inline Vector3D centerPoint() const
+  inline Vector<T, n> centerPoint() const
   {
-    return Vector3D((bbmax + bbmin) * 0.5f);
+    return Vector<T, n>((bbmax + bbmin) * 0.5f);
   }
 
-  /*inline AABB scaleFromCenter(const float32_t scalar) const
+  /*inline AABB scaleFromCenter(const T scalar) const
   {
-    const Vector3D c = centerPoint();
+    const Vector<T, n> c = centerPoint();
     return AABB((bbmin - c) * scalar, (bbmax - c) * scalar) + c;
     }*/
-  inline void scaleFromCenter(const float32_t scalar)
+  inline void scaleFromCenter(const T scalar)
   {
     if (bbmin != bbmax)
       {
-        const Vector3D c = centerPoint();
+        const Vector<T, n> c = centerPoint();
         bbmin = ((bbmin - c) * scalar) + c;
         bbmax = ((bbmax - c) * scalar) + c;
       }
@@ -181,14 +179,14 @@ public:
       }
   }
 
-  inline Vector3D dimension() const
+  inline Vector<T, n> dimension() const
   {
     return bbmax - bbmin;
   }
 
-  inline float32_t volume() const
+  inline T volume() const
   {
-    Vector3D dim = dimension();
+    Vector<T, n> dim = dimension();
     return dim.x * dim.y * dim.z;
   }
 
@@ -212,15 +210,15 @@ public:
     return volume() > other.volume();
   }
 
-  inline bool contains(const Vector3D& other) const
+  inline bool contains(const Vector<T, n>& other) const
   {
-    return
-      (bbmin.x <= other.x) &&
-      (other.x <= bbmax.x) &&
-      (bbmin.y <= other.y) &&
-      (other.y <= bbmax.y) &&
-      (bbmin.z <= other.z) &&
-      (other.z <= bbmax.z);
+    uint32_t i = n;
+    while (i--)
+      {
+        if (!((bbmin[i] <= other[i]) && (other[i] <= bbmax[i])))
+          return false;
+      }
+    return true;
   }
 
   inline bool contains(const AABB& other) const
@@ -233,7 +231,7 @@ public:
       (other.bbmax.z <= bbmax.z);
   }
 
-  inline bool collides(const Vector3D& other) const
+  inline bool collides(const Vector<T, n>& other) const
   {
     return
       (other.x >= bbmin.x) &&
@@ -275,14 +273,20 @@ public:
   }
 
   // special values
-  static const AABB DUMMY;
-  static const AABB ZERO;
-  static const AABB UNIT_SCALE;
-  static const AABB INFINITE;
+  static const AABB<T, n> DUMMY;
+  static const AABB<T, n> ZERO;
+  static const AABB<T, n> UNIT_SCALE;
+  static const AABB<T, n> INFINITE;
 
   //protected:
-  Vector3D bbmin;
-  Vector3D bbmax;
+  Vector<T, n> bbmin;
+  Vector<T, n> bbmax;
 };
 
-#endif /* BOUNDINGBOX_HPP_ */
+const AABB<T, n> AABB<T, n>::DUMMY(Vector<T, n>(NAN), Vector<T, n>(NAN));
+const AABB<T, n> AABB<T, n>::ZERO(Vector<T, n>(0), Vector<T, n>(0));
+const AABB<T, n> AABB<T, n>::UNIT_SCALE(Vector<T, n>(-0.5f), Vector3<T, n>(0.5f));
+const AABB<T, n> AABB<T, n>::INFINITE(Vector<T, n>(std::numeric_limits<T>::lowest()),
+                                      Vector<T, n>(std::numeric_limits<T>::max()));
+
+#endif /* BOUNDINGBOX_TPP_ */

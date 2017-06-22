@@ -16,12 +16,27 @@ SimTaDyn is based on C++11, Modern OpenGL (>= 3.0), The C++ version of GTK+, the
 
 ## Ubuntu
 
-Install dependencies:
+Install dependencies for the master branch:
 ```sh
-sudo apt-get install freeglut3 freeglut3-dev mesa-common-dev libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev libgtksourceviewmm-3.0-dev libglu1-mesa-dev libglew-dev libcppunit-dev gcovr libdw-dev libglfw3-dev
+sudo apt-get install libgtksourceviewmm-3.0-dev freeglut3 freeglut3-dev mesa-common-dev libglu1-mesa-dev libglew-dev libglfw3-dev libdw-dev
 ```
 
-It's mandatory to install the gtkmm version 3.22 due to a major bug with the OpenGL widget breaking the OpenGL context when using inheritance. See this [bug](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md). for more informations. This version is not present on Ubuntu older than 17.04. On current Ubuntu version (16.04, 16.11) you’ll have to install it by compiling sources (need long time to compile but the process compiles well).   
+Note: if you prefer compiling the legacy version of SimTaDyn, install the gtkmm-2.4 instead of gtkmm-3.0 (both versions can co-exist on your system):
+```sh
+sudo libgtkglextmm-x11-1.2-dev libgtkmm-2.4-dev
+```
+
+Optionally, for launching unit test, install the following packages:
+```sh
+libcppunit-dev gcovr libglm-dev
+```
+
+And even more optionally for generating some expected unit test results, install the Scilab fork: [ScicosLab](http://www.scicoslab.org/)
+```sh
+sudo apt-get install scicoslab-gtk
+```
+
+Concerning libgtkmm-3.0-dev: t's mandatory to install the gtkmm version 3.22 due to a major bug with the OpenGL widget breaking the OpenGL context when using inheritance. See this [bug](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md). for more informations. This version is not present on Ubuntu older than 17.04. That's mean on Ubuntu version (16.04, 16.11) you’ll have to install it by compiling sources by yourself (need long time to compile but the process compiles well).
 
 If needed, for fixing some Gtk-Message: Failed to load module "overlay-scrollbar":
 ```sh
@@ -30,13 +45,13 @@ sudo apt-get install overlay-scrollbar*
 
 ## Mac OS X
 
-SimTaDyn compiles on a MacBook Air and Mac OS X 10.9.5. To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. however the Gtk::GlArea is not implemented on this architecture and the OpenGL context is not created.
+SimTaDyn compiles on a MacBook Air and Mac OS X 10.9.5. To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. however the Gtk::GlArea is not implemented on this architecture and by consequence the OpenGL context is not created.
 
 ## Other architecture
 
 Not yet tested/done. No development scheduled yet.
 
-Because Cygwin stopped being ported on Windows XP, you need higher Window version.
+Because Cygwin stopped being ported on Windows XP, you need higher Window version (which it's not my case currently).
 
 ## Compilation
 
