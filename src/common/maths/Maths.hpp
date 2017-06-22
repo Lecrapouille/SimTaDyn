@@ -68,7 +68,7 @@ namespace maths
   // https://www.working-software.com/cpp-float-comparisons
   // http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm#_Toc135149455
   // Usable AlmostEqual function
-  template <>
+  /*template <>
   bool almostEqual(float const A, float const B)
   {
     if (A == B)
@@ -94,7 +94,7 @@ namespace maths
     if (intDiff <= (int) maths::maxUlps)
         return true;
     return false;
-  }
+  }*/
 
   inline bool almostZero(float const A)
   {
