@@ -91,7 +91,7 @@ void BasicGraphTests::test()
   // Add a node outside the scope of the graph. Check a new node has
   // been added.
   uint32_t blocks = g.m_nodes.blocks();
-  const Key k = (1U << simtadyn::graph_container_nb_elements) + 1U;
+  const Key k = (1U << config::graph_container_nb_elements) + 1U;
   CPPUNIT_ASSERT_EQUAL(true, g.m_nodes.outofbound(k));
   CPPUNIT_ASSERT_EQUAL(false, g.hasNode(k));
   g.addNode(k);
@@ -247,7 +247,7 @@ void BasicGraphTests::test()
   g.reset();
   CPPUNIT_ASSERT_EQUAL(true, g.empty());
   CPPUNIT_ASSERT_EQUAL(1U, g.m_nodes.blocks());
-  CPPUNIT_ASSERT_EQUAL(1U << simtadyn::graph_container_nb_elements, g.m_nodes.remaining());
+  CPPUNIT_ASSERT_EQUAL(1U << config::graph_container_nb_elements, g.m_nodes.remaining());
   CPPUNIT_ASSERT_EQUAL(0U, g.m_nodes.used());
   CPPUNIT_ASSERT_EQUAL(0U, g.howManyNodes());
   CPPUNIT_ASSERT_THROW(g.getArc(2U).id(), std::out_of_range); // Arc2

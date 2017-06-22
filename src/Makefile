@@ -38,24 +38,25 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../tools -IUtils -ICommon/SharedLibrary -ICommon/Containers -ICommon  \
-	   -IOpenGL -ISimForth -ISimForth/Forth -ISimMap -ISimMap  \
-	   -ISimMap/RTree -ISimMap/Graph -ISimMap/Loaders -ISimGui \
-	   -ISimTaDyn
-# -I/usr/include/mysql
+INCLUDES = -I. -I../external/backward -Icommon/patterns			\
+-Icommon/managers -Icommon/utils -Icommon/maths -Icommon/containers	\
+-Icommon/graph-theory -Icommon/graphics/OpenGL				\
+-Icommon/graphics/RTree -Icommon/graphics -Icore -Icore/loaders		\
+-Iforth -Iui
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../tools:Utils:Common/SharedLibrary:Common/Containers:Common:OpenGL:SimForth:SimForth/Forth:SimMap:SimMap/RTree:SimMap/Graph:SimMap/Loaders:SimGui:SimTaDyn
+VPATH=.:$(BUILD):../external/backward:common/patterns:common/managers:common/utils:common/maths:common/containers:common/graph-theory:common/graphics:common/graphics/OpenGL:common/graphics/RTree:core:core/loaders:forth:ui
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_TOOL     = Backward.o Logger.o SimTaDynLogger.o
-OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o  SharedLibrary_UNIX.o SharedLibrary.o
-OBJECTS_COMMON   = File.o Color.o Vector3D.o Camera2D.o
-OBJECTS_FORTH    = TextColor.o ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJECTS_RTREE    = BoundingBox.o RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJECTS_MAP      = BasicGraph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
+OBJECTS_TOOL     = Backward.o ILogger.o Logger.o
+OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o
+OBJECTS_COMMON   = File.o Color.o Camera2D.o
+OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJECTS_RTREE    =
+# RTreeNode.o RTreeIndex.o RTreeSplit.o
+OBJECTS_MAP      = Graph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
 OBJECTS_LOADER   = MapLoader.o ShapeFile.o
 OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o Renderer.o
 OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o

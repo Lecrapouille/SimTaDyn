@@ -7,7 +7,7 @@
 
 #define protected public
 #define private public
-#include "BasicGraph.hpp"
+#include "Graph.hpp"
 #undef protected
 #undef private
 

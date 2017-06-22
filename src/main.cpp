@@ -1,5 +1,5 @@
 #include "SimTaDynWindow.hpp"
-#include "SimTaDynLogger.hpp"
+#include "Logger.hpp"
 #include "MapEditor.hpp"
 #include "ForthEditor.hpp"
 
@@ -11,11 +11,11 @@
 int main(int argc, char** argv)
 {
   std::cout << "Welcome to SimTaDyn version "
-            << simtadyn::m_major_version
+            << config::major_version
             << '.'
-            << simtadyn::m_minor_version
+            << config::minor_version
             << std::endl;
-  SimTaDynLogger::instance();
+  Logger::instance();
 
   LOGI("** Init GTK");
   const Gtk::Main kit(argc, argv);
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
   ForthEditor::destroy();
   MapEditor::destroy();
   SimForth::destroy();
-  SimTaDynLogger::destroy();
+  Logger::destroy();
   return 0;
 }
 

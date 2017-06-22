@@ -1,19 +1,29 @@
+sudo: required
+
 language: cpp
 
-sudo: required
-dist: trusty
-
 compiler:
-  - gcc
+  - g++
+
+services:
+  - docker
 
 os:
   - linux
 #  - osx
 
 before_install:
-  - if [ $TRAVIS_OS_NAME == linux ]; then ./travis-before-install-linux.sh ; fi
-#  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install gtkmm3 && brew link --force gtkmm3 ; fi
+# Linux: create Docker image
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull ubuntu:16.04 ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -it ubuntu bash ; fi
+
+install:
+  - if [ $TRAVIS_OS_NAME == linux ]; then ./.integration/travis-install-linux.sh ; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then ./.integration/travis-install-osx.sh ; fi
 
 script:
-  - cd tests && make
-  - ./build/UnitTest
+# SimTaDyn unit tests
+  - cd tests && make -j4 || exit 1
+  - ./build/UnitTest || exit 1
+# SimTaDyn executable
+  - cd ../src && make -j4 || exit 1

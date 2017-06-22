@@ -10,7 +10,7 @@ static Color c4(1.1f, 1.1f, 1.1f, 1.1f);
 static Color c5 = Color::Black;
 static Color c6 = Color::Red;
 
-static inline void checkColor(const Color& c, const float32_t r, const float32_t g, const float32_t b, const float32_t a)
+static inline void checkColor(const Color& c, const float r, const float g, const float b, const float a)
 {
   CPPUNIT_ASSERT_EQUAL(r, c.r);
   CPPUNIT_ASSERT_EQUAL(g, c.g);

@@ -37,24 +37,28 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../tools -I../tools/glm -Icommon -I../src/Common		 \
--I../src/Common/Maths -I../src/Common/Containers -Iopengl	 \
--I../src/OpenGL -Isimmap -I../src/SimMap/Graph -I../src/SimTaDyn
+INCLUDES = -I. -I../external/backward -I../src			\
+-I../src/common/patterns -I../src/common/managers		\
+-I../src/common/utils -I../src/common/maths			\
+-I../src/common/containers -I../src/common/graph-theory		\
+-I../src/common/graphics/OpenGL -I../src/common/graphics/RTree	\
+-I../src/common/graphics -I../src/core -I../src/core/loaders	\
+-I../src/forth -I../src/ui -Isimmap -Icommon -Iopengl
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../tools:common:../src/Common:../src/Common/Containers:../src/Common/Maths/:opengl:../src/OpenGL:simmap:../src/SimMap/Graph:../src/SimTaDyn
+VPATH=.:$(BUILD):../external/backward:../src:../src/common/patterns:../src/common/managers:../src/common/utils:../src/common/maths:../src/common/containers:../src/common/graph-theory :../src/common/graphics/OpenGL:../src/common/graphics/RTree:../src/common/graphics:../src/core:../src/core/loaders:../src/forth:../src/ui:simmap:common:opengl
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = Backward.o Logger.o SimTaDynLogger.o File.o FileTests.o	\
-	Maths.o VectorTests.o MatrixTests.o TransformationTests.o	\
+OBJECTS = Backward.o ILogger.o Logger.o File.o FileTests.o Maths.o	\
+	VectorTests.o MatrixTests.o TransformationTests.o		\
 	BoundingBoxTests.o FilteringTests.o Color.o ColorTests.o	\
 	SetTests.o CollectionTests.o Exception.o OpenGL.o GLObject.o	\
 	GLShader.o GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o	\
-	BasicGraph.o BasicArcTests.o BasicNodeTests.o			\
-	BasicGraphTests.o GraphAlgorithm.o GraphAlgoTests.o		\
-	GLBufferTests.o OpenGLTests.o main.o
+	Graph.o BasicArcTests.o BasicNodeTests.o BasicGraphTests.o	\
+	GraphAlgorithm.o GraphAlgoTests.o GLBufferTests.o		\
+	OpenGLTests.o main.o
 
 #
 TARGET = UnitTest
