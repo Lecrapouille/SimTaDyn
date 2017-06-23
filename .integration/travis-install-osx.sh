@@ -1,5 +1,7 @@
-brew update || exit 1
+#!/bin/sh -e
 
-brew install gtkmm3 || exit 1
+brew update
 
-# brew link --force gtkmm3
+brew install gtkmm3 libsoil glm cppunit glfw glew
+
+brew link --force gtkmm3 libsoil glm cppunit glfw glew
