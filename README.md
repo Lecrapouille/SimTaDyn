@@ -1,5 +1,3 @@
-https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master
-
 # SimTaDyn
 
 SimTaDyn is a proof of concept project for a geographic information system (GIS) allowing to draw geographic maps and manipulate them like we do with a spreadsheet page in the aim to design dynamical geographic simulations.
@@ -16,5 +14,7 @@ The master branch is a redesign of the branch Original-Version-EPITA-2004 but fo
 * [Forth standalone](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/forth/doc/standalone.md)
 * [SimTaDyn architecture for developpers](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Architecture.md)
 * [Credits](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Credits.md)
+
+Unit Tests Status: [![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)
 
 ![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.jpg)
