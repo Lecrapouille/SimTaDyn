@@ -16,6 +16,12 @@ static Matrix33f A3 =
     4.0f, 5.0f, 6.0f,
     7.0f, 8.0f, 9.0f
   };
+static Matrix33f HA3 =
+  {
+    1.0f, 4.0f, 9.0f,
+    16.0f, 25.0f, 36.0f,
+    49.0f, 64.0f, 81.0f
+  };
 static Matrix44f A4 =
   {
     1.0f,   2.0f,  3.0f,  4.0f,
@@ -172,6 +178,16 @@ void MatrixTests::testCreator()
   B.size(rows, cols);
   CPPUNIT_ASSERT_EQUAL(3U, rows);
   CPPUNIT_ASSERT_EQUAL(3U, cols);
+
+  // Check accessor
+  checkVector3f(I3[0], 1.0f, 0.0f, 0.0f);
+  checkVector3f(I3[1], 0.0f, 1.0f, 0.0f);
+  checkVector3f(I3[2], 0.0f, 0.0f, 1.0f);
+
+  // Check accessor
+  checkVector3f(A3[0], 1.0f, 2.0f, 3.0f);
+  checkVector3f(A3[1], 4.0f, 5.0f, 6.0f);
+  checkVector3f(A3[2], 7.0f, 8.0f, 9.0f);
 }
 
 //--------------------------------------------------------------------------
@@ -208,12 +224,21 @@ void MatrixTests::testEquality()
   isTrueMatrix(M, M4);
   isTrueMatrix(matrix::transpose(A), B);
   isTrueMatrix(matrix::transpose(B), A);
+
+  CPPUNIT_ASSERT_EQUAL(true, matrix::allTrue(Matrix33b(true)));
+  CPPUNIT_ASSERT_EQUAL(false, matrix::allFalse(Matrix33b(true)));
+  CPPUNIT_ASSERT_EQUAL(true, matrix::allFalse(Matrix33b(false)));
+  CPPUNIT_ASSERT_EQUAL(false, matrix::allTrue(Matrix33b(false)));
+  CPPUNIT_ASSERT_EQUAL(true, matrix::allTrue(matrix::transpose(A) == B));
+  CPPUNIT_ASSERT_EQUAL(false, matrix::allTrue(A == B));
+  CPPUNIT_ASSERT_EQUAL(false, matrix::allFalse(matrix::transpose(A) == B));
+  CPPUNIT_ASSERT_EQUAL(false, matrix::allFalse(A == B));
 }
 
 //--------------------------------------------------------------------------
 void MatrixTests::testArithmetic()
 {
-  /*isTrueMatrix(O, O * I3);
+  isTrueMatrix(O, O * I3);
   isTrueMatrix(O, I3 * O);
   isTrueMatrix(A, A * I3);
   isTrueMatrix(B, I3 * B);
@@ -253,19 +278,58 @@ void MatrixTests::testArithmetic()
   checkVector3f(v1, v_times_A.x, v_times_A.y, v_times_A.z);
   Matrix33f C(A);
   C *= B;
-  isTrueMatrix(C, A_times_B);*/
+  isTrueMatrix(C, A_times_B);
+
+  isTrueMatrix(HA3, matrix::Hprod(A3, A3));
+
+  CPPUNIT_ASSERT_EQUAL(true, matrix::allTrue(matrix::compare(I3, I3)));
+  //CPPUNIT_ASSERT_EQUAL(true, matrix::allTrue(matrix::compare(I3, I3 * 0.00001f)));
+
+  CPPUNIT_ASSERT_EQUAL(107.0f, matrix::trace(HA3));
+  CPPUNIT_ASSERT_EQUAL(true, matrix::isDiagonal(I3));
+  //CPPUNIT_ASSERT_EQUAL(true, matrix::isDiagonal(I3 * 0.0001f));
+  CPPUNIT_ASSERT_EQUAL(false, matrix::isDiagonal(HA3));
+  CPPUNIT_ASSERT_EQUAL(true, matrix::isSymmetric(I3));
+  //CPPUNIT_ASSERT_EQUAL(true, matrix::isSymetric(I3 * 0.0001f));
+  CPPUNIT_ASSERT_EQUAL(false, matrix::isSymmetric(HA3));
 }
 
 //--------------------------------------------------------------------------
 void MatrixTests::testCopy()
 {
-  /*Matrix33f O3 = O;
+  Matrix33f O3 = O;
 
   O = I3;
   isTrueMatrix(I3, (O * O));
   O = O3;
   isTrueMatrix(O, (O * I3));
-  isTrueMatrix(I3, (I3 + O));*/
+  isTrueMatrix(I3, (I3 + O));
+
+  // Swap rows
+  Matrix33f tmp = A3;
+  checkVector3f(tmp[0], 1.0f, 2.0f, 3.0f);
+  checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
+  checkVector3f(tmp[2], 7.0f, 8.0f, 9.0f);
+
+  CPPUNIT_ASSERT_EQUAL(true, matrix::swapRows(tmp, 0U, 2U));
+  checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
+  checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
+  checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
+
+  CPPUNIT_ASSERT_EQUAL(true, matrix::swapRows(tmp, 0U, 0U));
+  checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
+  checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
+  checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
+
+  CPPUNIT_ASSERT_EQUAL(true, matrix::swapRows(tmp, 10U, 10U));
+  checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
+  checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
+  checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
+
+  CPPUNIT_ASSERT_EQUAL(false, matrix::swapRows(tmp, 0U, 10U));
+  checkVector3f(tmp[0], 7.0f, 8.0f, 9.0f);
+  checkVector3f(tmp[1], 4.0f, 5.0f, 6.0f);
+  checkVector3f(tmp[2], 1.0f, 2.0f, 3.0f);
 }
 
 //--------------------------------------------------------------------------
