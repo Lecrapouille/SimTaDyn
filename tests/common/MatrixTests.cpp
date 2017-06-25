@@ -3,6 +3,7 @@
 // Register the test suite
 CPPUNIT_TEST_SUITE_REGISTRATION(MatrixTests);
 
+// Expected results are computed by the ScicosLab tool
 static Matrix33f I3 =
   {
     1.0f, 0.0f, 0.0f,
@@ -115,6 +116,26 @@ static Vector3f v_times_A(42, 54, 66);
 
 //--------------------------------------------------------------------------
 template <typename T, uint32_t r, uint32_t c>
+static void compareMatricesEps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
+{
+  for (uint32_t i = 0U; i < r * c; ++i)
+    {
+      CPPUNIT_ASSERT_EQUAL(true, maths::abs(a.m_data[i] - b.m_data[i]) < T(0.000001));
+    }
+}
+
+//--------------------------------------------------------------------------
+template <typename T, uint32_t r, uint32_t c>
+static void compareMatricesUlps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
+{
+  for (uint32_t i = 0U; i < r * c; ++i)
+    {
+      CPPUNIT_ASSERT_EQUAL(true, maths::almostEqual(a.m_data[i], b.m_data[i]));
+    }
+}
+
+//--------------------------------------------------------------------------
+template <typename T, uint32_t r, uint32_t c>
 static inline void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b, const bool expected)
 {
   std::cout << "Comparing: " << std::endl << a
@@ -153,6 +174,22 @@ static inline void checkVector3f(Vector3f const& v, const float x, const float y
   CPPUNIT_ASSERT_EQUAL(x, v.x);
   CPPUNIT_ASSERT_EQUAL(y, v.y);
   CPPUNIT_ASSERT_EQUAL(z, v.z);
+}
+
+//--------------------------------------------------------------------------
+static inline void checkAlmostVectorEps(Vector3g const& v, const double x, const double y, const double z)
+{
+  CPPUNIT_ASSERT_EQUAL(true, maths::abs(x - v.x) < 0.000001);
+  CPPUNIT_ASSERT_EQUAL(true, maths::abs(y - v.y) < 0.000001);
+  CPPUNIT_ASSERT_EQUAL(true, maths::abs(z - v.z) < 0.000001);
+}
+
+//--------------------------------------------------------------------------
+static inline void checkAlmostVectorUlps(Vector3g const& v, const double x, const double y, const double z)
+{
+  CPPUNIT_ASSERT_EQUAL(true, maths::almostEqual(x, v.x));
+  CPPUNIT_ASSERT_EQUAL(true, maths::almostEqual(y, v.y));
+  CPPUNIT_ASSERT_EQUAL(true, maths::almostEqual(z, v.z));
 }
 
 //--------------------------------------------------------------------------
@@ -335,4 +372,48 @@ void MatrixTests::testCopy()
 //--------------------------------------------------------------------------
 void MatrixTests::testOperations()
 {
+  // Random matrix
+  Matrix44g Ra =
+    {
+      -0.5003796,   0.1910551,  -0.1043591,  -0.3966362,
+       1.1937458,  -1.3189198,   0.2973099,   0.5163254,
+      -1.5206395,   0.9307226,   0.5308515,   0.0075659,
+      1.8655072,  -0.8575199,  -1.5404673,   1.0422456,
+    };
+  // LU decomposition of Ra. Expected result.
+  Matrix44g U =
+    {
+      1.8655072,  -0.8575199,  -1.5404673,   1.0422456,
+      0.0,        -0.7701892,   1.2830613,  -0.1506119,
+      0.0,         0.0,        -0.5824496,  -0.1094599,
+      0.0,         0.0,         0.0,         0.8754921
+    };
+  // LU decomposition of Ra. Expected result.
+  Matrix44g L =
+    {
+       1.0,         0.0,          0.0,          0.0,
+       0.6399042,   1.0,          0.0,          0.0,
+      -0.2682271,   0.0505785,    1.0,          0.0,
+      -0.8151346,  -0.3008722,    0.5816799,    1.0,
+    };
+
+  Matrix44g LL, UU, P;
+  matrix::LUdecomposition(Ra, LL, UU, P);
+  maths::maxUlps = 1U;
+
+  compareMatricesEps(LL, L);
+  compareMatricesEps(UU, U);
+
+  Vector3g a(3.0f, -24.0f, 30.0f);
+  Matrix33g B = {
+      9.0f,   -36.0f,    30.0f,
+    -36.0f,   192.0f,  -180.0f,
+     30.0f,  -180.0f,   180.0f
+  };
+  // ScicosLab: x = a / B
+  Vector3g x(matrix::LUsolve(B, a));
+  Vector3g Z(x * B - a);
+
+  checkAlmostVectorEps(x, 1.0, 1.0, 1.0); // Close to 1
+  checkAlmostVectorEps(Z, 0.0, 0.0, 0.0); // Close to 0
 }

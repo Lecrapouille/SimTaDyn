@@ -56,21 +56,22 @@ public:
     return m_coefs[nth];
   }
 
-  //! \brief Pretty print the polynom.
-  void debug() const
-  {
-    std::cout << "Degree: " << degree() << std::endl;
-    for (size_t i = 0; i < m_coefs.size(); ++i)
-      {
-        std::cout << "  P[" << i << "]: " << m_coefs[i] << std::endl;
-      }
-  }
-
 protected:
 
   //! \brief Store coef values.
   std::vector<double> m_coefs;
 };
 
+
+//! \brief Display the matrix.
+inline std::ostream& operator<<(std::ostream& os, Polynom const& p)
+{
+  os << "Degree: " << p.degree() << std::endl;
+  for (size_t i = 0; i < p.m_coefs.size(); ++i)
+    {
+       std::cout << "  P[" << i << "]: " << p.m_coefs[i] << std::endl;
+    }
+  return os;
+}
 
 #endif

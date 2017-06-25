@@ -5,6 +5,7 @@
 #  include <limits>
 #  include <cassert>
 #  include <iostream>
+#  include <cstdint>
 
 namespace maths
 {
@@ -53,6 +54,7 @@ namespace maths
     return value;
   }
 
+  /*
   template <typename T>
   typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
   almostEqual(T const x, T const y)
@@ -63,43 +65,16 @@ namespace maths
     // unless the result is subnormal
            || std::abs(x-y) < std::numeric_limits<T>::min();
   }
-
+  */
   // http://bitbashing.io/comparing-floats.html
   // https://www.working-software.com/cpp-float-comparisons
   // http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm#_Toc135149455
   // Usable AlmostEqual function
-  /*template <>
-  bool almostEqual(float const A, float const B)
-  {
-    if (A == B)
-      return true;
+  //template <>
 
-    // Make sure maxUlps is non-negative and small enough that the
-    // default NAN won't compare as equal to anything.
-    assert(maths::maxUlps < 4U * 1024U * 1024U);
+  bool almostEqual(float const A, float const B);
+  bool almostZero(float const A);
 
-    int aInt = *(int*)&A;
-
-    // Make aInt lexicographically ordered as a twos-complement int
-    if (aInt < 0)
-      aInt = 0x80000000 - aInt;
-
-    // Make bInt lexicographically ordered as a twos-complement int
-    int bInt = *(int*)&B;
-
-    if (bInt < 0)
-      bInt = 0x80000000 - bInt;
-
-    int intDiff = maths::abs(aInt - bInt);
-    if (intDiff <= (int) maths::maxUlps)
-        return true;
-    return false;
-  }*/
-
-  inline bool almostZero(float const A)
-  {
-    return almostEqual(A, 0.0f);
-  }
 }
 
 #endif

@@ -7,11 +7,17 @@ CPPUNIT_TEST_SUITE_REGISTRATION(FilteringTests);
 
 //--------------------------------------------------------------------------
 // Generated file by Scilab tool: input output
-static float c_LPF[] = {
+static double c_LPF[] = {
 #include "generated/LowPassFilter1storder.h"
 };
-static float c_rolling[] = {
+static double c_rolling[] = {
 #include "generated/RollingAverageFilter.h"
+};
+static double c_polyfit_io[] = {
+#include "generated/PolyFitIO.h"
+};
+static Vector4g c_polynom = {
+#include "generated/PolyFit.h"
 };
 
 //--------------------------------------------------------------------------
@@ -19,13 +25,6 @@ static float c_rolling[] = {
 #ifndef ARRAY_SIZE
 #  define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
 #endif
-
-//--------------------------------------------------------------------------
-static float fabs(const float v)
-{
-  if (v < 0.0f) return -v;
-  return v;
-}
 
 //--------------------------------------------------------------------------
 void FilteringTests::setUp()
@@ -104,4 +103,30 @@ void FilteringTests::lpf()
       std::cout << msg.str() << std::endl;
       CPPUNIT_ASSERT_EQUAL_MESSAGE(msg.str(), true, error < 0.0001f);
     }
+}
+
+//--------------------------------------------------------------------------
+static inline void checkAlmostVectorEps(Vector4g const& a, Vector4g const& b)
+{
+  CPPUNIT_ASSERT_EQUAL(true, maths::abs(a.x - b.x) < 0.000001);
+  CPPUNIT_ASSERT_EQUAL(true, maths::abs(a.y - b.y) < 0.000001);
+  CPPUNIT_ASSERT_EQUAL(true, maths::abs(a.z - b.z) < 0.000001);
+  CPPUNIT_ASSERT_EQUAL(true, maths::abs(a.w - b.w) < 0.000001);
+}
+
+//--------------------------------------------------------------------------
+void FilteringTests::polyfit()
+{
+  PolyFit<4U> fit;
+
+  const uint32_t N = ARRAY_SIZE(c_polyfit_io) / 2U;
+  CPPUNIT_ASSERT_EQUAL(10U, N);
+  for (uint32_t i = 0; i < N; ++i)
+    {
+      double X = c_polyfit_io[2U * i + 0U]; // input
+      double Y = c_polyfit_io[2U * i + 1U]; // output
+      fit.process(X, Y);
+    }
+  Vector<double, 4U> obt_p = fit.end();
+  checkAlmostVectorEps(obt_p, c_polynom);
 }

@@ -1,8 +1,7 @@
 #ifndef POLYFIT_HPP_
 #  define POLYFIT_HPP_
 
-#  include "Matrix.hpp"
-#  include "Polynom.hpp"
+#  include "Matrix.tpp"
 #  include <cmath>
 
 // *************************************************************************************************
@@ -19,9 +18,9 @@ public:
     reset();
   }
 
-  inline uint32_t order() const
+  inline uint32_t size() const
   {
-    return order + 1U;
+    return order;
   }
 
   //! \brief Reset states to initial values.
@@ -35,8 +34,8 @@ public:
   //! \brief Accumulate new raw datum from axis X and Y.
   void process(const double dataX, const double dataY)
   {
-    assert(isfinite(dataX));
-    assert(isfinite(dataY));
+    //assert(std::isfinite(dataX));
+    //assert(std::isfinite(dataY));
 
     // Compute [X^0 X^1 X^2 ... X^(2*order)]
     double X[2U * order];
@@ -61,7 +60,7 @@ public:
     }
 
     // Compute m_b
-    for (uint32_t i = 0U; i < m_order; ++i)
+    for (uint32_t i = 0U; i < order; ++i)
     {
       // The following code suffers of accurancy:
       //   b->element[i] = b->element[i] + X[i] * DataY;
@@ -73,18 +72,13 @@ public:
   }
 
   //! \brief Compute the polynom fitting datum.
-  Polynom end()
+  Vector<double, order> end()
   {
-    Matrix<double, order, order> P(matrix::Identity);
-    Matrix<double, order, order> L;
-    Matrix<double, order, order> U;
-    Matrix<double, order, order> P;
-
-    LUDecomposition(m_Xsquared, L, U, P);
-    return LUSolve(L, U, P, m_b);
+    return matrix::LUsolve(m_Xsquared, m_b);
   }
 
   //! \brief Apply the polynom on a given data
+  template <typename T>
   double apply(Polynom const& P, Vector<T, order> const& X) const
   {
     assert(X.size() + 1U >= P.degree());
@@ -92,7 +86,7 @@ public:
     double res = P[0];
     for (uint32_t i = 1U; i < P.degree(); ++i)
       {
-        res += (P[i] * X[i - 1]);
+        res += (P[i] * X[i - 1U]);
       }
     return res;
   }

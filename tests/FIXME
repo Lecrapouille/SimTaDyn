@@ -1,2 +1,3 @@
+Mieux tester maths::almostEqual()
 Collection.ipp::occupy() aucun tests unit dessus mais 100% de couverture !!
 Code mort avec Icontainer::occupy() modify() etc ...

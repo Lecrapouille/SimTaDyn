@@ -30,14 +30,14 @@ static void testMath(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
 
-  /*suite = new CppUnit::TestSuite("VectorTests");
+  suite = new CppUnit::TestSuite("VectorTests");
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testCreator", &VectorTests::testCreator));
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testSwap", &VectorTests::testSwap));
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testEquality", &VectorTests::testEquality));
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testArithmetic", &VectorTests::testArithmetic));
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testCopy", &VectorTests::testCopy));
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testOperations", &VectorTests::testOperations));
-  runner.addTest(suite);*/
+  runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("MatrixTests");
   suite->addTest(new CppUnit::TestCaller<MatrixTests>("testCreator", &MatrixTests::testCreator));
@@ -48,13 +48,14 @@ static void testMath(CppUnit::TextUi::TestRunner& runner)
   suite->addTest(new CppUnit::TestCaller<MatrixTests>("testOperations", &MatrixTests::testOperations));
   runner.addTest(suite);
 
-  /*suite = new CppUnit::TestSuite("TransformationsTests");
+  suite = new CppUnit::TestSuite("TransformationsTests");
   suite->addTest(new CppUnit::TestCaller<TransformationTests>("testMatrixTransform", &TransformationTests::tests));
   runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("Filtering");
-  suite->addTest(new CppUnit::TestCaller<FilteringTests>("RollingAverage", &FilteringTests::rolling));
-  suite->addTest(new CppUnit::TestCaller<FilteringTests>("LowPassFilter", &FilteringTests::lpf));
+  //suite->addTest(new CppUnit::TestCaller<FilteringTests>("RollingAverage", &FilteringTests::rolling));
+  //suite->addTest(new CppUnit::TestCaller<FilteringTests>("LowPassFilter", &FilteringTests::lpf));
+  suite->addTest(new CppUnit::TestCaller<FilteringTests>("PolynomialFit", &FilteringTests::polyfit));
   runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("BoundingBoxTests");
@@ -64,7 +65,7 @@ static void testMath(CppUnit::TextUi::TestRunner& runner)
   suite->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testArithmetic", &BoundingBoxTests::testArithmetic));
   suite->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testCopy", &BoundingBoxTests::testCopy));
   suite->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testOperations", &BoundingBoxTests::testOperations));
-  runner.addTest(suite);*/
+  runner.addTest(suite);
 }
 
 //--------------------------------------------------------------------------
@@ -149,7 +150,9 @@ int main(void)
   testContainer(runner);
   //testGraph(runner);
   testOpenGL(runner);
+
   runner.run();
 
+#warning "devrair retourner 1 si ko"
   return 0;
 }

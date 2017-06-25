@@ -8,6 +8,7 @@
 // *************************************************************************************************
 
 #  include "Vector.tpp"
+#  include "Polynom.hpp"
 
 namespace matrix
 {
@@ -491,7 +492,132 @@ namespace matrix
     a[j] = tmp;
     return true;
   }
-}
+
+  //! \brief This function LU decomposes a given matrix A and stores
+  //! it in two new matricies L and U.  It uses the Gaussian
+  //! Elimination with partial pivoting algorithm from Golub & Van
+  //! Loan, Matrix Computations, Algorithm 3.4.1.
+  template <typename T, uint32_t rows, uint32_t cols>
+  void LUdecomposition(Matrix<T, rows, cols> const &AA,
+                       Matrix<T, rows, cols> &L,
+                       Matrix<T, rows, cols> &U,
+                       Matrix<T, rows, cols> &P)
+  {
+    uint32_t i, j, pivot, k;
+    double max;
+
+    // Set matrices to 0
+    L *= T(0);
+    U *= T(0);
+
+    // FIXME: Copy not necessary
+    Matrix<T, rows, cols> A(AA);
+
+    for (i = 0; i < rows - 1; ++i)
+      {
+        max = maths::abs(A[i][i]);
+        pivot = i;
+
+        for (j = i + 1U; j < rows; ++j)
+          {
+            if (maths::abs(A[j][i]) > max)
+              {
+                max = maths::abs(A[j][i]);
+                pivot = j;
+              }
+          }
+
+        if (pivot != i)
+          {
+            matrix::swapRows(A, i, pivot);
+            matrix::swapRows(P, i, pivot);
+          }
+
+        // WARNING:
+        // -- original code:  if (A[i][i] != 0.0)
+        // -- new code which seems to give less good results: if (fabs(A[i][i]) > 0.00001)
+        // we cannot use == with floats or double !!!!
+        if (A[i][i] != T(0))
+          {
+            for (j = i + 1U; j < rows; ++j)
+              {
+                A[j][i] = A[j][i] / A[i][i];
+                for (k = i + 1U; k < rows; ++k)
+                  {
+                    A[j][k] = A[j][k] - A[j][i] * A[i][k];
+                  }
+              }
+          }
+      }
+    for (i = 0U; i < rows; ++i)
+      {
+        L[i][i] = T(1);
+        for (j = 0U; j < rows; ++j)
+          {
+            if (j < i)
+              {
+                L[i][j] = A[i][j];
+              }
+            else
+              {
+                U[i][j] = A[i][j];
+              }
+          }
+      }
+  }
+
+  //! \brief This function solves an LU decomposed matrix equation
+  //! LU.x = b.
+  template <typename T, uint32_t rows, uint32_t cols>
+  Vector<T, rows> LUsolve(Matrix<T, rows, cols> const &L,
+                          Matrix<T, rows, cols> const &U,
+                          Matrix<T, rows, cols> const &P,
+                          Vector<T, rows> const &b1)
+  {
+    Vector<T, rows> solution(0), y;
+
+    // Apply permutation
+    Vector<T, rows> b(P * b1);
+
+    // y = U.x, thus Ly = b
+    // solve for y by forward substitution
+    y[0] = b[0] / L[0][0];
+    for (uint32_t i = 1U; i < rows; ++i)
+      {
+        y[i] = b[i] / L[i][i];
+        for (uint32_t j = 0U; j < i; ++j)
+          {
+            y[i] -= (L[i][j] * y[j] / L[i][i]);
+          }
+      }
+
+    // U.x = y
+    // Solve for x by backward substitution
+    uint32_t r = rows - 1U;
+    solution[r] = y[r] / U[r][r];
+    for (int32_t i = r - 1; i >= 0; i--)
+      {
+        solution[i] = y[i] / U[i][i];
+        for (uint32_t j = i + 1U; j < rows; j++)
+          {
+            solution[i] -= (U[i][j] * solution[j] / U[i][i]);
+          }
+      }
+    return solution;
+  }
+
+  template <typename T, uint32_t rows, uint32_t cols>
+  Vector<T, rows> LUsolve(Matrix<T, rows, cols> const &A,
+                          Vector<T, rows> const &b)
+  {
+    Matrix<T, rows, cols> L;
+    Matrix<T, rows, cols> U;
+    Matrix<T, rows, cols> P(matrix::Identity);
+
+    matrix::LUdecomposition(A, L, U, P);
+    return matrix::LUsolve(L, U, P, b);
+  }
+} // namespace
 
 //! \brief Display the matrix.
 template <typename T, uint32_t rows, uint32_t cols>
