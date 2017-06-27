@@ -4,63 +4,107 @@
 
 #  include "Transformation.tpp"
 
+// *************************************************************************************************
+//! \brief a Movable defines a 4x4 transformation matrix from a translation, a rotation and a scale.
+//! This class allow an object to move in a 2D-world (if n == 2U) or 3D-world (if n == 3U).
+//! Not a thread safe class.
+// *************************************************************************************************
 template <typename T, uint32_t n>
 class Movable
 {
 public:
+
+  //! \brief Empty construction. Set an identity 4x4 transformation matrix.
   Movable()
-    m_origin(0),
-    m_position(0),
-    m_rotation(0),
-    m_angle(0),
-    m_transform(matrix::Identity),
-    m_inverse_transform(matrix::Identity)
+    : m_origin(0),
+      m_position(0),
+      m_scale(1),
+      m_rot_axis(1),
+      m_rot_angle(0),
+      m_transform(matrix::Identity),
+      m_inverse_transform(matrix::Identity),
+      m_to_update(false),
+      m_inv_to_update(false)
   {
   }
 
+  //! \brief Reset states. Set an identity 4x4 transformation matrix.
+  inline void reset()
+  {
+    const Vector<T, n> zero(0);
+    const Vector<T, n> one(1);
+
+    m_origin = zero;
+    m_position = zero;
+    m_rot_axis = one;
+    m_rot_angle = T(0);
+    m_scale = one;
+    matrix::identity(m_transform);
+    matrix::identity(m_inverse_transform);
+    m_to_update = false;
+    m_inv_to_update = false;
+  }
+
+  //! \brief Set the position of the object.
   inline void position(Vector<T, n> const &position)
   {
     m_position = position;
     m_to_update = true;
   }
 
+  //! \brief Get the position of the object.
   inline Vector<T, n> const &position() const
   {
     return m_position;
   }
 
+  //! \brief Set the local origin of the object.
   inline void origin(Vector<T, n> const &origin)
   {
     m_origin = origin;
     m_to_update = true;
   }
 
+  //! \brief Get the local origin of the object.
   inline Vector<T, n> const &origin() const
   {
     return m_origin;
   }
 
+  //! \brief Set scale factors of the object.
   inline void scale(Vector<T, n> const &scale)
   {
     m_scale = scale;
     m_to_update = true;
   }
 
+  //! \brief Get scale factors of the object.
   inline Vector<T, n> const &scale() const
   {
     return m_scale;
   }
 
+  //! \brief Set the orientation of the object.
   inline void rotate(T const angle, Vector<T, 3U> const &v)
   {
-    m_angle = angle;
-    m_rotation = v;
+    m_rot_angle = angle;
+    m_rot_axis = v;
     m_to_update = true;
   }
 
+  //! \brief Set the orientation of the object.
+  inline void rotate(T const angle)
+  {
+    m_rot_angle += angle;
+    // TODO m_rot_angle = maths::wrapTo2PI(m_rot_angle);
+    m_to_update = true;
+  }
+
+  //! \brief Move the object by a given offset.
   inline void move(Vector<T, n> const &offset)
   {
     m_position += offset;
+    m_to_update = true;
   }
 
   inline void scalefactor(Vector<T, n> const &factor)
@@ -69,19 +113,32 @@ public:
     m_to_update = true;
   }
 
-  Matrix<T, 4U, 4U> const &transform()
+  //! \brief Return the 4x4 transform matrix combining the
+  //! position/rotation/scale/origin of the object.
+  Matrix<T, n + 1U, n + 1U> const &transform()
   {
     if (m_to_update)
       {
-        m_transform = translate(matrix::Identity, m_position - m_origin);
-        m_transform = rotate(m_transform, m_rot_angle, m_rot_axis);
-        m_transform = scale(m_transform, m_scale);
+        Matrix<T,n+1U,n+1U> I(matrix::Identity);
+        m_transform = matrix::translate(I, m_position - m_origin);
+        m_transform = matrix::rotate(m_transform, m_rot_angle, m_rot_axis);
+        m_transform = matrix::scale(m_transform, m_scale);
         m_to_update = false;
-
-        m_inverse_transform = matrix::inverse(m_transform);
+        m_inv_to_update = true;
       }
 
     return m_transform;
+  }
+
+  //! \brief Return the 4x4 inverse transform matrix.
+  Matrix<T, n + 1U, n + 1U> const &invTransform()
+  {
+    if (m_inv_to_update)
+      {
+        // TODO m_inverse_transform = matrix::inverse(transform());
+        m_inv_to_update = false;
+      }
+    return m_inverse_transform;
   }
 
 protected:
@@ -89,10 +146,12 @@ protected:
   Vector<T, n> m_origin;
   Vector<T, n> m_position;
   Vector<T, n> m_scale;
-  Vector<T, n> m_rotation;
-  T m_angle;
+  Vector<T, n> m_rot_axis;
+  T m_rot_angle;
   Matrix<T, n + 1U, n + 1U> m_transform;
   Matrix<T, n + 1U, n + 1U> m_inverse_transform;
+  bool m_to_update;
+  bool m_inv_to_update;
 };
 
 #endif

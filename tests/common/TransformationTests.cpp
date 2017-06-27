@@ -33,13 +33,6 @@ static void display(Matrix44f const &a)
 }
 
 //--------------------------------------------------------------------------
-static float fabs(const float v)
-{
-  if (v < 0.0f) return -v;
-  return v;
-}
-
-//--------------------------------------------------------------------------
 static void compareMatrices(Matrix44f const &a, glm::mat4 const &b)
 {
   std::cout << std::endl << "Comparing Matrices:" << std::endl;
@@ -49,7 +42,7 @@ static void compareMatrices(Matrix44f const &a, glm::mat4 const &b)
     {
       for (uint32_t j = 0U; j < 4U; ++j)
         {
-          CPPUNIT_ASSERT_EQUAL(true, fabs(a[i][j] - b[i][j]) < 0.001f);
+          CPPUNIT_ASSERT_EQUAL(true, maths::abs(a[i][j] - b[i][j]) < 0.001f);
         }
     }
 }
@@ -100,4 +93,39 @@ void TransformationTests::tests()
   T = matrix::lookAt(Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f));
   gT = glm::lookAt(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
   compareMatrices(T, gT);
+}
+
+//--------------------------------------------------------------------------
+void TransformationTests::movable()
+{
+  Movable<float, 3U> obj;
+
+  // Check init.
+  compareMatrices(obj.transform(), glm::mat4());
+
+  // Check identity
+  obj.position(Vector3f(0.0f));
+  compareMatrices(obj.transform(), glm::mat4());
+
+  // Check identity
+  obj.scale(Vector3f(1.0f));
+  compareMatrices(obj.transform(), glm::mat4());
+
+  // Check identity
+  obj.rotate(0.0f, Vector3f(1.0f));
+  compareMatrices(obj.transform(), glm::mat4());
+
+  // Change scale factor
+  obj.scalefactor(Vector3f(4.0f));
+  compareMatrices(obj.transform(), glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 4.0f)));
+
+  // Check reset
+  obj.reset();
+  compareMatrices(obj.transform(), glm::mat4());
+
+  // Change origin
+  obj.position(Vector3f(1.0f));
+  compareMatrices(obj.transform(), glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
+  obj.origin(Vector3f(1.0f));
+  compareMatrices(obj.transform(), glm::mat4());
 }

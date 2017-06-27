@@ -67,9 +67,9 @@ protected:
 inline std::ostream& operator<<(std::ostream& os, Polynom const& p)
 {
   os << "Degree: " << p.degree() << std::endl;
-  for (size_t i = 0; i < p.m_coefs.size(); ++i)
+  for (size_t i = 0; i < p.degree(); ++i)
     {
-       std::cout << "  P[" << i << "]: " << p.m_coefs[i] << std::endl;
+       std::cout << "  P[" << i << "]: " << p[i] << std::endl;
     }
   return os;
 }

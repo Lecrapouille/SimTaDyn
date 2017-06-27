@@ -38,20 +38,20 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I.. -I../../SimTaDyn -I../../Common -I../../Common/Containers -I../../../tools
+INCLUDES = -I. -I.. -I../.. -I../../../utils -I../../../maths -I../../../patterns -I../../../containers -I../../../../../src -I../../../../../external/backward
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):..:../../SimTaDyn:../../Common:../../Common/Containers:../../../tools
+VPATH=.:$(BUILD):..:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/backward
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_TOOL     = Logger.o SimTaDynLogger.o
-OBJECTS_UTILS    = Exception.o
+OBJECTS_TOOL     = Backward.o
+OBJECTS_UTILS    = ILogger.o Logger.o Exception.o
 OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o
-OBJECTS          = Backward.o $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_OPENGL) \
-                   Example01.o Example02.o main.o
-TARGET = Simple
+OBJECTS          = $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_OPENGL) \
+                   Example01.o Example02.o Example03.o main.o
+TARGET = Examples
 
 ###################################################
 # Compil options

@@ -344,6 +344,18 @@ inline Matrix<T, rows, cols>& operator*=(Matrix<T, rows, cols> &a, Matrix<T, col
 namespace matrix
 {
 
+  template <typename T, uint32_t rows, uint32_t cols>
+  inline void identity(Matrix<T, rows, cols> &a)
+  {
+    static_assert(rows == cols, "Can't construct identity for a non-square matrix");
+    a *= T(0);
+    uint32_t i = rows;
+    while (i--)
+      {
+        a[i][i] = T(1);
+      }
+  }
+
   //! \brief Compare each elements of two matrices, check if they have
   //! the same value +/- epsilon and store the comparaison result in a
   //! boolean matrix.

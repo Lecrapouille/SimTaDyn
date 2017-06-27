@@ -41,6 +41,49 @@ namespace maths
     return val;
   }
 
+  //! \brief Converts radians to degrees and returns the result.
+  template <typename T>
+  inline T radians(T const degrees)
+  {
+    double rad = degrees * 0.01745329251994329576923690768489;
+    return T(rad);
+  }
+
+  //! \brief Converts degrees to radians and returns the result.
+  template <typename T>
+  inline T degrees(T const radians)
+  {
+    double deg = radians * 57.295779513082320876798154814105;
+    return T(deg);
+  }
+
+  //! \brief Normalize the angle given in degrees to [-180 +180] degrees.
+  template <typename T>
+  inline T wrapTo180(T const degrees)
+  {
+    T angle = degrees;
+    while (angle <= -T(180))
+      angle += T(360);
+    while (angle > T(180))
+      angle -= T(360);
+    return angle;
+  }
+
+  //! \brief Normalize the angle given in degrees to [0 +360] degrees.
+  template <typename T>
+  inline T wrapTo360(T const degrees)
+  {
+    T angle = degrees;
+    while (angle < T(0))
+      angle += T(360);
+    while (angle >= T(360))
+      angle -= T(360);
+    return angle;
+  }
+
+  // Fast inversed square root. Code from Doom/Quake code source
+  float fastInvSqrt(const float number);
+
   //! \brief Constrain value: std::min(std::max(a[i], lower), upper)
   template <typename T>
   inline T clamp(T const value, T const lower, T const upper)

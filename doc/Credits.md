@@ -112,7 +112,7 @@ Simulation of Urban MObility
 * [lo-th](https://github.com/lo-th/root/tree/gh-pages/traffic)
 Fork of the previous link (better look)
 
-## Drawing cities and streets
+## Drawing cities, maps and streets
 
 * [City Building](https://www.binpress.com/tutorial/creating-a-city-building-game-with-sfml/137) and the [github](https://github.com/dbMansfield/citybuilder)
 Creating a City Building Game with SFML
@@ -120,9 +120,19 @@ Creating a City Building Game with SFML
 * [glosm](https://github.com/Dimitri1/glosm)
 C++ and OpenGL legacy for displaying in 3D Openstreet map files with french pdf docs.
 
+* [Off-road game engine](http://www.milantimko.info/index.php?page=articles&category=tutorials&article=01)
+
 * [Curved Path](http://www.redblobgames.com/articles/curved-paths/)
 
 * [Smooth thick lines using geometry shader](https://forum.libcinder.org/topic/smooth-thick-lines-using-geometry-shader)
+
+* https://github.com/tangrams/tangram
+Real-Time WebGL Maps
+
+* https://github.com/mapbox/mapbox-gl-js
+Interactive, thoroughly customizable maps in the browser, powered by vector tiles and WebGL
+
+* https://www.mapbox.com/blog/labels-for-navigation/
 
 ## OpenGL tutorials and 2D libraries
 
@@ -132,15 +142,14 @@ Simple and Fast Multimedia Library.
 * [glumpy](https://github.com/glumpy/glumpy)
 Python + Numpy + modern OpenGL: fast, scalable and beautiful scientific visualization.
 
-* http://loulou.developpez.com/tutoriels/moteur3d/
+* [ThinMatrix](https://www.youtube.com/user/ThinMatrix)
+Modern OpenGL tutorials on Youtube.
 
 * http://www.tomdalling.com/blog/modern-opengl/01-getting-started-in-xcode-and-visual-cpp/
-
 * http://opengl.developpez.com/tutoriels/open_gl/
-
 * https://learnopengl.com/
-
 * http://www.opengl-tutorial.org/
+Modern OpenGL tutorials.
 
 ## Forth and OpenGL, GTK, SQL
 
@@ -161,6 +170,9 @@ Code source Editor with gtksourceviewmm.
 ## Libraries
 
 ### General lib
+
+* [Moteur3D](http://loulou.developpez.com/tutoriels/moteur3d/)
+More than a tutorial on 3D game engine, it explains manager classes in C++ which can used for a more general projects.
 
 * [POCO](https://pocoproject.org/)
 Modern, powerful open source C++ class libraries for building network- and internet-based applications that run on desktop, server, mobile and embedded systems.

@@ -38,6 +38,37 @@ namespace maths
     return almostEqual(A, 0.0f);
   }
 
+  float fastInvSqrt(const float number)
+  {
+#if 0
+    long i;
+    float x2, y;
+    const float threehalfs = 1.5f;
+
+    x2 = number * 0.5f;
+    y = number;
+    i = * (long *) &y;
+    i = 0x5f3759df - (i >> 1);
+    y = * (float *) &i;
+    // 1st iteration
+    y = y * (threehalfs - (x2 * y * y));
+    // 2nd iteration, this can be removed
+    y = y * (threehalfs - (x2 * y * y));
+
+    return y;
+#else
+    union
+    {
+      int32_t i;
+      float   f;
+    } conv;
+
+    conv.f = number;
+    conv.i = 0x5f3759df - (conv.i >> 1);
+    return 0.5f * conv.f * (3.0f - number * conv.f * conv.f);
+#endif
+  }
+
 };
 
 #include "Maths.hpp"

@@ -623,6 +623,7 @@ namespace vector
   template <typename T, uint32_t n>
   inline Vector<T, n> normalize(Vector<T, n> const &a)
   {
+    // FIXME: throw exception
     return a / length(a);
   }
 
