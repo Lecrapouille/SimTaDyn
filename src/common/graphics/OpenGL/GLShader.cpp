@@ -11,19 +11,25 @@
 // **************************************************************
 void GLShader::cleanShader(GLuint vertex, GLuint fragment, GLuint geometry)
 {
-  if (0U != vertex)
+  if (0U != vertex) {
     glCheck(glDetachShader(m_handle, vertex));
-  if (0U != fragment)
+  }
+  if (0U != fragment) {
     glCheck(glDetachShader(m_handle, fragment));
-  if (0U != geometry)
+  }
+  if (0U != geometry) {
     glCheck(glDetachShader(m_handle, geometry));
+  }
 
-  if (0U != vertex)
+  if (0U != vertex) {
     glCheck(glDeleteShader(vertex));
-  if (0U != fragment)
+  }
+  if (0U != fragment) {
     glCheck(glDeleteShader(fragment));
-  if (0U != geometry)
+  }
+  if (0U != geometry) {
     glCheck(glDeleteShader(geometry));
+  }
 }
 
 // **************************************************************
@@ -196,25 +202,37 @@ GLint GLShader::locate(const char *name) const
 {
   int res = -1;
 
-  // Correct shader variable name shall start either by a_ for
-  // attribute or u_ for uniform.
-  if ((nullptr != name) && ('\0' != name[0U]) && ('_' == name[1U]))
+  if (nullptr != name)
     {
-      if (('a' == name[0U]) || ('i' == name[0U]))
+      // Correct shader variable name shall start either by a_ for
+      // attribute or u_ for uniform.
+      if (('\0' != name[0U]) && ('_' == name[1U]))
         {
-          res = glCheck(glGetAttribLocation(m_handle, name));
-        }
-      else if ('u' == name[0U])
-        {
-          res = glCheck(glGetUniformLocation(m_handle, name));
+          if (('a' == name[0U]) || ('i' == name[0U]))
+            {
+              res = glCheck(glGetAttribLocation(m_handle, name));
+            }
+          else if ('u' == name[0U])
+            {
+              res = glCheck(glGetUniformLocation(m_handle, name));
+            }
         }
     }
 
   // Failed loaction shader variable
   if (-1 == res)
     {
-      std::cerr << "[FAILED] getting shader location for '"
-                << name << "'" << std::endl;
+      if (nullptr != name)
+        {
+          std::cerr << "[FAILED] getting shader location for '"
+                    << name << "'" << std::endl;
+        }
+      else
+        {
+          std::cerr << "[FAILED] attribute name shall not be nullptr"
+                    << std::endl;
+        }
     }
+
   return res;
 }

@@ -96,7 +96,7 @@ protected:
 
   std::ifstream m_infile;
   std::string   m_filename;
-  uint32_t      m_file_length;
+  uint32_t      m_file_length = 0U;
 
 private:
 

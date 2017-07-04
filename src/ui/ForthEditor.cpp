@@ -358,6 +358,9 @@ ForthEditor::ForthEditor()
     m_vpaned.pack2(m_vbox[1]); // bottom
     m_vpaned.set_position(350);
   }
+
+  //
+  m_elapsed_time = std::chrono::nanoseconds::zero();
 }
 
 // *************************************************************************************************
@@ -397,7 +400,11 @@ void ForthEditor::empty()
 void ForthEditor::templated()
 {
   ForthEditor::empty();
-  TextEditor::document()->buffer()->set_text(": COMPUTE-ME 1 1 + . ;\nCOMPUTE-ME");
+  TextDocument* doc = TextEditor::document();
+  if (nullptr != doc)
+    return ;
+
+  doc->buffer()->set_text(": COMPUTE-ME 1 1 + . ;\nCOMPUTE-ME");
 }
 
 // *************************************************************************************************

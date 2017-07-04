@@ -15,8 +15,20 @@ Forth::Forth(ForthDictionary& dictionary, TextColor &color)
   LOGI("Creating Forth");
   m_err_stream = 0;
   m_base = 10U;
-  abort();
   m_last_completion = m_dictionary.last();
+
+  // Not necessary but used for hiding coverity scan errors
+  m_tos = 0;
+  m_tos1 = 0;
+  m_tos2 = 0;
+  m_tos3 = 0;
+  m_tos4 = 0;
+  m_depth_at_colon = 0;
+  m_last_at_colon = 0;
+  m_here_at_colon = 0;
+
+  //
+  abort();
 }
 
 // **************************************************************
@@ -33,7 +45,9 @@ void Forth::abort()
       m_dictionary.m_here = m_here_at_colon;
     }
 
+  m_ip = 0;
   m_state = forth::Interprete;
+  m_saved_state = m_state;
   m_data_stack = m_data_stack_ + STACK_UNDERFLOW_MARGIN;
   m_alternative_stack = m_alternative_stack_ + STACK_UNDERFLOW_MARGIN;
   m_return_stack = m_return_stack_ + STACK_UNDERFLOW_MARGIN;
@@ -117,11 +131,18 @@ void Forth::displayStack(std::ostream& stream, const forth::StackID id) const
       return ;
     }
 
+  // save default formatting
+  std::ios init(NULL);
+  init.copyfmt(std::cout);
+
   for (int32_t s = 0; s < depth; ++s)
     {
       stream << std::setbase(m_base) << ptr[s] << ' ';
     }
   stream << std::endl;
+
+  // restore default formatting
+  std::cout.copyfmt(init);
 }
 
 // **************************************************************

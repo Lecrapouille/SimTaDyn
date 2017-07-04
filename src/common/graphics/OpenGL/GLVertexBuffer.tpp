@@ -115,11 +115,11 @@ public:
     if (Block<T, N>::hasPendingData(pos_start, pos_end)) // FIXME the if() is useless
       {
         LOGI("GLVertexBuffer named '%s' updating %u --> %u", m_name.c_str(), pos_start, pos_end);
-        m_offset = sizeof (T) * pos_start;
-        m_nbytes = sizeof (T) * (pos_end - pos_start + 1U);
-        LOGI("GLVertexBuffer named '%s' updating Offset:%u --> Bytes:%u", m_name.c_str(), m_offset, m_nbytes);
+        uint32_t offset = sizeof (T) * pos_start;
+        uint32_t nbytes = sizeof (T) * (pos_end - pos_start + 1U);
+        LOGI("GLVertexBuffer named '%s' updating Offset:%u --> Bytes:%u", m_name.c_str(), offset, nbytes);
 
-        glCheck(glBufferSubData(m_target, m_offset, m_nbytes, Block<T, N>::m_block));
+        glCheck(glBufferSubData(m_target, offset, nbytes, Block<T, N>::m_block));
         Block<T, N>::clearPending();
       }
     return false;
@@ -131,11 +131,6 @@ public:
     LOGI("GLVertexBuffer named '%s' setup", m_name.c_str());
     return false;
   }
-
-private:
-
-  //! Indicate which elements have been changed.
-  uint32_t m_offset, m_nbytes;
 
 protected:
 

@@ -207,7 +207,7 @@ public:
   // Et qui dit script dit qu'il faudra les gerer dans l'IHM (sorte speedbar)
 
   //! \brief Spatial index FIXME: drawble rtree
-  RTreeNode* m_rtree;
+  //RTreeNode* m_rtree;
 
   //! \brief Axis Align Bounding box of the map
   //! FIXME: TEMPORAIRE car sera donner par Rtree.bbox()

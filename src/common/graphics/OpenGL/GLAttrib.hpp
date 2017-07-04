@@ -135,7 +135,7 @@ protected:
 
     LOGI("GLAttrib named '%s' setting up", m_name.c_str());
     m_handle = (GLenum) m_program->locateAttrib(m_name.c_str());
-    if (isValid())
+    if (isValid() && (0 != m_size) && (0 != m_type))
       {
         activate();
         glCheck(glVertexAttribPointer((GLint) m_handle, m_size, m_type, m_normalized, 0, nullptr));
@@ -164,9 +164,9 @@ protected:
 protected:
 
   GLShader *m_program = nullptr;
-  GLint m_size;
-  GLenum m_type;
-  GLboolean m_normalized;
+  GLint m_size = 0;
+  GLenum m_type = 0;
+  GLboolean m_normalized = false;
 };
 
 #endif /* GLATTRIB_HPP_ */

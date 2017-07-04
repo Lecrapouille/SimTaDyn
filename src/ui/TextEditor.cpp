@@ -231,7 +231,10 @@ CloseLabel::CloseLabel(std::string const& text)
   : Box(Gtk::ORIENTATION_HORIZONTAL),
     m_label(text),
     m_button(),
-    m_image(Gtk::Stock::CLOSE, Gtk::ICON_SIZE_MENU)
+    m_image(Gtk::Stock::CLOSE, Gtk::ICON_SIZE_MENU),
+    m_editor(nullptr),
+    m_widget(nullptr),
+    m_asterisk(false)
 {
   set_can_focus(false);
   m_label.set_can_focus(false);
@@ -271,6 +274,11 @@ void CloseLabel::asterisk(const bool asterisk)
 // *************************************************************************************************
 void CloseLabel::close()
 {
+  if (nullptr == m_editor)
+    return ;
+  if (nullptr == m_widget)
+    return ;
+
   if (m_asterisk)
     {
       int page = m_editor->m_notebook.page_num(*m_widget);
@@ -278,6 +286,8 @@ void CloseLabel::close()
       if (NULL != widget)
         {
           TextDocument* doc = dynamic_cast<TextDocument*>(widget);
+          if (nullptr == doc)
+            return ;
           if (!m_editor->dialogSave(doc))
             return ;
         }

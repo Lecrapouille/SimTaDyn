@@ -118,6 +118,12 @@ check-travis:
 	@travis lint ../.travis.yml
 
 ###################################################
+# Coverity Scan: static analysis of code
+# Prepare the tarball ready to be uploaded to Coverity Scan servers.
+coverity:
+	@cov-build --dir cov-int make && tar czvf SimTaDyn.tgz cov-int
+
+###################################################
 # Clean Target
 clean:
 	@echo "*** Cleaning"
