@@ -24,10 +24,21 @@ public:
       }
   }
 
+  //! \brief Return the container size of the polynom.
+  inline uint32_t size() const
+  {
+    return m_coefs.size();
+  }
+
   //! \brief Return the degree of the polynom.
   inline uint32_t degree() const
   {
-    return m_coefs.size();
+    uint32_t deg = m_coefs.size();
+
+    while ((0.0 != m_coefs[deg]) && deg)
+      --deg;
+
+    return deg;
   }
 
   //! \brief Change the value of the nth coef. If nth is greater than
@@ -35,7 +46,7 @@ public:
   //! than the current degree.
   inline double& operator[](size_t nth)
   {
-    const uint32_t s = m_coefs.size();
+    const uint32_t s = m_coefs.size(); // FIXME capacity
     if (nth >= s)
       {
         // Insert zeros
@@ -67,7 +78,7 @@ protected:
 inline std::ostream& operator<<(std::ostream& os, Polynom const& p)
 {
   os << "Degree: " << p.degree() << std::endl;
-  for (size_t i = 0; i < p.degree(); ++i)
+  for (size_t i = 0; i < p.size(); ++i)
     {
        std::cout << "  P[" << i << "]: " << p[i] << std::endl;
     }
