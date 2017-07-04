@@ -136,6 +136,9 @@ Interactive, thoroughly customizable maps in the browser, powered by vector tile
 
 ## OpenGL tutorials and 2D libraries
 
+* [Programming for Games](https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/)
+Tutorials from the module on Programming for Games of the Newcastle University.
+
 * [SFML](http://www.sfml-dev.org/index-fr.php)
 Simple and Fast Multimedia Library.
 

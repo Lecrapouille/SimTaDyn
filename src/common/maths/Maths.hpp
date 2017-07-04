@@ -7,6 +7,8 @@
 #  include <iostream>
 #  include <cstdint>
 
+// TODO ajouter un fast_cos
+
 namespace maths
 {
   //! \brief
@@ -39,6 +41,18 @@ namespace maths
   {
     if (val < 0) return -val;
     return val;
+  }
+
+  template<class T>
+  const T& min(const T& a, const T& b)
+  {
+    return (b < a) ? b : a;
+  }
+
+  template<class T>
+  const T& max(const T& a, const T& b)
+  {
+    return (a < b) ? b : a;
   }
 
   //! \brief Converts radians to degrees and returns the result.

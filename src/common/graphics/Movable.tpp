@@ -101,7 +101,7 @@ public:
   }
 
   //! \brief Move the object by a given offset.
-  inline void move(Vector<T, n> const &offset)
+  inline void move(Vector<T, n> const &offset) //FIXME: renommer translate
   {
     m_position += offset;
     m_to_update = true;
@@ -115,6 +115,13 @@ public:
 
   //! \brief Return the 4x4 transform matrix combining the
   //! position/rotation/scale/origin of the object.
+  //!
+  //! Operation:
+  //!   Transform = TranslationMatrix * RotationMatrix * ScaleMatrix;
+  //!   TransformedVector = Transform * OriginalVector;
+  //! Note:
+  //!   Be careful of operation order: we apply scale first, then
+  //!   the rotation then the translation.
   Matrix<T, n + 1U, n + 1U> const &transform()
   {
     if (m_to_update)

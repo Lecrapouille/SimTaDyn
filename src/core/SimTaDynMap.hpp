@@ -7,6 +7,7 @@
 #  include "SimTaDynGraph.hpp"
 #  include "Set.tpp"
 #  include "Renderable.hpp"
+#  include "GLCollection.tpp"
 
 // FIXME: faut creer une class helper pour charger une seule fois les
 // shader commun a tous les cartes (ou alors 1 carte == 1 shader meme
@@ -222,8 +223,8 @@ public:
   // BTree sur des fichiers + convertion(char, type_de_la_colonne)
   // or: clef MySQL
   //Set<Vertex, 8U, Block> m_vertices;
-  GLVertexBuffer<Vector3f, config::graph_container_nb_elements> pos;
-  GLVertexBuffer<Color, config::graph_container_nb_elements> col;
+  GLVertexCollection<Vector3f, config::graph_container_nb_elements> pos;
+  GLVertexCollection<Color, config::graph_container_nb_elements> col;
 };
 
 class CurrentSimTaDynMap

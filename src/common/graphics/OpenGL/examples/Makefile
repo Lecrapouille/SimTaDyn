@@ -38,19 +38,19 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I.. -I../.. -I../../../utils -I../../../maths -I../../../patterns -I../../../containers -I../../../../../src -I../../../../../external/backward
+INCLUDES = -I. -I.. -I../geometry -I../.. -I../../../utils -I../../../maths -I../../../patterns -I../../../containers -I../../../../../src -I../../../../../external/backward
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):..:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/backward
+VPATH=.:$(BUILD):..:../geometry:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/backward
 
 ###################################################
 # Set objects architecture specific
 OBJECTS_TOOL     = Backward.o
-OBJECTS_UTILS    = ILogger.o Logger.o Exception.o
-OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o
+OBJECTS_UTILS    = PendingData.o ILogger.o Logger.o Exception.o
+OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
 OBJECTS          = $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_OPENGL) \
-                   Example01.o Example02.o Example03.o main.o
+                   Example01.o Example02.o Example03.o Example04.o Example05.o main.o
 TARGET = Examples
 
 ###################################################

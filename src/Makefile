@@ -50,7 +50,7 @@ VPATH=.:$(BUILD):../external/backward:common/patterns:common/managers:common/uti
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_TOOL     = ILogger.o Logger.o
+OBJECTS_TOOL     = Backward.o ILogger.o Logger.o PendingData.o
 OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o
 OBJECTS_COMMON   = File.o Color.o Camera2D.o
 OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
@@ -58,7 +58,7 @@ OBJECTS_RTREE    =
 # RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJECTS_MAP      = Graph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
 OBJECTS_LOADER   = MapLoader.o ShapeFile.o
-OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o Renderer.o
+OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLVertexBuffer.o GLAttrib.o Renderer.o
 OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJECTS_SIMTADYN =
 

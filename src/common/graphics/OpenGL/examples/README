@@ -1,0 +1,24 @@
+Example 01:
+============
+Display a colorfull triangle. One edge of the triangle is movable
+through keys LEFT, RIGHT. The aim of this example is to show that
+graphical elements are updatable by the CPU and automaticly transfered
+to the graphic card.
+
+Example 02:
+============
+Show a textured triangle with color mixing.
+
+Example 03:
+============
+Show a textured cube, with perspective view. Cube can turn or move
+with keys: UP, DOWN, LEFT, RIGHT.
+
+Example 04:
+============
+Same than Example 03 but the cube is fixed. The difference is the cube
+comes from the Mesh class.
+
+Example 05:
+============
+Example of graph scene: moving robots.
