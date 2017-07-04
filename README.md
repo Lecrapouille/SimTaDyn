@@ -15,6 +15,8 @@ The master branch is a redesign of the branch Original-Version-EPITA-2004 but fo
 * [SimTaDyn architecture for developpers](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Architecture.md)
 * [Credits](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Credits.md)
 
-Unit Tests Status: [![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)
+Unit tests: [![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)
+
+Static code analysis: [![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn)
 
 ![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.jpg)

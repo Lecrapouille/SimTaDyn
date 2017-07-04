@@ -50,7 +50,7 @@ VPATH=.:$(BUILD):../external/backward:common/patterns:common/managers:common/uti
 
 ###################################################
 # Set objects architecture specific
-OBJECTS_TOOL     = Backward.o ILogger.o Logger.o
+OBJECTS_TOOL     = ILogger.o Logger.o
 OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o
 OBJECTS_COMMON   = File.o Color.o Camera2D.o
 OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
@@ -127,7 +127,7 @@ coverity:
 # Clean Target
 clean:
 	@echo "*** Cleaning"
-	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(BUILD) 2> /dev/null
+	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(BUILD) cov-int SimTaDyn.tgz 2> /dev/null
 
 ###################################################
 # Install project datum

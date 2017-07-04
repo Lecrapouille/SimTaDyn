@@ -401,7 +401,7 @@ void ForthEditor::templated()
 {
   ForthEditor::empty();
   TextDocument* doc = TextEditor::document();
-  if (nullptr != doc)
+  if (nullptr == doc)
     return ;
 
   doc->buffer()->set_text(": COMPUTE-ME 1 1 + . ;\nCOMPUTE-ME");
