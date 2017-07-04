@@ -3,6 +3,7 @@
 #ifndef CONTAINER_HPP_
 #  define CONTAINER_HPP_
 
+#  include "PendingData.hpp"
 #  include <iterator>
 #  include <iostream>
 #  include <vector>
@@ -20,7 +21,7 @@ typedef uint32_t ContainerBitField;
 //! By block we mean a contigious memory of elements liek an array.
 // **************************************************************
 template<typename T, const uint32_t N>
-class Block
+class Block: public PendingData
 {
 protected:
 
@@ -33,8 +34,9 @@ public:
 
   //! \brief Default constructor to create an empty block.
   Block()
+    : PendingData()
   {
-    clear();
+    clear(); // FIXME: this call twice clearPending();
   }
 
   //! \brief Virtual destructor. Do nothing. Elements are
@@ -86,60 +88,6 @@ public:
     return total;
   }
 
-  //! \brief Return a boolean indicating if some elements of the block
-  //! has chnaged.
-  inline bool hasPendingData() const
-  {
-    bool res = ((uint32_t) -1 != m_pending_start);
-    return res;
-  }
-
-  //! \brief Return a boolean indicating if some elements of the block
-  //! has chnaged. Return the range indexes of elements that changed.
-  //! \param pos_start (outpout) if and only if the return code is
-  //! true, update the starting index of the range of elements that
-  //! changed.
-  //! \param pos_end (outpout) if and only if the return code is
-  //! true, update the ending index of the range of elements that
-  //! changed.
-  bool hasPendingData(uint32_t &pos_start, uint32_t &pos_end) const
-  {
-    if ((uint32_t) -1 == m_pending_start)
-      return false;
-
-    pos_start = m_pending_start;
-    pos_end = m_pending_end;
-    return true;
-  }
-
-  //! \brief Call this function when changed elements have been updated.
-  void clearPending()
-  {
-    m_pending_start = (uint32_t) -1;
-    m_pending_end = (uint32_t) -1;
-  }
-
-  //! \brief Update the range indexes of changed elements with a new range.
-  void addPendingData(const uint32_t pos_start, const uint32_t pos_end)
-  {
-    if ((uint32_t) -1 == m_pending_start)
-      {
-        m_pending_start = pos_start;
-        m_pending_end = pos_end;
-      }
-    else
-      {
-        m_pending_start = std::min(m_pending_start, pos_start);
-        m_pending_end = std::max(m_pending_end, pos_end);
-      }
-  }
-
-  //! \brief Update the range indexes of changed elements with a new range.
-  inline void addPendingData(const uint32_t pos_start)
-  {
-    addPendingData(pos_start, pos_start);
-  }
-
 private:
 
   //! \brief Count the number of bit '1' in a number.
@@ -165,11 +113,6 @@ public:
   T                 m_block[M];
   //! Indicate which elements are occupied.
   ContainerBitField m_occupied[E];
-
-protected:
-
-  //! Indicate which elements have been changed.
-  uint32_t m_pending_start, m_pending_end;
 };
 
 // **************************************************************

@@ -4,7 +4,7 @@
 #  include "GLWindow.hpp"
 #  include "GLVertexArray.hpp"
 #  include "GLShader.hpp"
-#  include "GLVertexBuffer.tpp"
+#  include "GLVertexBuffer.hpp"
 #  include "GLAttrib.hpp"
 #  include "GLTextures.hpp"
 
@@ -14,7 +14,7 @@ public:
 
   GLExample01()
     : m_shader("Shader01"),
-      m_vao("VAO"), 
+      m_vao("VAO"),
       m_pos("vert"),
       m_col("color")
   {
@@ -36,8 +36,8 @@ public:
 
   GLShader m_shader;
   GLVertexArray m_vao;
-  GLVertexBuffer<float, 4U> m_pos;
-  GLVertexBuffer<float, 4U> m_col;
+  GLVertexBuffer<float> m_pos;
+  GLVertexBuffer<float> m_col;
 };
 
 #  endif /* EXAMPLE_01_HPP_ */

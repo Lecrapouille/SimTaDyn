@@ -38,6 +38,21 @@ public:
     m_index = m_subindex = m_last = INITIAL_INDEX;
   }
 
+  //! \brief Constructor
+  Set(std::initializer_list<T> initList)
+    : IContainer<T, N, Block>(initList.size())
+  {
+    m_index = m_subindex = m_last = INITIAL_INDEX;
+
+    const uint32_t m = uint32_t(initList.size());
+    auto iter = initList.begin();
+    for (uint32_t i = 0; i < m; ++i)
+      {
+        append(*iter);
+        ++iter;
+      }
+  }
+
   //! \brief Insert an element at first empty location. Complexity
   //! is O(1) of elements iteration.
   virtual void append(T const& elt);

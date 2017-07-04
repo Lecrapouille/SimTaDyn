@@ -36,6 +36,21 @@ public:
     m_end = 0;
   }
 
+  Collection(std::initializer_list<T> initList)
+    : IContainer<T, N, Block>(initList.size())
+  {
+    m_begin = INITIAL_INDEX;
+    m_end = 0;
+
+    const uint32_t m = uint32_t(initList.size());
+    auto iter = initList.begin();
+    for (uint32_t i = 0; i < m; ++i)
+      {
+        append(*iter);
+        ++iter;
+      }
+  }
+
   //! \brief Insert an element at the given index. Complexity
   //! is O(1) of elements iteration.
   void insert(const uint32_t index, T const& elt);

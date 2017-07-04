@@ -4,7 +4,7 @@
 #  include "GLWindow.hpp"
 #  include "GLShader.hpp"
 #  include "GLVertexArray.hpp"
-#  include "GLVertexBuffer.tpp"
+#  include "GLVertexBuffer.hpp"
 #  include "GLAttrib.hpp"
 #  include "GLTextures.hpp"
 
@@ -14,7 +14,7 @@ public:
 
   GLExample02()
     : m_shader("Shader02"),
-      m_vao("VAO"), 
+      m_vao("VAO"),
       m_pos("vert"),
       m_col("color"),
       m_tex("vertTexCoord")
@@ -31,9 +31,9 @@ public:
 
   GLShader m_shader;
   GLVertexArray m_vao;
-  GLVertexBuffer<float, 4U> m_pos;
-  GLVertexBuffer<float, 4U> m_col;
-  GLVertexBuffer<float, 4U> m_tex;
+  GLVertexBuffer<float> m_pos;
+  GLVertexBuffer<float> m_col;
+  GLVertexBuffer<float> m_tex;
   GLTexture2D m_texture;
 };
 

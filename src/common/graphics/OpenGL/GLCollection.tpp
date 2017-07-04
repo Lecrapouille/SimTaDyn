@@ -1,7 +1,7 @@
 // -*- c++ -*- Coloration Syntaxique pour Emacs
 
-#ifndef GLVERTEX_BUFFER_TPP_
-#  define GLVERTEX_BUFFER_TPP_
+#ifndef GL_COLLECTION_TPP_
+#  define GL_COLLECTION_TPP_
 
 //! \file This class get its inspiration from the code of the Glumpy
 //! project (Python + Numpy + modern OpenGL: a fast, scalable and
@@ -34,7 +34,6 @@ public:
   GLBlockBuffer(const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLObject("GLBlockBuffer"), Block<T, N>()
   {
-    LOGI("New GLBlockBuffer with no name");
     m_target = target;
     m_usage = usage;
   }
@@ -42,7 +41,6 @@ public:
   GLBlockBuffer(std::string const& name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLObject(name), Block<T, N>()
   {
-    LOGI("New GLBlockBuffer named '%s'", name.c_str());
     m_target = target;
     m_usage = usage;
   }
@@ -50,7 +48,6 @@ public:
   GLBlockBuffer(const char *name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLObject(name), Block<T, N>()
   {
-    LOGI("New GLBlockBuffer named '%s'", name);
     m_target = target;
     m_usage = usage;
   }
@@ -61,7 +58,7 @@ public:
     GLObject::destroy();
   }
 
-  //protected:
+protected:
 
   //! \brief Allocate memory in the GPU.
   virtual bool create() override
@@ -69,7 +66,6 @@ public:
     // Total size of the container
     const uint32_t bytes = Block<T, N>::size() * sizeof (T);
 
-    LOGI("GLVertexBuffer named '%s' reserving GPU memory", m_name.c_str());
     glCheck(glGenBuffers(1, &m_handle));
     activate();
     glCheck(glBufferData(m_target, bytes, nullptr, m_usage));
@@ -80,28 +76,24 @@ public:
   //! \brief Delete the object from GPU memory.
   virtual inline void release() override
   {
-    LOGI("GLVertexBuffer named '%s' release", m_name.c_str());
     glCheck(glDeleteBuffers(1, &m_handle));
   }
 
   //! \brief Bind the buffer to some target.
   virtual inline void activate() override
   {
-    LOGI("GLVertexBuffer named '%s' activated #%u", m_name.c_str(), m_handle);
     glCheck(glBindBuffer(m_target, m_handle));
   }
 
   //! \brief Unbind the current bound buffer.
   virtual inline void deactivate() override
   {
-    LOGI("GLVertexBuffer named '%s' deactivated #%u", m_name.c_str(), m_handle);
     glCheck(glBindBuffer(m_target, 0));
   }
 
   //! \brief Whether object needs to be updated.
   virtual inline bool needUpdate() const override
   {
-    LOGI("GLVertexBuffer named '%s' need update ?", m_name.c_str());
     return Block<T, N>::hasPendingData();
   }
 
@@ -111,26 +103,28 @@ public:
     uint32_t pos_start;
     uint32_t pos_end;
 
-    LOGI("GLVertexBuffer named '%s' updating", m_name.c_str());
-    if (Block<T, N>::hasPendingData(pos_start, pos_end)) // FIXME the if() is useless
-      {
-        LOGI("GLVertexBuffer named '%s' updating %u --> %u", m_name.c_str(), pos_start, pos_end);
-        uint32_t offset = sizeof (T) * pos_start;
-        uint32_t nbytes = sizeof (T) * (pos_end - pos_start + 1U);
-        LOGI("GLVertexBuffer named '%s' updating Offset:%u --> Bytes:%u", m_name.c_str(), offset, nbytes);
+    PendingData::getPendingData(pos_start, pos_end);
+    LOGI("GLVertexBuffer named '%s' updating %u --> %u", m_name.c_str(), pos_start, pos_end);
+    m_offset = sizeof (T) * pos_start;
+    m_nbytes = sizeof (T) * (pos_end - pos_start + 1U);
 
-        glCheck(glBufferSubData(m_target, offset, nbytes, Block<T, N>::m_block));
-        Block<T, N>::clearPending();
-      }
+    LOGI("GLVertexBuffer named '%s' updating Offset:%u --> Bytes:%u", m_name.c_str(), m_offset, m_nbytes);
+    glCheck(glBufferSubData(m_target, m_offset, m_nbytes, Block<T, N>::m_block));
+    Block<T, N>::clearPending();
+
     return false;
   }
 
   //! \brief Dummy configuration.
   virtual bool setup() override
   {
-    LOGI("GLVertexBuffer named '%s' setup", m_name.c_str());
     return false;
   }
+
+private:
+
+  //! Indicate which elements have been changed.
+  uint32_t m_offset, m_nbytes;
 
 protected:
 
@@ -148,19 +142,16 @@ public:
   GLVertexBlockBuffer(const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBlockBuffer<T, N>("GLVertexBlockBuffer", GL_ARRAY_BUFFER, usage)
   {
-    ////LOGI("New GLVertexBlockBuffer with no name");
   }
 
   GLVertexBlockBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBlockBuffer<T, N>(name, GL_ARRAY_BUFFER, usage)
   {
-    ////LOGI("New GLVertexBlockBuffer named '%s'", name.c_str());
   }
 
   GLVertexBlockBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBlockBuffer<T, N>(name, GL_ARRAY_BUFFER, usage)
   {
-    ////LOGI("New GLVertexBlockBuffer named '%s'", name);
   }
 };
 
@@ -175,19 +166,16 @@ public:
   GLIndexBlockBuffer(const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBlockBuffer<T, N>("GLIndexBlockBuffer", GL_ELEMENT_ARRAY_BUFFER, usage)
   {
-    ////LOGI("New GLIndexBlockBuffer with no name");
   }
 
   GLIndexBlockBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBlockBuffer<T, N>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
-    ////LOGI("New GLIndexBlockBuffer named '%s'", name);
   }
 
   GLIndexBlockBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBlockBuffer<T, N>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
-    ////LOGI("New GLIndexBlockBuffer named '%s'", name);
   }
 };
 
@@ -196,26 +184,26 @@ public:
 // **************************************************************
 template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block = GLBlockBuffer>
-class GLBuffer: public GLAttrib, public Set<T, N, Block>
+class GLCollection: public GLAttrib, public Set<T, N, Block>
 {
 public:
 
-  GLBuffer(std::string const& name, const uint32_t reserve_elements = 1)
+  GLCollection(std::string const& name, const uint32_t reserve_elements = 1)
     : GLAttrib(name), Set<T,N,Block>(reserve_elements)
   {
-    LOGI("New GLBuffer with %u elements", reserve_elements);
   }
 
-  GLBuffer(const char *name, const uint32_t reserve_elements = 1)
+  GLCollection(const char *name, const uint32_t reserve_elements = 1)
     : GLAttrib(name), Set<T,N,Block>(reserve_elements)
   {
-    LOGI("New GLBuffer with %u elements", reserve_elements);
   }
 
   virtual void setup(GLShader& program, const GLint size, const GLenum type, const GLboolean normalized = GL_FALSE) override
   {
     if (nullptr == Set<T, N, Block>::block(0))
-      Set<T, N, Block>::reserve(1);
+      {
+        Set<T, N, Block>::reserve(1);
+      }
     Set<T, N, Block>::block(0)->start();
     GLAttrib::setup(program, size, type, normalized);
     GLAttrib::start();
@@ -236,28 +224,27 @@ public:
 // **************************************************************
 template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block = GLVertexBlockBuffer>
-class GLVertexBuffer: public GLBuffer<T, N, Block>
+class GLVertexCollection: public GLCollection<T, N, Block>
 {
 public:
 
-  GLVertexBuffer(const uint32_t reserve_elements = 1)
-    : GLBuffer<T,N,Block>("GLVertexBuffer", reserve_elements)
+  GLVertexCollection(const uint32_t reserve_elements = 1)
+    : GLCollection<T,N,Block>("GLVertexCollection", reserve_elements)
   {
-    LOGI("New GLVertexBuffer with %u elements", reserve_elements);
+    LOGI("New GLVertexCollection with %u elements", reserve_elements);
   }
 
-  GLVertexBuffer(const char *name, const uint32_t reserve_elements = 1)
-    : GLBuffer<T,N,Block>(name, reserve_elements)
+  GLVertexCollection(const char *name, const uint32_t reserve_elements = 1)
+    : GLCollection<T,N,Block>(name, reserve_elements)
   {
-    LOGI("New GLVertexBuffer with %u elements", reserve_elements);
+    LOGI("New GLVertexCollection with %u elements", reserve_elements);
   }
 
-  GLVertexBuffer(std::string const& name, const uint32_t reserve_elements = 1)
-    : GLBuffer<T,N,Block>(name, reserve_elements)
+  GLVertexCollection(std::string const& name, const uint32_t reserve_elements = 1)
+    : GLCollection<T,N,Block>(name, reserve_elements)
   {
-    LOGI("New GLVertexBuffer with %u elements", reserve_elements);
+    LOGI("New GLVertexCollection with %u elements", reserve_elements);
   }
-
 };
 
 // **************************************************************
@@ -265,27 +252,27 @@ public:
 // **************************************************************
 template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block = GLIndexBlockBuffer>
-class GLIndexBuffer: public GLBuffer<T, N, Block>
+class GLIndexCollection: public GLCollection<T, N, Block>
 {
 public:
 
-  GLIndexBuffer(const uint32_t reserve_elements = 1)
-    : GLBuffer<T,N,Block>("GLIndexBuffer", reserve_elements)
+  GLIndexCollection(const uint32_t reserve_elements = 1)
+    : GLCollection<T,N,Block>("GLIndexCollection", reserve_elements)
   {
-    LOGI("New GLIndexBuffer with %u elements", reserve_elements);
+    LOGI("New GLIndexCollection with %u elements", reserve_elements);
   }
 
-  GLIndexBuffer(const char *name, const uint32_t reserve_elements = 1)
-    : GLBuffer<T,N,Block>(name, reserve_elements)
+  GLIndexCollection(const char *name, const uint32_t reserve_elements = 1)
+    : GLCollection<T,N,Block>(name, reserve_elements)
   {
-    LOGI("New GLIndexBuffer with %u elements", reserve_elements);
+    LOGI("New GLIndexCollection with %u elements", reserve_elements);
   }
 
-  GLIndexBuffer(std::string const& name, const uint32_t reserve_elements = 1)
-    : GLBuffer<T,N,Block>(name, reserve_elements)
+  GLIndexCollection(std::string const& name, const uint32_t reserve_elements = 1)
+    : GLCollection<T,N,Block>(name, reserve_elements)
   {
-    LOGI("New GLIndexBuffer with %u elements", reserve_elements);
+    LOGI("New GLIndexCollection with %u elements", reserve_elements);
   }
 };
 
-#endif /* GLVERTEX_BUFFER_TPP_ */
+#endif /* GL_COLLECTION_TPP_ */

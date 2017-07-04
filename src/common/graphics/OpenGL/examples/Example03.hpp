@@ -4,7 +4,7 @@
 #  include "GLWindow.hpp"
 #  include "GLShader.hpp"
 #  include "GLVertexArray.hpp"
-#  include "GLVertexBuffer.tpp"
+#  include "GLVertexBuffer.hpp"
 #  include "GLAttrib.hpp"
 #  include "GLTextures.hpp"
 #  include "Movable.tpp"
@@ -33,8 +33,8 @@ public:
 
   GLShader m_shader;
   GLVertexArray m_vao;
-  GLVertexBuffer<float, 10U> m_pos;
-  GLVertexBuffer<float, 10U> m_tex;
+  GLVertexBuffer<float> m_pos;
+  GLVertexBuffer<float> m_tex;
   GLTexture2D m_texture;
 };
 

@@ -122,8 +122,8 @@ bool GLExample03::setup()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  m_pos.append(vertexData, ARRAY_SIZE(vertexData));
-  m_tex.append(textureData, ARRAY_SIZE(textureData));
+  m_pos.add(vertexData, ARRAY_SIZE(vertexData));
+  m_tex.add(textureData, ARRAY_SIZE(textureData));
 
   if (0U == m_shader.load("Example03.vertex", "Example03.fragment"))
     return false;
@@ -133,11 +133,14 @@ bool GLExample03::setup()
   if (false == m_texture.load("wooden-crate.jpg"))
     return false;
 
-  m_vao.start();
-
   m_pos.setup(m_shader, 3, GL_FLOAT);
   m_tex.setup(m_shader, 2, GL_FLOAT);
 
+  m_vao.start();
+  {
+    m_pos.start();
+    m_tex.start();
+  }
   m_vao.stop();
   return true;
 }
