@@ -53,32 +53,27 @@ protected:
 
   virtual bool create() override
   {
-    LOGI("TEX::creeate");
     glCheck(glGenTextures(1U, &m_handle));
     return false;
   }
 
   virtual void release() override
   {
-    LOGI("TEX::release");
     glCheck(glDeleteTextures(1U, &m_handle));
   }
 
   virtual void activate() override
   {
-    LOGI("TEX::activate");
     glCheck(glBindTexture(m_target, m_handle));
   }
 
   virtual void deactivate() override
   {
-    LOGI("TEX::deactivate");
     glCheck(glBindTexture(m_target, 0U));
   }
 
   virtual bool setup() override
   {
-LOGI("TEX::setup");
     activate();
     glCheck(glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, m_min_filter));
     glCheck(glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, m_mag_filter));
@@ -164,7 +159,6 @@ protected:
   virtual bool setup() override
   {
     bool b = GLTexture::setup();
-    LOGI("TEXTURE setup %u", nullptr != m_buffer);
     glCheck(glTexImage2D(m_target, 0, m_gpu_format, m_width, m_height,
                          0, m_cpu_format, m_type, m_buffer));
     return b;
@@ -172,7 +166,6 @@ protected:
 
   virtual bool update() override
   {
-    LOGI("TEXTURE update");
     //return false; // FIXME
     //if (isValid())
       {

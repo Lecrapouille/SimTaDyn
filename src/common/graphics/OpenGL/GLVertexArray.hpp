@@ -35,7 +35,6 @@ protected:
 
   virtual bool create() override
   {
-    //LOGI("GLVertexArray named '%s' reserving GPU memory", m_name.c_str());
     glCheck(glGenVertexArrays(1, &m_handle));
     return false;
   }
@@ -47,13 +46,11 @@ protected:
 
   virtual void activate() override
   {
-    //LOGI("GLVertexArray named '%s' activated: %d", m_name.c_str(), (GLint) m_handle);
     glCheck(glBindVertexArray(m_handle));
   }
 
   virtual void deactivate() override
   {
-    //LOGI("GLVertexArray named '%s' deactivated", m_name.c_str());
     glCheck(glBindVertexArray(0U));
   }
 

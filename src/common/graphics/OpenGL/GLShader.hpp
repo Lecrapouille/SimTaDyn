@@ -66,7 +66,6 @@ protected:
   //! to parameters.
   virtual bool create() override
   {
-    //LOGI("GLShader named '%s' create", m_name.c_str());
     if (!isValid())
       {
         if (m_throw_enable)
@@ -74,7 +73,6 @@ protected:
             GLShaderNotLoadedException e(m_name);
             throw e;
           }
-        //LOGI("GLShader named '%s' failed", m_name.c_str());
         return true;
       }
     return false;
@@ -100,7 +98,6 @@ protected:
   //! been loaded into a program (else nothing is done).
   virtual inline void activate() override
   {
-    //LOGI("GLShader named '%s' activate", m_name.c_str());
     glUseProgram(m_handle);
   }
 
@@ -108,7 +105,6 @@ protected:
   //! been loaded into a program (else nothing is done).
   virtual inline void deactivate() override
   {
-    //LOGI("GLShader named '%s' deactivate", m_name.c_str());
     glUseProgram(0U);
   }
 
@@ -165,8 +161,6 @@ public:
   {
     assert(nullptr != name);
     GLint res = glCheck(glGetAttribLocation(m_handle, name));
-    //LOGI("GLShader named '%s' locating attribute '%s': %d", 
-    //m_name.c_str(), name, res);
     return res;
   }
 

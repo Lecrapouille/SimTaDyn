@@ -69,7 +69,6 @@ public:
   //! \brief Setup attributes
   virtual void setup(GLShader& program, const GLint size, const GLenum type, const GLboolean normalized = GL_FALSE)
   {
-    LOGI("GLAttrib named '%s': seting-up attributes", m_name.c_str());
     m_program = &program;
     m_normalized = normalized;
 
@@ -88,7 +87,6 @@ public:
 
   virtual bool isValid() const override
   {
-    LOGI("GLAttrib named '%s' is valid ? %u", m_name.c_str(), ((GLint) m_handle) != -1);
     return ((GLint) m_handle) != -1;
   }
 
@@ -105,14 +103,12 @@ protected:
 
   virtual void activate() override
   {
-    LOGI("GLAttrib named '%s' activated: %d", m_name.c_str(), (GLint) m_handle);
     glCheck(glEnableVertexAttribArray((GLint) m_handle));
     glCheck(glVertexAttribPointer((GLint) m_handle, m_size, m_type, m_normalized, 0, nullptr));
   }
 
   virtual void deactivate() override
   {
-    LOGI("GLAttrib named '%s' deactivated", m_name.c_str());
     glCheck(glEnableVertexAttribArray(0));
   }
 
@@ -133,7 +129,6 @@ protected:
           }
       }
 
-    LOGI("GLAttrib named '%s' setting up", m_name.c_str());
     m_handle = (GLenum) m_program->locateAttrib(m_name.c_str());
     if (isValid() && (0 != m_size) && (0 != m_type))
       {
