@@ -51,7 +51,7 @@ VPATH=.:$(BUILD):../external/backward:../src:../src/common/patterns:../src/commo
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = Backward.o ILogger.o Logger.o File.o FileTests.o Maths.o	\
+OBJECTS = Backward.o ILogger.o Logger.o PendingData.o File.o FileTests.o Maths.o	\
 	VectorTests.o MatrixTests.o TransformationTests.o		\
 	BoundingBoxTests.o FilteringTests.o Color.o ColorTests.o	\
 	SetTests.o CollectionTests.o Exception.o OpenGL.o GLObject.o	\
