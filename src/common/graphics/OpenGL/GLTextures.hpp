@@ -2,12 +2,13 @@
 #  define GLTEXTURES_HPP_
 
 #  include "GLObject.hpp"
+#  include "PendingData.hpp"
 #  include <SOIL/SOIL.h>
 
 // **************************************************************
-//! FIXME: should inherit from a GPUdata
+//
 // **************************************************************
-class GLTexture: public GLObject
+class GLTexture: public GLObject, public PendingData
 {
 public:
 
@@ -110,7 +111,6 @@ public:
     return load(filename.c_str(), rename);
   }
 
-  // FIXME: m_buffer should be a container for automatic update
   bool load(const char *const filename, const bool rename = true)
   {
     int width, height;
@@ -132,6 +132,7 @@ public:
           {
             m_name = filename;
           }
+        PendingData::addPendingData(0U, m_width * m_height);
         LOGI("Successfuly load picture file '%s'", filename);
         res = true;
       }
@@ -142,6 +143,22 @@ public:
       }
     m_need_update = (nullptr != m_buffer);
     return res;
+  }
+
+  inline unsigned char& operator[](size_t nth)
+  {
+    //TBD ?
+    //if (nth > m_width * m_height)
+    //  {
+    //    reserve(nth);
+    //  }
+    PendingData::addPendingData(nth);
+    return m_buffer[nth];
+  }
+
+  inline const unsigned char& operator[](size_t nth) const
+  {
+    return m_buffer[nth];
   }
 
   inline uint32_t width() const
@@ -164,17 +181,17 @@ protected:
     return b;
   }
 
+  virtual inline bool needUpdate() const override
+  {
+    return PendingData::hasPendingData();
+  }
+
   virtual bool update() override
   {
-    //return false; // FIXME
-    //if (isValid())
-      {
-        glCheck(glBindTexture(m_target, m_handle));
-        glCheck(glTexSubImage2D(m_target, 0, 0, 0, m_width, m_height,
-                                m_cpu_format, m_type, m_buffer));
-        return false;
-      }
-    return true;
+    glCheck(glBindTexture(m_target, m_handle));
+    glCheck(glTexSubImage2D(m_target, 0, 0, 0, m_width, m_height,
+                            m_cpu_format, m_type, m_buffer));
+    return false;
   };
 
   uint32_t m_width = 0;

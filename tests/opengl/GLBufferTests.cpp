@@ -32,8 +32,8 @@ public:
   GLVertexBlockBuffer<int, 2U> block2;
   // An index Buffer block of data
   GLIndexBlockBuffer<int, 2U> block3;
-  GLIndexBuffer<int, 2U> vbo1;
-  GLVertexBuffer<int, 2U> vbo2;
+  GLIndexCollection<int, 2U> vbo1;
+  GLVertexCollection<int, 2U> vbo2;
 };
 
 static std::shared_ptr<GLWindow> win;
@@ -104,7 +104,8 @@ void GLBufferTests::testDummy()
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, win->block1.m_pending_end);
   uint32_t pos_start = 40U;
   uint32_t pos_end = 41U;
-  CPPUNIT_ASSERT_EQUAL(false, win->block1.hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(false, win->block1.hasPendingData());
+  win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(41U, pos_end);
   CPPUNIT_ASSERT_EQUAL(false, win->block1.needUpdate());
@@ -137,7 +138,7 @@ void GLBufferTests::testDummy()
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, b->m_pending_start);
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, b->m_pending_end);
   CPPUNIT_ASSERT_EQUAL(false, b->hasPendingData());
-  CPPUNIT_ASSERT_EQUAL(false, b->hasPendingData(pos_start, pos_end));
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(41U, pos_end);
 
@@ -145,7 +146,7 @@ void GLBufferTests::testDummy()
   pos_start = 0U;
   pos_end = 1U;
   CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(41U, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, b->m_pending_start);
@@ -166,7 +167,8 @@ void GLBufferTests::testPendingData()
   win->block1.addPendingData(pos_start, pos_end);
   pos_start = 0U;
   pos_end = 1U;
-  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
+  win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(41U, pos_end);
   CPPUNIT_ASSERT_EQUAL(true, win->block1.needUpdate());
@@ -175,7 +177,8 @@ void GLBufferTests::testPendingData()
   win->block1.clearPending();
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, win->block1.m_pending_start);
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, win->block1.m_pending_end);
-  CPPUNIT_ASSERT_EQUAL(false, win->block1.hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(false, win->block1.hasPendingData());
+  win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(41U, pos_end);
   CPPUNIT_ASSERT_EQUAL(false, win->block1.needUpdate());
@@ -184,7 +187,8 @@ void GLBufferTests::testPendingData()
   pos_start = 40U;
   pos_end = 41U;
   win->block1.addPendingData(pos_start, pos_end);
-  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
+  win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(41U, pos_end);
   CPPUNIT_ASSERT_EQUAL(true, win->block1.needUpdate());
@@ -193,7 +197,8 @@ void GLBufferTests::testPendingData()
   pos_start = 40U;
   pos_end = 42U;
   win->block1.addPendingData(pos_start, pos_end);
-  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
+  win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
   CPPUNIT_ASSERT_EQUAL(42U, pos_end);
   CPPUNIT_ASSERT_EQUAL(true, win->block1.needUpdate());
@@ -202,7 +207,8 @@ void GLBufferTests::testPendingData()
   pos_start = 2U;
   pos_end = 44U;
   win->block1.addPendingData(pos_start, pos_end);
-  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
+  win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(2U, pos_start);
   CPPUNIT_ASSERT_EQUAL(44U, pos_end);
   CPPUNIT_ASSERT_EQUAL(true, win->block1.needUpdate());
@@ -223,7 +229,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.used());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.blocks());
   CPPUNIT_ASSERT_EQUAL(3U, win->vbo1.remaining());
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(0U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -234,7 +241,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(2U, win->vbo1.used());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.blocks());
   CPPUNIT_ASSERT_EQUAL(2U, win->vbo1.remaining());
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(1U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -245,7 +253,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(3U, win->vbo1.used());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.blocks());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.remaining());
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(2U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -256,7 +265,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(4U, win->vbo1.used());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.blocks());
   CPPUNIT_ASSERT_EQUAL(0U, win->vbo1.remaining());
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(3U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -267,7 +277,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(3U, win->vbo1.used());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.blocks());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.remaining());
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(3U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -275,7 +286,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(true, b->needUpdate());
 
   b->clearPending();
-  CPPUNIT_ASSERT_EQUAL(false, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(false, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(3U, pos_end);
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, b->m_pending_start);
@@ -286,7 +298,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(4U, win->vbo1.used());
   CPPUNIT_ASSERT_EQUAL(1U, win->vbo1.blocks());
   CPPUNIT_ASSERT_EQUAL(0U, win->vbo1.remaining());
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(3U, pos_start);
   CPPUNIT_ASSERT_EQUAL(3U, pos_end);
   CPPUNIT_ASSERT_EQUAL(3U, b->m_pending_start);
@@ -299,7 +312,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(3U, win->vbo1.remaining());
   b = win->vbo1.block(0);
   CPPUNIT_ASSERT_EQUAL(true, nullptr != b);
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(3U, pos_start);
   CPPUNIT_ASSERT_EQUAL(3U, pos_end);
   CPPUNIT_ASSERT_EQUAL(3U, b->m_pending_start);
@@ -307,7 +321,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(true, b->needUpdate());
   b = win->vbo1.block(1);
   CPPUNIT_ASSERT_EQUAL(true, nullptr != b);
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(0U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -315,7 +330,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(true, b->needUpdate());
 
   win->vbo1.append(47);
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(1U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -323,7 +339,8 @@ void GLBufferTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(true, b->needUpdate());
 
   win->vbo1.append(48);
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(2U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -341,7 +358,8 @@ void GLBufferTests::testSuppress()
   win->vbo1.remove();
   auto b = win->vbo1.block(0);
   CPPUNIT_ASSERT_EQUAL(true, nullptr != b);
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(3U, pos_start);
   CPPUNIT_ASSERT_EQUAL(3U, pos_end);
   CPPUNIT_ASSERT_EQUAL(3U, b->m_pending_start);
@@ -350,7 +368,8 @@ void GLBufferTests::testSuppress()
 
   b = win->vbo1.block(1);
   CPPUNIT_ASSERT_EQUAL(true, nullptr != b);
-  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(2U, pos_end);
   CPPUNIT_ASSERT_EQUAL(0U, b->m_pending_start);
@@ -365,7 +384,8 @@ void GLBufferTests::testSuppress()
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, b->m_pending_end);
 
   win->vbo1.remove();
-  CPPUNIT_ASSERT_EQUAL(false, b->hasPendingData(pos_start, pos_end));
+  CPPUNIT_ASSERT_EQUAL(false, b->hasPendingData());
+  b->getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, b->m_pending_start);
   CPPUNIT_ASSERT_EQUAL((uint32_t) -1, b->m_pending_end);
   CPPUNIT_ASSERT_EQUAL(false, b->needUpdate());

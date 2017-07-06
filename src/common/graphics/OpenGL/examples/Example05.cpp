@@ -1,5 +1,7 @@
 #include "Example05.hpp"
 
+//! \file Draw several animated robots
+
 // FIXME
 void GLExample05::setUniform(const char *name, Matrix44f const &mat)
 {
@@ -11,20 +13,25 @@ bool GLExample05::setup()
 {
   LOGI("GLExample05::setup()");
 
+  // Enable the depth buffer
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  // Compile a shader program
   if (0U == m_shader.load("Example05.vertex", "Example05.fragment"))
     return false;
 
+  // Tell to OpenGL how to manage VBO values. This fixes the size
+  // of the VBO container to its current capacity (ie. now the VBO
+  // size no longer be larger): the GPU have allocated static memory.
+  m_robot1->setup(m_shader);
+  m_robot2->setup(m_shader);
+  m_robot3->setup(m_shader);
+
   m_shader.start();
   {
-    m_robot1->setup(m_shader);
-    m_robot2->setup(m_shader);
-    m_robot3->setup(m_shader);
-
     // Projection matrix
     float ratio = ((float) m_width) / ((float) m_height);
     Matrix44f m = matrix::perspective(maths::radians(50.0f), ratio, 0.01f, 10000.0f);
@@ -39,6 +46,7 @@ bool GLExample05::setup()
   return true;
 }
 
+// Draw recursively a node from a scene graph
 void GLExample05::drawNode(SceneNode<float, 3U> &node)
 {
   LOGI("Renderer:drawNode '%s'", node.m_name.c_str());
@@ -46,24 +54,19 @@ void GLExample05::drawNode(SceneNode<float, 3U> &node)
   Mesh *m = node.mesh();
   if (nullptr != m)
     {
-      Matrix44f transform = matrix::scale(node.worldTransform(), node.scaleF());
+      Matrix44f transform = matrix::scale(node.worldTransform(), node.localScale());
       setUniform("model", transform);
       m->draw(GL_TRIANGLES);
     }
 
-  // FIXME
-  for (auto i: node.m_childrens)
+  std::vector<SceneNode<float, 3U>*> const &children = node.children();
+  for (auto i: children)
     {
       drawNode(*i);
     }
-  // FIXME
-  /*  for (auto i: node.cbegin(); i != node.cend(); ++i)
-    {
-      drawNode(*i);
-    }
-  */
-}
+ }
 
+// Draw scene graph (made of robots)
 bool GLExample05::draw()
 {
   LOGI("GLExample05::update()");
@@ -71,7 +74,7 @@ bool GLExample05::draw()
   if (nullptr == m_root)
     return false;
 
-  m_root->update(m_deltaTime);
+  m_root->update(dt());
 
   LOGI("GLExample05::draw()");
 

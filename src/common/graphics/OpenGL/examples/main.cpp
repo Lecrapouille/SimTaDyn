@@ -3,9 +3,10 @@
 #include "Example03.hpp"
 #include "Example04.hpp"
 #include "Example05.hpp"
+//#include "Example06.hpp"
 #include <memory>
 
-#define MAX_EXAMPLES 5
+#define MAX_EXAMPLES 6
 
 static void usage(char *argv[])
 {
@@ -27,6 +28,7 @@ int main(int argc, char *argv[])
     }
 
   IGLWindow *win;
+
   switch (example)
     {
     case 1:
@@ -41,8 +43,11 @@ int main(int argc, char *argv[])
     case 4:
       win = new GLExample04();
       break;
-    default:
+    case 5:
       win = new GLExample05();
+      break;
+    default:
+      //win = new GLExample06();
       break;
     }
 

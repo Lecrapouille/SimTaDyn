@@ -7,7 +7,7 @@
 
 #define protected public
 #define private public
-#include "GLVertexBuffer.tpp"
+#include "GLCollection.tpp"
 #undef protected
 #undef private
 

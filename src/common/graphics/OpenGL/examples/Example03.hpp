@@ -36,6 +36,8 @@ public:
   GLVertexBuffer<float> m_pos;
   GLVertexBuffer<float> m_tex;
   GLTexture2D m_texture;
+  float m_degreesRotated = 0.0f;
+  Movable<float, 3U> m_movable;
 };
 
 #  endif /* EXAMPLE_03_HPP_ */

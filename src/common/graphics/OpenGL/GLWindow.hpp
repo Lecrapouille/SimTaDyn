@@ -21,6 +21,10 @@ public:
   virtual bool draw() = 0;
   void update();
   void close();
+  inline float dt() const
+  {
+    return m_deltaTime;
+  }
 
 private:
 
@@ -29,6 +33,7 @@ private:
   double m_lastTime;
   double m_lastFrameTime;
   int m_nbFrames;
+  float m_deltaTime;
 
 protected:
 
@@ -36,7 +41,6 @@ protected:
   const int m_height = 768;
   const char *m_title = "Example";
   GLFWwindow *m_window;
-  float m_deltaTime;
 };
 
 #endif /* GLWINDOW_HPP_ */

@@ -83,6 +83,24 @@ public:
     return m_data[nth];
   }
 
+  inline void push_back(T const &e)
+  {
+    m_data.push_back(e);
+    PendingData::addPendingData(m_data.size() - 1U);
+  }
+
+  inline void pop_back()
+  {
+    m_data.pop_back(); // FIXME --Pending::last ssi last == size
+  }
+
+  inline void push_front(T const &e)
+  {
+    auto it = m_data.begin();
+    m_data.insert(it, e);
+    PendingData::addPendingData(0U, m_data.size() - 1U);
+  }
+
   //! \brief Return the number of elements a block can store
   inline uint32_t size() const
   {
@@ -123,8 +141,7 @@ public:
     uint32_t offset = m_data.size();
     PendingData::addPendingData(offset, offset + size);
 
-    uint32_t s = size;
-    while (s--)
+    for (uint32_t s = 0U; s < size; ++s)
       {
         m_data.push_back(array[s]);
       }
@@ -132,7 +149,6 @@ public:
 
   virtual void setup(GLShader& program, const GLint size, const GLenum type, const GLboolean normalized = GL_FALSE)
   {
-    LOGI("VBO::config");
     m_attrib.setup(program, size, type, normalized);
   }
 
@@ -152,7 +168,6 @@ protected:
 
   virtual bool create() override
   {
-    LOGI("VBO::create");
     const uint32_t bytes = m_data.capacity() * sizeof (T);
     glCheck(glGenBuffers(1, &m_handle));
     activate();
@@ -168,19 +183,16 @@ protected:
 
   virtual void activate() override
   {
-    LOGI("VBO::activate");
     glCheck(glBindBuffer(m_target, m_handle));
   }
 
   virtual void deactivate() override
   {
-    LOGI("VBO::deactive");
     glCheck(glBindBuffer(m_target, 0));
   }
 
   virtual bool setup() override
   {
-    LOGI("VBO::setup");
     return false;
   }
 
@@ -202,7 +214,8 @@ protected:
     return false;
   }
 
-protected:
+  //protected:
+public:
 
   GLAttrib m_attrib;
   GLenum m_usage;

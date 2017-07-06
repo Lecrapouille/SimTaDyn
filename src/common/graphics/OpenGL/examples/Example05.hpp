@@ -11,41 +11,41 @@ class CubicRobot: public SceneNode<float, 3U>
 public:
 
   CubicRobot(const char *name)
-    : SceneNode(name)
+    : SceneNode(nullptr, name)
   {
     // Body
     m_body = new SceneNode(m_cube, "Body");
-    m_body->scaleF(Vector3f(10.0f, 15.0f, 5.0f));
+    m_body->localScale(Vector3f(10.0f, 15.0f, 5.0f));
     m_body->position(Vector3f(0.0f, 35.0f, 0.0f));
     add(*m_body);
 
     // Head
     m_head = new SceneNode(m_cube, "Head");
-    m_head->scaleF(Vector3f(5.0f));
+    m_head->localScale(Vector3f(5.0f));
     m_head->position(Vector3f(0.0f, 30.0f, 0.0f));
     m_body->add(*m_head);
 
     // Left arm
     m_leftArm = new SceneNode(m_cube, "Left Arm");
-    m_leftArm->scaleF(Vector3f(3.0f, -18.0f, 3.0f));
+    m_leftArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
     m_leftArm->position(Vector3f(-12.0f, 30.0f, -1.0f));
     m_body->add(*m_leftArm);
 
     // Right arm
     m_rightArm = new SceneNode(m_cube, "Right Arm");
-    m_rightArm->scaleF(Vector3f(3.0f, -18.0f, 3.0f));
+    m_rightArm->localScale(Vector3f(3.0f, -18.0f, 3.0f));
     m_rightArm->position(Vector3f(12.0f, 30.0f, -1.0f));
     m_body->add(*m_rightArm);
 
     // Left leg
     m_leftLeg = new SceneNode(m_cube, "Left Leg");
-    m_leftLeg->scaleF(Vector3f(3.0f, -17.5f, 3.0f));
+    m_leftLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
     m_leftLeg->position(Vector3f(-8.0f, 0.0f, 0.0f));
     m_body->add(*m_leftLeg);
 
     // Right leg
     m_rightLeg = new SceneNode(m_cube, "Right Leg");
-    m_rightLeg->scaleF(Vector3f(3.0f, -17.5f, 3.0f));
+    m_rightLeg->localScale(Vector3f(3.0f, -17.5f, 3.0f));
     m_rightLeg->position(Vector3f(8.0f, 0.0f, 0.0f));
     m_body->add(*m_rightLeg);
   }

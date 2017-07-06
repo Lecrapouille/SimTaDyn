@@ -18,7 +18,7 @@ SimTaDyn is based on C++11, Modern OpenGL (>= 3.0), The C++ version of GTK+, the
 
 Install dependencies for the master branch:
 ```sh
-sudo apt-get install libgtksourceviewmm-3.0-dev freeglut3 freeglut3-dev mesa-common-dev libglu1-mesa-dev libglew-dev libglfw3-dev libdw-dev libsoil-dev
+sudo apt-get install libgtksourceviewmm-3.0-dev freeglut3 freeglut3-dev mesa-common-dev libglu1-mesa-dev libglew-dev libglfw3-dev libdw-dev libsoil-dev binutils-dev
 ```
 
 Note: if you prefer compiling the legacy version of SimTaDyn, install the gtkmm-2.4 instead of gtkmm-3.0 (both versions can co-exist on your system):
