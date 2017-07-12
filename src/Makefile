@@ -85,7 +85,7 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
-       -lGLEW -ldl -ldw
+       -lGLEW -ldl -ldw -lSOIL
 else
 $(error Unknown architecture)
 endif
@@ -136,7 +136,7 @@ install-data:
 	@rm -fr $(PROJECT_DATA_PATH)
 	@mkdir -p $(PROJECT_DATA_PATH)/forth
 	@cp -r ../data/* $(PROJECT_DATA_PATH)
-	@cp -r SimForth/Forth/core/system.fs $(PROJECT_DATA_PATH)/forth
+	@cp -r forth/core/system.fs $(PROJECT_DATA_PATH)/forth
 
 ###################################################
 # Create a temporary folder to store *.o and *.d files

@@ -47,7 +47,7 @@ protected:
            map->m_name.c_str(), map);
       if (nullptr == m_editor.m_drawing_area)
         return ;
-      m_editor.m_drawing_area->drawThat(*map);
+      //FIXME m_editor.m_drawing_area->drawThat(*map);
     }
 
     MapEditor& m_editor;
@@ -68,7 +68,7 @@ public:
     LOGI("Creating a new SimTaDyn map");
     SimTaDynMap *map = new SimTaDynMap();
     map->addListener(m_listener);
-    m_drawing_area->attachModel(*map);
+    //FIXME m_drawing_area->attachModel(*map);
     m_maps.insert(map);
     m_current_map.set(map);
     return map;

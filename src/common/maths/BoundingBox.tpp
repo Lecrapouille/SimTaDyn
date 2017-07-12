@@ -345,7 +345,6 @@ protected:
       {
         throw std::out_of_range(msg.str().c_str());
       }
-    std::cout << msg.str();
   }
 
 public:

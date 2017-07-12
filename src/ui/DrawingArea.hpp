@@ -13,6 +13,7 @@ class GLDrawingArea
     public GLRenderer
 {
 public:
+
   enum Direction { Forward, Backward, Up, Down, Right, Left, DirectionIterEnd = Left, DirectionIterBegin = Forward };
 
   //! \brief Constructor.
@@ -40,6 +41,18 @@ public:
   {
   }
 
+  inline uint32_t screenWidth() const override
+  {
+    return Gtk::GLArea::get_width();
+  }
+
+  inline uint32_t screenHeight() const override
+  {
+    return Gtk::GLArea::get_height();
+  }
+
+  //FIXME protected:
+
   // Desired OpenGL context version 3.3
   inline void setContext() override
   {
@@ -55,18 +68,6 @@ public:
   {
     set_has_depth_buffer();
   }
-
-  inline uint32_t screenWidth() const override
-  {
-    return Gtk::GLArea::get_width();
-  }
-
-  inline uint32_t screenHeight() const override
-  {
-    return Gtk::GLArea::get_height();
-  }
-
-  virtual void drawThat(Renderable& renderable) override;
 
   //! \brief
   inline void keyPressed(Direction d) { m_direction[d] = true; }

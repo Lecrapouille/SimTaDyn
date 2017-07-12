@@ -8,7 +8,7 @@
 // **************************************************************
 //
 // **************************************************************
-class GLTexture: public GLObject, public PendingData
+class GLTexture: public GLObject, protected PendingData
 {
 public:
 
@@ -188,9 +188,21 @@ protected:
 
   virtual bool update() override
   {
+    uint32_t pos_start;
+    uint32_t pos_end;
+    PendingData::getPendingData(pos_start, pos_end);
+
+    // FIXME: TODO pendingData --> x,y,width,height
+    const uint32_t x = 0U;
+    const uint32_t y = 0U;
+    const uint32_t width = m_width;
+    const uint32_t height = m_height;
+
     glCheck(glBindTexture(m_target, m_handle));
-    glCheck(glTexSubImage2D(m_target, 0, 0, 0, m_width, m_height,
+    glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
                             m_cpu_format, m_type, m_buffer));
+
+    PendingData::clearPending();
     return false;
   };
 

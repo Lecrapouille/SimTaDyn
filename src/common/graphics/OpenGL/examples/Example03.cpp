@@ -219,7 +219,7 @@ bool GLExample03::draw()
   // Model matrix transformation
   setUniform("model", m_movable.transform());
 
-  // Projetion matrix transformation
+  // Projection matrix transformation
   float ratio = ((float) m_width) / ((float) m_height);
   Matrix44f projection = matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
   setUniform("projection", projection);

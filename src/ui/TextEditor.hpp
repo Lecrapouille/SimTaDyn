@@ -151,8 +151,8 @@ protected:
   Gtk::Label m_label;
   Gtk::Button m_button;
   Gtk::Image m_image;
-  TextEditor *m_editor = nullptr;
-  Gtk::Widget *m_widget = nullptr;
+  TextEditor *m_editor;
+  Gtk::Widget *m_widget;
   bool m_asterisk;
   std::string m_title;
 };

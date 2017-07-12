@@ -1,8 +1,11 @@
-#version 330 core
+#version 150
 
-in vec4 a_fragmentColor; // given by node.vertex
+uniform sampler2D tex;
 
-void main()
-{
-  gl_FragColor = a_fragmentColor;
+in vec2 fragTexCoord;
+
+out vec4 finalColor;
+
+void main() {
+    finalColor = texture(tex, fragTexCoord);
 }

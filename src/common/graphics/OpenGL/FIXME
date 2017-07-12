@@ -1,0 +1,15 @@
+Faire une classe OpenGLexception parente a GLObject exception, shderexception ...
+
+Finir GLTexture::update() --> prendre en compte pending data.
+Finir GLTexture operator[][] + index(i, j) = return i * w + j
+Finir GLTexture + examples rendre plus propre: 
+  GLint TextureID = glCheck(glGetUniformLocation(m_shader, "tex"));
+  glCheck(glUniform1i(TextureID, 0));
+  glCheck(glActiveTexture(GL_TEXTURE0));
+  m_texture.start();
+
+Mouse Picking
+
+Finir Attribures/Uniform + examples:  setUniform(Matrix)
+
+Ajouter fontes et framebuffer

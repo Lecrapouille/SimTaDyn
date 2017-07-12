@@ -23,7 +23,7 @@ namespace SimTaDyn
             throw Gdk::GLError(Gdk::GLError::NOT_AVAILABLE, Glib::ustring(m));
           }
         _context_started = true;
-	LOGI("OpenGL context created with success");
+        LOGI("OpenGL context created with success");
       }
     catch (const Gdk::GLError& gle)
       {
@@ -34,7 +34,6 @@ namespace SimTaDyn
 
   bool glIsFunctional()
   {
-    LOGI("glIsFunctional ? %u", _context_started);
     return _context_started;
   }
 
@@ -69,7 +68,7 @@ namespace SimTaDyn
             break;
           }
 
-	LOGES("Failed executing '%s'. Reason is %s", expression, error);
+        LOGES("Failed executing '%s'. Reason is %s", expression, error);
       }
   }
 } // namespace

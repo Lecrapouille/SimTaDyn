@@ -1,14 +1,17 @@
-#version 330 core
+#version 150
 
-in vec3 a_position;
-in vec4 a_color;
-uniform mat4 u_mvp;
-uniform float u_time;
-out vec4 a_fragmentColor;
+uniform mat4 projection;
+uniform mat4 camera;
+uniform mat4 model;
 
-void main()
-{
-  gl_Position = u_mvp * vec4(a_position, 1.0);
-  gl_PointSize = 3.0 * (1.0 + sin(u_time));
-  a_fragmentColor = a_color;
+in vec3 vert;
+in vec2 vertTexCoord;
+
+out vec2 fragTexCoord;
+
+void main() {
+    // Pass the tex coord straight through to the fragment shader
+    fragTexCoord = vertTexCoord;
+
+    gl_Position = projection * camera * model * vec4(vert, 1);
 }

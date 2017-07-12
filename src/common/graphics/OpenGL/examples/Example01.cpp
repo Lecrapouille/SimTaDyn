@@ -38,10 +38,10 @@ bool GLExample01::setup()
   m_pos.setup(m_shader, 3, GL_FLOAT);
   m_col.setup(m_shader, 3, GL_FLOAT);
 
-  for (uint32_t i = 0U; i < 9U; ++i)
-    {
-      std::cout << m_pos.m_data[i] << std::endl;
-    }
+  //for (uint32_t i = 0U; i < 9U; ++i)
+  //  {
+  //    std::cout << m_pos.m_data[i] << std::endl;
+  //  }
 
   m_shader.start();
   {

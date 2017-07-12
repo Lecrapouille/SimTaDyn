@@ -1,9 +1,10 @@
 #include "DrawingArea.hpp"
 #include <exception>
 
+// FIXME: plutot MapEditor::keyboard() ?
 bool GLDrawingArea::keyboard()
 {
-  Camera2D& camera = GLRenderer::camera2D();
+  /*Camera2D& camera = GLRenderer::camera2D();
 
   if (m_direction[GLDrawingArea::Forward])
     {
@@ -31,14 +32,14 @@ bool GLDrawingArea::keyboard()
     }
 
   // std::cout << camera << std::endl;
-  GLRenderer::applyViewport(camera);
+  GLRenderer::applyViewport(camera);*/
   return true;
 }
 
 bool GLDrawingArea::onScrollEvent(GdkEventScroll *event)
 {
-  GLRenderer::camera2D().zoomAt(event->x, event->y, event->delta_y);
-  GLRenderer::applyViewport();
+  //GLRenderer::camera2D().zoomAt(event->x, event->y, event->delta_y);
+  //GLRenderer::applyViewport();
   return true;
 }
 
@@ -52,7 +53,6 @@ void GLDrawingArea::onRealize()
     {
       LOGES("During the setup of SimTaDyn graphic renderer");
     }
-  GLRenderer::clearScreen();
 }
 
 void GLDrawingArea::onUnrealize()
@@ -61,7 +61,6 @@ void GLDrawingArea::onUnrealize()
   try
     {
       Gtk::GLArea::throw_if_error();
-      //FIXME: GLRenderer::release();
     }
   catch (const Gdk::GLError& gle)
     {
@@ -70,25 +69,15 @@ void GLDrawingArea::onUnrealize()
     }
 }
 
-void GLDrawingArea::drawThat(Renderable& renderable)
-{
-  LOGI("GLDrawingArea::drawThat");
-  // FIXME: mettre dans une queue
-  m_model = &renderable;
-  //setRefresh(true);
-}
-
 bool GLDrawingArea::onRender()
 {
   try
     {
       Gtk::GLArea::throw_if_error();
 
-      if (SimTaDyn::glIsFunctional() && m_success_init && GLRenderer::needRefresh())
+      if (SimTaDyn::glIsFunctional() && m_success_init /*&& GLRenderer::needRefresh()*/)
         {
-          GLRenderer::begin();
           GLRenderer::draw();
-          GLRenderer::end();
         }
 
       return true;
