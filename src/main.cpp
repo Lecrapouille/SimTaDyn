@@ -22,6 +22,8 @@ int main(int argc, char** argv)
   Gsv::init();
 
   LOGI("** Init SimTaDyn");
+  ResourceManager<Key>::instance();
+  LoaderManager::instance();
   SimForth::instance();
   ForthEditor::instance();
   MapEditor::instance();
@@ -36,6 +38,8 @@ int main(int argc, char** argv)
   ForthEditor::destroy();
   MapEditor::destroy();
   SimForth::destroy();
+  LoaderManager::destroy();
+  ResourceManager<Key>::destroy();
   Logger::destroy();
   return 0;
 }

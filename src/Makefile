@@ -38,7 +38,7 @@ PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../external/backward -Icommon/patterns			\
+INCLUDES = -I. -I../external/backward -I../external/YesEngine -Icommon/patterns			\
 -Icommon/managers -Icommon/utils -Icommon/maths -Icommon/containers	\
 -Icommon/graph-theory -Icommon/graphics/OpenGL				\
 -Icommon/graphics/RTree -Icommon/graphics -Icore -Icore/loaders		\
@@ -46,27 +46,32 @@ INCLUDES = -I. -I../external/backward -Icommon/patterns			\
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../external/backward:common/patterns:common/managers:common/utils:common/maths:common/containers:common/graph-theory:common/graphics:common/graphics/OpenGL:common/graphics/RTree:core:core/loaders:forth:ui
+VPATH=.:$(BUILD):../external/backward:../external/YesEngine:common/patterns:common/managers:common/utils:common/maths:common/containers:common/graph-theory:common/graphics:common/graphics/OpenGL:common/graphics/RTree:core:core/loaders:forth:ui
 
 ###################################################
-# Set objects architecture specific
-OBJECTS_TOOL     = Backward.o ILogger.o Logger.o PendingData.o
-OBJECTS_UTILS    = Singleton.o Resources.o ResourceManager.o Exception.o
-OBJECTS_COMMON   = File.o Color.o Camera2D.o
-OBJECTS_FORTH    = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJECTS_RTREE    =
-# RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJECTS_MAP      = Graph.o SimTaDynGraph.o SimTaDynMap.o GraphAlgorithm.o
-OBJECTS_LOADER   = MapLoader.o ShapeFile.o
-OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLVertexBuffer.o GLAttrib.o Renderer.o
-OBJECTS_GUI      = Redirection.o TextEditor.o ForthEditor.o SimForth.o Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
-OBJECTS_SIMTADYN =
+OBJ_EXTERNAL   = Backward.o
+OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
+OBJ_PATTERNS   = Singleton.o
+OBJ_MATHS      = Maths.o
+OBJ_CONTAINERS = PendingData.o
+OBJ_MANAGERS   =
+OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
+OBJ_OPENGL     = Color.o Camera2D.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
+OBJ_OPENGL    += GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
+# OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
+OBJ_LOADERS    = ILoader.o ShapeFile.o
+# SimTaDynFile.o
+OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
+OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
+OBJ_SIMTADYN   = main.o
 
-OBJECTS         = $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_COMMON) $(OBJECTS_FORTH) $(OBJECTS_RTREE) \
-                  $(OBJECTS_MAP) $(OBJECTS_LOADER) $(OBJECTS_OPENGL) $(OBJECTS_GUI) $(OBJECTS_SIMTADYN) \
-                  main.o
-
-TARGET = SimTaDyn
+###################################################
+TARGET         = SimTaDyn
+OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+                 $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
+                 $(OBJ_GUI) $(OBJ_SIMTADYN)
 
 ###################################################
 # Compil options
@@ -85,7 +90,7 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
-       -lGLEW -ldl -ldw -lSOIL
+       -lGLEW -ldl -ldw -lSOIL -lZipper-static -lz
 else
 $(error Unknown architecture)
 endif
@@ -99,12 +104,12 @@ POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
 # Main entry
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
+$(TARGET): $(OBJ)
 	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
-	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
+	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
-%.o: %.cpp Makefile
-%.o: %.cpp $(BUILD)/%.d Makefile
+%.o: %.cpp
+%.o: %.cpp $(BUILD)/%.d
 	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
 ifeq ($(ARCHI),Darwin)
 	@mkdir -p $(BUILD)
@@ -124,6 +129,11 @@ coverity:
 	@cov-build --dir cov-int make && tar czvf SimTaDyn.tgz cov-int
 
 ###################################################
+# Compress SimTaDyn sources
+targz:
+	@tar czvf /tmp/SimTaDyn.tgz .. && mv /tmp/SimTaDyn.tgz .
+
+###################################################
 # Clean Target
 clean:
 	@echo "*** Cleaning"
@@ -141,7 +151,7 @@ install-data:
 ###################################################
 # Create a temporary folder to store *.o and *.d files
 $(DEPFILES): | $(BUILD)
-$(OBJECTS): | $(BUILD)
+$(OBJ): | $(BUILD)
 $(BUILD):
 	@mkdir -p $(BUILD)
 
@@ -150,4 +160,4 @@ $(BUILD):
 $(BUILD)/%.d: ;
 .PRECIOUS: $(BUILD)/%.d
 
--include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJECTS)))
+-include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJ)))

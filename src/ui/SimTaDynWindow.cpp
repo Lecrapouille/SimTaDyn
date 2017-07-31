@@ -74,6 +74,8 @@ SimTaDynWindow::SimTaDynWindow()
     m_box.pack_start(m_menubar, Gtk::PACK_SHRINK);
     m_box.pack_start(ForthEditor::instance().m_vpaned);
     m_hpaned.pack2(m_box);
+    m_box.pack_start(m_package_explorer.widget());
+    LoaderManager::instance().addListener(m_package_explorer);
 
     //
     add(m_hpaned);

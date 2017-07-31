@@ -45,17 +45,20 @@ void ShapefileLoader::goToByte(const uint32_t offset)
   if (!m_infile)
     {
       LOGF("ShapefileLoaderException");
-      ShapefileLoaderException e(offset, "ShapefileLoader::goToByte");
+      LoaderException e("Failed parsing the shapefile '" + m_filename
+                        + "' at offset " + std::to_string(offset));
       throw e;
     }
 }
+
 void ShapefileLoader::skypeNBytes(const uint32_t offset)
 {
   m_infile.seekg(offset, std::ios::cur);
   if (!m_infile)
     {
       LOGF("ShapefileLoaderException");
-      ShapefileLoaderException e(offset, "ShapefileLoader::skypeNBytes");
+      LoaderException e("Failed parsing the shapefile '" + m_filename
+                        + "' at offset " + std::to_string(offset));
       throw e;
     }
 }
@@ -135,8 +138,13 @@ void ShapefileLoader::checkFileSize()
     }
   else
     {
-      LOGF("ShapefileLoaderException");
-      ShapefileLoaderBadLength e(m_file_length, value32b);
+      LOGF("ShapefileLoaderBadLength");
+      std::string msg("Incorrect Shapefile size. Expected ");
+      msg += std::to_string(m_file_length);
+      msg += " bytes but detected ";
+      msg += value32b;
+      msg += " bytes";
+      LoaderException e(msg);
       throw e;
     }
 }
@@ -151,8 +159,8 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   m_infile.open(filename, std::ios::binary | std::ios::in);
   if (!m_infile)
     {
-      LOGF("ShapefileLoaderException");
-      ShapefileLoaderOpenFailed e(errno);
+      LOGF("ShapefileLoaderOpenFailed");
+      LoaderException e("Failed opening the Shapefile '" + filename + "': " + strerror(errno));
       throw e;
     }
 
@@ -162,8 +170,8 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   value32b = readBigEndianInt();
   if (9994 != value32b)
     {
-      LOGF("ShapefileLoaderException");
-      ShapefileLoaderBadId e(value32b, 9994);
+      LOGF("ShapefileLoaderBadId");
+      LoaderException e("Bad Shapefile ID: read " + std::to_string(value32b) + " instead of 9994");
       throw e;
     }
 }
@@ -221,13 +229,13 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
       m_point.x = readDoubleCastedFloat();
       m_point.y = readDoubleCastedFloat();
       m_point.z = 0.0f;
-      map.add(m_point);
+      map.addNode(m_point);
       break;
     case 11: // PointZ
       m_point.x = readDoubleCastedFloat();
       m_point.y = readDoubleCastedFloat();
       m_point.z = readDoubleCastedFloat();
-      map.add(m_point);
+      map.addNode(m_point);
       break;
     default:
       std::cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << std::endl;
@@ -249,70 +257,57 @@ void ShapefileLoader::getAllRecords(SimTaDynMap& map)
 
       content_length = getRecordAt(map, offset);
       offset += content_length;
-      //std::cout << "Total bytes read: " << offset << std::endl;
     }
 }
 
-bool ShapefileLoader::load(std::string const& filename, SimTaDynMap* &map)
+void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynMap* &current_map)
 {
-  bool ret = false;
+  bool dummy_map = (nullptr == current_map);
 
-  LOGI("Loading the shapefile '%s' in an %s", filename.c_str(), ((nullptr == map) ? "empty map" : "already opened map"));
-  try // FIXME: comment faire undo en cas d'echec ?
+  LOGI("Loading the shapefile '%s' in an %s",
+       filename.c_str(), (dummy_map ? "dummy map" : "already opened map"));
+
+  try
     {
-      uint32_t value32b;
-
       openShapeFile(filename);
-      value32b = getShapeVersion();
+
+      uint32_t value32b = getShapeVersion();
       if (1000 != value32b)
         {
-          LOGIS("Expected shapefile version 1000 not found. The file '%s' may be not fully interpreted",
-                filename.c_str());
-          goto l_err;
-        }
-
-      std::string shortname = File::shortNameWithExtension(filename);
-      if (nullptr == map)
-        {
-          map = new SimTaDynMap(shortname);
-        }
-      else
-        {
-          // Concat the old map name with the new one
-          if (map->m_name != "")
-            map->m_name += "_";
-          map->m_name += shortname;
+          LOGWS("Expected shapefile version 1000 but found %u: the file '%s' may be not fully interpreted",
+                value32b, filename.c_str());
         }
 
       value32b = getShapeType();
-      //std::cout << "Shape Type: " << value32b << ": " << shapeTypes(value32b) << std::endl;
+      LOGI("Shapefile Type: %u: %s", value32b, shapeTypes(value32b).c_str());
+
+      std::string shortname = File::shortNameWithExtension(filename);
+      SimTaDynMap *map = new SimTaDynMap(shortname);
 
       getBoundingBox(map->m_bbox);
-      std::cout << "Map Bounding Box: " << map->m_bbox << std::endl;
+      // FIXME CPP_LOG(logger::Info) << "Map Bounding Box: " << map->m_bbox << std::endl;
 
       getAllRecords(*map);
-      m_error = "no error";
-      ret = true;
-    }
-  catch (const ShapefileLoaderBadLength& e)
-    {
-      m_error = "The real file size is " + std::to_string(e.m_real_size)
-        + " ko but the extracted size information is " + std::to_string(e.m_expected_size)
-        + " bytes.";
-    }
-  catch (const ShapefileLoaderBadId& e)
-    {
-      m_error = "The expected file identifier is " + std::to_string(e.m_expected_id)
-        + " but the identifier read is " + std::to_string(e.m_bad_id)
-        + ". The file '" + m_filename + "' seems not to be a proper .shp file.";
-    }
-  catch (const ShapefileLoaderOpenFailed& e)
-    {
-      m_error = strerror(e.m_error) + '.';
-      return ret;
-    }
+      m_infile.close();
 
-l_err:
-  m_infile.close();
-  return ret;
+      if (dummy_map)
+        {
+          current_map = map;
+        }
+      else
+        {
+          // Concat the old map with the new one: elements, name and bounding box
+          current_map += *map;
+          current_map->m_bbox = merge(current_map->m_bbox, map->m_bbox); // TODO a mettre dans le code de +=
+
+          if (map->m_name != "") // TODO a mettre dans le code de += avec option
+            map->m_name += "_";
+          map->m_name += shortname;
+        }
+    }
+  catch (std::exception const &e)
+    {
+      m_infile.close();
+      throw e;
+    }
 }

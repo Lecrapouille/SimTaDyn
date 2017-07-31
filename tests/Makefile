@@ -37,7 +37,7 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../external/backward -I../src			\
+INCLUDES = -I. -I../external/backward -I../external/YesEngine -I../src			\
 -I../src/common/patterns -I../src/common/managers		\
 -I../src/common/utils -I../src/common/maths			\
 -I../src/common/containers -I../src/common/graph-theory		\
@@ -47,18 +47,18 @@ INCLUDES = -I. -I../external/backward -I../src			\
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../external/backward:../src:../src/common/patterns:../src/common/managers:../src/common/utils:../src/common/maths:../src/common/containers:../src/common/graph-theory :../src/common/graphics/OpenGL:../src/common/graphics/RTree:../src/common/graphics:../src/core:../src/core/loaders:../src/forth:../src/ui:simmap:common:opengl
+VPATH=.:$(BUILD):../src:../src/common/patterns:../src/common/managers:../src/common/utils:../src/common/maths:../src/common/containers:../src/common/graph-theory:../src/common/graphics/OpenGL:../src/common/graphics/RTree:../src/common/graphics:../src/core:../src/core/loaders:../src/forth:../src/ui:simmap:common:opengl:../external/backward:../external/YesEngine
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = Backward.o ILogger.o Logger.o PendingData.o File.o FileTests.o Maths.o	\
-	VectorTests.o MatrixTests.o TransformationTests.o		\
-	BoundingBoxTests.o FilteringTests.o Color.o ColorTests.o	\
-	SetTests.o CollectionTests.o Exception.o OpenGL.o GLObject.o	\
-	GLShader.o GLVertexArray.o GLAttrib.o GLTextures.o GLWindow.o	\
-	Graph.o BasicArcTests.o BasicNodeTests.o BasicGraphTests.o	\
-	GraphAlgorithm.o GraphAlgoTests.o GLBufferTests.o		\
-	OpenGLTests.o main.o
+OBJECTS = Backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o	\
+	FileTests.o ResourcesTests.o Maths.o VectorTests.o MatrixTests.o			\
+	TransformationTests.o BoundingBoxTests.o FilteringTests.o	\
+	Color.o ColorTests.o SetTests.o CollectionTests.o Exception.o	\
+	OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o	\
+	GLTextures.o GLWindow.o Graph.o BasicArcTests.o			\
+	BasicNodeTests.o BasicGraphTests.o GraphAlgorithm.o		\
+	GraphAlgoTests.o GLBufferTests.o OpenGLTests.o main.o
 
 #
 TARGET = UnitTest
@@ -75,7 +75,7 @@ CXXFLAGS = -W -Wall -Wextra -O0 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksou
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib -I/opt/X11/lib -framework OpenGL -lglew -lglfw -lSOIL
 else ifeq ($(ARCHI),Linux)
-CXXFLAGS = -W -Wall -Wextra -O0 --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O0 -g --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
@@ -95,12 +95,12 @@ POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
 # Main entry
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS) Makefile
+$(TARGET): $(OBJECTS)
 	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
-%.o: %.cpp
-%.o: %.cpp $(BUILD)/%.d
+%.o: %.cpp Makefile
+%.o: %.cpp $(BUILD)/%.d Makefile
 	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)

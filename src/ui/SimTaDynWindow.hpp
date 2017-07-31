@@ -4,6 +4,7 @@
 #  include "Names.hpp"
 #  include "DrawingArea.hpp"
 #  include "ForthEditor.hpp"
+#  include "PackageExplorer.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -54,6 +55,7 @@ protected:
   FindWindow                  *m_findwin = nullptr;
   ReplaceWindow               *m_replacewin = nullptr;
   GotoLineWindow              *m_gotolinewindow = nullptr;
+  PackageExplorer              m_package_explorer;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

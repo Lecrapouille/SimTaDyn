@@ -29,7 +29,12 @@ public:
   {
     std::string::size_type pos = path.find_last_of(".");
     if (pos != std::string::npos)
-      return path.substr(pos + 1, std::string::npos);
+      {
+        std::string ext = path.substr(pos + 1, std::string::npos);
+        if ('~' == ext.back())
+          ext.pop_back();
+        return ext;
+      }
     return "";
   }
 

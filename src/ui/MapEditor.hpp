@@ -2,17 +2,17 @@
 #  define MAPEDITOR_HPP_
 
 #  include "Names.hpp"
-#  include "MapLoader.hpp"
-#  include "ResourceManager.hpp"
+#  include "SimTaDynLoaders.hpp"
 #  include "Inspector.hpp"
 #  include "DrawingArea.hpp"
+
+class LoaderManager;
 
 // *************************************************************************************************
 // This class implements a Controler pattern of the Model-View-Controler (MVC) design pattern.
 // *************************************************************************************************
 class MapEditor
   : public Gtk::HBox,
-    protected MapLoader,
     public Singleton<MapEditor>
 {
 private:
@@ -30,7 +30,7 @@ protected:
   // ***********************************************************************************************
   //! \brief Implements the SimTaDynMap::ISimTaDynMapListener interface.
   // ***********************************************************************************************
-  class SimTaDynMapListener: public SimTaDynMap::ISimTaDynMapListener
+  class SimTaDynMapListener: public ISimTaDynMapListener
   {
   public:
 
@@ -55,6 +55,68 @@ protected:
 
 public:
 
+  //! \brief Return the current map
+  inline SimTaDynMap* map()
+  {
+    return m_current_map.get();
+  }
+  SimTaDynMap* map(const Key id);
+
+  //! \brief Load a new map from a file through a dialog box.
+  inline bool open()
+  {
+    return dialogLoadMap(true, false);
+  }
+
+  //! \brief Load a new map from a file.
+  inline bool open(std::string const& filename)
+  {
+    return doOpen(filename, true, false);
+  }
+
+  //! \brief Create a dummy map.
+  void newMap();
+
+  //! \brief Load a map from a file in the current map.
+  inline bool addMap()
+  {
+    return dialogLoadMap(false, false);
+  }
+
+  //! \brief Load a map from a file in the current map.
+  inline bool addMap(std::string const& filename)
+  {
+    return doOpen(filename, false, false);
+  }
+
+  //! \brief Load a map and replace the current map.
+  inline bool replace()
+  {
+    return dialogLoadMap(false, true);
+  }
+
+  //! \brief Load a map and replace the current map.
+  inline bool replace(std::string const& filename)
+  {
+    return doOpen(filename, false, true);
+  }
+
+  //! \brief Reset the map (suppres everything)
+  inline void clear()
+  {
+    if (nullptr != m_current_map.get())
+      {
+        m_current_map.get()->clear();
+      }
+  }
+
+  //! \brief Close the current map and activate the previous one (if
+  //! present)
+  void close();
+  void save() {} //TODO
+  void saveAs();
+  bool exec();
+
   //! \brief Attach a the MVC view to this MVC controller.
   void attachView(GLDrawingArea& drawing_area)
   {
@@ -63,75 +125,20 @@ public:
     m_vbox.pack_start(drawing_area);
   }
 
-  SimTaDynMap *newMap()
-  {
-    LOGI("Creating a new SimTaDyn map");
-    SimTaDynMap *map = new SimTaDynMap();
-    map->addListener(m_listener);
-    //FIXME m_drawing_area->attachModel(*map);
-    m_maps.insert(map);
-    m_current_map.set(map);
-    return map;
-  }
-
-  SimTaDynMap* map()
-  {
-    return m_current_map.get();
-  }
-
-  inline void openMap()
-  {
-    openDialog(true, false);
-  }
-
-  inline void addMap()
-  {
-    openDialog(false, false);
-  }
-
-  inline void replaceMap()
-  {
-    openDialog(false, true);
-  }
-
-  inline void clearMap()
-  {
-    if (nullptr != m_current_map.get())
-      {
-        m_current_map.get()->clear();
-      }
-  }
-
-  void closeMap();
-  bool selectMap(const Key id);
-
-  inline void saveMap()
-  {
-    // TODO
-  }
-
-  inline void saveAsMap()
-  {
-    // TODO
-  }
-
-  bool execMap();
-  //void foo() { m_inspector.showCell(m_foo); ++m_foo; } //FIXME
-
 protected:
 
-  virtual bool load(const std::string& filename, SimTaDynMap* &oldmap) override;
-  void doOpen(std::string const& filename, const bool new_map, const bool reset_map);
-  void openDialog(const bool new_map, const bool reset_map);
+  void registerLoaders();
+  virtual bool load(const std::string& filename, SimTaDynMap* &oldmap);
+  bool doOpen(std::string const& filename, const bool new_map, const bool reset_map);
+  bool dialogLoadMap(const bool new_map, const bool reset_map);
+  bool dialogSaveAsMap(const bool closing);
   void add(const Key id, SimTaDynMap* map);
   void remove(const Key id);
 
 public:
 
-  //! \brief Models of the MVC design pattern
-  ResourceManager<Key>   m_maps;
   //! \brief Current model of the MVC design pattern
-  CurrentSimTaDynMap     m_current_map;
+  SimTaDynMapHolder     m_current_map;
   //! \brief View implementation of the MVC
   GLDrawingArea         *m_drawing_area = nullptr;
   //!

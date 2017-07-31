@@ -8,6 +8,7 @@
 #define protected public
 #define private public
 #include "File.hpp"
+#include "Path.hpp"
 #undef protected
 #undef private
 
@@ -15,14 +16,16 @@ class FileTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
   CPPUNIT_TEST_SUITE(FileTests);
-  CPPUNIT_TEST(tests);
+  CPPUNIT_TEST(testfiles);
+  CPPUNIT_TEST(testpath);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void setUp();
   void tearDown();
 
-  void tests();
+  void testfiles();
+  void testpath();
 };
 
 #endif /* FILETESTS_HPP_ */

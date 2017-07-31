@@ -14,7 +14,7 @@ void FileTests::tearDown()
 }
 
 //--------------------------------------------------------------------------
-void FileTests::tests()
+void FileTests::testfiles()
 {
   std::string res;
   bool b;
@@ -40,6 +40,9 @@ void FileTests::tests()
   res = File::extension("/home/qq/SimTaDyn/tests/common/FileTests.cpp");
   CPPUNIT_ASSERT_EQUAL(true, "cpp" == res);
 
+  res = File::extension("/home/qq/SimTaDyn/tests/common/FileTests.cpp~");
+  CPPUNIT_ASSERT_EQUAL(true, "cpp" == res);
+
   res = File::extension("/home/qq/SimTaDyn/tests/common/FileTests.cpp.hpp");
   CPPUNIT_ASSERT_EQUAL(true, "hpp" == res);
 
@@ -54,5 +57,22 @@ void FileTests::tests()
 
   b = File::exist("/dev/null");
   CPPUNIT_ASSERT_EQUAL(true, b);
+}
 
+//--------------------------------------------------------------------------
+void FileTests::testpath()
+{
+  Path path1;
+  CPPUNIT_ASSERT_EQUAL(0, path1.toString().compare(""));
+  Path path2("aa:bb:cc::ee::");
+  std::cout << "Path: '" << path2.toString() << "'" << std::endl;
+  path2.replace("/usr/bin/");
+  std::cout << "Path: '" << path2.toString() << "'" << std::endl;
+  CPPUNIT_ASSERT_EQUAL(0, path2.toString().compare("/usr/bin:"));
+  path2.add("/usr/share:/bin/");
+  std::cout << "Path: '" << path2.toString() << "'" << std::endl;
+  CPPUNIT_ASSERT_EQUAL(0, path2.toString().compare("/usr/bin:/usr/share:/bin:"));
+  std::pair<std::string, bool> res = path2.find("ls");
+  CPPUNIT_ASSERT_EQUAL(true, res.second);
+  CPPUNIT_ASSERT_EQUAL(0, res.first.compare("/bin/ls"));
 }

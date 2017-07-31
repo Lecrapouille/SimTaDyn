@@ -2,20 +2,27 @@
 #  define SIMTADYN_MAP_HPP_
 
 #  include "Vertex.hpp"
-#  include "Resources.hpp"
+//#  include "IResource.tpp"
+#  include "ResourceManager.tpp"
 #  include "RTree.hpp"
 #  include "SimTaDynGraph.hpp"
-#  include "Set.tpp"
-#  include "Renderable.hpp"
+//#  include "Set.tpp"
 #  include "GLCollection.tpp"
 
-// FIXME: faut creer une class helper pour charger une seule fois les
-// shader commun a tous les cartes (ou alors 1 carte == 1 shader meme
-// s'il doit etre mis N fois dans le GPU
+class SimTaDynMap;
 
-//! \brief Abstract class for inheritance: drawable by an OpenGL renderer.
-class ISimTaDynMap: public Renderable
+// ***********************************************************************************************
+//! \brief This interface is used to define methods
+// ***********************************************************************************************
+class ISimTaDynMapListener
 {
+public:
+
+  //! \brief
+  ISimTaDynMapListener() { };
+
+  //! \brief Callback when the map changed (loaded, graph modified, etc)
+  virtual void onChanged(SimTaDynMap*) = 0;
 };
 
 // *************************************************************************************************
@@ -25,34 +32,16 @@ class ISimTaDynMap: public Renderable
 //! the MVC design pattern, where SimTaDynMap is the model).
 // *************************************************************************************************
 class SimTaDynMap
-  : public ISimTaDynMap,
-    public IResource<Key>,
+  : public IResource<Key>,
     private ClassCounter<SimTaDynMap>
 {
   friend class MapEditor;
 
 public:
 
-  // ***********************************************************************************************
-  //! \brief This interface is used to define methods
-  // ***********************************************************************************************
-  class ISimTaDynMapListener
-  {
-  public:
-
-    //! \brief
-    ISimTaDynMapListener() { };
-
-    //! \brief Callback when the map changed (loaded, graph modified, etc)
-    virtual void onChanged(SimTaDynMap*) = 0;
-  };
-
-public:
-
   //! \brief Empty constructor.
   SimTaDynMap()
-    : IResource(),
-      m_id(ClassCounter<SimTaDynMap>::count()),
+    : IResource(ClassCounter<SimTaDynMap>::count()),
       m_name("Map_" + std::to_string(m_id)),
       m_graph("graph_01")
   {
@@ -61,25 +50,17 @@ public:
 
   //! \brief Constructor with the desired name for the map.
   SimTaDynMap(std::string const& name)
-    : IResource(),
-      m_id(ClassCounter<SimTaDynMap>::count()),
+    : IResource(ClassCounter<SimTaDynMap>::count()),
       m_name(name),
       m_graph("graph_01")
   {
-    LOGI("New SimTaDynMap named '%s' and ID #%u\n", m_name.c_str(), m_id);
+    LOGI("Creating SimTaDynMap named '%s' with ID #%u\n", m_name.c_str(), m_id);
   }
 
   //! \brief Destructor.
   ~SimTaDynMap()
   {
-    LOGI("Deleting SimTaDynMap %u named '%s'\n", m_id, m_name.c_str());
-    //FIXME MapEditor::instance().remove(m_id);
-  }
-
-  //! \brief Return the unique identifier.
-  inline Key id() const
-  {
-    return m_id;
+    LOGI("Deleting SimTaDynMap #%u named '%s'\n", m_id, m_name.c_str());
   }
 
   //! \brief Return the unique identifier.
@@ -87,6 +68,49 @@ public:
   {
     return m_id;
   }
+
+  // Same interface than TextDocument
+  /*inline void title(std::string const& text)
+  {
+    m_title = text;
+  }
+
+  inline std::string title() const
+  {
+    return m_title;
+  }
+
+  inline void filename(std::string const& filename)
+  {
+    m_filename = filename;
+  }
+
+  inline const std::string& filename() const
+  {
+    return m_filename;
+  }*/
+
+  inline bool modified() const
+  {
+    return m_modified;
+  }
+
+  inline void modified(bool const value)
+  {
+    m_modified = value;
+  }
+
+  //! \brief Reset all states concerning the map.
+  inline void clear()
+  {
+    m_graph.reset();
+    m_modified = true;
+    notify();
+  }
+
+  /*FIXME bool save() { }
+  bool saveAs(std::string const& filename);
+  bool load(std::string const& filename, bool clear = true);*/
 
   //! \brief Return the Axis Aligned Bounding Box containing all elements of the map.
   inline AABB3f const& bbox() const
@@ -115,20 +139,14 @@ public:
     std::cout << "}" << std::endl;
   }
 
-  inline void add(Vector3f const& p)
+  inline void addNode(Vector3f const& p)
   {
     LOGI("Add a new node to SimTaDynMap #%u %s\n", m_id, m_name.c_str());
     m_graph.addNode();
     pos.append(p / 10.0f + 0.1f * id());
     col.append(Color(1.0f, 0.0f, 0.0f));
-    notify();
-  }
-
-  //! \brief Reset all states concerning the map.
-  inline void clear()
-  {
-    m_graph.reset();
-    notify();
+    m_modified = true;
+    notify(); // FIXME: mettre a jour AABB mais ici cette fonction est utilisee pour loader shapefile et on connait deja la AABB
   }
 
   //! \brief Attach a new listener to map events.
@@ -161,6 +179,7 @@ public:
       }
   }
 
+  #if 0
   virtual void drawnBy(GLRenderer& renderer) const override
   {
     LOGI("SimTaDynMap.drawnBy 0x%x", this);
@@ -184,12 +203,9 @@ public:
         pos.block(i)->draw(GL_POINTS, renderer.m_posAttrib);
       }*/
   }
+  #endif
 
 protected:
-
-  //! \brief Unique identifier. We did not use \m m_name as id because
-  //! we want the posibility to change its name.
-  Key m_id;
 
   //! \brief List of observers attached to this map events.
   std::vector<ISimTaDynMapListener*> m_listeners;
@@ -214,6 +230,9 @@ public:
   //! FIXME: TEMPORAIRE car sera donner par Rtree.bbox()
   AABB3f m_bbox;
 
+  //FIXME std::atomic<bool> m_modified = false;
+  bool m_modified = false;
+
   //! \brief database FIXME TBD:
   // enum DataField { Position, Color };
   // std::vector<containers*> m_datum
@@ -227,35 +246,53 @@ public:
   GLVertexCollection<Color, config::graph_container_nb_elements> col;
 };
 
-class CurrentSimTaDynMap
+// ***********************************************************************************************
+//! \brief A class holding the currently edited SimTaDynMap. When
+//! the user changes of map, this class will notifies to observers that
+//! map changed.
+// ***********************************************************************************************
+class SimTaDynMapHolder
 {
 public:
 
-  CurrentSimTaDynMap()
+  SimTaDynMapHolder()
   {
     m_map = nullptr;
   }
 
   void set(SimTaDynMap* p)
   {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     if (m_map != p)
       {
+        ResourceManager<Key> &rm =
+          ResourceManager<Key>::instance();
+        if (nullptr != m_map)
+          {
+            //FIXME MapEditor::save();
+            rm.dispose(m_map->id());
+          }
         m_map = p;
         if (nullptr != p)
           {
-            p->notify();
+            rm.acquire(m_map->id());
+            p->notify(); // TODO ---> DrawingArea::onNotify(){>attachModel(*map);}
           }
       }
   }
 
   SimTaDynMap* get()
   {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     return m_map;
   }
 
 protected:
 
   SimTaDynMap* m_map;
+  std::mutex m_mutex;
 };
 
 #endif /* SIMTADYN_MAP_HPP_ */

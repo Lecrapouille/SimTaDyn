@@ -13,6 +13,7 @@
 #include "GLBufferTests.hpp"
 #include "OpenGLTests.hpp"
 #include "FilteringTests.hpp"
+#include "ResourcesTests.hpp"
 #include <cppunit/ui/text/TestRunner.h>
 
 //--------------------------------------------------------------------------
@@ -21,7 +22,8 @@ static void testUtils(CppUnit::TextUi::TestRunner& runner)
   CppUnit::TestSuite* suite;
 
   suite = new CppUnit::TestSuite("FileTests");
-  suite->addTest(new CppUnit::TestCaller<FileTests>("File tests", &FileTests::tests));
+  suite->addTest(new CppUnit::TestCaller<FileTests>("File tests", &FileTests::testfiles));
+  suite->addTest(new CppUnit::TestCaller<FileTests>("File path", &FileTests::testpath));
   runner.addTest(suite);
 }
 
@@ -142,12 +144,26 @@ static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
   runner.addTest(suite);
 }
 
+//--------------------------------------------------------------------------
+static void testResourceManager(CppUnit::TextUi::TestRunner& runner)
+{
+  CppUnit::TestSuite* suite;
+
+  suite = new CppUnit::TestSuite("resourcesManagerTests");
+  suite->addTest(new CppUnit::TestCaller<ResourcesTests>("Resources", &ResourcesTests::testsResources));
+  suite->addTest(new CppUnit::TestCaller<ResourcesTests>("RessourceManager", &ResourcesTests::testsResourceManager));
+  suite->addTest(new CppUnit::TestCaller<ResourcesTests>("LoaderManager", &ResourcesTests::testsLoaderManager));
+  runner.addTest(suite);
+}
+
 int main(void)
 {
   CppUnit::TextUi::TestRunner runner;
 
   //testUtils(runner);
   testMath(runner);
+  testUtils(runner);
+  testResourceManager(runner);
   //testContainer(runner);
   //testGraph(runner);
   //testOpenGL(runner);
