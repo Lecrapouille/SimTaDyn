@@ -5,8 +5,8 @@ static const char *c_str_severity[logger::MaxLoggerSeverity + 1] =
     [logger::None] = "",
     [logger::Info] = "[INFO]",
     [logger::Debug] = "[DEBUG]",
-    [logger::Warning] = "[WARNI]",
-    [logger::Failed] = "[FAILU]",
+    [logger::Warning] = "[WARNING]",
+    [logger::Failed] = "[FAILURE]",
     [logger::Error] = "[ERROR]",
     [logger::Fatal] = "[FATAL]"
   };
@@ -89,5 +89,11 @@ void Logger::footer()
 ILogger& Logger::operator<<(const logger::LoggerSeverity& severity)
 {
   write(c_str_severity[severity]);
+  return *this;
+}
+
+ILogger& Logger::operator<<(const char *msg)
+{
+  write(msg);
   return *this;
 }

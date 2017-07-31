@@ -16,6 +16,7 @@ public:
   Logger(std::string const& filename = config::log_path);
   virtual ~Logger();
   ILogger& operator<<(const logger::LoggerSeverity& severity);
+  ILogger& operator<<(const char *msg);
 
 protected:
 
@@ -42,7 +43,9 @@ private:
 #define SHORT_FILENAME File::shortNameWithExtension(__FILE__).c_str()
 
 //! \brief Log C++ like. Example:  CPP_LOG(logger::Fatal) << "test\n";
-#define CPP_LOG(severity, ...) Logger::instance() << severity << '[' << __FILE__ << "::" << __LINE__ << ']'
+#define CPP_LOG(severity, ...)                                          \
+  Logger::instance() << Logger::instance().strtime();                   \
+  Logger::instance() << severity << '[' << SHORT_FILENAME << "::" << __LINE__ << "] "
 
 
 //! \brief Basic log without severity or file and line information. 'B' for Basic.

@@ -1,6 +1,12 @@
 #include "ILogger.hpp"
 #include <cstring>
 
+const char *ILogger::strtime()
+{
+  currentTime();
+  return m_buffer_time;
+}
+
 void ILogger::currentDate()
 {
   time_t current_time = time(nullptr);
@@ -17,10 +23,10 @@ void ILogger::currentTime()
 
 void ILogger::log(std::ostream *stream, enum logger::LoggerSeverity severity, const char* format, ...)
 {
+  std::lock_guard<std::mutex> lock(m_mutex);
+
   int n;
   va_list params;
-
-  m_mutex.lock();
 
   m_severity = severity;
   m_stream = stream;
@@ -39,19 +45,16 @@ void ILogger::log(std::ostream *stream, enum logger::LoggerSeverity severity, co
   write(m_buffer);
 
   m_stream = nullptr;
-  m_mutex.unlock();
 }
 
 void ILogger::log(const char* format, ...)
 {
-  va_list params;
+  std::lock_guard<std::mutex> lock(m_mutex);
 
-  m_mutex.lock();
+  va_list params;
 
   va_start(params, format);
   vsnprintf(m_buffer, c_buffer_size, format, params);
   va_end(params);
   write(m_buffer);
-
-  m_mutex.unlock();
 }

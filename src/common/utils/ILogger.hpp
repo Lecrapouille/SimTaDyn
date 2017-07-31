@@ -25,6 +25,7 @@ public:
   void log(const char* format, ...);
   void log(std::ostream *stream, enum logger::LoggerSeverity severity, const char* format, ...);
   template <class T> ILogger& operator<<(const T& tolog);
+  const char *strtime();
 
 protected:
 
