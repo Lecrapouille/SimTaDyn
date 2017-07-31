@@ -734,7 +734,7 @@ public:
 
 private:
 
-  //! Shared function by two public fucntions.
+  //! Shared function by two public functions.
   void private_addArc(BasicNode &fromNode, BasicNode &toNode)
   {
     const uint32_t last = m_arcs.last() + 1U;// FIXME degeux car Collection est non pas Set

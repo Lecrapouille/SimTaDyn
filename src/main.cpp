@@ -29,10 +29,10 @@ int main(int argc, char** argv)
   SimTaDynWindow window;
   SimForth::instance().boot();
 
-  LOGI("** End of the init. Starting the runtime");
+  LOGI("** End of the init: starting the runtime");
   kit.run(window);
 
-  LOGI("** End of the runtime. Releasing the memory");
+  LOGI("** Leaving SimTaDyn: releasing the memory");
   ForthEditor::destroy();
   MapEditor::destroy();
   SimForth::destroy();
