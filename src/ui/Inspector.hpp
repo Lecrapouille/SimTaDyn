@@ -2,7 +2,7 @@
 #  define INSPECTOR_HPP_
 
 #  include <gtkmm.h>
-typedef unsigned int Key;
+typedef unsigned int Key; // FIXME en double
 
 class Inspector
 {
