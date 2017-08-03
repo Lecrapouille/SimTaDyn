@@ -36,8 +36,16 @@ public:
   //! -1. You can call hasPendingData() before this method.
   void getPendingData(uint32_t &pos_start, uint32_t &pos_end) const
   {
-    pos_start = m_pending_start;
-    pos_end = m_pending_end;
+    if ((uint32_t) -1 != m_pending_start)
+    {
+      pos_start = m_pending_start;
+      pos_end = m_pending_end;
+    }
+    else
+    {
+      pos_start = 0;
+      pos_end = 0;
+    }
   }
 
   //! \brief Call this function when changed elements have been uploaded.

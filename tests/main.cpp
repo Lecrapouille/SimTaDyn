@@ -32,7 +32,7 @@ static void testMath(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
 
-  /*suite = new CppUnit::TestSuite("VectorTests");
+  suite = new CppUnit::TestSuite("VectorTests");
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testCreator", &VectorTests::testCreator));
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testSwap", &VectorTests::testSwap));
   suite->addTest(new CppUnit::TestCaller<VectorTests>("testEquality", &VectorTests::testEquality));
@@ -48,14 +48,14 @@ static void testMath(CppUnit::TextUi::TestRunner& runner)
   suite->addTest(new CppUnit::TestCaller<MatrixTests>("testArithmetic", &MatrixTests::testArithmetic));
   suite->addTest(new CppUnit::TestCaller<MatrixTests>("testCopy", &MatrixTests::testCopy));
   suite->addTest(new CppUnit::TestCaller<MatrixTests>("testOperations", &MatrixTests::testOperations));
-  runner.addTest(suite);*/
+  runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("TransformationsTests");
   suite->addTest(new CppUnit::TestCaller<TransformationTests>("testMatrixTransform", &TransformationTests::tests));
   suite->addTest(new CppUnit::TestCaller<TransformationTests>("testMovableClass", &TransformationTests::movable));
   runner.addTest(suite);
 
-  /*suite = new CppUnit::TestSuite("Filtering");
+  suite = new CppUnit::TestSuite("Filtering");
   //suite->addTest(new CppUnit::TestCaller<FilteringTests>("RollingAverage", &FilteringTests::rolling));
   //suite->addTest(new CppUnit::TestCaller<FilteringTests>("LowPassFilter", &FilteringTests::lpf));
   suite->addTest(new CppUnit::TestCaller<FilteringTests>("PolynomialFit", &FilteringTests::polyfit));
@@ -68,7 +68,7 @@ static void testMath(CppUnit::TextUi::TestRunner& runner)
   suite->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testArithmetic", &BoundingBoxTests::testArithmetic));
   suite->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testCopy", &BoundingBoxTests::testCopy));
   suite->addTest(new CppUnit::TestCaller<BoundingBoxTests>("testOperations", &BoundingBoxTests::testOperations));
-  runner.addTest(suite);*/
+  runner.addTest(suite);
 }
 
 //--------------------------------------------------------------------------
@@ -160,16 +160,13 @@ int main(void)
 {
   CppUnit::TextUi::TestRunner runner;
 
-  //testUtils(runner);
-  testMath(runner);
   testUtils(runner);
   testResourceManager(runner);
-  //testContainer(runner);
-  //testGraph(runner);
-  //testOpenGL(runner);
+  testMath(runner);
+  testContainer(runner);
+  testGraph(runner);
+  testOpenGL(runner);
 
-  runner.run();
-
-#warning "devrair retourner 1 si ko"
-  return 0;
+  bool wasSucessful = runner.run();
+  return wasSucessful ? 0 : 1;
 }
