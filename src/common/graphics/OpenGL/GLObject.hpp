@@ -13,7 +13,7 @@
 
 #  include "Exception.hpp"
 #  include "OpenGL.hpp"
-#  include "ClassCounter.hpp"
+#  include "ClassCounter.tpp"
 #  include "Logger.hpp"
 #  include <assert.h>
 #  include <cstdint>

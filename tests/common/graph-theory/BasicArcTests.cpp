@@ -7,16 +7,16 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BasicArcTests);
 void BasicArcTests::setUp()
 {
   // Reset node/arcs unique identifiers to 0
-  BasicNode::reset();
-  BasicArc::reset();
+  BasicNode::resetID();
+  BasicArc::resetID();
 }
 
 //--------------------------------------------------------------------------
 void BasicArcTests::tearDown()
 {
   // Reset node/arcs unique identifiers to 0
-  BasicNode::reset();
-  BasicArc::reset();
+  BasicNode::resetID();
+  BasicArc::resetID();
 }
 
 //--------------------------------------------------------------------------
@@ -36,7 +36,7 @@ void BasicArcTests::test()
   CPPUNIT_ASSERT_EQUAL(true, 2U == a2);
 
   // Check if the unique identifier can be reseted to 0
-  BasicArc::reset();
+  BasicArc::resetID();
   BasicArc a3;
   BasicArc a4;
 

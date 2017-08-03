@@ -1,5 +1,5 @@
 #include "ResourcesTests.hpp"
-#include "ClassCounter.hpp"
+#include "ClassCounter.tpp"
 #include <iostream>
 #include <fstream>
 
@@ -9,13 +9,14 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ResourcesTests);
 static bool destroyedA = false;
 class ResourceA
   : public IResource<uint32_t>,
-    private ClassCounter<ResourceA>
+    private UniqueID<ResourceA>
 {
 public:
 
   ResourceA()
-    : IResource(ClassCounter<ResourceA>::count())
+    : IResource(UniqueID<ResourceA>::getID())
   {
+     LOGI("Created ResourceA %u", m_id);
   }
 
   ~ResourceA()
@@ -27,13 +28,14 @@ public:
 static bool destroyedB = false;
 class ResourceB
   : public IResource<std::string>,
-    private ClassCounter<ResourceB>
+    private UniqueID<ResourceB>
 {
 public:
 
   ResourceB()
-    : IResource("BB_" + std::to_string(ClassCounter<ResourceB>::count()))
+    : IResource("BB_" + std::to_string(UniqueID<ResourceB>::getID()))
   {
+     LOGI("Created ResourceB %s", m_id.c_str());
   }
 
   ~ResourceB()
@@ -106,34 +108,35 @@ void ResourcesTests::testsResourceManager()
   // Check empty resource manager
   ResourceManager<uint32_t> rm;
   CPPUNIT_ASSERT_EQUAL(0U, rm.size());
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(0U));
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(1U));
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(0U)); // Resource exists but not present in the manager
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(1U)); // Resource exists but not present in the manager
 
-  // Insert resources in the resource manager.
-  rm.add(new ResourceA());
-  rm.add(new ResourceA());
+  // Insert 2 resources in the resource manager. Check they are inserted.
+  rm.add(new ResourceA()); // --> id #2U
+  rm.add(new ResourceA()); // --> id #3U
   CPPUNIT_ASSERT_EQUAL(2U, rm.size());
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.look(1U));
   CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.look(2U));
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(3U));
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.look(3U));
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(4U));
 
-  // Insert resource #3 and acquire it
-  rm.add( new ResourceA());
+  // Insert 3th resource and acquire it. Check acquisition.
+  rm.add(new ResourceA());
+  uint32_t id = 4U;
   CPPUNIT_ASSERT_EQUAL(3U, rm.size());
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.acquire(41U));
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.acquire(3U));
-  CPPUNIT_ASSERT_EQUAL(1U, ((ResourceA*) rm.look(3U))->owners());
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.acquire(id));
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.acquire(id + 1U));
+  CPPUNIT_ASSERT_EQUAL(1U, ((ResourceA*) rm.look(id))->owners());
 
   // Check disposing of the resource already acquired.
-  rm.dispose(3U);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.acquire(3U));
-  CPPUNIT_ASSERT_EQUAL(1U, ((ResourceA*) rm.look(3U))->owners());
-  rm.dispose(3U);
-  CPPUNIT_ASSERT_EQUAL(0U, ((ResourceA*) rm.look(3U))->owners());
+  rm.dispose(id);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.acquire(id));
+  CPPUNIT_ASSERT_EQUAL(1U, ((ResourceA*) rm.look(id))->owners());
+  rm.dispose(id);
+  CPPUNIT_ASSERT_EQUAL(0U, ((ResourceA*) rm.look(id))->owners());
 
   // Dispose the resource and check it's no longer exists.
-  rm.dispose(3U);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.acquire(3U));
+  rm.dispose(id);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.acquire(id));
   CPPUNIT_ASSERT_EQUAL(2U, rm.size());
 }
 

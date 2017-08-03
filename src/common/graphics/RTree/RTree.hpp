@@ -1,7 +1,7 @@
 #ifndef RTREE_HPP_
 #  define RTREE_HPP_
 
-#  include "ClassCounter.hpp"
+#  include "ClassCounter.tpp"
 #  include "BoundingBox.tpp"
 
 // Inspired from:
@@ -85,7 +85,7 @@ public:
 //
 // **************************************************************
 class RTreeNode
-  : private ClassCounter<RTreeNode>
+  : private InstanceCounter<RTreeNode>
 {
 public:
   RTreeNode();
@@ -102,7 +102,7 @@ public:
 
   static size_t howMany()
   {
-    return ClassCounter<RTreeNode>::howMany();
+    return InstanceCounter<RTreeNode>::howMany();
   }
 
   inline friend std::ostream& operator<<(std::ostream& os, const RTreeNode& n)

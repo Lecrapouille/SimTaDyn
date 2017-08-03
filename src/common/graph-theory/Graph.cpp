@@ -4,13 +4,13 @@
 static BasicNode fakenode(0);
 
 BasicNode::BasicNode()
-  :  m_id(ClassCounter<BasicNode>::count())
+  :  m_id(UniqueID<BasicNode>::getID())
 {
   //LOGIS("New BasicNode empty constructor\n");
 }
 
 BasicArc::BasicArc()
-  : m_id(ClassCounter<BasicArc>::count()),
+  : m_id(UniqueID<BasicArc>::getID()),
     m_fromNode(&fakenode),
     m_toNode(&fakenode)
 {

@@ -33,7 +33,7 @@ public:
 // *************************************************************************************************
 class SimTaDynMap
   : public IResource<Key>,
-    private ClassCounter<SimTaDynMap>
+    private UniqueID<SimTaDynMap>
 {
   friend class MapEditor;
 
@@ -41,7 +41,7 @@ public:
 
   //! \brief Empty constructor.
   SimTaDynMap()
-    : IResource(ClassCounter<SimTaDynMap>::count()),
+    : IResource(UniqueID<SimTaDynMap>::getID()),
       m_name("Map_" + std::to_string(m_id)),
       m_graph("graph_01")
   {
@@ -50,7 +50,7 @@ public:
 
   //! \brief Constructor with the desired name for the map.
   SimTaDynMap(std::string const& name)
-    : IResource(ClassCounter<SimTaDynMap>::count()),
+    : IResource(UniqueID<SimTaDynMap>::getID()),
       m_name(name),
       m_graph("graph_01")
   {

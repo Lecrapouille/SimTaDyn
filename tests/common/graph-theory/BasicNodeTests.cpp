@@ -6,15 +6,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BasicNodeTests);
 //--------------------------------------------------------------------------
 void BasicNodeTests::setUp()
 {
-  BasicNode::reset();
-  BasicArc::reset();
+  BasicNode::resetID();
+  BasicArc::resetID();
 }
 
 //--------------------------------------------------------------------------
 void BasicNodeTests::tearDown()
 {
-  BasicNode::reset();
-  BasicArc::reset();
+  BasicNode::resetID();
+  BasicArc::resetID();
 }
 
 //--------------------------------------------------------------------------
@@ -38,7 +38,7 @@ void BasicNodeTests::dummy()
   CPPUNIT_ASSERT_EQUAL(true, 2U == n2);
 
   // Check if the unique identifier can be reseted to 0
-  BasicNode::reset();
+  BasicNode::resetID();
   BasicNode n3;
   BasicNode n4;
 

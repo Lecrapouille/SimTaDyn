@@ -3,7 +3,7 @@
 
 //! Special container
 #  include "Logger.hpp"
-#  include "ClassCounter.hpp"
+#  include "ClassCounter.tpp"
 #  include "GraphContainer.tpp"
 #  include <cstdint>
 #  include <algorithm>
@@ -14,7 +14,7 @@ class BasicArc;
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class BasicArc: private ClassCounter<BasicArc>
+class BasicArc: private UniqueID<BasicArc>
 {
 public:
 
@@ -34,7 +34,7 @@ public:
   //! \brief Constructor by copy.
   //! \param arc the reference of an existing arc.
   BasicArc(BasicArc const& arc)
-    : ClassCounter<BasicArc>(),
+    : UniqueID<BasicArc>(),
       m_id(arc.id()),
       m_fromNode(&arc.from()),
       m_toNode(&arc.to())
@@ -111,7 +111,7 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class BasicNode: private ClassCounter<BasicNode>
+class BasicNode: private UniqueID<BasicNode>
 {
 public:
 
@@ -129,7 +129,7 @@ public:
   //! \brief Constructor by copy.
   //! \param node the reference of an existing node.
   BasicNode(BasicNode const& node)
-    : ClassCounter<BasicNode>(),
+    : UniqueID<BasicNode>(),
       m_id(node.m_id),
       m_arcs(node.m_arcs)
   {
@@ -356,22 +356,22 @@ public:
   BasicGraph(const bool directed = true)
     : m_directed(directed)
   {
-    ClassCounter<BasicNode>::reset();
-    ClassCounter<BasicArc>::reset();
+    UniqueID<BasicNode>::resetID();
+    UniqueID<BasicArc>::resetID();
   }
 
   BasicGraph(const char* name, const bool directed = true)
     : m_directed(directed), m_name(name)
   {
-    ClassCounter<BasicNode>::reset();
-    ClassCounter<BasicArc>::reset();
+    UniqueID<BasicNode>::resetID();
+    UniqueID<BasicArc>::resetID();
   }
 
   BasicGraph(std::string const& name, const bool directed = true)
     : m_directed(directed), m_name(name)
   {
-    ClassCounter<BasicNode>::reset();
-    ClassCounter<BasicArc>::reset();
+    UniqueID<BasicNode>::resetID();
+    UniqueID<BasicArc>::resetID();
   }
 
   //! \brief Constructor. Reserve memory for the given
@@ -381,8 +381,8 @@ public:
              const bool directed = true)
     : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed)
   {
-    ClassCounter<BasicNode>::reset();
-    ClassCounter<BasicArc>::reset();
+    UniqueID<BasicNode>::resetID();
+    UniqueID<BasicArc>::resetID();
   }
 
   BasicGraph(std::string const& name,
@@ -391,8 +391,8 @@ public:
              const bool directed = true)
     : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed), m_name(name)
   {
-    ClassCounter<BasicNode>::reset();
-    ClassCounter<BasicArc>::reset();
+    UniqueID<BasicNode>::resetID();
+    UniqueID<BasicArc>::resetID();
   }
 
   BasicGraph(const char* name,
@@ -401,8 +401,8 @@ public:
              const bool directed = true)
     : m_nodes(noNodes), m_arcs(noArcs), m_directed(directed), m_name(name)
   {
-    ClassCounter<BasicNode>::reset();
-    ClassCounter<BasicArc>::reset();
+    UniqueID<BasicNode>::resetID();
+    UniqueID<BasicArc>::resetID();
   }
 
   //! \brief Destructor. Release allocated nodes and arcs.

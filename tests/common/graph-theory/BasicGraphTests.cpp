@@ -6,15 +6,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BasicGraphTests);
 //--------------------------------------------------------------------------
 void BasicGraphTests::setUp()
 {
-  BasicNode::reset();
-  BasicArc::reset();
+  BasicNode::resetID();
+  BasicArc::resetID();
 }
 
 //--------------------------------------------------------------------------
 void BasicGraphTests::tearDown()
 {
-  BasicNode::reset();
-  BasicArc::reset();
+  BasicNode::resetID();
+  BasicArc::resetID();
 }
 
 //--------------------------------------------------------------------------
@@ -195,8 +195,8 @@ void BasicGraphTests::test()
 
   // Check if auto-counters for nodes/arcs unique identifiers start to 0
   // for a new graph and identifiers are auto incrementing.
-  BasicNode::reset();
-  BasicArc::reset();
+  BasicNode::resetID();
+  BasicArc::resetID();
   BasicGraph<BasicNode, BasicArc> g2(2U, 2U, false);
   for (uint32_t i = 0; i < 4; ++i)
     {
