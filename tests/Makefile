@@ -37,31 +37,44 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../external/backward -I../external/YesEngine -I../src			\
--I../src/common/patterns -I../src/common/managers		\
--I../src/common/utils -I../src/common/maths			\
--I../src/common/containers -I../src/common/graph-theory		\
--I../src/common/graphics/OpenGL -I../src/common/graphics/RTree	\
--I../src/common/graphics -I../src/core -I../src/core/loaders	\
--I../src/forth -I../src/ui -Isimmap -Icommon -Iopengl
+INCLUDES = -I. -I../external/backward -I../external/YesEngine		\
+-I../src -I../src/common/patterns -I../src/common/managers		\
+-Icommon/managers -I../src/common/utils -Icommon/utils			\
+-I../src/common/maths -Icommon/maths -I../src/common/containers		\
+-Icommon/containers -I../src/common/graph-theory			\
+-Icommon/graph-theory -I../src/common/graphics/OpenGL			\
+-I../src/common/graphics/RTree -I../src/common/graphics			\
+-Icommon/graphics/OpenGL -Icommon/graphics/RTree -Icommon/graphics	\
+-I../src/core -I../src/core/loaders -I../src/forth -Iforth		\
+-I../src/ui
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../src:../src/common/patterns:../src/common/managers:../src/common/utils:../src/common/maths:../src/common/containers:../src/common/graph-theory:../src/common/graphics/OpenGL:../src/common/graphics/RTree:../src/common/graphics:../src/core:../src/core/loaders:../src/forth:../src/ui:simmap:common:opengl:../external/backward:../external/YesEngine
+VPATH=.:$(BUILD):../src:../src/common/patterns:\
+../src/common/managers:common/managers:\
+../src/common/utils:common/utils:\
+../src/common/maths:common/maths:\
+../src/common/containers:common/containers:\
+../src/common/graph-theory:common/graph-theory:\
+../src/common/graphics/OpenGL:common/graphics/OpenGL:\
+../src/common/graphics/RTree:common/graphics/RTree:\
+../src/common/graphics:common/graphics:\
+../src/core:../src/core/loaders:\
+../src/forth:forth:\
+../src/ui:\
+../external/backward:../external/YesEngine
 
 ###################################################
 # Set objects architecture specific
-OBJECTS = Backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o	\
-	FileTests.o ResourcesTests.o Maths.o VectorTests.o MatrixTests.o			\
-	TransformationTests.o BoundingBoxTests.o FilteringTests.o	\
-	Color.o ColorTests.o SetTests.o CollectionTests.o Exception.o	\
-	OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o	\
-	GLTextures.o GLWindow.o Graph.o BasicArcTests.o			\
-	BasicNodeTests.o BasicGraphTests.o GraphAlgorithm.o		\
-	GraphAlgoTests.o GLBufferTests.o OpenGLTests.o main.o
-
-#
 TARGET = UnitTest
+OBJECTS = Backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o   \
+	FileTests.o ResourcesTests.o Maths.o VectorTests.o MatrixTests.o        \
+	TransformationTests.o BoundingBoxTests.o FilteringTests.o	        \
+	Color.o ColorTests.o SetTests.o CollectionTests.o Exception.o           \
+	OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o               \
+	GLTextures.o GLWindow.o Graph.o BasicArcTests.o                         \
+	BasicNodeTests.o BasicGraphTests.o GraphAlgorithm.o                     \
+	GraphAlgoTests.o GLBufferTests.o OpenGLTests.o main.o
 
 ###################################################
 # Compil options
