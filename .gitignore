@@ -45,5 +45,16 @@
 # Logs
 *.log
 
+# Tarball
+*.tgz
+*.tar.gz
+*.zip
+*.deb
+
+# SimTaDyn build dir
+build/*
+tests/build/*
+
 # Debian packages
 doc-pak
+description-pak

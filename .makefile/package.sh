@@ -6,15 +6,21 @@ MAINTAINERS=`cat AUTHORS | sed 's/</\\\\</g; s/>/\\\\>/g'`
 #VERSION="$MAJOR_VERSION.$MINOR_VERSION"
 VERSION=`cat VERSION`
 
-function make_package()
+function generate_description
 {
-  sudo checkinstall --default \
-                    --install=no \
-                    --pkgname="simtadyn" \
-                    --pkglicense=GPL3 \
-                    --pkgversion="$VERSION" \
-                    --maintainer="$MAINTAINERS" \
-                    --require='libgtksourceviewmm-3.0-dev,freeglut3,freeglut3-dev,mesa-common-dev,libglu1-mesa-dev,libglew-dev,libglfw3-dev,libdw-dev,libsoil-dev'
+    echo "SimTaDyn a GIS in a spreadsheet" > description-pak
 }
 
+function make_package()
+{
+    sudo checkinstall --default \
+         --install=no \
+         --pkgname="simtadyn" \
+         --pkglicense=GPL3 \
+         --pkgversion="$VERSION" \
+         --maintainer="$MAINTAINERS" \
+         --require='libgtksourceviewmm-3.0-dev,freeglut3,freeglut3-dev,mesa-common-dev,libglu1-mesa-dev,libglew-dev,libglfw3-dev,libdw-dev,libsoil-dev'
+}
+
+generate_description
 make_package
