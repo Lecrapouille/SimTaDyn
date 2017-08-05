@@ -156,17 +156,66 @@ static void testResourceManager(CppUnit::TextUi::TestRunner& runner)
   runner.addTest(suite);
 }
 
-int main(void)
+static bool run_tests(bool const has_xdisplay)
 {
   CppUnit::TextUi::TestRunner runner;
 
-  testUtils(runner);
+  /*testUtils(runner);
   testResourceManager(runner);
   testMath(runner);
   testContainer(runner);
-  testGraph(runner);
-  testOpenGL(runner);
+  testGraph(runner);*/
 
-  bool wasSucessful = runner.run();
+  // Travis-CI does not support export display
+  if (has_xdisplay)
+    {
+      testOpenGL(runner);
+    }
+
+  return runner.run();
+}
+
+#include <getopt.h>
+
+int main(int argc, char *argv[])
+{
+  const char *c_short_options = "a";
+  bool has_xdisplay = true;
+  int c;
+  opterr = 0;
+
+  // TODO: make this code better. Only used for disabling Travis
+  while ((c = getopt(argc, argv, c_short_options)) != -1)
+    {
+      switch (c)
+        {
+        case 'a':
+          has_xdisplay = false;
+          break;
+        case '?':
+          if (optopt == 'c')
+            {
+              std::cerr << "Option -" << optopt << " requires an argument" << std::endl;
+            }
+          else if (isprint(optopt))
+            {
+              std::cerr << "Unknown option -" << (char) optopt << std::endl;
+            }
+          else
+            {
+              std::cerr << "Unknown option character " << optopt << std::endl;
+            }
+          return 1;
+        default:
+          abort();
+        }
+    }
+
+  for (int index = optind; index < argc; ++index)
+    {
+      std::cerr << "Non-option argument " << argv[index] << std::endl;
+    }
+
+  bool wasSucessful = run_tests(has_xdisplay);
   return wasSucessful ? 0 : 1;
 }
