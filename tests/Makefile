@@ -1,19 +1,5 @@
-
 .PHONY: clean build coverage gcov
-
-###################################################
-# Color
-CLR_DEFAULT := $(shell echo '\033[00m')
-CLR_RED     := $(shell echo '\033[31m')
-CLR_GREEN   := $(shell echo '\033[32m')
-CLR_YELLOW  := $(shell echo '\033[33m')
-CLR_BLUE    := $(shell echo '\033[34m')
-CLR_PURPLE  := $(shell echo '\033[35m')
-CLR_CYAN    := $(shell echo '\033[36m')
-print-comp = \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) <= $(CLR_YELLOW)$3$(CLR_DEFAULT)"
-print-link= \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) => $(CLR_YELLOW)$3$(CLR_DEFAULT) $4"
+-include ../.makefile/Makefile.helper
 
 ###################################################
 # Path where to store *.o files. Default: ./build/
@@ -37,7 +23,7 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I. -I../external/backward -I../external/YesEngine		\
+INCLUDES = -I$(BUILD) -I. -I../external/backward -I../external/YesEngine\
 -I../src -I../src/common/patterns -I../src/common/managers		\
 -Icommon/managers -I../src/common/utils -Icommon/utils			\
 -I../src/common/maths -Icommon/maths -I../src/common/containers		\
@@ -67,7 +53,7 @@ VPATH=.:$(BUILD):../src:../src/common/patterns:\
 ###################################################
 # Set objects architecture specific
 TARGET = UnitTest
-OBJECTS = Backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o   \
+OBJECTS = version.h Backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o   \
 	FileTests.o ResourcesTests.o Maths.o VectorTests.o MatrixTests.o        \
 	TransformationTests.o BoundingBoxTests.o FilteringTests.o	        \
 	Color.o ColorTests.o SetTests.o CollectionTests.o Exception.o           \
@@ -108,28 +94,34 @@ POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
 # Main entry
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
-	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
+$(TARGET): version.h $(OBJECTS)
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 %.o: %.cpp Makefile
 %.o: %.cpp $(BUILD)/%.d Makefile
-	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
+	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
+#
+version.h: ../VERSION
+	@$(call print-from,"Check version","$(TARGET)","VERSION","")
+	@../.makefile/version.sh ../VERSION $(BUILD)/version.h
+
+###################################################
 # Clean Target
 clean:
-	@echo "*** Cleaning"
+	@$(call print-simple,"Cleaning","$(PWD)")
 	@rm -fr *~ $(DOC) gui/*~ cells/*~ common/*~ $(BUILD) 2> /dev/null
 
 ###################################################
 # Code coverage
 coverage: $(TARGET)
-	@$(call print-link,"Running","$(TARGET)","$(RAPPORT)","")
+	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
 	./build/$(TARGET)
-	@$(call print-link,"Documentation","$(RAPPORT)","$(DOC)","")
+	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
 	@lcov --quiet --remove $(RAPPORT) '/usr*' -o $(RAPPORT)
 	@genhtml --quiet -o $(DOC) -t "SimTaDyn Unit Tests" $(RAPPORT)

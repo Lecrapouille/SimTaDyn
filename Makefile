@@ -1,23 +1,10 @@
-.PHONY: clean build install-data
-
-###################################################
-# Color
-CLR_DEFAULT := $(shell echo '\033[00m')
-CLR_RED     := $(shell echo '\033[31m')
-CLR_GREEN   := $(shell echo '\033[32m')
-CLR_YELLOW  := $(shell echo '\033[33m')
-CLR_BLUE    := $(shell echo '\033[34m')
-CLR_PURPLE  := $(shell echo '\033[35m')
-CLR_CYAN    := $(shell echo '\033[36m')
-print-comp = \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) <= $(CLR_YELLOW)$3$(CLR_DEFAULT)"
-print-link= \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) => $(CLR_YELLOW)$3$(CLR_DEFAULT) $4"
+.PHONY: clean very-clean build install uninstall coverity-scan unit-tests package coverage
+-include .makefile/Makefile.helper
 
 ###################################################
 # Path where to store *.o files. Default: ./build/
 ifeq ($(BUILD),)
-BUILD = ../build
+BUILD = ./build
 endif
 
 ###################################################
@@ -32,21 +19,42 @@ endif
 # Where to install project datum
 # FIXME: do not change this location (for the moment)
 # ifeq ($(PROJECT_DATA_ROOT),)
-PROJECT_DATA_ROOT = ~/.SimTaDyn
+PROJECT_DATA_ROOT = /usr/share/SimTaDyn
 # endif
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
+# Where to install project runnable
+# ifeq ($(PREFIX),)
+PREFIX = /usr/bin
+# endif
+
+###################################################
 # Set include paths
-INCLUDES = -I. -I../external/backward -I../external/YesEngine -Icommon/patterns			\
--Icommon/managers -Icommon/utils -Icommon/maths -Icommon/containers	\
--Icommon/graph-theory -Icommon/graphics/OpenGL				\
--Icommon/graphics/RTree -Icommon/graphics -Icore -Icore/loaders		\
--Iforth -Iui
+INCLUDES = -I$(BUILD) -Iexternal/backward -Iexternal/YesEngine -Isrc	\
+-Isrc/common/patterns -Isrc/common/managers -Isrc/common/utils		\
+-Isrc/common/maths -Isrc/common/containers -Isrc/common/graph-theory	\
+-Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree		\
+-Isrc/common/graphics -Isrc/core -Isrc/core/loaders -Isrc/forth		\
+-Isrc/ui
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=.:$(BUILD):../external/backward:../external/YesEngine:common/patterns:common/managers:common/utils:common/maths:common/containers:common/graph-theory:common/graphics:common/graphics/OpenGL:common/graphics/RTree:core:core/loaders:forth:ui
+VPATH=$(BUILD):external/backward:external/YesEngine:\
+src:\
+src/common/patterns:\
+src/common/managers:\
+src/common/utils:\
+src/common/maths:\
+src/common/containers:\
+src/common/graph-theory:\
+src/common/graphics:\
+src/common/graphics/OpenGL:\
+src/common/graphics/RTree:\
+src/core:\
+src/core/loaders:\
+src/forth:\
+src/ui
 
 ###################################################
 OBJ_EXTERNAL   = Backward.o
@@ -69,7 +77,8 @@ OBJ_SIMTADYN   = main.o
 
 ###################################################
 TARGET         = SimTaDyn
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+TARGET_TGZ     = SimTaDyn-$(DATE).tar.gz
+OBJ            = version.h $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
 
@@ -78,7 +87,7 @@ OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-DEFINES = -DCHECK_OPENGL
+DEFINES = -DCHECK_OPENGL -DDATA_PATH=$(PROJECT_DATA_PATH)
 
 ###################################################
 # Set Libraries
@@ -104,13 +113,13 @@ POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
 # Main entry
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
-	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
+$(TARGET): version.h $(OBJ)
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 %.o: %.cpp
 %.o: %.cpp $(BUILD)/%.d
-	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
+	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 ifeq ($(ARCHI),Darwin)
 	@mkdir -p $(BUILD)
 endif
@@ -118,35 +127,71 @@ endif
 	@$(POSTCOMPILE)
 
 ###################################################
-# Check yaml syntax
-check-travis:
-	@travis lint ../.travis.yml
-
-###################################################
 # Coverity Scan: static analysis of code
 # Prepare the tarball ready to be uploaded to Coverity Scan servers.
-coverity:
+coverity-scan: $(TARGET)
 	@cov-build --dir cov-int make && tar czvf SimTaDyn.tgz cov-int
 
 ###################################################
+# Compile unit tests
+unit-tests:
+	@$(call print-simple,"Compiling unit tests")
+	@make -C tests all
+
+###################################################
+#
+coverage:
+	@$(call print-simple,"Coveraging unit tests")
+	@make -C tests coverage
+
+###################################################
+# Create Debian/Ubuntu package
+package: $(TARGET)
+	$(call print-simple,"Creating a Debian/Ubuntu package")
+	./.makefile/package.sh
+
+###################################################
 # Compress SimTaDyn sources
-targz:
-	@tar czvf /tmp/SimTaDyn.tgz .. && mv /tmp/SimTaDyn.tgz .
+targz: very-clean
+	@$(call print-from,"Tarball","$(TARGET_TGZ)","$(PWD)","")
+	@tar czvf /tmp/$(TARGET_TGZ) . > /dev/null && mv /tmp/$(TARGET_TGZ) .
 
 ###################################################
 # Clean Target
 clean:
-	@echo "*** Cleaning"
-	@rm -fr *~ common/*~ rtree/*~ forth/*~ cells/*~ gui/*~ $(BUILD) cov-int SimTaDyn.tgz 2> /dev/null
+	@$(call print-simple,"Cleaning","$(PWD)")
+	@rm -fr $(BUILD) 2> /dev/null
 
 ###################################################
-# Install project datum
-install-data:
-	@$(call print-link,"Copying","../data","$(PROJECT_DATA_PATH)","")
+# Clean Target
+very-clean: clean
+	@rm -fr cov-int SimTaDyn.tgz 2> /dev/null
+	@cd tests && make -s clean; cd - > /dev/null
+
+###################################################
+# Install project
+install: $(TARGET)
+	@$(call print-to,"Installing","data/","$(PROJECT_DATA_PATH)","")
 	@rm -fr $(PROJECT_DATA_PATH)
 	@mkdir -p $(PROJECT_DATA_PATH)/forth
-	@cp -r ../data/* $(PROJECT_DATA_PATH)
-	@cp -r forth/core/system.fs $(PROJECT_DATA_PATH)/forth
+	@cp -r data/* $(PROJECT_DATA_PATH)
+	@cp -r src/forth/core/system.fs $(PROJECT_DATA_PATH)/forth
+	@$(call print-to,"Installing",$(TARGET),"$(PREFIX)","")
+	@cp $(BUILD)/$(TARGET) $(PREFIX)
+
+###################################################
+# Uninstall project
+uninstall:
+	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
+	@rm -f $(PREFIX)/$(TARGET)
+	@rm -fr $(PROJECT_DATA_ROOT)
+#	@echo "$(CLR_GREEN)*** You can remove manually your personal SimTaDyn folder located at $(PROJECT_DATA_ROOT)$(CLR_DEFAULT)"
+
+###################################################
+# Generate a header file with the project version
+version.h: VERSION
+	@$(call print-from,"Check version","$(TARGET)","VERSION","")
+	@./.makefile/version.sh VERSION $(BUILD)/version.h
 
 ###################################################
 # Create a temporary folder to store *.o and *.d files

@@ -44,3 +44,6 @@
 
 # Logs
 *.log
+
+# Debian packages
+doc-pak

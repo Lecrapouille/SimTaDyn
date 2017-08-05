@@ -1,0 +1,8 @@
+2016: version 0.2
+        * Reborn of the project.
+        * Rewrite the project in C++, gtkmm, modern OpenGL.
+        * Application not yet function. Work in progress.
+
+2004: version 0.1
+        * School project version written in C, GTK+, legacy OpenGL.
+        * Minimalist but functional application.

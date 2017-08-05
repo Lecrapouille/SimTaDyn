@@ -2,6 +2,7 @@
 #  define CONFIG_HPP_
 
 #  include "Singleton.hpp"
+#  include "version.h"
 #  include <string>
 #  include <glibmm.h>
 
@@ -40,15 +41,15 @@ private:
 
 namespace config
 {
-  //! \brief 
+  //! \brief
   const char project_name[] = "SimTaDyn";
   //! \brief Major version of SimTaDyn
-  const uint32_t major_version = 0U;
+  const uint32_t major_version = SIMTADYN_MAJOR_VERSION;
   //! \brief Minor version of SimTaDyn
-  const uint32_t minor_version = 2U;
-  //! \brief 
+  const uint32_t minor_version = SIMTADYN_MINOR_VERSION;
+  //! \brief
   const char log_path[] = "SimTaDyn.log";
-  //! \brief 
+  //! \brief
   const char tmp_log_path[] = "/tmp/SimTaDyn.log";
   //! \brief Number of elements by pool in containers
   //! used for storing nodes and arcs in a graph
