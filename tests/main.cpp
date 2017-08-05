@@ -160,11 +160,11 @@ static bool run_tests(bool const has_xdisplay)
 {
   CppUnit::TextUi::TestRunner runner;
 
-  /*testUtils(runner);
+  testUtils(runner);
   testResourceManager(runner);
   testMath(runner);
   testContainer(runner);
-  testGraph(runner);*/
+  testGraph(runner);
 
   // Travis-CI does not support export display
   if (has_xdisplay)
