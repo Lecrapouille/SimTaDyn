@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef AFFICHAGE_H
 #define AFFICHAGE_H
 
@@ -32,7 +55,7 @@
 #define NBR_ZONE_MAX 200
 #define NBR_TRIANGLE_MAX 200
 #define NBR_FORTH_MAX 10
-#define BORDURE_X 500  
+#define BORDURE_X 500
 #define BORDURE_Y 500
 #define DEFAULT_TITLE  "GRAPHE"
 #define THICKNESS 5
@@ -61,9 +84,9 @@ typedef struct
 
 #define t_densite t_couleur
 
-typedef struct elem { 
+typedef struct elem {
      int valeur ;
-     struct elem * suivant ; 
+     struct elem * suivant ;
 } element ;
 typedef element * t_liste;
 
@@ -90,7 +113,7 @@ typedef struct
      float zoom;
 }t_camera;
 
-typedef struct 
+typedef struct
 {
      char *nom;
      t_pos pos;
@@ -100,7 +123,7 @@ typedef struct
      int selec;
 }t_sommet;
 
-typedef struct 
+typedef struct
 {
   char *nom;
   char *mot_forth;

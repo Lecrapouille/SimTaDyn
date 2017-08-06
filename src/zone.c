@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "affichage.h"
 
 void selec_zone()
@@ -6,10 +29,10 @@ void selec_zone()
   for (i=0;i<nbr_zone;i++)
     {
       if (sqrt((float)((coordx-(int)zone[i].poignet.x)*(coordx-(int)zone[i].poignet.x)+(coordy-(int) zone[i].poignet.y)*(coordy-(int)zone[i].poignet.y)))<10)
-	{
-	  zone_selec=zone[i].id;
-	  break;
-	}
+        {
+          zone_selec=zone[i].id;
+          break;
+        }
     }
 }
 
@@ -27,16 +50,16 @@ void recherche_poignet_zone()
     {
       temp=l->valeur;
       for (i=0;i<nbr_arete;i++)
-	{
-	  if (arete[i].id==temp)
-	    {
-	      nbr_moy++;
-	      xmoy=xmoy+arete[i].pos1.x;
-	      ymoy=ymoy+arete[i].pos1.y;
-	      xmoy=xmoy+arete[i].pos2.x;
-	      ymoy=ymoy+arete[i].pos2.y;
-	    }
-	}
+        {
+          if (arete[i].id==temp)
+            {
+              nbr_moy++;
+              xmoy=xmoy+arete[i].pos1.x;
+              ymoy=ymoy+arete[i].pos1.y;
+              xmoy=xmoy+arete[i].pos2.x;
+              ymoy=ymoy+arete[i].pos2.y;
+            }
+        }
       l=l->suivant;
     }
   zone[nbr_zone-1].poignet.x=(xmoy)/(2*nbr_moy);
@@ -77,15 +100,15 @@ void tab_to_mysql_zone()
   for (i=0;i<nbr_zone;i++)
   {
     sprintf (buffer,"UPDATE zone set x_poig = %s, y_poig = %s, z_poig = %s, R = %s, G = %s, B = %s, A= %s, nbr_arete = %i, liste_arete = %s",
-	     floattostring(zone[i].poignet.x),
-	     floattostring(zone[i].poignet.y),
-	     floattostring(zone[i].poignet.z),
-	     floattostring(zone[i].densite.R),
-	     floattostring(zone[i].densite.G),
-	     floattostring(zone[i].densite.B),
-	     floattostring(zone[i].densite.A),
-	     zone[i].nbr_arete,
-	     liste_to_string(zone[i].liste_arete));
+             floattostring(zone[i].poignet.x),
+             floattostring(zone[i].poignet.y),
+             floattostring(zone[i].poignet.z),
+             floattostring(zone[i].densite.R),
+             floattostring(zone[i].densite.G),
+             floattostring(zone[i].densite.B),
+             floattostring(zone[i].densite.A),
+             zone[i].nbr_arete,
+             liste_to_string(zone[i].liste_arete));
     printf ("%s\n",buffer);
     mysql_execreq(buffer);
     strcpy(buffer,"\0");

@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef CALLBACKS_H
 #define CALLBACKS_H
 
@@ -283,7 +306,7 @@ gboolean
 on_win_champ_delete_event              (GtkWidget       *widget,
                                         GdkEvent        *event,
                                         gpointer         user_data);
-										
+
 void enfonce_bt_outil(bool aj, bool sup, bool ins, bool dep);
 
 void enfonce_bt_cell(bool som, bool arc, bool zone);

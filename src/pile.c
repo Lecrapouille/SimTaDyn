@@ -1,9 +1,32 @@
-#include "pile.h" 
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
+#include "pile.h"
 
 t_pile nouvelle_pile(void)
 {
      t_pile pile;
-     
+
      pile.position = 0;
      pile.taille_allouee = TAILLE_PILE_INIT;
      pile.donnees = (t_cfa) xmalloc(TAILLE_PILE_INIT*(sizeof(t_cf)));
@@ -19,7 +42,7 @@ inline bool pile_vide(t_pile * pile)
 
 inline void reinit_pile(t_pile * pile)
 {
-     (*pile).position = 0; 
+     (*pile).position = 0;
 }
 
 inline void reinit_pile_gtk(GtkListStore * store)
@@ -44,13 +67,13 @@ inline void depiler(t_pile * pile)
 
      if ((*pile).position <= 0)
      {
-	  printf("\007Erreur : Pile vide !!\n");
-	  gtk_text_buffer_get_end_iter(bf_res, &fin);
-	  gtk_text_buffer_insert(bf_res, &fin, "Erreur : Pile vide !!", -1);
-	  guts.erreur = true;
+          printf("\007Erreur : Pile vide !!\n");
+          gtk_text_buffer_get_end_iter(bf_res, &fin);
+          gtk_text_buffer_insert(bf_res, &fin, "Erreur : Pile vide !!", -1);
+          guts.erreur = true;
      }
-     else	  
-	  --(*pile).position;
+     else
+          --(*pile).position;
 }
 
 inline void depiler_gtk(GtkListStore * store)
@@ -60,8 +83,8 @@ inline void depiler_gtk(GtkListStore * store)
 
      path = gtk_tree_path_new_from_indices(guts.pile_donnees.position,-1);
      gtk_tree_model_get_iter (GTK_TREE_MODEL (store),
-			      &iter,
-			      path);
+                              &iter,
+                              path);
      gtk_tree_path_free (path);
      gtk_list_store_remove(GTK_LIST_STORE(store), &iter);
 }
@@ -71,8 +94,8 @@ inline void empiler(t_pile * pile, t_cf elt)
      ++(*pile).position;
      if ((*pile).position >= (*pile).taille_allouee)
      {
-	  (*pile).taille_allouee += TAILLE_PILE_INIT;
-	  (*pile).donnees = xrealloc((*pile).donnees, (*pile).taille_allouee*sizeof(t_cf));
+          (*pile).taille_allouee += TAILLE_PILE_INIT;
+          (*pile).donnees = xrealloc((*pile).donnees, (*pile).taille_allouee*sizeof(t_cf));
      }
      (*pile).donnees[(*pile).position] = elt;
 }
@@ -90,7 +113,7 @@ void recopier_pile_gtk(t_pile * pile, GtkListStore * store, GtkTreeIter * iter)
      int i;
      reinit_pile_gtk(store);
      for (i = 1; i <= (*pile).position; i++)
-	  empiler_gtk(store, (*pile).donnees[i], iter);
+          empiler_gtk(store, (*pile).donnees[i], iter);
 }
 
 inline int nb_elt_pile(t_pile * pile)
@@ -113,8 +136,8 @@ void afficher_pile_buffer(t_pile pile, GtkTextBuffer * bf)
      g_free(buf);
      for (i = 1; i <= pile.position; i++)
      {
-	  elt = pile.donnees[i];	  
-	  afficher_elt_buffer(elt, bf);
+          elt = pile.donnees[i];
+          afficher_elt_buffer(elt, bf);
      }
 }
 
@@ -127,7 +150,7 @@ void afficher_pile(t_pile pile)
      printf("%d elt(s) : ", pile.position);
      for (i = 1; i <= pile.position; i++)
      {
-	  elt = pile.donnees[i];	  
-	  afficher_elt(elt);
+          elt = pile.donnees[i];
+          afficher_elt(elt);
      }
 }

@@ -1,10 +1,33 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef MOT_H
 #define MOT_H
 
 #include <stdio.h>
 #include <string.h>
 #include "memoire.h"
-#include "erreur.h" 
+#include "erreur.h"
 #include "header.h"
 #include "hash.h"
 #include "elt_pile.h"
@@ -29,7 +52,7 @@ void change_longueur(octet nb, octet * info);
 
 void detruire_mot(t_cfa mot);
 t_cfa adresse_fin_mot(t_cfa mot);
-bool nouveau_mot_courant(void);    
+bool nouveau_mot_courant(void);
 t_nfa nouveau_nfa(gchar * nom, octet masque, FONCTION_C);
 t_cfa nouveau_mot(gchar * nom, octet masque, FONCTION_C);
 void ajouter_adresse(t_cfa mot, void * ad, t_type type); //A SUPP

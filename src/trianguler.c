@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "trianguler.h"
 
 t_pos calcul_poignet(t_liste l)
@@ -29,20 +52,20 @@ void trianguler(t_liste tempzone)
   char buffer[250];
   if (nbr_elt_liste(tempzone)==3)
     {
-	 //Pourquoi pas appeller creer_zone ???
+         //Pourquoi pas appeller creer_zone ???
 
       poignet_temp=calcul_poignet(tempzone);
       normal_temp=Normal(tempzone->valeur,tempzone->suivant->valeur);
       sprintf(buffer,
-	      "INSERT INTO triangle (arete1,arete2,arete3,x_poig,y_poig,x_normal,y_normal,z_normal) values(%i, %i,%i,%s, %s,%s,%s,%s)",
-	      tempzone->valeur,
-	      tempzone->suivant->valeur,
-	      tempzone->suivant->suivant->valeur,
-	      floattostring(poignet_temp.x),
-	      floattostring(poignet_temp.y),
-	      floattostring(normal_temp.x),
-	      floattostring(normal_temp.y),
-	      floattostring(normal_temp.z));
+              "INSERT INTO triangle (arete1,arete2,arete3,x_poig,y_poig,x_normal,y_normal,z_normal) values(%i, %i,%i,%s, %s,%s,%s,%s)",
+              tempzone->valeur,
+              tempzone->suivant->valeur,
+              tempzone->suivant->suivant->valeur,
+              floattostring(poignet_temp.x),
+              floattostring(poignet_temp.y),
+              floattostring(normal_temp.x),
+              floattostring(normal_temp.y),
+              floattostring(normal_temp.z));
       printf ("%s\n",buffer);
       mysql_execreq(buffer);
       printf ("fin trianguler\n");
@@ -52,7 +75,7 @@ void trianguler(t_liste tempzone)
       int i;
       int j=0;
       int maxid=0;;
-      gboolean rep=TRUE;; 
+      gboolean rep=TRUE;;
       t_liste triangle;
       triangle=init_liste();
       int arete1,arete2;
@@ -68,54 +91,54 @@ void trianguler(t_liste tempzone)
       arete3_temp=arete[id_to_tab2(arete2)].pos1.s;
       arete4_temp=arete[id_to_tab2(arete2)].pos2.s;
       if (arete1_temp==arete3_temp)
-	arete1_temp=arete4_temp;
+        arete1_temp=arete4_temp;
       else
-	if (arete1_temp==arete4_temp)
-	  arete1_temp=arete3_temp;
-	else
-	  if (arete2_temp==arete3_temp)
-	    arete2_temp=arete4_temp;
-	  else
-	    arete2_temp=arete3_temp;
+        if (arete1_temp==arete4_temp)
+          arete1_temp=arete3_temp;
+        else
+          if (arete2_temp==arete3_temp)
+            arete2_temp=arete4_temp;
+          else
+            arete2_temp=arete3_temp;
       for (i=0;i<nbr_arete&&rep;i++)
-	{
-	  if ((arete[i].pos1.s==arete1_temp&&arete[i].pos2.s==arete2_temp)||
-	      (arete[i].pos1.s==arete2_temp&&arete[i].pos2.s==arete1_temp))
-	    rep=FALSE;
-	}
+        {
+          if ((arete[i].pos1.s==arete1_temp&&arete[i].pos2.s==arete2_temp)||
+              (arete[i].pos1.s==arete2_temp&&arete[i].pos2.s==arete1_temp))
+            rep=FALSE;
+        }
       if (rep)
-	{
-	  ajout_arete(arete1_temp,arete2_temp,1);
-	  for (j=0;j<nbr_arete;j++)
-	    {
-	      if(maxid<arete[j].id)
-		maxid=arete[j].id;
-	    }
-	  insert_liste(maxid,&triangle);
-	}
+        {
+          ajout_arete(arete1_temp,arete2_temp,1);
+          for (j=0;j<nbr_arete;j++)
+            {
+              if(maxid<arete[j].id)
+                maxid=arete[j].id;
+            }
+          insert_liste(maxid,&triangle);
+        }
       else
       {
-	   printf (" relance calcul triangle\n");
-	   insert_liste(arete[i-1].id,&triangle);
+           printf (" relance calcul triangle\n");
+           insert_liste(arete[i-1].id,&triangle);
       }
-	   poignet_temp=calcul_poignet(triangle);
-      normal_temp=Normal(triangle->valeur,triangle->suivant->valeur); 
+           poignet_temp=calcul_poignet(triangle);
+      normal_temp=Normal(triangle->valeur,triangle->suivant->valeur);
       sprintf(buffer,
-	      "INSERT INTO triangle (arete1,arete2,arete3,x_poig,y_poig,x_normal,y_normal,z_normal) values(%i, %i,%i,%s, %s,%s,%s,%s)",
-	      triangle->valeur,
-	      triangle->suivant->valeur,
-	      triangle->suivant->suivant->valeur,
-	      floattostring(poignet_temp.x),
-	      floattostring(poignet_temp.y),
-	      floattostring(normal_temp.x),
-	      floattostring(normal_temp.y),
-	      floattostring(normal_temp.z));
+              "INSERT INTO triangle (arete1,arete2,arete3,x_poig,y_poig,x_normal,y_normal,z_normal) values(%i, %i,%i,%s, %s,%s,%s,%s)",
+              triangle->valeur,
+              triangle->suivant->valeur,
+              triangle->suivant->suivant->valeur,
+              floattostring(poignet_temp.x),
+              floattostring(poignet_temp.y),
+              floattostring(normal_temp.x),
+              floattostring(normal_temp.y),
+              floattostring(normal_temp.z));
       printf ("%s\n",buffer);
       mysql_execreq(buffer);
       if (rep)
-	  insert_liste(maxid,&tempzone);
+          insert_liste(maxid,&tempzone);
       else
-	  insert_liste(arete[i-1].id,&tempzone);
+          insert_liste(arete[i-1].id,&tempzone);
       trianguler (tempzone);
     }
 }
@@ -126,21 +149,21 @@ void trianguler_carte()
   int i;
   mysql_execreq("DROP TABLE triangle");
   mysql_execreq("CREATE TABLE triangle (id INTEGER AUTO_INCREMENT NOT NULL PRIMARY KEY, arete1 INTEGER, arete2 INTEGER, arete3 INTEGER, x_poig FLOAT, y_poig FLOAT, x_normal FLOAT , y_normal FLOAT, z_normal FLOAT)");
- 
+
   for (i=0;i<nbr_arete;i++)
     {
       if (arete[i].triangle==1)
-	{
-	  arete_selec=arete[i].id;
-	  suppr_arete();
-	}
+        {
+          arete_selec=arete[i].id;
+          suppr_arete();
+        }
     }
-  
+
   for (i=0;i<nbr_zone;i++)
     {
       t_liste temp;
       temp=zone[i].liste_arete;
-      trianguler(temp); 
+      trianguler(temp);
     }
   TtriangleInit();
   mysql_db_triangle();

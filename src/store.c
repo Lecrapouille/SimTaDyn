@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "store.h"
 
 #define NB_TITRES_VISUAL_DICO 5
@@ -22,12 +45,12 @@ void ajouter_colonne_visualdico(GtkTreeView *vue)
      renderer = gtk_cell_renderer_text_new();
      for (i=0; i<NB_TITRES_VISUAL_DICO; ++i)
      {
-	  colonne = gtk_tree_view_column_new_with_attributes(Titre_visualdico[i],
-							     renderer, 
-							     "text",
-							     i, NULL);
-	  gtk_tree_view_column_set_sort_column_id(colonne, i);
-	  gtk_tree_view_append_column(vue, colonne);
+          colonne = gtk_tree_view_column_new_with_attributes(Titre_visualdico[i],
+                                                             renderer,
+                                                             "text",
+                                                             i, NULL);
+          gtk_tree_view_column_set_sort_column_id(colonne, i);
+          gtk_tree_view_append_column(vue, colonne);
      }
 }
 
@@ -35,13 +58,13 @@ GtkTreeModel *creer_visualdico(void)
 {
      GtkListStore *store;
 
-     store = 
-	  gtk_list_store_new(NB_TITRES_VISUAL_DICO,
-			     G_TYPE_STRING, 
-			     G_TYPE_STRING, 
-			     G_TYPE_STRING,
-			     G_TYPE_STRING,
-			     G_TYPE_STRING);
+     store =
+          gtk_list_store_new(NB_TITRES_VISUAL_DICO,
+                             G_TYPE_STRING,
+                             G_TYPE_STRING,
+                             G_TYPE_STRING,
+                             G_TYPE_STRING,
+                             G_TYPE_STRING);
      return GTK_TREE_MODEL(store);
 }
 
@@ -60,8 +83,8 @@ void ajouter_mot_dans_visualdico(GtkTreeModel * store, t_cfa mot)
      cfa = mot;
      nfa = (t_nfa) mot[0].adresse;
 
-     for (i=1; i < nfa->taille_utilisee; ++i)	  
-	  ch = g_strconcat(ch, " ", elt_to_string(mot[i]), NULL);
+     for (i=1; i < nfa->taille_utilisee; ++i)
+          ch = g_strconcat(ch, " ", elt_to_string(mot[i]), NULL);
 
      sprintf(s_cfa, "%p", cfa);
      sprintf(s_fp,  "%p", nfa->fp);
@@ -69,11 +92,11 @@ void ajouter_mot_dans_visualdico(GtkTreeModel * store, t_cfa mot)
      gtk_list_store_append(GTK_LIST_STORE(store), &iter);
      nfa->ad_gtk = iter;
      gtk_list_store_set(GTK_LIST_STORE(store), &iter,
-			0, nfa->nom,
-			1, s_cfa,
-			2, s_info,
-			3, s_fp,
-			4, ch, -1);
+                        0, nfa->nom,
+                        1, s_cfa,
+                        2, s_info,
+                        3, s_fp,
+                        4, ch, -1);
      g_free(ch);
 }
 
@@ -83,7 +106,7 @@ void ajouter_mot_dans_visualdico(GtkTreeModel * store, t_cfa mot)
 */
 void ajouter_nomdeschamps_magazin_champ(GtkTreeStore * store, const gchar* nom)
 {
-     GtkTreeIter iter1, iter2, iter3, iter4; 
+     GtkTreeIter iter1, iter2, iter3, iter4;
      char *carte;
 
      carte = nouvelle_chaine();
@@ -176,9 +199,9 @@ void ajouter_col_visual_champ(GtkTreeView *vue)
 
      renderer = gtk_cell_renderer_text_new();
      colonne = gtk_tree_view_column_new_with_attributes(TITRE_VISUAL_CHAMP,
-							renderer, 
-							"text",
-							0, NULL);
+                                                        renderer,
+                                                        "text",
+                                                        0, NULL);
      gtk_tree_view_column_set_sort_column_id(colonne, 0);
      gtk_tree_view_append_column(vue, colonne);
 }
@@ -195,8 +218,8 @@ void ajouter_id_cell_visual_pile(GtkListStore * store, int i)
 
      gtk_list_store_append(GTK_LIST_STORE(store), &iter);
      gtk_list_store_set(GTK_LIST_STORE(store), &iter,
-			0, som[i].nom,
-			-1);
+                        0, som[i].nom,
+                        -1);
 }
 
 void ajouter_col_visual_pile_donnees(GtkTreeView *vue)
@@ -206,9 +229,9 @@ void ajouter_col_visual_pile_donnees(GtkTreeView *vue)
 
      renderer = gtk_cell_renderer_text_new();
      colonne = gtk_tree_view_column_new_with_attributes(TITRE_VISUAL_PILE_DONNEES,
-							renderer, 
-							"text",
-							0, NULL);
+                                                        renderer,
+                                                        "text",
+                                                        0, NULL);
      gtk_tree_view_column_set_sort_column_id(colonne, 0);
      gtk_tree_view_append_column(vue, colonne);
 }
@@ -223,10 +246,10 @@ popup_menu_handler(GtkWidget      *widget,
 {
      if (event->button == 3)
      {
-	  gtk_menu_popup(GTK_MENU(widget), NULL, NULL, NULL, NULL, event->button, event->time);
-	  return TRUE;
+          gtk_menu_popup(GTK_MENU(widget), NULL, NULL, NULL, NULL, event->button, event->time);
+          return TRUE;
      }
-     
+
      return FALSE;
 }
 
@@ -244,11 +267,11 @@ void create_popup_menu(GtkWidget *widget, GtkWidget ** menu)
      gtk_menu_attach_to_widget(GTK_MENU(*menu),GTK_WIDGET(widget),popup_menu_detacher);
 
      g_signal_connect_swapped(G_OBJECT(widget), "button_press_event",
-			      G_CALLBACK(popup_menu_handler), *menu);
+                              G_CALLBACK(popup_menu_handler), *menu);
 }
 
 static void item_popup_active(GtkWidget *attach_widget,
-			      gchar * chaine)
+                              gchar * chaine)
 {
      printf("%s\n", chaine);
 }
@@ -261,14 +284,14 @@ void nouveau_item_popup(gchar * chaine, GtkWidget ** menu)
   gtk_widget_show(item);
 
   g_signal_connect(G_OBJECT(item), "activate",
-                   G_CALLBACK(item_popup_active), chaine); 
+                   G_CALLBACK(item_popup_active), chaine);
 }
 
 
 #if 0
 void user_function(GtkCellRendererText *renderer,
-		   gchar *path_string, gchar *new_text,
-		   gpointer user_data)
+                   gchar *path_string, gchar *new_text,
+                   gpointer user_data)
 {
      GtkWidget *vue = lookup_widget(GTK_WIDGET(win_main), "tree_som");
      GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vue));
@@ -277,12 +300,12 @@ void user_function(GtkCellRendererText *renderer,
 
      if (gtk_tree_selection_get_selected(selection, &model, &iter))
      {
-	  //OKKKK ::  gtk_list_store_remove(GTK_LIST_STORE(cl_som), &iter); 
-	  printf("%s\n", path_string);
-	  gtk_list_store_set(GTK_LIST_STORE(cl_som), &iter, atoi(path_string),
-	  		     new_text, -1);
-     }	
-	
+          //OKKKK ::  gtk_list_store_remove(GTK_LIST_STORE(cl_som), &iter);
+          printf("%s\n", path_string);
+          gtk_list_store_set(GTK_LIST_STORE(cl_som), &iter, atoi(path_string),
+                             new_text, -1);
+     }
+
      //GtkTreeViewColumn *col = gtk_tree_view_get_column(GTK_TREE_VIEW(vue), g_ascii_strtoull(path_string, NULL, 10));
 }
 #endif

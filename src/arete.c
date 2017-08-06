@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "affichage.h"
 
 void selec_arete()
@@ -6,12 +29,12 @@ void selec_arete()
   for (i=0;i<nbr_arete;i++)
     {
       if (sqrt((float)((coordx-(int)arete[i].poignet.x)*(coordx-(int)arete[i].poignet.x)+(coordy-(int) arete[i].poignet.y)*(coordy-(int)arete[i].poignet.y)))<10)
-	{
-	  arete_selec=arete[i].id;
-	  arete[i].selec=1;
-	  break;
-	}
-    } 
+        {
+          arete_selec=arete[i].id;
+          arete[i].selec=1;
+          break;
+        }
+    }
 }
 
 
@@ -46,9 +69,9 @@ int suppr_zone_arete(t_liste temp)
   while (temp!=NULL)
     {
       if (temp->valeur==arete_selec)
-	return 1;
+        return 1;
       else
-	temp=temp->suivant;
+        temp=temp->suivant;
     }
   return 0;
 }
@@ -62,18 +85,18 @@ void tab_to_mysql_arete()
   for (i=0;i<nbr_arete;i++)
     {
       sprintf (buffer,"UPDATE arc set x_poig = %s, y_poig = %s, z_poig = %s, R = %s, G = %s, B = %s, A = %s, cout = %s, id_som_1 = %i, id_som_2 = %i, triangle = %i WHERE id = %i",
-	       floattostring(arete[i].poignet.x),
-	       floattostring(arete[i].poignet.y),
-	       floattostring(arete[i].poignet.z),
-	       floattostring(arete[i].densite.R),
-	       floattostring(arete[i].densite.G),
-	       floattostring(arete[i].densite.B),
-	       floattostring(arete[i].densite.A),
-	       floattostring(arete[i].cout),
-	       arete[i].pos1.s,
-	       arete[i].pos2.s,
-	       arete[i].triangle,
-	       arete[i].id);
+               floattostring(arete[i].poignet.x),
+               floattostring(arete[i].poignet.y),
+               floattostring(arete[i].poignet.z),
+               floattostring(arete[i].densite.R),
+               floattostring(arete[i].densite.G),
+               floattostring(arete[i].densite.B),
+               floattostring(arete[i].densite.A),
+               floattostring(arete[i].cout),
+               arete[i].pos1.s,
+               arete[i].pos2.s,
+               arete[i].triangle,
+               arete[i].id);
       //printf ("%s\n",buffer);
       mysql_execreq(buffer);
       buffer[0]='\0';

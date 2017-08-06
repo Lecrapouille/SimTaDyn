@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "affichage.h"
 
 void calcul_coord()
@@ -83,7 +106,7 @@ void affich_liste (t_liste l)
   temp=l;
   while (temp!=NULL)
     {
-	 /*printf ("%i,",temp->valeur);*/
+         /*printf ("%i,",temp->valeur);*/
       temp=temp->suivant;
     }
   printf ("\n");
@@ -134,25 +157,25 @@ t_liste string_to_liste (char *chaine)
   liste=init_liste();
   while (chaine[i]!='\0')
     {
-     
+
       if (chaine[i]!=',')
-	{	
-	  s[k]=chaine[i];
-	  s[k+1]='\0';
-	  k++;
-	}
+        {
+          s[k]=chaine[i];
+          s[k+1]='\0';
+          k++;
+        }
       else
-	{
-	  val=atoi(s);
-	  //printf ("%i\n",val);
-	  insert_liste(val,&liste);
-	  strcpy(s,"\0"); 
-	  k=0;
-	}
+        {
+          val=atoi(s);
+          //printf ("%i\n",val);
+          insert_liste(val,&liste);
+          strcpy(s,"\0");
+          k=0;
+        }
       i++;
     }
   val=atoi(s);
-  insert_liste(val,&liste); 
+  insert_liste(val,&liste);
   return liste;
 }
 
@@ -161,7 +184,7 @@ char* init_chaine(char *chaine)
   unsigned int i;
   for (i=0;i<50;i++)
     chaine[i]='\0';
-  return (char *) chaine; 
+  return (char *) chaine;
 }
 
 
@@ -177,8 +200,8 @@ int recherche_pos_tab_arete (int x)
 {
   int i;
   for (i=0;(i<nbr_arete)&&(arete[i].id!=x);i++);
-  return i;  
-} 
+  return i;
+}
 
 /*
 *****************************************************************************
@@ -206,10 +229,10 @@ int id_to_tab (int val_id)
      res = -1;
      for (i=0;i<nbr_sommet;i++)
      {
-	  if (som[i].id == val_id)
-	  {
-	    res = i;
-	  }
+          if (som[i].id == val_id)
+          {
+            res = i;
+          }
      }
      return res;
 }
@@ -220,11 +243,10 @@ int id_to_tab2 (int val_id)
      res = -1;
      for (i=0;i<nbr_arete;i++)
      {
-	  if (arete[i].id == val_id)
-	  {
-	    res = i;
-	  }
+          if (arete[i].id == val_id)
+          {
+            res = i;
+          }
      }
      return res;
 }
-

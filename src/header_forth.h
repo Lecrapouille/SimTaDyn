@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef HEADER_FORTH_H
 #define HEADER_FORTH_H
 
@@ -56,9 +79,9 @@ typedef enum t_type {
 
 typedef enum t_nom_champ {
      ID, NOM, FORTH, POSITION, POSX, POSY, POSZ, COUT,
-     LONGUEUR, AIRE, PERIMETRE, DENSITE, POIGNET, 
+     LONGUEUR, AIRE, PERIMETRE, DENSITE, POIGNET,
      POIGNETX, POIGNETY, COULEUR, ROUGE, VERT, BLEU, ALPHA,
-     NB_ARC, 
+     NB_ARC,
 } t_nom_champ;
 
 typedef enum t_vue {
@@ -98,14 +121,14 @@ typedef struct t_iterateur {
 **  >> tab[i].type = TYPE_CFA
 **  >> tab[i].adresse = (t_cfa) XXX.
 **
-**  Elles peuvent aussi contenir des entiers, des 
+**  Elles peuvent aussi contenir des entiers, des
 **          flottants et des adresses.
 **
-**  ATTENTION : lors de l'execution d'un mot (cad lors 
+**  ATTENTION : lors de l'execution d'un mot (cad lors
 **      du parcours de l'arbre) a ne pas utiliser
 ** la case zero du tab mais celle qui suit (la case une).
 **
-**  ATTENTION : la pile (de retour) contient des 
+**  ATTENTION : la pile (de retour) contient des
 **  cellules qui sont des ad sur des cfa (TYPE_HANDLE).
 ** ========================================================
 */
@@ -114,13 +137,13 @@ typedef struct t_cf * t_cfa;  // Code Field Addresse
 typedef struct t_cf {         // Code Field
      t_type type;
      union {
-	  int    entier;
-	  float  reel;
-	  void * adresse;
+          int    entier;
+          float  reel;
+          void * adresse;
      };
 } t_cf;
 
-/* 
+/*
 ** ===============================================
 **
 **                         PILE
@@ -143,8 +166,8 @@ typedef struct t_pile {
 */
 
 typedef struct t_nf * t_nfa;
-typedef struct t_nf {     
-     octet     info;   
+typedef struct t_nf {
+     octet     info;
      char*     nom;
      FONCTION_C;
      GtkTreeIter  ad_gtk;
@@ -179,7 +202,7 @@ typedef struct t_hash {
 /*
 ** ===============================================
 **
-**                  BUFFER    
+**                  BUFFER
 **
 ** ===============================================
 */
@@ -205,7 +228,7 @@ typedef struct t_trash {
 /*
 ** ===============================================
 **
-**             BOYAUX DE L'INTERPRETEUR    
+**             BOYAUX DE L'INTERPRETEUR
 **
 ** ===============================================
 */
@@ -217,10 +240,10 @@ typedef struct t_guts {
      t_pile           pile_donnees;
      t_pile           pile_retour;
      gchar*           tampon;
-     gchar*           mytoken;       // 
-     t_iterateur      iter;          // 
+     gchar*           mytoken;       //
+     t_iterateur      iter;          //
      octet            mode;          // Compilation --- Execution
-     bool	      debugger;
+     bool             debugger;
      t_cfa            dernier_mot_cree;
      t_cfa            IP;               // Pointeur d'Interpretation
      t_cfa            PC;               // pointeur en cours
@@ -236,7 +259,7 @@ typedef struct t_guts {
 /*
 ** ===============================================
 **
-**                PARAMETRES GLOBAUX    
+**                PARAMETRES GLOBAUX
 **
 ** ===============================================
 */
@@ -250,7 +273,7 @@ GtkTreeStore *store_champ;
 GtkTreeSelection *select_champ;
 GtkListStore *store_pile;
 GtkTreeIter iter_pile;
-GtkTextTag *balise_rouge, *balise_soulignee,  
+GtkTextTag *balise_rouge, *balise_soulignee,
      *balise_bonne, *balise_erreur, *balise_normale;
 GtkTextBuffer *bf_nouv, *bf_res, *bf_svgd_code, *bf_debug;
 GtkWidget * win_main, *win_champ;

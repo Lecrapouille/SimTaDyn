@@ -1,3 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2004 Quentin Quadrat <lecrapouille@gmail.com>,
+//                Minh-Long Nguyen <>,
+//                Benoit Marcot <>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "string_util.h"
 
 bool chaine_to_int(gchar * ch, int *nb)
@@ -6,7 +29,7 @@ bool chaine_to_int(gchar * ch, int *nb)
      gchar * cp_ch;
 
      if (ch[0] == '\0')
-	  return false;
+          return false;
 
      /*
      ** verifie que que des nombres
@@ -15,12 +38,12 @@ bool chaine_to_int(gchar * ch, int *nb)
      if ((ch[0] == '-') || (ch[0] == '+')) ++ch;
      while ((*ch != '\0') && (res))
      {
-	  res = g_ascii_isdigit(*ch);
-	  ++ch;
+          res = g_ascii_isdigit(*ch);
+          ++ch;
      }
-     
+
      if ((!res) || ((ch[1] == '\0') && ((ch[0] == '-') || (ch[0] == '+'))))
-	  return false;
+          return false;
 
      *nb = g_ascii_strtoull(cp_ch, NULL, 10);
      return true;
@@ -33,7 +56,7 @@ bool chaine_to_float(gchar * ch, float *nb)
      gchar * cp_ch;
 
      if (ch[0] == '\0')
-	  return false;
+          return false;
 
      /*
      ** verifie que que des nombres
@@ -42,40 +65,40 @@ bool chaine_to_float(gchar * ch, float *nb)
      if ((ch[0] == '-') || (ch[0] == '+')) ++ch;
      while ((*ch != '\0') && (res) && (nb_point <= 1))
      {
-	  if ((*ch == '.') || (*ch == ','))
-	       ++nb_point;
-	  else
-	       res = g_ascii_isdigit(*ch);
-	  ++ch;
+          if ((*ch == '.') || (*ch == ','))
+               ++nb_point;
+          else
+               res = g_ascii_isdigit(*ch);
+          ++ch;
      }
 
-     if ((!res) || ((ch[1] == '\0') && 
-		    ((ch[0] == '.') || 
-		     (ch[0] == ',') || 
-		     (ch[0] == '-') || 
-		     (ch[0] == '+'))))
-	  return false;
+     if ((!res) || ((ch[1] == '\0') &&
+                    ((ch[0] == '.') ||
+                     (ch[0] == ',') ||
+                     (ch[0] == '-') ||
+                     (ch[0] == '+'))))
+          return false;
 
-     *nb = strtof(cp_ch, NULL); 
+     *nb = strtof(cp_ch, NULL);
      return true;
 }
 
 void my_printf(const gchar * texte, GtkTextTag * balise, GtkTextBuffer * txtbf)
 {
      GtkTextIter debut, fin;
-     
-     gtk_text_buffer_get_end_iter(txtbf, &debut);  
+
+     gtk_text_buffer_get_end_iter(txtbf, &debut);
      gtk_text_buffer_insert(txtbf, &debut, texte, -1);
-     gtk_text_buffer_get_end_iter(txtbf, &fin);  
+     gtk_text_buffer_get_end_iter(txtbf, &fin);
      gtk_text_buffer_apply_tag(txtbf, balise, &debut, &fin);
 }
 
 unsigned int maxi(unsigned int a, unsigned int b)
 {
      if (a > b)
-	  return a;
+          return a;
      else
-	  return b;
+          return b;
 }
 
 t_buffer nouveau_buffer(unsigned int taille, char * chaine)
@@ -88,14 +111,14 @@ t_buffer nouveau_buffer(unsigned int taille, char * chaine)
 
      return buf;
 }
-     
+
 void ajouter_string(t_buffer *buf, char* chaine)
 {
      unsigned int t = (*buf).taille_allouee;
-     
+
      (*buf).taille_allouee += strlen(chaine);
      if ((*buf).taille_allouee > t)
-	  (*buf).str = (char*) realloc((*buf).str, (*buf).taille_allouee*sizeof(char));
+          (*buf).str = (char*) realloc((*buf).str, (*buf).taille_allouee*sizeof(char));
      (*buf).str = strcat((*buf).str, chaine);
 }
 
@@ -127,7 +150,7 @@ t_iterateur nouveau_iterateur()
 gchar* nouvelle_chaine(void)
 {
      gchar * buffer;
- 
+
      buffer = (gchar *) xmalloc(sizeof(char));
      buffer[0] = '\0';
 
@@ -141,29 +164,28 @@ inline bool car_separation(gchar * ch)
 
 gchar *my_cut(gchar ** ch, gchar * mytoken, t_iterateur * iter)
 {
-     int lg = -1; 
+     int lg = -1;
      mytoken = nouvelle_chaine();
 
      while ((**ch != '\0') && (car_separation(*ch)))
      {
-	  if (**ch == '\n')
-	  {
-	       ++(*iter).y;
-	       (*iter).x = 0;
-	  }
-	  else
-	       ++(*iter).x;
-	  ++(*ch);
+          if (**ch == '\n')
+          {
+               ++(*iter).y;
+               (*iter).x = 0;
+          }
+          else
+               ++(*iter).x;
+          ++(*ch);
      }
 
      (*iter).oldx = (*iter).x; (*iter).oldy = (*iter).y;
      while ((**ch != '\0') && (!car_separation(*ch)))
      {
-	  ++lg;
-	  mytoken = g_strconcat(mytoken, " ", NULL);
-	  mytoken[lg] = MAJUSCULE(**ch);
-	  ++(*iter).x; ++(*ch);
+          ++lg;
+          mytoken = g_strconcat(mytoken, " ", NULL);
+          mytoken[lg] = MAJUSCULE(**ch);
+          ++(*iter).x; ++(*ch);
      }
      return mytoken;
 }
-
