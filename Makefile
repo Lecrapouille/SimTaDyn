@@ -119,7 +119,8 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
-       -lGLEW -ldl -ldw -lSOIL -lZipper-static -lz
+       -lGLEW -ldl -ldw -lSOIL
+# -lZipper-static -lz
 else
 $(error Unknown architecture)
 endif
