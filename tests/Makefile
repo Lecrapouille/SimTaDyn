@@ -23,7 +23,7 @@ endif
 
 ###################################################
 # Set include paths
-INCLUDES = -I$(BUILD) -I. -I../external/backward -I../external/YesEngine\
+INCLUDES = -I$(BUILD) -I. -I../external/backward-cpp -I../external/YesEngine\
 -I../src -I../src/common/patterns -I../src/common/managers		\
 -Icommon/managers -I../src/common/utils -Icommon/utils			\
 -I../src/common/maths -Icommon/maths -I../src/common/containers		\
@@ -48,12 +48,12 @@ VPATH=.:$(BUILD):../src:../src/common/patterns:\
 ../src/core:../src/core/loaders:\
 ../src/forth:forth:\
 ../src/ui:\
-../external/backward:../external/YesEngine
+../external/backward-cpp:../external/YesEngine
 
 ###################################################
 # Set objects architecture specific
 TARGET = UnitTest
-OBJECTS = version.h Backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o   \
+OBJECTS = version.h backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o   \
 	FileTests.o ResourcesTests.o Maths.o VectorTests.o MatrixTests.o        \
 	TransformationTests.o BoundingBoxTests.o FilteringTests.o	        \
 	Color.o ColorTests.o SetTests.o CollectionTests.o Exception.o           \
@@ -65,7 +65,7 @@ OBJECTS = version.h Backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o
 ###################################################
 # Compil options
 CXX = g++
-DEFINES =
+DEFINES = -DBACKWARD_HAS_DW=1
 
 ###################################################
 # Set Libraries

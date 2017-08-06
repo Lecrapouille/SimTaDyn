@@ -31,7 +31,7 @@ PREFIX = /usr/bin
 
 ###################################################
 # Set include paths
-INCLUDES = -I$(BUILD) -Iexternal/backward -Iexternal/YesEngine -Isrc	\
+INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/YesEngine -Isrc	\
 -Isrc/common/patterns -Isrc/common/managers -Isrc/common/utils		\
 -Isrc/common/maths -Isrc/common/containers -Isrc/common/graph-theory	\
 -Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree		\
@@ -40,7 +40,7 @@ INCLUDES = -I$(BUILD) -Iexternal/backward -Iexternal/YesEngine -Isrc	\
 
 ###################################################
 # Path for Makefile to find *.o
-VPATH=$(BUILD):external/backward:external/YesEngine:\
+VPATH=$(BUILD):external/backward-cpp:external/YesEngine:\
 src:\
 src/common/patterns:\
 src/common/managers:\
@@ -57,7 +57,7 @@ src/forth:\
 src/ui
 
 ###################################################
-OBJ_EXTERNAL   = Backward.o
+OBJ_EXTERNAL   = backward.o
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_PATTERNS   = Singleton.o
 OBJ_MATHS      = Maths.o
@@ -87,7 +87,7 @@ OBJ            = version.h $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MA
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-DEFINES = -DCHECK_OPENGL -DDATA_PATH=$(PROJECT_DATA_PATH)
+DEFINES = -DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DDATA_PATH=$(PROJECT_DATA_PATH)
 
 ###################################################
 # Set Libraries
