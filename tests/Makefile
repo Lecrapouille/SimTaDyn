@@ -85,7 +85,7 @@ OBJECTS = version.h backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o
 ###################################################
 # Compil options
 CXX = g++
-DEFINES = -DBACKWARD_HAS_DW=1
+DEFINES = -DBACKWARD_HAS_DW=1 -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Set Libraries

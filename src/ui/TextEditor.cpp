@@ -706,7 +706,7 @@ bool TextEditor::saveAs(TextDocument *doc)
   dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
 
   // Set to the SimTaDyn path while no longer the GTK team strategy.
-  dialog.set_current_folder(Config::instance().m_data_path);
+  dialog.set_current_folder(config::data_path);
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -753,7 +753,7 @@ bool TextEditor::open()
   dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
 
   // Set to the SimTaDyn path while no longer the GTK team strategy.
-  dialog.set_current_folder(Config::instance().m_data_path);
+  dialog.set_current_folder(config::data_path);
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

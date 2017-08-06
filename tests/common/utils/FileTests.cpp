@@ -86,7 +86,7 @@ void FileTests::testpath()
   CPPUNIT_ASSERT_EQUAL(0, path1.toString().compare(""));
   Path path2("aa:bb:cc::ee::");
   std::cout << "Path: '" << path2.toString() << "'" << std::endl;
-  path2.replace("/usr/bin/");
+  path2.init("/usr/bin/");
   std::cout << "Path: '" << path2.toString() << "'" << std::endl;
   CPPUNIT_ASSERT_EQUAL(0, path2.toString().compare("/usr/bin:"));
   path2.add("/usr/share:/bin/");

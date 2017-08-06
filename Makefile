@@ -36,14 +36,6 @@ ARCHI := $(shell uname -s)
 endif
 
 ###################################################
-# Where to install project datum
-# FIXME: do not change this location (for the moment)
-# ifeq ($(PROJECT_DATA_ROOT),)
-PROJECT_DATA_ROOT = /usr/share/SimTaDyn
-# endif
-PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
-
-###################################################
 # Where to install project runnable
 # ifeq ($(PREFIX),)
 PREFIX = /usr/bin
@@ -107,7 +99,7 @@ OBJ            = version.h $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MA
 CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-DEFINES = -DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DDATA_PATH=$(PROJECT_DATA_PATH)
+DEFINES = -DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Set Libraries

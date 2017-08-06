@@ -57,7 +57,7 @@ protected:
 
 private:
 
-  void setTitleIcon();
+  void setTitleIcon(std::string const &icon_name);
 
 protected:
 

@@ -36,7 +36,7 @@ SimTaDynWindow::SimTaDynWindow()
     set_title(config::project_name);
     set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
-    setTitleIcon();
+    setTitleIcon("icons/SimTaDyn.png");
 
     // Connect signals
     add_events(Gdk::KEY_RELEASE_MASK);
@@ -119,17 +119,17 @@ bool SimTaDynWindow::onExitClicked(GdkEventAny*)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void SimTaDynWindow::setTitleIcon()
+void SimTaDynWindow::setTitleIcon(std::string const &icon_name)
 {
-  std::string path = Config::instance().data_path("icons/SimTaDyn.png");
+  std::pair<std::string, bool> res = Config::instance().find(icon_name);
 
-  if (File::exist(path))
+  if (res.second)
     {
-      set_icon_from_file(path);
+      set_icon_from_file(res.first);
     }
   else
     {
-      LOGW("SimTaDynWindow: Icon '%s' does not exist\n", path.c_str());
+      LOGW("SimTaDynWindow: Icon '%s' does not exist\n", icon_name.c_str());
     }
 }
 

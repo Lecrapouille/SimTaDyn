@@ -38,6 +38,10 @@ public:
     split(path);
   }
 
+  virtual ~Path()
+  {
+  }
+
   //! \brief add a directory in the path
   void add(std::string const& path)
   {
@@ -45,7 +49,7 @@ public:
   }
 
   //! \brief add a directory in the path
-  void replace(std::string const& path)
+  void init(std::string const& path)
   {
     m_paths.clear();
     split(path);
@@ -60,7 +64,7 @@ public:
   {
     for (auto it: m_paths)
     {
-      std::string file = it + filename;
+      std::string file(it + filename);
       if (File::exist(file))
         return std::make_pair(file, true);
     }
@@ -69,6 +73,18 @@ public:
 
     // Not found
     return std::make_pair(std::string(), false);
+  }
+
+  std::string expand(std::string const& filename) const
+  {
+    for (auto it: m_paths)
+    {
+      std::string file(it + filename);
+      if (File::exist(file))
+        return file;
+    }
+
+    return filename;
   }
 
   std::string const &toString() const

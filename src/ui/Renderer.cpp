@@ -154,14 +154,14 @@ bool GLRenderer::setupGraphics()
       m_tex.add(textureData, ARRAY_SIZE(textureData));
 
       // Compile a shader program
-      if (0U == m_shader.load(Config::instance().data_path("shaders/node.vertex"),
-                              Config::instance().data_path("shaders/node.fragment")))
+      if (0U == m_shader.load(Config::instance().expand("shaders/node.vertex"),
+                              Config::instance().expand("shaders/node.fragment")))
         return false;
 
       // Configure the texture
       m_texture.interpolation(GL_LINEAR);
       m_texture.wrapping(GL_CLAMP_TO_EDGE);
-      if (false == m_texture.load(Config::instance().data_path("textures/wooden-crate.jpg")))
+      if (false == m_texture.load(Config::instance().expand("textures/wooden-crate.jpg")))
         return false;
 
       // Tell to OpenGL how to manage VBO values. This fixes the size

@@ -21,6 +21,7 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
+#  include "Config.hpp"
 #  include "Color.hpp"
 #  include "GLShader.hpp"
 #  include "GLVertexArray.hpp"

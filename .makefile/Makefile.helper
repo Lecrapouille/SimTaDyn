@@ -20,3 +20,10 @@ print-to = \
 ###################################################
 #
 DATE=`date +%Y-%m-%d`
+
+###################################################
+# Where to install project datum
+# ifeq ($(PROJECT_DATA_ROOT),)
+PROJECT_DATA_ROOT = /usr/share/SimTaDyn
+# endif
+PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data

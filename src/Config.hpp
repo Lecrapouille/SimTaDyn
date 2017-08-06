@@ -22,41 +22,37 @@
 #  define CONFIG_HPP_
 
 #  include "Singleton.hpp"
+#  include "Path.hpp"
 #  include "version.h"
 #  include <string>
-#  include <glibmm.h>
 
-class Config: public Singleton<Config>
+// **************************************************************
+//! \brief
+// **************************************************************
+class Config:
+  public Path,
+  public Singleton<Config>
 {
-  friend class Singleton<Config>;
-
-public:
-
-  //! \brief
-  inline std::string data_path(const std::string& path) const
-  {
-    return m_data_path + path;
-  }
-
-  //! \brief
-  inline std::string data_path(const char *path) const
-  {
-    return m_data_path + path;
-  }
-
-  inline const char *char_data_path() const
-  {
-    return m_data_path.c_str();
-  }
-
-  std::string m_data_path;
-
 private:
 
+  //------------------------------------------------------------------
+  //! \brief Mandatory by design.
+  //------------------------------------------------------------------
+  friend class Singleton<Config>;
+
+  //------------------------------------------------------------------
+  //! \brief Private because of Singleton.
+  //------------------------------------------------------------------
   Config()
-    : m_data_path(Glib::get_home_dir() + std::string("/.SimTaDyn/data/"))
   {
+    add(SIMTADYN_DATA_PATH);
   }
+
+  //------------------------------------------------------------------
+  //! \brief Private because of Singleton. Check if resources is still
+  //! acquired which show a bug in the management of resources.
+  //------------------------------------------------------------------
+  ~Config() { };
 };
 
 namespace config
@@ -67,6 +63,8 @@ namespace config
   const uint32_t major_version = SIMTADYN_MAJOR_VERSION;
   //! \brief Minor version of SimTaDyn
   const uint32_t minor_version = SIMTADYN_MINOR_VERSION;
+  //! \brief
+  const char data_path[] = SIMTADYN_DATA_PATH;
   //! \brief
   const char log_path[] = "SimTaDyn.log";
   //! \brief

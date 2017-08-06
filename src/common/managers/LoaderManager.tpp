@@ -22,15 +22,14 @@
 #ifndef LOADER_MANAGER_TPP_
 #  define LOADER_MANAGER_TPP_
 
-#include "ILoader.hpp"
-#include "Path.hpp"
-#include "Logger.hpp"
-//#include "Utilities/GenHierarchies.h"
+#  include "ILoader.hpp"
+#  include "Config.hpp"
+#  include "Logger.hpp"
 
-using namespace Yes;
 // Inspired by: http://loulou.developpez.com/tutoriels/moteur3d/
 // document: "Part 4: Gestion des ressources" and its code "YesEngine"
 // but this current code is different than the original code.
+using namespace Yes;
 
 // **************************************************************
 //! \brief Define a class managing a list of ILoader<T>.
@@ -44,7 +43,6 @@ using namespace Yes;
 // **************************************************************
 class LoaderManager
   : public Singleton<LoaderManager>,
-    public Path,
     public CScatteredHierarchy<ResourceList, LoaderHolder>
 {
 private:
@@ -98,7 +96,7 @@ public:
   void loadFromFile(std::string const& filename, T* &object) const
   {
     LOGI("Loading file '%s'", filename.c_str());
-    std::pair<std::string, bool> full_path = Path::find(filename);
+    std::pair<std::string, bool> full_path = Config::instance().find(filename);
     if (!full_path.second)
       {
         // Note: probably useless because if the file does not exist
@@ -106,7 +104,7 @@ public:
         // a different message.
         std::string msg("The file '" + filename +
                         "' cannot be found in the given search path '" +
-                        toString() + "'");
+                        Config::instance().toString() + "'");
         notifyLoadFailure<T>(filename, msg);
         throw LoaderException(msg);
       }
@@ -121,7 +119,7 @@ public:
       {
         LOGF("Failed loading the file '%s'", filename.c_str());
         notifyLoadFailure<T>(full_path.first, e.what());
-        throw e;
+        e.rethrow();
       }
   }
 
