@@ -1,3 +1,23 @@
+##=====================================================================
+## SimTaDyn: A GIS in a spreadsheet.
+## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+##
+## This file is part of SimTaDyn.
+##
+## SimTaDyn is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+##=====================================================================
+
 .PHONY: clean very-clean build install uninstall coverity-scan unit-tests package coverage
 -include .makefile/Makefile.helper
 
@@ -59,7 +79,7 @@ src/ui
 ###################################################
 OBJ_EXTERNAL   = backward.o
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_PATTERNS   = Singleton.o
+OBJ_PATTERNS   =
 OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
 OBJ_MANAGERS   =
@@ -99,7 +119,7 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
-       -lGLEW -ldl -ldw -lSOIL
+       -lGLEW -ldl -ldw -lSOIL -lZipper-static -lz
 else
 $(error Unknown architecture)
 endif
