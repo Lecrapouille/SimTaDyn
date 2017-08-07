@@ -1,26 +1,37 @@
 # SimTaDyn Compilation Guide
 
-## Compiling SimTaDyn
+Table of contents:
+- [Steps for compiling SimTaDyn](steps-for-compiling-simtadyn)
+- [Installing packages that SimTaDyn depends on.](install-packages-that-simtadyn-depends-on)
+  - [Ubuntu](#ubuntu)
+  - [OS X](#mac-os-x)
+  - [Debian](#other-architecture)
+  - [Windows](#other-architecture)
+- [Docker](#docker)
+- [Compiling SimTaDyn unit tests](compiling-simtadyn-unit-tests)
+- [Building a debian package](building-a-debian-package)
+- [PPA](ppa)
+
+## Steps for compiling SimTaDyn
 
 This section explains how to compile SimTaDyn code source taken from the git [master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master). For other SimTaDyn branches (specially for the [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004)), read the install file associated to the branch.
 
-* Step 1: Install packages that SimTaDyn depends on.
+##### Step 1: Install packages that SimTaDyn depends on:
 
 SimTaDyn is based on C++11, modern OpenGL (>= 3.3), gtkmm >= 3.22 and gtksourceviewmm (which are C++ interfaces for GTK+ and GtkSourceView a boosted version of the GTK+ text editor) and other small libraries like libSOIL (for loading image files). Click on the link matching your operating system:
+* [Ubuntu](#ubuntu)
+* [OS X](#mac-os-x)
+* [Docker](#docker)
+* [Debian](#other-architecture)
+* [Windows](#other-architecture)
 
-- [Ubuntu](#ubuntu)
-- [OS X](#mac-os-x)
-- [Docker](#docker)
-- [Debian](#other-architecture)
-- [Windows](#other-architecture)
-
-* Step 2: Clone the SimTaDyn code source:
+##### Step 2: Clone the SimTaDyn code source:
 ```sh
 git clone https://github.com/Lecrapouille/SimTaDyn.git
 ```
 A SimTaDyn folder should have been created.
 
-* Step 3: Clone libraries code source that SimTaDyn depends on.
+##### Step 3: Clone libraries code source that SimTaDyn depends on:
 ```sh
 git clone https://github.com/Lecrapouille/SimTaDyn.git
 cd SimTaDyn/external
@@ -28,14 +39,14 @@ cd SimTaDyn/external
 ```
 This will clone and compile libs.
 
-* Step 4: Compile SimTaDyn code source:
+##### Step 4: Compile SimTaDyn code source:
 ```sh
 cd ..
 make -j4
 ```
 Note: SimTaDyn does use ./configure script. Call directly the Makefile. -j4 is optional and is used for compiling faster the code source. It refers to the desired number of threads (usually 2 * number of cores of your computer).
 
-* Step 5: Install data that SimTaDyn depends on.
+##### Step 5: Install data that SimTaDyn depends on:
 ```sh
 sudo make install
 ```
@@ -44,18 +55,20 @@ By default, the runable will be placed in /usr/bin and data in /usr/share/SimTaD
 SimTaDyn/.makefile/Makefile.helper
 ```
 
-* Step 6: getting fun with SimTaDyn
+##### Step 6: getting fun with SimTaDyn:
 ```sh
 SimTaDyn
 ```
 
 Note: SimTaDyn does have command line options for the moment. Be sure you typed ``make install`` like described in the previous step before launching the executable. SimTaDyn needs these files installed to run correctly.
 
-## Installing packages that SimTaDyn depends on.
+## Installing packages that SimTaDyn depends on
 
 Currently, gtkmm >= 3.22 is mandatory to get SimTaDyn worked correctly with OpenGL due to a bug in gtkmm solved in this version. Not all Ubuntu versions contains this version. In addition OpenGL is hardly supported by GTK+, a shame !
 
-### Ubuntu >= 17.04
+### Ubuntu
+
+#### Ubuntu >= 17.04
 
 For Ubuntu >= 17.04, gtkmm >= 3.22 is available. Install the following packages:
 ```sh
@@ -68,15 +81,22 @@ If needed and for fixing some Gtk-Message like: "Failed to load module overlay-s
 sudo apt-get install overlay-scrollbar*
 ```
 
-### Ubuntu < 17.04
+#### Ubuntu < 17.04
 
 For Ubuntu versions < 17.04, gtkmm >= 3.22 is not available. If you have a 64-bits machine you could install [Docker](https://en.wikipedia.org/wiki/Docker_(software)), pull an image of Ubuntu 17.04 and inside the docker, follow instructions [described in below section](#docker).
 
 If you have a 32-bits (which is my case), unfortunately Docker does not support 32-bits architecture, so you will have to compile by yourself, GTK+ and gtkmm source code. [Link here](http://www.linuxfromscratch.org/blfs/view/svn/x/gtk3.html).
 
-## Mac OS X
+### Mac OS X
 
 SimTaDyn compiles on a MacBook Air and Mac OS X (tested on version 10.9.5). To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. However the Gtk::GlArea is not implemented on this architecture and by consequence the OpenGL context is not created !
+
+### Other architecture
+
+Debian: not tested but shall be closed to Ubuntu.
+
+Window: Not done and no development scheduled yet. Indeed Cygwin stopped being ported on Windows XP and so you need higher Window version, which it's not my case currently.
+Feel free to help me on this point.
 
 ## Docker
 
@@ -84,14 +104,16 @@ This section is for people having an Ubuntu < 17.04 or preferring to test SimTaD
 
 If you have a 32-bits (which is my case, I have to use a computer not owned by me, so I cannot help a lot on docker subject), unfortunately Docker does not support 32-bits architecture and you have to find another way for compling SimTaDyn.
 
-* Step 1: Install docker image.
+##### Step 1: Install docker image:
 
-For example [follow these steps](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) and download the official image of Ubuntu >= 17.04.
+If you have not a docker installe, you can [follow these steps](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04).
+
+Then download an official image of Ubuntu 17.04:
 ```sh
 docker pull ubuntu:17.04
 ```
 
-* Step 2: Clone SimTaDyn
+##### Step 2: Clone SimTaDyn:
 
 And go inside SimTaDyn folder, this will be the entry point for your docker:
 ```sh
@@ -99,7 +121,7 @@ git clone https://github.com/Lecrapouille/SimTaDyn.git
 cd SimTaDyn
 ```
 
-* Step 3: Launch the docker
+##### Step 3: Launch the docker:
 
 Launch the docker with an interactive bash where the root of the docker will contain the root of the SimTaDyn project:
 
@@ -117,7 +139,7 @@ Note that you are a root user located at the / directory (root) in your docker. 
 docker ps -a
 ```
 
-* Step 4: Installing packages
+##### Step 4: Installing packages:
 
 Now that you are inside the docker, if you type the ls command, you'll see the SimTaDyn directory. Go inside it. Now, still inside the docker, follow:
 - [these steps](#ubuntu) for installing libraries for SimTaDyn. Note that do not have to type the sudo command because you are already the root user.
@@ -136,7 +158,7 @@ Note: An alternative to Xvfb (not working well in my case)
 docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY -e LOCAL_USER_ID=`id -u $USER` -it ubuntu:17.04 /bin/bash
 ```
 
-* Step 5: Save your docker image
+##### Step 5: Save your docker image:
 
 You have to know that Docker creates a dropable copy of the image (here Ubuntu 17.04), so your current image will be destroyed when leaving the docker (command exit). If you did that you will have to install all packages that SimTaDyn depends on.
 
@@ -147,19 +169,12 @@ docker commit 524a5c276943 test/simtadyn:0.2
 
 Where 524a5c276943 shall be your image unique ID and where test/simtadyn:0.2 is an example of name (give a better name in your case).
 
-* Step 6: Call your SimTaDyn image
+##### Step 6: Call your SimTaDyn image:
 
 You can exit your docker image and run up the container but this time with your new image.
 ```sh
 docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -u $USER` -it test/simtadyn:0.2 /bin/bash
 ```
-
-## Other architecture
-
-Debian: not tested but shall be closed to Ubuntu.
-
-Window: Not done and no development scheduled yet. Indeed Cygwin stopped being ported on Windows XP and so you need higher Window version, which it's not my case currently.
-Feel free to help me on this point.
 
 ## Compiling SimTaDyn unit tests
 
@@ -170,7 +185,7 @@ sudo apt-get update && apt-get install libcppunit-dev gcovr libglm-dev
 
 And optionally, for generating some expected unit test results, install the Scilab fork: [ScicosLab](http://www.scicoslab.org/)
 ```sh
-sudo apt-get install scicoslab-gtk
+sudo apt-get update && apt-get install scicoslab-gtk
 ```
 
 The compilation of unit tests is made by the following command:
@@ -193,9 +208,16 @@ make coverage -j4
 The HTML files are generated in SimTaDyn/doc/coverage. Open the index.html with any kind of browser (like Firefox).
 
 ## Building a debian package.
+
+Install the checkinstall tool which will create a package from source and binary:
+```sh
+sudo apt-get update && apt-get install checkinstall
+```
+
+Launch the makefile rule:
 ```sh
 cd SimTaDyn
-make package
+sudo make package
 ```
 
 A .deb file shall have been created.
