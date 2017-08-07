@@ -1,16 +1,16 @@
 # SimTaDyn Compilation Guide
 
 Table of contents:
-- [Steps for compiling SimTaDyn](steps-for-compiling-simtadyn)
-- [Installing packages that SimTaDyn depends on.](install-packages-that-simtadyn-depends-on)
+- [Steps for compiling SimTaDyn](#steps-for-compiling-simtadyn)
+- [Installing packages that SimTaDyn depends on.](#install-packages-that-simtadyn-depends-on)
   - [Ubuntu](#ubuntu)
   - [OS X](#mac-os-x)
   - [Debian](#other-architecture)
   - [Windows](#other-architecture)
 - [Docker](#docker)
-- [Compiling SimTaDyn unit tests](compiling-simtadyn-unit-tests)
-- [Building a debian package](building-a-debian-package)
-- [PPA](ppa)
+- [Compiling SimTaDyn unit tests](#compiling-simtadyn-unit-tests)
+- [Building a debian package](#building-a-debian-package)
+- [PPA](#ppa)
 
 ## Steps for compiling SimTaDyn
 
@@ -106,7 +106,7 @@ If you have a 32-bits (which is my case, I have to use a computer not owned by m
 
 ##### Step 1: Install docker image:
 
-If you have not a docker installe, you can [follow these steps](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04).
+If you have not a docker installed, you can [follow these steps](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04).
 
 Then download an official image of Ubuntu 17.04:
 ```sh
@@ -144,7 +144,7 @@ docker ps -a
 Now that you are inside the docker, if you type the ls command, you'll see the SimTaDyn directory. Go inside it. Now, still inside the docker, follow:
 - [these steps](#ubuntu) for installing libraries for SimTaDyn. Note that do not have to type the sudo command because you are already the root user.
 - Compile and run SimTaDyn like described in next sections.
-- [Read this article](https://linuxmeerkat.wordpress.com/2014/10/17/running-a-gui-application-in-a-docker-container/) for getting the graphical display. Here its summary:
+- [Read this article](https://linuxmeerkat.wordpress.com/2014/10/17/running-a-gui-application-in-a-docker-container/) for getting the graphic display. Here its summary:
 - Install the Xvfb package and configure it:
 ```sh
 apt-get install xvfb
