@@ -29,14 +29,6 @@ ARCHI := $(shell uname -s)
 endif
 
 ###################################################
-# Where to install project datum
-# FIXME: do not change this location (for the moment)
-# ifeq ($(PROJECT_DATA_ROOT),)
-PROJECT_DATA_ROOT = ~/.SimTaDyn
-# endif
-PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
-
-###################################################
 # Set include paths
 INCLUDES = -I. -I.. -I../geometry -I../.. -I../../../utils -I../../../maths -I../../../patterns -I../../../containers -I../../../../../src -I../../../../../external/backward
 

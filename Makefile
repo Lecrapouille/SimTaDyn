@@ -36,12 +36,6 @@ ARCHI := $(shell uname -s)
 endif
 
 ###################################################
-# Where to install project runnable
-# ifeq ($(PREFIX),)
-PREFIX = /usr/bin
-# endif
-
-###################################################
 # Set include paths
 INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/YesEngine -Isrc	\
 -Isrc/common/patterns -Isrc/common/managers -Isrc/common/utils		\

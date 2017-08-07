@@ -22,8 +22,16 @@ print-to = \
 DATE=`date +%Y-%m-%d`
 
 ###################################################
+# Where to install project runnable
+
+ifeq ($(PREFIX),)
+PREFIX = /usr/bin
+endif
+
+###################################################
 # Where to install project datum
-# ifeq ($(PROJECT_DATA_ROOT),)
+
+ifeq ($(PROJECT_DATA_ROOT),)
 PROJECT_DATA_ROOT = /usr/share/SimTaDyn
-# endif
+endif
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
