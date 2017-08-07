@@ -4,10 +4,13 @@
 cd external
 ./gitclone.sh
 
-# Build SimTaDyn unit tests and disable
-# OpenGL tests (not supported by Travis).
+# Export display
+Xvfb :1 -screen 0 1024x768x16 -nolisten tcp &
+export DISPLAY=":1.0"
+
+# Build SimTaDyn unit tests.
 cd ../tests && make -j4
-./build/UnitTest -a
+./build/UnitTest
 
 # Build SimTaDyn executable.
 cd .. && make -j4
