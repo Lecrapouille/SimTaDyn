@@ -18,10 +18,6 @@ print-to = \
         @echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) => $(CLR_YELLOW)$3$(CLR_DEFAULT) $4"
 
 ###################################################
-#
-DATE=`date +%Y-%m-%d`
-
-###################################################
 # Where to install project runnable
 
 ifeq ($(PREFIX),)

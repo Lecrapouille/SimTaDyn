@@ -83,7 +83,6 @@ OBJ_SIMTADYN   = main.o
 
 ###################################################
 TARGET         = SimTaDyn
-TARGET_TGZ     = SimTaDyn-$(DATE).tar.gz
 OBJ            = version.h $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
@@ -155,13 +154,12 @@ coverage:
 # Create Debian/Ubuntu package
 package: $(TARGET)
 	$(call print-simple,"Creating a Debian/Ubuntu package")
-	./.makefile/package.sh
+	@./.makefile/package.sh
 
 ###################################################
 # Compress SimTaDyn sources
 targz: very-clean
-	@$(call print-from,"Tarball","$(TARGET_TGZ)","$(PWD)","")
-	@tar czvf /tmp/$(TARGET_TGZ) . > /dev/null && mv /tmp/$(TARGET_TGZ) .
+	@./.makefile/targz.sh . $(PWD)
 
 ###################################################
 # Clean Target
