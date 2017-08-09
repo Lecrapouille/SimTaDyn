@@ -23,7 +23,7 @@
 
 #  include "Forth.hpp"
 #  include "SimForthPrimitives.hpp"
-#  include "Singleton.hpp"
+#  include "Names.hpp"
 //#  include <list> of dictionaries ?
 
 class SimForthDictionary : public ForthDictionary

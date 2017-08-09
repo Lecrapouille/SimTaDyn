@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "PackageExplorer.hpp"
-#include <iostream>
 
 PackageExplorer::PackageExplorer()
 {

@@ -21,10 +21,8 @@
 #ifndef LOGGER_HPP_
 #  define LOGGER_HPP_
 
-#  include "Singleton.hpp"
 #  include "ILogger.hpp"
 #  include "Config.hpp"
-#  include "File.hpp"
 //#  include "TextColor.hpp"
 
 class Logger: public FileLogger, public Singleton<Logger>

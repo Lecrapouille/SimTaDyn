@@ -2,9 +2,7 @@
 #  define EXAMPLE_04_HPP_
 
 #  include "GLWindow.hpp"
-#  include "GLShader.hpp"
 #  include "Cube.hpp"
-#  include "Movable.tpp"
 
 class GLExample04: public IGLWindow
 {

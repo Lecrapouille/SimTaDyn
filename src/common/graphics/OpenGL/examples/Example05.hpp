@@ -2,7 +2,6 @@
 #  define EXAMPLE_05_HPP_
 
 #  include "GLWindow.hpp"
-#  include "GLShader.hpp"
 #  include "Cube.hpp"
 #  include "SceneGraph.tpp"
 

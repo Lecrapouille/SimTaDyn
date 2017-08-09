@@ -25,7 +25,6 @@
 #  include "Logger.hpp"
 #  include "ClassCounter.tpp"
 #  include "GraphContainer.tpp"
-#  include <cstdint>
 #  include <algorithm>
 
 class BasicNode;

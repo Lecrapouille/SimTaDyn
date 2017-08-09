@@ -18,7 +18,7 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Inspector.hpp"
+// FIXME MapEditor.hpp includes #include "Inspector.hpp"
 #include "MapEditor.hpp"
 
 Inspector::Inspector()

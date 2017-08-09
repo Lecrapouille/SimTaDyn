@@ -24,7 +24,6 @@
 #  include "CellForth.hpp"
 #  include "Graph.hpp"
 //#  include "BoundingBox.tpp"
-#  include "ClassCounter.tpp"
 
 // **************************************************************
 //

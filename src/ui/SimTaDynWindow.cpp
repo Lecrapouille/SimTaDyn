@@ -20,8 +20,6 @@
 
 #include "SimTaDynWindow.hpp"
 #include "MapEditor.hpp"
-#include "ForthEditor.hpp"
-#include "Config.hpp"
 
 // *************************************************************************************************
 // SimTaDyn main window

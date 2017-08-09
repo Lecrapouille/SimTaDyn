@@ -22,7 +22,6 @@
 #  define POLYFIT_HPP_
 
 #  include "Matrix.tpp"
-#  include <cmath>
 
 // *************************************************************************************************
 //! \brief Recursive Least Square method

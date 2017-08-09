@@ -23,8 +23,6 @@
 
 #  include "Logger.hpp"
 #  include <cstdint>
-#  include <cassert>
-#  include <string>
 #  include <iomanip>
 
 // **************************************************************

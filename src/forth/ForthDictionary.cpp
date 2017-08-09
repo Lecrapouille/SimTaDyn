@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "ForthDictionary.hpp"
-#include <fstream>
 
 // **************************************************************
 //! Initialize dictionary states to obtain an empty dictionary

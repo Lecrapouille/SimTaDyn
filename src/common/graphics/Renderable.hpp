@@ -21,7 +21,6 @@
 #ifndef RENDERABLE_HPP_
 #  define RENDERABLE_HPP_
 
-#include <iostream>
 #include "Renderer.hpp"
 
 class GLRenderer;

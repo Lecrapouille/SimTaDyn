@@ -19,9 +19,7 @@
 //=====================================================================
 
 #include "SimTaDynWindow.hpp"
-#include "Logger.hpp"
 #include "MapEditor.hpp"
-#include "ForthEditor.hpp"
 
 /*MapEditor& mapeditor = SimTaDynContext::mapEditor();
    mapeditor.addButon(Gtk::Stock::NO, "42 42 FOO", "42 42 FOO");

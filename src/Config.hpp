@@ -24,7 +24,6 @@
 #  include "Singleton.hpp"
 #  include "Path.hpp"
 #  include "version.h"
-#  include <string>
 
 // **************************************************************
 //! \brief

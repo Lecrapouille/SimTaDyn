@@ -25,7 +25,7 @@
 //! Forth interpreter. See this class like a word splitter.
 
 #  include "ForthHelper.hpp"
-#  include <fstream>
+// #  include <fstream>
 
 class ForthStream
 {

@@ -21,7 +21,6 @@
 #ifndef FORTHEDITOR_HPP_
 #  define FORTHEDITOR_HPP_
 
-#  include "Singleton.hpp"
 #  include "TextEditor.hpp"
 #  include "SimForth.hpp"
 #  include "Redirection.hpp"

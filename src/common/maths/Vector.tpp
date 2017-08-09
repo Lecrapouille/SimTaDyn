@@ -29,10 +29,8 @@
 // *************************************************************************************************
 
 #  include "Maths.hpp"
-#  include <cstdint>
 #  include <initializer_list>
 #  include <algorithm>
-#  include <iostream>
 
 // *************************************************************************************************
 //! \brief Macro for building constructors

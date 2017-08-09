@@ -18,10 +18,8 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimForth.hpp"
-#include "Config.hpp"
-#include "MapEditor.hpp"
-#include <string>
+//#include "SimForth.hpp"
+#include "MapEditor.hpp" //FIXME: includes SimForth.hpp
 
 void SimForth::boot()
 {

@@ -21,7 +21,6 @@
 #ifndef SIMTADYNWINDOW_HPP_
 #  define SIMTADYNWINDOW_HPP_
 
-#  include "Names.hpp"
 #  include "DrawingArea.hpp"
 #  include "ForthEditor.hpp"
 #  include "PackageExplorer.hpp"
