@@ -22,6 +22,7 @@
 #  define GLWINDOW_HPP_
 
 #  include <iostream>
+#  include <GL/glew.h>
 #  include <GLFW/glfw3.h>
 #  include "GLObject.hpp"
 
