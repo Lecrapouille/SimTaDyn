@@ -1,6 +1,6 @@
 ### SimForth ###
 
-SimForth is the script langage used in SimTaDyn replacing Visual Basic in traditional spreadsheet. It also can be used as standalone forth: see [here](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/SimForth/Forth/doc/standalone.md) for more details.
+SimForth is the script langage used in SimTaDyn replacing Visual Basic in traditional spreadsheet. It also can be used as standalone forth: see [here](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/forth/doc/standalone.md) for more details.
 
 SimForth is based on standard Forth 1978 .. 2012 like [Gforth](https://www.gnu.org/software/gforth/), [pForth](http://www.softsynth.com/pforth/), [4th](https://thebeez.home.xs4all.nl/4tH/4tHmanual.pdf), [reforth](https://github.com/seanpringle/reforth) but, for the moment, with some incompatibilites or missing words with the standard [Forth 2012](http://lars.nocrew.org/forth2012/core.html).
 
@@ -9,7 +9,7 @@ SimForth is based on standard Forth 1978 .. 2012 like [Gforth](https://www.gnu.o
 Several good websites and books:
 
 * [Starting Forth](https://www.forth.com/starting-forth/) well written for discovering this language.
-* [Forth](https://www.amazon.com/FORTH-W-P-SALMAN/dp/0387912568/), W.P. Salman, O. Tisserand, B. Toulout Edition Macmillan (english version) or Eyrolles (french version) 1983. An excellent book for understanding how Forth works internaly. The 1983 french version has more typo than the english version (the 2nd revision is 1984 but I do not have it). ISBN-13: 978-0387912561, ISBN-10: 0387912568 
+* [Forth](https://www.amazon.com/FORTH-W-P-SALMAN/dp/0387912568/), W.P. Salman, O. Tisserand, B. Toulout Edition Macmillan (english version) or Eyrolles (french version) 1983. An excellent book for understanding how Forth works internaly. The 1983 french version has more typo than the english version (the 2nd revision is 1984 but I do not have it). ISBN-13: 978-0387912561, ISBN-10: 0387912568
 * [JonesForth](http://git.annexia.org/?p=jonesforth.git;a=blob;f=jonesforth.S;h=45e6e854a5d2a4c3f26af264dfce56379d401425;hb=HEAD) excellent tutorial on how to implement a Forth (in assembly) and how Forth is implemented.
 * [Thinking Forth](http://thinking-forth.sourceforge.net/) how to well write Forth code.
 

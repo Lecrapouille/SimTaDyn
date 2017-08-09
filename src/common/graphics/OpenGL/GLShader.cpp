@@ -164,7 +164,7 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
 // **************************************************************
 //! \param vertex_shader_filename the path of the file containing
 //! the vertex shader script.
-//! \param fragement_shader_filename the path of the file containing
+//! \param fragment_shader_filename the path of the file containing
 //! the vertex fragment script.
 //! \param geometry_shader_filename the path of the file containing
 //! the vertex geometry script.

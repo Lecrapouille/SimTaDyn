@@ -1,6 +1,7 @@
 #include "Example02.hpp"
 
-//! \file Draw a textured and colorfull triangle.
+//! \file Example02.cpp
+//! Draw a textured and colorfull triangle.
 
 // Vertices for drawing a triangle
 static GLfloat vertexData[] =

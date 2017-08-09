@@ -40,7 +40,8 @@ public:
 };
 
 // **************************************************************
-//! \class GLShader is a class for managing OpenGL shader scripts
+//! \class GLShader GLShader.hpp
+//! \brief GLShader is a class for managing OpenGL shader scripts
 //! (like loading them into the GPU).
 //!
 //! Shaders are scripts running in the GPU manipulating vertices,
@@ -143,7 +144,7 @@ public:
   //! being replacing by the new one.
   //! \param vertex_shader_filename the path of the file containing
   //! the vertex shader script.
-  //! \param fragement_shader_filename the path of the file containing
+  //! \param fragment_shader_filename the path of the file containing
   //! the vertex fragment script.
   //! \param geometry_shader_filename the path of the file containing
   //! the vertex geometry script.

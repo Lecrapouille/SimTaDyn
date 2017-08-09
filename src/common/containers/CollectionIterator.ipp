@@ -20,8 +20,9 @@
 //=====================================================================
 
 // **************************************************************
-//! \class iterator allows to iterate on elements contained by \c
-//! container. Implements methods for compatibility with
+//! \class CollectionIterator.ipp
+//! This class allows to iterate on elements contained by the \c
+//! container class. It implements methods for compatibility with
 //! std::iterator.
 // **************************************************************
 class iterator

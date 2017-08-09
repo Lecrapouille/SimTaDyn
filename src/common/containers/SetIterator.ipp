@@ -20,8 +20,9 @@
 //=====================================================================
 
 // **************************************************************
-//! \class iterator allows to iterate on elements contained by \c
-//! container. Implements methods for compatibility with
+//! \class SetIterator.ipp
+//! This clss allows to iterate on elements contained by the \c
+//! container class. It implements methods for compatibility with
 //! std::iterator.
 // **************************************************************
 class iterator

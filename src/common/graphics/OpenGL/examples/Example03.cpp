@@ -1,7 +1,9 @@
 #include "Example03.hpp"
 
-//! \file Draw a textured cube and display it with perspective.
-//! FIXME: use index.
+//! \file Example03.hpp
+//! Draw a textured cube and display it with perspective.
+
+//FIXME: use index.
 
 // Vertices for drawing a cube
 static GLfloat vertexData[] = {

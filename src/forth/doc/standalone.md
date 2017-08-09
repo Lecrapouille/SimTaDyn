@@ -30,8 +30,8 @@ More explanations:
 
 A dictionary file is a binary
 
-
 ## Example ##
+
 ```sh
 ./build/SimForth -f ../core/system.fs -f../core/tester.fs -e "T{ 1 2 3 -> 1 2 3 }T"
 ```

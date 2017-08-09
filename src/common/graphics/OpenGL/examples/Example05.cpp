@@ -1,6 +1,7 @@
 #include "Example05.hpp"
 
-//! \file Draw several animated robots
+//! \file Example05.cpp
+//! Draw several animated robots
 
 // FIXME
 void GLExample05::setUniform(const char *name, Matrix44f const &mat)

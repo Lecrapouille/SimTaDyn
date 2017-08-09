@@ -586,8 +586,9 @@ std::pair<bool, std::string> Forth::interpreteFile(std::string const& filename)
 
 // **************************************************************
 //! \param code_forth the forth script stored as char*.
-//! \param name give a name to the Foth script code_forth. When
-//! an error occures the name is displayed.
+//! \param name give a name to the Foth script code_forth. For
+//! example when an error occures during the code interpretation
+//! this name is used in error message.
 //! \return See Forth::interpreteFile
 // FIXME: convert char* --> string can be consumns lot of memory ?!
 // **************************************************************
@@ -599,6 +600,9 @@ std::pair<bool, std::string> Forth::interpreteString(const char* const code_fort
 
 // **************************************************************
 //! \param code_forth the forth script stored as string.
+//! \param name give a name to the Foth script code_forth. For
+//! example when an error occures during the code interpretation
+//! this name is used in error message.
 //! \return See Forth::interpreteFile
 // **************************************************************
 std::pair<bool, std::string> Forth::interpreteString(std::string const& code_forth,

@@ -22,7 +22,8 @@
 #  define GLOBJECT_HPP_
 
 // **************************************************************
-//! \file This class get its inspiration from the Glumpy project
+//! \file GLObject.hpp
+//! This class get its inspiration from the Glumpy project
 //! code (Python + Numpy + modern OpenGL: a fast, scalable and
 //! beautiful scientific visualization): https://github.com/glumpy/glumpy
 //!
@@ -55,10 +56,10 @@ public:
   }
 };
 
-
 // **************************************************************
-//! \brief \class GLObject is an interface for managing a generic
-//! OpenGL object.
+//! \class GLObject GLObject.hpp
+//! \brief GLObject is an interface for managing a generic OpenGL
+//! object.
 // **************************************************************
 class GLObject
 {
