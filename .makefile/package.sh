@@ -32,7 +32,7 @@ function generate_description
 
 function make_package()
 {
-    sudo checkinstall --default \
+    checkinstall --default \
          --install=no \
          --pkgname="simtadyn" \
          --pkglicense=GPL3 \

@@ -14,7 +14,7 @@ os:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull ubuntu:16.04 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --name travis-ci -v $TRAVIS_BUILD_DIR:/SimTaDyn -td ubuntu:16.04 /bin/bash ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -e QQ="$QQ" -e FB="$FB" --name travis-ci -v $TRAVIS_BUILD_DIR:/SimTaDyn -td ubuntu:16.04 /bin/bash ; fi
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-install-linux.sh" ; fi
@@ -23,6 +23,9 @@ install:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-launch_tests.sh" ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.integration/travis-launch_tests.sh ; fi
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-deploy.sh" ; fi
 
 after_script:
   - docker stop travis-ci
