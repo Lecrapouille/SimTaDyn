@@ -89,7 +89,7 @@ OBJ            = version.h $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MA
 
 ###################################################
 # Compil options
-CXX = g++
+# CXX = g++
 CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES = -DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
@@ -125,6 +125,7 @@ $(TARGET): version.h $(OBJ)
 
 %.o: %.cpp
 %.o: %.cpp $(BUILD)/%.d
+	@$(CXX) --version
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 ifeq ($(ARCHI),Darwin)
 	@mkdir -p $(BUILD)
