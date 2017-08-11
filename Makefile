@@ -18,34 +18,25 @@
 ## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
-.PHONY: clean very-clean build install uninstall coverity-scan unit-tests package coverage
--include .makefile/Makefile.helper
+###################################################
+# Sharable informations between all Makefiles
+-include .makefile/Makefile.header
 
 ###################################################
-# Path where to store *.o files. Default: ./build/
-ifeq ($(BUILD),)
-BUILD = ./build
-endif
+# Executable name
+TARGET = SimTaDyn
 
 ###################################################
-# Operating system detection
-ifeq ($(OS),Windows_NT)
-ARCHI := Windows
-else
-ARCHI := $(shell uname -s)
-endif
-
-###################################################
-# Set include paths
-INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/YesEngine -Isrc	\
--Isrc/common/patterns -Isrc/common/managers -Isrc/common/utils		\
+# Inform Makefile where to find header files
+INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/YesEngine	\
+-Isrc -Isrc/common/patterns -Isrc/common/managers -Isrc/common/utils	\
 -Isrc/common/maths -Isrc/common/containers -Isrc/common/graph-theory	\
 -Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree		\
 -Isrc/common/graphics -Isrc/core -Isrc/core/loaders -Isrc/forth		\
 -Isrc/ui
 
 ###################################################
-# Path for Makefile to find *.o
+# Inform Makefile where to find *.cpp and *.o files
 VPATH=$(BUILD):external/backward-cpp:external/YesEngine:\
 src:\
 src/common/patterns:\
@@ -63,6 +54,7 @@ src/forth:\
 src/ui
 
 ###################################################
+# List of files to compile. Splited by directories
 OBJ_EXTERNAL   = backward.o
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_PATTERNS   =
@@ -80,25 +72,30 @@ OBJ_LOADERS    = ILoader.o ShapeFile.o
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_SIMTADYN   = main.o
-
-###################################################
-TARGET         = SimTaDyn
-OBJ            = version.h $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
 
 ###################################################
-# Compil options
-# CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+# Compilation options. For knowing which libraries
+# is needed please read the doc/Install.md file.
+ifneq ($(MY_CXX),)
+CXX = $(MY_CXX)
+endif
+CXXFLAGS = -W -Wall -Wextra -O2 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-DEFINES = -DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
-# Set Libraries
+# Set Libraries. For knowing which libraries
+# is needed please read the doc/Install.md file.
 
+## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib -I/opt/X11/lib -framework OpenGL -lglew
+LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib	\
+-I/opt/X11/lib -framework OpenGL -lglew
+
+## Linux
 else ifeq ($(ARCHI),Linux)
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
@@ -106,76 +103,77 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
        -lGLEW -ldl -ldw -lSOIL
 # -lZipper-static -lz
+
+## TODO: Window
 else
 $(error Unknown architecture)
 endif
 
 ###################################################
-# Files dependencies
-DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
-POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
-
-###################################################
-# Main entry
 all: $(TARGET)
 
-$(TARGET): version.h $(OBJ)
+$(TARGET): Makefile Makefile.header Makefile.footer version.h $(OBJ)
 	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
-%.o: %.cpp
-%.o: %.cpp $(BUILD)/%.d
-	@$(CXX) --version
+###################################################
+# Compile sources
+%.o: %.cpp version.h
+%.o: %.cpp $(BUILD)/%.d version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 ifeq ($(ARCHI),Darwin)
+# FIXME OSX
 	@mkdir -p $(BUILD)
 endif
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
-# Coverity Scan: static analysis of code
-# Prepare the tarball ready to be uploaded to Coverity Scan servers.
-coverity-scan: $(TARGET)
+# https://scan.coverity.com/
+# Coverity Scan: static analysis of code (web service)
+# For working, this service needs you download a runnable
+# and to compile your code with it. Once done, you have to
+# create a tarball of generated files and to upload the
+# tarball to the website.
+#
+# This rule clean and launch the compilation again and
+# create the tarball. TODO: upload the tarball to Coverity scan
+.PHONY: coverity-scan
+coverity-scan: clean $(TARGET)
 	@cov-build --dir cov-int make && tar czvf SimTaDyn.tgz cov-int
 
 ###################################################
-# Compile unit tests
+# Call the unit tests makefile (in tests/ directory),
+# compile tests, launch them and generate code coverage.
+.PHONY: unit-tests
 unit-tests:
 	@$(call print-simple,"Compiling unit tests")
-	@make -C tests all
-
-###################################################
-#
-coverage:
-	@$(call print-simple,"Coveraging unit tests")
 	@make -C tests coverage
 
 ###################################################
-# Create Debian/Ubuntu package
+# Generate the code source documentation with doxygen.
+.PHONY: doc
+doc:
+	@doxygen Doxyfile
+
+###################################################
+# Create Debian/Ubuntu package. Need to be root user
+.PHONY: package
 package: $(TARGET)
 	$(call print-simple,"Creating a Debian/Ubuntu package")
 	@./.makefile/package.sh
 
 ###################################################
-# Compress SimTaDyn sources
-targz: very-clean
+# Compress SimTaDyn sources without its .git, build
+# folders and doc generated files. If a tarball
+# already exists, it'll not be smashed.
+.PHONY: targz
+targz:
 	@./.makefile/targz.sh . $(PWD)
 
 ###################################################
-# Clean Target
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr $(BUILD) 2> /dev/null
-
-###################################################
-# Clean Target
-very-clean: clean
-	@rm -fr cov-int SimTaDyn.tgz 2> /dev/null
-	@cd tests && make -s clean; cd - > /dev/null
-
-###################################################
-# Install project
+# Install project. You need to be root user.
+.PHONY: install
 install: $(TARGET)
 	@$(call print-to,"Installing","data/","$(PROJECT_DATA_PATH)","")
 	@rm -fr $(PROJECT_DATA_PATH)
@@ -186,12 +184,26 @@ install: $(TARGET)
 	@cp $(BUILD)/$(TARGET) $(PREFIX)
 
 ###################################################
-# Uninstall project
+# Uninstall project. You need to be root user.
+.PHONY: uninstall
 uninstall:
 	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
 	@rm -f $(PREFIX)/$(TARGET)
 	@rm -fr $(PROJECT_DATA_ROOT)
 #	@echo "$(CLR_GREEN)*** You can remove manually your personal SimTaDyn folder located at $(PROJECT_DATA_ROOT)$(CLR_DEFAULT)"
+
+###################################################
+.PHONY: clean
+clean:
+	@$(call print-simple,"Cleaning","$(PWD)")
+	@rm -fr $(BUILD) 2> /dev/null
+
+###################################################
+# Cleaning
+.PHONY: very-clean
+very-clean: clean
+	@rm -fr cov-int SimTaDyn.tgz *.log foo 2> /dev/null
+	@cd tests && make -s clean; cd - > /dev/null
 
 ###################################################
 # Generate a header file with the project version
@@ -200,15 +212,11 @@ version.h: VERSION
 	@./.makefile/version.sh VERSION $(BUILD)/version.h
 
 ###################################################
-# Create a temporary folder to store *.o and *.d files
-$(DEPFILES): | $(BUILD)
-$(OBJ): | $(BUILD)
-$(BUILD):
-	@mkdir -p $(BUILD)
+# Display the compilator version (g++, clang ...)
+.PHONY: which-gcc
+which-gcc:
+	@$(CXX) --version
 
 ###################################################
-# Auto-Dependency Generation
-$(BUILD)/%.d: ;
-.PRECIOUS: $(BUILD)/%.d
-
--include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJ)))
+# Sharable informations between all Makefiles
+-include .makefile/Makefile.footer

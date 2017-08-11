@@ -18,14 +18,13 @@
 ## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
-.PHONY: clean build coverage gcov
--include ../.makefile/Makefile.helper
+###################################################
+# Sharable informations between all Makefiles
+-include ../.makefile/Makefile.header
 
 ###################################################
-# Path where to store *.o files. Default: ./build/
-ifeq ($(BUILD),)
-BUILD = build
-endif
+# Executable name
+TARGET = UnitTest
 
 ###################################################
 # Path where to store the generated coverage docs
@@ -34,15 +33,7 @@ DOC = ../doc/coverage
 RAPPORT = build/rapport.info
 
 ###################################################
-# Operating system detection
-ifeq ($(OS),Windows_NT)
-ARCHI := Windows
-else
-ARCHI := $(shell uname -s)
-endif
-
-###################################################
-# Set include paths
+# Inform Makefile where to find header files
 INCLUDES = -I$(BUILD) -I. -I../external/backward-cpp -I../external/YesEngine\
 -I../src -I../src/common/patterns -I../src/common/managers		\
 -Icommon/managers -I../src/common/utils -Icommon/utils			\
@@ -55,7 +46,7 @@ INCLUDES = -I$(BUILD) -I. -I../external/backward-cpp -I../external/YesEngine\
 -I../src/ui
 
 ###################################################
-# Path for Makefile to find *.o
+# Inform Makefile where to find *.cpp and *.o files
 VPATH=.:$(BUILD):../src:../src/common/patterns:\
 ../src/common/managers:common/managers:\
 ../src/common/utils:common/utils:\
@@ -71,74 +62,84 @@ VPATH=.:$(BUILD):../src:../src/common/patterns:\
 ../external/backward-cpp:../external/YesEngine
 
 ###################################################
-# Set objects architecture specific
-TARGET = UnitTest
-OBJECTS = version.h backward.o ILogger.o Logger.o ILoader.o PendingData.o File.o Path.o   \
-	FileTests.o ResourcesTests.o Maths.o VectorTests.o MatrixTests.o        \
-	TransformationTests.o BoundingBoxTests.o FilteringTests.o	        \
-	Color.o ColorTests.o SetTests.o CollectionTests.o Exception.o           \
-	OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLAttrib.o               \
-	GLTextures.o GLWindow.o Graph.o BasicArcTests.o                         \
-	BasicNodeTests.o BasicGraphTests.o GraphAlgorithm.o                     \
-	GraphAlgoTests.o GLBufferTests.o OpenGLTests.o main.o
+# List of files to compile.
+OBJ_EXTERNAL   = backward.o
+OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
+OBJ_UTILS     += FileTests.o
+OBJ_PATTERNS   =
+OBJ_MATHS      = Maths.o VectorTests.o MatrixTests.o TransformationTests.o
+OBJ_MATHS     += BoundingBoxTests.o FilteringTests.o
+OBJ_CONTAINERS = PendingData.o SetTests.o CollectionTests.o
+OBJ_MANAGERS   = ResourcesTests.o
+OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
+OBJ_GRAPHS    += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
+OBJ_OPENGL     = Color.o Camera2D.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
+OBJ_OPENGL    += GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
+OBJ_OPENGL    += ColorTests.o GLBufferTests.o OpenGLTests.o
+# OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
+OBJ_LOADERS    = ILoader.o ShapeFile.o
+# SimTaDynFile.o
+OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
+OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
+OBJ_UT_SIMTADYN= main.o
+OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+                 $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
+                 $(OBJ_GUI) $(OBJ_UT_SIMTADYN)
 
 ###################################################
-# Compil options
-# CXX = g++
-DEFINES = -DBACKWARD_HAS_DW=1 -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-
-###################################################
-# Set Libraries
-ifeq ($(ARCHI),Darwin)
-CXXFLAGS = -W -Wall -Wextra -O0 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+# Compilation options. For knowing which libraries
+# is needed please read the doc/Install.md file.
+ifneq ($(MY_CXX),)
+CXX = $(MY_CXX)
+endif
+CXXFLAGS = -W -Wall -Wextra -O2 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
-LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib -I/opt/X11/lib -framework OpenGL -lglew -lglfw -lSOIL
+DEFINES = $(SIMTADYN_DEFINES)
+
+###################################################
+# Set Libraries. For knowing which libraries
+# is needed please read the doc/Install.md file.
+
+## OS X
+ifeq ($(ARCHI),Darwin)
+LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib	\
+-I/opt/X11/lib -framework OpenGL -lglew -lglfw -lSOIL
+
+## Linux
 else ifeq ($(ARCHI),Linux)
-CXXFLAGS = -W -Wall -Wextra -O0 -g --coverage -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = --coverage `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
+CXXFLAGS += --coverage
+LDFLAGS += --coverage
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread      \
        -lX11 -lGLEW  -lglfw -lSOIL -ldl -ldw
+
+## TODO: Windows
 else
 $(error Unknown architecture)
 endif
 
 ###################################################
-# Files dependencies
-DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
-POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
-
-###################################################
-# Main entry
 all: $(TARGET)
 
-$(TARGET): version.h $(OBJECTS)
+$(TARGET): version.h $(OBJ) Makefile ../Makefile ../.makefile/Makefile.header ../.makefile/Makefile.footer
 	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
-	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
+	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
-%.o: %.cpp Makefile
-%.o: %.cpp $(BUILD)/%.d Makefile
+###################################################
+# Compile sources
+%.o: %.cpp version.h
+%.o: %.cpp $(BUILD)/%.d version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) --version
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
-#
-version.h: ../VERSION
-	@$(call print-from,"Check version","$(TARGET)","VERSION","")
-	@../.makefile/version.sh ../VERSION $(BUILD)/version.h
-
-###################################################
-# Clean Target
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr *~ $(DOC) gui/*~ cells/*~ common/*~ $(BUILD) 2> /dev/null
-
-###################################################
-# Code coverage
+# Generate the rapport of the code coverage
+.PHONY: coverage
 coverage: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
 	./build/$(TARGET)
@@ -148,12 +149,23 @@ coverage: $(TARGET)
 	@genhtml --quiet -o $(DOC) -t "SimTaDyn Unit Tests" $(RAPPORT)
 
 ###################################################
-# Create a temporary folder to store *.o
-$(DEPFILES): | $(BUILD)
-$(OBJECTS): | $(BUILD)
-$(BUILD):
-	@mkdir -p $(BUILD)
-$(BUILD)/%.d: ;
-.PRECIOUS: $(BUILD)/%.d
+.PHONY: clean
+clean:
+	@$(call print-simple,"Cleaning","$(PWD)")
+	@rm -fr $(BUILD) $(DOC) 2> /dev/null
 
--include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJECTS)))
+###################################################
+# Generate a header file with the project version
+version.h: ../VERSION
+	@$(call print-from,"Check version","$(TARGET)","VERSION","")
+	@../.makefile/version.sh ../VERSION $(BUILD)/version.h
+
+###################################################
+# Display the compilator version (g++, clang ...)
+.PHONY: which-gcc
+which-gcc:
+	@$(CXX) --version
+
+###################################################
+# Sharable informations between all Makefiles
+-include ../.makefile/Makefile.footer
