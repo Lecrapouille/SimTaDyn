@@ -32,8 +32,7 @@ class LoaderManager;
 // This class implements a Controler pattern of the Model-View-Controler (MVC) design pattern.
 // *************************************************************************************************
 class MapEditor
-  : public Gtk::HBox,
-    public Singleton<MapEditor>
+  : public Singleton<MapEditor>
 {
 private:
 
@@ -74,6 +73,11 @@ protected:
   };
 
 public:
+
+  inline Gtk::Widget &widget()
+  {
+    return m_hbox;
+  }
 
   //! \brief Return the current map
   inline SimTaDynMap* map()
@@ -174,6 +178,7 @@ protected:
   Gtk::Toolbar           m_toolbar;
   Inspector              m_inspector;
   Gtk::VBox              m_vbox;
+  Gtk::HBox              m_hbox;
   SimTaDynMapListener    m_listener;
 };
 

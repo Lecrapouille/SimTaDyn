@@ -143,7 +143,7 @@ public:
   //! \brief Empty all the container. Complexity is O(n)
   //! where n is number of allocated blocks. Note: blocks
   //! are not deleted from memory.
-  inline void clear()
+  inline virtual void clear() override
   {
     IContainer<T, N, Block>::clear();
     m_index = m_subindex = m_last = INITIAL_INDEX;

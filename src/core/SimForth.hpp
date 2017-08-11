@@ -56,7 +56,7 @@ protected:
   virtual void interpreteWordCaseCompile(std::string const& word) override;
   bool isACell(std::string const& word, Cell32& number);
 
-  virtual inline uint32_t maxPrimitives() const
+  virtual inline uint32_t maxPrimitives() const override
   {
     return SIMFORTH_MAX_PRIMITIVES;
   }

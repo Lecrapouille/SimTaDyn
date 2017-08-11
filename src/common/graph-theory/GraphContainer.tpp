@@ -53,7 +53,7 @@ public:
       }
   }
 
-  void clear() override
+  virtual void clear() override
   {
     Block<T, N>::clear();
     clearMarks();

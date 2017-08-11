@@ -86,7 +86,7 @@ SimTaDynWindow::SimTaDynWindow()
   {
     // Left:
     MapEditor::instance().attachView(m_drawing_area);
-    m_hpaned.pack1(MapEditor::instance());
+    m_hpaned.pack1(MapEditor::instance().widget());
 
     // Right:
     m_box.pack_start(m_menubar, Gtk::PACK_SHRINK);

@@ -115,8 +115,8 @@ MapEditor::MapEditor()
   // Pack all stuffs together
   {
     m_vbox.pack_start(m_inspector.m_scrolledwindow, Gtk::PACK_SHRINK);
-    pack_start(m_vbox);
-    pack_start(m_toolbar, Gtk::PACK_SHRINK);
+    m_hbox.pack_start(m_vbox);
+    m_hbox.pack_start(m_toolbar, Gtk::PACK_SHRINK);
   }
 }
 
