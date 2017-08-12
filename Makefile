@@ -112,7 +112,7 @@ endif
 ###################################################
 all: $(TARGET)
 
-$(TARGET): Makefile Makefile.header Makefile.footer version.h $(OBJ)
+$(TARGET): Makefile .makefile/Makefile.header .makefile/Makefile.footer version.h $(OBJ)
 	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 

@@ -26,6 +26,8 @@ namespace maths
   uint32_t maxUlps = 4U;
   bool fastSqrt = false;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
   bool almostEqual(float const A, float const B)
   {
     if (A == B)
@@ -35,14 +37,14 @@ namespace maths
     // default NAN won't compare as equal to anything.
     assert(maths::maxUlps < 4U * 1024U * 1024U);
 
-    int aInt = *(int*)&A;
+    int aInt = *(int*) &A;
 
     // Make aInt lexicographically ordered as a twos-complement int
     if (aInt < 0)
       aInt = 0x80000000 - aInt;
 
     // Make bInt lexicographically ordered as a twos-complement int
-    int bInt = *(int*)&B;
+    int bInt = *(int*) &B;
 
     if (bInt < 0)
       bInt = 0x80000000 - bInt;
@@ -52,6 +54,7 @@ namespace maths
         return true;
     return false;
   }
+#pragma GCC diagnostic pop
 
   bool almostZero(float const A)
   {
