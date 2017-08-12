@@ -104,9 +104,10 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -lGLEW -ldl -ldw -lSOIL
 # -lZipper-static -lz
 
-## TODO: Window
+## Window
 else
-$(error Unknown architecture)
+
+#$(error Unknown architecture)
 endif
 
 ###################################################

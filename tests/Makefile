@@ -104,8 +104,8 @@ DEFINES = $(SIMTADYN_DEFINES)
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib	\
--I/opt/X11/lib -framework OpenGL -lglew -lglfw -lSOIL
+INCLUDES += -I/opt/local/include -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
+LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL
 
 ## Linux
 else ifeq ($(ARCHI),Linux)
@@ -117,9 +117,9 @@ LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread      \
        -lX11 -lGLEW  -lglfw -lSOIL -ldl -ldw
 
-## TODO: Windows
+## Windows
 else
-$(error Unknown architecture)
+#$(error Unknown architecture)
 endif
 
 ###################################################
