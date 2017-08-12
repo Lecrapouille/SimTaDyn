@@ -208,14 +208,8 @@ very-clean: clean
 ###################################################
 # Generate a header file with the project version
 version.h: VERSION
-	@$(call print-from,"Check version","$(TARGET)","VERSION","")
+	@$(call print-from,"Version","$(TARGET)","VERSION","")
 	@./.makefile/version.sh VERSION $(BUILD)/version.h
-
-###################################################
-# Display the compilator version (g++, clang ...)
-.PHONY: which-gcc
-which-gcc:
-	@$(CXX) --version
 
 ###################################################
 # Sharable informations between all Makefiles

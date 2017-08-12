@@ -39,4 +39,7 @@ do
 done
 
 echo -e "\033[35m*** Tarball:\033[00m \033[36m$TARGET_TGZ\033[00m <= \033[33m$2\033[00m"
-tar --exclude='.git' --exclude="SimTaDyn-*.tar.gz" -czvf /tmp/$TARGET_TGZ $1 > /dev/null && mv /tmp/$TARGET_TGZ $1
+
+tar --exclude='.git' --exclude="SimTaDyn-*.tar.gz" --exclude="doc/coverage" \
+    --exclude "doc/coverage" --exclude "*/build" -czvf /tmp/$TARGET_TGZ $1 \
+    > /dev/null && mv /tmp/$TARGET_TGZ $1

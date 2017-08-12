@@ -66,9 +66,10 @@ endif
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
-# Which gcc you want
+# Which gcc you want. Leave it empty for Travis-CI
 ifeq ($(MY_CXX),)
-MY_CXX=g++
+#MY_CXX=g++-6
+#MY_CXX=g++-5
 #MY_CXX=clang++-4.0
 endif
 

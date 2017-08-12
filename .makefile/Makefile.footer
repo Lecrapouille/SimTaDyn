@@ -20,6 +20,13 @@
 ##=====================================================================
 
 ###################################################
+# Display the compilator version (g++, clang ...)
+.PHONY: which-gcc
+which-gcc:
+	@$(call print-simple,"Version","$(CXX)")
+	@$(CXX) --version
+
+###################################################
 # Create a temporary folder to store *.o and *.d files
 $(DEPFILES): | $(BUILD)
 $(OBJ): | $(BUILD)
