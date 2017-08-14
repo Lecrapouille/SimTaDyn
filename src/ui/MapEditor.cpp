@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "MapEditor.hpp"
-#include "ShapeFile.hpp"
 
 // *************************************************************************************************
 //
@@ -136,6 +135,7 @@ void MapEditor::registerLoaders()
 {
   LoaderManager &lm = LoaderManager::instance();
   lm.registerLoader(new ShapefileLoader(), "shp");
+  lm.registerLoader(new SimTaDynFileLoader(), "spak");
 }
 
 // *************************************************************************************************

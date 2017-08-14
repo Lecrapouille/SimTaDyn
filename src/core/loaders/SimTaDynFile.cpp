@@ -18,16 +18,13 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNLOADERS_HPP_
-#  define SIMTADYNLOADERS_HPP_
+#include "SimTaDynFile.hpp"
+#include "File.hpp"
 
-#  include "ShapeFile.hpp"
-#  include "SimTaDynFile.hpp"
+void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap* &current_map)
+{
+  bool dummy_map = (nullptr == current_map);
 
-#  include "Utilities/GenHierarchies.h"
-
-typedef TYPELIST_1(SimTaDynMap) ResourceList;
-
-#  include "LoaderManager.tpp"
-
-#endif
+  LOGI("Loading the SimTaDynFile '%s' in an %s",
+       filename.c_str(), (dummy_map ? "dummy map" : "already opened map"));
+}

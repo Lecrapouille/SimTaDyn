@@ -18,16 +18,29 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNLOADERS_HPP_
-#  define SIMTADYNLOADERS_HPP_
+#ifndef SIMTADYNFILE_HPP_
+#  define SIMTADYNFILE_HPP_
 
-#  include "ShapeFile.hpp"
-#  include "SimTaDynFile.hpp"
+#  include "ILoader.hpp"
+#  include "SimTaDynMap.hpp"
 
-#  include "Utilities/GenHierarchies.h"
+// ***********************************************************************************************
+//! \brief
+// ***********************************************************************************************
+class SimTaDynFileLoader : public ILoader<SimTaDynMap>
+{
+public:
 
-typedef TYPELIST_1(SimTaDynMap) ResourceList;
+  SimTaDynFileLoader()
+    : ILoader<SimTaDynMap>("SimTaDynFile")
+  {
+    LOGI("Creating a SimTaDynFile loader %p", this);
+  }
+  virtual void loadFromFile(std::string const& filename, SimTaDynMap* &map) override;
 
-#  include "LoaderManager.tpp"
+private:
+
+  Vector3f      m_point;
+};
 
 #endif

@@ -112,12 +112,22 @@ public:
       {
         ILoader<T>& loader = getLoader<T>(File::extension(full_path.first));
         loader.loadFromFile(full_path.first, object);
-        LOGI("Sucessfuly loaded the file '%s'", filename.c_str());
-        notifyLoadSucess<T>(full_path.first);
+        if (nullptr == object)
+          {
+            std::string msg("Get a nullptr object after loading the file '"
+                            + filename + "'");
+            throw LoaderException(msg);
+          }
+        else
+          {
+            LOGI("Sucessfuly loaded the file '%s'", filename.c_str());
+            notifyLoadSucess<T>(full_path.first);
+          }
       }
     catch (LoaderException const &e)
       {
-        LOGF("Failed loading the file '%s'", filename.c_str());
+        LOGF("Failed loading the file '%s'. Reason is '%s'",
+             filename.c_str(), e.what());
         notifyLoadFailure<T>(full_path.first, e.what());
         e.rethrow();
       }
