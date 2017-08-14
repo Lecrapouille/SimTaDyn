@@ -14,9 +14,5 @@ brew_install cppunit
 brew_install glfw
 brew_install glew
 
-# brew install libsoil:
-brew tap Nyoho/libsoil
-brew install libsoil
-
 #
 brew link --force gtkmm3 gtksourceviewmm3 libsoil glm cppunit glfw glew

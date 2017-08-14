@@ -130,6 +130,12 @@ endif
 	@$(POSTCOMPILE)
 
 ###################################################
+# git clone external projects that SimTaDyn needs
+.PHONY: clone
+clone:
+	@cd external && ./gitclone.sh $(ARCHI); cd -
+
+###################################################
 # https://scan.coverity.com/
 # Coverity Scan: static analysis of code (web service)
 # For working, this service needs you download a runnable

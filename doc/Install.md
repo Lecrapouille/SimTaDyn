@@ -2,7 +2,7 @@
 
 Table of contents:
 - [Steps for compiling SimTaDyn](#steps-for-compiling-simtadyn)
-- [Installing packages that SimTaDyn depends on.](#install-packages-that-simtadyn-depends-on)
+- [Installing packages that SimTaDyn depends on](#installing-packages-that-simtadyn-depends-on)
   - [Ubuntu](#ubuntu)
   - [OS X](#mac-os-x)
   - [Debian](#other-architecture)
@@ -33,18 +33,17 @@ A SimTaDyn folder should have been created.
 
 ##### Step 3: Clone libraries code source that SimTaDyn depends on:
 ```sh
-git clone https://github.com/Lecrapouille/SimTaDyn.git
 cd SimTaDyn/external
-./gitclone.sh
+make clone
 ```
-This will clone and compile libs.
+This will git clone and compile some external libraries that SimTaDyn need and which cannot be installed directly like shown in step 1.
 
-##### Step 4: Compile SimTaDyn code source:
+##### Step 4: Compile the SimTaDyn code source:
 ```sh
 cd ..
 make -j4
 ```
-Note: SimTaDyn does use ./configure script. Call directly the Makefile. -j4 is optional and is used for compiling faster the code source. It refers to the desired number of threads (usually 2 * number of cores of your computer).
+Note: SimTaDyn does not use ./configure script. Call directly the Makefile. -j4 is optional and is used for compiling faster the code source. In, this example 4 refers to the desired number of threads (usually 2 * number of cores of your computer, here 2 * 2).
 
 ##### Step 5: Install data that SimTaDyn depends on:
 ```sh
@@ -60,7 +59,7 @@ SimTaDyn/.makefile/Makefile.helper
 SimTaDyn
 ```
 
-Note: SimTaDyn does have command line options for the moment. Be sure you typed ``make install`` like described in the previous step before launching the executable. SimTaDyn needs these files installed to run correctly.
+Note: SimTaDyn does not have command line options for the moment. Be sure you typed ``make install`` like described in the previous step before launching the executable. SimTaDyn needs these files installed to run correctly.
 
 ## Installing packages that SimTaDyn depends on
 

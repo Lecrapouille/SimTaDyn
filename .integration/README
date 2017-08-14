@@ -1,5 +1,18 @@
-Travis CI is a hosted, distributed continuous integration service used to build and test software projects hosted at GitHub. See https://travis-ci.org/ for more informations.
+Continuous integration
+======================
 
-Note: SimTaDyn needs Ubuntu 17.04 for GTK+ buts Ubuntu 16.04 is ok just for launching unit tests. Travis CI only uses Ubuntu 12.04 which is too old for GTK, but offers Ubuntu 16.04 inside a docker. The last option is used for SimTaDyn continuous integration.
+Continuous integration (CI) tools, in the case of SimTaDyn project, is a pratice for building code source on different architectures (Linux, OS X, Window) and run unit tests for each git commit or github pull requests. This allows:
+* to detect code regressions (running unit tests or static code analysis).
+* to detect compilation regressions.
+* to compile the project on several different architectures with different kind and version of compilators.
+
+SimTaDyn uses three CI tools:
+* [Travis CI](See https://travis-ci.org/) for Linux and OS X.
+* [Appveyor](https://www.appveyor.com/) for Windows.
+* [Coverity Scan](https://scan.coverity.com/) for static code analysis.
+
+Travis and Appveyor are triggered on each git commit and gith pull request while Coverity Scan is called manually.
+
+Note: SimTaDyn needs Ubuntu 17.04 for GTK+ buts Ubuntu 16.04 is ok just for launching unit tests. Travis CI only uses Ubuntu 12.04 (and soon 14.04) which is too old for GTK+, but let use a docker. The last option is used for SimTaDyn continuous integration.
 
 

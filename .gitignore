@@ -51,9 +51,12 @@
 *.zip
 *.deb
 
-# SimTaDyn build dir
+# SimTaDyn specifics
 build/*
 tests/build/*
+doc/html/*
+doc/coverage/*
+_*
 
 # Debian packages
 doc-pak

@@ -145,7 +145,7 @@ coverage: $(TARGET)
 	./build/$(TARGET)
 	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
-	@lcov --quiet --remove $(RAPPORT) '/usr*' -o $(RAPPORT)
+	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)
 	@genhtml --quiet -o $(DOC) -t "SimTaDyn Unit Tests" $(RAPPORT)
 
 ###################################################
