@@ -65,7 +65,7 @@ VPATH=.:$(BUILD):../src:../src/common/patterns:\
 # List of files to compile.
 OBJ_EXTERNAL   = backward.o
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_UTILS     += FileTests.o
+OBJ_UTILS     += LoggerTests.o FileTests.o
 OBJ_PATTERNS   =
 OBJ_MATHS      = Maths.o VectorTests.o MatrixTests.o TransformationTests.o
 OBJ_MATHS     += BoundingBoxTests.o FilteringTests.o

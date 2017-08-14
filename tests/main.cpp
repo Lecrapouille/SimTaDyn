@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "FileTests.hpp"
+#include "LoggerTests.hpp"
 #include "VectorTests.hpp"
 #include "MatrixTests.hpp"
 #include "TransformationTests.hpp"
@@ -40,6 +41,10 @@
 static void testUtils(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
+
+  suite = new CppUnit::TestSuite("LoggerTests");
+  suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testlog));
+  runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("FileTests");
   suite->addTest(new CppUnit::TestCaller<FileTests>("File tests", &FileTests::testfiles));
