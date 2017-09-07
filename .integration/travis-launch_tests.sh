@@ -11,4 +11,4 @@ make clone || exit 1
 (cd tests && make -j4 && ./build/UnitTest -a) || exit 1
 
 # Build SimTaDyn executable.
-(cd .. && make -j4) || exit 1
+make -j4 || exit 1
