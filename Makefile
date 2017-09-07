@@ -28,8 +28,8 @@ TARGET = SimTaDyn
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/libSOIL	\
--Iexternal/YesEngine -Isrc -Isrc/common/patterns			\
+INCLUDES = -I$(BUILD) -Iexternal -Iexternal/backward-cpp		\
+-Iexternal/SOIL -Iexternal/YesEngine -Isrc -Isrc/common/patterns	\
 -Isrc/common/managers -Isrc/common/utils -Isrc/common/maths		\
 -Isrc/common/containers -Isrc/common/graph-theory			\
 -Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree		\
@@ -38,7 +38,7 @@ INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/libSOIL	\
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
-VPATH=$(BUILD):external/backward-cpp:external/YesEngine:external/libSOIL\
+VPATH=$(BUILD):external/backward-cpp:external/YesEngine:external/SOIL\
 src:\
 src/common/patterns:\
 src/common/managers:\
@@ -88,21 +88,27 @@ LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
+# Set Libraries compiled in the external directory.
+# For knowing which libraries is needed please read
+# the doc/Install.md file.
+EXT_LIBS = -L$(PWD)/external/SOIL -lSOIL -L$(PWD)/external/zipper/build -lZipper-static
+
+###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the doc/Install.md file.
 
-## OS X: FIXME update this to avoid installing libSOIL
+## OS X
 ifeq ($(ARCHI),Darwin)
 INCLUDES += -I/opt/local/include -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
-LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL
+LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw
+
 ## Linux
 else ifeq ($(ARCHI),Linux)
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
        -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
        -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
        -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
-       -lGLEW -ldl -ldw -lSOIL
-# -lZipper-static -lz
+       -lGLEW -ldl -ldw -lz
 
 ## Window
 else
@@ -115,7 +121,7 @@ all: $(TARGET)
 
 $(TARGET): Makefile .makefile/Makefile.header .makefile/Makefile.footer version.h $(OBJ)
 	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
+	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(EXT_LIBS) $(LIBS) $(LDFLAGS)
 
 ###################################################
 # Compile sources
@@ -133,7 +139,7 @@ endif
 # git clone external projects that SimTaDyn needs
 .PHONY: clone
 clone:
-	@cd external && ./gitclone.sh $(ARCHI); cd -
+	@cd external && ./gitclone.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
 
 ###################################################
 # https://scan.coverity.com/

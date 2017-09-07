@@ -6,49 +6,62 @@ if [ "$1" == "" ]; then
   exit 1
 fi
 ARCHI="$1"
+TARGET=SimTaDyn
+
+rm -fr backward-cpp zipper SOIL 2> /dev/null
+
+function print-clone
+{
+    echo -e "\033[35m*** Cloning:\033[00m \033[36m$TARGET\033[00m <= \033[33m$1\033[00m"
+}
+
+function print-compile
+{
+    echo -e "\033[35m*** Compiling:\033[00m \033[36m$TARGET\033[00m <= \033[33m$1\033[00m"
+}
 
 # Clone Backward tool: A beautiful stack trace pretty printer for C++.
 # License: MIT
-rm -fr backward-cpp 2> /dev/null
-git clone https://github.com/bombela/backward-cpp.git --depth=1
+print-clone backward-cpp
+git clone https://github.com/bombela/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
 
 # https://github.com/sebastiandev/zipper
 # License: MIT
-rm -fr zipper 2> /dev/null
-git clone --recursive https://github.com/sebastiandev/zipper.git --depth=1
+print-clone zipper
+git clone --recursive https://github.com/sebastiandev/zipper.git --depth=1 > /dev/null 2> /dev/null
 if [ "$?" == "0" ]; then
-    mkdir -p zipper/build
-    cd zipper/build
-    cmake ../ && make -j4 && make install
-    cd ..
+    print-compile zipper
+    mkdir -p zipper/build > /dev/null 2> /dev/null
+    cd zipper/build > /dev/null 2> /dev/null
+    cmake ../ > /dev/null 2> /dev/null && make -j4 && ls build/
+    # > /dev/null 2> /dev/null
+    cd ../.. > /dev/null 2> /dev/null
 fi
 
-rm -fr libSOIL 2> /dev/null
-if [ "$ARCHI" == "Linux" ]; then
-
-    # https://github.com/kbranigan/Simple-OpenGL-Image-Library
-    # License: public domain
-    git clone https://github.com/kbranigan/Simple-OpenGL-Image-Library.git --depth=1
-    if [ "$?" == "0" ];
-    then
-	mv Simple-OpenGL-Image-Library libSOIL
-        cd libSOIL && make -j4 && make install
-    fi
-
-elif [ "$ARCHI" == "Darwin" ]; then
+print-clone SOIL
+if [ "$ARCHI" == "Darwin" ]; then
 
     # https://github.com/childhood/libSOIL
     # License: public domain
-    rm -fr zipper 2> /dev/null
-    git clone https://github.com/childhood/libSOIL.git --depth=1
+    git clone https://github.com/childhood/libSOIL.git --depth=1 > /dev/null 2> /dev/null
     if [ "$?" == "0" ];
     then
-	cd libSOIL && make -j4 && make install
+	print-compile SOIL
+	mv libSOIL SOIL && cd SOIL && make -j4 && ls
+	# > /dev/null 2> /dev/null
+	cd .. > /dev/null 2> /dev/null
     fi
-
+ 
 else
 
-    echo "libSOIL for Window: todo"
-    exit 1
-
+    # https://github.com/kbranigan/Simple-OpenGL-Image-Library
+    # License: public domain
+    git clone https://github.com/kbranigan/Simple-OpenGL-Image-Library.git --depth=1 > /dev/null 2> /dev/null
+    if [ "$?" == "0" ];
+    then
+	print-compile SOIL
+	mv Simple-OpenGL-Image-Library SOIL && cd SOIL && make -j4 && ls
+	# > /dev/null 2> /dev/null
+	cd .. > /dev/null 2> /dev/null
+    fi
 fi
