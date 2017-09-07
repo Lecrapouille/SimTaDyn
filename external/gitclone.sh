@@ -25,19 +25,6 @@ function print-compile
 print-clone backward-cpp
 git clone https://github.com/bombela/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
 
-# https://github.com/sebastiandev/zipper
-# License: MIT
-print-clone zipper
-git clone --recursive https://github.com/sebastiandev/zipper.git --depth=1 > /dev/null 2> /dev/null
-if [ "$?" == "0" ]; then
-    print-compile zipper
-    mkdir -p zipper/build > /dev/null 2> /dev/null
-    cd zipper/build > /dev/null 2> /dev/null
-    cmake ../ > /dev/null 2> /dev/null && make -j4 && ls build/
-    # > /dev/null 2> /dev/null
-    cd ../.. > /dev/null 2> /dev/null
-fi
-
 print-clone SOIL
 if [ "$ARCHI" == "Darwin" ]; then
 
@@ -47,9 +34,10 @@ if [ "$ARCHI" == "Darwin" ]; then
     if [ "$?" == "0" ];
     then
 	print-compile SOIL
-	mv libSOIL SOIL && cd SOIL && make -j4 && ls
-	# > /dev/null 2> /dev/null
-	cd .. > /dev/null 2> /dev/null
+	mv libSOIL SOIL
+	cd SOIL
+	make -j4
+	cd ..
     fi
  
 else
@@ -60,8 +48,31 @@ else
     if [ "$?" == "0" ];
     then
 	print-compile SOIL
-	mv Simple-OpenGL-Image-Library SOIL && cd SOIL && make -j4 && ls
-	# > /dev/null 2> /dev/null
-	cd .. > /dev/null 2> /dev/null
+	mv Simple-OpenGL-Image-Library SOIL
+	cd SOIL
+	make -j4
+	# Move header and static lib in the same location to be indentical than SOIL for Darwin
+	cp src/SOIL.h .
+	cp lib/libSOIL.a .
+	cd ..
     fi
+fi
+
+# https://github.com/sebastiandev/zipper
+# License: MIT
+print-clone zipper
+git clone --recursive https://github.com/sebastiandev/zipper.git --depth=1 > /dev/null 2> /dev/null
+if [ "$?" == "0" ]; then
+    print-compile zipper
+    mkdir -p zipper/build
+    cd zipper/build
+    if [ "$ARCHI" == "Windows" ]; then
+	export ZLIBROOT="/mingw64"
+	export LIBZ_LIBRARY="/mingw64/lib"
+	cmake -DLIBZ_LIBRARY="/mingw64/lib" ..
+    else
+	cmake .. 
+    fi 
+    make
+    cd ../..
 fi

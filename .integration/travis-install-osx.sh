@@ -16,4 +16,4 @@ brew_install glfw
 brew_install glew
 
 #
-brew link --force gtkmm3 gtksourceviewmm3 libsoil glm cppunit glfw glew
+brew link --force gtkmm3 gtksourceviewmm3 glm cppunit glfw glew

@@ -23,7 +23,7 @@
 
 #  include "GLObject.hpp"
 #  include "PendingData.hpp"
-#  include <SOIL/SOIL.h>
+#  include "SOIL.h"
 
 // **************************************************************
 //

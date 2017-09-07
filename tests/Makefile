@@ -34,16 +34,16 @@ RAPPORT = build/rapport.info
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -I. -I../external/backward-cpp -I../external/YesEngine\
--I../src -I../src/common/patterns -I../src/common/managers		\
--Icommon/managers -I../src/common/utils -Icommon/utils			\
--I../src/common/maths -Icommon/maths -I../src/common/containers		\
--Icommon/containers -I../src/common/graph-theory			\
--Icommon/graph-theory -I../src/common/graphics/OpenGL			\
--I../src/common/graphics/RTree -I../src/common/graphics			\
--Icommon/graphics/OpenGL -Icommon/graphics/RTree -Icommon/graphics	\
--I../src/core -I../src/core/loaders -I../src/forth -Iforth		\
--I../src/ui
+INCLUDES = -I$(BUILD) -I. -I../external/SOIL				\
+-I../external/backward-cpp -I../external/YesEngine -I../src		\
+-I../src/common/patterns -I../src/common/managers -Icommon/managers	\
+-I../src/common/utils -Icommon/utils -I../src/common/maths		\
+-Icommon/maths -I../src/common/containers -Icommon/containers		\
+-I../src/common/graph-theory -Icommon/graph-theory			\
+-I../src/common/graphics/OpenGL -I../src/common/graphics/RTree		\
+-I../src/common/graphics -Icommon/graphics/OpenGL			\
+-Icommon/graphics/RTree -Icommon/graphics -I../src/core			\
+-I../src/core/loaders -I../src/forth -Iforth -I../src/ui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
@@ -59,7 +59,7 @@ VPATH=.:$(BUILD):../src:../src/common/patterns:\
 ../src/core:../src/core/loaders:\
 ../src/forth:forth:\
 ../src/ui:\
-../external/backward-cpp:../external/YesEngine
+../external/SOIL:../external/backward-cpp:../external/YesEngine
 
 ###################################################
 # List of files to compile.
@@ -100,23 +100,28 @@ LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
+# Set Libraries compiled in the external directory.
+# For knowing which libraries is needed please read
+# the doc/Install.md file.
+LIBS = -L$(PWD)/../external/SOIL -lSOIL -L$(PWD)/../external/zipper/build -lZipper-static
+
+###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the doc/Install.md file.
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
-INCLUDES += -I/opt/local/include -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
-LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL
+INCLUDES += -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
+LIBS += -L/usr/local/lib -framework OpenGL -lglew -lglfw
 
 ## Linux
 else ifeq ($(ARCHI),Linux)
 CXXFLAGS += --coverage
 LDFLAGS += --coverage
-LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
-       -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
-       -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo -lXrandr -lXi -lXxf86vm -pthread      \
-       -lX11 -lGLEW  -lglfw -lSOIL -ldl -ldw
+LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
+-lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0		\
+-lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
+-lglfw -ldl -ldw -lz
 
 ## Windows
 else
