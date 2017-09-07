@@ -11,7 +11,7 @@
 static void usage(char *argv[])
 {
   std::cout << "Usage: " << std::endl
-            << argv[0] << "example       example is an integer meaning the nth example (1 .. " << MAX_EXAMPLES << ")" << std::endl;
+            << argv[0] << " <example>       <example> is an integer meaning the nth example (1 .. " << MAX_EXAMPLES << ")" << std::endl;
   exit(1);
 }
 
@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 {
   if (argc <= 1)
     {
+      std::cout << "Incorrect argument(s)" << std::endl; 
       usage(argv);
     }
   long int example = strtol(argv[1], nullptr, 10);
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
       win = new GLExample05();
       break;
     default:
-      //win = new GLExample06();
+      win = new GLExample05(); // FIXME new GLExample06();
       break;
     }
 

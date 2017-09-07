@@ -28,16 +28,17 @@ TARGET = SimTaDyn
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/YesEngine	\
--Isrc -Isrc/common/patterns -Isrc/common/managers -Isrc/common/utils	\
--Isrc/common/maths -Isrc/common/containers -Isrc/common/graph-theory	\
+INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/libSOIL	\
+-Iexternal/YesEngine -Isrc -Isrc/common/patterns			\
+-Isrc/common/managers -Isrc/common/utils -Isrc/common/maths		\
+-Isrc/common/containers -Isrc/common/graph-theory			\
 -Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree		\
 -Isrc/common/graphics -Isrc/core -Isrc/core/loaders -Isrc/forth		\
 -Isrc/ui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
-VPATH=$(BUILD):external/backward-cpp:external/YesEngine:\
+VPATH=$(BUILD):external/backward-cpp:external/YesEngine:external/libSOIL\
 src:\
 src/common/patterns:\
 src/common/managers:\
@@ -90,11 +91,10 @@ DEFINES = $(SIMTADYN_DEFINES)
 # Set Libraries. For knowing which libraries
 # is needed please read the doc/Install.md file.
 
-## OS X
+## OS X: FIXME update this to avoid installing libSOIL
 ifeq ($(ARCHI),Darwin)
-LIBS = -I/usr/local/include -I/opt/X11/include -L/usr/local/lib	\
--I/opt/X11/lib -framework OpenGL -lglew
-
+INCLUDES += -I/opt/local/include -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
+LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL
 ## Linux
 else ifeq ($(ARCHI),Linux)
 LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
@@ -208,10 +208,12 @@ clean:
 
 ###################################################
 # Cleaning
-.PHONY: very-clean
-very-clean: clean
+.PHONY: distclean
+distclean: clean
 	@rm -fr cov-int SimTaDyn.tgz *.log foo 2> /dev/null
 	@cd tests && make -s clean; cd - > /dev/null
+	@cd src/common/graphics/OpenGL/examples/ && make -s clean; cd - > /dev/null
+	@cd src/forth/standalone && make -s clean; cd - > /dev/null
 
 ###################################################
 # Generate a header file with the project version

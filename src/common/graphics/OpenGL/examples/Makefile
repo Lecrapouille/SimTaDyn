@@ -1,59 +1,65 @@
-.PHONY: clean build install-data
+##=====================================================================
+## SimTaDyn: A GIS in a spreadsheet.
+## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+##
+## This file is part of SimTaDyn.
+##
+## SimTaDyn is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+##=====================================================================
 
 ###################################################
-# Color
-CLR_DEFAULT := $(shell echo '\033[00m')
-CLR_RED     := $(shell echo '\033[31m')
-CLR_GREEN   := $(shell echo '\033[32m')
-CLR_YELLOW  := $(shell echo '\033[33m')
-CLR_BLUE    := $(shell echo '\033[34m')
-CLR_PURPLE  := $(shell echo '\033[35m')
-CLR_CYAN    := $(shell echo '\033[36m')
-print-comp = \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) <= $(CLR_YELLOW)$3$(CLR_DEFAULT)"
-print-link= \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) => $(CLR_YELLOW)$3$(CLR_DEFAULT) $4"
+# Sharable informations between all Makefiles
+M=../../../../../.makefile/
+-include $(M)/Makefile.header
 
 ###################################################
-# Path where to store *.o files. Default: ./build/
-ifeq ($(BUILD),)
-BUILD = build
-endif
+# Executable name
+TARGET = OpenGLExamples
 
 ###################################################
-# Operating system detection
-ifeq ($(OS),Windows_NT)
-ARCHI := Windows
-else
-ARCHI := $(shell uname -s)
-endif
+# Inform Makefile where to find header files
+INCLUDES = -I$(BUILD) -I. -I.. -I../geometry -I../.. -I../../../utils \
+-I../../../maths -I../../../patterns -I../../../containers	      \
+-I../../../../../src -I../../../../../external/backward-cpp	      \
+-I../../../../../
 
 ###################################################
-# Set include paths
-INCLUDES = -I. -I.. -I../geometry -I../.. -I../../../utils -I../../../maths -I../../../patterns -I../../../containers -I../../../../../src -I../../../../../external/backward
+#  Inform Makefile where to find *.cpp and *.o files
+VPATH=.:$(BUILD):..:../geometry:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/backward-cpp:../../../../../
 
 ###################################################
-# Path for Makefile to find *.o
-VPATH=.:$(BUILD):..:../geometry:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/backward
-
-###################################################
-# Set objects architecture specific
-OBJECTS_TOOL     = Backward.o
+#  List of files to compile. Splited by directories
+OBJECTS_TOOL     = 
+#backward.o
 OBJECTS_UTILS    = PendingData.o ILogger.o Logger.o Exception.o
 OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
 OBJECTS          = $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_OPENGL) \
                    Example01.o Example02.o Example03.o Example04.o Example05.o main.o
-TARGET = Examples
 
 ###################################################
-# Compil options
-CXX = g++
+# Compilation options. For knowing which libraries
+# is needed please read the doc/Install.md file.
+ifneq ($(MY_CXX),)
+CXX = $(MY_CXX)
+endif
 CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-DEFINES = -DCHECK_OPENGL
+DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
-# Set Libraries
+# Set Libraries. For knowing which libraries
+# is needed please read the doc/Install.md file.
 ifeq ($(ARCHI),Darwin)
 INCLUDES += -I/opt/local/include -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
 LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL
@@ -68,21 +74,17 @@ $(error Unknown architecture)
 endif
 
 ###################################################
-# Files dependencies
-DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
-POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
-
-###################################################
-# Main entry
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS) Makefile
+$(TARGET): Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h $(OBJECTS)
 	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
+###################################################
+# Compile sources
 %.o: %.cpp
 %.o: %.cpp $(BUILD)/%.d
-	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
+	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 ifeq ($(ARCHI),Darwin)
 	@mkdir -p $(BUILD)
 endif
@@ -90,19 +92,17 @@ endif
 	@$(POSTCOMPILE)
 
 ###################################################
-# Clean Target
+.PHONY: clean
 clean:
-	@echo "*** Cleaning"
+	@$(call print-simple,"Cleaning","$(PWD)")
 	@rm -fr *~ $(BUILD) 2> /dev/null
 
 ###################################################
-# Create a temporary folder to store *.o
-$(DEPFILES): | $(BUILD)
-$(OBJECTS): | $(BUILD)
-$(BUILD):
-	@mkdir -p $(BUILD)
+# Generate a header file with the project version
+version.h: VERSION
+	@$(call print-from,"Version","$(TARGET)","VERSION","")
+	@./$(M)/version.sh $(M)/../VERSION $(BUILD)/version.h
 
-$(BUILD)/%.d: ;
-.PRECIOUS: $(BUILD)/%.d
-
--include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJECTS)))
+###################################################
+# Sharable informations between all Makefiles
+-include $(M)/Makefile.footer
