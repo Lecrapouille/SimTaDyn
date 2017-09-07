@@ -47,22 +47,22 @@ ARCHI := $(shell uname -s)
 endif
 
 ###################################################
-# Default path storing *.o files.
+# Default path storing compilation files (*.o ...)
 ifeq ($(BUILD),)
 BUILD = build
 endif
 
 ###################################################
-# Where to install project runnable
-ifeq ($(PREFIX),)
-PREFIX = /usr/bin
+# Where to install project runnable and project data
+ifeq ($(ARCHI),Linux)
+PREFIX = /usr/local
+else ifeq ($(ARCHI),Darwin)
+PREFIX = /usr/local
+else
+PREFIX = /usr/local
 endif
-
-###################################################
-# Where to install project datum
-ifeq ($(PROJECT_DATA_ROOT),)
-PROJECT_DATA_ROOT = /usr/share/SimTaDyn
-endif
+BINDIR = $(DESTDIR)$(PREFIX)/bin
+PROJECT_DATA_ROOT = $(DESTDIR)$(PREFIX)/SimTaDyn
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################

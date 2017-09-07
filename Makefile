@@ -187,8 +187,9 @@ install: $(TARGET)
 	@mkdir -p $(PROJECT_DATA_PATH)/forth
 	@cp -r data/* $(PROJECT_DATA_PATH)
 	@cp -r src/forth/core/system.fs $(PROJECT_DATA_PATH)/forth
-	@$(call print-to,"Installing",$(TARGET),"$(PREFIX)","")
-	@cp $(BUILD)/$(TARGET) $(PREFIX)
+	@$(call print-to,"Installing",$(TARGET),"$(BINDIR)","")
+	@mkdir -p $(BINDIR)
+	@cp $(BUILD)/$(TARGET) $(BINDIR)/$(TARGET)
 
 ###################################################
 # Uninstall project. You need to be root user.
