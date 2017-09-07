@@ -242,5 +242,13 @@ int main(int argc, char *argv[])
     }
 
   bool wasSucessful = run_tests(has_xdisplay);
+  if (wasSucessful)
+    {
+      std::cout << "*** Congratulation: all tests passed ***" << std::endl;
+    }
+  else
+    {
+      std::cout << "*** Sorry but not all tests passed ***" << std::endl;
+    }
   return wasSucessful ? 0 : 1;
 }

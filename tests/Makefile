@@ -77,12 +77,13 @@ OBJ_OPENGL     = Color.o Camera2D.o OpenGL.o GLObject.o GLShader.o GLVertexArray
 OBJ_OPENGL    += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o Renderer.o
 OBJ_OPENGL    += ColorTests.o GLBufferTests.o OpenGLTests.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
-OBJ_LOADERS    = ILoader.o ShapeFile.o
+#OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+#OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
+OBJ_LOADERS    = ILoader.o
+# ShapeFile.o
 # SimTaDynFile.o
-OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
-OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
+#OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
+#OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_UT_SIMTADYN= main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
