@@ -2,10 +2,11 @@
 
 function brew_install
 {
-  (brew outdated "$1" || brew install "$1") || (echo "Error installing $1"; return 1)
+#    (brew outdated "$1" || brew install "$1") || (echo "Error installing $1"; return 1)
+    (brew install "$1") || (echo "Error installing $1"; return 1)
 }
 
-#brew update
+brew update
 #brew upgrade
 brew_install gtkmm3
 brew_install gtksourceviewmm3
