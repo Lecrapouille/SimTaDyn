@@ -23,12 +23,19 @@
 PackageExplorer::PackageExplorer()
 {
   // Preload some icons
-  Glib::RefPtr<Gtk::IconTheme> icon_theme = Gtk::IconTheme::get_for_screen(m_tree_view.get_screen());
-  m_icon_folder = icon_theme->load_icon("folder", 16);
-  m_icon_document = icon_theme->load_icon("document", 16);
-  m_icon_status_ok = icon_theme->load_icon("starred", 16);
-  m_icon_status_warning = icon_theme->load_icon("important", 16);
-  m_icon_status_ko = icon_theme->load_icon("error", 16);
+  try
+    {
+      Glib::RefPtr<Gtk::IconTheme> icon_theme = Gtk::IconTheme::get_for_screen(m_tree_view.get_screen());
+      m_icon_folder = icon_theme->load_icon("folder", 16);
+      m_icon_document = icon_theme->load_icon("document", 16);
+      m_icon_status_ok = icon_theme->load_icon("starred", 16);
+      m_icon_status_warning = icon_theme->load_icon("important", 16);
+      m_icon_status_ko = icon_theme->load_icon("error", 16);
+    }
+  catch (Gtk::IconThemeError const &e)
+    {
+      LOGE("Failed loading GTK+ icon theme. Reason '%s'", e.what().c_str());
+    }
 
   // Create the Tree model
   m_tree_store = Gtk::TreeStore::create(m_columns);
