@@ -100,10 +100,10 @@ LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
-# Set Libraries compiled in the external directory.
+# Set Libraries compiled in the external-l directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS = -L$(PWD)/../external/SOIL -lSOIL -L$(PWD)/../external/zipper/build -lZipper-static
+LIBS = $(abspath $(PWD)/../external/SOIL/libSOIL.a) $(abspath $(PWD)/../external/zipper/build/libZipper-static.a)
 
 ###################################################
 # Set Libraries. For knowing which libraries
@@ -111,8 +111,7 @@ LIBS = -L$(PWD)/../external/SOIL -lSOIL -L$(PWD)/../external/zipper/build -lZipp
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
-INCLUDES += -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
-LIBS += -L/usr/local/lib -framework OpenGL -lglew -lglfw
+LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
 
 ## Linux
 else ifeq ($(ARCHI),Linux)
@@ -131,14 +130,15 @@ endif
 ###################################################
 all: $(TARGET)
 
-$(TARGET): version.h $(OBJ) Makefile ../Makefile ../.makefile/Makefile.header ../.makefile/Makefile.footer
+###################################################
+# Link sources
+$(TARGET): $(OBJ)
 	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################
 # Compile sources
-%.o: %.cpp version.h
-%.o: %.cpp $(BUILD)/%.d version.h
+%.o: %.cpp $(BUILD)/%.d Makefile ../Makefile ../.makefile/Makefile.header ../.makefile/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)

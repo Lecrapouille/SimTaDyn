@@ -29,23 +29,22 @@ TARGET = OpenGLExamples
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -I. -I.. -I../geometry -I../.. -I../../../utils \
--I../../../maths -I../../../patterns -I../../../containers	      \
--I../../../../../src -I../../../../../external/backward-cpp	      \
--I../../../../../
+INCLUDES = -I$(BUILD) -I.. -I../geometry -I../.. -I../../../utils	\
+-I../../../maths -I../../../patterns -I../../../containers		\
+-I../../../../../src -I../../../../../external/backward-cpp		\
+-I../../../../../external/SOIL -I../../../../../
 
 ###################################################
 #  Inform Makefile where to find *.cpp and *.o files
-VPATH=.:$(BUILD):..:../geometry:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/backward-cpp:../../../../../
+VPATH=.:$(BUILD):..:../geometry:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/SOIL:../../../../../external/backward-cpp:../../../../../
 
 ###################################################
 #  List of files to compile. Splited by directories
-OBJECTS_TOOL     = 
-#backward.o
-OBJECTS_UTILS    = PendingData.o ILogger.o Logger.o Exception.o
-OBJECTS_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
-OBJECTS          = $(OBJECTS_TOOL) $(OBJECTS_UTILS) $(OBJECTS_OPENGL) \
-                   Example01.o Example02.o Example03.o Example04.o Example05.o main.o
+OBJ_TOOL     = backward.o
+OBJ_UTILS    = Exception.o PendingData.o ILogger.o Logger.o
+OBJ_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
+OBJ          = $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) \
+               Example01.o Example02.o Example03.o Example04.o Example05.o main.o
 
 ###################################################
 # Compilation options. For knowing which libraries
@@ -58,17 +57,27 @@ LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
+# Set Libraries compiled in the external/ directory.
+# For knowing which libraries is needed please read
+# the doc/Install.md file.
+LIBS = $(abspath ../../../../../external/SOIL/libSOIL.a)
+
+###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the doc/Install.md file.
+
+## OS X
 ifeq ($(ARCHI),Darwin)
-INCLUDES += -I/opt/local/include -I/usr/local/include -I/opt/X11/include -I/opt/X11/lib
-LIBS = -L/opt/local/lib -L/usr/local/lib -framework OpenGL -lglew -lglfw -lSOIL
+LIBS += -L/usr/local/lib -framework OpenGL -lglew -lglfw
+
+## Linux
 else ifeq ($(ARCHI),Linux)
-LIBS = -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0   \
-       -latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0        \
-       -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0     \
-       -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11\
-       -lGLEW -lglfw -ldl -ldw -lSOIL -lbfd
+LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
+-lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0		\
+-lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
+-lglfw -ldl -ldw -lSOIL -lbfd
+
+## Window
 else
 $(error Unknown architecture)
 endif
@@ -76,18 +85,16 @@ endif
 ###################################################
 all: $(TARGET)
 
-$(TARGET): Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h $(OBJECTS)
+###################################################
+# Link sources
+$(TARGET): $(OBJ)
 	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
-	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
+	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################
 # Compile sources
-%.o: %.cpp
-%.o: %.cpp $(BUILD)/%.d
+%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-ifeq ($(ARCHI),Darwin)
-	@mkdir -p $(BUILD)
-endif
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
