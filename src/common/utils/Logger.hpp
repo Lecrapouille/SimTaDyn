@@ -58,7 +58,7 @@ private:
   std::ofstream m_file;
 };
 
-#define SHORT_FILENAME File::shortNameWithExtension(__FILE__).c_str()
+#define SHORT_FILENAME File::fileName(__FILE__).c_str()
 
 //! \brief Log C++ like. Example:  CPP_LOG(logger::Fatal) << "test\n";
 #define CPP_LOG(severity, ...)                                          \

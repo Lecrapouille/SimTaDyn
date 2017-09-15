@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "ShapeFile.hpp"
-#include "File.hpp"
 
 // ESRI Shapefile Technical Description:
 // https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
@@ -301,7 +300,7 @@ void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynMap* &cu
       value32b = getShapeType();
       LOGI("Shapefile Type: %u: %s", value32b, shapeTypes(value32b).c_str());
 
-      std::string shortname = File::shortNameWithExtension(filename);
+      std::string shortname = File::fileName(filename);
       SimTaDynMap *map = new SimTaDynMap(shortname);
 
       getBoundingBox(map->m_bbox);

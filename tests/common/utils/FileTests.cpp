@@ -37,24 +37,23 @@ void FileTests::tearDown()
 void FileTests::testfiles()
 {
   std::string res;
-  bool b;
 
-  res = File::shortNameWithExtension("/home/qq/SimTaDyn/tests/common/FileTests.cpp");
+  res = File::fileName("/home/qq/SimTaDyn/tests/common/FileTests.cpp");
   CPPUNIT_ASSERT_EQUAL(true, "FileTests.cpp" == res);
 
-  res = File::shortNameWithExtension("/home/qq/SimTaDyn/tests/common");
+  res = File::fileName("/home/qq/SimTaDyn/tests/common");
   CPPUNIT_ASSERT_EQUAL(true, "common" == res);
 
-  res = File::shortNameWithExtension("common");
+  res = File::fileName("common");
   CPPUNIT_ASSERT_EQUAL(true, "common" == res);
 
-  res = File::shortName("/home/qq/SimTaDyn/tests/common/FileTests.cpp");
+  res = File::baseName("/home/qq/SimTaDyn/tests/common/FileTests.cpp");
   CPPUNIT_ASSERT_EQUAL(true, "FileTests" == res);
 
-  res = File::shortName("/home/qq/SimTaDyn/tests/common");
+  res = File::baseName("/home/qq/SimTaDyn/tests/common");
   CPPUNIT_ASSERT_EQUAL(true, "common" == res);
 
-  res = File::shortName("common");
+  res = File::baseName("common");
   CPPUNIT_ASSERT_EQUAL(true, "common" == res);
 
   res = File::extension("/home/qq/SimTaDyn/tests/common/FileTests.cpp");
@@ -72,11 +71,33 @@ void FileTests::testfiles()
   res = File::extension("common");
   CPPUNIT_ASSERT_EQUAL(true, "" == res);
 
-  b = File::exist("pouet");
-  CPPUNIT_ASSERT_EQUAL(false, b);
+  CPPUNIT_ASSERT_EQUAL(false, File::exist("pouet"));
+  CPPUNIT_ASSERT_EQUAL(true, File::exist("/dev/null"));
 
-  b = File::exist("/dev/null");
-  CPPUNIT_ASSERT_EQUAL(true, b);
+  CPPUNIT_ASSERT(File::Directory == File::type("/tmp"));
+  CPPUNIT_ASSERT(true == File::isReadable("/tmp"));
+  CPPUNIT_ASSERT(true == File::isWritable("/tmp"));
+
+  CPPUNIT_ASSERT(File::Directory == File::type("/usr/sbin/"));
+  CPPUNIT_ASSERT(true == File::isReadable("/usr/sbin/"));
+  CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/"));
+
+  CPPUNIT_ASSERT(File::DoesNotExist == File::type("/usr/sbin/ls"));
+  CPPUNIT_ASSERT(false == File::isReadable("/usr/sbin/ls"));
+  CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/ls"));
+
+  CPPUNIT_ASSERT(File::Document == File::type("/bin/ls"));
+  CPPUNIT_ASSERT(true == File::isReadable("/bin/ls"));
+  CPPUNIT_ASSERT(false == File::isWritable("/bin/ls"));
+
+  CPPUNIT_ASSERT(true == File::mkdir("/tmp/qq"));
+  CPPUNIT_ASSERT(true == File::mkdir("/tmp/qq/"));
+
+  CPPUNIT_ASSERT(File::dirName("/tmp/foo/bar") == "/tmp/foo/");
+  CPPUNIT_ASSERT(File::dirName("/tmp/foo/") == "/tmp/foo/");
+  CPPUNIT_ASSERT(File::dirName("/tmp/foo") == "/tmp/");
+  CPPUNIT_ASSERT(File::dirName("/tmp/") == "/tmp/");
+  CPPUNIT_ASSERT(File::dirName("/tmp") == "/");
 }
 
 //--------------------------------------------------------------------------

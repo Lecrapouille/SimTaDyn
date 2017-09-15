@@ -21,43 +21,23 @@
 #ifndef FILE_HPP_
 #  define FILE_HPP_
 
-#  include <string>
 #  include <sys/stat.h>
+#  include <unistd.h>
+#  include <string.h>
+#  include <string>
+#  include <iostream>
+#  include <algorithm>
 
+// **************************************************************
+//! \brief
+// **************************************************************
 class File
 {
 public:
 
-  //! \brief give the file name with its extension from a given path
-  inline static std::string shortNameWithExtension(std::string const& path)
-  {
-    std::string::size_type pos = path.find_last_of("\\/");
-    if (pos != std::string::npos)
-      return path.substr(pos + 1, std::string::npos);
-    return path;
-  }
+  enum FileType { DoesNotExist, Directory, Document, UnknownType };
 
-  //! \brief give the file name without its extension from a given path
-  inline static std::string shortName(std::string const& path)
-  {
-    std::string filename = shortNameWithExtension(path);
-    return filename.substr(0, filename.find_last_of("."));
-  }
-
-  //! \brief give the file extension
-  inline static std::string extension(std::string const& path)
-  {
-    std::string::size_type pos = path.find_last_of(".");
-    if (pos != std::string::npos)
-      {
-        std::string ext = path.substr(pos + 1, std::string::npos);
-        if ('~' == ext.back())
-          ext.pop_back();
-        return ext;
-      }
-    return "";
-  }
-
+  //------------------------------------------------------------------
   //! \brief Check if a file exits.
   //!
   //! Beware of race condition ! Do not use this function for opening
@@ -65,10 +45,152 @@ public:
   //! code. Indeed, the file may be deleted between this function and
   //! the open() function because theses two functions will not be
   //! atomic.
+  //------------------------------------------------------------------
   inline static bool exist(std::string const& path)
   {
     struct stat buffer;
     return 0 == stat(path.c_str(), &buffer);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline static FileType type(std::string const& path)
+  {
+    struct stat buffer;
+    if (0 == stat(path.c_str(), &buffer))
+      {
+        if (buffer.st_mode & S_IFDIR)
+          {
+            return Directory;
+          }
+        else if (buffer.st_mode & S_IFREG)
+          {
+            return Document;
+          }
+        return UnknownType;
+      }
+    return DoesNotExist;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return if a directory or a file is readable.
+  //------------------------------------------------------------------
+  inline static bool isReadable(std::string const& path)
+  {
+    return 0 == access(path.c_str(), R_OK);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return if a directory or a file is writable.
+  //------------------------------------------------------------------
+  inline static bool isWritable(std::string const& path)
+  {
+    return 0 == access(path.c_str(), W_OK);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief give the file name with its extension from a given path
+  //------------------------------------------------------------------
+  inline static std::string fileName(std::string const& path)
+  {
+    std::string::size_type pos = path.find_last_of("\\/");
+    if (pos != std::string::npos)
+      return path.substr(pos + 1, std::string::npos);
+    return path;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief give the file name without its extension from a given path
+  //------------------------------------------------------------------
+  inline static std::string baseName(std::string const& path)
+  {
+    std::string filename = fileName(path);
+    return filename.substr(0, filename.find_last_of("."));
+  }
+
+  //------------------------------------------------------------------
+  //! \brief give the file extension
+  //------------------------------------------------------------------
+  inline static std::string extension(std::string const& path)
+  {
+    std::string::size_type pos = path.find_last_of(".");
+    if (pos != std::string::npos)
+      {
+        std::string ext = path.substr(pos + 1, std::string::npos);
+
+        // Ignore the ~ in the extension (ie. foo.txt~)
+        if ('~' == ext.back())
+          ext.pop_back();
+
+        // Get the file extension in lower case
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        return ext;
+      }
+    return "";
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //! \note the path is considered as referencing a file not a directory execpt if a '/' is set
+  //! Example dirName("/tmp/") will return dirName("/tmp/") but dirName("/tmp") will return dirName("/")
+  //------------------------------------------------------------------
+  inline static std::string dirName(std::string const& path)
+  {
+    std::string::size_type pos = path.find_last_of("\\/");
+    if (pos == path.length() - 1)
+      {
+        return path;
+      }
+    if (pos != std::string::npos)
+      {
+        return path.substr(0, pos + 1);
+      }
+    return "";
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  static bool mkdir(std::string const& path, mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO)
+  {
+    struct stat st;
+    std::string::const_iterator begin = path.begin();
+    std::string::const_iterator end = path.end();
+    std::string::const_iterator iter = begin;
+
+    while (iter != end)
+      {
+        std::string::const_iterator new_iter = std::find(iter, end, '/');
+        std::string new_path = '/' + std::string(begin, new_iter);
+
+        if (stat(new_path.c_str(), &st) != 0)
+          {
+            if ((::mkdir(new_path.c_str(), mode) != 0) && (errno != EEXIST))
+              {
+                std::cout << "cannot create folder [" << new_path << "] : "
+                          << strerror(errno) << std::endl;
+                return false;
+              }
+          }
+        else if (!(st.st_mode & S_IFDIR))
+          {
+            errno = ENOTDIR;
+            std:: cout << "path [" << new_path << "] not a dir " << std::endl;
+            return false;
+          }
+        else
+          {
+            //std::cout << "path [" << new_path << "] already exists " << std::endl;
+          }
+
+         iter = new_iter;
+         if (new_iter != path.end())
+           {
+             ++iter;
+           }
+      }
+    return true;
   }
 };
 

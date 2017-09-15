@@ -262,7 +262,7 @@ bool MapEditor::doOpen(std::string const& filename, const bool new_map, const bo
     {
       if (reset_map)
         {
-          map->m_name = File::shortName(filename);
+          map->m_name = File::baseName(filename);
         }
 
       //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
