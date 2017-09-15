@@ -31,7 +31,7 @@ void ILogger::currentDate()
 {
   time_t current_time = time(nullptr);
 
-  strftime(m_buffer_time, sizeof (m_buffer_time), "[%d/%m/%Y]", localtime(&current_time));
+  strftime(m_buffer_time, sizeof (m_buffer_time), "[%Y/%m/%d]", localtime(&current_time));
 }
 
 void ILogger::currentTime()

@@ -48,24 +48,28 @@ static uint32_t number_of_lines()
   // count the newlines with an algorithm specialized for counting:
   line_count = std::count(
     std::istream_iterator<char>(myfile),
-    std::istream_iterator<char>(),
-    '\n');
+    std::istream_iterator<char>(), '\n');
 
   return line_count;
 }
 
 //--------------------------------------------------------------------------
-static const uint32_t num_threads = 1000;
+static const uint32_t num_threads = 10U;
+static const uint32_t lines_by_thread = 10U;
+static std::thread t[num_threads];
 static void call_from_thread(uint32_t const x)
 {
-  LOGI("Hello World from thread %3u", x);
+  for (uint32_t i = 0U; i < lines_by_thread; ++i)
+    {
+      LOGI("Hello World from thread %3u", x);
+    }
 }
 
 //--------------------------------------------------------------------------
 void LoggerTests::testlog()
 {
   Logger::instance();
-  std::thread t[num_threads];
+
 
   // Launch a group of threads
   for (uint32_t i = 0; i < num_threads; ++i)
@@ -83,5 +87,5 @@ void LoggerTests::testlog()
   // Check: count the number of lines == num_threads + header + footer
   uint32_t lines = number_of_lines();
   const uint32_t header_footer_lines = 4U + 5U;
-  CPPUNIT_ASSERT_EQUAL(num_threads + header_footer_lines, lines);
+  CPPUNIT_ASSERT_EQUAL(num_threads * lines_by_thread + header_footer_lines, lines);
 }
