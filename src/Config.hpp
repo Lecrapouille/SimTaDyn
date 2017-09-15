@@ -64,10 +64,10 @@ namespace config
   const uint32_t minor_version = SIMTADYN_MINOR_VERSION;
   //! \brief
   const char data_path[] = SIMTADYN_DATA_PATH;
+  //! \brief Location for storing temporary files
+  const char tmp_path[] = "/tmp/SimTaDyn/";
   //! \brief
   const char log_path[] = "SimTaDyn.log";
-  //! \brief
-  const char tmp_log_path[] = "/tmp/SimTaDyn.log";
   //! \brief Number of elements by pool in containers
   //! used for storing nodes and arcs in a graph
   const uint32_t graph_container_nb_elements = 8U;

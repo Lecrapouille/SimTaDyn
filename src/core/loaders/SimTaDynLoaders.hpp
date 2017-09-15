@@ -21,12 +21,12 @@
 #ifndef SIMTADYNLOADERS_HPP_
 #  define SIMTADYNLOADERS_HPP_
 
-#  include "ShapeFile.hpp"
-#  include "SimTaDynFile.hpp"
+#  include "ShapeFileLoader.hpp"
+#  include "SimTaDynFileLoader.hpp"
 
 #  include "Utilities/GenHierarchies.h"
 
-typedef TYPELIST_1(SimTaDynMap) ResourceList;
+typedef TYPELIST_2(SimTaDynMap, SimTaDynFile) ResourceList;
 
 #  include "LoaderManager.tpp"
 

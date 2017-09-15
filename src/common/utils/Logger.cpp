@@ -46,7 +46,9 @@ void Logger::open(std::string const& filename)
   m_file.open(filename.c_str());
   if (!m_file.is_open())
     {
-      m_file.open(config::tmp_log_path);
+      std::string tmp_log_path(config::tmp_path);
+      tmp_log_path += filename;
+      m_file.open(tmp_log_path);
     }
   if (m_file.is_open())
     {
