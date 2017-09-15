@@ -70,6 +70,9 @@ public:
     m_need_setup = true;
   }
 
+  // TODO:
+  // virtual bool load(std::string const& filename, const bool rename = false) = 0;
+
 protected:
 
   virtual bool create() override
@@ -158,8 +161,18 @@ public:
       }
     else
       {
-        LOGES("Failed loading picture file '%s'", filename);
-        res = false;
+        if (m_throw_enable)
+          {
+            std::string msg("Failed loading picture file '");
+            msg += filename; msg += "'";
+            OpenGLException e(msg);
+            throw e;
+          }
+        else
+          {
+            LOGES("Failed loading picture file '%s'", filename);
+            res = false;
+          }
       }
     m_need_update = (nullptr != m_buffer);
     return res;

@@ -63,12 +63,12 @@ OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
 OBJ_MANAGERS   =
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
-OBJ_OPENGL     = Color.o Camera2D.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
-OBJ_OPENGL    += GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
+OBJ_OPENGL     = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o
+OBJ_OPENGL    += GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
 OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
-OBJ_LOADERS    = ILoader.o ShapeFile.o SimTaDynFile.o
+OBJ_LOADERS    = LoaderException.o ILoader.o ShapeFile.o SimTaDynFile.o
 # SimTaDynFile.o
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o

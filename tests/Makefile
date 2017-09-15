@@ -63,31 +63,29 @@ VPATH=.:$(BUILD):../src:../src/common/patterns:\
 
 ###################################################
 # List of files to compile.
-OBJ_EXTERNAL   = backward.o
-OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_UTILS     += LoggerTests.o FileTests.o
-OBJ_PATTERNS   =
-OBJ_MATHS      = Maths.o VectorTests.o MatrixTests.o TransformationTests.o
-OBJ_MATHS     += BoundingBoxTests.o FilteringTests.o
-OBJ_CONTAINERS = PendingData.o SetTests.o CollectionTests.o
-OBJ_MANAGERS   = ResourcesTests.o
-OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
-OBJ_GRAPHS    += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
-OBJ_OPENGL     = Color.o Camera2D.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
-OBJ_OPENGL    += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o Renderer.o
-OBJ_OPENGL    += ColorTests.o GLBufferTests.o OpenGLTests.o
-# OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
-#OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-#OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
-OBJ_LOADERS    = ILoader.o
-# ShapeFile.o
-# SimTaDynFile.o
-#OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
-#OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
-OBJ_UT_SIMTADYN= main.o
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
-                 $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
-                 $(OBJ_GUI) $(OBJ_UT_SIMTADYN)
+OBJ_EXTERNAL       = backward.o
+OBJ_UTILS          = Exception.o ILogger.o Logger.o File.o Path.o
+OBJ_UTILS_UT      += LoggerTests.o FileTests.o
+OBJ_MATHS          = Maths.o
+OBJ_MATHS_UT       = VectorTests.o MatrixTests.o TransformationTests.o
+OBJ_MATHS_UT      += BoundingBoxTests.o FilteringTests.o
+OBJ_CONTAINERS     = PendingData.o
+OBJ_CONTAINERS_UT  = SetTests.o CollectionTests.o
+OBJ_MANAGERS       = LoaderException.o
+OBJ_MANAGERS_UT    = ResourcesTests.o
+OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
+OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
+OBJ_OPENGL         = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
+OBJ_OPENGL        += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o Renderer.o
+OBJ_OPENGL_UT      = ColorTests.o GLBufferTests.o OpenGLTests.o
+OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJ_LOADERS        =
+OBJ_UNIT_TEST      = main.o
+OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
+      $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)		\
+      $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)			\
+      $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH)	\
+      $(OBJ_LOADERS) $(OBJ_UNIT_TEST)
 
 ###################################################
 # Compilation options. For knowing which libraries

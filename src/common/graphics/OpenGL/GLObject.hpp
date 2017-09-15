@@ -39,23 +39,6 @@
 #  include <assert.h>
 #  include <cstdint>
 
-//! This macro (from the library POCO) will declare a class
-//! GLObjectException derived from simtadyn::Exception.
-POCO_DECLARE_EXCEPTION(GLObjectException, simtadyn::Exception)
-
-// **************************************************************
-//! \brief
-// **************************************************************
-class GLObjectExceptionNotCreated: public GLObjectException
-{
-public:
-
-  GLObjectExceptionNotCreated(std::string const& name)
-  {
-    m_msg = "OpenGL Object '" + name + "' has not been correctly created";
-  }
-};
-
 // **************************************************************
 //! \class GLObject GLObject.hpp
 //! \brief GLObject is an interface for managing a generic OpenGL
@@ -121,7 +104,10 @@ public:
       }
     else if (m_throw_enable)
       {
-        GLObjectExceptionNotCreated e(m_name);
+        std::string msg("OpenGL Object '");
+        msg += m_name;
+        msg += "' has not been correctly created";
+        OpenGLException e(msg);
         throw e;
       }
 

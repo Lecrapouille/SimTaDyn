@@ -105,7 +105,7 @@ int IGLWindow::create()
     {
       res = setup();
     }
-  catch (const GLObjectException& e)
+  catch (const OpenGLException& e)
     {
       LOGIS("%s", e.message().c_str());
       res = false;
@@ -147,7 +147,7 @@ void IGLWindow::update()
       while ((GLFW_PRESS != glfwGetKey(m_window, GLFW_KEY_ESCAPE)) &&
              (0 == glfwWindowShouldClose(m_window)));
     }
-  catch (const GLObjectException& e)
+  catch (const OpenGLException& e)
     {
       LOGIS("%s", e.message().c_str());
     }

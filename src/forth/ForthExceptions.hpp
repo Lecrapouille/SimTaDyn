@@ -30,7 +30,7 @@
 
 //! This macro (from the library POCO) will declare a class
 //! ForthException derived from simtadyn::Exception.
-POCO_DECLARE_EXCEPTION(ForthException, simtadyn::Exception)
+DECLARE_EXCEPTION(ForthException, Exception)
 
 // **************************************************************
 //

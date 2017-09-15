@@ -27,19 +27,6 @@
 #  include "GLObject.hpp"
 
 // **************************************************************
-//!
-// **************************************************************
-class GLShaderNotLoadedException: public GLObjectException
-{
-public:
-
-  GLShaderNotLoadedException(std::string const& name)
-  {
-    m_msg = "No vertex and fragment shaders have been given for the GLShader '" + name + "'";
-  }
-};
-
-// **************************************************************
 //! \class GLShader GLShader.hpp
 //! \brief GLShader is a class for managing OpenGL shader scripts
 //! (like loading them into the GPU).
@@ -91,7 +78,8 @@ protected:
       {
         if (m_throw_enable)
           {
-            GLShaderNotLoadedException e(m_name);
+            std::string msg("No vertex and fragment shaders have been given for the GLShader '" + m_name + "'");
+            OpenGLException e(msg);
             throw e;
           }
         return true;

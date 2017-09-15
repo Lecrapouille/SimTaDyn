@@ -21,6 +21,7 @@
 #ifndef OPENGL_HPP
 #define OPENGL_HPP
 
+#  include "OpenGLException.hpp"
 #  include <GL/glew.h>
 
 namespace SimTaDyn

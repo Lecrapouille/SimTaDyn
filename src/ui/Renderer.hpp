@@ -93,6 +93,7 @@ protected:
 
   //! \brief Same role than a constructor but here we are sure than
   //! and OpenGL context is created before.
+  //! \throw OpenGLException.
   bool setupGraphics();
 
   //! \brief

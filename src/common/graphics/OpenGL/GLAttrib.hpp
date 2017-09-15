@@ -26,35 +26,6 @@
 // **************************************************************
 //! \brief
 // **************************************************************
-class GLObjectExceptionNotLocated: public GLObjectException
-{
-public:
-
-  GLObjectExceptionNotLocated(std::string const& GLObject_name, std::string const& GLShader_name)
-  {
-    m_msg = "The OpenGL attribute '" + GLObject_name + "' has not been correctly located in the shader program '"
-      + GLShader_name + "'";
-  }
-};
-
-// **************************************************************
-//! \brief
-// **************************************************************
-class GLObjectExceptionNoShader: public GLObjectException
-{
-public:
-
-  GLObjectExceptionNoShader(std::string const& GLObject_name)
-  {
-    m_msg = "The OpenGL attribute '" + GLObject_name + "' failed because no shader program was given. "
-      "Call setup((GLShader& program, const GLint size, const GLenum type, const GLboolean) before calling"
-      "start() method";
-  }
-};
-
-// **************************************************************
-//! \brief
-// **************************************************************
 class GLAttrib: public GLObject
 {
 public:
@@ -139,7 +110,10 @@ protected:
       {
         if (m_throw_enable)
           {
-            GLObjectExceptionNoShader e(m_name);
+            std::string msg("The OpenGL attribute '" + m_name + "' failed because no shader program was given. "
+                            "Call setup((GLShader& program, const GLint size, const GLenum type, const GLboolean) before calling"
+                            "start() method");
+            OpenGLException e(msg);
             throw e;
           }
         else
@@ -160,7 +134,9 @@ protected:
       }
     else if (m_throw_enable)
       {
-        GLObjectExceptionNotLocated e(m_name, m_program->m_name);
+        std::string msg("The OpenGL attribute '" + m_name + "' has not been correctly located in the shader program '"
+                        + m_program->m_name + "'");
+        OpenGLException e(msg);
         throw e;
       }
     else

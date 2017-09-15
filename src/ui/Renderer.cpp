@@ -135,7 +135,7 @@ void GLRenderer::setUniform(const char *name, Matrix44f const &mat)
   glCheck(glUniformMatrix4fv(id, 1, GL_FALSE, &mat[0U][0U]));
 }
 
-
+// This function can throw OpenGL exception but caught by the class DrawingArea
 bool GLRenderer::setupGraphics()
 {
   // This is an awful hack but this is to be sure to flush OpenGL
@@ -143,59 +143,51 @@ bool GLRenderer::setupGraphics()
   // fake error is returned on the first OpenGL routines while valid.
   glGetError();
 
-  try
+  // Configure OpenGL states
+  activateTransparency();
+  activateDepthBuffer();
+
+  // Copy arrays inside the VBO class
+  m_pos.add(vertexData, ARRAY_SIZE(vertexData));
+  m_tex.add(textureData, ARRAY_SIZE(textureData));
+
+  // Compile a shader program
+  if (0U == m_shader.load(Config::instance().expand("shaders/node.vertex"),
+                          Config::instance().expand("shaders/node.fragment")))
+    return false;
+
+  // Configure the texture
+  m_texture.interpolation(GL_LINEAR);
+  m_texture.wrapping(GL_CLAMP_TO_EDGE);
+  if (false == m_texture.load(Config::instance().expand("textures/wooden-crate.jpg")))
+    return false;
+
+  // Tell to OpenGL how to manage VBO values. This fixes the size
+  // of the VBO container to its current capacity (ie. now the VBO
+  // size no longer be larger): the GPU have allocated static memory.
+  m_pos.setup(m_shader, 3, GL_FLOAT);
+  m_tex.setup(m_shader, 2, GL_FLOAT);
+
+  m_shader.start();
+  {
+    // Bind VBOs to the VAO. It's now enough for drawing primitives.
+    m_vao.start();
     {
-      // Configure OpenGL states
-      activateTransparency();
-      activateDepthBuffer();
-
-      // Copy arrays inside the VBO class
-      m_pos.add(vertexData, ARRAY_SIZE(vertexData));
-      m_tex.add(textureData, ARRAY_SIZE(textureData));
-
-      // Compile a shader program
-      if (0U == m_shader.load(Config::instance().expand("shaders/node.vertex"),
-                              Config::instance().expand("shaders/node.fragment")))
-        return false;
-
-      // Configure the texture
-      m_texture.interpolation(GL_LINEAR);
-      m_texture.wrapping(GL_CLAMP_TO_EDGE);
-      if (false == m_texture.load(Config::instance().expand("textures/wooden-crate.jpg")))
-        return false;
-
-      // Tell to OpenGL how to manage VBO values. This fixes the size
-      // of the VBO container to its current capacity (ie. now the VBO
-      // size no longer be larger): the GPU have allocated static memory.
-      m_pos.setup(m_shader, 3, GL_FLOAT);
-      m_tex.setup(m_shader, 2, GL_FLOAT);
-
-      m_shader.start();
-      {
-        // Bind VBOs to the VAO. It's now enough for drawing primitives.
-        m_vao.start();
-        {
-          m_pos.start();
-          m_tex.start();
-        }
-        m_vao.stop();
-      }
-      m_shader.stop();
-
-      // Camera
-      /*m_default_camera.lookAt(static_cast<float>(screenWidth()) / 2.0f,
-        static_cast<float>(screenHeight()) / 2.0f,
-        static_cast<float>(screenWidth()),
-        static_cast<float>(screenHeight()));
-        m_current_camera = m_default_camera;*/
-
-      return true;
+      m_pos.start();
+      m_tex.start();
     }
-  catch (simtadyn::Exception e)
-    {
-      LOGES("%s", e.message().c_str());
-      return false;
-    }
+    m_vao.stop();
+  }
+  m_shader.stop();
+
+  // Camera
+  /*m_default_camera.lookAt(static_cast<float>(screenWidth()) / 2.0f,
+    static_cast<float>(screenHeight()) / 2.0f,
+    static_cast<float>(screenWidth()),
+    static_cast<float>(screenHeight()));
+    m_current_camera = m_default_camera;*/
+
+  return true;
 }
 
 void GLRenderer::clearScreen() const

@@ -1,19 +1,22 @@
+//=====================================================================
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
 // SPDX-License-Identifier:     BSL-1.0
 //
-// NOTE: This file has been adapted for the SimTaDyn project.
-// For more informations, see official Poco webpage: https://pocoproject.org/index.html
-
+//=====================================================================
+// Inspired by the POCO project, adapted for the SimTaDyn project.
+// The original POCO code source:
+//   https://github.com/pocoproject/poco
+// For more informations, see the official website:
+//   https://pocoproject.org/index.html
+//=====================================================================
 
 #ifndef EXCEPTION_HPP_
-#define EXCEPTION_HPP_
+#  define EXCEPTION_HPP_
 
-#include <string>
-#include <typeinfo>
-
-namespace simtadyn {
+#  include <string>
+#  include <typeinfo>
 
 class Exception: public std::exception
 /// This is the base class for all exceptions defined
@@ -126,27 +129,27 @@ inline int Exception::code() const
 // pointers (which we need for specifying the exception name)
 // are not allowed as template arguments.
 //
-#define POCO_DECLARE_EXCEPTION_CODE(/*API,*/ CLS, BASE, CODE)           \
+#define DECLARE_EXCEPTION_CODE(/*API,*/ CLS, BASE, CODE)                \
   class /*API*/ CLS: public BASE                                        \
   {                                                                     \
   public:                                                               \
     CLS(int code = CODE);                                               \
     CLS(const std::string& msg, int code = CODE);                       \
     CLS(const std::string& msg, const std::string& arg, int code = CODE); \
-    CLS(const std::string& msg, const simtadyn::Exception& exc, int code = CODE); \
+    CLS(const std::string& msg, const Exception& exc, int code = CODE); \
     CLS(const CLS& exc);                                                \
     ~CLS() throw();                                                     \
     CLS& operator = (const CLS& exc);                                   \
     const char* name() const throw();                                   \
     const char* className() const throw();                              \
-    simtadyn::Exception* clone() const;                                 \
+    Exception* clone() const;                                           \
     void rethrow() const;                                               \
   };
 
-#define POCO_DECLARE_EXCEPTION(/*API,*/ CLS, BASE)                      \
-  POCO_DECLARE_EXCEPTION_CODE(/*API,*/ CLS, BASE, 0)
+#define DECLARE_EXCEPTION(/*API,*/ CLS, BASE)                           \
+  DECLARE_EXCEPTION_CODE(/*API,*/ CLS, BASE, 0)
 
-#define POCO_IMPLEMENT_EXCEPTION(CLS, BASE, NAME)                       \
+#define IMPLEMENT_EXCEPTION(CLS, BASE, NAME)                            \
   CLS::CLS(int code): BASE(code)                                        \
   {                                                                     \
   }                                                                     \
@@ -158,7 +161,7 @@ inline int Exception::code() const
     : BASE(msg, arg, code)                                              \
   {                                                                     \
   }                                                                     \
-  CLS::CLS(const std::string& msg, const simtadyn::Exception& exc, int code)\
+  CLS::CLS(const std::string& msg, const Exception& exc, int code)      \
     : BASE(msg, exc, code)                                              \
   {                                                                     \
   }                                                                     \
@@ -181,7 +184,7 @@ inline int Exception::code() const
   {                                                                     \
     return typeid(*this).name();                                        \
   }                                                                     \
-  simtadyn::Exception* CLS::clone() const                               \
+  Exception* CLS::clone() const                                         \
   {                                                                     \
     return new CLS(*this);                                              \
   }                                                                     \
@@ -189,7 +192,5 @@ inline int Exception::code() const
   {                                                                     \
     throw *this;                                                        \
   }
-
-} // namespace simtadyn
 
 #endif // EXCEPTION_HPP_

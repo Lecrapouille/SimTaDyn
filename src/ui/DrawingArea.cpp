@@ -68,8 +68,17 @@ void GLDrawingArea::onRealize()
   Gtk::GLArea::make_current();
   SimTaDyn::glStartContext();
   Gtk::GLArea::throw_if_error();
-  m_success_init = GLRenderer::setupGraphics();
-  if (!m_success_init)
+  try
+    {
+      m_success_init = GLRenderer::setupGraphics();
+    }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the realize callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+      m_success_init = false;
+    }
+  if (false == m_success_init)
     {
       LOGES("During the setup of SimTaDyn graphic renderer");
     }
@@ -87,6 +96,11 @@ void GLDrawingArea::onUnrealize()
       std::cerr << "[FAILED] An error occured making the context current during unrealize" << std::endl;
       std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
     }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+    }
 }
 
 bool GLDrawingArea::onRender()
@@ -99,8 +113,6 @@ bool GLDrawingArea::onRender()
         {
           GLRenderer::draw();
         }
-
-      return true;
     }
   catch (const Gdk::GLError& gle)
     {
@@ -108,4 +120,12 @@ bool GLDrawingArea::onRender()
       std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
       return false;
     }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+      return false;
+    }
+
+  return true;
 }

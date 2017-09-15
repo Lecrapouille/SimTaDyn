@@ -22,17 +22,11 @@
 #ifndef ILOADER_HPP_
 #  define ILOADER_HPP_
 
-#  include "Exception.hpp"
+#  include "LoaderException.hpp"
 #  include "Logger.hpp"
 #  include <memory>
 #  include <map>
 #  include <vector>
-
-// ***********************************************************************************************
-//! \brief This macro (from the library POCO) will declare a class
-//! LoaderException derived from simtadyn::Exception.
-POCO_DECLARE_EXCEPTION(LoaderException, simtadyn::Exception)
-// ***********************************************************************************************
 
 // ***********************************************************************************************
 //! \brief Define callbacks on loader events

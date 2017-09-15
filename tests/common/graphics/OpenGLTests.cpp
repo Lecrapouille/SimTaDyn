@@ -113,7 +113,7 @@ public:
     vao.stop();
 
     // Start attrib
-    CPPUNIT_ASSERT_THROW(attrib.start(), GLObjectExceptionNoShader);
+    CPPUNIT_ASSERT_THROW(attrib.start(), OpenGLException);
     CPPUNIT_ASSERT_EQUAL(true, attrib.m_need_setup);
     CPPUNIT_ASSERT_EQUAL(true, attrib.m_need_update);
     CPPUNIT_ASSERT_EQUAL(false, attrib.m_need_create);
