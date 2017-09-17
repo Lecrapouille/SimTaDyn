@@ -42,7 +42,9 @@ VPATH=.:$(BUILD):..:../geometry:../..:../../../maths:../../../utils:../../../pat
 #  List of files to compile. Splited by directories
 OBJ_TOOL     = backward.o
 OBJ_UTILS    = Exception.o PendingData.o ILogger.o Logger.o
-OBJ_OPENGL   = OpenGL.o GLObject.o GLShader.o GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
+OBJ_OPENGL   = OpenGLException.o OpenGL.o GLObject.o GLShader.o         \
+               GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o \
+               GLWindow.o
 OBJ          = $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) \
                Example01.o Example02.o Example03.o Example04.o Example05.o main.o
 

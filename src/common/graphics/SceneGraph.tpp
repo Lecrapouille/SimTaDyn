@@ -35,8 +35,9 @@
 //! an 3D entity (Mesh class) that can be drawn (Drawable) while it's
 //! not mandatory (in this case the node is used for transforming children).
 // *************************************************************************************************
-template <typename T, uint32_t n>
-class SceneNode: public Movable<T, n>
+template <typename Mesh, typename Type, uint32_t dim>
+class SceneNode
+  : public Movable<Type, dim>
 {
 public:
 
@@ -122,7 +123,7 @@ public:
 
   //! \brief Return the world transform matrix.
   //! \note the local transform matrix is given by Movable::transform().
-  inline Matrix<T, n + 1U, n + 1U> const& worldTransform() const
+  inline Matrix<Type, dim + 1U, dim + 1U> const& worldTransform() const
   {
     return m_world_transform;
   }
@@ -137,13 +138,13 @@ public:
     if (nullptr != m_parent)
       {
         // This  node  has a parent
-        m_world_transform = Movable<T,n>::transform()
+        m_world_transform = Movable<Type, dim>::transform()
           * m_parent->m_world_transform;
       }
     else
       {
         // Root node, world transform is local transform
-        m_world_transform = Movable<T,n>::transform();
+        m_world_transform = Movable<Type, dim>::transform();
       }
 
     // Update all children
@@ -157,13 +158,13 @@ public:
   //! will not impact children (they will not be scaled).
   //! \note for scaling children use methods Movable::scale or
   //! Movable::scaleFactor.
-  inline void localScale(Vector<T, n> const &scale)
+  inline void localScale(Vector<Type, dim> const &scale)
   {
     m_local_scaling = scale;
   }
 
   //! \brief Get the local scaling.
-  inline Vector<T, n> const &localScale() const
+  inline Vector<Type, dim> const &localScale() const
   {
     return m_local_scaling;
   }
@@ -181,28 +182,28 @@ public:
       }
   }
 
-  inline std::vector<SceneNode<T,n>*> const &children() const
+  inline std::vector<SceneNode<Mesh, Type, dim>*> const &children() const
   {
     return m_children;
   }
 
 
   //! \brief Give a name to the node.
-  std::string                  m_name;
+  std::string                        m_name;
 
 protected:
 
   //! \brief holds a 3D entity. If no entity has to be hold set it to nullptr.
-  Mesh                        *m_mesh;
+  Mesh                              *m_mesh;
   //! \brief Pointer on the parent : nullptr for the root, for children it's never nullptr.
-  SceneNode                   *m_parent;
+  SceneNode                         *m_parent;
   //! \brief World transformation matrix. Stored faor avoiding to compute it every times when
   //! traversing the scene graph.
-  Matrix<T, n + 1U, n + 1U>    m_world_transform;
+  Matrix<Type, dim + 1U, dim + 1U>   m_world_transform;
   //! List of SceneNode as children. Pointers are never nullptr.
-  std::vector<SceneNode<T,n>*> m_children;
+  std::vector<SceneNode<Mesh, Type, dim>*> m_children;
   //! Scale factors for the current 3D entity
-  Vector<T, n>                 m_local_scaling;
+  Vector<Type, dim>                  m_local_scaling;
 };
 
 // *************************************************************************************************
@@ -220,7 +221,7 @@ protected:
 //!
 //! This class only manage the root of the scene graph.
 // *************************************************************************************************
-template <typename T, uint32_t n>
+template <typename Type, uint32_t dim>
 class SceneGraph
 {
 public:
@@ -236,12 +237,12 @@ public:
       delete m_root;
   }
 
-  inline SceneNode<T, n> *root()
+  inline SceneNode<Mesh, Type, dim> *root()
   {
     return m_root;
   }
 
-  inline void root(SceneNode<T, n> *node)
+  inline void root(SceneNode<Mesh, Type, dim> *node)
   {
     if (nullptr != m_root)
       delete m_root;
@@ -250,7 +251,7 @@ public:
 
 private:
 
-  SceneNode<T, n> *m_root;
+  SceneNode<Mesh, Type, dim> *m_root;
 };
 
 #endif /* SCENEGRAPH_TPP_ */
