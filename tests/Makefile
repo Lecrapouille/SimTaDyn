@@ -90,9 +90,6 @@ OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
 ###################################################
 # Compilation options. For knowing which libraries
 # is needed please read the doc/Install.md file.
-ifneq ($(MY_CXX),)
-CXX = $(MY_CXX)
-endif
 CXXFLAGS = -W -Wall -Wextra -O2 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES = $(SIMTADYN_DEFINES)
