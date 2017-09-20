@@ -78,13 +78,15 @@ void FileTests::testfiles()
   CPPUNIT_ASSERT(true == File::isReadable("/tmp"));
   CPPUNIT_ASSERT(true == File::isWritable("/tmp"));
 
-  CPPUNIT_ASSERT(File::Directory == File::type("/usr/sbin/"));
-  CPPUNIT_ASSERT(true == File::isReadable("/usr/sbin/"));
-  CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/"));
-
-  CPPUNIT_ASSERT(File::DoesNotExist == File::type("/usr/sbin/ls"));
-  CPPUNIT_ASSERT(false == File::isReadable("/usr/sbin/ls"));
-  CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/ls"));
+  if (File::exist("/usr/sbin/")) // FIXME: does not exist on Travis-CI docker
+    {
+      CPPUNIT_ASSERT(File::Directory == File::type("/usr/sbin/"));
+      CPPUNIT_ASSERT(true == File::isReadable("/usr/sbin/"));
+      CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/"));
+    }
+  CPPUNIT_ASSERT(File::DoesNotExist == File::type("/usr/sbin/foobar"));
+  CPPUNIT_ASSERT(false == File::isReadable("/usr/sbin/foobar"));
+  CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/foobar"));
 
   CPPUNIT_ASSERT(File::Document == File::type("/bin/ls"));
   CPPUNIT_ASSERT(true == File::isReadable("/bin/ls"));

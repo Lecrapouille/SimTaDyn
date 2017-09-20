@@ -221,7 +221,7 @@ protected:
 //!
 //! This class only manage the root of the scene graph.
 // *************************************************************************************************
-template <typename Type, uint32_t dim>
+template <typename Mesh, typename Type, uint32_t dim>
 class SceneGraph
 {
 public:

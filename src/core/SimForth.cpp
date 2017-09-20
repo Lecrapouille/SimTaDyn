@@ -40,9 +40,16 @@ void SimForth::boot()
 
 bool SimForth::isACell(std::string const& word, Cell32& number)
 {
+  // FIXME QQQQQQQQQQQ
+  return false;
+
   // Map exists ?
-  SimTaDynMap *map = MapEditor::instance().map();
+  SimTaDynMap *map = MapEditor::instance().map(); // A decoupler par un observer
   if (nullptr == map)
+    return false;
+
+  SimTaDynGraph *graph = map->graph();
+  if (nullptr == graph)
     return false;
 
   // Forth word starting by A# or N# or Z#
@@ -74,9 +81,10 @@ bool SimForth::isACell(std::string const& word, Cell32& number)
     {
       // Node
     case 'N':
-      if (!map->m_graph.hasNode(id))
+
+      if (!graph->hasNode(id))
         return false;
-      number = map->m_graph.getNode(id).m_cost;
+      number = graph->getNode(id).m_cost;
       break;
 
       // Not a SimTaDyn cell

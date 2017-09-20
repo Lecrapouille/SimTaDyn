@@ -18,16 +18,31 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNLOADERS_HPP_
-#  define SIMTADYNLOADERS_HPP_
+#ifndef SIMTADYNFILELOADERTESTS_HPP_
+#  define SIMTADYNFILELOADERTESTS_HPP_
 
-#  include "ShapeFileLoader.hpp"
-#  include "SimTaDynFileLoader.hpp"
+#  include <cppunit/TestFixture.h>
+#  include <cppunit/TestResult.h>
+#  include <cppunit/extensions/HelperMacros.h>
 
-#  include "Utilities/GenHierarchies.h"
+#  define protected public
+#  define private public
+#  include "SimTaDynLoaders.hpp"
+#  undef protected
+#  undef private
 
-typedef TYPELIST_2(SimTaDynGraph, SimTaDynMap) ResourceList;
+class LoaderTests : public CppUnit::TestFixture
+{
+  // CppUnit macros for setting up the test suite
+  CPPUNIT_TEST_SUITE(LoaderTests);
+  CPPUNIT_TEST(testSimTaDyn);
+  CPPUNIT_TEST_SUITE_END();
 
-#  include "LoaderManager.tpp"
+public:
+  void setUp();
+  void tearDown();
 
-#endif
+  void testSimTaDyn();
+};
+
+#endif /* SIMTADYNFILELOADERTESTS_HPP_ */

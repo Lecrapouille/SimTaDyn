@@ -229,7 +229,7 @@ void ShapefileLoader::getBoundingBox(AABB3f& bbox)
   bbox.m_bbmax.z = readDoubleCastedFloat();
 }
 
-uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
+uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offset)
 {
   uint32_t record_number, content_length, shape_type;
 
@@ -248,13 +248,13 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
       m_point.x = readDoubleCastedFloat();
       m_point.y = readDoubleCastedFloat();
       m_point.z = 0.0f;
-      map.addNode(m_point);
+      graph.addNode(m_point);
       break;
     case 11: // PointZ
       m_point.x = readDoubleCastedFloat();
       m_point.y = readDoubleCastedFloat();
       m_point.z = readDoubleCastedFloat();
-      map.addNode(m_point);
+      graph.addNode(m_point);
       break;
     default:
       std::cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << std::endl;
@@ -264,7 +264,7 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynMap& map, const uint32_t offset)
   return content_length + 8U; // 8U: record header
 }
 
-void ShapefileLoader::getAllRecords(SimTaDynMap& map)
+void ShapefileLoader::getAllRecords(SimTaDynGraph& graph)
 {
   uint32_t content_length;
   uint32_t offset = 100U;
@@ -274,17 +274,17 @@ void ShapefileLoader::getAllRecords(SimTaDynMap& map)
       if (m_infile.eof())
         break;
 
-      content_length = getRecordAt(map, offset);
+      content_length = getRecordAt(graph, offset);
       offset += content_length;
     }
 }
 
-void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynMap* &current_map)
+void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynGraph* &current_graph)
 {
-  bool dummy_map = (nullptr == current_map);
+  bool dummy_map = (nullptr == current_graph);
 
   LOGI("Loading the shapefile '%s' in an %s",
-       filename.c_str(), (dummy_map ? "dummy map" : "already opened map"));
+       filename.c_str(), (dummy_map ? "dummy graph" : "already opened graph"));
 
   try
     {
@@ -301,27 +301,27 @@ void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynMap* &cu
       LOGI("Shapefile Type: %u: %s", value32b, shapeTypes(value32b).c_str());
 
       std::string shortname = File::fileName(filename);
-      SimTaDynMap *map = new SimTaDynMap(shortname);
+      SimTaDynGraph *graph = new SimTaDynGraph(shortname);
 
-      getBoundingBox(map->m_bbox);
-      // FIXME CPP_LOG(logger::Info) << "Map Bounding Box: " << map->m_bbox << std::endl;
+      getBoundingBox(graph->m_bbox);
+      // FIXME CPP_LOG(logger::Info) << "Map Bounding Box: " << graph->m_bbox << std::endl;
 
-      getAllRecords(*map);
+      getAllRecords(*graph);
       m_infile.close();
 
       if (dummy_map)
         {
-          current_map = map;
+          current_graph = graph;
         }
       else
         {
-          // Concat the old map with the new one: elements, name and bounding box
-          current_map += *map;
-          current_map->m_bbox = merge(current_map->m_bbox, map->m_bbox); // TODO a mettre dans le code de +=
+          // Concat the old graph with the new one: elements, name and bounding box
+          current_graph += *graph;
+          current_graph->m_bbox = merge(current_graph->m_bbox, graph->m_bbox); // TODO a mettre dans le code de +=
 
-          if (map->m_name != "") // TODO a mettre dans le code de += avec option
-            map->m_name += "_";
-          map->m_name += shortname;
+          if (graph->m_name != "") // TODO a mettre dans le code de += avec option
+            graph->m_name += "_";
+          graph->m_name += shortname;
         }
     }
   catch (std::exception const &e)

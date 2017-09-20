@@ -20,6 +20,7 @@
 
 #include "SimTaDynFileLoader.hpp"
 #include "File.hpp"
+#include "SimForth.hpp"
 #include "zipper/unzipper.h"
 #include "zipper/zipper.h"
 #include <cstdio>
@@ -40,41 +41,54 @@ std::string SimTaDynFileLoader::generateTempDirName() const
 }
 
 // FIXME password
-bool SimTaDynFileLoader::unzip(std::string const &zip_file)
+void SimTaDynFileLoader::unzip(std::string const &zip_file)
 {
-  zipper::Unzipper unzipper(zip_file);
+  std::string msg;
 
   m_base_dir = generateTempDirName();
-  if (false == File::mkdir(m_base_dir))
+  if (File::mkdir(m_base_dir))
     {
-      LOGE("Failed unzipping '%s' could not create the temporary dir", m_base_dir.c_str());
-      return false;
+      try
+        {
+          zipper::Unzipper unzipper(zip_file);
+          if (false == unzipper.extract(m_base_dir))
+            {
+              msg = "Failed unzipping '" + zip_file
+                + "': could not extract '"
+                + m_base_dir + "' from the tarball";
+            }
+        }
+      catch (std::exception const&)
+        {
+          msg = "Failed unzipping '" + zip_file
+            + "': could not locate this file";
+        }
     }
-  if (false == unzipper.extract(m_base_dir))
+  else
     {
-      LOGE("Failed unzipping '%s' could not create the temporary dir", m_base_dir.c_str());
-      return false;
+      msg = "Failed unzipping '" + zip_file
+        + "': could not create the temporary folder '"
+        + m_base_dir + "'";
     }
 
-  return true;
+  if (!msg.empty())
+    {
+      LoaderException e(msg);
+      throw e;
+    }
 }
 
-void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynFile* &current_project)
+void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap* &current_project)
 {
   bool dummy_project = (nullptr == current_project);
 
-  LOGI("Loading the SimTaDynFile '%s' in an %s",
+  LOGI("Loading the SimTaDynMap '%s' in an %s",
        filename.c_str(), (dummy_project ? "dummy map" : "already opened map"));
 
-  if (false == unzip(filename))
-    {
-      LoaderException e("Failed unzipping file '" + filename + "'");
-      throw e;
-    }
-
+  unzip(filename);
   if (dummy_project)
     {
-      current_project = new SimTaDynFile();
+      current_project = new SimTaDynMap();
     }
   current_project->m_name = File::baseName(filename);
   current_project->m_zip_path = filename;
@@ -91,30 +105,33 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynFile*
       forth.backup(restore);
     }
   */
+  SimForth &forth = SimForth::instance();
+  auto res = forth.interpreteFile(current_project->m_full_path + "/Index.fth");
+  forth.ok(res);
 }
 
 // FIXME password
-bool SimTaDynFileLoader::zip(SimTaDynFile const& project, std::string const& filename)
+bool SimTaDynFileLoader::zip(SimTaDynMap const& map, std::string const& filename)
 {
-  if (filename == project.m_zip_path)
+  if (filename == map.m_zip_path)
     {
       // FIXME pas le plus safe si zipper.add echoue
       std::remove(filename.c_str());
     }
 
   zipper::Zipper zipper(filename);
-  bool ret = zipper.add(project.m_full_path);
+  bool ret = zipper.add(map.m_full_path);
   if (false == ret)
     {
-      LOGE("Failed zipping the dir '%s'", project.m_full_path.c_str());
+      LOGE("Failed zipping the dir '%s'", map.m_full_path.c_str());
     }
 
   return ret;
 }
 
-void SimTaDynFileLoader::saveToFile(SimTaDynFile const& project, std::string const& filename)
+void SimTaDynFileLoader::saveToFile(SimTaDynMap const& map, std::string const& filename)
 {
-  if (false == zip(project, filename))
+  if (false == zip(map, filename))
     {
       LoaderException e("Failed zipping file '" + filename + "'");
       throw e;

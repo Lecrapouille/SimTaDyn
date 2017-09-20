@@ -35,6 +35,7 @@
 #include "OpenGLTests.hpp"
 #include "FilteringTests.hpp"
 #include "ResourcesTests.hpp"
+#include "SimTaDynFileLoaderTests.hpp"
 #include <cppunit/ui/text/TestRunner.h>
 
 //--------------------------------------------------------------------------
@@ -181,15 +182,28 @@ static void testResourceManager(CppUnit::TextUi::TestRunner& runner)
   runner.addTest(suite);
 }
 
+//--------------------------------------------------------------------------
+static void testLoader(CppUnit::TextUi::TestRunner& runner)
+{
+  CppUnit::TestSuite* suite;
+
+  suite = new CppUnit::TestSuite("LoaderTests");
+  suite->addTest(new CppUnit::TestCaller<LoaderTests>("Loader", &LoaderTests::testSimTaDyn));
+  runner.addTest(suite);
+}
+
+//--------------------------------------------------------------------------
 static bool run_tests(bool const has_xdisplay)
 {
   CppUnit::TextUi::TestRunner runner;
 
   testUtils(runner);
   testResourceManager(runner);
+  testLoader(runner);
   testMath(runner);
   testContainer(runner);
   testGraph(runner);
+  testLoader(runner);
 
   // Travis-CI does not support export display
   if (has_xdisplay)

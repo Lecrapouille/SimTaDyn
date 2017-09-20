@@ -55,6 +55,12 @@ public:
     split(path);
   }
 
+  void clear()
+  {
+    m_paths.clear();
+    m_path.clear();
+  }
+
   void remove(std::string const& path)
   {
     m_paths.remove(path);
@@ -123,7 +129,7 @@ protected:
     update();
   }
 
-  char m_delimiter = ':';
+  const char m_delimiter = ':';
   std::list<std::string> m_paths;
   std::string m_path;
 };

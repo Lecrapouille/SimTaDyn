@@ -22,22 +22,22 @@
 #  define SIMTADYNFILELOADER_HPP_
 
 #  include "ILoader.hpp"
-#  include "SimTaDynFile.hpp"
+#  include "SimTaDynMap.hpp"
 
 // ***********************************************************************************************
 //! \brief
 // ***********************************************************************************************
-class SimTaDynFileLoader : public ILoader<SimTaDynFile>
+class SimTaDynFileLoader : public ILoader<SimTaDynMap>
 {
 public:
 
   SimTaDynFileLoader()
-    : ILoader<SimTaDynFile>("SimTaDynFile")
+    : ILoader<SimTaDynMap>("SimTaDynMap")
   {
-    LOGI("Creating a SimTaDynFile loader %p", this);
+    LOGI("Creating a SimTaDynMap loader %p", this);
   }
-  virtual void loadFromFile(std::string const& filename, SimTaDynFile* &project) override;
-  virtual void saveToFile(SimTaDynFile const& project, std::string const& filename) override;
+  virtual void loadFromFile(std::string const& filename, SimTaDynMap* &map) override;
+  virtual void saveToFile(SimTaDynMap const& map, std::string const& filename) override;
 
 protected:
 
@@ -46,8 +46,8 @@ protected:
   std::string generateTempDirName() const;
 
   //! \brief
-  bool unzip(std::string const &zip_file);
-  bool zip(SimTaDynFile const& project, std::string const& filename);
+  void unzip(std::string const &zip_file);
+  bool zip(SimTaDynMap const& map, std::string const& filename);
 
 private:
 

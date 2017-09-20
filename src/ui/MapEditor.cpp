@@ -322,7 +322,11 @@ bool MapEditor::exec() // FIXME: Exec(typeCell, nodeID)
   bool res;
 
   SimForth &forth = SimForth::instance();
-  SimTaDynNode& n1 = map()->m_graph.getNode(1); // FIXME far all cells + faire un ancetre commun aux cell pour eviter de faire un switch
+  SimTaDynGraph *graph = map()->graph();
+  if (nullptr == graph)
+    return false;
+
+  SimTaDynNode& n1 = graph->getNode(1); // FIXME far all cells + faire un ancetre commun aux cell pour eviter de faire un switch
   n1.forthWord("N#1 N#2 N#3 + +");
 
   // FIXME: should be called outside each cell: optimisation

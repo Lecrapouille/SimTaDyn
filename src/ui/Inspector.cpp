@@ -56,9 +56,12 @@ void Inspector::showCell(const Key nodeID)
   if (nullptr == map)
     return ;
 
-  if (!map->m_graph.hasNode(nodeID))
+  // FIXME: parcours du SceneGraph
+  SimTaDynGraph *graph = map->graph();
+  if ((nullptr == graph) || (!graph->hasNode(nodeID)))
     return ;
-  SimTaDynNode& node = map->m_graph.getNode(nodeID);
+
+  SimTaDynNode& node = graph->getNode(nodeID);
 
   m_ref_tree_model->clear();
 

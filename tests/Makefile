@@ -43,7 +43,8 @@ INCLUDES = -I$(BUILD) -I. -I../external/SOIL				\
 -I../src/common/graphics/OpenGL -I../src/common/graphics/RTree		\
 -I../src/common/graphics -Icommon/graphics/OpenGL			\
 -Icommon/graphics/RTree -Icommon/graphics -I../src/core			\
--I../src/core/loaders -I../src/forth -Iforth -I../src/ui
+-I../src/core/loaders -Icore/loaders -I../src/forth -Iforth		\
+-I../src/ui
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
@@ -56,7 +57,7 @@ VPATH=.:$(BUILD):../src:../src/common/patterns:\
 ../src/common/graphics/OpenGL:common/graphics/OpenGL:\
 ../src/common/graphics/RTree:common/graphics/RTree:\
 ../src/common/graphics:common/graphics:\
-../src/core:../src/core/loaders:\
+../src/core:../src/core/loaders:core/loaders:\
 ../src/forth:forth:\
 ../src/ui:\
 ../external/SOIL:../external/backward-cpp:../external/YesEngine
@@ -71,7 +72,7 @@ OBJ_MATHS_UT       = VectorTests.o MatrixTests.o TransformationTests.o
 OBJ_MATHS_UT      += BoundingBoxTests.o FilteringTests.o
 OBJ_CONTAINERS     = PendingData.o
 OBJ_CONTAINERS_UT  = SetTests.o CollectionTests.o
-OBJ_MANAGERS       = LoaderException.o
+OBJ_MANAGERS       =
 OBJ_MANAGERS_UT    = ResourcesTests.o
 OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
 OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
@@ -79,13 +80,18 @@ OBJ_OPENGL         = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GL
 OBJ_OPENGL        += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o Renderer.o
 OBJ_OPENGL_UT      = ColorTests.o GLBufferTests.o OpenGLTests.o
 OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJ_LOADERS        =
+OBJ_CORE           = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
+OBJ_LOADERS        = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoader.o
+OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
+OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
+OBJ_GUI           += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_UNIT_TEST      = main.o
 OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
       $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)		\
       $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)			\
       $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH)	\
-      $(OBJ_LOADERS) $(OBJ_UNIT_TEST)
+      $(OBJ_CORE) $(OBJ_LOADERS) $(OBJ_LOADERS_UT) $(OBJ_GUI)		\
+      $(OBJ_UNIT_TEST)
 
 ###################################################
 # Compilation options. For knowing which libraries
@@ -143,7 +149,7 @@ $(TARGET): $(OBJ)
 .PHONY: coverage
 coverage: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	./build/$(TARGET)
+	@./build/$(TARGET) || echo ""
 	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
 	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)
