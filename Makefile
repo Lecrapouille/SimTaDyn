@@ -28,12 +28,12 @@ TARGET = SimTaDyn
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/SOIL	   \
--Iexternal/YesEngine -Iexternal/zipper -Isrc -Isrc/common/patterns \
--Isrc/common/managers -Isrc/common/utils -Isrc/common/maths	   \
--Isrc/common/containers -Isrc/common/graph-theory		   \
--Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree	   \
--Isrc/common/graphics -Isrc/core -Isrc/core/loaders -Isrc/forth	   \
+INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/SOIL		\
+-Iexternal/YesEngine -Iexternal/zipper -Isrc -Isrc/common/patterns	\
+-Isrc/common/managers -Isrc/common/utils -Isrc/common/maths		\
+-Isrc/common/containers -Isrc/common/graph-theory			\
+-Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree		\
+-Isrc/common/graphics -Isrc/core -Isrc/core/loaders -Isrc/forth		\
 -Isrc/ui
 
 ###################################################
@@ -67,7 +67,7 @@ OBJ_OPENGL     = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShad
 OBJ_OPENGL    += GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o SimTaDynFile.o
+OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
 OBJ_LOADERS    = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoader.o
 # SimTaDynFile.o
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o

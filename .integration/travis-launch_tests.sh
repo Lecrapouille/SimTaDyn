@@ -12,3 +12,8 @@ make clone || exit 1
 
 # Build SimTaDyn executable.
 make -j4 || exit 1
+
+# Build standalone Forth.
+# FIXME: launch Forth unit tests when they will be done:
+# && ./build/SimForth -f ../core/system.fs -f../core/tester.fs
+(cd src/forth/standalone && make -j4) || exit 1
