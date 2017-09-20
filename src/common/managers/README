@@ -1,6 +1,0 @@
-Manage resources and their loaders.
-
-A resource is data stored in a file (picture file, proprietary file, ...).
-A resource manager take care of who is acquiring and disposing of resources.
-A loader is a class saving and loading a resource.
-A loader manager is a class which take care of calling the correct loader for the resource.
