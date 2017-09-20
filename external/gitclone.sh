@@ -1,6 +1,11 @@
 #!/bin/bash
 
-# Given by Makefile
+### This script will git clone some libraries that SimTaDyn needs and
+### compile them. To avoid pollution, they are not installed into your
+### environement. Therefore SimTaDyn Makefiles have to know where to
+### find their files (includes and static/shared libraries).
+
+### $1 is given by ../Makefile and refers to the current architecture.
 if [ "$1" == "" ]; then
   echo "Expected one argument: arhitecture"
   exit 1
@@ -8,6 +13,8 @@ fi
 ARCHI="$1"
 TARGET=SimTaDyn
 
+### Delete all previous directories to be sure to have and compile
+### fresh code source.
 rm -fr backward-cpp zipper SOIL 2> /dev/null
 
 function print-clone
@@ -20,46 +27,46 @@ function print-compile
     echo -e "\033[35m*** Compiling:\033[00m \033[36m$TARGET\033[00m <= \033[33m$1\033[00m"
 }
 
-# Clone Backward tool: A beautiful stack trace pretty printer for C++.
-# License: MIT
+### Clone Backward tool: A beautiful stack trace pretty printer for C++. No installation
+### is needed but some libraries are needed (libdw-dev, binutils-dev, ...).
+### License: MIT
 print-clone backward-cpp
 git clone https://github.com/bombela/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
 
+### Library for opening pictures files (jpeg, png ...)
 print-clone SOIL
 if [ "$ARCHI" == "Darwin" ]; then
 
-    # https://github.com/childhood/libSOIL
     # License: public domain
     git clone https://github.com/childhood/libSOIL.git --depth=1 > /dev/null 2> /dev/null
     if [ "$?" == "0" ];
     then
-	print-compile SOIL
-	mv libSOIL SOIL
-	cd SOIL
-	make -j4
-	cd ..
+        print-compile SOIL
+        mv libSOIL SOIL
+        cd SOIL
+        (make -j4) > /dev/null 2> /dev/null
+        cd ..
     fi
- 
+
 else
 
-    # https://github.com/kbranigan/Simple-OpenGL-Image-Library
     # License: public domain
     git clone https://github.com/kbranigan/Simple-OpenGL-Image-Library.git --depth=1 > /dev/null 2> /dev/null
     if [ "$?" == "0" ];
     then
-	print-compile SOIL
-	mv Simple-OpenGL-Image-Library SOIL
-	cd SOIL
-	make -j4
-	# Move header and static lib in the same location to be indentical than SOIL for Darwin
-	cp src/SOIL.h .
-	cp lib/libSOIL.a .
-	cd ..
+        print-compile SOIL
+        mv Simple-OpenGL-Image-Library SOIL
+        cd SOIL
+        (make -j4) > /dev/null 2> /dev/null
+        # Move header and static lib in the same location to be indentical than SOIL for Darwin
+        cp src/SOIL.h .
+        cp lib/libSOIL.a .
+        cd ..
     fi
 fi
 
-# https://github.com/sebastiandev/zipper
-# License: MIT
+### Library for manipulating zip files.
+### License: MIT
 print-clone zipper
 git clone --recursive https://github.com/sebastiandev/zipper.git --depth=1 > /dev/null 2> /dev/null
 if [ "$?" == "0" ]; then
@@ -67,12 +74,12 @@ if [ "$?" == "0" ]; then
     mkdir -p zipper/build
     cd zipper/build
     if [ "$ARCHI" == "Windows" ]; then
-	export ZLIBROOT="/mingw64"
-	export LIBZ_LIBRARY="/mingw64/lib"
-	cmake -DLIBZ_LIBRARY="/mingw64/lib" ..
+        export ZLIBROOT="/mingw64"
+        export LIBZ_LIBRARY="/mingw64/lib"
+        cmake -DLIBZ_LIBRARY="/mingw64/lib" ..
     else
-	cmake .. 
-    fi 
-    make
+        (cmake ..) > /dev/null 2> /dev/null
+    fi
+    (make -j4) > /dev/null 2> /dev/null
     cd ../..
 fi
