@@ -129,6 +129,14 @@ public:
   {
   }
 
+  virtual ~GLTexture2D()
+  {
+    if (nullptr != m_buffer)
+      {
+        SOIL_free_image_data(m_buffer);
+      }
+  }
+
   inline bool load(std::string const& filename, const bool rename = false)
   {
     return load(filename.c_str(), rename);

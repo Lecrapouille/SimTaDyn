@@ -96,7 +96,7 @@ LIBS = $(abspath $(PWD)/external/SOIL/libSOIL.a) $(abspath $(PWD)/external/zippe
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
+LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
 
 ## Linux
 else ifeq ($(ARCHI),Linux)
@@ -110,6 +110,15 @@ else
 
 #$(error Unknown architecture)
 endif
+
+###################################################
+# Address sanitizer. Uncomment these lines if asan
+# is desired.
+##OPTIM = -O1 -g
+##CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+##LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+##LIBS += -static-libstdc++ -static-libasan
+##SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
 
 ###################################################
 all: $(TARGET)
@@ -154,6 +163,12 @@ coverity-scan: clean $(TARGET)
 unit-tests:
 	@$(call print-simple,"Compiling unit tests")
 	@make -C tests coverage
+
+###################################################
+# Run and call address sanitizer (if enabled)
+.PHONY: run
+run: $(TARGET)
+	$(SANITIZER) ./build/$(TARGET) 2>&1 | ./external/asan_symbolize.py
 
 ###################################################
 # Generate the code source documentation with doxygen.
@@ -222,3 +237,4 @@ version.h: VERSION
 ###################################################
 # Sharable informations between all Makefiles
 -include .makefile/Makefile.footer
+

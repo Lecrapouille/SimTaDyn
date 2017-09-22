@@ -219,7 +219,7 @@ public:
   //! \param nth the nth element of the list of neighbor.
   inline void removeNthNeighbor(const uint32_t nth)
   {
-    LOGIS("Node ID %u: Remove its %u'nth ID neighbor\n", nth);
+    LOGIS("Node ID %u: Remove its %u'nth ID neighbor\n", m_id, nth);
     if (nth < m_arcs.size())
       {
         remove(m_arcs.begin() + nth);

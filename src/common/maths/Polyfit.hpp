@@ -33,8 +33,10 @@ public:
 
   //! \brief Constructor and define the order of the polynom
   PolyFit()
+    : m_iteration(0U),
+      m_Xsquared(0.0),
+      m_b(0.0)
   {
-    reset();
   }
 
   inline uint32_t size() const

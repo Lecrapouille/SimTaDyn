@@ -203,7 +203,6 @@ static bool run_tests(bool const has_xdisplay)
   testMath(runner);
   testContainer(runner);
   testGraph(runner);
-  testLoader(runner);
 
   // Travis-CI does not support export display
   if (has_xdisplay)

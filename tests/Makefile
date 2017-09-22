@@ -34,7 +34,7 @@ RAPPORT = build/rapport.info
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -I. -I../external/SOIL				\
+INCLUDES = -I$(BUILD) -I. -I../external/SOIL -I../external/zipper	\
 -I../external/backward-cpp -I../external/YesEngine -I../src		\
 -I../src/common/patterns -I../src/common/managers -Icommon/managers	\
 -I../src/common/utils -Icommon/utils -I../src/common/maths		\
@@ -96,7 +96,8 @@ OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
 ###################################################
 # Compilation options. For knowing which libraries
 # is needed please read the doc/Install.md file.
-CXXFLAGS = -W -Wall -Wextra -O2 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+OPTIM = -O2
+CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 DEFINES = $(SIMTADYN_DEFINES)
 
@@ -112,12 +113,10 @@ LIBS = $(abspath $(PWD)/../external/SOIL/libSOIL.a) $(abspath $(PWD)/../external
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
+LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
 
 ## Linux
 else ifeq ($(ARCHI),Linux)
-CXXFLAGS += --coverage
-LDFLAGS += --coverage
 LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0		\
 -lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
@@ -126,6 +125,35 @@ LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
 ## Windows
 else
 #$(error Unknown architecture)
+endif
+
+# if inside Docker with Travis-CI, OpenGL context cannot be created.
+# So disable some tests.
+ifeq ($(CI),true)
+TU_OPTIONS=-a
+endif
+
+###################################################
+# Code coverage. Comment these lines if coveraging
+# is not desired.
+CXXFLAGS += --coverage
+LDFLAGS += --coverage
+
+###################################################
+# Address sanitizer. Comment these lines if asan is
+# not desired.
+
+# FIXME: clang on Travis-CI bugs during linking (infinite loop).
+# FIXME: g++ on Tracis-CI I have a segfault and trace are not human
+# readable. Temporary disable asan with Travis
+
+# ifeq ($(CXX),g++)
+ifneq ($(CI),true)
+OPTIM = -O1 -g
+CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+LIBS += -static-libstdc++ -static-libasan
+SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
 endif
 
 ###################################################
@@ -141,15 +169,24 @@ $(TARGET): $(OBJ)
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile ../Makefile ../.makefile/Makefile.header ../.makefile/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
-# Generate the rapport of the code coverage
-.PHONY: coverage
-coverage: $(TARGET)
+# Run unit tests.
+.PHONY: unit-tests
+unit-tests: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	@./build/$(TARGET) || echo ""
+	$(SANITIZER) ./build/$(TARGET) $(TU_OPTIONS) || (cat SimTaDyn.log; return 1)
+
+###################################################
+# Generate the rapport of the code coverage.
+# Contrary to the unit-tests rule, if unit tests
+# failed, clear the $? to let lcov to be launched.
+.PHONY: coverage
+coverage: unit-tests
+	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
+	$(SANITIZER) ./build/$(TARGET) $(TU_OPTIONS) || cat SimTaDyn.log
 	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
 	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)

@@ -179,7 +179,22 @@ docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -
 
 This section is optional for users but can be useful for developers. Install the following packages:
 ```sh
-sudo apt-get update && apt-get install libcppunit-dev gcovr libglm-dev
+sudo apt-get update && apt-get install libcppunit-dev gcovr libglm-dev llvm-4.0-tools
+```
+
+Address Sanitizer (aka ASAN) displays the stack trace with addresses
+instead of file names and file lines. For human readable traces ASAN
+needs llvm-symbolizer. The drawback with llvm-symbolizer in Ubuntu
+does not create a symbolic link to the current version. Therefore
+you'll have to do by yourself. For example, in Ubuntu:
+```
+sudo ln -s /usr/bin/llvm-symbolizer-4.0 /usr/bin/llvm-symbolizer
+```
+Where `/usr/bin/` should be adapted to your environment and be set to your `PATH`. For example
+```
+echo $PATH
+export PATH=/usr/bin:$PATH
+echo $PATH
 ```
 
 And optionally, for generating some expected unit test results, install the Scilab fork: [ScicosLab](http://www.scicoslab.org/)

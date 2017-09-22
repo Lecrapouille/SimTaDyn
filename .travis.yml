@@ -19,11 +19,11 @@ before_install:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-install-linux.sh" ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.integration/travis-install-osx.sh ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$CXX" != "g++" ]]; then ./.integration/travis-install-osx.sh ; fi
 
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-launch_tests.sh" ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.integration/travis-launch_tests.sh ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$CXX" != "g++" ]]; then ./.integration/travis-launch_tests.sh ; fi
 
 after_success:
   - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CXX" == "g++" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-deploy.sh" ; fi

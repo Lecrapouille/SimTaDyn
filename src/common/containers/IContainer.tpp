@@ -170,6 +170,16 @@ public:
   //! type T.
   IContainer(const uint32_t reserve_elements = 1);
 
+  //! \brief Destructor. Release all created blocks.
+  ~IContainer()
+  {
+    for (auto block : m_blocks)
+      {
+        delete block;
+      }
+    m_blocks.clear();
+  }
+
   //! \brief Allocate a new block. Use virtual to allow inheritance
   //! of the class Block.
   inline virtual block_t *newBlock() const

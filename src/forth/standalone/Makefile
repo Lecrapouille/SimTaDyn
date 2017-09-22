@@ -52,8 +52,8 @@ OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE) mai
 ###################################################
 # Compilation options. For knowing which libraries
 # is needed please read the doc/Install.md file.
-CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11
-LDFLAGS = -ldl -ldw
+OPTIM = -O2
+CXXFLAGS = -W -Wall -Wextra -g -std=c++11
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
@@ -65,7 +65,19 @@ LIBS =
 ###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the doc/Install.md file.
+
+## OS X
+ifeq ($(ARCHI),Darwin)
 LIBS +=
+
+## Linux
+else ifeq ($(ARCHI),Linux)
+LIBS += -ldl -ldw
+
+## Windows
+else
+#$(error Unknown architecture)
+endif
 
 ###################################################
 # Code coverage. Uncomment if desired
@@ -85,7 +97,7 @@ $(TARGET): $(OBJ)
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile ../../../.makefile/Makefile.header ../../../.makefile/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
@@ -93,7 +105,7 @@ $(TARGET): $(OBJ)
 .PHONY: coverage
 coverage: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	@./build/$(TARGET) || echo ""
+	@./build/$(TARGET) || cat SimTaDyn.log
 	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
 	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)

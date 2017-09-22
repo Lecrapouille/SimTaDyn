@@ -535,8 +535,7 @@ namespace matrix
                        Matrix<T, rows, cols> &U,
                        Matrix<T, rows, cols> &P)
   {
-    uint32_t i, j, pivot, k;
-    double max;
+    uint32_t i, j;
 
     // Set matrices to 0
     L *= T(0);
@@ -547,8 +546,8 @@ namespace matrix
 
     for (i = 0; i < rows - 1; ++i)
       {
-        max = maths::abs(A[i][i]);
-        pivot = i;
+        double max = maths::abs(A[i][i]);
+        uint32_t pivot = i;
 
         for (j = i + 1U; j < rows; ++j)
           {
@@ -574,7 +573,7 @@ namespace matrix
             for (j = i + 1U; j < rows; ++j)
               {
                 A[j][i] = A[j][i] / A[i][i];
-                for (k = i + 1U; k < rows; ++k)
+                for (uint32_t k = i + 1U; k < rows; ++k)
                   {
                     A[j][k] = A[j][k] - A[j][i] * A[i][k];
                   }

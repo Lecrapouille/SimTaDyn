@@ -98,6 +98,9 @@ void ResourcesTests::testsResources()
   CPPUNIT_ASSERT_EQUAL(0U, rA1->owners());
   rA1->dispose();
   CPPUNIT_ASSERT_EQUAL(true, destroyedA);
+  destroyedA = false;
+  rA2->dispose();
+  CPPUNIT_ASSERT_EQUAL(true, destroyedA);
 
   // -- Resource B
 
@@ -119,6 +122,9 @@ void ResourcesTests::testsResources()
   rB1->dispose();
   CPPUNIT_ASSERT_EQUAL(0U, rB1->owners());
   rB1->dispose();
+  CPPUNIT_ASSERT_EQUAL(true, destroyedB);
+  destroyedB = false;
+  rB2->dispose();
   CPPUNIT_ASSERT_EQUAL(true, destroyedB);
 }
 
@@ -241,6 +247,8 @@ void ResourcesTests::testsLoaderManager()
   lm.loadFromFile("/tmp/toto.a", rA1);
   CPPUNIT_ASSERT_EQUAL(true, nullptr != rA1); // the file exists
   CPPUNIT_ASSERT_EQUAL(true, loadedA);
+  // FIXME: call ressourceManager.dispose();
+  delete rA1;
 
   std::cout << "4-----------------------------------------" << std::endl;
   ResourceB rB;
@@ -250,6 +258,8 @@ void ResourcesTests::testsLoaderManager()
   { std::fstream fs; fs.open("/tmp/tutu.bb", std::ios::out); fs.close(); } // create a file
   lm.loadFromFile("/tmp/tutu.bb", rB1);
   CPPUNIT_ASSERT_EQUAL(true, loadedB);
+  // FIXME: call ressourceManager.dispose();
+  delete rB1;
 
   CPPUNIT_ASSERT_THROW(lm.saveToFile(rB, "/home/toto.cc"), LoaderException);
   CPPUNIT_ASSERT_THROW(lm.saveToFile(rB, "/home/toto"), LoaderException);

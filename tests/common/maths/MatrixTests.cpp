@@ -417,10 +417,9 @@ void MatrixTests::testOperations()
       -0.8151346,  -0.3008722,    0.5816799,    1.0,
     };
 
-  Matrix44g LL, UU, P;
+  Matrix44g LL(11111.0), UU(22222.0), P(333.3); // Init with random values
   matrix::LUdecomposition(Ra, LL, UU, P);
   maths::maxUlps = 1U;
-
   compareMatricesEps(LL, L);
   compareMatricesEps(UU, U);
 
