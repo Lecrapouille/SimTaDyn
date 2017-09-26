@@ -25,9 +25,9 @@
 #  include "Config.hpp"
 //#  include "TextColor.hpp"
 
-class Logger: public FileLogger, public Singleton<Logger>
+class Logger: public FileLogger, public LazySingleton<Logger>
 {
-  friend class Singleton<Logger>;
+  friend class LazySingleton<Logger>;
 
 public:
 

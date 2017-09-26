@@ -21,7 +21,7 @@
 #ifndef CONFIG_HPP_
 #  define CONFIG_HPP_
 
-#  include "Singleton.hpp"
+#  include "Singleton.tpp"
 #  include "Path.hpp"
 #  include "version.h"
 
@@ -30,14 +30,14 @@
 // **************************************************************
 class Config:
   public Path,
-  public Singleton<Config>
+  public LazySingleton<Config>
 {
 private:
 
   //------------------------------------------------------------------
   //! \brief Mandatory by design.
   //------------------------------------------------------------------
-  friend class Singleton<Config>;
+  friend class LazySingleton<Config>;
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton.

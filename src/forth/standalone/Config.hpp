@@ -21,7 +21,7 @@
 #ifndef CONFIG_HPP_
 #  define CONFIG_HPP_
 
-#  include "Singleton.hpp"
+#  include "Singleton.tpp"
 #  include "Path.hpp"
 #  include "version.h"
 

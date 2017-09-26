@@ -22,7 +22,7 @@
 #ifndef RESOURCE_MANAGER_TPP_
 #  define RESOURCE_MANAGER_TPP_
 
-#  include "Singleton.hpp"
+#  include "Singleton.tpp"
 #  include "IResource.tpp"
 #  include "Logger.hpp"
 #  include <map>
