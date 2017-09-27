@@ -66,15 +66,18 @@ PROJECT_DATA_ROOT = $(DESTDIR)$(PREFIX)/SimTaDyn
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 
 ###################################################
-# Which gcc you want. Leave it empty for Travis-CI
-ifeq ($(MY_CXX),)
-#MY_CXX=g++-6
-#MY_CXX=g++-5
-#MY_CXX=clang++-4.0
+# Select your favorite c++ compiler.
+ifeq ($(PREFERED_CXX),)
+#PREFERED_CXX=g++-6
+#PREFERED_CXX=g++-5
+#PREFERED_CXX=clang++-4.0
 endif
 
-ifneq ($(MY_CXX),)
-CXX = $(MY_CXX)
+# Leave it empty for Travis-CI
+ifneq ($(CI),true)
+ifneq ($(PREFERED_CXX),)
+CXX = $(PREFERED_CXX)
+endif
 endif
 
 ###################################################
