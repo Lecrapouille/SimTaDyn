@@ -26,6 +26,25 @@ static void onError(int /*errorCode*/, const char* msg)
   throw std::runtime_error(msg);
 }
 
+IGLWindow::IGLWindow()
+{
+}
+
+/* Close OpenGL window and terminate GLFW */
+IGLWindow::~IGLWindow()
+{
+  if (m_opengl_context)
+    {
+      release();
+      glfwTerminate();
+    }
+}
+
+void IGLWindow::release()
+{
+  /* By default no 3D resources has to released */
+}
+
 void IGLWindow::FPS()
 {
   double currentTime = glfwGetTime();
@@ -45,8 +64,16 @@ void IGLWindow::FPS()
     }
 }
 
-int IGLWindow::create()
+bool IGLWindow::start()
 {
+  if (m_opengl_context)
+    {
+      std::cerr << "Warning you called twice start(). "
+                << "OpenGL context already created"
+                << std::endl;
+      goto l_update;
+    }
+
   int res;
 
   // Initialise GLFW
@@ -54,8 +81,7 @@ int IGLWindow::create()
   if (!glfwInit())
     {
       std::cerr << "Failed to initialize GLFW" << std::endl;
-      getchar();
-      return -1;
+      return false;
     }
 
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -68,9 +94,8 @@ int IGLWindow::create()
   if (nullptr == m_window)
     {
       std::cerr << "Failed to open GLFW window" << std::endl;
-      getchar();
       glfwTerminate();
-      return -1;
+      return false;
     }
   glfwMakeContextCurrent(m_window);
 
@@ -79,9 +104,8 @@ int IGLWindow::create()
   if (GLEW_OK != glewInit())
     {
       std::cerr << "Failed to initialize GLFW" << std::endl;
-      getchar();
       glfwTerminate();
-      return -1;
+      return false;
     }
 
   // print out some info about the graphics drivers
@@ -94,9 +118,8 @@ int IGLWindow::create()
   if (!GLEW_VERSION_3_2)
     {
       std::cerr << "OpenGL 3.2 API is not available." << std::endl;
-      getchar();
       glfwTerminate();
-      return -1;
+      return false;
     }
 
   // Ensure we can capture the escape key being pressed below
@@ -114,7 +137,8 @@ int IGLWindow::create()
   if (false == res)
     {
       std::cerr << "Failed setting-up graphics" << std::endl;
-      return -1;
+      glfwTerminate();
+      return res;
     }
 
   // init FPS
@@ -122,9 +146,11 @@ int IGLWindow::create()
   m_lastFrameTime = m_lastTime;
   m_nbFrames = 0;
 
+  m_opengl_context = true;
+
+l_update:
   update();
-  close();
-  return 0;
+  return true;
 }
 
 void IGLWindow::update()
@@ -151,10 +177,4 @@ void IGLWindow::update()
     {
       LOGIS("%s", e.message().c_str());
     }
-}
-
-// Close OpenGL window and terminate GLFW
-void IGLWindow::close()
-{
-  glfwTerminate();
 }

@@ -28,3 +28,6 @@ make install $JCORES || exit 1
 # FIXME: launch Forth unit tests when they will be done:
 # && ./build/SimForth -f ../core/system.fs -f../core/tester.fs
 (cd src/forth/standalone && make $JCORES) || exit 1
+
+# Build OpenGL examples
+(cd src/common/graphics/OpenGL/examples/ && make $JCORES) || exit 1

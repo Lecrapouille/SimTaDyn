@@ -166,5 +166,5 @@ void OpenGLTests::tearDown()
 //--------------------------------------------------------------------------
 void OpenGLTests::testOpenGL()
 {
-  CPPUNIT_ASSERT_EQUAL(0, win->create());
+  CPPUNIT_ASSERT_EQUAL(true, win->start());
 }

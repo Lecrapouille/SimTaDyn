@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 {
   if (argc <= 1)
     {
-      std::cout << "Incorrect argument(s)" << std::endl; 
+      std::cout << "Incorrect argument(s)" << std::endl;
       usage(argv);
     }
   long int example = strtol(argv[1], nullptr, 10);
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     }
 
   std::shared_ptr<IGLWindow> window(win);
-  window->create();
+  window->start();
 
   return 0;
 }
