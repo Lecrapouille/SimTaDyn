@@ -65,21 +65,15 @@ else
     fi
 fi
 
-### Library for manipulating zip files.
+### Library for manipulating zip files (forked from https://github.com/sebastiandev/zipper)
 ### License: MIT
 print-clone zipper
-git clone --recursive https://github.com/sebastiandev/zipper.git --depth=1 > /dev/null 2> /dev/null
+git clone --recursive https://github.com/Lecrapouille/zipper.git --depth=1 > /dev/null 2> /dev/null
 if [ "$?" == "0" ]; then
     print-compile zipper
     mkdir -p zipper/build
     cd zipper/build
-    if [ "$ARCHI" == "Windows" ]; then
-        export ZLIBROOT="/mingw64"
-        export LIBZ_LIBRARY="/mingw64/lib"
-        cmake -DLIBZ_LIBRARY="/mingw64/lib" ..
-    else
-        (cmake ..) > /dev/null 2> /dev/null
-    fi
-    (make -j4) > /dev/null 2> /dev/null
+    (cmake ..) > /dev/null 2> /dev/null
+    (make CXX_FLAGS='-O2' -j4) > /dev/null 2> /dev/null
     cd ../..
 fi
