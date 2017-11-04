@@ -184,7 +184,7 @@ unit-tests: $(TARGET)
 # Contrary to the unit-tests rule, if unit tests
 # failed, clear the $? to let lcov to be launched.
 .PHONY: coverage
-coverage: unit-tests
+coverage:
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
 	$(SANITIZER) ./build/$(TARGET) $(TU_OPTIONS) || cat SimTaDyn.log
 	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
