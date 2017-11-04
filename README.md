@@ -1,5 +1,7 @@
 # SimTaDyn
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/Lecrapouille/SimTaDyn/blob/master/LICENSE)
+
 SimTaDyn is a proof of concept project for a geographic information system (GIS) allowing to draw geographic maps and manipulate them like we do with a spreadsheet page in the aim to design dynamical geographic simulations.
 
 Note: the source of the functional version is on this [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004)
@@ -19,4 +21,9 @@ The master branch is a redesign of the branch Original-Version-EPITA-2004 but fo
 *This screenshot comes from the legacy version of SimTaDyn*
 
 Project compilation and unit/non regression tests (Linux, Mac OS X, MinGW), static analysis:
-[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn) [![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn)
+
+| **`Linux/Mac OS`** | **`Windows`** |
+|------------------|-------------|
+|[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)|[![Build status](https://ci.appveyor.com/api/projects/status/github/lecrapouille/simtadyn?svg=true)](https://ci.appveyor.com/project/Lecrapouille/SimTaDyn)|
+
+[![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn) [![Coverage Status](https://coveralls.io/repos/github/Lecrapouille/SimTaDyn/badge.svg?branch=master)](https://coveralls.io/github/Lecrapouille/SimTaDyn?branch=master)
