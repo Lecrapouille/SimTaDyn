@@ -68,7 +68,7 @@ fi
 ### Library for manipulating zip files (forked from https://github.com/sebastiandev/zipper)
 ### License: MIT
 print-clone zipper
-git clone --recursive https://github.com/Lecrapouille/zipper.git --depth=1 > /dev/null 2> /dev/null
+git clone --recursive https://github.com/Lecrapouille/zipper.git --branch fix_leaks --depth=1 > /dev/null 2> /dev/null
 if [ "$?" == "0" ]; then
     print-compile zipper
     mkdir -p zipper/build
