@@ -54,16 +54,16 @@ endif
 
 ###################################################
 # Where to install project runnable and project data
-ifeq ($(ARCHI),Linux)
-PREFIX = /usr/local
-else ifeq ($(ARCHI),Darwin)
-PREFIX = /usr/local
-else
-PREFIX = /usr/local
+ifeq ($(PREFIX),)
+PREFIX = /usr
 endif
 BINDIR = $(DESTDIR)$(PREFIX)/bin
-PROJECT_DATA_ROOT = $(DESTDIR)$(PREFIX)/SimTaDyn
+DATADIR = $(DESTDIR)$(PREFIX)/share
+DOCDIR = $(DATADIR)/doc
+PROJECT_EXE = $(BINDIR)/$(TARGET)-$(VERSION)
+PROJECT_DATA_ROOT = $(DATADIR)/$(TARGET)/$(VERSION)
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
+PROJECT_DOC_PATH = $(PROJECT_DATA_ROOT)/doc
 
 ###################################################
 # Select your favorite c++ compiler.
@@ -79,10 +79,6 @@ ifneq ($(PREFERED_CXX),)
 CXX = $(PREFERED_CXX)
 endif
 endif
-
-###################################################
-# Common defines
-SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Store files dependencies in *.d files.  When a file

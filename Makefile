@@ -19,12 +19,16 @@
 ##=====================================================================
 
 ###################################################
-# Sharable informations between all Makefiles
--include .makefile/Makefile.header
-
-###################################################
 # Executable name
 TARGET = SimTaDyn
+
+###################################################
+# Target version
+VERSION := $(shell cat VERSION)
+
+###################################################
+# Sharable informations between all Makefiles
+-include .makefile/Makefile.header
 
 ###################################################
 # Inform Makefile where to find header files
@@ -82,6 +86,10 @@ OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ
 # is needed please read the doc/Install.md file.
 CXXFLAGS = -W -Wall -Wextra -O2 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+
+###################################################
+# Common defines
+SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
@@ -137,10 +145,16 @@ $(TARGET): $(OBJ)
 	@$(POSTCOMPILE)
 
 ###################################################
-# git clone external projects that SimTaDyn needs
-.PHONY: clone
-clone:
-	@cd external && ./gitclone.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
+# Download external projects that SimTaDyn needs
+.PHONY: download-external-libs
+download-external-libs:
+	@cd external && ./download-external-libs.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
+
+###################################################
+# Download and compile external projects that SimTaDyn needs
+.PHONY: compile-external-libs
+compile-external-libs:
+	@cd external && ./compile-external-libs.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
 
 ###################################################
 # https://scan.coverity.com/
@@ -177,41 +191,43 @@ doc:
 	@doxygen Doxyfile
 
 ###################################################
-# Create Debian/Ubuntu package. Need to be root user
-.PHONY: package
-package: $(TARGET)
-	$(call print-simple,"Creating a Debian/Ubuntu package")
-	@./.makefile/package.sh
-
-###################################################
 # Compress SimTaDyn sources without its .git, build
 # folders and doc generated files. If a tarball
 # already exists, it'll not be smashed.
 .PHONY: targz
 targz:
-	@./.makefile/targz.sh . $(PWD)
+	@./.makefile/targz.sh $(PWD)
+
+###################################################
+# Create a tarball for OpenSuse Build Service
+.PHONY: obs
+obs:
+	@./.integration/opensuse-build-service.sh
 
 ###################################################
 # Install project. You need to be root user.
 .PHONY: install
 install: $(TARGET)
-	@$(call print-to,"Installing","data/","$(PROJECT_DATA_PATH)","")
+	@$(call print-to,"Installing","data","$(PROJECT_DATA_PATH)","")
 	@rm -fr $(PROJECT_DATA_PATH)
 	@mkdir -p $(PROJECT_DATA_PATH)/forth
 	@cp -r data/* $(PROJECT_DATA_PATH)
 	@cp -r src/forth/core/system.fs $(PROJECT_DATA_PATH)/forth
-	@$(call print-to,"Installing",$(TARGET),"$(BINDIR)","")
+	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
+	@mkdir -p $(PROJECT_DOC_PATH)
+	@cp -r doc/* $(PROJECT_DATA_ROOT)/doc
+	@cp AUTHORS LICENSE INSTALL README.md ChangeLog $(PROJECT_DATA_ROOT)
+	@$(call print-to,"Installing","$(BUILD)/$(TARGET)","$(PROJECT_EXE)","")
 	@mkdir -p $(BINDIR)
-	@cp $(BUILD)/$(TARGET) $(BINDIR)/$(TARGET)
+	@cp $(BUILD)/$(TARGET) $(PROJECT_EXE)
 
 ###################################################
 # Uninstall project. You need to be root user.
 .PHONY: uninstall
 uninstall:
 	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
-	@rm -f $(PREFIX)/$(TARGET)
-	@rm -fr $(PROJECT_DATA_ROOT)
-#	@echo "$(CLR_GREEN)*** You can remove manually your personal SimTaDyn folder located at $(PROJECT_DATA_ROOT)$(CLR_DEFAULT)"
+	@rm $(PROJECT_EXE)
+	@rm -r $(PROJECT_DATA_ROOT)
 
 ###################################################
 .PHONY: clean
@@ -237,4 +253,3 @@ version.h: VERSION
 ###################################################
 # Sharable informations between all Makefiles
 -include .makefile/Makefile.footer
-

@@ -39,6 +39,7 @@ void LoaderTests::tearDown()
 void LoaderTests::testSimTaDyn()
 {
   Path path(SIMTADYN_DATA_PATH);
+  path.add("data/loaders"); // FIXME ko si uniquement Path path("data/loaders"); Pourquoi
   SimTaDynFileLoader loader;
   SimTaDynMap *map = nullptr;
 

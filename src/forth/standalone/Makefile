@@ -19,12 +19,16 @@
 ##=====================================================================
 
 ###################################################
-# Sharable informations between all Makefiles
--include ../../../.makefile/Makefile.header
-
-###################################################
 # Executable name
 TARGET = SimForth
+
+###################################################
+# Target version
+VERSION := $(shell cat ../../VERSION)
+
+###################################################
+# Sharable informations between all Makefiles
+-include ../../../.makefile/Makefile.header
 
 ###################################################
 # Path where to store the generated coverage docs
@@ -54,6 +58,13 @@ OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE) mai
 # is needed please read the doc/Install.md file.
 OPTIM = -O2
 CXXFLAGS = -W -Wall -Wextra -g -std=c++11
+
+###################################################
+# Common defines
+PROJECT_DATA_PATH=$(DESTDIR)$(PREFIX)/share
+PROJECT_DATA_ROOT = $(DATADIR)/SimTaDyn/$(VERSION)
+PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
+SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################

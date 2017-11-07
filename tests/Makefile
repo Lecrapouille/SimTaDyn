@@ -19,12 +19,16 @@
 ##=====================================================================
 
 ###################################################
-# Sharable informations between all Makefiles
--include ../.makefile/Makefile.header
+# Executable name
+TARGET = SimTaDyn-UnitTest
 
 ###################################################
-# Executable name
-TARGET = UnitTest
+# Target version
+VERSION := $(shell cat ../VERSION)
+
+###################################################
+# Sharable informations between all Makefiles
+-include ../.makefile/Makefile.header
 
 ###################################################
 # Path where to store the generated coverage docs
@@ -99,6 +103,13 @@ OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
 OPTIM = -O2
 CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
+
+###################################################
+# Common defines
+PROJECT_DATA_PATH=$(DESTDIR)$(PREFIX)/share
+PROJECT_DATA_ROOT = $(DATADIR)/SimTaDyn/$(VERSION)
+PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
+SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
@@ -162,7 +173,7 @@ all: $(TARGET)
 ###################################################
 # Link sources
 $(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################

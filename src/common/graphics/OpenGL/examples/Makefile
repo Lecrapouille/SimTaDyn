@@ -19,13 +19,17 @@
 ##=====================================================================
 
 ###################################################
+# Executable name
+TARGET = OpenGLExamples
+
+###################################################
+# Target version
+VERSION := $(shell cat ../../../../VERSION)
+
+###################################################
 # Sharable informations between all Makefiles
 M=../../../../../.makefile/
 -include $(M)/Makefile.header
-
-###################################################
-# Executable name
-TARGET = OpenGLExamples
 
 ###################################################
 # Inform Makefile where to find header files
@@ -56,6 +60,13 @@ CXX = $(MY_CXX)
 endif
 CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+
+###################################################
+# Common defines
+PROJECT_DATA_PATH=$(DESTDIR)$(PREFIX)/share
+PROJECT_DATA_ROOT = $(DATADIR)/SimTaDyn/$(VERSION)
+PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
+SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 DEFINES = $(SIMTADYN_DEFINES)
 
 ###################################################
