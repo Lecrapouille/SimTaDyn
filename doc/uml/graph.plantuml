@@ -1,0 +1,51 @@
+@startuml
+
+class BasicNode {
+-id: UniqueID
+-neighbors: BasicArc[]
++addNeighbor(arc: BasicArc)
++addNeighbor(arc: UniqueID)
++removeNeighbor(arc: UniqueID)
+}
+
+class BasicArc {
+-id: UniqueID
+-from: BasicNode
+-to BasicNode
++BasicArc(id: UniqueID, from: BasicNode, to BasicNode)
++from(): BasicNode
++to(): BasicNode
+}
+
+BasicNode "2" <-> "*" BasicArc
+
+class "BasicGraph<Node,Arc>" as BasicGraph
+class BasicGraph {
+-directed: bool
+-nodes: Node[]
+-arcs: Arc[]
++hasNode(node: UniqueID) : bool
++addNode(node: UniqueID)
++removeNode(node: UniqueID)
++neighbors(node: UniqueID) : Arc[]
++markNode(node: UniqueID)
++unmarkNode(node: UniqueID)
++hasArc(arc: UniqueID) : bool
++hasArc(from: UniqueID, to: UniqueID) : bool
++addArc(from: UniqueID, to: UniqueID)
++addArc(from: Node, to: Node)
++removeArc(arc: UniqueID)
++markArc(arc: UniqueID)
++unmarkArc(arc: UniqueID)
+}
+
+BasicGraph <.. BasicArc
+BasicGraph <.. BasicNode
+
+class GraphAlgorithm {
++depthFirstSearch(graph: BasicGraph, startingNode: uniqueID)
+}
+
+GraphAlgorithm .> BasicGraph
+
+@enduml

@@ -1,12 +1,22 @@
 # SimTaDyn
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/Lecrapouille/SimTaDyn/blob/master/LICENSE)
+[![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn)
+[![Coverage Status](https://coveralls.io/repos/github/Lecrapouille/SimTaDyn/badge.svg?branch=master)](https://coveralls.io/github/Lecrapouille/SimTaDyn?branch=master)
 
-SimTaDyn is a proof of concept project for a geographic information system (GIS) allowing to draw geographic maps and manipulate them like we do with a spreadsheet page in the aim to design dynamical geographic simulations.
+| **`Linux/Mac OS`** | **`Windows`** |
+|------------------|-------------|
+|[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)|[![Build status](https://ci.appveyor.com/api/projects/status/github/lecrapouille/simtadyn?svg=true)](https://ci.appveyor.com/project/Lecrapouille/SimTaDyn)|
 
-Note: the source of the functional version is on this [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004)
+SimTaDyn is a proof of concept project for a geographic information
+system (GIS) allowing to draw geographic maps and manipulate them like
+a spreadsheet. The goal is to design dynamical geographic simulations.
 
-The master branch is a redesign of the branch Original-Version-EPITA-2004 but for the moment the developpement is starting and there is no graphical features.
+SimTaDyn was originally a one-year student project made in 2004 but in 2017 I decided to restart it from scratch.
+
+Note: The master branch is a rework (but still in gestation) of the branch
+[Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004).
+Therefore, for the moment the master branch shows less features than the 2004 branch.
 
 * [Introduction to SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.md)
 * [How to compile SimTaDyn code source](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Install.md)
@@ -19,11 +29,3 @@ The master branch is a redesign of the branch Original-Version-EPITA-2004 but fo
 
 ![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.jpg)
 *This screenshot comes from the legacy version of SimTaDyn*
-
-Project compilation and unit/non regression tests (Linux, Mac OS X, MinGW), static analysis:
-
-| **`Linux/Mac OS`** | **`Windows`** |
-|------------------|-------------|
-|[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)|[![Build status](https://ci.appveyor.com/api/projects/status/github/lecrapouille/simtadyn?svg=true)](https://ci.appveyor.com/project/Lecrapouille/SimTaDyn)|
-
-[![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn) [![Coverage Status](https://coveralls.io/repos/github/Lecrapouille/SimTaDyn/badge.svg?branch=master)](https://coveralls.io/github/Lecrapouille/SimTaDyn?branch=master)

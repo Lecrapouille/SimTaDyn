@@ -1,0 +1,41 @@
+@startuml
+
+class Forth {
++Forth(Dictionary*)
++{abstract} boot()
++{abstract} interpreteString(script: String)
++{abstract} interpreteFile(filename: String)
+#{abstract} execPrimitive(idPrimitive: Cell16)
+#{abstract} execPrimitive(token: Cell16)
+}
+
+class Stack {
++push(Value)
++pop(): Value
++pick(): Value
+}
+
+class Dictionary {
+
+}
+
+class SimForth {
++SimForth(Dictionary*)
++{abstract} boot()
++{abstract} interpreteString(script: String)
++{abstract} interpreteFile(filename: String)
+#{abstract} execPrimitive(idPrimitive: Cell16)
+#{abstract} execPrimitive(token: Cell16)
+}
+
+class SimDictionary {
+
+}
+
+Stack "2" <- Forth
+Forth -> "1" Dictionary
+Forth <|-- SimForth
+Dictionary <|-- SimDictionary
+SimTaDyn -> "1" SimForth
+
+@enduml

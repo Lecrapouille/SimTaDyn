@@ -1,0 +1,43 @@
+@startuml
+
+class Observable {
+-changed: bool
++notifObservers(msg: Object)
++setChanged()
+}
+
+abstract class Observer {
+{abstract} update(subject: Observer, msg: Object)
+}
+
+Observable -> "*" Observer : observers
+
+class SpreadSheetCell {
+-formulae: string
+-Value: double
++setformulae(formulae: string)
++setValue(value: double)
++eval(): double
+}
+
+Observable <|-- SpreadSheetCell
+Observer <|.. SpreadSheetCell
+SpreadSheetCell --> "*" SpreadSheetCell : subjects
+
+class SpreadSheet {
+-SpreadSheetCell[][]
++addCell()
++removeCell()
++evalSheet(): double
+}
+
+class SimForth {
++InterpreteString(formulae: string)
+}
+
+' SimTaDyn -> "*" SimMap
+' SimMap -> "1" SpreadSheet
+SpreadSheet -> "*" SpreadSheetCell : cells
+SpreadSheetCell ..> SimForth : "uses"
+
+@enduml
