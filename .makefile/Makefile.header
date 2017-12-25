@@ -53,15 +53,21 @@ BUILD = build
 endif
 
 ###################################################
+#
+VERSION := $(shell cat VERSION)
+TARGET_VERSION := $(shell cat $(P)/VERSION)
+
+###################################################
 # Where to install project runnable and project data
 ifeq ($(PREFIX),)
 PREFIX = /usr
 endif
+
 BINDIR = $(DESTDIR)$(PREFIX)/bin
 DATADIR = $(DESTDIR)$(PREFIX)/share
 DOCDIR = $(DATADIR)/doc
-PROJECT_EXE = $(BINDIR)/$(TARGET)-$(VERSION)
-PROJECT_DATA_ROOT = $(DATADIR)/$(TARGET)/$(VERSION)
+PROJECT_EXE = $(BINDIR)/$(TARGET)-$(TARGET_VERSION)
+PROJECT_DATA_ROOT = $(DATADIR)/$(TARGET)/$(TARGET_VERSION)
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 PROJECT_DOC_PATH = $(PROJECT_DATA_ROOT)/doc
 
@@ -79,6 +85,49 @@ ifneq ($(PREFERED_CXX),)
 CXX = $(PREFERED_CXX)
 endif
 endif
+
+###################################################
+# Inform Makefile where to find header files
+INCLUDES = -I$(BUILD) -I$(P)/external/backward-cpp			\
+-I$(P)/external/SOIL -I$(P)/external/YesEngine -I$(P)/external/zipper	\
+-I$(P)/src -I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns	\
+-I$(P)/src/common/managers -I$(P)/src/common/utils			\
+-I$(P)/src/common/maths -I$(P)/src/common/containers			\
+-I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
+-I$(P)/src/common/graphics/OpenGL/geometry				\
+-I$(P)/src/common/graphics/RTree -I$(P)/src/common/graphics		\
+-I$(P)/src/core -I$(P)/src/core/loaders -I$(P)/src/forth		\
+-I$(P)/src/ui
+
+###################################################
+# Inform Makefile where to find *.cpp and *.o files
+VPATH=\
+$(BUILD):\
+$(P)/external/backward-cpp:\
+$(P)/external/YesEngine:\
+$(P)/external/SOIL:\
+$(P)/src:\
+$(P)/src/common/spreadsheet:\
+$(P)/src/common/patterns:\
+$(P)/src/common/managers:\
+$(P)/src/common/utils:\
+$(P)/src/common/maths:\
+$(P)/src/common/containers:\
+$(P)/src/common/graph-theory:\
+$(P)/src/common/graphics:\
+$(P)/src/common/graphics/OpenGL:\
+$(P)/src/common/graphics/OpenGL/geometry:\
+$(P)/src/common/graphics/RTree:\
+$(P)/src/core:\
+$(P)/src/core/loaders:\
+$(P)/src/forth:\
+$(P)/src/ui
+
+###################################################
+# Path where to store the generated coverage docs
+DOC = $(P)/doc/coverage
+# Path where to store lcov rapport
+RAPPORT = $(BUILD)/rapport.info
 
 ###################################################
 # Store files dependencies in *.d files.  When a file

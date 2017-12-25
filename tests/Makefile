@@ -24,7 +24,7 @@ TARGET = SimTaDyn-UnitTest
 
 ###################################################
 # Target version
-VERSION := $(shell cat ../VERSION)
+TARGET_VERSION := $(shell cat ../VERSION)
 
 ###################################################
 # Sharable informations between all Makefiles
@@ -202,6 +202,7 @@ coverage:
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
 	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)
 	@genhtml --quiet -o $(DOC) -t "SimTaDyn Unit Tests" $(RAPPORT)
+	@xdg-open $(RAPPORT) >/dev/null
 
 ###################################################
 .PHONY: clean

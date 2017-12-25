@@ -23,49 +23,28 @@
 TARGET = SimTaDyn
 
 ###################################################
-# Target version
-VERSION := $(shell cat VERSION)
+# Location from the project root directory.
+P=.
 
 ###################################################
 # Sharable informations between all Makefiles
--include .makefile/Makefile.header
+M=$(P)/.makefile
+-include $(M)/Makefile.header
 
 ###################################################
-# Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -Iexternal/backward-cpp -Iexternal/SOIL		\
--Iexternal/YesEngine -Iexternal/zipper -Isrc -Isrc/common/patterns	\
--Isrc/common/managers -Isrc/common/utils -Isrc/common/maths		\
--Isrc/common/containers -Isrc/common/graph-theory			\
--Isrc/common/graphics/OpenGL -Isrc/common/graphics/RTree		\
--Isrc/common/graphics -Isrc/core -Isrc/core/loaders -Isrc/forth		\
--Isrc/ui
-
-###################################################
-# Inform Makefile where to find *.cpp and *.o files
-VPATH=$(BUILD):external/backward-cpp:external/YesEngine:external/SOIL\
-src:\
-src/common/patterns:\
-src/common/managers:\
-src/common/utils:\
-src/common/maths:\
-src/common/containers:\
-src/common/graph-theory:\
-src/common/graphics:\
-src/common/graphics/OpenGL:\
-src/common/graphics/RTree:\
-src/core:\
-src/core/loaders:\
-src/forth:\
-src/ui
+# Debug mode or Release mode
+PROJECT_MODE = debug
 
 ###################################################
 # List of files to compile. Splited by directories
+ifeq ($(PROJECT_MODE),debug)
 OBJ_EXTERNAL   = backward.o
+else
+OBJ_EXTERNAL   =
+endif
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_PATTERNS   =
 OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
-OBJ_MANAGERS   =
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
 OBJ_OPENGL     = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o
 OBJ_OPENGL    += GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
@@ -77,30 +56,30 @@ OBJ_LOADERS    = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoade
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_SIMTADYN   = main.o
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
-                 $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
+OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+                 $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
 
 ###################################################
-# Compilation options. For knowing which libraries
-# is needed please read the doc/Install.md file.
-CXXFLAGS = -W -Wall -Wextra -O2 -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+# Compilation options.
+CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
 # Common defines
-SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES = $(SIMTADYN_DEFINES)
+SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += $(SIMTADYN_DEFINES) -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS = $(abspath $(PWD)/external/SOIL/libSOIL.a) $(abspath $(PWD)/external/zipper/build/libZipper-static.a)
+LIBS = $(abspath $(P)/external/SOIL/libSOIL.a) \
+       $(abspath $(P)/external/zipper/build/libZipper-static.a)
 
 ###################################################
 # Set Libraries. For knowing which libraries
-# is needed please read the doc/Install.md file.
+# is needed please read the external/README.md file.
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
@@ -111,22 +90,23 @@ else ifeq ($(ARCHI),Linux)
 LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0		\
 -lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
--ldl -ldw -lz
+-ldl -lz -lstdc++
 
-## Window
+## Windows
 else
 
 #$(error Unknown architecture)
 endif
 
 ###################################################
-# Address sanitizer. Uncomment these lines if asan
-# is desired.
-##OPTIM = -O1 -g
-##CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-##LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-##LIBS += -static-libstdc++ -static-libasan
-##SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
+# Backward allows tracing stack when segfault happens
+ifeq ($(PROJECT_MODE),debug)
+OPTIM_FLAGS = -O2 -g
+DEFINES += -DBACKWARD_HAS_DW=1
+LIBS += -ldw
+else
+OPTIM_FLAGS = -O3
+endif
 
 ###################################################
 all: $(TARGET)
@@ -139,10 +119,19 @@ $(TARGET): $(OBJ)
 
 ###################################################
 # Compile sources
-%.o: %.cpp $(BUILD)/%.d Makefile .makefile/Makefile.header .makefile/Makefile.footer version.h
+%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
+
+###################################################
+# Address sanitizer. Uncomment these lines if asan
+# is desired.
+##OPTIM = -O1 -g
+##CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+##LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+##LIBS += -static-libstdc++ -static-libasan
+##SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
 
 ###################################################
 # Download external projects that SimTaDyn needs
@@ -189,6 +178,7 @@ run: $(TARGET)
 .PHONY: doc
 doc:
 	@doxygen Doxyfile
+	@xdg-open doc/html/index.html >/dev/null
 
 ###################################################
 # Compress SimTaDyn sources without its .git, build
@@ -216,7 +206,7 @@ install: $(TARGET)
 	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
 	@mkdir -p $(PROJECT_DOC_PATH)
 	@cp -r doc/* $(PROJECT_DATA_ROOT)/doc
-	@cp AUTHORS LICENSE INSTALL README.md ChangeLog $(PROJECT_DATA_ROOT)
+	@cp AUTHORS LICENSE README.md ChangeLog $(PROJECT_DATA_ROOT)
 	@$(call print-to,"Installing","$(BUILD)/$(TARGET)","$(PROJECT_EXE)","")
 	@mkdir -p $(BINDIR)
 	@cp $(BUILD)/$(TARGET) $(PROJECT_EXE)
@@ -245,11 +235,5 @@ distclean: clean
 	@cd src/forth/standalone && make -s clean; cd - > /dev/null
 
 ###################################################
-# Generate a header file with the project version
-version.h: VERSION
-	@$(call print-from,"Version","$(TARGET)","VERSION","")
-	@./.makefile/version.sh VERSION $(BUILD)/version.h
-
-###################################################
 # Sharable informations between all Makefiles
--include .makefile/Makefile.footer
+-include $(M)/Makefile.footer

@@ -20,6 +20,7 @@
 
 //#include "SimForth.hpp"
 #include "MapEditor.hpp" //FIXME: includes SimForth.hpp
+#include "PathManager.hpp"
 
 void SimForth::boot()
 {
@@ -34,7 +35,7 @@ void SimForth::boot()
   // Initialize basic Forth system
   std::pair<bool, std::string> res;
 
-  res = Forth::interpreteFile(Config::instance().expand("forth/system.fs"));
+  res = Forth::interpreteFile(PathManager::instance().expand("forth/system.fs"));
   ok(res);
 }
 

@@ -23,6 +23,7 @@
 
 #  include "Names.hpp"
 #  include "Logger.hpp"
+#  include "Config.hpp"
 #  include <gtkmm.h>
 #  include <gtksourceviewmm.h>
 #  include <cstdint>

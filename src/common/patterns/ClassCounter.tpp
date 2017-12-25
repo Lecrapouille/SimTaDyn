@@ -25,7 +25,7 @@
 #  include <cstddef>
 #  include <atomic>
 
-typedef uint32_t Key;
+typedef size_t Key;
 
 // *************************************************************************************************
 //! \brief This class allows to count the number of created

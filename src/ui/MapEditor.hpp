@@ -21,7 +21,7 @@
 #ifndef MAPEDITOR_HPP_
 #  define MAPEDITOR_HPP_
 
-//#  include "Names.hpp"
+#  include "Names.hpp"
 #  include "SimTaDynLoaders.hpp"
 #  include "Inspector.hpp"
 #  include "DrawingArea.hpp"

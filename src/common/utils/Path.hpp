@@ -21,9 +21,9 @@
 #ifndef PATH_HPP_
 #  define PATH_HPP_
 
+#  include "Logger.hpp"
 #  include "File.hpp"
 #  include <list>
-#  include <sstream>
 
 class Path
 {
@@ -45,12 +45,14 @@ public:
   //! \brief add a directory in the path
   void add(std::string const& path)
   {
+    LOGI("Path::add '%s'", path.c_str());
     split(path);
   }
 
   //! \brief add a directory in the path
   void init(std::string const& path)
   {
+    LOGI("Path::clear()");
     m_paths.clear();
     split(path);
   }
@@ -63,6 +65,7 @@ public:
 
   void remove(std::string const& path)
   {
+    LOGI("Path::remove '%s'", path.c_str());
     m_paths.remove(path);
   }
 

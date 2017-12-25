@@ -18,14 +18,11 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimTaDynWindow.hpp"
-#include "MapEditor.hpp"
+#include "SimTaDyn.hpp"
+#include "Config.hpp"
 
-/*MapEditor& mapeditor = SimTaDynContext::mapEditor();
-   mapeditor.addButon(Gtk::Stock::NO, "42 42 FOO", "42 42 FOO");
-   mapeditor.addButon(Gtk::Stock::NO, "42 42 TOTO", "42 42 TOTO");
-   mapeditor.addButon(Gtk::Stock::NO, "42 .", "42 .");*/
-
+// Init Gtkmm and SimTaDyn contexts. Be careful not to create a GTK+
+// button before the context creation of GTK libraries.
 int main(int argc, char** argv)
 {
   std::cout << "Welcome to SimTaDyn version "
@@ -33,33 +30,27 @@ int main(int argc, char** argv)
             << '.'
             << config::minor_version
             << std::endl;
-  Logger::instance();
 
-  LOGI("** Init GTK");
+  // Call it before Logger constructor
+  if (!File::mkdir(config::tmp_path))
+    {
+      std::cerr << "Failed creating the temporary directory '"
+                << config::tmp_path << "'" << std::endl;
+    }
+
+  LOGI("Init GTK");
   const Gtk::Main kit(argc, argv);
   Gsv::init();
 
-  LOGI("** Init SimTaDyn");
-  ResourceManager<Key>::instance();
-  LoaderManager::instance();
-  SimForth::instance();
-  ForthEditor::instance();
-  MapEditor::instance();
+  auto SimTaDyn = std::unique_ptr<SimTaDynContext>(new SimTaDynContext);
+  if (nullptr == SimTaDyn)
+    {
+      LOGE("Failed creating the SimTaDynContext GUI. Aborting");
+      exit(1);
+    }
 
-  SimTaDynWindow window;
-  SimForth::instance().boot();
+  SimTaDyn->init();
+  kit.run(SimTaDyn->window());
 
-  LOGI("** End of the init: starting the runtime");
-  kit.run(window);
-
-  LOGI("** Leaving SimTaDyn: releasing the memory");
-  ForthEditor::destroy();
-  MapEditor::destroy();
-  SimForth::destroy();
-  LoaderManager::destroy();
-  ResourceManager<Key>::destroy();
-  Logger::destroy();
   return 0;
 }
-
-// FIXME: faire une classe avec une methode pure pour lancer les trucs de 'utilsateur

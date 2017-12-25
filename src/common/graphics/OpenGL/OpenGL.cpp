@@ -20,7 +20,6 @@
 
 #include "OpenGL.hpp"
 #include "Logger.hpp"
-#include <iostream>
 #include <gtkmm/glarea.h>
 
 namespace SimTaDyn

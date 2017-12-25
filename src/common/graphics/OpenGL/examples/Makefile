@@ -23,76 +23,77 @@
 TARGET = OpenGLExamples
 
 ###################################################
-# Target version
-VERSION := $(shell cat ../../../../VERSION)
+# Location from the project root directory.
+P=../../../../..
 
 ###################################################
 # Sharable informations between all Makefiles
-M=../../../../../.makefile/
+M=$(P)/.makefile
 -include $(M)/Makefile.header
 
 ###################################################
-# Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -I.. -I../geometry -I../.. -I../../../utils	\
--I../../../maths -I../../../patterns -I../../../containers		\
--I../../../../../src -I../../../../../external/backward-cpp		\
--I../../../../../external/SOIL -I../../../../../
+# Debug mode or Release mode
+PROJECT_MODE = debug
 
 ###################################################
-#  Inform Makefile where to find *.cpp and *.o files
-VPATH=.:$(BUILD):..:../geometry:../..:../../../maths:../../../utils:../../../patterns:../../../containers:../../../../../external/SOIL:../../../../../external/backward-cpp:../../../../../
-
-###################################################
-#  List of files to compile. Splited by directories
-OBJ_TOOL     = backward.o
+# List of files to compile. Splited by directories
+ifeq ($(PROJECT_MODE),debug)
+OBJ_EXTERNAL   = backward.o
+else
+OBJ_EXTERNAL   =
+endif
 OBJ_UTILS    = Exception.o PendingData.o ILogger.o Logger.o
 OBJ_OPENGL   = OpenGLException.o OpenGL.o GLObject.o GLShader.o         \
                GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o \
                GLWindow.o
-OBJ          = $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) \
+OBJ          = $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) \
                Example01.o Example02.o Example03.o Example04.o Example05.o main.o
 
 ###################################################
-# Compilation options. For knowing which libraries
-# is needed please read the doc/Install.md file.
-ifneq ($(MY_CXX),)
-CXX = $(MY_CXX)
-endif
+# Compilation options.
 CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
 # Common defines
-PROJECT_DATA_PATH=$(DESTDIR)$(PREFIX)/share
-PROJECT_DATA_ROOT = $(DATADIR)/SimTaDyn/$(VERSION)
-PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
-SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES = $(SIMTADYN_DEFINES)
+SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += $(SIMTADYN_DEFINES) -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS = $(abspath ../../../../../external/SOIL/libSOIL.a)
+LIBS = $(abspath $(P)/external/SOIL/libSOIL.a)
 
 ###################################################
 # Set Libraries. For knowing which libraries
-# is needed please read the doc/Install.md file.
+# is needed please read the external/README.md file.
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib -framework OpenGL -lglew -lglfw
+LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw
 
 ## Linux
 else ifeq ($(ARCHI),Linux)
 LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0		\
 -lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
--lglfw -ldl -ldw
+-ldl -lglfw -lstdc++
 
-## Window
+## Windows
 else
+
 $(error Unknown architecture)
+endif
+
+###################################################
+# Backward allows tracing stack when segfault happens
+ifeq ($(PROJECT_MODE),debug)
+OPTIM_FLAGS = -O2 -g
+DEFINES += -DBACKWARD_HAS_DW=1
+LIBS += -ldw
+else
+OPTIM_FLAGS = -O3
 endif
 
 ###################################################
@@ -101,14 +102,14 @@ all: $(TARGET)
 ###################################################
 # Link sources
 $(TARGET): $(OBJ)
-	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
@@ -116,12 +117,6 @@ $(TARGET): $(OBJ)
 clean:
 	@$(call print-simple,"Cleaning","$(PWD)")
 	@rm -fr *~ $(BUILD) 2> /dev/null
-
-###################################################
-# Generate a header file with the project version
-version.h: VERSION
-	@$(call print-from,"Version","$(TARGET)","VERSION","")
-	@./$(M)/version.sh $(M)/../VERSION $(BUILD)/version.h
 
 ###################################################
 # Sharable informations between all Makefiles

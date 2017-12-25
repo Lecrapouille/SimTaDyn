@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "GLWindow.hpp"
-#include <sstream>
 
 static void onError(int /*errorCode*/, const char* msg)
 {

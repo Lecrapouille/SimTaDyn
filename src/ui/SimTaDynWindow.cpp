@@ -20,6 +20,7 @@
 
 #include "SimTaDynWindow.hpp"
 #include "MapEditor.hpp"
+#include "PathManager.hpp"
 
 // *************************************************************************************************
 // SimTaDyn main window
@@ -119,7 +120,7 @@ bool SimTaDynWindow::onExitClicked(GdkEventAny*)
 // *************************************************************************************************
 void SimTaDynWindow::setTitleIcon(std::string const &icon_name)
 {
-  std::pair<std::string, bool> res = Config::instance().find(icon_name);
+  std::pair<std::string, bool> res = PathManager::instance().find(icon_name);
 
   if (res.second)
     {

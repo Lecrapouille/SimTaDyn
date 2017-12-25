@@ -21,8 +21,8 @@
 #ifndef SIMTADYNWINDOW_HPP_
 #  define SIMTADYNWINDOW_HPP_
 
-#  include "DrawingArea.hpp"
 #  include "ForthEditor.hpp"
+#  include "MapEditor.hpp"
 #  include "PackageExplorer.hpp"
 
 class SimTaDynWindow: public Gtk::Window

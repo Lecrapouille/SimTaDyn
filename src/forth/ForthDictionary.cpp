@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "ForthDictionary.hpp"
+#include <cstring>
 
 // **************************************************************
 //! Initialize dictionary states to obtain an empty dictionary
@@ -29,6 +30,9 @@ ForthDictionary::ForthDictionary()
   LOGI("Creating Forth dictionnary");
   m_here = 0U;
   m_last = 0U;
+
+  // Useless but valgrind is complaining else
+  std::memset(m_dictionary, 0u, DICTIONARY_SIZE);
 }
 
 ForthDictionary::~ForthDictionary()

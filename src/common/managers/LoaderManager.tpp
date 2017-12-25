@@ -23,7 +23,7 @@
 #  define LOADER_MANAGER_TPP_
 
 #  include "ILoader.hpp"
-#  include "Config.hpp"
+#  include "PathManager.hpp"
 #  include "Logger.hpp"
 
 // Inspired by: http://loulou.developpez.com/tutoriels/moteur3d/
@@ -96,7 +96,7 @@ public:
   void loadFromFile(std::string const& filename, T* &object) const
   {
     LOGI("Loading file '%s'", filename.c_str());
-    std::pair<std::string, bool> full_path = Config::instance().find(filename);
+    std::pair<std::string, bool> full_path = PathManager::instance().find(filename);
     if (!full_path.second)
       {
         // Note: probably useless because if the file does not exist
@@ -104,7 +104,7 @@ public:
         // a different message.
         std::string msg("The file '" + filename +
                         "' cannot be found in the given search path '" +
-                        Config::instance().toString() + "'");
+                        PathManager::instance().toString() + "'");
         notifyLoadFailure<T>(filename, msg);
         throw LoaderException(msg);
       }

@@ -150,6 +150,30 @@ public:
   }
 
   //------------------------------------------------------------------
+  //! \brief Generate the name of a temporary file or directory.
+  //! The name is made with the current date. There is no garanty that
+  //! directory does not already exists, therefore you have to check it
+  //! before calling mkdir().
+  //------------------------------------------------------------------
+  static std::string generateTempFileName(std::string const& root_path, std::string const& extension = "")
+  {
+    char buffer_time[32];
+    std::string path(root_path);
+    time_t current_time = time(nullptr);
+
+    strftime(buffer_time, sizeof (buffer_time), "%Y-%m-%d/", localtime(&current_time));
+    path += buffer_time;
+
+    strftime(buffer_time, sizeof (buffer_time), "%Hh-%Mm-%Ss", localtime(&current_time));
+    path += buffer_time;
+
+    // Optionaly: file extension
+    path += extension;
+
+    return path;
+  }
+
+  //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
   static bool mkdir(std::string const& path, mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO)

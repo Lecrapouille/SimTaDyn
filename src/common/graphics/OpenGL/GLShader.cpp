@@ -20,9 +20,6 @@
 
 #include "GLShader.hpp"
 #include <vector>
-#include <cassert>
-#include <fstream>
-#include <iostream>
 
 // **************************************************************
 //! \param vertex the identifer of the loaded vertex shader.

@@ -48,10 +48,6 @@ protected:
   //! \brief
   void unzip(std::string const &zip_file);
   bool zip(SimTaDynMap const& map, std::string const& filename);
-
-private:
-
-  std::string m_base_dir;
 };
 
 #endif

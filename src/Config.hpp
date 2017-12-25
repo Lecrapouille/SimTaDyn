@@ -21,56 +21,29 @@
 #ifndef CONFIG_HPP_
 #  define CONFIG_HPP_
 
-#  include "Singleton.tpp"
-#  include "Path.hpp"
 #  include "version.h"
-
-// **************************************************************
-//! \brief
-// **************************************************************
-class Config:
-  public Path,
-  public LazySingleton<Config>
-{
-private:
-
-  //------------------------------------------------------------------
-  //! \brief Mandatory by design.
-  //------------------------------------------------------------------
-  friend class LazySingleton<Config>;
-
-  //------------------------------------------------------------------
-  //! \brief Private because of Singleton.
-  //------------------------------------------------------------------
-  Config()
-  {
-    add(SIMTADYN_DATA_PATH);
-  }
-
-  //------------------------------------------------------------------
-  //! \brief Private because of Singleton. Check if resources is still
-  //! acquired which show a bug in the management of resources.
-  //------------------------------------------------------------------
-  ~Config() { };
-};
+#  include "File.hpp"
 
 namespace config
 {
   //! \brief
-  const char project_name[] = "SimTaDyn";
+  static const std::string project_name("SimTaDyn");
   //! \brief Major version of SimTaDyn
-  const uint32_t major_version = SIMTADYN_MAJOR_VERSION;
+  static const uint32_t major_version(SIMTADYN_MAJOR_VERSION);
   //! \brief Minor version of SimTaDyn
-  const uint32_t minor_version = SIMTADYN_MINOR_VERSION;
-  //! \brief
-  const char data_path[] = SIMTADYN_DATA_PATH;
+  static const uint32_t minor_version(SIMTADYN_MINOR_VERSION);
+  //! \brief Pathes where default SimTaDyn resources have been installed
+  //! (when called  by the shell command: sudo make install).
+  static const std::string data_path(SIMTADYN_DATA_PATH);
   //! \brief Location for storing temporary files
-  const char tmp_path[] = "/tmp/SimTaDyn/";
-  //! \brief
-  const char log_path[] = "SimTaDyn.log";
+  static const std::string tmp_path(File::generateTempFileName(SIMTADYN_TEMP_DIR, "/"));
+  //! \brief Give a name to the default project log file.
+  static const std::string log_name(project_name + ".log");
+  //! \brief Define the full path for SimTaDyn project.
+  static const std::string log_path(tmp_path + log_name);
   //! \brief Number of elements by pool in containers
   //! used for storing nodes and arcs in a graph
-  const uint32_t graph_container_nb_elements = 8U;
+  static const uint32_t graph_container_nb_elements(8U);
 }
 
 #endif /* CONFIG_HPP_ */

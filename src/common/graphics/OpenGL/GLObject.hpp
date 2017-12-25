@@ -32,7 +32,6 @@
 //! Distributed under the (new) BSD License.
 // **************************************************************
 
-#  include "Exception.hpp"
 #  include "OpenGL.hpp"
 #  include "ClassCounter.tpp"
 #  include "Logger.hpp"

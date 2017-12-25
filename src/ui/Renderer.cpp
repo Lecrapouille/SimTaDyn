@@ -1,10 +1,10 @@
 //=====================================================================
-// SimTaDyn: A GIS in a spreadsheet.
+// PathManager: A GIS in a spreadsheet.
 // Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
 //
-// This file is part of SimTaDyn.
+// This file is part of PathManager.
 //
-// SimTaDyn is free software: you can redistribute it and/or modify it
+// PathManager is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "Renderer.hpp"
+#include "PathManager.hpp"
 
 #  ifndef ARRAY_SIZE
 #    define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
@@ -151,15 +152,15 @@ bool GLRenderer::setupGraphics()
   m_pos.add(vertexData, ARRAY_SIZE(vertexData));
   m_tex.add(textureData, ARRAY_SIZE(textureData));
 
-  // Compile a shader program
-  if (0U == m_shader.load(Config::instance().expand("shaders/node.vertex"),
-                          Config::instance().expand("shaders/node.fragment")))
+  // Compile a shader program.
+  if (0U == m_shader.load(PathManager::instance().expand("shaders/node.vertex"),
+                          PathManager::instance().expand("shaders/node.fragment")))
     return false;
 
   // Configure the texture
   m_texture.interpolation(GL_LINEAR);
   m_texture.wrapping(GL_CLAMP_TO_EDGE);
-  if (false == m_texture.load(Config::instance().expand("textures/wooden-crate.jpg")))
+  if (false == m_texture.load(PathManager::instance().expand("textures/wooden-crate.jpg")))
     return false;
 
   // Tell to OpenGL how to manage VBO values. This fixes the size

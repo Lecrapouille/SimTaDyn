@@ -19,6 +19,8 @@
 //=====================================================================
 
 #include "Logger.hpp"
+#include "Config.hpp"
+#include <cstring>
 
 static const char *c_str_severity[logger::MaxLoggerSeverity + 1] =
   {
@@ -36,22 +38,37 @@ Logger::Logger(std::string const& filename)
   open(filename);
 }
 
+Logger::Logger()
+{
+  open(config::log_path);
+}
+
 Logger::~Logger()
 {
   close();
 }
 
-void Logger::open(std::string const& filename)
+void Logger::changeLog(std::string const& logfile)
 {
-  m_file.open(filename.c_str());
+  close();
+  open(logfile);
+}
+
+void Logger::open(std::string const& logfile)
+{
+  // Try to open the given log path
+  m_file.open(logfile.c_str());
   if (!m_file.is_open())
     {
-      std::string tmp_log_path(config::tmp_path);
-      tmp_log_path += filename;
-      m_file.open(tmp_log_path);
+      std::cerr << "Failed creating the log file '"
+                << logfile << "'. Reason is '"
+                << strerror(errno) << "'"
+                << std::endl;
     }
-  if (m_file.is_open())
+  else
     {
+      std::cout << "Log created: '" << logfile
+                << "'" << std::endl;
       header();
     }
 }
@@ -93,7 +110,7 @@ void Logger::header()
   log("===============================================\n"
       "  %s %u.%u - Event log - %s\n"
       "===============================================\n\n",
-      config::project_name,
+      config::project_name.c_str(),
       config::major_version,
       config::minor_version,
       m_buffer_time);
@@ -105,7 +122,8 @@ void Logger::footer()
   log("\n===============================================\n"
       "  %s log closed at %s\n"
       "===============================================\n\n",
-      config::project_name, m_buffer_time);
+      config::project_name.c_str(),
+      m_buffer_time);
 }
 
 ILogger& Logger::operator<<(const logger::LoggerSeverity& severity)

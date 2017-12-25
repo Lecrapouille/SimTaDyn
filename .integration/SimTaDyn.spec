@@ -35,6 +35,5 @@ rm -fr $RPM_BUILD_ROOT
 %{_datadir}/%{name}/%{version}/doc/*
 %{_datadir}/%{name}/%{version}/AUTHORS
 %{_datadir}/%{name}/%{version}/ChangeLog
-%{_datadir}/%{name}/%{version}/INSTALL
 %{_datadir}/%{name}/%{version}/LICENSE
 %{_datadir}/%{name}/%{version}/README.md

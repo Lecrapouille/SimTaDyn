@@ -23,52 +23,28 @@
 #include "SimForth.hpp"
 #include "zipper/unzipper.h"
 #include "zipper/zipper.h"
+#include "Config.hpp"
 #include <cstdio>
-
-std::string SimTaDynFileLoader::generateTempDirName() const
-{
-  char buffer_time[32];
-  std::string path(config::tmp_path);
-  time_t current_time = time(nullptr);
-
-  strftime(buffer_time, sizeof (buffer_time), "%Y-%m-%d/", localtime(&current_time));
-  path += buffer_time;
-
-  strftime(buffer_time, sizeof (buffer_time), "%Hh-%Mm-%Ss", localtime(&current_time));
-  path += buffer_time;
-
-  return path;
-}
 
 // FIXME password
 void SimTaDynFileLoader::unzip(std::string const &zip_file)
 {
   std::string msg;
 
-  m_base_dir = generateTempDirName();
-  if (File::mkdir(m_base_dir))
+  try
     {
-      try
-        {
-          zipper::Unzipper unzipper(zip_file);
-          if (false == unzipper.extract(m_base_dir))
-            {
-              msg = "Failed unzipping '" + zip_file
-                + "': could not extract '"
-                + m_base_dir + "' from the tarball";
-            }
-        }
-      catch (std::exception const&)
+      zipper::Unzipper unzipper(zip_file);
+      if (false == unzipper.extract(config::tmp_path))
         {
           msg = "Failed unzipping '" + zip_file
-            + "': could not locate this file";
+            + "': could not extract '"
+            + config::tmp_path + "' from the tarball";
         }
     }
-  else
+  catch (std::exception const&)
     {
       msg = "Failed unzipping '" + zip_file
-        + "': could not create the temporary folder '"
-        + m_base_dir + "'";
+        + "': could not locate this file";
     }
 
   if (!msg.empty())
@@ -92,8 +68,7 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap* 
     }
   current_project->m_name = File::baseName(filename);
   current_project->m_zip_path = filename;
-  current_project->m_base_dir = m_base_dir;
-  current_project->m_full_path = current_project->m_base_dir + '/' + current_project->m_name;
+  current_project->m_full_path = config::tmp_path + current_project->m_name;
 
   /* Path::instance().add(base_dir);
   forth = Forth::instance();

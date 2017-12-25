@@ -19,7 +19,7 @@
 //=====================================================================
 
 #include "Forth.hpp"
-//#include "SharedLibrary.hpp"
+#include "Config.hpp"
 #include <unistd.h>
 #include <memory>
 
@@ -58,6 +58,13 @@ static void test()
 
 int main(int argc,char *argv[])
 {
+  // Call it before Logger constructor
+  if (!File::mkdir(config::tmp_path))
+    {
+      std::cerr << "Failed creating the temporary directory '"
+                << config::tmp_path << "'" << std::endl;
+    }
+
   TextColor* color;
 
   // No option

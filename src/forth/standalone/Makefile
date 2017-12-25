@@ -23,49 +23,39 @@
 TARGET = SimForth
 
 ###################################################
-# Target version
-VERSION := $(shell cat ../../VERSION)
+# Location from the project root directory.
+P=../../..
 
 ###################################################
 # Sharable informations between all Makefiles
--include ../../../.makefile/Makefile.header
-
-###################################################
-# Path where to store the generated coverage docs
-DOC = ../doc/coverage
-# Path where to store lcov rapport
-RAPPORT = build/rapport.info
-
-###################################################
-# Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -I. -I.. -I../../../src/common/utils	\
--I../../../src/common/patterns -I../../../external/backward-cpp
-
-###################################################
-# Inform Makefile where to find *.cpp and *.o files
-VPATH=$(BUILD):.:..:../../../src/common/utils:../../../src/common/patterns:../../../external/backward-cpp
+M=$(P)/.makefile
+-include $(M)/Makefile.header
 
 ###################################################
 # List of files to compile. Splited by directories
+ifeq ($(PROJECT_MODE),debug)
 OBJ_EXTERNAL   = backward.o
-OBJ_UTILS      = Exception.o ILogger.o Logger.o
+else
+OBJ_EXTERNAL   =
+endif
+OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJ_STANDALONE =
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE) main.o
+OBJ_STANDALONE = main.o
+OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
 ###################################################
-# Compilation options. For knowing which libraries
-# is needed please read the doc/Install.md file.
-OPTIM = -O2
-CXXFLAGS = -W -Wall -Wextra -g -std=c++11
+# Debug mode or Release mode
+PROJECT_MODE = debug
+
+###################################################
+# Compilation options.
+CXXFLAGS = -W -Wall -Wextra -std=c++11
+LDFLAGS =
 
 ###################################################
 # Common defines
-PROJECT_DATA_PATH=$(DESTDIR)$(PREFIX)/share
-PROJECT_DATA_ROOT = $(DATADIR)/SimTaDyn/$(VERSION)
-PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
-SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES = $(SIMTADYN_DEFINES)
+SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += $(SIMTADYN_DEFINES)
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
@@ -75,19 +65,30 @@ LIBS =
 
 ###################################################
 # Set Libraries. For knowing which libraries
-# is needed please read the doc/Install.md file.
+# is needed please read the external/README.md file.
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS +=
+LIBS += -L/usr/local/lib
 
 ## Linux
 else ifeq ($(ARCHI),Linux)
-LIBS += -ldl -ldw
+LIBS += -ldl
 
 ## Windows
 else
+
 #$(error Unknown architecture)
+endif
+
+###################################################
+# Backward allows tracing stack when segfault happens
+ifeq ($(PROJECT_MODE),debug)
+OPTIM_FLAGS = -O2 -g
+DEFINES += -DBACKWARD_HAS_DW=1
+LIBS += -ldw
+else
+OPTIM_FLAGS = -O3
 endif
 
 ###################################################
@@ -106,34 +107,17 @@ $(TARGET): $(OBJ)
 
 ###################################################
 # Compile sources
-%.o: %.cpp $(BUILD)/%.d Makefile ../../../.makefile/Makefile.header ../../../.makefile/Makefile.footer version.h
+%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
-
-###################################################
-# Generate the rapport of the code coverage
-.PHONY: coverage
-coverage: $(TARGET)
-	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	@./build/$(TARGET) || cat SimTaDyn.log
-	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
-	@lcov --quiet --directory .. -c -o $(RAPPORT)
-	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)
-	@genhtml --quiet -o $(DOC) -t "SimForth" $(RAPPORT)
 
 ###################################################
 .PHONY: clean
 clean:
 	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr *~ ../*~ $(BUILD) coverage_report 2> /dev/null
-
-###################################################
-# Generate a header file with the project version
-version.h: VERSION
-	@$(call print-from,"Version","$(TARGET)","VERSION","")
-	@../../../.makefile/version.sh VERSION $(BUILD)/version.h
+	@rm -fr *~ ../*~ $(BUILD) 2> /dev/null
 
 ###################################################
 # Sharable informations between all Makefiles
--include ../../../.makefile/Makefile.footer
+-include $(M)/Makefile.footer

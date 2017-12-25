@@ -21,8 +21,8 @@
 #ifndef LOGGER_HPP_
 #  define LOGGER_HPP_
 
+#  include "Singleton.tpp"
 #  include "ILogger.hpp"
-#  include "Config.hpp"
 //#  include "TextColor.hpp"
 
 class Logger: public FileLogger, public LazySingleton<Logger>
@@ -31,10 +31,21 @@ class Logger: public FileLogger, public LazySingleton<Logger>
 
 public:
 
-  Logger(std::string const& filename = config::log_path);
+  Logger();
+  Logger(std::string const& logfile);
   virtual ~Logger();
+  void changeLog(std::string const& logfile);
   ILogger& operator<<(const logger::LoggerSeverity& severity);
   ILogger& operator<<(const char *msg);
+
+  // FIXME: en double avec File::fileName
+  inline static std::string fileName(std::string const& path)
+  {
+    std::string::size_type pos = path.find_last_of("\\/");
+    if (pos != std::string::npos)
+      return path.substr(pos + 1, std::string::npos);
+    return path;
+  }
 
 protected:
 
@@ -58,7 +69,7 @@ private:
   std::ofstream m_file;
 };
 
-#define SHORT_FILENAME File::fileName(__FILE__).c_str()
+#define SHORT_FILENAME Logger::fileName(__FILE__).c_str()
 
 //! \brief Log C++ like. Example:  CPP_LOG(logger::Fatal) << "test\n";
 #define CPP_LOG(severity, ...)                                          \
