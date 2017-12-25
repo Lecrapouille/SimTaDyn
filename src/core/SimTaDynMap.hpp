@@ -21,15 +21,14 @@
 #ifndef SIMTADYN_MAP_HPP_
 #  define SIMTADYN_MAP_HPP_
 
-#  include "ResourceManager.tpp"
-#  include "SimTaDynGraph.hpp"
+#  include "SimTaDynSheet.hpp"
 #  include "SceneGraph.tpp"
 
 class SimTaDynMap;
-typedef SceneNode<SimTaDynGraph, float, 3U> SceneNode_t;
+typedef SceneNode<SimTaDynSheet, float, 3U> SceneNode_t;
 
 // ***********************************************************************************************
-//! \brief This interface is used to define methods
+//! \brief This interface is used to define callbacks from SimTaDyn Map events.
 // ***********************************************************************************************
 class ISimTaDynMapListener
 {
@@ -44,9 +43,9 @@ public:
 
 // *************************************************************************************************
 //! \brief This class defines a SimTaDyn geographic map. It contains, nodes, arcs, Forth scripts,
-//! OpenGL datum for the display. It immplements the observable (aka listenable) design pattern:
+//! OpenGL datum for the display. It implements the observable (aka listenable) design pattern:
 //! When the map changes, it notifies to all observers which have subscribed to this map (for example
-//! the MVC design pattern, where SimTaDynMap is the model).
+//! a MVC design pattern, where SimTaDynMap is the model, for the GUI).
 // *************************************************************************************************
 class SimTaDynMap
   : public IResource<Key>,
@@ -89,12 +88,12 @@ public:
     // TODO
   }
 
-  SimTaDynGraph* graph()
+  SimTaDynSheet* sheet()
   {
-    if (nullptr == m_graphs.root())
+    if (nullptr == m_sheets.root())
       return nullptr;
 
-    return m_graphs.root()->mesh();
+    return m_sheets.root()->mesh();
   }
 
     //! \brief Attach a new listener to map events.
@@ -127,40 +126,18 @@ public:
       }
   }
 
-  //! \brief For debug purpose.
-  /*virtual void debug() //FIXME const
-  {
-    std::cout << "I am SimTaDynMap #" << m_id << " named '" << m_name << "':"
-              << std::endl << "{"
-              << std::endl << "  " << m_graphs.bbox() << std::endl
-              << "  List of nodes (" << m_graphs.nodes().blocks() << " blocks):"
-              << std::endl;
-
-    // FIXME: ajouter un forEach
-    auto end = m_graphs.nodes().end();
-    auto it = m_graphs.nodes().begin();
-    for (; it != end; ++it)
-      {
-        std::cout << "    " << (*it) << " " << pos[it->m_dataKey]
-                  << std::endl;
-      }
-    std::cout << "}" << std::endl;
-    }*/
-
   inline bool modified() const
   {
     return (m_nb_graphs_modified > 0U) || (m_nb_scripts_modified > 0U);
   }
-
-public:
 
   void draw()
   {
     LOGI("SimTaDynMap.drawnBy 0x%x", this);
     LOGI("SimTaDynMap #%u %s drawnBy renderer",  m_id, m_name.c_str());
 
-    if (nullptr != m_graphs.root())
-      draw(*(m_graphs.root()));
+    //if (nullptr != m_sheets.root())
+    //  draw(*(m_sheets.root()));
   }
 
 private:
@@ -176,12 +153,12 @@ private:
   {
     LOGI("Renderer:drawNode '%s'", node.m_name.c_str());
 
-    SimTaDynGraph *m = node.mesh();
-    if (nullptr != m)
+    SimTaDynSheet *mesh = node.mesh();
+    if (nullptr != mesh)
       {
         //Matrix44f transform = matrix::scale(node.worldTransform(), node.localScale());
         //setUniform("model", transform);
-        m->draw(GL_POINTS);
+        mesh->draw(GL_POINTS);
       }
 
     std::vector<SceneNode_t*> const &children = node.children();
@@ -191,11 +168,6 @@ private:
       }
   }
 
-protected:
-
-  //! \brief List of observers attached to this map events.
-  std::vector<ISimTaDynMapListener*> m_listeners;
-
 public:
 
   //! \brief Give a name to the element which will be displayed in the
@@ -204,7 +176,7 @@ public:
   std::string m_name;
 
   //! \brief the map structured as a graph.
-  SceneGraph<SimTaDynGraph, float, 3U> m_graphs; // FIXME *m_graphs ???
+  SceneGraph<SimTaDynSheet, float, 3U> m_sheets; // FIXME *m_sheets ???
 
   //! \brief List of Forth scripts.
   std::vector<std::string> m_scripts_forth;
@@ -215,6 +187,11 @@ public:
 
   uint32_t m_nb_graphs_modified = 0U;
   uint32_t m_nb_scripts_modified = 0U;
+
+private:
+
+  //! \brief List of observers attached to this map events.
+  std::vector<ISimTaDynMapListener*> m_listeners;
 };
 
 // *************************************************************************************************
@@ -249,7 +226,7 @@ public:
         m_map = p;
         rm.acquire(m_map->id());
         //m_map->notify(); // TODO ---> DrawingArea::onNotify(){>attachModel(*map);} mais PendingData le fait deja
-        // TODO: notify to SimForth to get the address of the scenegraph<SimTaDynGraph>
+        // TODO: notify to SimForth to get the address of the scenegraph<SimTaDynSheet>
       }
   }
 

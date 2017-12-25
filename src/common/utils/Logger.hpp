@@ -23,6 +23,7 @@
 
 #  include "Singleton.tpp"
 #  include "ILogger.hpp"
+#  include "Config.hpp"
 //#  include "TextColor.hpp"
 
 class Logger: public FileLogger, public LazySingleton<Logger>
@@ -69,34 +70,59 @@ private:
   std::ofstream m_file;
 };
 
-#define SHORT_FILENAME Logger::fileName(__FILE__).c_str()
+#  define SHORT_FILENAME Logger::fileName(__FILE__).c_str()
 
 //! \brief Log C++ like. Example:  CPP_LOG(logger::Fatal) << "test\n";
-#define CPP_LOG(severity, ...)                                          \
+#  define CPP_LOG(severity, ...)                                        \
   Logger::instance() << Logger::instance().strtime();                   \
   Logger::instance() << severity << '[' << SHORT_FILENAME << "::" << __LINE__ << "] "
 
-
 //! \brief Basic log without severity or file and line information. 'B' for Basic.
-#define LOGB(...)         Logger::instance().log(nullptr, logger::None, __VA_ARGS__)
-//! \brief Information Log.
-#define LOGI(format, ...) Logger::instance().log(nullptr, logger::Info, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-//! \brief Debug Log.
-#define LOGD(format, ...) Logger::instance().log(nullptr, logger::Debug, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-//! \brief Warning Log.
-#define LOGW(format, ...) Logger::instance().log(nullptr, logger::Warning, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-//! \brief Failure Log.
-#define LOGF(format, ...) Logger::instance().log(nullptr, logger::Failed, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-//! \brief Error Log.
-#define LOGE(format, ...) Logger::instance().log(nullptr, logger::Error, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-//! \brief Fatal Log.
-#define LOGX(format, ...) Logger::instance().log(nullptr, logger::Fatal, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
+#  define LOGB(...)         \
+  do { Logger::instance().log(nullptr, logger::None, __VA_ARGS__); } while (0)
 
-#define LOGIS(format, ...) Logger::instance().log(&std::cout, logger::Info, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-#define LOGDS(format, ...) Logger::instance().log(&std::cout, logger::Debug, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-#define LOGWS(format, ...) Logger::instance().log(&std::cerr, logger::Warning, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-#define LOGFS(format, ...) Logger::instance().log(&std::cerr, logger::Failed, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-#define LOGES(format, ...) Logger::instance().log(&std::cerr, logger::Error, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
-#define LOGXS(format, ...) Logger::instance().log(&std::cerr, logger::Fatal, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__)
+//! \brief Information Log.
+#  define LOGI(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Info, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+//! \brief Debug Log.
+#  define LOGD(format, ...) \
+  do { if (config::Debug == config::mode) {                             \
+      Logger::instance().log(nullptr, logger::Debug, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); \
+  } } while (0)
+
+//! \brief Warning Log.
+#  define LOGW(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Warning, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+//! \brief Failure Log.
+#  define LOGF(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Failed, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+//! \brief Error Log.
+#  define LOGE(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Error, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+//! \brief Fatal Log.
+#  define LOGX(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Fatal, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGIS(format, ...) \
+  do { Logger::instance().log(&std::cout, logger::Info, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGDS(format, ...) \
+  do { Logger::instance().log(&std::cout, logger::Debug, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGWS(format, ...) \
+  do { Logger::instance().log(&std::cerr, logger::Warning, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGFS(format, ...) \
+  do { Logger::instance().log(&std::cerr, logger::Failed, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGES(format, ...) \
+  do { Logger::instance().log(&std::cerr, logger::Error, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGXS(format, ...) \
+  do { Logger::instance().log(&std::cerr, logger::Fatal, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #endif /* LOGGER_HPP_ */

@@ -24,6 +24,9 @@
 
 #  include "Collection.tpp"
 
+namespace graphtheory
+{
+
 #define MODULO(a, b)             ((a) & ((b) - 1U))
 
 // **************************************************************
@@ -126,5 +129,7 @@ public:
       }
   }
 };
+
+} // namespace graphtheory
 
 #endif /* GRAPHCONTAINER_TPP_ */

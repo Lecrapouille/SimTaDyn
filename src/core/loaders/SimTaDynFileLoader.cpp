@@ -20,7 +20,7 @@
 
 #include "SimTaDynFileLoader.hpp"
 #include "File.hpp"
-#include "SimForth.hpp"
+#include "SimTaDynForth.hpp"
 #include "zipper/unzipper.h"
 #include "zipper/zipper.h"
 #include "Config.hpp"

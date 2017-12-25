@@ -1,234 +1,370 @@
-//=====================================================================
-// SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
-//
-// This file is part of SimTaDyn.
-//
-// SimTaDyn is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
-//=====================================================================
+#ifndef SIMTADYN_GRAPH_HPP_
+#  define SIMTADYN_GRAPH_HPP_
 
-#ifndef SIMTADYNGRAPH_HPP_
-#  define SIMTADYNGRAPH_HPP_
+//#  include "Graph.hpp"
+#  include "GraphAlgorithm.hpp"
+#  include <initializer_list>
 
-#  include "CellForth.hpp"
-#  include "Graph.hpp"
-#  include "BoundingBox.tpp"
-#  include "IResource.tpp"
+namespace graphtheory
+{
+
+class Zone;
+class ExtArc;
 
 // **************************************************************
 //
 // **************************************************************
-class SimTaDynNode: public BasicNode, public CellForth
+class Zone: private UniqueID<Zone>
 {
 public:
 
-  SimTaDynNode()
-    : BasicNode(), CellForth()
+  Zone()
   {
-    init();
   }
 
-  SimTaDynNode(const Key nodeID)
-    : BasicNode(nodeID), CellForth()
+  //! \brief! Constructor.
+  //! \param id the unique indentifier.
+  //! \param fromNode the reference of an existing node for the tail.
+  //! \param toNode the reference of an existing node for the head.
+  Zone(const Key id, std::initializer_list<Arc*> arcs)
+    : m_id((id & ~GraphElementId::MASK) | GraphElementId::ZONE),
+      m_arcs(arcs)
   {
-    init();
   }
 
-  SimTaDynNode(BasicNode const& node)
-    : BasicNode(node), CellForth()
+  //! \brief Constructor by copy.
+  //! \param arc the reference of an existing arc.
+  Zone(Zone const& zone)
+    : UniqueID<Zone>(),
+      m_id(zone.id() | GraphElementId::ZONE),
+      m_arcs(zone.m_arcs)
   {
-    init();
   }
 
-protected:
-
-  inline void setName() override
+  //! \brief Self copy. Used for the constructor by copy.
+  Zone* clone() const
   {
-    m_name = "Node" + std::to_string(id());
+    return new Zone(*this);
   }
 
-private:
-
-  inline void init()
-  {
-    setName();
-    m_dataKey = id();
-  }
-
-public:
-
-  //! \brief Key to database
-  Key m_dataKey;
-};
-
-// **************************************************************
-//
-// **************************************************************
-class SimTaDynArc: public BasicArc, public CellForth
-{
-public:
-
-  SimTaDynArc()
-    : BasicArc(), CellForth()
-  {
-    init();
-  }
-
-  SimTaDynArc(const Key id, BasicNode& fromNode, BasicNode& toNode)
-    : BasicArc(id, fromNode, toNode), CellForth()
-  {
-    init();
-  }
-
-  SimTaDynArc(BasicArc const& arc)
-    : BasicArc(arc), CellForth()
-  {
-    init();
-  }
-
-protected:
-
-  inline void setName()
-  {
-    m_name = "Arc" + std::to_string(id());
-  }
-
-private:
-
-  inline void init()
-  {
-    setName();
-    m_dataKey = id();
-  }
-
-public:
-
-  //! \brief Key to database
-  Key m_dataKey;
-};
-
-#  include "Vertex.hpp"
-#  include "GLCollection.tpp"
-#  include "RTree.hpp"
-
-// **************************************************************
-//
-// **************************************************************
-class SimTaDynGraph
-  : public BasicGraph<SimTaDynNode, SimTaDynArc>,
-    public IResource<Key>,
-    private UniqueID<SimTaDynGraph>
-{
-public:
-
-  SimTaDynGraph(const bool directed = true)
-    : BasicGraph<SimTaDynNode, SimTaDynArc>(directed),
-      IResource(UniqueID<SimTaDynGraph>::getID())
-  {
-    LOGI("New SimTaDynGraph with generic name '%s' and ID #%u\n", m_name.c_str(), m_id);
-  }
-
-  SimTaDynGraph(std::string const& name,
-                const bool directed = true)
-    : BasicGraph<SimTaDynNode, SimTaDynArc>(name, directed),
-      IResource(UniqueID<SimTaDynGraph>::getID())
-  {
-    LOGI("Creating SimTaDynGraph named '%s' with ID #%u\n", m_name.c_str(), m_id);
-  }
-
-  SimTaDynGraph(const uint32_t noNodes,
-                const uint32_t noArcs,
-                const bool directed = true)
-    : BasicGraph<SimTaDynNode, SimTaDynArc>(noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynGraph>::getID())
-  {
-    LOGI("New SimTaDynGraph with generic name '%s' and ID #%u\n", m_name.c_str(), m_id);
-  }
-
-  SimTaDynGraph(std::string const& name,
-                const uint32_t noNodes,
-                const uint32_t noArcs,
-                const bool directed = true)
-    : BasicGraph<SimTaDynNode, SimTaDynArc>(name, noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynGraph>::getID())
-  {
-    LOGI("Creating SimTaDynGraph named '%s' with ID #%u\n", m_name.c_str(), m_id);
-  }
-
-  //! \brief Destructor.
-  ~SimTaDynGraph()
-  {
-    LOGI("Deleting SimTaDynGraph #%u named '%s'\n", m_id, m_name.c_str());
-  }
+  //! \brief Virtual destructor.
+  virtual ~Zone() {}
 
   //! \brief Return the unique identifier.
-  operator int()
+  inline virtual Key id() const { return m_id; }
+
+  //! \brief Return the unique identifier.
+  operator int() { return m_id; }
+
+  inline const std::string name() const
   {
-    return m_id;
+    return "Z" + std::to_string(id());
   }
 
-  //! \brief Return the Axis Aligned Bounding Box containing all elements of the map.
-  inline AABB3f const& bbox() const
+  //! \brief Return the reference of the arc.
+  inline Arc *arc(const uint32_t nth) { return m_arcs.at(nth); }
+
+  //! \brief Compare the unique identifier of this node with the unique
+  // identifier of another node.
+  inline bool operator==(const Zone& rhs) const
   {
-    // FIXME: a faire par la suite m_spatial_index.root.bbox()
-    return m_bbox;
+    return (m_id == rhs.m_id) /*&& (m_fromNode == rhs.m_fromNode) &&
+                                (m_toNode == rhs.m_toNode)*/
+      ;
   }
 
-  SimTaDynNode& addNode(Vector3f const& p)
+  //! \brief Compare the unique identifier of this node with the unique
+  // identifier of another node.
+  inline bool operator!=(const Zone& rhs) const
   {
-    LOGI("Add a new node to SimTaDynGraph #%u %s\n", m_id, m_name.c_str());
-    SimTaDynNode& n = BasicGraph<SimTaDynNode, SimTaDynArc>::addNode();
-    pos.append(p / 10.0f + 0.1f * id());
-    col.append(Color(1.0f, 0.0f, 0.0f));
+    return !(*this == rhs);
+  }
 
+  //! \brief Compare the unique identifier of this node with a given
+  // identifier.
+  inline bool operator==(const Key& rhs) const
+  {
+    return m_id == rhs;
+  }
+
+  //! \brief Compare the unique identifier of this node with a given
+  // identifier.
+  inline bool operator!=(const Key& rhs) const
+  {
+    return !(*this == rhs);
+  }
+
+protected:
+
+  //! \brief Make an instance unique with this identifier.
+  //! Used it for comparing element in a container.
+  Key m_id;
+  //! \brief the tail of the arc.
+  std::vector<Arc*> m_arcs;
+};
+
+// *************************************************************************************************
+//! \brief Extended Arc. Knows zones as neighbors.
+// *************************************************************************************************
+class ExtArc: public Arc
+{
+public:
+
+  ExtArc()
+    : Arc()
+  {
+  }
+
+  //! \brief! Constructor.
+  //! \param id the unique indentifier.
+  //! \param fromNode the reference of an existing node for the tail.
+  //! \param toNode the reference of an existing node for the head.
+  ExtArc(const Key id, Node& fromNode, Node& toNode)
+    : Arc(id, fromNode, toNode)
+  {
+  }
+
+  //! \brief Constructor by copy.
+  //! \param arc the reference of an existing arc.
+  ExtArc(ExtArc const& arc)
+    : Arc(arc)
+  {
+    m_zones = arc.m_zones;
+  }
+
+  //! \brief add a new node neighbor refered by its link
+  inline void addNeighbor(Zone& zone)
+  {
+    //LOGI("Node ID %u: Add the arc ID %u as neighbor\n", m_id, arc);
+    m_zones.push_back(&zone);
+  }
+
+  //! \brief Remove all neighbors
+  inline void removeAllNeighbors()
+  {
+    m_zones.clear();
+  }
+
+  //! \brief Remove the arc neighbor of a node refered by its unique
+  //! identifier. If index is incorrect nothing is done and no error
+  //! is returned. Complexity is O(n) where n is the number of
+  //! neighbors.
+  //! \param arcID the unique identifier of the arc to be removed.
+  inline void removeNeighbor(const Key zoneID)
+  {
+    LOGIS("Arc ID %u: Remove the zone ID %u as neighbor\n", m_id, zoneID);
+
+    // Temporary structure for comparing uniques identifiers.
+    struct isValue
+    {
+      Key m_id;
+      isValue(const Key id) : m_id(id) {}
+      bool operator()(const Zone *zone) const
+      {
+        return (zone->id() == m_id);
+      }
+    };
+
+    // Search and remove
+    auto end = m_zones.end();
+    auto it = std::find_if(m_zones.begin(), end, isValue(zoneID));
+    if (it != end)
+      {
+        remove(it);
+      }
+  }
+
+  //! \brief Remove the nth arc neighbor of a node. No memory are
+  //! released and do not do it before calling this function. If the
+  //! index if incorrect no error is returned and nothing is
+  //! done. Complexity is O(1).
+  //! \param nth the nth element of the list of neighbor.
+  inline void removeNthNeighbor(const uint32_t nth)
+  {
+    LOGIS("Arc ID %u: Remove its %u'nth zone ID neighbor\n", m_id, nth);
+    if (nth < m_zones.size())
+      {
+        remove(m_zones.begin() + nth);
+      }
+  }
+
+  //! \brief Return the address of the nth neighbor refered by its
+  //! arc. Complexity is O(1).
+  //! \param nth the nth element of the list of neighbor.
+  //! \return the address of the arc, else nullptr if the index is
+  //! incorrect.
+  inline Zone *neighbor(const uint32_t nth)
+  {
+    if (nth < m_zones.size())
+      {
+        return m_zones.at(nth);
+      }
+    return nullptr;
+  }
+
+  //! \brief Return the address of the nth neighbor refered by its
+  //! arc. Complexity is O(1).
+  //! \param nth the nth element of the list of neighbor.
+  //! \return the address of the arc, else nullptr if the index is
+  //! incorrect.
+  inline const Zone *neighbor(const uint32_t nth) const
+  {
+    if (nth < m_zones.size())
+      {
+        return m_zones.at(nth);
+      }
+    return nullptr;
+  }
+
+  inline const Zone &nthNeighbor(const uint32_t nth) const
+  {
+    return *(m_zones[nth]);
+  }
+
+  inline Zone &nthNeighbor(const uint32_t nth)
+  {
+    return *(m_zones[nth]);
+  }
+
+  //! \brief Return the list of neighbors.
+  inline const std::vector<Zone*> &neighbors() const
+  {
+    return m_zones;
+  }
+
+  //! \brief Return the number of neighbors. Complexity is O(1).
+  inline uint32_t degree() const
+  {
+    return m_zones.size();
+  }
+
+protected:
+
+  //! \brief Swap element to be removed with the last element and then
+  //! remove the item at the end of the container. This prevents
+  //! moving all items after the one removed (complexity
+  //! O(n)). Complexity is O(1).
+  void remove(std::vector<Zone*>::iterator const& it)
+  {
+    *it = m_zones.back();
+    m_zones.pop_back();
+  }
+
+protected:
+
+  //! \brief the list of node neighbors refered by their arc starting
+  //! from this node. We prefer sacrificed memory than reducing
+  //! computations for looking for neighbors.
+  std::vector<Zone*> m_zones;
+};
+
+// *************************************************************************************************
+//! \brief SimTaDynGraph is a classic Graph extended to have zones. A zone is delimited by a set of
+//! graph arcs.
+// *************************************************************************************************
+template <class Node, class Arc, class Zone>
+class SimTaDynGraph: public Graph<Node, Arc>
+{
+public:
+
+  typedef GraphContainer<Zone, config::graph_container_nb_elements, GraphBlock> blockzones_t; // FIXME should be a Set not a Collection
+
+  SimTaDynGraph(const bool directed = true)
+    : Graph<Node, Arc>(directed)
+  {
+    UniqueID<Zone>::resetID();
+  }
+
+  SimTaDynGraph(const char* name, const bool directed = true)
+    : Graph<Node, Arc>(name, directed)
+  {
+    UniqueID<Zone>::resetID();
+  }
+
+  SimTaDynGraph(std::string const& name, const bool directed = true)
+    : Graph<Node, Arc>(name, directed)
+  {
+    UniqueID<Zone>::resetID();
+  }
+
+  //! \brief Constructor. Reserve memory for the given
+  //! number of nodes and arcs.
+  SimTaDynGraph(const uint32_t noNodes,
+          const uint32_t noArcs,
+          const bool directed = true)
+    : Graph<Node, Arc>(noNodes, noArcs, directed)
+  {
+    UniqueID<Zone>::resetID();
+  }
+
+  SimTaDynGraph(std::string const& name,
+          const uint32_t noNodes,
+          const uint32_t noArcs,
+          const bool directed = true)
+    : Graph<Node, Arc>(name, noNodes, noArcs, directed)
+  {
+    UniqueID<Zone>::resetID();
+  }
+
+  SimTaDynGraph(const char* name,
+          const uint32_t noNodes,
+          const uint32_t noArcs,
+          const bool directed = true)
+    : Graph<Node, Arc>(name, noNodes, noArcs, directed)
+  {
+    UniqueID<Zone>::resetID();
+  }
+
+  Node& addNode(const std::string formulae)
+  {
+    Node& n = Graph<Node, Arc>::addNode();
+    n.formulae(formulae);
     return n;
   }
 
-  void draw(GLuint const /*type*/)
+  // TODO ajouter addZone, removeZone, hasZone, markZone ...
+
+  void addZone(Arc const& a1, Arc const& a2, Arc const& a3)
   {
-    /*LOGI("SimTaDynMap.drawnBy 0x%x", this);
-    LOGI("SimTaDynMap #%u %s drawnBy renderer",  m_id, m_name.c_str());
-
-    if (pos.blocks() != col.blocks())
-      {
-        LOGI("Incompatible number of elements in VBO");
-        return ;
-      }
-
-    // Draw nodes
-    uint32_t i = pos.blocks();
-    while (i--)
-      {
-        col.block(i)->begin();
-        renderer.m_colAttrib.begin();
-
-        pos.block(i)->begin();
-        renderer.m_posAttrib.begin();
-        pos.block(i)->draw(GL_POINTS, renderer.m_posAttrib);
-      }*/
+    std::cout << "AddZone " << a1 << " -- " << a2 << " -- " << a3 << "\n";
+    addArc(a1);
+    addArc(a2);
+    addArc(a3);
+    //private_addZone(getNode(fromNode.id()), getNode(toNode.id()));
   }
 
-public: // FIXME
+  inline bool hasZone(const Key zoneID) const
+  {
+    if (m_zones.outofbound(zoneID))
+      return false;
+    return m_zones.occupied(zoneID);
+  }
 
-  //! \brief Spatial index: drawble rtree
-  //RTreeNode* m_rtree;
-  //! \brief Axis Align Bounding box of the map
-  //! FIXME: TEMPORAIRE car sera donner par Rtree.bbox()
-  AABB3f m_bbox;
-  std::string m_name;
-  GLVertexCollection<Vector3f, config::graph_container_nb_elements> pos;
-  GLVertexCollection<Color, config::graph_container_nb_elements> col;
+  //! \brief Return the number of zones constituing the
+  //! graph. Complexity is O(1).
+  inline uint32_t howManyZones() const
+  {
+    return m_zones.used();
+  }
+
+protected:
+
+  //! \brief the list of zones constituing the graph.
+  blockzones_t m_zones;
 };
 
-#endif /* SIMTADYNGRAPH_HPP_ */
+  //using SimTaDynGraph_t = SimTaDynGraph<Node, ExtArc, Zone>;
+
+// *************************************************************************************************
+//! \brief SimTaDynGraph is a classic Graph extended to have zones. A zone is delimited by a set of
+//! graph arcs.
+// *************************************************************************************************
+//template <class Node, class Arc, class Zone2D, class Zone3D>
+//class Graph3D: public SimTaDynGraph<Node,Arc,Zone2D>
+//{
+//};
+//using Graph3D_t = Graph3D<Node, ExtArc, ExtendedZone, BasicZone3D>;
+
+} // namespace graphtheory
+
+#endif

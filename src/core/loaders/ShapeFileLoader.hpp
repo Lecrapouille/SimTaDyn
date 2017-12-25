@@ -22,21 +22,23 @@
 #  define SHAPEFILELOADER_HPP_
 
 #  include "ILoader.hpp"
-#  include "SimTaDynGraph.hpp"
+#  include "SimTaDynSheet.hpp"
+#  include "BoundingBox.tpp"
 
 // ***********************************************************************************************
 //! \brief
 // ***********************************************************************************************
-class ShapefileLoader : public ILoader<SimTaDynGraph>
+class ShapefileLoader : public ILoader<SimTaDynSheet>
 {
 public:
 
   ShapefileLoader()
-    : ILoader<SimTaDynGraph>("Shapefile")
+    : ILoader<SimTaDynSheet>("Shapefile")
   {
     LOGI("Creating a Shapefile loader %p", this);
   }
-  virtual void loadFromFile(std::string const& filename, SimTaDynGraph* &graph) override;
+
+  virtual void loadFromFile(std::string const& filename, SimTaDynSheet* &sheet) override;
 
 protected:
 
@@ -53,8 +55,8 @@ protected:
   uint32_t     getShapeType();
   void         getBoundingBox(Vector3f& bbox_min, Vector3f& bbox_max);
   void         getBoundingBox(AABB3f& bbox);
-  uint32_t     getRecordAt(SimTaDynGraph& graph, const uint32_t offset);
-  void         getAllRecords(SimTaDynGraph& graph);
+  uint32_t     getRecordAt(SimTaDynSheet& sheet, const uint32_t offset);
+  void         getAllRecords(SimTaDynSheet& sheet);
 
   std::ifstream m_infile;
   std::string   m_filename;

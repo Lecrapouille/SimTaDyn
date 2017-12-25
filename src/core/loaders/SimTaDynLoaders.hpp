@@ -26,7 +26,7 @@
 
 #  include "Utilities/GenHierarchies.h"
 
-typedef TYPELIST_2(SimTaDynGraph, SimTaDynMap) ResourceList;
+typedef TYPELIST_2(SimTaDynSheet, SimTaDynMap) ResourceList;
 
 #  include "LoaderManager.tpp"
 

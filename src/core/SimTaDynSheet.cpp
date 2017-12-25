@@ -18,4 +18,41 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimTaDynGraph.hpp"
+#include "SimTaDynSheet.hpp"
+
+ASpreadSheetCell *SimTaDynSheet::isACell(std::string const& word)
+{
+  if (('A' != word[0]) && ('N' != word[0]) && ('Z' != word[0]))
+    return nullptr;
+
+  // Get the unique ID
+  Key id = 0u;
+  uint32_t i = 1u;
+  while ((word[i] != '\0') && (word[i] >= '0') && (word[i] <= '9'))
+    {
+      id = id * 10U + word[i] - '0';
+      ++i;
+    }
+
+  // End of the word
+  if (word[i] == '\0')
+    {
+      if ('N' == word[0])
+        {
+          std::cout << "Found Node " << id << std::endl;
+          return &getNode(id);
+        }
+      if ('A' == word[0])
+        {
+          std::cout << "Found Arc " << id << std::endl;
+          return &getArc(id);
+        }
+      if ('Z' == word[0])
+        {
+          std::cout << "Found Zone TODO" << id << std::endl;
+          return nullptr; // &getZone(id); //FIXME a finir
+        }
+    }
+
+  return nullptr;
+}

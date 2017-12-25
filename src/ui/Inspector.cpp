@@ -57,11 +57,11 @@ void Inspector::showCell(const Key nodeID)
     return ;
 
   // FIXME: parcours du SceneGraph
-  SimTaDynGraph *graph = map->graph();
-  if ((nullptr == graph) || (!graph->hasNode(nodeID)))
-    return ;
+  //SimTaDynSheet *sheet = map->sheet();
+  //if ((nullptr == sheet) || (!sheet->hasNode(nodeID)))
+  //  return ;
 
-  SimTaDynNode& node = graph->getNode(nodeID);
+  CellNode node;//FIXME CellNode& node = sheet->getNode(nodeID);
 
   m_ref_tree_model->clear();
 
@@ -71,9 +71,9 @@ void Inspector::showCell(const Key nodeID)
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Forth";
-  row[m_columns.m_token] = node.forthWord();
+  row[m_columns.m_token] = node.formulae();
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Cost";
-  row[m_columns.m_token] = std::to_string(node.m_cost);
+  row[m_columns.m_token] = std::to_string(node.value());
 }

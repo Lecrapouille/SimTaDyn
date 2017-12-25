@@ -229,7 +229,7 @@ void ShapefileLoader::getBoundingBox(AABB3f& bbox)
   bbox.m_bbmax.z = readDoubleCastedFloat();
 }
 
-uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offset)
+uint32_t ShapefileLoader::getRecordAt(SimTaDynSheet& sheet, const uint32_t offset)
 {
   uint32_t record_number, content_length, shape_type;
 
@@ -248,13 +248,15 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offse
       m_point.x = readDoubleCastedFloat();
       m_point.y = readDoubleCastedFloat();
       m_point.z = 0.0f;
-      graph.addNode(m_point);
+      //sheet.addNode(m_point);
+      std::cerr<<"addNode not implemented" << std::endl;
       break;
     case 11: // PointZ
       m_point.x = readDoubleCastedFloat();
       m_point.y = readDoubleCastedFloat();
       m_point.z = readDoubleCastedFloat();
-      graph.addNode(m_point);
+      //sheet.addNode(m_point);
+      std::cerr<<"addNode not implemented" << std::endl;
       break;
     default:
       std::cout << "  Shape " << shapeTypes(shape_type) << " not yet managed. Ignored !" << std::endl;
@@ -264,7 +266,7 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynGraph& graph, const uint32_t offse
   return content_length + 8U; // 8U: record header
 }
 
-void ShapefileLoader::getAllRecords(SimTaDynGraph& graph)
+void ShapefileLoader::getAllRecords(SimTaDynSheet& sheet)
 {
   uint32_t content_length;
   uint32_t offset = 100U;
@@ -274,17 +276,17 @@ void ShapefileLoader::getAllRecords(SimTaDynGraph& graph)
       if (m_infile.eof())
         break;
 
-      content_length = getRecordAt(graph, offset);
+      content_length = getRecordAt(sheet, offset);
       offset += content_length;
     }
 }
 
-void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynGraph* &current_graph)
+void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynSheet* &current_sheet)
 {
-  bool dummy_map = (nullptr == current_graph);
+  bool dummy_sheet = (nullptr == current_sheet);
 
   LOGI("Loading the shapefile '%s' in an %s",
-       filename.c_str(), (dummy_map ? "dummy graph" : "already opened graph"));
+       filename.c_str(), (dummy_sheet ? "dummy sheet" : "already opened sheet"));
 
   try
     {
@@ -301,27 +303,27 @@ void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynGraph* &
       LOGI("Shapefile Type: %u: %s", value32b, shapeTypes(value32b).c_str());
 
       std::string shortname = File::fileName(filename);
-      SimTaDynGraph *graph = new SimTaDynGraph(shortname);
+      SimTaDynSheet *sheet = new SimTaDynSheet(shortname);
 
-      getBoundingBox(graph->m_bbox);
-      // FIXME CPP_LOG(logger::Info) << "Map Bounding Box: " << graph->m_bbox << std::endl;
+      getBoundingBox(sheet->m_bbox);
+      // FIXME CPP_LOG(logger::Info) << "Map Bounding Box: " << sheet->m_bbox << std::endl;
 
-      getAllRecords(*graph);
+      getAllRecords(*sheet);
       m_infile.close();
 
-      if (dummy_map)
+      if (dummy_sheet)
         {
-          current_graph = graph;
+          current_sheet = sheet;
         }
       else
         {
-          // Concat the old graph with the new one: elements, name and bounding box
-          current_graph += *graph;
-          current_graph->m_bbox = merge(current_graph->m_bbox, graph->m_bbox); // TODO a mettre dans le code de +=
+          // Concat the old sheet with the new one: elements, name and bounding box
+          current_sheet += *sheet;
+          current_sheet->m_bbox = merge(current_sheet->m_bbox, sheet->m_bbox); // TODO a mettre dans le code de +=
 
-          if (graph->m_name != "") // TODO a mettre dans le code de += avec option
-            graph->m_name += "_";
-          graph->m_name += shortname;
+          if (sheet->m_name != "") // TODO a mettre dans le code de += avec option
+            sheet->m_name += "_";
+          sheet->m_name += shortname;
         }
     }
   catch (std::exception const &e)

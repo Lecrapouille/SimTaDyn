@@ -43,21 +43,23 @@ else
 OBJ_EXTERNAL   =
 endif
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
+OBJ_PATTERNS   =
 OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
+OBJ_MANAGERS   =
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
 OBJ_OPENGL     = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o
 OBJ_OPENGL    += GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJ_CORE       = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
+OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
 OBJ_LOADERS    = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoader.o
 # SimTaDynFile.o
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_SIMTADYN   = main.o
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
-                 $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
+OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+                 $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
 
 ###################################################
@@ -99,6 +101,15 @@ else
 endif
 
 ###################################################
+# Address sanitizer. Uncomment these lines if asan
+# is desired.
+##OPTIM = -O1 -g
+##CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+##LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+##LIBS += -static-libstdc++ -static-libasan
+##SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
+
+###################################################
 # Backward allows tracing stack when segfault happens
 ifeq ($(PROJECT_MODE),debug)
 OPTIM_FLAGS = -O2 -g
@@ -123,15 +134,6 @@ $(TARGET): $(OBJ)
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
-
-###################################################
-# Address sanitizer. Uncomment these lines if asan
-# is desired.
-##OPTIM = -O1 -g
-##CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-##LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-##LIBS += -static-libstdc++ -static-libasan
-##SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
 
 ###################################################
 # Download external projects that SimTaDyn needs
@@ -233,6 +235,7 @@ distclean: clean
 	@cd tests && make -s clean; cd - > /dev/null
 	@cd src/common/graphics/OpenGL/examples/ && make -s clean; cd - > /dev/null
 	@cd src/forth/standalone && make -s clean; cd - > /dev/null
+	@cd src/core/standalone/ClassicSpreadSheet && make -s clean; cd - > /dev/null
 
 ###################################################
 # Sharable informations between all Makefiles

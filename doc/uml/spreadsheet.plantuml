@@ -6,38 +6,50 @@ class Observable {
 +setChanged()
 }
 
-abstract class Observer {
-{abstract} update(subject: Observer, msg: Object)
+interface Observer {
++{abstract} update(subject: Observer, msg: Object)
 }
 
 Observable -> "*" Observer : observers
 
 class SpreadSheetCell {
 -formulae: string
--Value: double
-+setformulae(formulae: string)
-+setValue(value: double)
-+eval(): double
+-evaluatedFormulae: double
++setFormulae(formulae: string)
++setEvaluatedFormulae(val: double)
++getEvaluatedFormulae(): double
++addReference(SpreadSheetCell*)
 }
 
 Observable <|-- SpreadSheetCell
 Observer <|.. SpreadSheetCell
-SpreadSheetCell --> "*" SpreadSheetCell : subjects
+SpreadSheetCell --> "*" SpreadSheetCell : references
 
-class SpreadSheet {
--SpreadSheetCell[][]
-+addCell()
-+removeCell()
-+evalSheet(): double
+abstract class SpreadSheet {
++evaluateBy(interpreter: SimForth)
+#{abstract} resetCellIterator()
+#{abstract} hasCell() : bool
+#{abstract} nextCell() : SpreadSheetCell*
+#{abstract} howManyCell() : int
+}
+
+class ClassicSpreadSheet {
++rows: int
++cols: int
+-cells: SpreadSheetCell[][]
 }
 
 class SimForth {
-+InterpreteString(formulae: string)
++interpreteSheet(sheet: SpreadSheet)
++interpreteCell(cell: SpreadSheetCell)
++interpreteString(formulae: string)
 }
 
 ' SimTaDyn -> "*" SimMap
 ' SimMap -> "1" SpreadSheet
 SpreadSheet -> "*" SpreadSheetCell : cells
-SpreadSheetCell ..> SimForth : "uses"
+SpreadSheet <|-- ClassicSpreadSheet
+SpreadSheetCell <.. SimForth : "interpretes"
+SpreadSheet ..> SimForth : "uses"
 
 @enduml

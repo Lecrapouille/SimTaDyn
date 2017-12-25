@@ -94,7 +94,7 @@ Currently, gtkmm >= 3.22 is mandatory to get SimTaDyn worked correctly with Open
 
 For Ubuntu >= 17.04, gtkmm >= 3.22 is available. Install directly the following packages (this will take you around 1 GB in your disk space):
 ```sh
-sudo apt-get update && apt-get install libgtksourceviewmm-3.0-dev freeglut3 freeglut3-dev mesa-common-dev libglu1-mesa-dev libglew-dev libglfw3-dev libdw-dev
+sudo apt-get update && apt-get install cmake libgtksourceviewmm-3.0-dev freeglut3 freeglut3-dev mesa-common-dev libglu1-mesa-dev libglew-dev libglfw3-dev libdw-dev
 ```
 If needed and for fixing some Gtk-Message like: "Failed to load module overlay-scrollbar":
 ```sh

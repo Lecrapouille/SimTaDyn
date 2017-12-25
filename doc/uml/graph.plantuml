@@ -1,26 +1,25 @@
 @startuml
 
-class BasicNode {
+class Node {
 -id: UniqueID
--neighbors: BasicArc[]
-+addNeighbor(arc: BasicArc)
+-neighbors: Arc[]
++addNeighbor(arc: Arc)
 +addNeighbor(arc: UniqueID)
 +removeNeighbor(arc: UniqueID)
 }
 
-class BasicArc {
+class Arc {
 -id: UniqueID
--from: BasicNode
--to BasicNode
-+BasicArc(id: UniqueID, from: BasicNode, to BasicNode)
-+from(): BasicNode
-+to(): BasicNode
+-from: Node
+-to Node
++Arc(id: UniqueID, from: Node, to Node)
++from(): Node
++to(): Node
 }
 
-BasicNode "2" <-> "*" BasicArc
+Node "2" <-> "*" Arc
 
-class "BasicGraph<Node,Arc>" as BasicGraph
-class BasicGraph {
+class Graph {
 -directed: bool
 -nodes: Node[]
 -arcs: Arc[]
@@ -39,13 +38,28 @@ class BasicGraph {
 +unmarkArc(arc: UniqueID)
 }
 
-BasicGraph <.. BasicArc
-BasicGraph <.. BasicNode
+Graph --> "*" Arc
+Graph --> "*" Node
 
-class GraphAlgorithm {
-+depthFirstSearch(graph: BasicGraph, startingNode: uniqueID)
+abstract class GraphAlgorithm {
++{static} factory(name: String): GraphAlgorithm*
++init(graph: Graph, startingNode: Key)
++{abstract} finished(): bool
++{abstract} update(): Node*
 }
 
-GraphAlgorithm .> BasicGraph
+class DepthFirstSearch {
++finished(): bool
++update(): Node*
+}
+
+class BreadthFirstSearch {
++finished(): bool
++update(): Node*
+}
+
+GraphAlgorithm .> Graph : computes
+GraphAlgorithm <|-- DepthFirstSearch
+GraphAlgorithm <|-- BreadthFirstSearch
 
 @enduml

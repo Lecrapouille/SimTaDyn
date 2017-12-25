@@ -37,6 +37,7 @@ public:
   SimTaDynContext()
   {
     LOGI("New SimTaDynContext");
+    PathManager::instance();
     ResourceManager<Key>::instance();
     LoaderManager::instance();
     SimForth::instance();
@@ -63,16 +64,18 @@ public:
     SimForth::destroy();
     LoaderManager::destroy();
     ResourceManager<Key>::destroy();
+    PathManager::destroy();
     Logger::destroy();
   };
 
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  void init()
-  {
-  }
+  void init();
 
+  //------------------------------------------------------------------
+  //! \brief Return the reference of the main UI window.
+  //------------------------------------------------------------------
   SimTaDynWindow& window()
   {
     return *m_window;

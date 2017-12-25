@@ -1,0 +1,35 @@
+@startuml
+
+note as N1
+algorithm = GraphAlgorithm::factory("DepthFirstSearch") }
+SpreadSheet::resetCellIterator() { algorithm.init() }
+SpreadSheet::hasCell() { algorithm.finished() }
+SpreadSheet::nextCell() { algorithm.update() }
+end note
+
+abstract class GraphAlgorithm {
++init(graph: Graph, startingNode: Key)
++{abstract} finished(): bool
++{abstract} update(): Node*
+}
+
+abstract class SpreadSheet {
++{static} factory(name: String): GraphAlgorithm*
+#{abstract} resetCellIterator()
+#{abstract} hasCell() : bool
+#{abstract} nextCell() : SpreadSheetCell*
+#{abstract} howManyCell() : int
++algorithm: GraphAlgorithm
+}
+
+class SimSheet {
+
+}
+
+SpreadSheet <- "*" SimTaDyn
+SimTaDyn --> "1" GraphAlgorithm
+GraphAlgorithm <.. SpreadSheet
+SpreadSheet <|-- SimSheet
+SimSheet -- N1
+
+@enduml

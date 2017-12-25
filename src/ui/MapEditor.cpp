@@ -319,28 +319,27 @@ bool MapEditor::load(std::string const& filename, SimTaDynMap* &map)
 // *************************************************************************************************
 bool MapEditor::exec() // FIXME: Exec(typeCell, nodeID)
 {
-  bool res;
-
   SimForth &forth = SimForth::instance();
-  SimTaDynGraph *graph = map()->graph();
-  if (nullptr == graph)
-    return false;
+  SimTaDynSheet *sheet = map()->sheet();
 
-  SimTaDynNode& n1 = graph->getNode(1); // FIXME far all cells + faire un ancetre commun aux cell pour eviter de faire un switch
-  n1.forthWord("N#1 N#2 N#3 + +");
+  if (nullptr == sheet)
+    return false;
 
   // FIXME: should be called outside each cell: optimisation
   // Disable compilation mode
   forth.dictionary().smudge(":");
   forth.dictionary().smudge("INCLUDE");
 
-  res = n1.interprete(forth);
+  forth.m_spreadsheet = sheet;
+  sheet->parse(SimForth::instance());
+  std::pair<bool, std::string> res = sheet->evaluate(forth);
+  forth.ok(res);
 
   // Enable compilation mode
   forth.dictionary().smudge("INCLUDE");
   forth.dictionary().smudge(":");
 
-  return res;
+  return res.first;
 }
 
 // *************************************************************************************************

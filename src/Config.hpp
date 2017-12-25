@@ -27,6 +27,13 @@
 namespace config
 {
   //! \brief
+  enum Mode { Debug, Release };
+
+  //! \brief
+  static const Mode mode = config::Debug;
+  //! \brief Either create a new log file or smash the older log.
+  static const bool separated_logs = false;
+  //! \brief Used for logs and GUI.
   static const std::string project_name("SimTaDyn");
   //! \brief Major version of SimTaDyn
   static const uint32_t major_version(SIMTADYN_MAJOR_VERSION);
@@ -36,7 +43,9 @@ namespace config
   //! (when called  by the shell command: sudo make install).
   static const std::string data_path(SIMTADYN_DATA_PATH);
   //! \brief Location for storing temporary files
-  static const std::string tmp_path(File::generateTempFileName(SIMTADYN_TEMP_DIR, "/"));
+  static const std::string tmp_path(false == separated_logs ?
+                                    SIMTADYN_TEMP_DIR :
+                                    File::generateTempFileName(SIMTADYN_TEMP_DIR, "/"));
   //! \brief Give a name to the default project log file.
   static const std::string log_name(project_name + ".log");
   //! \brief Define the full path for SimTaDyn project.

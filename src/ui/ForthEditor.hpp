@@ -22,7 +22,7 @@
 #  define FORTHEDITOR_HPP_
 
 #  include "TextEditor.hpp"
-#  include "SimForth.hpp"
+#  include "SimTaDynForth.hpp" // FIXME Forth.hpp
 #  include "Redirection.hpp"
 #  include <chrono>
 

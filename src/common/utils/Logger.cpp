@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "Logger.hpp"
-#include "Config.hpp"
 #include <cstring>
 
 static const char *c_str_severity[logger::MaxLoggerSeverity + 1] =

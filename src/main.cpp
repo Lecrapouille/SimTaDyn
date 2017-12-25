@@ -21,6 +21,32 @@
 #include "SimTaDyn.hpp"
 #include "Config.hpp"
 
+void SimTaDynContext::init()
+{
+  LOGI("Init SimTaDynContext");
+
+  SimTaDynSheet sheet("Sheet0");
+  SimForth& forth = SimForth::instance();
+  forth.boot();
+  assert(sheet.name().compare("Sheet0") == 0);
+
+  CellNode& n0 = sheet.addNode("1 1 +");
+  LOGI("CellNode: %p %s %u", &n0, n0.name().c_str(), n0.id());
+  CellNode& n1 = sheet.addNode("2 N0 +");
+  LOGI("CellNode: %p %s %u", &n1, n1.name().c_str(), n1.id());
+  n0.addNeighbor(n1);
+
+  sheet.parse(forth);
+  std::pair<bool, std::string> res = sheet.evaluate(forth);
+  forth.ok(res);
+  if (res.first)
+    {
+      //sheet.displayResult();
+      std::cout << n0.value() << std::endl;
+      std::cout << n1.value() << std::endl;
+    }
+}
+
 // Init Gtkmm and SimTaDyn contexts. Be careful not to create a GTK+
 // button before the context creation of GTK libraries.
 int main(int argc, char** argv)
@@ -29,6 +55,9 @@ int main(int argc, char** argv)
             << config::major_version
             << '.'
             << config::minor_version
+            << ' '
+            << (config::Debug == config::mode ? "Debug" : "Release")
+            << " mode"
             << std::endl;
 
   // Call it before Logger constructor

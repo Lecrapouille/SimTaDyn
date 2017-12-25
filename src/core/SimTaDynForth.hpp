@@ -21,14 +21,18 @@
 #ifndef SIMFORTH_HPP_
 #  define SIMFORTH_HPP_
 
+#  include "ASpreadSheet.hpp"
 #  include "Forth.hpp"
-#  include "SimForthPrimitives.hpp"
-#  include "Names.hpp"
-//#  include <list> of dictionaries ?
+#  include "SimTaDynForthPrimitives.hpp"
+//#  include "Names.hpp"
+
+class ASpreadSheetCell;
+class ASpreadSheet;
 
 class SimForthDictionary : public ForthDictionary
 {
 public:
+
   SimForthDictionary()
     : ForthDictionary()
   {
@@ -42,16 +46,18 @@ class SimForth : public Forth, public Singleton<SimForth>
 
 public:
 
-  virtual void boot() override;
-  std::pair<bool, std::string> interpreteCell(std::string const& code_forth,
-                                              std::string const& name,
-                                              Cell32& tos);
+  ASpreadSheet *m_spreadsheet = nullptr;
 
-  SimForthDictionary m_dictionaries;
-  NoColor m_color;
+  virtual void boot() override;
+  void compileCell(ASpreadSheetCell &cell);
+  void evaluate(ASpreadSheet& spreadsheet);
+  std::pair<bool, std::string>
+  interpreteCell(ASpreadSheetCell &cell);
+  bool parseCell(ASpreadSheetCell &cell);
 
 protected:
 
+  ASpreadSheetCell *isACell(std::string const& word);
   virtual void interpreteWordCaseInterprete(std::string const& word) override;
   virtual void interpreteWordCaseCompile(std::string const& word) override;
   bool isACell(std::string const& word, Cell32& number);
@@ -86,6 +92,11 @@ private:
   {
     LOGI("Destroying SimForth");
   }
+
+protected:
+
+  SimForthDictionary m_dictionaries;
+  NoColor m_color;
 };
 
 #endif /* SIMFORTH_HPP_ */
