@@ -106,21 +106,26 @@ void Logger::beginLine()
 void Logger::header()
 {
   currentDate();
-  log("===============================================\n"
-      "  %s %u.%u - Event log - %s\n"
-      "===============================================\n\n",
+  log("======================================================\n"
+      "  %s %s %u.%u - Event log - %s\n"
+      "  git branch: %s\n"
+      "  git SHA1: %s\n"
+      "======================================================\n\n",
       config::project_name.c_str(),
+      config::Debug == config::mode ? "Debug" : "Release",
       config::major_version,
       config::minor_version,
-      m_buffer_time);
+      m_buffer_time,
+      config::git_branch.c_str(),
+      config::git_sha1.c_str());
 }
 
 void Logger::footer()
 {
   currentTime();
-  log("\n===============================================\n"
+  log("\n======================================================\n"
       "  %s log closed at %s\n"
-      "===============================================\n\n",
+      "======================================================\n\n",
       config::project_name.c_str(),
       m_buffer_time);
 }

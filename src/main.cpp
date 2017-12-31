@@ -57,7 +57,9 @@ int main(int argc, char** argv)
             << config::minor_version
             << ' '
             << (config::Debug == config::mode ? "Debug" : "Release")
-            << " mode"
+            << " mode "
+            << std::endl
+            << "git: " << config::git_branch << " " << config::git_sha1
             << std::endl;
 
   // Call it before Logger constructor

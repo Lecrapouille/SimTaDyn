@@ -20,8 +20,10 @@
 ##=====================================================================
 
 ### Commentary:
-# Generate build/version.h from the VERSION file
+# Generate build/version.h from the VERSION file and git SHA1 and
+# git branch
 
+### Get the version
 VERSION=`grep "[0-9]\+\.[0-9]\+" $1 2> /dev/null`
 if [ "$VERSION" == "" ];
 then
@@ -32,14 +34,24 @@ fi
 MAJOR_VERSION=`echo "$VERSION" | cut -d'.' -f1`
 MINOR_VERSION=`echo "$VERSION" | cut -d'.' -f2`
 
-echo "SimTaDyn version $MAJOR_VERSION.$MINOR_VERSION"
+### Get git SHA1 and branch
+SHA1=`git log 2> /dev/null | head -n1 | cut -d" " -f2`
+BRANCH=`git branch 2> /dev/null | head -n1 | cut -d" " -f2`
 
-echo "#ifndef VERSION_H_" > $2
-echo "#  define VERSION_H_" >> $2
-echo "" >> $2
-echo "#  define SIMTADYN_MAJOR_VERSION $MAJOR_VERSION""u" >> $2
-echo "#  define SIMTADYN_MINOR_VERSION $MINOR_VERSION""u" >> $2
-echo "" >> $2
-echo "#endif /* VERSION_H_ */" >> $2
+echo "SimTaDyn version: $MAJOR_VERSION.$MINOR_VERSION"
+echo "git: $BRANCH $SHA1"
+echo ""
+
+cat <<EOF >$2
+#ifndef VERSION_H_
+#  define VERSION_H_
+
+#  define SIMTADYN_MAJOR_VERSION ${MAJOR_VERSION}u
+#  define SIMTADYN_MINOR_VERSION ${MINOR_VERSION}u
+#  define SIMTADYN_BRANCH "$BRANCH"
+#  define SIMTADYN_SHA1 "$SHA1"
+
+#endif /* VERSION_H_ */
+EOF
 
 exit 0

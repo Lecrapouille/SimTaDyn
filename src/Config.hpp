@@ -39,6 +39,10 @@ namespace config
   static const uint32_t major_version(SIMTADYN_MAJOR_VERSION);
   //! \brief Minor version of SimTaDyn
   static const uint32_t minor_version(SIMTADYN_MINOR_VERSION);
+  //! \brief Save the git SHA1
+  static const std::string git_sha1(SIMTADYN_SHA1);
+  //! \brief Save the git branch
+  static const std::string git_branch(SIMTADYN_BRANCH);
   //! \brief Pathes where default SimTaDyn resources have been installed
   //! (when called  by the shell command: sudo make install).
   static const std::string data_path(SIMTADYN_DATA_PATH);
