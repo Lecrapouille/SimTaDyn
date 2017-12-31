@@ -1,8 +1,18 @@
-2016: version 0.2
-        * Reborn of the project.
-        * Rewrite the project in C++, gtkmm, modern OpenGL.
-        * Application not yet function. Work in progress.
+January 2018: version 0.3
+        * Basic spreadsheet functionalities.
 
-2004: version 0.1
+August 2016: version 0.2
+        * Reborn of the project.
+        * Rewrite the project in C++, gtkmm-3, modern OpenGL.
+        * Most work made on libraries needed by SimTaDyn.
+        * Unit tests and continuous intergration.
+        * Application not yet functional. Work in progress.
+        * Basic Forth interpreter.
+        * Basic Forth GUI (save, closed, color, code completion).
+        * No GUI for spreadsheet manipulation.
+        * Quicky and dirty renderer displaying basic 3D objects.
+
+Year 2004: version 0.1
         * School project version written in C, GTK+, legacy OpenGL.
-        * Minimalist but functional application.
+        * Minimalist but functional GUI and Forth interpreter.
+        * No concrete examples given.
