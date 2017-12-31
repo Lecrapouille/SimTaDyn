@@ -23,48 +23,13 @@
 TARGET = SimTaDyn-UnitTest
 
 ###################################################
-# Target version
-TARGET_VERSION := $(shell cat ../VERSION)
+# Location from the project root directory.
+P=..
 
 ###################################################
 # Sharable informations between all Makefiles
--include ../.makefile/Makefile.header
-
-###################################################
-# Path where to store the generated coverage docs
-DOC = ../doc/coverage
-# Path where to store lcov rapport
-RAPPORT = build/rapport.info
-
-###################################################
-# Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -I. -I../external/SOIL -I../external/zipper	\
--I../external/backward-cpp -I../external/YesEngine -I../src		\
--I../src/common/patterns -I../src/common/managers -Icommon/managers	\
--I../src/common/utils -Icommon/utils -I../src/common/maths		\
--Icommon/maths -I../src/common/containers -Icommon/containers		\
--I../src/common/graph-theory -Icommon/graph-theory			\
--I../src/common/graphics/OpenGL -I../src/common/graphics/RTree		\
--I../src/common/graphics -Icommon/graphics/OpenGL			\
--Icommon/graphics/RTree -Icommon/graphics -I../src/core			\
--I../src/core/loaders -Icore/loaders -I../src/forth -Iforth		\
--I../src/ui
-
-###################################################
-# Inform Makefile where to find *.cpp and *.o files
-VPATH=.:$(BUILD):../src:../src/common/patterns:\
-../src/common/managers:common/managers:\
-../src/common/utils:common/utils:\
-../src/common/maths:common/maths:\
-../src/common/containers:common/containers:\
-../src/common/graph-theory:common/graph-theory:\
-../src/common/graphics/OpenGL:common/graphics/OpenGL:\
-../src/common/graphics/RTree:common/graphics/RTree:\
-../src/common/graphics:common/graphics:\
-../src/core:../src/core/loaders:core/loaders:\
-../src/forth:forth:\
-../src/ui:\
-../external/SOIL:../external/backward-cpp:../external/YesEngine
+M=$(P)/.makefile
+-include $(M)/Makefile.header
 
 ###################################################
 # List of files to compile.
@@ -79,12 +44,12 @@ OBJ_CONTAINERS_UT  = SetTests.o CollectionTests.o
 OBJ_MANAGERS       =
 OBJ_MANAGERS_UT    = ResourcesTests.o
 OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
-OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
+#OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
 OBJ_OPENGL         = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
 OBJ_OPENGL        += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o Renderer.o
 OBJ_OPENGL_UT      = ColorTests.o GLBufferTests.o OpenGLTests.o
 OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJ_CORE           = SimForth.o CellForth.o SimTaDynGraph.o SimTaDynMap.o
+OBJ_CORE           = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
 OBJ_LOADERS        = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoader.o
 OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
 OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
@@ -98,29 +63,38 @@ OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
       $(OBJ_UNIT_TEST)
 
 ###################################################
-# Compilation options. For knowing which libraries
-# is needed please read the doc/Install.md file.
-OPTIM = -O2
+# Compilation options.
+OPTIM_FLAGS = -O2 -g
 CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 
 ###################################################
-# Common defines
-PROJECT_DATA_PATH=$(DESTDIR)$(PREFIX)/share
-PROJECT_DATA_ROOT = $(DATADIR)/SimTaDyn/$(VERSION)
-PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
-SIMTADYN_DEFINES=-DBACKWARD_HAS_DW=1 -DCHECK_OPENGL -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES = $(SIMTADYN_DEFINES)
+#
+INCLUDES += -Icommon/containers -Icommon/graphics -Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils \
+-Icore/loaders
+VPATH += common/containers:\
+common/graphics:\
+common/graph-theory:\
+common/managers:\
+common/maths:\
+common/utils:\
+core/loaders
 
 ###################################################
-# Set Libraries compiled in the external-l directory.
+# Common defines
+SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += $(SIMTADYN_DEFINES) -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+
+###################################################
+# Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS = $(abspath $(PWD)/../external/SOIL/libSOIL.a) $(abspath $(PWD)/../external/zipper/build/libZipper-static.a)
+LIBS = $(abspath $(P)/external/SOIL/libSOIL.a) \
+       $(abspath $(P)/external/zipper/build/libZipper-static.a)
 
 ###################################################
 # Set Libraries. For knowing which libraries
-# is needed please read the doc/Install.md file.
+# is needed please read the external/README.md file.
 
 ## OS X
 ifeq ($(ARCHI),Darwin)
@@ -135,6 +109,7 @@ LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
 
 ## Windows
 else
+
 #$(error Unknown architecture)
 endif
 
@@ -160,7 +135,7 @@ LDFLAGS += --coverage
 
 # ifeq ($(CXX),g++)
 ifneq ($(CI),true)
-OPTIM = -O1 -g
+OPTIM_FLAGS = -O1 -g
 CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 LIBS += -static-libstdc++ -static-libasan
@@ -178,9 +153,9 @@ $(TARGET): $(OBJ)
 
 ###################################################
 # Compile sources
-%.o: %.cpp $(BUILD)/%.d Makefile ../Makefile ../.makefile/Makefile.header ../.makefile/Makefile.footer version.h
+%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
@@ -191,31 +166,11 @@ unit-tests: $(TARGET)
 	$(SANITIZER) ./build/$(TARGET) $(TU_OPTIONS) || (cat SimTaDyn.log; return 1)
 
 ###################################################
-# Generate the rapport of the code coverage.
-# Contrary to the unit-tests rule, if unit tests
-# failed, clear the $? to let lcov to be launched.
-.PHONY: coverage
-coverage:
-	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	$(SANITIZER) ./build/$(TARGET) $(TU_OPTIONS) || cat SimTaDyn.log
-	@$(call print-to,"Documentation","$(RAPPORT)","$(DOC)","")
-	@lcov --quiet --directory .. -c -o $(RAPPORT)
-	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)
-	@genhtml --quiet -o $(DOC) -t "SimTaDyn Unit Tests" $(RAPPORT)
-	@xdg-open $(RAPPORT) >/dev/null
-
-###################################################
 .PHONY: clean
 clean:
 	@$(call print-simple,"Cleaning","$(PWD)")
 	@rm -fr $(BUILD) $(DOC) 2> /dev/null
 
 ###################################################
-# Generate a header file with the project version
-version.h: ../VERSION
-	@$(call print-from,"Version","$(TARGET)","VERSION","")
-	@../.makefile/version.sh ../VERSION $(BUILD)/version.h
-
-###################################################
 # Sharable informations between all Makefiles
--include ../.makefile/Makefile.footer
+-include $(M)/Makefile.footer

@@ -27,10 +27,10 @@
 #include "ColorTests.hpp"
 #include "SetTests.hpp"
 #include "CollectionTests.hpp"
-#include "BasicNodeTests.hpp"
+/*#include "BasicNodeTests.hpp"
 #include "BasicArcTests.hpp"
 #include "BasicGraphTests.hpp"
-#include "GraphAlgoTests.hpp"
+#include "GraphAlgoTests.hpp"*/
 #include "GLBufferTests.hpp"
 #include "OpenGLTests.hpp"
 #include "FilteringTests.hpp"
@@ -119,7 +119,7 @@ static void testContainer(CppUnit::TextUi::TestRunner& runner)
 }
 
 //--------------------------------------------------------------------------
-static void testGraph(CppUnit::TextUi::TestRunner& runner)
+/*static void testGraph(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
 
@@ -139,7 +139,7 @@ static void testGraph(CppUnit::TextUi::TestRunner& runner)
   suite = new CppUnit::TestSuite("GraphAlgoTests");
   suite->addTest(new CppUnit::TestCaller<GraphAlgoTests>("test", &GraphAlgoTests::test));
   runner.addTest(suite);
-}
+  }*/
 
 //--------------------------------------------------------------------------
 static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
@@ -197,12 +197,19 @@ static bool run_tests(bool const has_xdisplay)
 {
   CppUnit::TextUi::TestRunner runner;
 
-  testUtils(runner);
+  // Call it before Logger constructor
+  if (!File::mkdir(config::tmp_path))
+    {
+      std::cerr << "Failed creating the temporary directory '"
+                << config::tmp_path << "'" << std::endl;
+    }
+
+  //testUtils(runner);
   testResourceManager(runner);
-  testLoader(runner);
+  //testLoader(runner);
   testMath(runner);
   testContainer(runner);
-  testGraph(runner);
+  //testGraph(runner);
 
   // Travis-CI does not support export display
   if (has_xdisplay)
