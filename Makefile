@@ -125,7 +125,7 @@ all: $(TARGET)
 ###################################################
 # Link sources
 $(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################
@@ -158,8 +158,8 @@ compile-external-libs:
 # This rule clean and launch the compilation again and
 # create the tarball. TODO: upload the tarball to Coverity scan
 .PHONY: coverity-scan
-coverity-scan: clean $(TARGET)
-	@cov-build --dir cov-int make && tar czvf SimTaDyn.tgz cov-int
+coverity-scan: clean
+	@cov-build --dir cov-int make -j8 && tar czvf SimTaDyn.tgz cov-int
 
 ###################################################
 # Call the unit tests makefile (in tests/ directory),

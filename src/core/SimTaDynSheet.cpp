@@ -39,17 +39,18 @@ ASpreadSheetCell *SimTaDynSheet::isACell(std::string const& word)
     {
       if ('N' == word[0])
         {
-          std::cout << "Found Node " << id << std::endl;
+          LOGI("Found Node %u", id);
           return &getNode(id);
         }
       if ('A' == word[0])
         {
-          std::cout << "Found Arc " << id << std::endl;
+          LOGI("Found Arc %u", id);
           return &getArc(id);
         }
       if ('Z' == word[0])
         {
-          std::cout << "Found Zone TODO" << id << std::endl;
+          std::cerr << "Found Zone TODO " << id << std::endl;
+          LOGI("Found Zone %u", id);
           return nullptr; // &getZone(id); //FIXME a finir
         }
     }

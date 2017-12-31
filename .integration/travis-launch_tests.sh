@@ -30,7 +30,6 @@ VERSION=`cat VERSION`
 exists /tmp/usr/share/SimTaDyn/$VERSION/data
 exists /tmp/usr/share/SimTaDyn/$VERSION/doc
 exists /tmp/usr/share/SimTaDyn/$VERSION/AUTHORS
-exists /tmp/usr/share/SimTaDyn/$VERSION/README.md
 exists /tmp/usr/share/SimTaDyn/$VERSION/LICENSE
 exists /tmp/usr/share/SimTaDyn/$VERSION/ChangeLog
 exists /tmp/usr/bin/SimTaDyn-$VERSION

@@ -142,12 +142,9 @@ bool SimForth::parseCell(ASpreadSheetCell &cell)
 
 ASpreadSheetCell *SimForth::isACell(std::string const& word)
 {
-  if (nullptr != m_spreadsheet)
-    {
-      return m_spreadsheet->isACell(word);
-    }
-
-  return nullptr;
+  if (nullptr == m_spreadsheet)
+    return nullptr;
+  return m_spreadsheet->isACell(word);
 }
 
 void SimForth::interpreteWordCaseInterprete(std::string const& word)

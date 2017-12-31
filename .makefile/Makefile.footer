@@ -29,6 +29,7 @@ coverage: $(TARGET)
 	@lcov --quiet --directory .. -c -o $(RAPPORT)
 	@lcov --quiet --remove $(RAPPORT) '/usr*' 'external/*' 'tests/*' -o $(RAPPORT)
 	@genhtml --quiet -o $(DOC) -t "$(TARGET)" $(RAPPORT)
+	@xdg-open $(DOC)/index.html >/dev/null
 
 ###################################################
 # Generate a header file with the project version

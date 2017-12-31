@@ -5,25 +5,31 @@ Table of contents:
 - [Installing packages that SimTaDyn depends on](#installing-packages-that-simtadyn-depends-on)
   - [Ubuntu](#ubuntu)
   - [OpenSUSE](#opensuse)
-  - [Debian](#other-architecture)
+  - [Debian](#debian)
   - [OS X](#mac-os-x)
   - [Windows](#other-architecture)
   - [Docker](#docker)
-- [RPM and debian packages](#rpm-and-debian-packages)
 - [Developers](#developers)
+  - [RPM and debian packages](#rpm-and-debian-packages)
   - [Create RPM and Debian packages](#create-rpm-and-debian-packages)
   - [Compiling SimTaDyn unit tests](#compiling-simtadyn-unit-tests)
   - [Makefile options](#makefile-options)
 
 ## Steps for compiling SimTaDyn
 
-This section explains the differents steps for compiling the SimTaDyn code source taken from the git [master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master). For other SimTaDyn branches (specially for the [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004)), read the install file associated to the branch.
+This document explains the different steps for getting, compiling the SimTaDyn code source take from the git
+[master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master) and install it.
+
+For other SimTaDyn branches, specially for the [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004),
+please read the INSTALL file associated to this branch.
 
 ##### Step 1: Install packages that SimTaDyn depends on:
 
-SimTaDyn is based on C++11, modern OpenGL (>= 3.3), gtkmm >= 3.22 and gtksourceviewmm (which are C++ interfaces for GTK+ and GtkSourceView a boosted version of the GTK+ text editor) and other small libraries like libSOIL (for loading image files) or zipper (a C++ manipulationg zip archives).
+SimTaDyn code is based on C++11, modern OpenGL (>= 3.3), gtkmm >= 3.22 and gtksourceviewmm
+(which are C++ interfaces for GTK+ and GtkSourceView a boosted version of the GTK+ text editor)
+and other small libraries like libSOIL (for loading image files) or zipper (a C++ manipulationg zip archives).
 
-Click on the link matching your operating system, for knowing how to install these libs:
+Click on the link matching your operating system, for knowing how to install these libraries:
 * [Ubuntu](#ubuntu)
 * [OpenSUSE](#opensuse)
 * [Debian](#other-architecture)
@@ -31,48 +37,50 @@ Click on the link matching your operating system, for knowing how to install the
 * [Windows](#other-architecture)
 * [Docker](#docker)
 
-##### Step 2: Clone the SimTaDyn code source:
+##### Step 2: Clone the SimTaDyn code source and its external parts:
 
-Download the SimTaDyn code source from github <img src="http://i.imgur.com/Cj4rMrS.gif" height="40" alt="Swimming Octocat" title="Games on GitHub">:
+Not all libraries can be installed from disribution packages like explained in step 1.
+Therefore, you have to download from github and compile them. For reasons not explained here,
+SimTaDyn does use git submodule.
+
+Step 2.1: download the SimTaDyn code source from github <img src="http://i.imgur.com/Cj4rMrS.gif" height="40" alt="Swimming Octocat" title="Games on GitHub">:
 
 ```sh
 git clone https://github.com/Lecrapouille/SimTaDyn.git
 ```
-A SimTaDyn folder should have been created. If not working install git before.
+A `SimTaDyn/` folder should have been created.
 
-##### Step 3: Clone libraries code source that SimTaDyn depends on:
-
-Not all libraries are available on your disribution (aka cannot be installed directly like shown in step 1). You have to download and compile them. This is made by two bash scripts called by the makefile:
-
+Step 2.2: download third parts. This is made by two bash scripts which can be called by the main Makefile:
 ```sh
 cd SimTaDyn
-make download-external-lib
+make download-external-libs
 make compile-external-libs
 ```
-Note: These libraries are not install into your environnement. If you desired them, you have to go to each directories and type:
 
+Note: As alternative, you can do this:
+```sh
+cd SimTaDyn/external
+./download-external-libs.sh Linux
+./compile-external-libs.sh Linux
+```
+
+* If you are not working on Linux, but OSX or Windows: replace `Linux` by `Darwin` or `Windows`.
+* These libraries are not installed in your environnement but if you desire it, you have to go to each directories and type:
 ```sh
 sudo make install
 ```
 
-##### Step 4: Compile the SimTaDyn code source:
+##### Step 3: Compile the SimTaDyn code source:
 
 SimTaDyn does not use ./configure script. Call directly the Makefile:
 
 ```sh
-cd ..
+cd SimTaDyn
 make -j4
 ```
 Note: -jX is optional and is used for compiling faster the code source. X refers to the desired number of threads (usually 2 * number of cores of your computer. For example X = 2 * 2).
 
-##### Step 5: getting fun with SimTaDyn:
-```sh
-./build/SimTaDyn
-```
-
-Note: SimTaDyn does take options for the moment.
-
-##### Step 6: Install data that SimTaDyn depends on:
+##### Step 4: Install data that SimTaDyn depends on:
 
 If you like SimTaDyn you can install it by typing:
 ```sh
@@ -80,9 +88,20 @@ sudo make install
 ```
 By default:
 * the binary will be placed in `/usr/bin` and named `SimTaDyn-<version>`
-* its data and documentation placed in `/usr/share/SimTaDyn/<version>`.
+* its data and documentation placed in `/usr/share/SimTaDyn/<version>/`.
 
 If you do not like the default location, Give to Makefile options `DESTDIR`, `PREFIX` and `BINDIR` or directly edit the file `.makefile/Makefile.header` (note: touching a makfile file will force a whole project compilation).
+
+##### Step 5: getting fun with SimTaDyn:
+```sh
+./build/SimTaDyn
+```
+or directly:
+```sh
+SimTaDyn
+```
+
+Note: SimTaDyn does take options for the moment but will in the future.
 
 ## Installing packages that SimTaDyn depends on
 
@@ -111,18 +130,23 @@ If you have a 32-bits (which is my case), unfortunately Docker does not support 
 
 SimTaDyn compiles on a MacBook Air and Mac OS X (tested on version 10.9.5). To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. __However the Gtk::GlArea is not fully implemented on this architecture and by consequence the OpenGL context is not created ! I'm sorry it does not depend on me but on gtk+ developpers (for memory, Legacy OpenGL worked perfectly on gtk+2 with gtkglext on 2003 with OSX (see [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004) but again gtk+ developpers seems have made regressions because the whole gtk window is black (even butons) !)__
 
+### Debian
+
+Is similar to Ubuntu. Recommended version is 9.3 which contains the correct Gtk version.
+
 ### OpenSUSE
 
 Install the following packages:
 ```
 gcc-c++ gtksourceviewmm-devel freeglut-devel glew-devel libdw-devel Mesa-devel Mesa-libGLU-devel libglfw-devel
 ```
-I cannot personally test on SimTaDyn on this plateform.
+
+Note: I cannot personally test SimTaDyn on this plateform.
 
 ### Other architecture
 
-* Debian: I cannot personally test on SimTaDyn on this plateform.
-* Window: Not done and no development scheduled yet. Indeed Cygwin stopped being ported on Windows XP and so you need higher Window version, which it's not my case currently.
+* I cannot yet personally test on SimTaDyn on distribution like OpenSUSE, Red Hat, Slackware, Gentoo.
+* Window: Not done and no development scheduled yet. Indeed, I only have a XP and Cygwin stopped being ported for Windows XP and so I need higher Window version, which it's not my case currently.
 Feel free to help me on this point (I have an Appveyor script for my continous inegration but this script fails during the compilation of the external lib: zipper).
 
 ## Docker
@@ -203,27 +227,25 @@ You can exit your docker image and run up the container but this time with your 
 docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -u $USER` -it test/simtadyn:0.2 /bin/bash
 ```
 
-## RPM and debian packages.
+## Developers
+
+These sections are optional for users but can be useful for developers. Install the following packages:
+```sh
+sudo apt-get update && apt-get install libcppunit-dev gcovr libglm-dev llvm-4.0-tools osc npm
+sudo npm install markdown-to-html -g
+```
+
+### RPM and debian packages.
 
 (in gestation) SimTaDyn uses the OpenSUSE Build Service for building the project on different distributions and architectures.
 Go [here](https://build.opensuse.org/project/show/home:Lecrapouille) for downloading packages.
-Not all distrubutions are yet made but will be done in the future. I cannot yet test them. So any feeback is welcome.
-
-## Developers
-
-These sections are optional for users but can be useful for developers.
+Not all distrubutions are yet made but will be done in the future. I cannot test all of them. So any feeback is welcome.
 
 ### Create RPM and Debian packages
 
 * `make obs` for launching RPM and debian packages compilation with OpenSUSE Build Service.
 
 ### Compiling SimTaDyn unit tests
-
-Install the following packages:
-```sh
-sudo apt-get update && apt-get install libcppunit-dev gcovr libglm-dev llvm-4.0-tools osc npm
-sudo npm install markdown-to-html -g
-```
 
 Address Sanitizer (aka ASAN) displays the stack trace with addresses
 instead of file names and file lines. For human readable traces ASAN
