@@ -24,11 +24,19 @@
 //
 // *************************************************************************************************
 MapEditor::MapEditor()
-  : m_listener(*this)
+  : m_action_type(m_toolbar),
+    m_action_on(m_toolbar),
+    m_listener(*this)
 {
   LOGI("Creating MapEditor");
 
   registerLoaders();
+
+  // Init map edition tool to dummy action
+  m_edition_tools[ActionType::Add] = new AddCellTool();
+  m_edition_tools[ActionType::Remove] = new RemoveCellTool();
+  m_edition_tools[ActionType::Select] = new SelectCellTool();
+  m_edition_tools[ActionType::Move] = new MoveCellTool();
 
   // Menu '_Map'
   {
@@ -65,7 +73,7 @@ MapEditor::MapEditor()
     m_menu[simtadyn::MapMenu].append(m_submenu[4]);
 
     //
-    m_menu[simtadyn::MapMenu].append(m_menuseparator[0]);
+    m_menu[simtadyn::MapMenu].append(m_menu_separator[0]);
 
     //
     m_submenu[5].set_label("Replace Map");
@@ -91,24 +99,29 @@ MapEditor::MapEditor()
 
   // Map toolbar (vertical)
   {
+    using namespace std::placeholders;
     m_toolbar.set_property("orientation", Gtk::ORIENTATION_VERTICAL);
     m_toolbar.set_property("toolbar-style", Gtk::TOOLBAR_ICONS);
 
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("New");
-      button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Load and add a map to the current map");
-      m_toolbar.append(*button, [this](){ MapEditor::exec(); });
-    }
+    // Cells
+    m_action_on.append(ActionOn::Node, "Switch to Node mode", Gtk::Stock::YES,
+                       sigc::mem_fun(*this, &MapEditor::onActionOnSelected));
+    m_action_on.append(ActionOn::Arc, "Switch to Arc mode", Gtk::Stock::NO,
+                       sigc::mem_fun(*this, &MapEditor::onActionOnSelected));
+    m_action_on.append(ActionOn::Zone, "Switch to Zone mode", Gtk::Stock::HOME,
+                       sigc::mem_fun(*this, &MapEditor::onActionOnSelected));
+    m_action_on.append(m_toolbar_separator[0]);
 
-    {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
-      button->set_label("Open");
-      button->set_stock_id(Gtk::Stock::NEW);
-      button->set_tooltip_text("Load a map file");
-      m_toolbar.append(*button, [this](){ MapEditor::open(); });
-    }
+    // Operations on cells
+    m_action_type.append(ActionType::Add, "Remove a cell", Gtk::Stock::ADD,
+                         sigc::mem_fun(*this, &MapEditor::onActionTypeSelected));
+    m_action_type.append(ActionType::Remove, "Remove a cell", Gtk::Stock::REMOVE,
+                         sigc::mem_fun(*this, &MapEditor::onActionTypeSelected));
+    m_action_type.append(ActionType::Select, "Select a cell", Gtk::Stock::JUMP_TO,
+                         sigc::mem_fun(*this, &MapEditor::onActionTypeSelected));
+    m_action_type.append(ActionType::Move, "Move a cell", Gtk::Stock::JUMP_TO,
+                         sigc::mem_fun(*this, &MapEditor::onActionTypeSelected));
+                         m_toolbar.append(m_toolbar_separator[1]);
   }
 
   // Pack all stuffs together
@@ -125,6 +138,11 @@ MapEditor::MapEditor()
 MapEditor::~MapEditor()
 {
   LOGI("Destroying MapEditor");
+  delete m_edition_tools[ActionType::Add];
+  delete m_edition_tools[ActionType::Remove];
+  delete m_edition_tools[ActionType::Select];
+  delete m_edition_tools[ActionType::Move];
+
   // TODO: be sure no Forth script is running on the map before destroying mapq
 }
 
@@ -136,6 +154,24 @@ void MapEditor::registerLoaders()
   LoaderManager &lm = LoaderManager::instance();
   lm.registerLoader(new ShapefileLoader(), "shp");
   lm.registerLoader(new SimTaDynFileLoader(), "spak");
+}
+
+// *************************************************************************************************
+//!
+// *************************************************************************************************
+void MapEditor::onActionOnSelected_(const ActionOn id)
+{
+  LOGI("ActionOnSelected %u", id);
+  // TODO: afficher les id du type de cellule selectionnee
+}
+
+// *************************************************************************************************
+//!
+// *************************************************************************************************
+void MapEditor::onActionTypeSelected_(const ActionType id)
+{
+  LOGI("ActionTypeSelected %u", id);
+  // TODO changer le curseur
 }
 
 // *************************************************************************************************
@@ -423,7 +459,7 @@ bool MapEditor::dialogSaveAsMap(const bool closing)
 // **************************************************************
 // Interface
 // **************************************************************
-/*Gtk::ToolButton *MapEditor::addButon(const Gtk::BuiltinStockID icon,
+/*MapEditor::addButon(const Gtk::BuiltinStockID icon,
                                      const std::string &script,
                                      const std::string &help)
 {

@@ -94,6 +94,8 @@ public:
   //! \brief
   inline void keyReleased(Direction d) { m_direction[d] = false; }
   //! \brief
+  bool on_button_press_event(GdkEventButton* event);
+  //! \brief
   bool keyboard();
   //! \brief
   bool onScrollEvent(GdkEventScroll *event);

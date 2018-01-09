@@ -19,7 +19,32 @@
 //=====================================================================
 
 #include "DrawingArea.hpp"
+#include "MapEditor.hpp"
 #include <exception>
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool GLDrawingArea::on_button_press_event(GdkEventButton* event)
+{
+  if (event->type == GDK_BUTTON_PRESS)
+    {
+      switch (event->button)
+        {
+        case 1:
+          MapEditor::instance().button1PressEvent(event->x, event->y);
+          break;
+        case 2:
+          MapEditor::instance().button2PressEvent(event->x, event->y);
+          break;
+        case 3:
+          MapEditor::instance().button3PressEvent(event->x, event->y);
+          break;
+        }
+    }
+
+  return true;
+}
 
 // FIXME: plutot MapEditor::keyboard() ?
 bool GLDrawingArea::keyboard()
