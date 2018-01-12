@@ -22,9 +22,12 @@
 #include "Config.hpp"
 
 // FIXME: this is a temporary example
-void SimTaDynContext::init()
+void SimTaDynContext::init(cli::Parser& parser)
 {
-  LOGI("Init SimTaDynContext");
+  LOGI("Parsing project options");
+  PathManager::instance().add(parser.get<std::string>("p"));
+  LOGI("%s", PathManager::instance().toString().c_str());
+
 
   SimTaDynSheet* sheet = new SimTaDynSheet("Sheet0"); // Ok leak but just for example
   SimForth& forth = SimForth::instance();
@@ -46,6 +49,11 @@ void SimTaDynContext::init()
       std::cout << n0.value() << std::endl;
       std::cout << n1.value() << std::endl;
     }
+}
+
+static void configure_options(cli::Parser& parser)
+{
+  parser.set_optional<std::string>("p", "path", "", "Add pathes for searching datum. Use ':' for separate pathes");
 }
 
 // Init Gtkmm and SimTaDyn contexts. Be careful not to create a GTK+
@@ -70,18 +78,25 @@ int main(int argc, char** argv)
                 << config::tmp_path << "'" << std::endl;
     }
 
+  LOGI("Init option parser");
+  cli::Parser parser(argc, argv);
+  configure_options(parser);
+  parser.run_and_exit_if_error();
+
   LOGI("Init GTK");
   const Gtk::Main kit(argc, argv);
   Gsv::init();
 
+  LOGI("Init SimTaDyn");
   auto SimTaDyn = std::unique_ptr<SimTaDynContext>(new SimTaDynContext);
   if (nullptr == SimTaDyn)
     {
       LOGE("Failed creating the SimTaDynContext GUI. Aborting");
       exit(1);
     }
+  SimTaDyn->init(parser);
 
-  SimTaDyn->init();
+  LOGI("Start SimTaDyn main loop");
   kit.run(SimTaDyn->window());
 
   return 0;

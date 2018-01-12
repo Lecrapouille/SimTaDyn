@@ -88,7 +88,7 @@ endif
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES = -I$(BUILD) -I$(P)/external/backward-cpp			\
+INCLUDES = -I$(BUILD) -I$(P)/external/backward-cpp -I$(P)/external	\
 -I$(P)/external/SOIL -I$(P)/external/YesEngine -I$(P)/external/zipper	\
 -I$(P)/src -I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns	\
 -I$(P)/src/common/managers -I$(P)/src/common/utils			\

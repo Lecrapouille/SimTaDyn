@@ -15,7 +15,7 @@ TARGET=SimTaDyn
 
 ### Delete all previous directories to be sure to have and compile
 ### fresh code source.
-rm -fr backward-cpp zipper SOIL 2> /dev/null
+rm -fr backward-cpp zipper SOIL CmdParser 2> /dev/null
 
 function print-clone
 {
@@ -27,6 +27,10 @@ function print-clone
 ### License: MIT
 print-clone backward-cpp
 git clone https://github.com/bombela/backward-cpp.git --depth=1 > /dev/null 2> /dev/null
+
+### Library CmdParser is a C++ alternative to C getopt for parsing options like --help
+print-clone CmdParser
+git clone https://github.com/FlorianRappl/CmdParser.git --depth=1 > /dev/null 2> /dev/null
 
 ### Library SOIL for opening pictures files (jpeg, png ...)
 print-clone SOIL

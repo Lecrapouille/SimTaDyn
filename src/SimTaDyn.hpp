@@ -23,6 +23,7 @@
 
 #  include "Path.hpp"
 #  include "SimTaDynWindow.hpp"
+#  include "CmdParser/cmdparser.hpp"
 
 // **************************************************************
 //! \brief
@@ -70,8 +71,9 @@ public:
 
   //------------------------------------------------------------------
   //! \brief
+  //! \param parser A command line parser (same job than getoption)
   //------------------------------------------------------------------
-  void init();
+  void init(cli::Parser& parser);
 
   //------------------------------------------------------------------
   //! \brief Return the reference of the main UI window.
