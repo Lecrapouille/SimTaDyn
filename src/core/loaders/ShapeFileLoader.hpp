@@ -21,7 +21,7 @@
 #ifndef SHAPEFILELOADER_HPP_
 #  define SHAPEFILELOADER_HPP_
 
-#  include "ILoader.hpp"
+#  include "ILoader.tpp"
 #  include "SimTaDynSheet.hpp"
 #  include "BoundingBox.tpp"
 

@@ -22,7 +22,7 @@
 #ifndef LOADER_MANAGER_TPP_
 #  define LOADER_MANAGER_TPP_
 
-#  include "ILoader.hpp"
+#  include "ILoader.tpp"
 #  include "PathManager.hpp"
 #  include "Logger.hpp"
 

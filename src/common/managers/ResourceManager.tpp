@@ -23,7 +23,7 @@
 #  define RESOURCE_MANAGER_TPP_
 
 #  include "Singleton.tpp"
-#  include "IResource.tpp"
+#  include "Resource.hpp"
 #  include "Logger.hpp"
 #  include <map>
 #  include <mutex>

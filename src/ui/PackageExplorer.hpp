@@ -22,7 +22,7 @@
 #  define PACKAGE_EXPLORER_HPP_
 
 #  include <gtkmm.h>
-#  include "ILoader.hpp"
+#  include "ILoader.tpp"
 
 class SimTaDynMap;
 

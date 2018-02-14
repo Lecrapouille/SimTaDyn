@@ -22,6 +22,7 @@
 #  define GLTEXTURES_HPP_
 
 #  include "GLObject.hpp"
+#  include "Resource.hpp"
 #  include "PendingData.hpp"
 #  include "SOIL.h"
 

@@ -21,7 +21,7 @@
 #ifndef SIMTADYNFILELOADER_HPP_
 #  define SIMTADYNFILELOADER_HPP_
 
-#  include "ILoader.hpp"
+#  include "ILoader.tpp"
 #  include "SimTaDynMap.hpp"
 
 // ***********************************************************************************************

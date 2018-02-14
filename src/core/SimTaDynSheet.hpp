@@ -21,7 +21,7 @@
 #ifndef CLASSIC_SPREADSHEET_HPP_
 #  define CLASSIC_SPREADSHEET_HPP_
 
-#  include "ResourceManager.tpp"
+#  include "Resource.hpp"
 #  include "SimTaDynCell.hpp"
 #  include "SimTaDynGraph.hpp"
 //#  include "GraphAlgorithm.hpp"

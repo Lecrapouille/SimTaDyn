@@ -23,6 +23,7 @@
 
 #  include "SimTaDynSheet.hpp"
 #  include "SceneGraph.tpp"
+#  include "Resource.hpp"
 
 class SimTaDynMap;
 typedef SceneNode<SimTaDynSheet, float, 3U> SceneNode_t;

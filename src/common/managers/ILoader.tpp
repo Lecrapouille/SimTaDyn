@@ -31,7 +31,6 @@
 // ***********************************************************************************************
 //! \brief Define callbacks on loader events
 // ***********************************************************************************************
-template <class T>
 class ILoaderListener
 {
 public:
@@ -64,8 +63,9 @@ public:
 
 // **************************************************************
 //! \brief Interface for loading and saving data from/to a file.
+//! Template R is for IResource but not necessary.
 // **************************************************************
-template <class T>
+template <class R>
 class ILoader
 {
 public:
@@ -81,7 +81,7 @@ public:
   //! class holding these datum. Calling this method will produce an
   //! exception.
   //------------------------------------------------------------------
-  virtual void loadFromFile(std::string const& filename, T* &/*object*/)
+  virtual void loadFromFile(std::string const& filename, std::shared_ptr<R> &/*resource*/)
   {
     std::string msg("Found no loader supporting this kind of file '"
                     + filename);
@@ -94,7 +94,7 @@ public:
   //! implementing this method shall pass the T-typed class holding
   //! these datum. Calling this method will produce an exception.
   //------------------------------------------------------------------
-  virtual void saveToFile(T const& /*object*/, std::string const& filename)
+  virtual void saveToFile(std::shared_ptr<R> const /*resource*/, std::string const& filename)
   {
     std::string msg("Found no loader supporting this kind of file '"
                     + filename);
@@ -131,19 +131,19 @@ protected:
 // **************************************************************
 //! \brief Same goal than 'typedef'.
 // **************************************************************
-template <class T>
-using LoaderContainer = std::map<std::string, std::shared_ptr<ILoader<T>>>;
+template <class R>
+using LoaderContainer = std::map<std::string, std::shared_ptr<ILoader<R>>>;
 
 // **************************************************************
 //! \brief Hold loaders. Needed for meta-programming
 // **************************************************************
-template <class T>
+template <class R>
 struct LoaderHolder
 {
-  //! \brief Hash table of loaders
-  LoaderContainer<T> m_loaders;
+  //! \brief Hash table of loaders. Ordered by file extension.
+  LoaderContainer<R> m_loaders;
   //! \brief List of observers attached to loader events.
-  std::vector<ILoaderListener<T>*> m_listeners;
+  std::vector<ILoaderListener*> m_listeners;
 };
 
 #endif
