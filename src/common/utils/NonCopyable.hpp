@@ -18,35 +18,19 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNFILELOADER_HPP_
-#  define SIMTADYNFILELOADER_HPP_
+#ifndef NONCOPYABLE_HPP
+#define NONCOPYABLE_HPP
 
-#  include "ILoader.tpp"
-#  include "SimTaDynMap.hpp"
-#  include "ResourceManager.tpp"
-
-using SimTaDynMapManager = ResourceManager<SimTaDynMap, std::string>;
-
-// ***********************************************************************************************
-//! \brief
-// ***********************************************************************************************
-class SimTaDynFileLoader : public ILoader<SimTaDynMap>
+//! \brief Inspired by http://www.boost.org/doc/libs/1_66_0/boost/core/noncopyable.hpp
+class NonCopyable
 {
-public:
-
-  SimTaDynFileLoader()
-    : ILoader<SimTaDynMap>("SimTaDynMap")
-  {
-    LOGI("Creating a SimTaDynMap loader %p", this);
-  }
-  virtual void loadFromFile(std::string const& filename, SimTaDynMapPtr &map) override;
-  virtual void saveToFile(SimTaDynMapPtr const map, std::string const& filename) override;
-
 protected:
 
-  //! \brief
-  void unzip(std::string const &zip_file);
-  bool zip(SimTaDynMapPtr const map, std::string const& filename);
+  constexpr NonCopyable() = default;
+  ~NonCopyable() = default;
+
+  NonCopyable(const NonCopyable&) = delete;
+  const NonCopyable& operator=(const NonCopyable&) = delete;
 };
 
 #endif

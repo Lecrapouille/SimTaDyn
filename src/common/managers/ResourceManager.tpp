@@ -28,20 +28,55 @@
 #  include <map>
 #  include <mutex>
 
-template<class T>
-class ResourceManager: public Singleton<ResourceManager<T>>
+// **************************************************************
+//! \brief Hold resources. Needed for meta-programming
+// **************************************************************
+template <class T>
+class ResourceHolder
+{
+public:
+
+  ResourceHolder() {}
+  virtual ~ResourceHolder()
+  {
+    if (m_resources.empty())
+      return ;
+
+    for (auto& it: m_resources)
+      {
+        // Note: -1 because shared_ptr has 1 reference made by its
+        // own container.
+        auto n = it.second.use_count() - 1;
+        if (n > 0u)
+        {
+          CPP_LOG(logger::Warning)
+            << "Destroying the ResourceManager but its resource #"
+            << it.first << " is still used by " << n << " owners\n";
+        }
+      }
+  }
+
+public:
+
+  std::map<T, ResourcePtr> m_resources;
+};
+
+// **************************************************************
+//! \brief
+// **************************************************************
+template <class R, class T>
+class ResourceManager
+  : public Singleton<ResourceManager<R, T>>,
+    public ResourceHolder<T>
 {
 private:
 
   //------------------------------------------------------------------
   //! \brief Mandatory by design.
   //------------------------------------------------------------------
-  friend class Singleton<ResourceManager<T>>;
+  friend class Singleton<ResourceManager<R, T>>;
 
-  //------------------------------------------------------------------
-  //! \brief Allow the resource to call methods like remove()
-  //------------------------------------------------------------------
-  // friend class IResource<T>;
+public:
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton.
@@ -52,64 +87,56 @@ private:
   //! \brief Private because of Singleton. Check if resources is still
   //! acquired which show a bug in the management of resources.
   //------------------------------------------------------------------
-  virtual ~ResourceManager()
-  {
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    LOGI("Destroying the ResourceManager");
-    if (m_resources.empty())
-      return ;
-
-    for (auto it: m_resources)
-      {
-        IResource<T> *resource = it.second;
-        uint32_t n = resource->owners();
-        if (0U == n)
-          {
-            // Created but not used by someone
-            // so can be released.
-            resource->dispose();
-          }
-        else
-          {
-            CPP_LOG(logger::Warning)
-              << "  ==> The resource "
-              << resource->id()
-              << " is still aquired by "
-              << n << " owners\n";
-          }
-      }
-  }
+  ~ResourceManager() { }
 
 public:
+
+  std::shared_ptr<R>
+  create(const T& id, const bool force = true)
+  {
+    ResourcePtr r = Resource::create<R>();
+    if (true == add(id, r, force))
+      {
+        return std::static_pointer_cast<R>(r);
+      }
+    return nullptr;
+  }
 
   //------------------------------------------------------------------
   //! \brief Insert an allocated resource in the list of resources.
   //------------------------------------------------------------------
-  bool add(IResource<T> *resource)
+  bool add(const T& id, ResourcePtr& resource, const bool force = true)
+  {
+    CPP_LOG(logger::Info) << "Adding the resource #" << id << "\n";
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    const auto& it = ResourceHolder<T>::m_resources.find(id);
+    if (it != ResourceHolder<T>::m_resources.end())
+      {
+        CPP_LOG(logger::Info) << "Replacing the resource #" << id
+                              << " owned by " << (it->second.use_count() - 1)
+                              << "\n";
+        if (!force)
+          return false;
+      }
+
+    ResourceHolder<T>::m_resources[id] = resource;
+    return true;
+  }
+
+  //------------------------------------------------------------------
+  //! Get the resource address in read only access.
+  //------------------------------------------------------------------
+  inline bool exist(const T& id) const
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    if (nullptr == resource)
+    const auto& it = ResourceHolder<T>::m_resources.find(id);
+    if (it != ResourceHolder<T>::m_resources.end())
       {
-        LOGF("Trying to add a resource with a NULL pointer");
-        return false;
+        return true;
       }
-
-    const T id = resource->id();
-    if (m_resources.find(id) != m_resources.end())
-      {
-        CPP_LOG(logger::Warning)
-          << "Trying to add a duplicated resource #"
-          << id << ". This current action is ignored !\n";
-        return false;
-      }
-
-    CPP_LOG(logger::Info)
-      << "Added the resource #" << id
-      << " to the ResourceManager\n";
-    m_resources[id] = resource;
-    return true;
+    return false;
   }
 
   //------------------------------------------------------------------
@@ -118,37 +145,23 @@ public:
   //! \return the adress of the resource if it exists, else return
   //! nullptr.
   //------------------------------------------------------------------
-  inline IResource<T> *acquire(T const& id)
+  inline std::shared_ptr<R> acquire(const T& id)
   {
+    CPP_LOG(logger::Info) << "Acquiring the resource #" << id << "\n";
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    LOGI("Acquiring the resource #%u", id);
-    auto it = m_resources.find(id);
-    if (it != m_resources.end())
+    const auto& it = ResourceHolder<T>::m_resources.find(id);
+    if (it != ResourceHolder<T>::m_resources.end())
       {
-        it->second->acquire();
-        return it->second;
+        return std::static_pointer_cast<R>(it->second);
       }
-
-    CPP_LOG(logger::Error)
-      << "Trying to acquire a non-existent resource "
-      << (uint32_t) id << ". This current action is ignored !\n";
-    return nullptr;
-  }
-
-  //------------------------------------------------------------------
-  //! Get the resource address in read only access.
-  //------------------------------------------------------------------
-  inline IResource<T> const *look(T const& id)
-  {
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    auto it = m_resources.find(id);
-    if (it != m_resources.end())
+    else
       {
-        return it->second;
+        CPP_LOG(logger::Warning)
+          << "Trying to acquire a non-existent resource "
+          << id << ". This current action is ignored !\n";
+        return nullptr;
       }
-    return nullptr;
   }
 
   //------------------------------------------------------------------
@@ -156,24 +169,28 @@ public:
   //! is still using it, the resource is not destroyed. If nobody uses
   //! it, the resource is destroyed.
   //------------------------------------------------------------------
-  void dispose(T const& id)
+  void remove(const T& id, const bool force = true)
   {
+    CPP_LOG(logger::Info) << "Disposing of the resource #" << id << "\n";
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    auto it = m_resources.find(id);
-    if (it != m_resources.end())
+    const auto& it = ResourceHolder<T>::m_resources.find(id);
+    if (it != ResourceHolder<T>::m_resources.end())
       {
-        uint32_t owners = it->second->dispose();
-        LOGI("Disposing of the resource #%u (%u owner(s))", id, owners);
-        if (0U == owners)
+        uint32_t owners = it->second.use_count();
+        if (owners > 1u)
           {
-            // Note: compared to
-            // http://loulou.developpez.com/tutoriels/moteur3d/ this
-            // line was added because only the ResourceManager can
-            // dispose of the resource.
-            LOGI("Destroying the resource #%u", id);
-            m_resources.erase(it);
+            CPP_LOG(logger::Warning)
+              << "Trying to dispose of the resource #"
+              << id << " currently used by " << (owners - 1)
+              << " owners !" << (force ? "Force removing" : "Action ignored")
+              << ".\n";
+
+            if (!force)
+              return ;
           }
+
+        ResourceHolder<T>::m_resources.erase(it);
       }
     else
       {
@@ -191,41 +208,24 @@ public:
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    return m_resources.size();
+    return ResourceHolder<T>::m_resources.size();
   }
 
-protected:
-
-  //------------------------------------------------------------------
-  //! \brief Remove an allocated resource in the list of resources.
-  //------------------------------------------------------------------
-  void remove(T const& id)
+  void debug() const
   {
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    auto it = m_resources.find(id);
-    if (it != m_resources.end())
+    std::cout << "ResourceManager::debug():" << std::endl;
+    for (const auto& it: ResourceHolder<T>::m_resources)
       {
-        LOGI("Destroying the resource #%u", id);
-        m_resources.erase(it);
-      }
-    else
-      {
-        CPP_LOG(logger::Warning)
-          << "Trying to remove a non-existent resource "
-          << id << ". This current action is ignored !\n";
+        std::cout << it.first << ": shared by "
+          << (it.second.use_count() - 1)
+          << " owners" << std::endl;
       }
   }
-
-  //------------------------------------------------------------------
-  //! \brief the list of resources.
-  //------------------------------------------------------------------
-  std::map<T, IResource<T>*> m_resources;
 
   //------------------------------------------------------------------
   //! \brief Allow several threads to access to the manager.
   //-----------------------------------------------------------------
-  std::mutex m_mutex;
+  mutable std::mutex m_mutex;
 };
 
 #endif /* RESOURCE_MANAGER_TPP_ */

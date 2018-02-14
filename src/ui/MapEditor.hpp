@@ -31,6 +31,72 @@
 class LoaderManager;
 
 // *************************************************************************************************
+//! \brief A class holding the currently edited by SimTaDynMap. When
+//! the user changes of map, this class will notifies to observers that
+//! map changed.
+// ***********************************************************************************************
+class SimTaDynMapHolder
+{
+public:
+
+  SimTaDynMapHolder()
+  {
+  }
+
+  void set(SimTaDynMapPtr p)
+  {
+    m_map = p;
+    if (nullptr != m_map)
+      {
+        m_map->notify(); // TODO ---> DrawingArea::onNotify(){>attachModel(*map);} mais PendingData le fait deja
+        // TODO: notify to SimForth to get the address of the scenegraph<SimTaDynSheet>
+      }
+  }
+
+  SimTaDynMapPtr get(std::string const& name)
+  {
+    // The desired map is already currently used
+    if ((nullptr != m_map) && (m_map->name() == name))
+      return m_map;
+
+    // Get the desired map
+    SimTaDynMapPtr new_map = SimTaDynMapManager::instance().acquire(name);
+
+    // The desired map does not exist
+    if (nullptr == new_map)
+      {
+        if (nullptr == m_map)
+          {
+            LOGE("Cannot select SimTaDyn map #%s because there is no map to select",
+                 name.c_str());
+          }
+        else
+          {
+            LOGE("Cannot select SimTaDyn map #%s. Keep using the current map #%s",
+                 name.c_str(), m_map->name().c_str());
+          }
+      }
+    else
+      {
+        m_map = new_map;
+        m_map->notify();
+        // TODO ---> DrawingArea::onNotify(){>attachModel(*map);}
+      }
+
+    return m_map;
+  }
+
+  inline SimTaDynMapPtr get()
+  {
+    return m_map;
+  }
+
+protected:
+
+  SimTaDynMapPtr m_map;
+};
+
+// *************************************************************************************************
 // This class implements a Controler pattern of the Model-View-Controler (MVC) design pattern.
 // *************************************************************************************************
 class MapEditor
@@ -70,10 +136,11 @@ protected:
     }
 
     //! \brief Callback when the map changed: draw it.
-    virtual void onChanged(SimTaDynMap* map) override
+    virtual void onChanged(SimTaDynMap const& map) override
     {
-      LOGI("MapEditor::SimTaDynMapListener has detected that Map %s has changed 0x%x",
-           map->m_name.c_str(), map);
+      LOGI("MapEditor::SimTaDynMapListener has detected that Map %s has changed",
+           map.m_name.c_str());
+
       if (nullptr == m_editor.m_drawing_area)
         return ;
       //FIXME m_editor.m_drawing_area->drawThat(*map);
@@ -90,20 +157,36 @@ public:
   }
 
   //! \brief Return the current map
-  inline SimTaDynMap* map()
+  inline SimTaDynMapPtr map()
   {
     return m_current_map.get();
   }
-  SimTaDynMap* map(const Key id);
 
-  //! \brief Load a new map from a file through a dialog box.
+  inline SimTaDynMapPtr map(std::string const& name)
+  {
+    return m_current_map.get(name);
+  }
+
+  //! \brief Load a new SimTaDyn map from a file through a dialog box.
   inline bool open()
   {
-    return dialogLoadMap(true, false);
+    return dialogLoadMap(false, true);
   }
 
   //! \brief Load a new map from a file.
   inline bool open(std::string const& filename)
+  {
+    return doOpen(filename, false, true);
+  }
+
+  //! \brief Load a new map from a file through a dialog box.
+  inline bool import()
+  {
+    return dialogLoadMap(true, false);
+  }
+
+    //! \brief Load a new map from a file through a dialog box.
+  inline bool import(std::string const& filename)
   {
     return doOpen(filename, true, false);
   }
@@ -189,13 +272,10 @@ public:
 
 protected:
 
-  void registerLoaders();
-  virtual bool load(const std::string& filename, SimTaDynMap* &oldmap);
+  virtual bool load(const std::string& filename, SimTaDynMapPtr oldmap);
   bool doOpen(std::string const& filename, const bool new_map, const bool reset_map);
   bool dialogLoadMap(const bool new_map, const bool reset_map);
   bool dialogSaveAsMap(const bool closing);
-  void add(const Key id, SimTaDynMap* map);
-  void remove(const Key id);
   void onActionOnSelected_(const ActionOn id);
   void onActionTypeSelected_(const ActionType id);
   inline void onActionOnSelected(const uint32_t id)
@@ -206,12 +286,14 @@ protected:
   {
     onActionTypeSelected_(static_cast<ActionType>(id));
   }
+  void add(const Key name, SimTaDynMapPtr map);
+  void remove(const Key name);
 
 public:
 
-  //! \brief Current 'Model' of the MVC design pattern.
+  //! \brief Current model of the MVC design pattern
   SimTaDynMapHolder     m_current_map;
-  //! \brief View implementation of the MVC design pattern
+  //! \brief View implementation of the MVC
   GLDrawingArea         *m_drawing_area = nullptr;
   //!
   Gtk::MenuItem          m_menuitem[simtadyn::MaxMapMenuNames + 1];

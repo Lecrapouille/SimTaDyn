@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "SimTaDynWindow.hpp"
-#include "MapEditor.hpp"
 #include "PathManager.hpp"
 
 // *************************************************************************************************
@@ -94,7 +93,7 @@ SimTaDynWindow::SimTaDynWindow()
     m_box.pack_start(ForthEditor::instance().m_vpaned);
     m_hpaned.pack2(m_box);
     m_box.pack_start(m_package_explorer.widget());
-    LoaderManager::instance().addListener(m_package_explorer);
+    LoaderManager::instance().addListener<SimTaDynMap>(m_package_explorer);
 
     //
     add(m_hpaned);

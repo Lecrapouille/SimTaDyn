@@ -53,7 +53,7 @@ OBJ_OPENGL    += GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o Render
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
 OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
-OBJ_LOADERS    = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoader.o
+OBJ_LOADERS    = LoaderException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDynFileLoader.o TextureFileLoader.o
 # SimTaDynFile.o
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
@@ -112,9 +112,11 @@ endif
 ###################################################
 # Backward allows tracing stack when segfault happens
 ifeq ($(PROJECT_MODE),debug)
+ifneq ($(ARCHI),Darwin)
 OPTIM_FLAGS = -O2 -g
 DEFINES += -DBACKWARD_HAS_DW=1
 LIBS += -ldw
+endif
 else
 OPTIM_FLAGS = -O3
 endif
@@ -132,7 +134,7 @@ $(TARGET): $(OBJ)
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
@@ -229,13 +231,15 @@ clean:
 
 ###################################################
 # Cleaning
-.PHONY: distclean
-distclean: clean
+.PHONY: veryclean
+veryclean: clean
 	@rm -fr cov-int SimTaDyn.tgz *.log foo 2> /dev/null
 	@cd tests && make -s clean; cd - > /dev/null
 	@cd src/common/graphics/OpenGL/examples/ && make -s clean; cd - > /dev/null
 	@cd src/forth/standalone && make -s clean; cd - > /dev/null
 	@cd src/core/standalone/ClassicSpreadSheet && make -s clean; cd - > /dev/null
+	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
+	@cd doc/ && rm -fr html
 
 ###################################################
 # Sharable informations between all Makefiles

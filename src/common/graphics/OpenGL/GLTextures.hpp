@@ -29,7 +29,10 @@
 // **************************************************************
 //
 // **************************************************************
-class GLTexture: public GLObject, protected PendingData
+class GLTexture
+  : public GLObject,
+    public Resource,
+    protected PendingData
 {
 public:
 

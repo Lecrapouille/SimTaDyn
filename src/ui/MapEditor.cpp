@@ -30,8 +30,6 @@ MapEditor::MapEditor()
 {
   LOGI("Creating MapEditor");
 
-  registerLoaders();
-
   // Init map edition tool to dummy action
   m_edition_tools[ActionType::Add] = new AddCellTool();
   m_edition_tools[ActionType::Remove] = new RemoveCellTool();
@@ -147,16 +145,6 @@ MapEditor::~MapEditor()
 }
 
 // *************************************************************************************************
-//
-// *************************************************************************************************
-void MapEditor::registerLoaders()
-{
-  LoaderManager &lm = LoaderManager::instance();
-  lm.registerLoader(new ShapefileLoader(), "shp");
-  lm.registerLoader(new SimTaDynFileLoader(), "spak");
-}
-
-// *************************************************************************************************
 //!
 // *************************************************************************************************
 void MapEditor::onActionOnSelected_(const ActionOn id)
@@ -179,52 +167,25 @@ void MapEditor::onActionTypeSelected_(const ActionType id)
 // *************************************************************************************************
 void MapEditor::close()
 {
-  SimTaDynMap* map = m_current_map.get();
+  SimTaDynMapPtr map = m_current_map.get();
 
   // No map currently used.
   if (nullptr == map)
     return ;
 
+  // Look for another map
+  /*for (const auto& it: SimTaDynMapManager::instance().resources())
+    {
+      m_current_map.set(SimTaDynMapManager::instance().acquire(it->name));
+    }
+
   // The current map was the only one.
-  uint32_t id = map->id();
-  if (0U == id)
-    {
-      m_current_map.set(nullptr);
-      return ;
-    }
+  if (it == SimTaDynMapManager::instance().resources().end())
+  {*/
+      map = nullptr;
+      //  }
 
-  // Get the previous map
-  ResourceManager<Key> &rm =
-    ResourceManager<Key>::instance();
-
-  do
-    {
-      --id;
-      map = (SimTaDynMap*) rm.look(id); // FIXME: completement faux car peut retourner une texture
-    }
-  while ((nullptr != map) && (0U != id));
   m_current_map.set(map);
-}
-
-// *************************************************************************************************
-//
-// *************************************************************************************************
-SimTaDynMap* MapEditor::map(const Key id)
-{
-  ResourceManager<Key> &rm =
-    ResourceManager<Key>::instance();
-
-  SimTaDynMap *map = (SimTaDynMap*) rm.look(id);
-  if (nullptr != map)
-    {
-      m_current_map.set(map);
-    }
-  else
-    {
-      LOGW("Cannot select SimTaDyn map #%u", id);
-    }
-
-  return map;
 }
 
 // *************************************************************************************************
@@ -232,11 +193,31 @@ SimTaDynMap* MapEditor::map(const Key id)
 // *************************************************************************************************
 void MapEditor::newMap()
 {
-  LOGI("Creating a dummy SimTaDyn map");
+  SimTaDynMapPtr map;
+  std::string base_name = "NoName";
+  std::string name(base_name);
+  uint32_t i = 1;
 
-  SimTaDynMap *map = new SimTaDynMap();
+  do
+    {
+      LOGI("Creating a dummy SimTaDyn map named '%s'", name.c_str());
+      map = SimTaDynMapManager::instance().create(name);
+      if (nullptr == map)
+        {
+          LOGI("Failed ! Try with a new name");
+          name = base_name + '~' + std::to_string(i);
+          ++i;
+        }
+    }
+  while ((nullptr == map) && (i < 10));
+
+  if (nullptr == map)
+    {
+      LOGI("Failed 10 times ! Abort !");
+      return ;
+    }
+
   map->addListener(m_listener);
-  ResourceManager<Key>::instance().add(map);
   m_current_map.set(map);
 }
 
@@ -287,7 +268,9 @@ bool MapEditor::dialogLoadMap(const bool new_map, const bool reset_map)
 // *************************************************************************************************
 bool MapEditor::doOpen(std::string const& filename, const bool new_map, const bool reset_map)
 {
-  SimTaDynMap* map = (new_map) ? nullptr : m_current_map.get();
+  std::string name = (reset_map) ? File::baseName(filename) : filename;
+  SimTaDynMapPtr map = (new_map) ? SimTaDynMapManager::instance().create(name) : m_current_map.get();
+
   if ((reset_map) && (nullptr != map))
     {
       map->clear();
@@ -296,11 +279,6 @@ bool MapEditor::doOpen(std::string const& filename, const bool new_map, const bo
   bool res = load(filename, map);
   if (true == res)
     {
-      if (reset_map)
-        {
-          map->m_name = File::baseName(filename);
-        }
-
       //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
       //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }
     }
@@ -311,20 +289,20 @@ bool MapEditor::doOpen(std::string const& filename, const bool new_map, const bo
 // *************************************************************************************************
 //
 // *************************************************************************************************
-bool MapEditor::load(std::string const& filename, SimTaDynMap* &map)
+bool MapEditor::load(std::string const& filename, SimTaDynMapPtr map)
 {
-  ResourceManager<Key> &rm = ResourceManager<Key>::instance();
+  SimTaDynMapManager &rm = SimTaDynMapManager::instance();
 
   try
     {
       bool dummy_map = (nullptr == map);
-      if ((dummy_map) || (nullptr == rm.look(map->id())))
+      if ((dummy_map) || (false == rm.exist(map->name())))
         {
           LoaderManager::instance().loadFromFile(filename, map);
           if (dummy_map)
             {
               map->addListener(m_listener);
-              rm.add(map);
+              //FIXME rm.add(map);
               m_current_map.set(map);
             }
         }
@@ -359,15 +337,17 @@ bool MapEditor::exec() // FIXME: Exec(typeCell, nodeID)
   SimTaDynSheet *sheet = map()->sheet();
 
   if (nullptr == sheet)
+  {
+    LOGE("No sheet attached to Forth");
     return false;
+  }
 
   // FIXME: should be called outside each cell: optimisation
   // Disable compilation mode
   forth.dictionary().smudge(":");
   forth.dictionary().smudge("INCLUDE");
 
-  forth.m_spreadsheet = sheet;
-  sheet->parse(SimForth::instance());
+  sheet->parse(forth);
   std::pair<bool, std::string> res = sheet->evaluate(forth);
   forth.ok(res);
 
@@ -459,7 +439,7 @@ bool MapEditor::dialogSaveAsMap(const bool closing)
 // **************************************************************
 // Interface
 // **************************************************************
-/*MapEditor::addButon(const Gtk::BuiltinStockID icon,
+/*Gtk::ToolButton *MapEditor::addButon(const Gtk::BuiltinStockID icon,
                                      const std::string &script,
                                      const std::string &help)
 {

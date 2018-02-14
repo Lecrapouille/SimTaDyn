@@ -29,7 +29,7 @@ class SimTaDynMap;
 // **************************************************************
 //! \brief
 // **************************************************************
-class PackageExplorer: public ILoaderListener<SimTaDynMap>
+class PackageExplorer: public ILoaderListener
 {
 private:
 

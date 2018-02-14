@@ -71,14 +71,15 @@ public:
 
   std::pair<std::string, bool> find(std::string const& filename) const
   {
+    if (File::exist(filename))
+      return std::make_pair(filename, true);
+
     for (auto it: m_paths)
     {
       std::string file(it + filename);
       if (File::exist(file))
         return std::make_pair(file, true);
     }
-    if (File::exist(filename))
-      return std::make_pair(filename, true);
 
     // Not found
     return std::make_pair(std::string(), false);

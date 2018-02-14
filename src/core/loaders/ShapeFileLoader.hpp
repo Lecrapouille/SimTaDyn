@@ -23,7 +23,6 @@
 
 #  include "ILoader.tpp"
 #  include "SimTaDynSheet.hpp"
-#  include "BoundingBox.tpp"
 
 // ***********************************************************************************************
 //! \brief
@@ -38,7 +37,7 @@ public:
     LOGI("Creating a Shapefile loader %p", this);
   }
 
-  virtual void loadFromFile(std::string const& filename, SimTaDynSheet* &sheet) override;
+  virtual void loadFromFile(std::string const& filename, SimTaDynSheetPtr &sheet) override;
 
 protected:
 

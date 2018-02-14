@@ -39,7 +39,7 @@ public:
   {
     LOGI("New SimTaDynContext");
     PathManager::instance();
-    ResourceManager<Key>::instance();
+    //TODO ResourceManager::instance();
     LoaderManager::instance();
     SimForth::instance();
     ForthEditor::instance();
@@ -64,7 +64,7 @@ public:
     MapEditor::destroy();
     SimForth::destroy();
     LoaderManager::destroy();
-    ResourceManager<Key>::destroy();
+    //TODO ResourceManager::destroy();
     PathManager::destroy();
     Logger::destroy();
   };

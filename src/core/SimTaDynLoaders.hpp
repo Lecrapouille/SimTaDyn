@@ -18,35 +18,28 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNFILELOADER_HPP_
-#  define SIMTADYNFILELOADER_HPP_
+#ifndef SIMTADYNLOADERS_HPP_
+#  define SIMTADYNLOADERS_HPP_
 
-#  include "ILoader.tpp"
+#  include <cstddef>
+#  include "YesEngine/GenHierarchies.h"
+using namespace Yes;
+
+// *************************************************************************************************
+//! Add here all classes derivating from the Resource class.
+// *************************************************************************************************
+
 #  include "SimTaDynMap.hpp"
+#  include "GLTextures.hpp"
+
+typedef TYPELIST_3(SimTaDynMap,
+                   SimTaDynSheet,
+                   GLTexture2D) ResourceList;
+
 #  include "ResourceManager.tpp"
-
-using SimTaDynMapManager = ResourceManager<SimTaDynMap, std::string>;
-
-// ***********************************************************************************************
-//! \brief
-// ***********************************************************************************************
-class SimTaDynFileLoader : public ILoader<SimTaDynMap>
-{
-public:
-
-  SimTaDynFileLoader()
-    : ILoader<SimTaDynMap>("SimTaDynMap")
-  {
-    LOGI("Creating a SimTaDynMap loader %p", this);
-  }
-  virtual void loadFromFile(std::string const& filename, SimTaDynMapPtr &map) override;
-  virtual void saveToFile(SimTaDynMapPtr const map, std::string const& filename) override;
-
-protected:
-
-  //! \brief
-  void unzip(std::string const &zip_file);
-  bool zip(SimTaDynMapPtr const map, std::string const& filename);
-};
+#  include "ShapeFileLoader.hpp"
+#  include "SimTaDynFileLoader.hpp"
+#  include "TextureFileLoader.hpp"
+#  include "LoaderManager.tpp"
 
 #endif

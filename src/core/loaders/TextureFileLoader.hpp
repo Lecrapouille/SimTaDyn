@@ -18,35 +18,30 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNFILELOADER_HPP_
-#  define SIMTADYNFILELOADER_HPP_
+#ifndef TEXTURE_FILE_LOADER_HPP_
+#  define TEXTURE_FILE_LOADER_HPP_
 
 #  include "ILoader.tpp"
-#  include "SimTaDynMap.hpp"
+#  include "GLTextures.hpp"
 #  include "ResourceManager.tpp"
 
-using SimTaDynMapManager = ResourceManager<SimTaDynMap, std::string>;
+using GLTexture2DPtr = std::shared_ptr<GLTexture2D>;
+using GLTexture2DManager = ResourceManager<GLTexture2D, std::string>;
 
 // ***********************************************************************************************
 //! \brief
 // ***********************************************************************************************
-class SimTaDynFileLoader : public ILoader<SimTaDynMap>
+class TextureLoader
+  : public ILoader<GLTexture2D>
 {
 public:
 
-  SimTaDynFileLoader()
-    : ILoader<SimTaDynMap>("SimTaDynMap")
+  TextureLoader()
+    : ILoader<GLTexture2D>("OpenGL 2D Texture")
   {
-    LOGI("Creating a SimTaDynMap loader %p", this);
+    LOGI("Creating an OpenGL loader %p", this);
   }
-  virtual void loadFromFile(std::string const& filename, SimTaDynMapPtr &map) override;
-  virtual void saveToFile(SimTaDynMapPtr const map, std::string const& filename) override;
-
-protected:
-
-  //! \brief
-  void unzip(std::string const &zip_file);
-  bool zip(SimTaDynMapPtr const map, std::string const& filename);
+  virtual void loadFromFile(std::string const& filename, GLTexture2DPtr &texture) override;
 };
 
 #endif

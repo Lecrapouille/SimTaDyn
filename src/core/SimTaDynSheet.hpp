@@ -23,12 +23,10 @@
 
 #  include "Resource.hpp"
 #  include "SimTaDynCell.hpp"
-#  include "SimTaDynGraph.hpp"
 //#  include "GraphAlgorithm.hpp"
 #  include "BoundingBox.tpp"
 #  include "Vertex.hpp"
 #  include "GLCollection.tpp"
-#  include "Logger.hpp"
 
 //FIXME
 #include "algorithm/SimTaDynBFS.hpp"
@@ -41,7 +39,7 @@ using namespace graphtheory;
 class SimTaDynSheet
   : public ASpreadSheet,
     public SimTaDynGraph<CellNode, CellArc, CellZone>,
-    public IResource<Key>,
+    public Resource,
     private UniqueID<SimTaDynSheet>
 {
 public:
@@ -49,31 +47,28 @@ public:
   SimTaDynSheet(const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name("No name")
   {
     LOGI("New SimTaDynSheet with generic name '%s' and ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(std::string const& name, const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(const char* name, const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(const uint32_t noNodes,
@@ -81,44 +76,41 @@ public:
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name("No name")
   {
     LOGI("New SimTaDynSheet with generic name '%s' and ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(std::string const& name,
-                 const uint32_t noNodes,
-                 const uint32_t noArcs,
-                 const bool directed = true)
+                const uint32_t noNodes,
+                const uint32_t noArcs,
+                const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(const char *name,
-                 const uint32_t noNodes,
-                 const uint32_t noArcs,
-                 const bool directed = true)
+                const uint32_t noNodes,
+                const uint32_t noArcs,
+                const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   //! \brief Destructor.
   ~SimTaDynSheet()
   {
     LOGI("Deleting SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   virtual const std::string& name() const override
@@ -129,13 +121,13 @@ public:
   //! \brief Return the unique identifier.
   operator int()
   {
-    return m_id;
+    return getID();
   }
 
   void draw(GLuint const /*type*/)
   {
     /*LOGI("SimTaDynMap.drawnBy 0x%x", this);
-    LOGI("SimTaDynMap #%u %s drawnBy renderer",  m_id, m_name.c_str());
+    LOGI("SimTaDynMap #%u %s drawnBy renderer",  getID(), m_name.c_str());
 
     if (pos.blocks() != col.blocks())
       {
@@ -234,5 +226,7 @@ private:
   GraphAlgorithmSimTaDynBFS m_graphAlgorithm;
   std::vector<ASpreadSheetCell*> m_cells;
 };
+
+using SimTaDynSheetPtr = std::shared_ptr<SimTaDynSheet>;
 
 #endif
