@@ -155,11 +155,6 @@ void ClassicSpreadSheet::displayResult()
 
 int main()
 {
-  if (!File::mkdir(config::tmp_path))
-    {
-      std::cerr << "Failed creating the temporary directory '"
-                << config::tmp_path << "'" << std::endl;
-    }
   PathManager::instance();
 
   SimForth& forth = SimForth::instance();

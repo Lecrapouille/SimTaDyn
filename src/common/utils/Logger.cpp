@@ -55,6 +55,13 @@ void Logger::changeLog(std::string const& logfile)
 
 void Logger::open(std::string const& logfile)
 {
+  // Call it before Logger constructor
+  if (!File::mkdir(config::tmp_path))
+    {
+      std::cerr << "Failed creating the temporary directory '"
+                << config::tmp_path << "'" << std::endl;
+    }
+
   // Try to open the given log path
   m_file.open(logfile.c_str());
   if (!m_file.is_open())

@@ -38,8 +38,10 @@ public:
   //-------------------------------------------------------------
   ASpreadSheetCell(std::string const& formulae)
     : m_formulae(formulae),
+      m_evaluatedValue(0),
       m_evaluated(false),
-      m_unresolvedRefs(0)
+      m_unresolvedRefs(0),
+      m_dataKey(0)
   {
     // parse(); // Risque de crash si la cellule n'est pas encore connue
   }

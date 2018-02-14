@@ -20,6 +20,8 @@
 
 #include "BasicArcTests.hpp"
 
+using namespace graphtheory;
+
 // Register the test suite
 CPPUNIT_TEST_SUITE_REGISTRATION(BasicArcTests);
 
@@ -27,25 +29,25 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BasicArcTests);
 void BasicArcTests::setUp()
 {
   // Reset node/arcs unique identifiers to 0
-  BasicNode::resetID();
-  BasicArc::resetID();
+  Node::resetID();
+  Arc::resetID();
 }
 
 //--------------------------------------------------------------------------
 void BasicArcTests::tearDown()
 {
   // Reset node/arcs unique identifiers to 0
-  BasicNode::resetID();
-  BasicArc::resetID();
+  Node::resetID();
+  Arc::resetID();
 }
 
 //--------------------------------------------------------------------------
 void BasicArcTests::test()
 {
   // Check if the unique identifier is auto incrementing
-  BasicArc a0;
-  BasicArc a1;
-  BasicArc a2;
+  Arc a0;
+  Arc a1;
+  Arc a2;
 
   CPPUNIT_ASSERT_EQUAL(0U, a0.id());
   CPPUNIT_ASSERT_EQUAL(true, 0U == a0);
@@ -56,9 +58,9 @@ void BasicArcTests::test()
   CPPUNIT_ASSERT_EQUAL(true, 2U == a2);
 
   // Check if the unique identifier can be reseted to 0
-  BasicArc::resetID();
-  BasicArc a3;
-  BasicArc a4;
+  Arc::resetID();
+  Arc a3;
+  Arc a4;
 
   CPPUNIT_ASSERT_EQUAL(0U, a3.id());
   CPPUNIT_ASSERT_EQUAL(true, 0U == a3);
@@ -66,7 +68,7 @@ void BasicArcTests::test()
   CPPUNIT_ASSERT_EQUAL(true, 1U == a4);
 
   // Check cloning
-  BasicArc* a = a2.clone();
+  Arc* a = a2.clone();
   CPPUNIT_ASSERT_EQUAL(2U, a->id());
   CPPUNIT_ASSERT_EQUAL(true, 2U == *a);
   CPPUNIT_ASSERT_EQUAL(true, a2 == *a);
@@ -74,16 +76,16 @@ void BasicArcTests::test()
   delete a;
 
   // Check constructor by copy
-  a = new BasicArc(a1);
+  a = new Arc(a1);
   CPPUNIT_ASSERT_EQUAL(1U, a->id());
   CPPUNIT_ASSERT_EQUAL(true, 1U == *a);
   delete a;
 
   // Check an arc is well created
-  BasicNode n0, n1;
+  Node n0, n1;
   CPPUNIT_ASSERT_EQUAL(0U, n0.id());
   CPPUNIT_ASSERT_EQUAL(1U, n1.id());
-  BasicArc a5(42, n0, n1);
+  Arc a5(42, n0, n1);
   CPPUNIT_ASSERT_EQUAL(42U, a5.id());
   CPPUNIT_ASSERT_EQUAL(true, 42U == a5);
   CPPUNIT_ASSERT_EQUAL(0U, a5.m_fromNode->id());
@@ -96,7 +98,7 @@ void BasicArcTests::test()
   CPPUNIT_ASSERT_EQUAL(true, n1 == a5.to());
 
   // Node which will replace nodes of the arc
-  BasicNode n2;
+  Node n2;
   CPPUNIT_ASSERT_EQUAL(2U, n2.id());
   CPPUNIT_ASSERT_EQUAL(true, n2 != a5.from());
   CPPUNIT_ASSERT_EQUAL(true, n2 != a5.to());
@@ -124,7 +126,7 @@ void BasicArcTests::test()
   CPPUNIT_ASSERT_EQUAL(true, n2 == a5.to());
 
   // Check auto-reference is allowed
-  BasicArc a6(46, n0, n0);
+  Arc a6(46, n0, n0);
   CPPUNIT_ASSERT_EQUAL(46U, a6.id());
   CPPUNIT_ASSERT_EQUAL(true, a6.from() == a6.to());
 }

@@ -28,10 +28,13 @@ void SimTaDynContext::init(cli::Parser& parser)
   PathManager::instance().add(parser.get<std::string>("p"));
   LOGI("%s", PathManager::instance().toString().c_str());
 
-
-  SimTaDynSheet* sheet = new SimTaDynSheet("Sheet0"); // Ok leak but just for example
   SimForth& forth = SimForth::instance();
   forth.boot();
+
+  return ;
+
+  // FIXME: simple example to move in unit tests
+  SimTaDynSheet* sheet = new SimTaDynSheet("Sheet0"); // Ok leak but just for example
   assert(sheet->name().compare("Sheet0") == 0);
 
   CellNode& n0 = sheet->addNode("1 1 +");
