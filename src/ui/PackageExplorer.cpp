@@ -20,7 +20,102 @@
 
 #include "PackageExplorer.hpp"
 
+SceneGraphWindow::SceneGraphWindow(SceneNode_t* node)
+  : m_table(8, 6)
+{
+  m_ok.set_label("Ok");
+  m_cancel.set_label("Cancel");
+
+  m_labels[LabelNames::LabelLayerName].set_text("Layer Name:");
+  m_labels[LabelNames::LabelFilePath].set_text("File Path:");
+  m_labels[LabelNames::LabelScale].set_text("Scale:");
+  m_labels[LabelNames::LabelMapProjection].set_text("Map Projection:");
+  m_labels[LabelNames::LabelMatrix].set_text("World Transform:");
+
+  m_table.attach(m_labels[LabelNames::LabelLayerName], 0, 1, 0, 1);
+  m_table.attach(m_labels[LabelNames::LabelFilePath], 0, 1, 1, 2);
+  m_table.attach(m_labels[LabelNames::LabelScale], 0, 1, 2, 3);
+  m_table.attach(m_labels[LabelNames::LabelMapProjection], 0, 1, 3, 4);
+  m_table.attach(m_labels[LabelNames::LabelMatrix], 0, 1, 4, 5);
+
+  this->node(node);
+
+  m_table.attach(m_entries[EntryNames::EntryLayerName], 1, 5, 0, 1);
+  m_table.attach(m_entries[EntryNames::EntryFilePath], 1, 5, 1, 2);
+  m_table.attach(m_entries[EntryNames::EntryScaleX], 1, 2, 2, 3);
+  m_table.attach(m_entries[EntryNames::EntryScaleY], 2, 3, 2, 3);
+  m_table.attach(m_entries[EntryNames::EntryScaleZ], 3, 4, 2, 3);
+  m_table.attach(m_entries[EntryNames::EntryMapProjection], 1, 5, 3, 4);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix00], 1, 2, 4, 5);
+  m_table.attach(m_entries[EntryNames::EntryMatrix10], 2, 3, 4, 5);
+  m_table.attach(m_entries[EntryNames::EntryMatrix20], 3, 4, 4, 5);
+  m_table.attach(m_entries[EntryNames::EntryMatrix30], 4, 5, 4, 5);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix01], 1, 2, 5, 6);
+  m_table.attach(m_entries[EntryNames::EntryMatrix11], 2, 3, 5, 6);
+  m_table.attach(m_entries[EntryNames::EntryMatrix21], 3, 4, 5, 6);
+  m_table.attach(m_entries[EntryNames::EntryMatrix31], 4, 5, 5, 6);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix02], 1, 2, 6, 7);
+  m_table.attach(m_entries[EntryNames::EntryMatrix12], 2, 3, 6, 7);
+  m_table.attach(m_entries[EntryNames::EntryMatrix22], 3, 4, 6, 7);
+  m_table.attach(m_entries[EntryNames::EntryMatrix32], 4, 5, 6, 7);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix03], 1, 2, 7, 8);
+  m_table.attach(m_entries[EntryNames::EntryMatrix13], 2, 3, 7, 8);
+  m_table.attach(m_entries[EntryNames::EntryMatrix23], 3, 4, 7, 8);
+  m_table.attach(m_entries[EntryNames::EntryMatrix33], 4, 5, 7, 8);
+
+  set_title("Scene node settings");
+  add(m_table);
+
+  show_all_children();
+}
+
+void SceneGraphWindow::node(SceneNode_t* node)
+{
+  const SimTaDynSheet *sheet = nullptr;
+  m_node = node;
+
+  if (nullptr != node)
+    {
+      Vector<float, 3u> const &v = node->localScale();
+      m_entries[EntryNames::EntryScaleX].set_text(std::to_string(v.x));
+      m_entries[EntryNames::EntryScaleY].set_text(std::to_string(v.y));
+      m_entries[EntryNames::EntryScaleZ].set_text(std::to_string(v.z));
+
+      Matrix<float, 4u, 4u> const &M = node->worldTransform();
+      for (uint8_t i = 0; i < 16u; ++i)
+        m_entries[EntryNames::EntryMatrix00 + i].set_text(std::to_string(M.m_data[i]));
+
+      sheet = node->mesh();
+    }
+  else
+    {
+      m_entries[EntryNames::EntryScaleX].set_text("");
+      m_entries[EntryNames::EntryScaleY].set_text("");
+      m_entries[EntryNames::EntryScaleZ].set_text("");
+      for (uint8_t i = 0; i < 16u; ++i)
+        m_entries[EntryNames::EntryMatrix00 + i].set_text("");
+    }
+
+  if (nullptr != sheet)
+    {
+      m_entries[EntryNames::EntryLayerName].set_text(sheet->name());
+      m_entries[EntryNames::EntryFilePath].set_text(sheet->path());
+      m_entries[EntryNames::EntryMapProjection].set_text(std::to_string(sheet->mapProjectionType()));
+    }
+  else
+    {
+      m_entries[EntryNames::EntryLayerName].set_text("");
+      m_entries[EntryNames::EntryFilePath].set_text("");
+      m_entries[EntryNames::EntryMapProjection].set_text("None");
+    }
+}
+
 PackageExplorer::PackageExplorer()
+  : m_scene_graph_window(nullptr)
 {
   // Preload some icons
   try

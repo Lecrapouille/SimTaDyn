@@ -44,6 +44,8 @@ class SimTaDynSheet
 {
 public:
 
+  enum MapProjection { NoMapProjection, WGS84Projection };
+
   SimTaDynSheet(const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
@@ -118,10 +120,20 @@ public:
     return m_name;
   }
 
+  virtual const std::string& path() const
+  {
+    return m_file_path;
+  }
+
   //! \brief Return the unique identifier.
   operator int()
   {
     return getID();
+  }
+
+  inline MapProjection mapProjectionType() const
+  {
+    return m_projection_type;
   }
 
   void draw(GLuint const /*type*/)
@@ -149,6 +161,8 @@ public:
   }
 
   std::string m_name;
+  std::string m_file_path = "FIXME";
+  MapProjection m_projection_type = MapProjection::NoMapProjection;
 
 protected:
 

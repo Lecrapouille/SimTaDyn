@@ -74,6 +74,7 @@ protected:
   FindWindow                  *m_findwin = nullptr;
   ReplaceWindow               *m_replacewin = nullptr;
   GotoLineWindow              *m_gotolinewindow = nullptr;
+  SceneGraphWindow            *m_scene_graph_window = nullptr;
   PackageExplorer              m_package_explorer;
 };
 

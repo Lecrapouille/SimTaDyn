@@ -21,10 +21,47 @@
 #ifndef PACKAGE_EXPLORER_HPP_
 #  define PACKAGE_EXPLORER_HPP_
 
-#  include <gtkmm.h>
 #  include "ILoader.tpp"
+#  include "SimTaDynMap.hpp"
+#  include <gtkmm.h>
 
 class SimTaDynMap;
+
+// **************************************************************
+//! \brief
+// **************************************************************
+class SceneGraphWindow : public Gtk::Window
+{
+public:
+
+  SceneGraphWindow(SceneNode_t* node);
+  void node(SceneNode_t* node);
+
+private:
+
+  enum LabelNames { LabelLayerName, LabelFilePath, LabelScale,
+                    LabelMapProjection, LabelMatrix,
+                    LabelButtons,
+                    LastLabelNames = LabelButtons };
+  enum EntryNames { EntryLayerName, EntryFilePath,
+                    EntryScaleX, EntryScaleY, EntryScaleZ,
+                    EntryMapProjection,
+                    EntryMatrix00, EntryMatrix01, EntryMatrix02, EntryMatrix03,
+                    EntryMatrix10, EntryMatrix11, EntryMatrix12, EntryMatrix13,
+                    EntryMatrix20, EntryMatrix21, EntryMatrix22, EntryMatrix23,
+                    EntryMatrix30, EntryMatrix31, EntryMatrix32, EntryMatrix33,
+                    LastEntryNames = EntryMatrix33 };
+
+  //Gtk::VBox                m_vbox;
+  //Gtk::HBox                m_hbox[LastLabelNames + 1u];
+  Gtk::Table               m_table;
+  Gtk::Label               m_labels[LastLabelNames + 1u];
+  Gtk::Entry               m_entries[LastEntryNames + 1u];
+  Gtk::Button              m_ok;
+  Gtk::Button              m_cancel;
+
+  SceneNode_t             *m_node;
+};
 
 // **************************************************************
 //! \brief
@@ -103,6 +140,10 @@ public:
   // childrow[m_columns.m_error_msg] = "";
   // }
   // TODO ajouter des observers pour charger/decharger le contenu, appeller changerStatus ...
+
+public:
+
+  SceneGraphWindow m_scene_graph_window;
 
 protected:
 
