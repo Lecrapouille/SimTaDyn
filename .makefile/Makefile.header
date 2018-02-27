@@ -21,13 +21,13 @@
 
 ###################################################
 # Define colors
-CLR_DEFAULT := $(shell echo '\033[00m')
-CLR_RED     := $(shell echo '\033[31m')
-CLR_GREEN   := $(shell echo '\033[32m')
-CLR_YELLOW  := $(shell echo '\033[33m')
-CLR_BLUE    := $(shell echo '\033[34m')
-CLR_PURPLE  := $(shell echo '\033[35m')
-CLR_CYAN    := $(shell echo '\033[36m')
+CLR_DEFAULT = $(shell echo '\033[00m')
+CLR_RED     = $(shell echo '\033[31m')
+CLR_GREEN   = $(shell echo '\033[32m')
+CLR_YELLOW  = $(shell echo '\033[33m')
+CLR_BLUE    = $(shell echo '\033[34m')
+CLR_PURPLE  = $(shell echo '\033[35m')
+CLR_CYAN    = $(shell echo '\033[36m')
 
 ###################################################
 # Display predefine colorful messages
@@ -40,6 +40,7 @@ print-to = \
 
 ###################################################
 # Detect the operating system: Unix, OSX and Windows
+#
 ifeq ($(OS),Windows_NT)
 ARCHI := Windows
 else
@@ -134,3 +135,7 @@ RAPPORT = $(BUILD)/rapport.info
 # is modified compile others which depend on it.
 DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
 POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
+
+###################################################
+#
+include $(M)/Makefile.help
