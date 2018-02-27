@@ -59,6 +59,7 @@ src/core/standalone/ClassicSpreadSheet/build/*
 src/forth/standalone/build/*
 external/zipper
 external/SOIL
+external/CmdParser
 external/backward-cpp
 doc/html/*
 doc/coverage/*

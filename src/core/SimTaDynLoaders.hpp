@@ -26,15 +26,24 @@
 using namespace Yes;
 
 // *************************************************************************************************
-//! Add here all classes derivating from the Resource class.
+//! Include here all classes derivating from the Resource class that will be loaded
+//! and saved in files.
 // *************************************************************************************************
 
 #  include "SimTaDynMap.hpp"
 #  include "GLTextures.hpp"
 
+// *************************************************************************************************
+//! Define the list of resource that will be used by the ResourceManager and LoaderManagers.
+// *************************************************************************************************
+
 typedef TYPELIST_3(SimTaDynMap,
                    SimTaDynSheet,
                    GLTexture2D) ResourceList;
+
+// *************************************************************************************************
+//!
+// *************************************************************************************************
 
 #  include "ResourceManager.tpp"
 #  include "ShapeFileLoader.hpp"
