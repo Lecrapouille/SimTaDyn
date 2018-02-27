@@ -83,7 +83,8 @@ public:
         // Ignore empty string as extension
         if (!ext.empty())
           {
-            LOGI("Register file '%s' extension to loader %p", ext.c_str(), loader);
+            LOGI("Register file '%s' extension to loader %p",
+                 ext.c_str(), loader.get());
             LoaderHolder<R>::m_loaders[ext] = loader;
           }
       }
