@@ -1,7 +1,7 @@
-#include "BiDirObserver.hpp"
+#include "SafeObserver.tpp"
 #include <iostream>
 
-class MyEvent: public IEvent
+class MyEvent
 {
 public:
 
@@ -20,37 +20,49 @@ private:
   std::string m_message;
 };
 
-class MyObservable: public BiDirObservable<MyEvent>
+class MyObservable: public Observable<MyObservable, MyEvent>
 {
 public:
 
   MyObservable(const char* name)
-    : BiDirObservable(name)
+    : Observable(name)
   {
+  }
+
+  ~MyObservable()
+  {
+    std::cout << "    Je suis '" << info() << " est je suis destruit" << std::endl;
+  }
+
+  std::string specialStuff() const
+  {
+    return "Pouet";
   }
 };
 
-class Subject
-  : public BiDirObserver<MyEvent>,
-    public BiDirObservable<MyEvent>
+class MyObserver : public Observer<MyObservable, MyEvent>
 {
 public:
 
-  ~Subject() {}
+  ~MyObserver()
+  {
+    std::cout << "    Je suis '" << info() << " est je suis destruit" << std::endl;
+  }
 
-  Subject(const char* name)
-    : BiDirObserver(name),
-      BiDirObservable(name)
+  MyObserver(const char* name)
+    : Observer(name)
   {
   }
 
-  void update(BiDirObservable<MyEvent>& subject, MyEvent& arg) override
+  void update(MyObservable const& subject, MyEvent const& arg) const override
   {
-    std::cout << "Je suis '" << BiDirObserver<MyEvent>::info()
+    std::cout << "    Je suis '" << info()
               << "' et je m'update car "
               << subject.info()
               << " m'a notifie avec l'event '"
               << arg.message()
+              << "' et son truc special '"
+              << subject.specialStuff()
               << "'" << std::endl;
   }
 
@@ -61,23 +73,34 @@ private:
 
 int main()
 {
-  Subject n1("N1");
-  Subject n2("N2");
-  Subject n3("N3");
+#if 0
+  MyObservable o("MyObservable");
+  MyObserver n1("N1");
+  MyObserver n2("N2");
+  MyObserver n3("N3");
   MyEvent e1("coucou");
 
-  n1.attachObserver(n3);
-  n1.attachObserver(n2);
-  n3.attachObserver(n1);
+  o.attach(n3);
+  o.attach(n2);
+  o.attach(n1);
 
-  printf("-------\n");
-  n1.detachObserver(n3);
-  printf("-------\n");
-  n1.notify(e1);
-  n3.notify(e1);
+  o.detach(n3);
+  o.notify(e1);
+#endif
 
-  //observable.detach(o1);
-  //observable.detach(o2);
+  MyObservable o("MyObservable");
+  MyObserver n1("N1");
+  MyObserver n2("N2");
+  MyEvent e1("coucou");
+
+  {
+    MyObserver n3("N3");
+    o.attach(n3);
+    o.attach(n2);
+    o.attach(n1);
+  }
+  //o.detach(n3);
+  o.notify(e1);
 
   return 0;
 }
