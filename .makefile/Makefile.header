@@ -135,7 +135,3 @@ RAPPORT = $(BUILD)/rapport.info
 # is modified compile others which depend on it.
 DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
 POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
-
-###################################################
-#
-include $(M)/Makefile.help

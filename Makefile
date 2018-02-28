@@ -43,7 +43,7 @@ else
 OBJ_EXTERNAL   =
 endif
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_PATTERNS   = BiDirObserver.o
+OBJ_PATTERNS   =
 OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
 OBJ_MANAGERS   =
@@ -247,4 +247,5 @@ veryclean: clean
 
 ###################################################
 # Sharable informations between all Makefiles
--include $(M)/Makefile.footer
+include $(M)/Makefile.help
+include $(M)/Makefile.footer
