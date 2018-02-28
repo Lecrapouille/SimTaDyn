@@ -4,9 +4,9 @@
 [![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn)
 [![Coverage Status](https://coveralls.io/repos/github/Lecrapouille/SimTaDyn/badge.svg?branch=master)](https://coveralls.io/github/Lecrapouille/SimTaDyn?branch=master)
 
-| **`Linux/Mac OS`** | **`Windows`** |
-|------------------|-------------|
-|[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)|[![Build status](https://ci.appveyor.com/api/projects/status/github/lecrapouille/simtadyn?svg=true)](https://ci.appveyor.com/project/Lecrapouille/SimTaDyn)|
+| **`Linux/Mac OS`** | **`Windows`** | **`openSUSE Build`** |
+|------------------|-------------|----------------|
+|[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)|[![Build status](https://ci.appveyor.com/api/projects/status/github/lecrapouille/simtadyn?svg=true)](https://ci.appveyor.com/project/Lecrapouille/SimTaDyn)|[OBS](https://build.opensuse.org/repositories/home:Lecrapouille/SimTaDyn)|
 
 SimTaDyn is a proof of concept project for a geographic information
 system (GIS) allowing to draw geographic maps and manipulate them like
@@ -19,7 +19,7 @@ Note: The master branch is a rework (but still in gestation) of the branch
 Therefore, for the moment the master branch shows less features than the 2004 branch.
 
 * [Introduction to SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.md)
-* [How to compile SimTaDyn code source](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Install.md)
+* [Compile and install SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Install.md)
 * [SimTaDyn Known Bugs](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md)
 * [SimTaDyn GUI shortcuts](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Shortcuts.md)
 * [SimTaDyn Forth scripting](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/forth/doc/forth.md)

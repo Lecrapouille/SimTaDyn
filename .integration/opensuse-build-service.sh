@@ -38,7 +38,8 @@ cd SimTaDyn
 ### Clone and compile external projects
 make download-external-libs
 
-### Change the SimTaDyn version
+### Replace the default SimTaDyn version set in the .spec file
+### by the content of the VERSION file.
 VERSION=`cat VERSION`
 L="s/^Version.*/Version: $VERSION/"
 sed -i "$L" .integration/SimTaDyn.spec

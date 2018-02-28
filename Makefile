@@ -161,10 +161,11 @@ compile-external-libs:
 # Compile again the project for Coverity Scan. An uploadable tarball is created.
 .PHONY: coverity-scan
 coverity-scan: clean
+	@rm -fr SimTaDyn.tgz cov-int 2> /dev/null
 	@cov-build --dir cov-int make -j8 && tar czvf SimTaDyn.tgz cov-int
 
 ###################################################
-# Compile and launch unit tests then generate code coverage.
+# Compile and launch unit tests. Then generate the html code coverage.
 .PHONY: unit-tests
 unit-tests:
 	@$(call print-simple,"Compiling unit tests")
