@@ -19,7 +19,7 @@
 //=====================================================================
 
 #include "Renderer.hpp"
-#include "PathManager.hpp"
+#include "MapEditor.hpp"
 
 #  ifndef ARRAY_SIZE
 #    define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
@@ -188,6 +188,12 @@ bool GLRenderer::setupGraphics()
     static_cast<float>(screenHeight()));
     m_current_camera = m_default_camera;*/
 
+  // Signals
+  MapEditor::instance().loaded_success.connect(
+     sigc::mem_fun(*this, &GLRenderer::drawMap));
+  MapEditor::instance().m_current_map.signal_changed.connect(
+     sigc::mem_fun(*this, &GLRenderer::drawMap));
+
   return true;
 }
 
@@ -234,4 +240,10 @@ void GLRenderer::draw()
     m_vao.stop();
   }
   m_shader.stop();
+}
+
+void GLRenderer::drawMap(SimTaDynMapPtr map)
+{
+  // TODO ---> DrawingArea::onNotify(){>attachModel(*map);} mais PendingData le fait deja
+  std::cout << "GLRenderer::drawMap() " << map->m_name << std::endl;
 }

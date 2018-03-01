@@ -28,39 +28,6 @@
 #  include <map>
 #  include <vector>
 
-// ***********************************************************************************************
-//! \brief Define callbacks on loader events
-// ***********************************************************************************************
-class ILoaderListener
-{
-public:
-
-  ILoaderListener() { };
-  virtual ~ILoaderListener() { };
-  //------------------------------------------------------------------
-  //! \brief Callback when a failure occured during the loading of file
-  //! \param filename the full path of the file.
-  //! \param msg the error message returned by the loader.
-  //------------------------------------------------------------------
-  virtual void onLoadFailure(std::string const& filename, std::string const& msg) = 0;
-  //------------------------------------------------------------------
-  //! \brief CCallback when a file has been successfully loaded.
-  //! \param filename the full path of the file.
-  //------------------------------------------------------------------
-  virtual void onLoadSucess(std::string const& filename) = 0;
-  //------------------------------------------------------------------
-  //! \brief Callback when a failure occured during the saving of file
-  //! \param filename the full path of the file.
-  //! \param msg the error message returned by the loader.
-  //------------------------------------------------------------------
-  virtual void onSaveFailure(std::string const& filename, std::string const& msg) = 0;
-  //------------------------------------------------------------------
-  //! \brief Callback when a file has been successfully saved.
-  //! \param filename the full path of the file.
-  //------------------------------------------------------------------
-  virtual void onSaveSucess(std::string const& filename) = 0;
-};
-
 // **************************************************************
 //! \brief Interface for loading and saving data from/to a file.
 //! Template R is for IResource but not necessary.
@@ -142,8 +109,6 @@ struct LoaderHolder
 {
   //! \brief Hash table of loaders. Ordered by file extension.
   LoaderContainer<R> m_loaders;
-  //! \brief List of observers attached to loader events.
-  std::vector<ILoaderListener*> m_listeners;
 };
 
 #endif

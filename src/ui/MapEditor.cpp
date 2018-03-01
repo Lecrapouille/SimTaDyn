@@ -26,8 +26,7 @@
 // *************************************************************************************************
 MapEditor::MapEditor()
   : m_action_type(m_toolbar),
-    m_action_on(m_toolbar),
-    m_listener(*this)
+    m_action_on(m_toolbar)
 {
   LOGI("Creating MapEditor");
 
@@ -218,7 +217,6 @@ void MapEditor::newMap()
       return ;
     }
 
-  map->addListener(m_listener);
   m_current_map.set(map);
 }
 
@@ -302,7 +300,7 @@ bool MapEditor::load(std::string const& filename, SimTaDynMapPtr map)
           LoaderManager::instance().loadFromFile(filename, map);
           if (dummy_map)
             {
-              map->addListener(m_listener);
+              loaded_success.emit(map);
               //FIXME rm.add(map);
               m_current_map.set(map);
             }
@@ -310,6 +308,7 @@ bool MapEditor::load(std::string const& filename, SimTaDynMapPtr map)
     }
   catch (LoaderException const &e)
     {
+      loaded_failure.emit(filename, e.message());
       Gtk::MessageDialog dialog((Gtk::Window&) *(m_vbox.get_toplevel()),
                                 e.what(), false, Gtk::MESSAGE_WARNING);
       dialog.set_secondary_text("Could not load '" + filename + "' as a SimTaDyn map. Reason: "
@@ -319,6 +318,7 @@ bool MapEditor::load(std::string const& filename, SimTaDynMapPtr map)
     }
   catch (std::exception const &e)
     {
+      loaded_failure.emit(filename, e.what());
       Gtk::MessageDialog dialog((Gtk::Window&) *(m_vbox.get_toplevel()),
                                 e.what(), false, Gtk::MESSAGE_WARNING);
       dialog.set_secondary_text("Could not load '" + filename + "' as a SimTaDyn map.");

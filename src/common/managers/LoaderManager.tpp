@@ -110,7 +110,6 @@ public:
         std::string msg("The file '" + filename +
                         "' cannot be found in the given search path '" +
                         PathManager::instance().toString() + "'");
-        notifyLoadFailure<R>(filename, msg);
         throw LoaderException(msg);
       }
     try
@@ -126,14 +125,12 @@ public:
         else
           {
             LOGI("Sucessfuly loaded the file '%s'", filename.c_str());
-            notifyLoadSucess<R>(full_path.first);
           }
       }
     catch (LoaderException const &e)
       {
         LOGF("Failed loading the file '%s'. Reason is '%s'",
              filename.c_str(), e.what());
-        notifyLoadFailure<R>(full_path.first, e.what());
         e.rethrow();
       }
   }
@@ -154,12 +151,10 @@ public:
         ILoader<R>& loader = getLoader<R>(File::extension(filename));
         loader.saveToFile(resource, filename);
         LOGI("Sucessfuly saved the file '%s'", filename.c_str());
-        notifySaveSucess<R>(filename);
       }
     catch (LoaderException const &e)
       {
         LOGF("Failed saving the file '%s'", filename.c_str());
-        notifySaveFailure<R>(filename, e.what());
         throw e;
       }
   }
@@ -182,74 +177,6 @@ public:
   {
     return LoaderHolder<R>::m_loaders;
   }
-
-//FIXME ---> Mettre dans un classe Listener<R> + macro pour generer les notify
-
-  //! \brief Attach a new listener to loader events.
-  template <class R>
-  void addListener(ILoaderListener& listener)
-  {
-    LoaderHolder<R>::m_listeners.push_back(&listener);
-  }
-
-  //! \brief Remove the given listener from events.
-  template <class R>
-  void removeListener(ILoaderListener& listener)
-  {
-    auto it = std::find(LoaderHolder<R>::m_listeners.begin(),
-                        LoaderHolder<R>::m_listeners.end(), &listener);
-    if (it != LoaderHolder<R>::m_listeners.end())
-      {
-        // FIXME: memory leak: utiliser shared_pointer
-        LoaderHolder<R>::m_listeners.erase(it);
-      }
-  }
-
-  //! \brief Notify all listeners that the resource was succesfully loaded.
-  template <class R>
-  void notifySaveSucess(std::string const& filename) const
-  {
-    uint32_t i = LoaderHolder<R>::m_listeners.size();
-    while (i--)
-      {
-        LoaderHolder<R>::m_listeners[i]->onSaveSucess(filename);
-      }
-  }
-
-  //! \brief Notify
-  template <class R>
-  void notifySaveFailure(std::string const& filename, std::string const& msg) const
-  {
-    uint32_t i = LoaderHolder<R>::m_listeners.size();
-    while (i--)
-      {
-        LoaderHolder<R>::m_listeners[i]->onSaveFailure(filename, msg);
-      }
-  }
-
-  //! \brief Notify all listeners that the resource was succesfully loaded.
-  template <class R>
-  void notifyLoadSucess(std::string const& filename) const
-  {
-    uint32_t i = LoaderHolder<R>::m_listeners.size();
-    while (i--)
-      {
-        LoaderHolder<R>::m_listeners[i]->onLoadSucess(filename);
-      }
-  }
-
-  //! \brief Notify
-  template <class R>
-  void notifyLoadFailure(std::string const& filename, std::string const& msg) const
-  {
-    uint32_t i = LoaderHolder<R>::m_listeners.size();
-    while (i--)
-      {
-        LoaderHolder<R>::m_listeners[i]->onLoadFailure(filename, msg);
-      }
-  }
-
-//FIXME <--- Mettre dans un classe Listener<R> + macro pour generer les notify
 
 protected:
 

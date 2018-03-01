@@ -48,7 +48,7 @@ public:
     m_map = p;
     if (nullptr != m_map)
       {
-        m_map->notify(); // TODO ---> DrawingArea::onNotify(){>attachModel(*map);} mais PendingData le fait deja
+        m_map->signal_changed.emit(m_map);
         // TODO: notify to SimForth to get the address of the scenegraph<SimTaDynSheet>
       }
   }
@@ -76,11 +76,10 @@ public:
                  name.c_str(), m_map->name().c_str());
           }
       }
-    else
+    else // Found
       {
         m_map = new_map;
-        m_map->notify();
-        // TODO ---> DrawingArea::onNotify(){>attachModel(*map);}
+        m_map->signal_changed.emit(m_map);
       }
 
     return m_map;
@@ -90,6 +89,10 @@ public:
   {
     return m_map;
   }
+
+public:
+
+  sigc::signal<void, SimTaDynMapPtr> signal_changed;
 
 protected:
 
@@ -119,35 +122,6 @@ private:
 
   //! \brief Private because of Singleton.
   virtual ~MapEditor();
-
-protected:
-
-  // ***********************************************************************************************
-  //! \brief Implements the SimTaDynMap::ISimTaDynMapListener interface.
-  // ***********************************************************************************************
-  class SimTaDynMapListener: public ISimTaDynMapListener
-  {
-  public:
-
-    //! \brief
-    SimTaDynMapListener(MapEditor &editor)
-      : m_editor(editor)
-    {
-    }
-
-    //! \brief Callback when the map changed: draw it.
-    virtual void onChanged(SimTaDynMap const& map) override
-    {
-      LOGI("MapEditor::SimTaDynMapListener has detected that Map %s has changed",
-           map.m_name.c_str());
-
-      if (nullptr == m_editor.m_drawing_area)
-        return ;
-      //FIXME m_editor.m_drawing_area->drawThat(*map);
-    }
-
-    MapEditor& m_editor;
-  };
 
 public:
 
@@ -298,6 +272,11 @@ public:
   //!
   Gtk::MenuItem          m_menuitem[simtadyn::MaxMapMenuNames + 1];
 
+  sigc::signal<void, SimTaDynMapPtr> loaded_success;
+  sigc::signal<void, const std::string &, const std::string &> loaded_failure;
+  sigc::signal<void, SimTaDynMapPtr> saved_success;
+  sigc::signal<void, const std::string &, const std::string &> saved_failure;
+
 protected:
 
   Gtk::Toolbar           m_toolbar;
@@ -311,7 +290,6 @@ protected:
   Inspector              m_inspector;
   Gtk::VBox              m_vbox;
   Gtk::HBox              m_hbox;
-  SimTaDynMapListener    m_listener;
   MapEditionTools       *m_edition_tools[ActionType::LastAction + 1u];
 };
 

@@ -27,6 +27,7 @@
 //#  include "Camera2D.hpp"
 #  include "GLTextures.hpp"
 #  include "Movable.tpp"
+#  include "SimTaDynMap.hpp"
 
 /*
  * OpenGL renderer.
@@ -88,6 +89,8 @@ public:
 
   //! Get the number of pixels of the viewport
   virtual uint32_t screenHeight() const = 0;
+
+  void drawMap(SimTaDynMapPtr map);
 
 protected:
 

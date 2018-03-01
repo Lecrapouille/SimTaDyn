@@ -66,7 +66,7 @@ private:
 // **************************************************************
 //! \brief
 // **************************************************************
-class PackageExplorer: public ILoaderListener
+class PackageExplorer
 {
 private:
 
@@ -141,6 +141,11 @@ public:
   // }
   // TODO ajouter des observers pour charger/decharger le contenu, appeller changerStatus ...
 
+  void onSuccessMapLoaded(SimTaDynMapPtr map);
+  void onFailMapLoaded(const std::string &filename, const std::string &message);
+  void onSuccessMapSaved(SimTaDynMapPtr map);
+  void onFailMapSaved(const std::string &filename, const std::string &message);
+
 public:
 
   SceneGraphWindow m_scene_graph_window;
@@ -165,11 +170,6 @@ protected:
   Gtk::TreeModel::Row m_folders[MaxCategory + 1U];
 
 private:
-
-  virtual void onLoadFailure(std::string const& filename, std::string const& msg) override;
-  virtual void onLoadSucess(std::string const& filename) override;
-  virtual void onSaveFailure(std::string const& filename, std::string const& msg) override;
-  virtual void onSaveSucess(std::string const& filename) override;
 
   //! \brief
   bool on_mytreeview_button_press_event(GdkEventButton *ev);

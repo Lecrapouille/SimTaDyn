@@ -24,6 +24,7 @@
 #  include "SimTaDynSheet.hpp"
 #  include "SceneGraph.tpp"
 #  include "Resource.hpp"
+#  include <sigc++/sigc++.h>
 
 using SceneNode_t = SceneNode<SimTaDynSheet, float, 3U>;
 
@@ -32,20 +33,6 @@ using SceneNode_t = SceneNode<SimTaDynSheet, float, 3U>;
 // ***********************************************************************************************
 class SimTaDynMap;
 using SimTaDynMapPtr = std::shared_ptr<SimTaDynMap>;
-
-// ***********************************************************************************************
-//! \brief This interface is used to define callbacks from SimTaDyn Map events.
-// ***********************************************************************************************
-class ISimTaDynMapListener
-{
-public:
-
-  //! \brief
-  ISimTaDynMapListener() { };
-
-  //! \brief Callback when the map changed (loaded, graph modified, etc)
-  virtual void onChanged(SimTaDynMap const&) = 0;
-};
 
 // *************************************************************************************************
 //! \brief This class defines a SimTaDyn geographic map. It contains, nodes, arcs, Forth scripts,
@@ -104,36 +91,6 @@ public:
       return nullptr;
 
     return m_sheets.root()->mesh();
-  }
-
-    //! \brief Attach a new listener to map events.
-  void addListener(ISimTaDynMapListener& listener)
-  {
-    m_listeners.push_back(&listener);
-    LOGI("Attaching a listener to the SimTaDynMap #%u %s\n", getID(), m_name.c_str());
-  }
-
-  //! \brief Remove the given listener of map events.
-  void removeListener(ISimTaDynMapListener& listener)
-  {
-    LOGI("Detaching a listener from the SimTaDynMap #%u %s\n", getID(), m_name.c_str());
-    auto it = std::find(m_listeners.begin(), m_listeners.end(), &listener);
-    if (it != m_listeners.end())
-      {
-        m_listeners.erase(it);
-      }
-  }
-
-  //! \brief Notify all listeners that the map changed.
-  void notify()
-  {
-    uint32_t i = m_listeners.size();
-    LOGI("SimTaDynMap #%u %s has changed and notifies %u listener%s\n",
-         getID(), m_name.c_str(), i, (i > 1 ? "s" : ""));
-    while (i--)
-      {
-        m_listeners[i]->onChanged(*this);
-      }
   }
 
   inline bool modified() const
@@ -198,10 +155,7 @@ public:
   uint32_t m_nb_graphs_modified = 0U;
   uint32_t m_nb_scripts_modified = 0U;
 
-private:
-
-  //! \brief List of observers attached to this map events.
-  std::vector<ISimTaDynMapListener*> m_listeners;
+  sigc::signal<void, SimTaDynMapPtr> signal_changed;
 };
 
 #endif /* SIMTADYN_MAP_HPP_ */

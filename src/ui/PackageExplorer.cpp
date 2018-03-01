@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "PackageExplorer.hpp"
+#include "MapEditor.hpp"
 
 SceneGraphWindow::SceneGraphWindow(SceneNode_t* node)
   : m_table(8, 6)
@@ -150,7 +151,16 @@ PackageExplorer::PackageExplorer()
   m_tree_view.set_enable_tree_lines();
 
   // Signals
-  m_tree_view.signal_button_press_event().connect(sigc::mem_fun(*this, &PackageExplorer::on_mytreeview_button_press_event));
+  m_tree_view.signal_button_press_event().connect(
+     sigc::mem_fun(*this, &PackageExplorer::on_mytreeview_button_press_event));
+  MapEditor::instance().loaded_success.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onSuccessMapLoaded));
+  MapEditor::instance().loaded_failure.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onFailMapLoaded));
+  MapEditor::instance().saved_success.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onSuccessMapSaved));
+  MapEditor::instance().saved_failure.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onFailMapSaved));
 }
 
 PackageExplorer::~PackageExplorer()
@@ -200,28 +210,36 @@ bool PackageExplorer::on_mytreeview_button_press_event(GdkEventButton *ev)
           // TODO appeller Loader
         }
     }
+
+  //TODO
+  //SceneNode_t *node = new SceneNode_t();
+  //node->move(Vector3f(2.0f));
+  //node->update(0.001f);
+  //m_scene_graph_window.node(node);
+  //m_scene_graph_window.show();
   return false;
 }
 
-void PackageExplorer::onLoadFailure(std::string const& filename, std::string const& msg)
+void PackageExplorer::onSuccessMapLoaded(SimTaDynMapPtr map)
 {
-  std::cout << "PackageExplorer::onLoadFailure '" << filename
-            << "' Reason : '" << msg << "'" << std::endl;
+  std::cout << "PackageExplorer::onLoadSucess '" << map->m_name << "'" << std::endl;
+  addMap(map->m_name);
 }
 
-void PackageExplorer::onLoadSucess(std::string const& filename)
+void PackageExplorer::onFailMapLoaded(const std::string &filename, const std::string &message)
 {
-  std::cout << "PackageExplorer::onLoadSucess '" << filename << "'" << std::endl;
-  addMap(filename);
+  std::cout << "PackageExplorer::onLoadFail '" << filename << "' " << message << std::endl;
+  // TODO: store error in tooltips and change to red the color
 }
 
-void PackageExplorer::onSaveFailure(std::string const& filename, std::string const& msg)
+void PackageExplorer::onSuccessMapSaved(SimTaDynMapPtr map)
 {
-  std::cout << "PackageExplorer::onSaveFailure '" << filename
-            << "' Reason : '" << msg << "'" << std::endl;
+  std::cout << "PackageExplorer::onSaveSucess '" << map->m_name << "'" << std::endl;
+  // TODO: remove the not saved "*" symbol
 }
 
-void PackageExplorer::onSaveSucess(std::string const& filename)
+void PackageExplorer::onFailMapSaved(const std::string &filename, const std::string &message)
 {
-  std::cout << "PackageExplorer::onSaveSucess '" << filename << "'" << std::endl;
+  std::cout << "PackageExplorer::onSaveFail '" << filename << "' " << message << std::endl;
+  // TODO: store error in tooltips and change to red the color
 }
