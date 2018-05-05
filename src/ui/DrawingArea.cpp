@@ -90,6 +90,12 @@ bool GLDrawingArea::onScrollEvent(GdkEventScroll *event)
 
 void GLDrawingArea::onRealize()
 {
+#if ARCHI == OSX
+  // FIXME: sorry OpenGL quartz is not implemented by GTK team
+  m_success_init = false;
+  return ;
+#endif
+
   Gtk::GLArea::make_current();
   SimTaDyn::glStartContext();
   Gtk::GLArea::throw_if_error();
@@ -111,6 +117,9 @@ void GLDrawingArea::onRealize()
 
 void GLDrawingArea::onUnrealize()
 {
+  if (false == m_success_init)
+    return ;
+
   Gtk::GLArea::make_current();
   try
     {
@@ -130,6 +139,9 @@ void GLDrawingArea::onUnrealize()
 
 bool GLDrawingArea::onRender()
 {
+  if (false == m_success_init)
+    return false;
+
   try
     {
       Gtk::GLArea::throw_if_error();
