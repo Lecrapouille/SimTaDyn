@@ -20,7 +20,7 @@ Table of contents:
 This document explains the different steps for getting, compiling the SimTaDyn code source take from the git
 [master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master) and install it.
 
-For other SimTaDyn branches, specially for the [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004),
+For other SimTaDyn branches, specially for the [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004),
 please read the INSTALL file associated to this branch.
 
 ##### Step 1: Install packages that SimTaDyn depends on:
@@ -139,11 +139,12 @@ If you have a 32-bits (which is my case), unfortunately Docker does not support 
 
 ### Mac OS X
 
-SimTaDyn compiles on a MacBook Air and Mac OS X (tested on version 10.9.5). To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. __However the Gtk::GlArea is not fully implemented on this architecture and by consequence the OpenGL context is not created ! I'm sorry it does not depend on me but on gtk+ developpers (for memory, Legacy OpenGL worked perfectly on gtk+2 with gtkglext on 2003 with OSX (see [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004) but again gtk+ developpers seems have made regressions because the whole gtk window is black (even butons) !)__
+SimTaDyn compiles on a MacBook Air and Mac OS X (tested on version 10.9.5). To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. __However the Gtk::GlArea is not fully implemented on this architecture and by consequence the OpenGL context is not created ! I'm sorry it does not depend on me but on gtk+ developpers (for memory, Legacy OpenGL worked perfectly on gtk+2 with gtkglext on 2003 with OSX (see [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004) but again gtk+ developpers seems have made regressions because the whole gtk window is black (even butons) !)__
 
 ### Debian
 
-Is similar to Ubuntu. Recommended version is 9.3 which contains the correct Gtk version.
+Is similar to Ubuntu >= 17.04, so please refer to Ubuntu section.
+The recommended Debian version is >= 9.3 which contains the correct Gtk version.
 
 ### OpenSUSE
 

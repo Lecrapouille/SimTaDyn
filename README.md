@@ -15,7 +15,7 @@ a spreadsheet. The goal is to design dynamical geographic simulations.
 SimTaDyn was originally a one-year student project made in 2004 but in 2017 I decided to restart it from scratch.
 
 Note: The master branch is a rework (but still in gestation) of the branch
-[Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004).
+[release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004).
 Therefore, for the moment the master branch shows less features than the 2004 branch.
 
 * [Introduction to SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.md)
