@@ -68,9 +68,12 @@ CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourcev
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
-# Common defines
-SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\" -DARCHI=$(ARCHI)
-DEFINES += $(SIMTADYN_DEFINES) -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+# Project defines
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
+           -DPROJECT_TEMP_DIR=\"/tmp/SimTaDyn/\" \
+           -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+# Disable ugly gtkmm compilation warnings
+DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
@@ -208,8 +211,9 @@ install: $(TARGET)
 	@$(call print-to,"Installing","data","$(PROJECT_DATA_PATH)","")
 	@rm -fr $(PROJECT_DATA_PATH)
 	@mkdir -p $(PROJECT_DATA_PATH)/forth
-	@cp -r data/* $(PROJECT_DATA_PATH)
 	@cp -r src/forth/core/system.fs $(PROJECT_DATA_PATH)/forth
+	@cp -r src/forth/core/LibC $(PROJECT_DATA_PATH)/forth
+	@cp -r data/* $(PROJECT_DATA_PATH)
 	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
 	@mkdir -p $(PROJECT_DOC_PATH)
 	@cp -r doc/* $(PROJECT_DATA_ROOT)/doc

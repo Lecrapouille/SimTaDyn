@@ -1,6 +1,6 @@
 //=====================================================================
-// SimForth: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// SimForth: A Forth for SimTaDyn project.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimForth.
 //
@@ -44,7 +44,7 @@ private:
   //------------------------------------------------------------------
   Config()
   {
-    add(SIMTADYN_DATA_PATH);
+    add(SIMFORTH_DATA_PATH);
   }
 
   //------------------------------------------------------------------
@@ -59,11 +59,11 @@ namespace config
   //! \brief
   const char project_name[] = "SimForth";
   //! \brief Major version of SimForth
-  const uint32_t major_version = SIMTADYN_MAJOR_VERSION;
+  const uint32_t major_version = PROJECT_MAJOR_VERSION;
   //! \brief Minor version of SimForth
-  const uint32_t minor_version = SIMTADYN_MINOR_VERSION;
+  const uint32_t minor_version = PROJECT_MINOR_VERSION;
   //! \brief
-  const char data_path[] = SIMTADYN_DATA_PATH;
+  const char data_path[] = PROJECT_DATA_PATH;
   //! \brief Location for storing temporary files
   const char tmp_path[] = "/tmp/SimForth/";
   //! \brief

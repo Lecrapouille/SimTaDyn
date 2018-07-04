@@ -38,7 +38,7 @@ MINOR_VERSION=`echo "$VERSION" | cut -d'.' -f2`
 SHA1=`git log 2> /dev/null | head -n1 | cut -d" " -f2`
 BRANCH=`git branch 2> /dev/null | head -n1 | cut -d" " -f2`
 
-echo "SimTaDyn version: $MAJOR_VERSION.$MINOR_VERSION"
+echo "Project version: $MAJOR_VERSION.$MINOR_VERSION"
 echo "git: $BRANCH $SHA1"
 echo ""
 
@@ -46,10 +46,10 @@ cat <<EOF >$2
 #ifndef VERSION_H_
 #  define VERSION_H_
 
-#  define SIMTADYN_MAJOR_VERSION ${MAJOR_VERSION}u
-#  define SIMTADYN_MINOR_VERSION ${MINOR_VERSION}u
-#  define SIMTADYN_BRANCH "$BRANCH"
-#  define SIMTADYN_SHA1 "$SHA1"
+#  define PROJECT_MAJOR_VERSION ${MAJOR_VERSION}u
+#  define PROJECT_MINOR_VERSION ${MINOR_VERSION}u
+#  define PROJECT_BRANCH "$BRANCH"
+#  define PROJECT_SHA1 "$SHA1"
 
 #endif /* VERSION_H_ */
 EOF

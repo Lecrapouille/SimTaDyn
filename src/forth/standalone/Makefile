@@ -1,6 +1,6 @@
 ##=====================================================================
-## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## SimForth: A Forth for SimTaDyn project.
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -54,8 +54,9 @@ LDFLAGS =
 
 ###################################################
 # Common defines
-SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES += $(SIMTADYN_DEFINES)
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
+           -DPROJECT_TEMP_DIR=\"/tmp/SimForth/\" \
+           -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
@@ -111,6 +112,23 @@ $(TARGET): $(OBJ)
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
+
+###################################################
+# Install project. You need to be root user.
+.PHONY: install
+install: $(TARGET)
+	@$(call print-to,"Installing","data","$(PROJECT_DATA_PATH)","")
+	@rm -fr $(PROJECT_DATA_PATH)
+	@mkdir -p $(PROJECT_DATA_PATH)/forth
+	@cp -r ../core/system.fs $(PROJECT_DATA_PATH)/forth
+	@cp -r ../core/LibC $(PROJECT_DATA_PATH)/forth
+	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
+	@mkdir -p $(PROJECT_DOC_PATH)
+	@cp -r ../doc/* $(PROJECT_DATA_ROOT)/doc
+#	@cp AUTHORS LICENSE README.md ChangeLog $(PROJECT_DATA_ROOT)
+	@$(call print-to,"Installing","$(BUILD)/$(TARGET)","$(PROJECT_EXE)","")
+	@mkdir -p $(BINDIR)
+	@cp $(BUILD)/$(TARGET) $(PROJECT_EXE)
 
 ###################################################
 .PHONY: clean
