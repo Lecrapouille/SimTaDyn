@@ -415,13 +415,13 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
 
     case FORTH_PRIMITIVE_LITERAL_16:
       DPUSH(m_tos);
-      m_ip += 2U; // Skip primitive LITTERAL
+      m_ip += 2U; // Skip primitive LITERAL
       m_tos = m_dictionary.read16at(m_ip);
       break;
 
     case FORTH_PRIMITIVE_LITERAL_32:
       DPUSH(m_tos);
-      m_ip += 2U; // Skip primitive LITTERAL
+      m_ip += 2U; // Skip primitive LITERAL
       m_tos = m_dictionary.read32at(m_ip);
       m_ip += 2U; // Skip the number - 2 because of next ip
       break;
@@ -663,6 +663,75 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       displayStack(std::cout, forth::DataStack);
       DPOP(m_tos);
       break;
+    case FORTH_PRIMITIVE_BEGIN_C_LIB:
+      {
+        std::pair<bool, std::string> res = m_dynamic_libs.begin(STREAM);
+        if (!res.first)
+          {
+            abort(res.second);
+          }
+      }
+      break;
+    case FORTH_PRIMITIVE_END_C_LIB:
+      {
+        std::pair<bool, std::string> res = m_dynamic_libs.end(/*nth*/); // FIXME
+        if (res.first)
+          {
+            uint16_t i = 0;
+            for (auto it: m_dynamic_libs/*[nth]*/.m_functions)
+              {
+                create(it.func_forth_name);
+                m_dictionary.appendCell16(FORTH_PRIMITIVE_EXEC_C_FUNC);
+                m_dictionary.appendCell16(i);
+                m_dictionary.appendCell16(FORTH_PRIMITIVE_EXIT);
+                ++i;
+              }
+          }
+        else
+          {
+            abort(res.second);
+          }
+      }
+      break;
+    case FORTH_PRIMITIVE_EXEC_C_FUNC:
+      DPUSH(m_tos);
+      m_ip += 2U; // Skip the index of pointer function
+      m_tos = m_dictionary.read16at(m_ip);
+      //std::cout << "Pile avant: ";
+      //displayStack(std::cout, forth::DataStack);
+
+      m_dynamic_libs/*[nth]*/.m_functions[m_tos].fun_ptr(&m_dsp);
+      //std::cout << "Pile apres: ";
+      //displayStack(std::cout, forth::DataStack);
+      DPOP(m_tos);
+      break;
+    case FORTH_PRIMITIVE_C_FUNCTION:
+      {
+        std::pair<bool, std::string> res = m_dynamic_libs.function(STREAM);
+        if (!res.first)
+          {
+            abort(res.second);
+          }
+      }
+      break;
+    case FORTH_PRIMITIVE_C_CODE:
+      {
+        std::pair<bool, std::string> res = m_dynamic_libs.code(STREAM);
+        if (!res.first)
+          {
+            abort(res.second);
+          }
+      }
+      break;
+    case FORTH_PRIMITIVE_ADD_EXT_C_LIB:
+      {
+        std::pair<bool, std::string> res = m_dynamic_libs.extlib(STREAM);
+        if (!res.first)
+          {
+            abort(res.second);
+          }
+      }
+      break;
     default:
       UnknownForthPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;
       break;
@@ -816,8 +885,17 @@ void Forth::boot()
   m_dictionary.add(FORTH_PRIMITIVE_CARRIAGE_RETURN, FORTH_DICO_ENTRY("CR"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, FORTH_DICO_ENTRY(".S"), 0);
 
+  // C dynamic lib
+  m_dictionary.add(FORTH_PRIMITIVE_BEGIN_C_LIB, FORTH_DICO_ENTRY("C-LIB"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_END_C_LIB, FORTH_DICO_ENTRY("END-C-LIB"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_ADD_EXT_C_LIB, FORTH_DICO_ENTRY("ADD-LIB"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_C_FUNCTION, FORTH_DICO_ENTRY("C-FUNCTION"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_C_CODE, FORTH_DICO_ENTRY("\\C"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EXEC_C_FUNC, FORTH_DICO_ENTRY("(EXEC-C)"), 0);
+
   // Hide some words to user
   m_dictionary.smudge("(CREATE)");
+  m_dictionary.smudge("(EXEC-C)");
 
   m_last_completion = dictionary().last();
 }

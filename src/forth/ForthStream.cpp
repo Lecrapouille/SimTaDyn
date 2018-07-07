@@ -69,7 +69,7 @@ void ForthStream::init()
   m_cursor_last = m_cursor_next = m_cursor_prev = m_lines = 0;
   m_eol = m_eof = true;
   m_word = "";
-  m_word_picked = true;
+  //m_word_picked = true;
 }
 
 // **************************************************************
@@ -132,6 +132,28 @@ void ForthStream::skipLine()
 }
 
 // **************************************************************
+//!
+// **************************************************************
+std::string ForthStream::getLine()
+{
+  std::string line;
+
+  // Extract the line
+  m_cursor_last = m_str.find_first_not_of(m_delimiters, m_cursor_last);
+  m_cursor_next = m_str.find_first_of("\n", m_cursor_last);
+  if ((std::string::npos != m_cursor_next) || (std::string::npos != m_cursor_last))
+    {
+      line = m_str.substr(m_cursor_last, m_cursor_next - m_cursor_last);
+    }
+
+  // Refill data
+  m_eol = true;
+  m_cursor_prev = m_cursor_last;
+  m_cursor_last = m_cursor_next;
+  return line;
+}
+
+// **************************************************************
 //! \return if next line was loaded.
 // **************************************************************
 bool ForthStream::refill()
@@ -175,12 +197,9 @@ bool ForthStream::hasMoreWords()
     return false;
 
   do {
-    // Get next word ?
+    // Word extracted ?
     res = split();
-    if (res) {
-      return true; // extracted
-    }
-
+    if (res) return true;
     // Not extracted (EOL). Loop while next line available
     res = refill();
   } while (false != res);
@@ -221,13 +240,15 @@ bool ForthStream::split()
 
       m_cursor_prev = m_cursor_last;
       m_cursor_last = m_cursor_next;
+
+      m_eol = (std::string::npos == m_cursor_next) || (m_str[m_cursor_next] == '\n');
+      //std::cout << m_word << " " << m_eol << std::endl;
       return true;
     }
 
-  // Not found
   m_eol = true;
-  m_word_picked = false;
+  // Not found
+  //m_word_picked = false;
 
-  //
-  return !m_eol;
+  return false;
 }

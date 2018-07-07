@@ -26,6 +26,7 @@
 
 #  include "ForthStream.hpp"
 #  include "ForthDictionary.hpp"
+#  include "ForthClibrary.hpp"
 #  include <ostream>
 
 // **************************************************************
@@ -180,6 +181,7 @@ protected:
   std::string m_creating_word; //! The Forth word currently in creation.
   Cell32  m_saved_state; //! Save the interpreter state when enetring in a comment.
   ForthStream m_streams_stack[MAX_OPENED_STREAMS]; //! A stack of streams when script file include other files
+  ForthCLib m_dynamic_libs; //! Load C dynamic libs and load them as Forth words.
   uint32_t m_opened_streams; //! Number of streams opened.
   ForthDictionary& m_dictionary; //! Forth dictionary.
   bool  m_trace; //! Trace the execution of a word.

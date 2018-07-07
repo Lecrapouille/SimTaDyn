@@ -43,6 +43,8 @@ public:
   void skipLine();
   //! \brief Check if a word can be extracted it's extracted.
   bool hasMoreWords();
+  //! \brief Return the current line
+  std::string getLine();
   //! \brief Accessor. Return the current extracted Forth word
   //! called by ForthStream::hasMoreWords().
   inline const std::string& nextWord() const
@@ -69,6 +71,8 @@ public:
   {
     m_filename = filename;
   }
+  inline bool eol() const { return m_eol; }
+  inline bool eof() const { return m_eof; }
   //! \brief release the opened stream.
   void close();
 
@@ -101,7 +105,7 @@ protected:
   size_t m_lines;         // Line counter
   bool m_eol;             // End of line reached ?
   bool m_eof;             // End of file reached ?
-  bool m_word_picked;     // The current word has been picked by the caller
+  //bool m_word_picked;     // The current word has been picked by the caller
 
 public:
 
