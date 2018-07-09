@@ -63,6 +63,7 @@ static void configure_options(cli::Parser& parser)
 // button before the context creation of GTK libraries.
 int main(int argc, char** argv)
 {
+  termcolor::enable();
   std::cout << "Welcome to SimTaDyn version "
             << config::major_version
             << '.'

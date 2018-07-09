@@ -139,11 +139,9 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
         std::string const& word = nextWord();
         if (false == m_dictionary.smudge(word))
           {
-            m_color.yellow();
-            std::cout << m_color << "[WARNING] Unknown word '"
-                      << word << "'. Word SMUDGE Ignored !";
-            m_color.normal();
-            std::cout << m_color << std::endl;
+            std::cout << FORTH_WARNING_COLOR << "[WARNING] Unknown word '"
+                      << word << "'. Word SMUDGE Ignored !"
+                      << FORTH_NORMAL_COLOR << std::endl;
           }
       }
       break;
@@ -156,11 +154,9 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
         if (false == m_dictionary.find(word, token, immediate))
           {
             token = 0;
-            m_color.yellow();
-            std::cout << m_color << "[WARNING] Unknown word '"
-                      << word << "'. Word TICK Ignored !";
-            m_color.normal();
-            std::cout << m_color << std::endl;
+            std::cout << FORTH_WARNING_COLOR << "[WARNING] Unknown word '"
+                      << word << "'. Word TICK Ignored !"
+                      << FORTH_NORMAL_COLOR << std::endl;
           }
         DPUSH(m_tos);
         m_tos = token;
@@ -567,11 +563,9 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
     case FORTH_PRIMITIVE_SET_BASE:
       if (false == changeDisplayBase(m_tos))
         {
-          m_color.yellow();
-          std::cerr << m_color << "[WARNING] '"
-                    << m_tos << "' is an invalid base and shall be [2..36]. Ignored !";
-          m_color.normal();
-          std::cerr << m_color << std::endl;
+          std::cerr << FORTH_WARNING_COLOR << "[WARNING] '"
+                    << m_tos << "' is an invalid base and shall be [2..36]. Ignored !"
+                    << FORTH_NORMAL_COLOR << std::endl;
         }
       break;
 

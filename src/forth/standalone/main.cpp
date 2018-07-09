@@ -47,8 +47,6 @@ int main(int argc,char *argv[])
                 << config::tmp_path << "'" << std::endl;
     }
 
-  TextColor* color;
-
   // No option
   if (1 == argc)
   {
@@ -56,26 +54,18 @@ int main(int argc,char *argv[])
     return 1;
   }
 
-  // Look for option -x
-  bool no_color = false;
+  // Enable/disable colorful text displayed on terminal
+  termcolor::enable();
   for (int i = 1; i < argc; ++i)
     {
       if ((argv[i][0] == '-') && (argv[i][1] == 'x'))
         {
-          no_color = true;
+          termcolor::disable();;
         }
-    }
-  if (no_color)
-    {
-      color = new NoColor();
-    }
-  else
-    {
-      color = new PosixColor();
     }
 
   ForthDictionary dico;
-  Forth forth(dico, *color);
+  Forth forth(dico);
   std::pair<bool, std::string> res;
   bool r;
   int opt;
@@ -130,7 +120,7 @@ int main(int argc,char *argv[])
 
         // Pretty print the dictionary
       case 'p':
-        forth.displayDictionary(*color);
+        forth.displayDictionary();
         break;
 
         // Interactive mode
@@ -144,6 +134,5 @@ int main(int argc,char *argv[])
       }
   }
 
-  delete color;
   return 0;
 }

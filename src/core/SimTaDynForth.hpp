@@ -83,7 +83,7 @@ protected:
 private:
 
   SimForth()
-    : Forth(m_dictionaries, m_color)
+    : Forth(m_dictionaries)
   {
     LOGI("Creating SimForth");
   }
@@ -96,7 +96,6 @@ private:
 protected:
 
   SimForthDictionary m_dictionaries;
-  NoColor m_color;
 };
 
 #endif /* SIMFORTH_HPP_ */
