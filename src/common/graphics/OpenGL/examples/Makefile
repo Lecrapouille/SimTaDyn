@@ -55,9 +55,12 @@ CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtk
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
-# Common defines
-SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES += $(SIMTADYN_DEFINES) -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+# Project defines
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
+           -DPROJECT_TEMP_DIR=\"/tmp/SimTaDyn/\" \
+           -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+# Disable ugly gtkmm compilation warnings
+DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
 ###################################################
 # Set Libraries compiled in the external/ directory.

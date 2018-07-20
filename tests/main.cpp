@@ -34,7 +34,7 @@
 #include "GLBufferTests.hpp"
 #include "OpenGLTests.hpp"
 #include "FilteringTests.hpp"
-#include "ResourcesTests.hpp"
+//#include "ResourcesTests.hpp"
 #include "TerminalColorTests.hpp"
 #include "SimTaDynFileLoaderTests.hpp"
 #include <cppunit/ui/text/TestRunner.h>
@@ -47,6 +47,7 @@ static void testUtils(CppUnit::TextUi::TestRunner& runner)
   suite = new CppUnit::TestSuite("TerminalColorTests");
   suite->addTest(new CppUnit::TestCaller<TerminalColorTests>("TerminalColor tests", &TerminalColorTests::testcolors));
   runner.addTest(suite);
+/*
   suite = new CppUnit::TestSuite("LoggerTests");
   suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testlog));
   runner.addTest(suite);
@@ -54,7 +55,7 @@ static void testUtils(CppUnit::TextUi::TestRunner& runner)
   suite = new CppUnit::TestSuite("FileTests");
   suite->addTest(new CppUnit::TestCaller<FileTests>("File tests", &FileTests::testfiles));
   suite->addTest(new CppUnit::TestCaller<FileTests>("File path", &FileTests::testpath));
-  runner.addTest(suite);
+  runner.addTest(suite);*/
 }
 
 //--------------------------------------------------------------------------
@@ -176,14 +177,14 @@ static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
 
 //--------------------------------------------------------------------------
 static void testResourceManager(CppUnit::TextUi::TestRunner& runner)
-{
+{/*
   CppUnit::TestSuite* suite;
 
   suite = new CppUnit::TestSuite("resourcesManagerTests");
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("Resources", &ResourcesTests::testsResources));
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("RessourceManager", &ResourcesTests::testsResourceManager));
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("LoaderManager", &ResourcesTests::testsLoaderManager));
-  runner.addTest(suite);
+  runner.addTest(suite);*/
 }
 
 //--------------------------------------------------------------------------
@@ -208,7 +209,7 @@ static bool run_tests(bool const has_xdisplay)
                 << config::tmp_path << "'" << std::endl;
     }
 
-  //testUtils(runner);
+  testUtils(runner);
   testResourceManager(runner);
   //testLoader(runner);
   testMath(runner);

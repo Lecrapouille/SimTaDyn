@@ -35,25 +35,27 @@ M=$(P)/.makefile
 # List of files to compile.
 OBJ_EXTERNAL       = backward.o
 OBJ_UTILS          = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_UTILS_UT      += LoggerTests.o FileTests.o
+OBJ_UTILS_UT      += LoggerTests.o FileTests.o TerminalColorTests.o
 OBJ_MATHS          = Maths.o
 OBJ_MATHS_UT       = VectorTests.o MatrixTests.o TransformationTests.o
 OBJ_MATHS_UT      += BoundingBoxTests.o FilteringTests.o
 OBJ_CONTAINERS     = PendingData.o
 OBJ_CONTAINERS_UT  = SetTests.o CollectionTests.o
 OBJ_MANAGERS       =
-OBJ_MANAGERS_UT    = ResourcesTests.o
+#OBJ_MANAGERS_UT    = ResourcesTests.o
 OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
 #OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
 OBJ_OPENGL         = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
-OBJ_OPENGL        += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o Renderer.o
+OBJ_OPENGL        += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
+# Renderer.o
 OBJ_OPENGL_UT      = ColorTests.o GLBufferTests.o OpenGLTests.o
-OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_CORE           = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
-OBJ_LOADERS        = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoader.o
+OBJ_LOADERS        = LoaderException.o ShapeFileLoader.o SimTaDynFileLoader.o
+#ILoader.o
 OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
-OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
-OBJ_GUI           += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
+#OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
+#OBJ_GUI           += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_UNIT_TEST      = main.o
 OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
       $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)		\
@@ -81,9 +83,12 @@ common/utils:\
 core/loaders
 
 ###################################################
-# Common defines
-SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES += $(SIMTADYN_DEFINES) -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+# Project defines
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
+           -DPROJECT_TEMP_DIR=\"/tmp/SimTaDyn/\" \
+           -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+# Disable ugly gtkmm compilation warnings
+DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
 ###################################################
 # Set Libraries compiled in the external/ directory.

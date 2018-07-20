@@ -38,7 +38,7 @@ void LoaderTests::tearDown()
 //--------------------------------------------------------------------------
 void LoaderTests::testSimTaDyn()
 {
-  Path path(SIMTADYN_DATA_PATH);
+  Path path(PROJECT_DATA_PATH);
   path.add("data/loaders"); // FIXME ko si uniquement Path path("data/loaders"); Pourquoi
   SimTaDynFileLoader loader;
   SimTaDynMap *map = nullptr;
@@ -52,8 +52,8 @@ void LoaderTests::testSimTaDyn()
 
   SimForth::instance().boot();
   //dir = loader.generateTempDirName();
-  loader.loadFromFile(path.expand("maps/MaCarte.dyn"), map);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != map);
+  //loader.loadFromFile(path.expand("maps/MaCarte.dyn"), map);
+  //CPPUNIT_ASSERT_EQUAL(true, nullptr != map);
   //CPPUNIT_ASSERT_EQUAL(0, map->m_base_dir.compare(dir));
   CPPUNIT_ASSERT_EQUAL(0, map->m_name.compare("MaCarte"));
   std::cout << map->m_full_path << std::endl;
