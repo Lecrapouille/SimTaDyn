@@ -1,10 +1,10 @@
 //=====================================================================
-// SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// SimForth: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
 //
-// This file is part of SimTaDyn.
+// This file is part of SimForth.
 //
-// SimTaDyn is free software: you can redistribute it and/or modify it
+// SimForth is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -21,8 +21,39 @@
 #ifndef CONFIG_HPP_
 #  define CONFIG_HPP_
 
-#  include "version.h"
+#  include "Singleton.tpp"
+#  include "Path.hpp"
 #  include "File.hpp"
+#  include "version.h"
+
+// **************************************************************
+//! \brief
+// **************************************************************
+class Config:
+  public Path,
+  public Singleton<Config>
+{
+private:
+
+  //------------------------------------------------------------------
+  //! \brief Mandatory by design.
+  //------------------------------------------------------------------
+  friend class Singleton<Config>;
+
+  //------------------------------------------------------------------
+  //! \brief Private because of Singleton.
+  //------------------------------------------------------------------
+  Config()
+  {
+    add(PROJECT_DATA_PATH);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Private because of Singleton. Check if resources is still
+  //! acquired which show a bug in the management of resources.
+  //------------------------------------------------------------------
+  ~Config() { };
+};
 
 namespace config
 {
@@ -34,7 +65,7 @@ namespace config
   //! \brief Either create a new log file or smash the older log.
   static const bool separated_logs = false;
   //! \brief Used for logs and GUI.
-  static const std::string project_name("SimTaDyn");
+  static const std::string project_name("SimExcel");
   //! \brief Major version of project
   static const uint32_t major_version(PROJECT_MAJOR_VERSION);
   //! \brief Minor version of project

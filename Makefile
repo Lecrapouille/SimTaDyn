@@ -20,7 +20,8 @@
 
 ###################################################
 # Executable name
-TARGET = SimTaDyn
+PROJECT = SimTaDyn
+TARGET = $(PROJECT)
 
 ###################################################
 # Location from the project root directory.
@@ -57,7 +58,7 @@ OBJ_LOADERS    = LoaderException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDynF
 # SimTaDynFile.o
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
-OBJ_SIMTADYN   = main.o
+OBJ_SIMTADYN   = SimTaDyn.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
@@ -68,10 +69,13 @@ CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourcev
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
+#
+INCLUDES += -I$(P)/src
+VPATH += $(P)/src:
+
+###################################################
 # Project defines
 DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
-           -DPROJECT_TEMP_DIR=\"/tmp/SimTaDyn/\" \
-           -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 

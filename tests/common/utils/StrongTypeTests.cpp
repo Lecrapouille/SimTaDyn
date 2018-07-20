@@ -18,34 +18,39 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ASpreadSheetCell.hpp"
+#include "StrongTypeTests.hpp"
 
-void ASpreadSheetCell::update()
+// Register the test suite
+CPPUNIT_TEST_SUITE_REGISTRATION(StrongTypeTests);
+
+//--------------------------------------------------------------------------
+void StrongTypeTests::setUp()
 {
-  SimForth::instance().interpreteCell(*this);
 }
 
-//FIXME
-void ASpreadSheetCell::parse()
+//--------------------------------------------------------------------------
+void StrongTypeTests::tearDown()
 {
-  m_references.clear();
-  SimForth::instance().parseCell(*this);
-  m_unresolvedRefs = m_references.size();
 }
 
-/*
-void ASpreadSheetCell::parse(SimForth &forth)
+//--------------------------------------------------------------------------
+void StrongTypeTests::testEquality()
 {
-  //std::cout << "ASpreadSheetCell::parse()" << std::endl;
-  //if (m_evaluated)
-  //  return ;
+  STRONG_TYPEDEF(int, Foo);
+  STRONG_TYPEDEF(int, Bar);
 
-  m_references.clear();
-  forth.parseCell(*this);
-  m_unresolvedRefs = m_references.size();
+  Foo f1;
+  Foo f2(42);
+  Bar f3;
+
+  f1 = 42;
+  f3 = 20;
+  CPPUNIT_ASSERT_EQUAL(true, f1 == f2);
+  CPPUNIT_ASSERT_EQUAL(true, f3 != Bar(42));
+  CPPUNIT_ASSERT_EQUAL(true, f3 < Bar(42));
+  CPPUNIT_ASSERT_EQUAL(true, Bar(42) <= Bar(42));
+  CPPUNIT_ASSERT_EQUAL(true, Bar(42) >= Bar(42));
+  CPPUNIT_ASSERT_EQUAL(true, Bar(42) == Bar(42));
+  CPPUNIT_ASSERT_EQUAL(true, Bar(42) < Bar(43));
+  CPPUNIT_ASSERT_EQUAL(true, Bar(43) > Bar(42));
 }
-
-void ASpreadSheetCell::parse()
-{
-  parse(SimForth::instance());
-  }*/

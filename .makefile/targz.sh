@@ -1,7 +1,7 @@
 #!/bin/bash
 ##=====================================================================
 ## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -19,6 +19,14 @@
 ## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
+# This script, called by Makefile, makes a backup of the code source as
+# an unique tarball. Tarballs name are unique SimTaDyn$DATE-v$NTH.tar.gz
+# where $DATE is the date of today and $NTH a counter to make unique if
+# a tarball already exists. Some informations are not backuped like .git
+# generated doc, builds ...
+
+# $1 is the content of pwd.
+
 #set -x
 
 HERE=${1##*/}
@@ -27,6 +35,7 @@ VERSION='-'`cat VERSION`
 NTH=0
 TARGET_TGZ="SimTaDyn$DATE-v$NTH.tar.gz"
 
+### Iterate for finding an unique name
 while [ -e "$TARGET_TGZ" ];
 do
     NTH=`echo "$TARGET_TGZ" | cut -d"v" -f2 | cut -d"." -f1`
@@ -40,14 +49,14 @@ do
     fi
 done
 
+### Display informations with the same look than Makefile
 echo -e "\033[35m*** Tarball:\033[00m \033[36m$TARGET_TGZ\033[00m <= \033[33m$1\033[00m"
 
-cd .. > /dev/null
-tar --transform s/SimTaDyn/SimTaDyn$VERSION/ \
-    --exclude='.git' --exclude="SimTaDyn-*.tar.gz" --exclude="doc/coverage" \
-    --exclude "doc/coverage" --exclude "*/build" -czvf /tmp/$TARGET_TGZ $HERE \
-    > /dev/null && mv /tmp/$TARGET_TGZ $HERE
+### Compress ../SimTaDyn in /tmp, append the version number to the name and move the
+### created tarball from /tmp into the project root directory.
+(cd .. && tar --transform s/SimTaDyn/SimTaDyn$VERSION/ \
+              --exclude='.git' --exclude="SimTaDyn-*.tar.gz" --exclude="doc/coverage" \
+              --exclude "doc/coverage" --exclude "*/build" -czvf /tmp/$TARGET_TGZ $HERE \
+              > /dev/null && mv /tmp/$TARGET_TGZ $HERE)
 
-#FIXME OK it's ugly
-cd - > /dev/null
 cp $TARGET_TGZ SimTaDyn$VERSION.tar.gz

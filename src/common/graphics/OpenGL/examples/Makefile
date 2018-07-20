@@ -20,7 +20,8 @@
 
 ###################################################
 # Executable name
-TARGET = OpenGLExamples
+PROJECT = OpenGLExamples
+TARGET = $(PROJECT)
 
 ###################################################
 # Location from the project root directory.
@@ -55,10 +56,13 @@ CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtk
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
+#
+INCLUDES += -I$(P)/src
+VPATH += $(P)/src:
+
+###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
-           -DPROJECT_TEMP_DIR=\"/tmp/SimTaDyn/\" \
-           -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
@@ -92,27 +96,30 @@ endif
 ###################################################
 # Backward allows tracing stack when segfault happens
 ifeq ($(PROJECT_MODE),debug)
+ifneq ($(ARCHI),Darwin)
 OPTIM_FLAGS = -O2 -g
 DEFINES += -DBACKWARD_HAS_DW=1
 LIBS += -ldw
+endif
 else
 OPTIM_FLAGS = -O3
 endif
 
 ###################################################
+#
 all: $(TARGET)
 
 ###################################################
 # Link sources
 $(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
@@ -123,4 +130,5 @@ clean:
 
 ###################################################
 # Sharable informations between all Makefiles
--include $(M)/Makefile.footer
+include $(M)/Makefile.help
+include $(M)/Makefile.footer

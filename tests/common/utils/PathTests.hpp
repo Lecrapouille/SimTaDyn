@@ -18,8 +18,8 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FILE_TESTS_HPP_
-#  define FILE_TESTS_HPP_
+#ifndef PATH_TESTS_HPP_
+#  define PATH_TESTS_HPP_
 
 #  include <cppunit/TestFixture.h>
 #  include <cppunit/TestResult.h>
@@ -27,22 +27,28 @@
 
 #  define protected public
 #  define private public
-#  include "File.hpp"
+#  include "Path.hpp"
 #  undef protected
 #  undef private
 
-class FileTests : public CppUnit::TestFixture
+class PathTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(FileTests);
-  CPPUNIT_TEST(testfiles);
+  CPPUNIT_TEST_SUITE(PathTests);
+  CPPUNIT_TEST(testEmptyConstructor);
+  CPPUNIT_TEST(testSplitConstructor);
+  CPPUNIT_TEST(testSplitDir);
+  CPPUNIT_TEST(testFindAndExpand);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void setUp();
   void tearDown();
 
-  void testfiles();
+  void testEmptyConstructor();
+  void testSplitConstructor();
+  void testSplitDir();
+  void testFindAndExpand();
 };
 
-#endif /* FILE_TESTS_HPP_ */
+#endif /* PATH_TESTS_HPP_ */

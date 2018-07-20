@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -84,7 +84,7 @@ class FileLogger: public ILogger
 {
 private:
 
-  virtual void open(std::string const& filename) = 0;
+  virtual bool open(std::string const& filename) = 0;
   virtual void close() = 0;
   virtual void header() = 0;
   virtual void footer() = 0;

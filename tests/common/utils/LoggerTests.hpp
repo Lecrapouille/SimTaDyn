@@ -35,14 +35,18 @@ class LoggerTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
   CPPUNIT_TEST_SUITE(LoggerTests);
-  CPPUNIT_TEST(testlog);
+  CPPUNIT_TEST(testEmptyLog);
+  CPPUNIT_TEST(testBasic);
+  CPPUNIT_TEST(testWithConcurrency);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void setUp();
   void tearDown();
 
-  void testlog();
+  void testEmptyLog();
+  void testBasic();
+  void testWithConcurrency();
 };
 
 #endif /* LOGGERTESTS_HPP_ */

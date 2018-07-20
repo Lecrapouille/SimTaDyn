@@ -1,7 +1,7 @@
 # -*- mode: makefile -*-
 ##=====================================================================
 ## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -68,7 +68,7 @@ BINDIR = $(DESTDIR)$(PREFIX)/bin
 DATADIR = $(DESTDIR)$(PREFIX)/share
 DOCDIR = $(DATADIR)/doc
 PROJECT_EXE = $(BINDIR)/$(TARGET)-$(TARGET_VERSION)
-PROJECT_DATA_ROOT = $(DATADIR)/$(TARGET)/$(TARGET_VERSION)
+PROJECT_DATA_ROOT = $(DATADIR)/$(PROJECT)/$(TARGET_VERSION)
 PROJECT_DATA_PATH = $(PROJECT_DATA_ROOT)/data
 PROJECT_DOC_PATH = $(PROJECT_DATA_ROOT)/doc
 
@@ -91,7 +91,7 @@ endif
 # Inform Makefile where to find header files
 INCLUDES = -I$(BUILD) -I$(P)/external/backward-cpp -I$(P)/external	\
 -I$(P)/external/SOIL -I$(P)/external/YesEngine -I$(P)/external/zipper	\
--I$(P)/src -I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns	\
+-I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns	        \
 -I$(P)/src/common/managers -I$(P)/src/common/utils			\
 -I$(P)/src/common/maths -I$(P)/src/common/containers			\
 -I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
@@ -107,7 +107,6 @@ $(BUILD):\
 $(P)/external/backward-cpp:\
 $(P)/external/YesEngine:\
 $(P)/external/SOIL:\
-$(P)/src:\
 $(P)/src/common/spreadsheet:\
 $(P)/src/common/patterns:\
 $(P)/src/common/managers:\
@@ -123,6 +122,10 @@ $(P)/src/core:\
 $(P)/src/core/loaders:\
 $(P)/src/forth:\
 $(P)/src/ui
+
+###################################################
+# Common defines
+DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\" -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Path where to store the generated coverage docs

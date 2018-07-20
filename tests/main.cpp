@@ -18,44 +18,74 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "FileTests.hpp"
+// --- Utils ----------------------------------------------------------
+#include "StrongTypeTests.hpp"
 #include "LoggerTests.hpp"
+#include "PathTests.hpp"
+#include "FileTests.hpp"
+#include "TerminalColorTests.hpp"
+
+// --- Maths ----------------------------------------------------------
 #include "VectorTests.hpp"
 #include "MatrixTests.hpp"
 #include "TransformationTests.hpp"
+#include "FilteringTests.hpp"
 #include "BoundingBoxTests.hpp"
-#include "ColorTests.hpp"
+
+// --- Containers -----------------------------------------------------
 #include "SetTests.hpp"
 #include "CollectionTests.hpp"
+
+// --- Graph ----------------------------------------------------------
 /*#include "BasicNodeTests.hpp"
 #include "BasicArcTests.hpp"
 #include "BasicGraphTests.hpp"
 #include "GraphAlgoTests.hpp"*/
+
+// --- OpenGL ---------------------------------------------------------
+#include "ColorTests.hpp"
 #include "GLBufferTests.hpp"
 #include "OpenGLTests.hpp"
-#include "FilteringTests.hpp"
+
+// --- Loader ---------------------------------------------------------
 //#include "ResourcesTests.hpp"
-#include "TerminalColorTests.hpp"
 #include "SimTaDynFileLoaderTests.hpp"
+// --- Core ---------------------------------------------------------
+#include "ClassicSpreadSheetTests.hpp"
+
+// --- CPPUnit --------------------------------------------------------
 #include <cppunit/ui/text/TestRunner.h>
+
 
 //--------------------------------------------------------------------------
 static void testUtils(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
 
-  suite = new CppUnit::TestSuite("TerminalColorTests");
-  suite->addTest(new CppUnit::TestCaller<TerminalColorTests>("TerminalColor tests", &TerminalColorTests::testcolors));
+  suite = new CppUnit::TestSuite("StrongTypeTests");
+  suite->addTest(new CppUnit::TestCaller<StrongTypeTests>("StrongType tests", &StrongTypeTests::testEquality));
   runner.addTest(suite);
-/*
+
   suite = new CppUnit::TestSuite("LoggerTests");
-  suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testlog));
+  suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testEmptyLog));
+  suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testBasic));
+  suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testWithConcurrency));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("PathTests");
+  suite->addTest(new CppUnit::TestCaller<PathTests>("Path tests", &PathTests::testEmptyConstructor));
+  suite->addTest(new CppUnit::TestCaller<PathTests>("Path tests", &PathTests::testSplitConstructor));
+  suite->addTest(new CppUnit::TestCaller<PathTests>("Path tests", &PathTests::testFindAndExpand));
+  suite->addTest(new CppUnit::TestCaller<PathTests>("Path tests", &PathTests::testSplitDir));
   runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("FileTests");
   suite->addTest(new CppUnit::TestCaller<FileTests>("File tests", &FileTests::testfiles));
-  suite->addTest(new CppUnit::TestCaller<FileTests>("File path", &FileTests::testpath));
-  runner.addTest(suite);*/
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("TerminalColorTests");
+  suite->addTest(new CppUnit::TestCaller<TerminalColorTests>("TerminalColor tests", &TerminalColorTests::testcolors));
+  runner.addTest(suite);
 }
 
 //--------------------------------------------------------------------------
@@ -124,17 +154,17 @@ static void testContainer(CppUnit::TextUi::TestRunner& runner)
 }
 
 //--------------------------------------------------------------------------
-/*static void testGraph(CppUnit::TextUi::TestRunner& runner)
+static void testGraph(CppUnit::TextUi::TestRunner& runner)
 {
-  CppUnit::TestSuite* suite;
-
-  suite = new CppUnit::TestSuite("BasicArcTests");
-  suite->addTest(new CppUnit::TestCaller<BasicArcTests>("test", &BasicArcTests::test));
-  runner.addTest(suite);
+  /*CppUnit::TestSuite* suite;
 
   suite = new CppUnit::TestSuite("BasicNodeTests");
   suite->addTest(new CppUnit::TestCaller<BasicNodeTests>("test", &BasicNodeTests::dummy));
   suite->addTest(new CppUnit::TestCaller<BasicNodeTests>("test", &BasicNodeTests::neighbor));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("BasicArcTests");
+  suite->addTest(new CppUnit::TestCaller<BasicArcTests>("test", &BasicArcTests::test));
   runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("BasicGraphTests");
@@ -143,8 +173,8 @@ static void testContainer(CppUnit::TextUi::TestRunner& runner)
 
   suite = new CppUnit::TestSuite("GraphAlgoTests");
   suite->addTest(new CppUnit::TestCaller<GraphAlgoTests>("test", &GraphAlgoTests::test));
-  runner.addTest(suite);
-  }*/
+  runner.addTest(suite);*/
+}
 
 //--------------------------------------------------------------------------
 static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
@@ -176,24 +206,32 @@ static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
 }
 
 //--------------------------------------------------------------------------
-static void testResourceManager(CppUnit::TextUi::TestRunner& runner)
-{/*
-  CppUnit::TestSuite* suite;
+static void testLoader(CppUnit::TextUi::TestRunner& runner)
+{
+  /*CppUnit::TestSuite* suite;
 
   suite = new CppUnit::TestSuite("resourcesManagerTests");
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("Resources", &ResourcesTests::testsResources));
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("RessourceManager", &ResourcesTests::testsResourceManager));
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("LoaderManager", &ResourcesTests::testsLoaderManager));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("LoaderTests");
+  suite->addTest(new CppUnit::TestCaller<LoaderTests>("Loader", &LoaderTests::testSimTaDyn));
   runner.addTest(suite);*/
 }
 
 //--------------------------------------------------------------------------
-static void testLoader(CppUnit::TextUi::TestRunner& runner)
+static void testCore(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
 
-  suite = new CppUnit::TestSuite("LoaderTests");
-  suite->addTest(new CppUnit::TestCaller<LoaderTests>("Loader", &LoaderTests::testSimTaDyn));
+  suite = new CppUnit::TestSuite("ClassicSpreadSheetTests");
+  suite->addTest(new CppUnit::TestCaller<ClassicSpreadSheetTests>("Spreadsheet 1", &ClassicSpreadSheetTests::testInput1));
+  /*suite->addTest(new CppUnit::TestCaller<ClassicSpreadSheetTests>("Spreadsheet 2", &ClassicSpreadSheetTests::testInput2)); // FIXME bug libc++abi.dylib: Pure virtual function called!
+  suite->addTest(new CppUnit::TestCaller<ClassicSpreadSheetTests>("Spreadsheet 3", &ClassicSpreadSheetTests::testInput3));
+  suite->addTest(new CppUnit::TestCaller<ClassicSpreadSheetTests>("Spreadsheet 4", &ClassicSpreadSheetTests::testInput4));
+  suite->addTest(new CppUnit::TestCaller<ClassicSpreadSheetTests>("Spreadsheet 5", &ClassicSpreadSheetTests::testInput5));*/
   runner.addTest(suite);
 }
 
@@ -210,17 +248,13 @@ static bool run_tests(bool const has_xdisplay)
     }
 
   testUtils(runner);
-  testResourceManager(runner);
-  //testLoader(runner);
   testMath(runner);
   testContainer(runner);
-  //testGraph(runner);
-
+  testGraph(runner);
   // Travis-CI does not support export display
-  if (has_xdisplay)
-    {
-      testOpenGL(runner);
-    }
+  if (has_xdisplay) testOpenGL(runner);
+  testLoader(runner);
+  testCore(runner);
 
   return runner.run();
 }

@@ -1,3 +1,23 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "ASpreadSheet.hpp"
 
 void ASpreadSheet::parse(SimForth &forth)
@@ -71,7 +91,7 @@ ASpreadSheet::evaluate(SimForth &forth)
           // Pop the cell
           //std::cout << "Topo queue " << m_topologicalList.size() << std::endl;
           if (0u == m_topologicalList.size())
-            forth.abort("  Topological list shall not be empty");
+            forth.abort("Topological list shall not be empty");
 
           ASpreadSheetCell* cell = m_topologicalList.front();
           m_topologicalList.pop();
@@ -98,7 +118,7 @@ ASpreadSheet::evaluate(SimForth &forth)
         {
           //setCircularDependent(true);
           // FIXME: faudrait afficher le nom du spreadsheet dans le message d'erreur du forth
-          forth.abort("  CircularDependencyFound: Unable to solve the spreadsheet");
+          forth.abort("CircularDependencyFound: Unable to solve the spreadsheet");
         }
     }
   catch (ForthException const& e)

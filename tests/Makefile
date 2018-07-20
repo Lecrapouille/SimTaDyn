@@ -20,22 +20,24 @@
 
 ###################################################
 # Executable name
-TARGET = SimTaDyn-UnitTest
+PROJECT = SimTaDyn
+TARGET = $(PROJECT)-UnitTest
 
 ###################################################
 # Location from the project root directory.
 P=..
+ABSP=$(abspath $(P))
 
 ###################################################
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
--include $(M)/Makefile.header
+include $(M)/Makefile.header
 
 ###################################################
 # List of files to compile.
-OBJ_EXTERNAL       = backward.o
+#OBJ_EXTERNAL       = backward.o
 OBJ_UTILS          = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_UTILS_UT      += LoggerTests.o FileTests.o TerminalColorTests.o
+OBJ_UTILS_UT      += StrongTypeTests.o FileTests.o PathTests.o LoggerTests.o TerminalColorTests.o
 OBJ_MATHS          = Maths.o
 OBJ_MATHS_UT       = VectorTests.o MatrixTests.o TransformationTests.o
 OBJ_MATHS_UT      += BoundingBoxTests.o FilteringTests.o
@@ -51,18 +53,19 @@ OBJ_OPENGL        += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
 OBJ_OPENGL_UT      = ColorTests.o GLBufferTests.o OpenGLTests.o
 OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_CORE           = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
+OBJ_CORE_UT        = ClassicSpreadSheet.o ClassicSpreadSheetTests.o
 OBJ_LOADERS        = LoaderException.o ShapeFileLoader.o SimTaDynFileLoader.o
 #ILoader.o
-OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
+#OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
 #OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 #OBJ_GUI           += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_UNIT_TEST      = main.o
-OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)		\
-      $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)		\
-      $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)			\
-      $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH)	\
-      $(OBJ_CORE) $(OBJ_LOADERS) $(OBJ_LOADERS_UT) $(OBJ_GUI)		\
-      $(OBJ_UNIT_TEST)
+OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	   \
+      $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)	   \
+      $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)		   \
+      $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH) \
+      $(OBJ_CORE) $(OBJ_CORE_UT) $(OBJ_LOADERS) $(OBJ_LOADERS_UT)  \
+      $(OBJ_GUI) $(OBJ_UNIT_TEST)
 
 ###################################################
 # Compilation options.
@@ -72,21 +75,21 @@ LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 
 ###################################################
 #
-INCLUDES += -Icommon/containers -Icommon/graphics -Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils \
--Icore/loaders
+INCLUDES += -Icommon/containers -Icommon/graphics -Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils -Icore/loaders -Icore/spreadsheet -I../src/core/standalone/ClassicSpreadSheet
+
 VPATH += common/containers:\
 common/graphics:\
 common/graph-theory:\
 common/managers:\
 common/maths:\
 common/utils:\
-core/loaders
+core/loaders:\
+core/spreadsheet:\
+../src/core/standalone/ClassicSpreadSheet
 
 ###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
-           -DPROJECT_TEMP_DIR=\"/tmp/SimTaDyn/\" \
-           -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
@@ -139,13 +142,13 @@ LDFLAGS += --coverage
 # readable. Temporary disable asan with Travis
 
 # ifeq ($(CXX),g++)
-ifneq ($(CI),true)
-OPTIM_FLAGS = -O1 -g
-CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-LIBS += -static-libstdc++ -static-libasan
-SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
-endif
+#ifneq ($(CI),true)
+#OPTIM_FLAGS = -O1 -g
+#CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+#LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+#LIBS += -static-libstdc++ -static-libasan
+#SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
+#endif
 
 ###################################################
 all: $(TARGET)

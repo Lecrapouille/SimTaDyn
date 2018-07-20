@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,31 +18,36 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FILE_TESTS_HPP_
-#  define FILE_TESTS_HPP_
+#include "ClassicSpreadSheet.hpp"
+#include "PathManager.hpp"
 
-#  include <cppunit/TestFixture.h>
-#  include <cppunit/TestResult.h>
-#  include <cppunit/extensions/HelperMacros.h>
-
-#  define protected public
-#  define private public
-#  include "File.hpp"
-#  undef protected
-#  undef private
-
-class FileTests : public CppUnit::TestFixture
+int main()
 {
-  // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(FileTests);
-  CPPUNIT_TEST(testfiles);
-  CPPUNIT_TEST_SUITE_END();
+  // Call it before Logger constructor
+  if (!File::mkdir(config::tmp_path))
+    {
+      std::cerr << "Failed creating the temporary directory '"
+                << config::tmp_path << "'" << std::endl;
+    }
 
-public:
-  void setUp();
-  void tearDown();
+  PathManager::instance();
 
-  void testfiles();
-};
+  SimForth& forth = SimForth::instance();
+  ClassicSpreadSheet sheet("Sheet1");
 
-#endif /* FILE_TESTS_HPP_ */
+  forth.boot();
+  if (!sheet.readInput("examples/input2.txt"))
+    {
+      std::cerr << "Abort" << std::endl;
+    }
+
+  sheet.parse(forth);
+  std::pair<bool, std::string> res = sheet.evaluate(forth);
+  forth.ok(res);
+  if (res.first)
+    {
+      sheet.displayResult();
+    }
+
+  return 0;
+}

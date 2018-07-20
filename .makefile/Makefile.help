@@ -2,6 +2,9 @@
 # Credits:
 # https://gist.github.com/prwhite/8168133#file-makefile-L10
 # https://github.com/ianstormtaylor/makefile-help
+#
+# FIXME: Makefile variable with ':=' are taken into account in
+# the output
 
 ###################################################
 # Show this help.

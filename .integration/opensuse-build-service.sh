@@ -1,7 +1,7 @@
 #!/bin/bash
 ##=====================================================================
 ## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -19,7 +19,10 @@
 ## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
-### Deploy SimTaDyn to OpenSuse Build: a compilation farm service
+# This scripts allows to upload SimTaDyn to OpenSuse Build (OBS).
+# OBS is a compilation farm service, its allows to release binaries for
+# different kind of *nix architected.
+
 #set -x
 
 function out-print
@@ -27,7 +30,9 @@ function out-print
     echo -e "\033[35m*** $1:\033[00m \033[36m$2\033[00m => \033[33m$3\033[00m"
 }
 
-### Create a temporary dir to clone the SimTaDyn project
+### Create a temporary dir for cloning the SimTaDyn project in the aim to:
+###   - to download to OBS a proper tarball
+###   - to modify files with no risk of wrong commit on github
 out-print "Getting" "SimTaDyn" "/tmp/simtadyn-obs"
 rm -fr /tmp/simtadyn-obs 2> /dev/null
 mkdir -p /tmp/simtadyn-obs
@@ -38,8 +43,7 @@ cd SimTaDyn
 ### Clone and compile external projects
 make download-external-libs
 
-### Replace the default SimTaDyn version set in the .spec file
-### by the content of the VERSION file.
+### Replace the SimTaDyn version in the .spec file by the real one.
 VERSION=`cat VERSION`
 L="s/^Version.*/Version: $VERSION/"
 sed -i "$L" .integration/SimTaDyn.spec
@@ -47,7 +51,9 @@ sed -i "$L" .integration/SimTaDyn.spec
 ### Create the tarball
 make targz
 
-### Commit the tarball into the OpenSUSE Build Service
+### Upload the tarball in the OpenSUSE Build Service.
+### A password is requested. If needed, adapt these
+### lines of code to your own OBS account.
 out-print "Commiting" "SimTaDyn" "OpenSUSE Build Service"
 cd .. > /dev/null
 osc checkout home:Lecrapouille

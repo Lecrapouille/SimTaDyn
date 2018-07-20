@@ -1,12 +1,12 @@
-Makefile utilities.
+This directory contains Makefile utility files.
 
-List of files:
+The following files contain common rules used by sub-project Makefiles for avoiding code duplication.
+* Makefile.header: header part for Makefile.
+* Makefile.footer: footer part for Makefile.
 
-* Makefile.header: header part of the ../Makefile
-* Makefile.footer: footer part of the ../Makefile
-* Makefile.help: help rules of the Makefile (auto parse and display its rules)
+Auto-generate help rules for Makefile:
+* Makefile.help: Allow Makefile to auto parse and display its own rules.
 
-These files contains common rules used by sub-project Makefiles included in this project. This avoids code duplication.
-
-* targz.sh: bash script for creating backup tarball of the project.
-* version.sh: bash script for creating version.h file needed for the project.
+Bash scripts called by Mekfile:
+* targz.sh: for creating backup tarball of the code source project.
+* version.sh: for creating version.h file needed when compiling the project.

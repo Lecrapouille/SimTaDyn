@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -45,8 +45,24 @@ public:
   }
 
   virtual ASpreadSheetCell *isACell(std::string const& word) override;
-  void readInput(std::string const filename);
+  bool readInput(std::string const filename);
   void displayResult();
+
+  std::vector<std::vector<ASpreadSheetCell*>> const&
+  cells() const
+  {
+    return m_cellMatrix;
+  }
+
+  inline int rawValue(const uint32_t row, const uint32_t col) const
+  {
+    return m_cellMatrix[row][col]->rawValue();
+  }
+
+  inline  std::pair<bool, int32_t> value(const uint32_t row, const uint32_t col) const
+  {
+    return m_cellMatrix[row][col]->value();
+  }
 
 protected:
 

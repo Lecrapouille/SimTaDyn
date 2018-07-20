@@ -75,5 +75,13 @@ void Inspector::showCell(const Key nodeID)
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Cost";
-  row[m_columns.m_token] = std::to_string(node.value());
+  auto val = node.value();
+  if (val.first)
+    {
+      row[m_columns.m_token] = std::to_string(node.rawValue());
+    }
+  else
+    {
+      row[m_columns.m_token] = "Cell not yet evaluated";
+    }
 }

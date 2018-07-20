@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -53,7 +53,7 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! \brief
+  //! \brief Return the type of file
   //------------------------------------------------------------------
   inline static FileType type(std::string const& path)
   {
@@ -174,7 +174,9 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! \brief
+  //! \brief Create a path of directory.
+  //! \param last element of path shall not be considerate as a file
+  //! but as a directory.
   //------------------------------------------------------------------
   static bool mkdir(std::string const& path, mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO)
   {

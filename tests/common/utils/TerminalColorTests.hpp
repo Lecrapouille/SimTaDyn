@@ -18,8 +18,8 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef TERMINAL_COLOR_TESTS_
-#  define TERMINAL_COLOR_TESTS_
+#ifndef TERMINAL_COLOR_TESTS_HPP
+#  define TERMINAL_COLOR_TESTS_HPP
 
 #  include <cppunit/TestFixture.h>
 #  include <cppunit/TestResult.h>
@@ -44,4 +44,4 @@ public:
   void testcolors();
 };
 
-#endif /* TERMINAL_COLOR_TESTS_ */
+#endif /* TERMINAL_COLOR_TESTS_HPP */

@@ -52,8 +52,8 @@ void LoaderTests::testSimTaDyn()
 
   SimForth::instance().boot();
   //dir = loader.generateTempDirName();
-  //loader.loadFromFile(path.expand("maps/MaCarte.dyn"), map);
-  //CPPUNIT_ASSERT_EQUAL(true, nullptr != map);
+  loader.loadFromFile(path.expand("maps/MaCarte.dyn"), map);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != map);
   //CPPUNIT_ASSERT_EQUAL(0, map->m_base_dir.compare(dir));
   CPPUNIT_ASSERT_EQUAL(0, map->m_name.compare("MaCarte"));
   std::cout << map->m_full_path << std::endl;

@@ -154,7 +154,12 @@ void SimForth::interpreteWordCaseInterprete(std::string const& word)
   if ((c = isACell(word)) != nullptr)
     {
       //std::cout << "interpreteWordCaseInterprete: cell " << word << std::endl;
-      Cell32 number = c->value();
+      auto cell = c->value();
+      if (!cell.first)
+        {
+          abort("Cell not yet evaluated");
+        }
+      Cell32 number = cell.second;
       DPUSH(number);
       isStackUnderOverFlow(forth::DataStack);
     }
@@ -172,7 +177,12 @@ void SimForth::interpreteWordCaseCompile(std::string const& word)
   if ((c = isACell(word)) != nullptr)
     {
       // FIXME: temporaire car on ne va pas que gerer la fonction cout
-      Cell32 number = c->value();
+      auto cell = c->value();
+      if (!cell.first)
+        {
+          abort("Cell not yet evaluated");
+        }
+      Cell32 number = cell.second;
       if (number <= 65535U)
         {
           m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_16);

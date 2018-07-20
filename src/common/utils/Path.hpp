@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -21,117 +21,53 @@
 #ifndef PATH_HPP_
 #  define PATH_HPP_
 
-#  include "Logger.hpp"
-#  include "File.hpp"
 #  include <list>
+#  include <string>
 
 class Path
 {
 public:
 
-  Path()
-  {
-  }
+  //! \brief Empty constructor.
+  Path();
 
-  Path(std::string const& path)
-  {
-    split(path);
-  }
+  //! \brief Constructor. init with a given path. Directories are
+  //! separated by ':'. Example: "/foo/bar:/usr/lib/".
+  Path(std::string const& path);
 
-  virtual ~Path()
-  {
-  }
+  //! \brief Destructor.
+  ~Path();
 
-  //! \brief add a directory in the path
-  void add(std::string const& path)
-  {
-    LOGI("Path::add '%s'", path.c_str());
-    split(path);
-  }
+  //! \brief Append a new path. Directories are
+  //! separated by ':'. Example: "/foo/bar:/usr/lib/".
+  void add(std::string const& path);
 
-  //! \brief add a directory in the path
-  void init(std::string const& path)
-  {
-    LOGI("Path::clear()");
-    m_paths.clear();
-    split(path);
-  }
+  //! \brief Replace the path. Directories are
+  //! separated by ':'. Example: "/foo/bar:/usr/lib/".
+  void init(std::string const& path);
 
-  void clear()
-  {
-    m_paths.clear();
-    m_path.clear();
-  }
+  //! \brief Erase the path.
+  void clear();
 
-  void remove(std::string const& path)
-  {
-    LOGI("Path::remove '%s'", path.c_str());
-    m_paths.remove(path);
-  }
+  //! \brief Erase the given directory from the path.
+  void remove(std::string const& path);
 
-  std::pair<std::string, bool> find(std::string const& filename) const
-  {
-    if (File::exist(filename))
-      return std::make_pair(filename, true);
+  //! \brief Find if a file exists in the path.
+  //! \return the full path (if found) and the existence of this path.
+  std::pair<std::string, bool> find(std::string const& filename) const;
 
-    for (auto it: m_paths)
-    {
-      std::string file(it + filename);
-      if (File::exist(file))
-        return std::make_pair(file, true);
-    }
+  //! \brief Return the full path for the file (if found) else
+  //! return itself.
+  std::string expand(std::string const& filename) const;
 
-    // Not found
-    return std::make_pair(std::string(), false);
-  }
-
-  std::string expand(std::string const& filename) const
-  {
-    for (auto it: m_paths)
-    {
-      std::string file(it + filename);
-      if (File::exist(file))
-        return file;
-    }
-
-    return filename;
-  }
-
-  std::string const &toString() const
-  {
-    return m_path;
-  }
+  //! \brief Return the path as string.
+  std::string const &toString() const;
 
 protected:
 
-  void update()
-  {
-    m_path = "";
-    for (auto it: m_paths)
-      {
-        m_path += it;
-        m_path.pop_back(); // Remove the '/' char
-        m_path += m_delimiter;
-      }
-  }
+  void update();
 
-  void split(std::string const& path)
-  {
-    std::stringstream ss(path);
-    std::string directory;
-
-    while (std::getline(ss, directory, m_delimiter))
-      {
-        if (directory.empty())
-          continue ;
-
-        if ((*directory.rbegin() == '\\') || (*directory.rbegin() == '/'))
-          m_paths.push_back(directory);
-        else
-          m_paths.push_back(directory + "/");
-      }
-    update();
-  }
+  void split(std::string const& path);
 
   const char m_delimiter = ':';
   std::list<std::string> m_paths;

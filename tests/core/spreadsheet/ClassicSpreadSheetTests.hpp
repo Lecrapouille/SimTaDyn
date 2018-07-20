@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,8 +18,8 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FILE_TESTS_HPP_
-#  define FILE_TESTS_HPP_
+#ifndef CLASSIC_SPREADSHEET_TESTS_HPP_
+#  define CLASSIC_SPREADSHEET_TESTS_HPP_
 
 #  include <cppunit/TestFixture.h>
 #  include <cppunit/TestResult.h>
@@ -27,22 +27,30 @@
 
 #  define protected public
 #  define private public
-#  include "File.hpp"
+#  include "ClassicSpreadSheet.hpp"
 #  undef protected
 #  undef private
 
-class FileTests : public CppUnit::TestFixture
+class ClassicSpreadSheetTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(FileTests);
-  CPPUNIT_TEST(testfiles);
+  CPPUNIT_TEST_SUITE(ClassicSpreadSheetTests);
+  CPPUNIT_TEST(testInput1);
+  CPPUNIT_TEST(testInput2);
+  CPPUNIT_TEST(testInput3);
+  CPPUNIT_TEST(testInput4);
+  CPPUNIT_TEST(testInput5);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void setUp();
   void tearDown();
 
-  void testfiles();
+  void testInput1();
+  void testInput2();
+  void testInput3();
+  void testInput4();
+  void testInput5();
 };
 
-#endif /* FILE_TESTS_HPP_ */
+#endif /* CLASSIC_SPREADSHEET_TESTS_HPP_ */

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -22,9 +22,12 @@
 #include <thread>
 #include <algorithm>
 #include <iterator>
+#include <cstring>
 
 // Register the test suite
 CPPUNIT_TEST_SUITE_REGISTRATION(LoggerTests);
+
+static const uint32_t header_footer_lines = 6U + 5U;
 
 //--------------------------------------------------------------------------
 void LoggerTests::setUp()
@@ -37,15 +40,21 @@ void LoggerTests::tearDown()
 }
 
 //--------------------------------------------------------------------------
-static uint32_t number_of_lines()
+static uint32_t number_of_lines(std::string const& file)
 {
   uint32_t line_count = 0U;
-  std::ifstream myfile("SimTaDyn.log");
+  std::ifstream myfile(file);
+  if (!myfile)
+    {
+      std::cerr << "Could not open log '" << file << "' Reason: '"
+                << strerror(errno) << "'" << std::endl;
+      return 0u;
+    }
 
-  // new lines will be skipped unless we stop it from happening:
+  // New lines will be skipped unless we stop it from happening:
   myfile.unsetf(std::ios_base::skipws);
 
-  // count the newlines with an algorithm specialized for counting:
+  // Count the newlines with an algorithm specialized for counting:
   line_count = std::count(
     std::istream_iterator<char>(myfile),
     std::istream_iterator<char>(), '\n');
@@ -53,11 +62,7 @@ static uint32_t number_of_lines()
   return line_count;
 }
 
-//--------------------------------------------------------------------------
-static const uint32_t num_threads = 10U;
-static const uint32_t lines_by_thread = 10U;
-static std::thread t[num_threads];
-static void call_from_thread(uint32_t const x)
+static void call_from_thread(uint32_t const x, uint32_t const lines_by_thread)
 {
   for (uint32_t i = 0U; i < lines_by_thread; ++i)
     {
@@ -66,26 +71,67 @@ static void call_from_thread(uint32_t const x)
 }
 
 //--------------------------------------------------------------------------
-void LoggerTests::testlog()
-{
-  Logger::instance();
+void LoggerTests::testEmptyLog()
+  {
+    constexpr uint32_t num_threads = 0U;
+    constexpr uint32_t lines_by_thread = 0U;
 
+    Logger::instance("/tmp/empty.log");
+    Logger::destroy();
 
-  // Launch a group of threads
-  for (uint32_t i = 0; i < num_threads; ++i)
-    {
-      t[i] = std::thread(call_from_thread, i);
-    }
+    uint32_t lines = number_of_lines("/tmp/empty.log");
+    CPPUNIT_ASSERT_EQUAL(num_threads * lines_by_thread + header_footer_lines, lines);
+  }
 
-  // Join the threads with the main thread
-  for (uint32_t i = 0; i < num_threads; ++i)
-    {
-      t[i].join();
-    }
-  Logger::destroy();
+void LoggerTests::testBasic()
+  {
+    constexpr uint32_t num_threads = 1U;
+    constexpr uint32_t lines_by_thread = 2U;
 
-  // Check: count the number of lines == num_threads + header + footer
-  uint32_t lines = number_of_lines();
-  const uint32_t header_footer_lines = 4U + 5U;
-  CPPUNIT_ASSERT_EQUAL(num_threads * lines_by_thread + header_footer_lines, lines);
-}
+    // Change log with a full path
+    CPPUNIT_ASSERT(Logger::instance().changeLog("/tmp/foo/bar/new.log"));
+    CPP_LOG(logger::Fatal) << "test\n";
+    LOGE("Coucou");
+    Logger::destroy();
+    uint32_t lines = number_of_lines("/tmp/foo/bar/new.log");
+    CPPUNIT_ASSERT_EQUAL(num_threads * lines_by_thread + header_footer_lines, lines);
+
+    // Chnage log with a simple file name
+    CPPUNIT_ASSERT(Logger::instance().changeLog("simplefile.log"));
+    CPP_LOG(logger::Warning) << "test2\n";
+    LOGD("Coucou");
+    LOGW("TEST");
+    Logger::destroy();
+    lines = number_of_lines(config::tmp_path + "simplefile.log");
+    CPPUNIT_ASSERT_EQUAL(num_threads * (lines_by_thread + 1) + header_footer_lines, lines);
+  }
+
+void LoggerTests::testWithConcurrency()
+  {
+    constexpr uint32_t num_threads = 10U;
+    constexpr uint32_t lines_by_thread = 10U;
+
+    Logger::instance();
+
+    static std::thread t[num_threads];
+
+    // Launch a group of threads
+    for (uint32_t i = 0; i < num_threads; ++i)
+      {
+        t[i] = std::thread(call_from_thread, i, lines_by_thread);
+      }
+
+    // Join the threads with the main thread
+    for (uint32_t i = 0; i < num_threads; ++i)
+      {
+        if (t[i].joinable())
+          {
+            t[i].join();
+          }
+      }
+    Logger::destroy();
+
+    // Check: count the number of lines == num_threads + header + footer
+    uint32_t lines = number_of_lines(config::log_path);
+    CPPUNIT_ASSERT_EQUAL(num_threads * lines_by_thread + header_footer_lines, lines);
+  }

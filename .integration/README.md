@@ -44,8 +44,8 @@ appveyor-launch_tests.sh: bash script called by the Travis-CI ../appveyor.yml fi
 
 ##### OpenSUSE Build Service (OBS)
 
-opensuse-build-service.sh: bash script for commiting source files into OBS and starting building the newly package.
-SimTaDyn.spec: file needed by OBS for building RPM packages.
+* opensuse-build-service.sh: bash script for commiting source files into OBS and starting building the newly package.
+* SimTaDyn.spec: file needed by OBS for building RPM packages.
 
-Note: This will use my OBS repo https://build.opensuse.org/package/show/home:Lecrapouille/SimTaDyn protected by password.
+Note: This will use my OBS repo https://build.opensuse.org/package/show/home:Lecrapouille/SimTaDyn protected by my own password.
 Therefore adapt this script for your own repo.

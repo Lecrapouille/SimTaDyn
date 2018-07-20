@@ -2,11 +2,12 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/Lecrapouille/SimTaDyn/blob/master/LICENSE)
 [![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn)
-[![Coverage Status](https://coveralls.io/repos/github/Lecrapouille/SimTaDyn/badge.svg?branch=master)](https://coveralls.io/github/Lecrapouille/SimTaDyn?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Lecrapouille/SimTaDyn/badge.svg?branch=development)](https://coveralls.io/github/Lecrapouille/SimTaDyn?branch=development)
 
-| **`Linux/Mac OS`** | **`Windows`** | **`openSUSE Build`** |
-|------------------|-------------|----------------|
-|[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)|[![Build status](https://ci.appveyor.com/api/projects/status/github/lecrapouille/simtadyn?svg=true)](https://ci.appveyor.com/project/Lecrapouille/SimTaDyn)|[OBS](https://build.opensuse.org/repositories/home:Lecrapouille/SimTaDyn)|
+|Branch     | **`Linux/Mac OS`** | **`Windows`** | **`openSUSE Build`** |
+|-----------|------------------|-------------|----------------|
+|master     |[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn)|[![Build status](https://ci.appveyor.com/api/projects/status/github/lecrapouille/simtadyn?svg=true)](https://ci.appveyor.com/project/Lecrapouille/SimTaDyn)|[OBS](https://build.opensuse.org/repositories/home:Lecrapouille/SimTaDyn)|
+|development|[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=development)](https://travis-ci.org/Lecrapouille/SimTaDyn)|||
 
 SimTaDyn is a proof of concept project for a geographic information
 system (GIS) allowing to draw geographic maps and manipulate them like
