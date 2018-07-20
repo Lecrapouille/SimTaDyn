@@ -35,6 +35,7 @@
 #include "OpenGLTests.hpp"
 #include "FilteringTests.hpp"
 #include "ResourcesTests.hpp"
+#include "TerminalColorTests.hpp"
 #include "SimTaDynFileLoaderTests.hpp"
 #include <cppunit/ui/text/TestRunner.h>
 
@@ -43,6 +44,9 @@ static void testUtils(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
 
+  suite = new CppUnit::TestSuite("TerminalColorTests");
+  suite->addTest(new CppUnit::TestCaller<TerminalColorTests>("TerminalColor tests", &TerminalColorTests::testcolors));
+  runner.addTest(suite);
   suite = new CppUnit::TestSuite("LoggerTests");
   suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testlog));
   runner.addTest(suite);

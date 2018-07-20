@@ -50,8 +50,8 @@ namespace termcolor
   //! be ignored.
   //------------------------------------------------------------------
   enum class state {
-    Off = 0, //! \brief Color informations are ignored.
-    On  = 1  //! \brief Color informations are taken into account.
+    off = 0, //! \brief Color informations are ignored.
+    on  = 1  //! \brief Color informations are taken into account.
   };
 
   //------------------------------------------------------------------
@@ -60,7 +60,7 @@ namespace termcolor
   //------------------------------------------------------------------
   inline std::atomic<termcolor::state>& isEnabled()
   {
-    static std::atomic<termcolor::state> value(termcolor::state::On);
+    static std::atomic<termcolor::state> value(termcolor::state::on);
     return value;
   }
 
@@ -69,7 +69,7 @@ namespace termcolor
   //------------------------------------------------------------------
   inline void enable()
   {
-    termcolor::isEnabled() = termcolor::state::On;
+    termcolor::isEnabled() = termcolor::state::on;
   }
 
   //------------------------------------------------------------------
@@ -77,7 +77,7 @@ namespace termcolor
   //------------------------------------------------------------------
   inline void disable()
   {
-    termcolor::isEnabled() = termcolor::state::Off;
+    termcolor::isEnabled() = termcolor::state::off;
   }
 
   //------------------------------------------------------------------
@@ -170,7 +170,7 @@ namespace termcolor
   template <typename T> 
   inline enableIfColorTyped<T> operator<<(std::ostream &os, const T& value)
   {
-    if (termcolor::state::On == termcolor::isEnabled())
+    if (termcolor::state::on == termcolor::isEnabled())
       return setColor(os, value);
 
     return os;
