@@ -1,6 +1,6 @@
 ##=====================================================================
-## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## SimForth: A Forth for SimTaDyn project.
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -20,6 +20,7 @@
 
 ###################################################
 # Executable name
+PROJECT = SimTaDyn
 TARGET = SimForth
 
 ###################################################
@@ -39,7 +40,7 @@ else
 OBJ_EXTERNAL   =
 endif
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_STANDALONE = main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
@@ -49,13 +50,19 @@ PROJECT_MODE = debug
 
 ###################################################
 # Compilation options.
-CXXFLAGS = -W -Wall -Wextra -std=c++11
-LDFLAGS =
+CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0`
+LDFLAGS = `pkg-config --libs gtkmm-3.0`
 
 ###################################################
-# Common defines
-SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES += $(SIMTADYN_DEFINES)
+#
+INCLUDES += -I$(P)/src
+VPATH += $(P)/src:
+
+###################################################
+# Project defines
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
+# Disable ugly gtkmm compilation warnings
+DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
@@ -84,9 +91,11 @@ endif
 ###################################################
 # Backward allows tracing stack when segfault happens
 ifeq ($(PROJECT_MODE),debug)
+ifneq ($(ARCHI),Darwin)
 OPTIM_FLAGS = -O2 -g
 DEFINES += -DBACKWARD_HAS_DW=1
 LIBS += -ldw
+endif
 else
 OPTIM_FLAGS = -O3
 endif
@@ -102,15 +111,32 @@ all: $(TARGET)
 ###################################################
 # Link sources
 $(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
+
+###################################################
+# Install project. You need to be root user.
+.PHONY: install
+install: $(TARGET)
+	@$(call print-to,"Installing","data","$(PROJECT_DATA_PATH)","")
+	@rm -fr $(PROJECT_DATA_PATH)
+	@mkdir -p $(PROJECT_DATA_PATH)/forth
+	@cp -r ../core/system.fs $(PROJECT_DATA_PATH)/forth
+	@cp -r ../core/LibC $(PROJECT_DATA_PATH)/forth
+	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
+	@mkdir -p $(PROJECT_DOC_PATH)
+	@cp -r ../doc/* $(PROJECT_DATA_ROOT)/doc
+#	@cp AUTHORS LICENSE README.md ChangeLog $(PROJECT_DATA_ROOT)
+	@$(call print-to,"Installing","$(BUILD)/$(TARGET)","$(PROJECT_EXE)","")
+	@mkdir -p $(BINDIR)
+	@cp $(BUILD)/$(TARGET) $(PROJECT_EXE)
 
 ###################################################
 .PHONY: clean
@@ -120,4 +146,5 @@ clean:
 
 ###################################################
 # Sharable informations between all Makefiles
--include $(M)/Makefile.footer
+include $(M)/Makefile.help
+include $(M)/Makefile.footer

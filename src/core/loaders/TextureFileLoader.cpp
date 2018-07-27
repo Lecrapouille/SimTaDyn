@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,4 +18,20 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ILoader.hpp"
+#include "TextureFileLoader.hpp"
+
+void TextureLoader::loadFromFile(std::string const& filename, GLTexture2DPtr &texture)
+{
+  bool dummy_texture = (nullptr == texture);
+
+  LOGI("Loading the SimTaDynFile '%s' in an %s",
+       filename.c_str(), (dummy_texture ? "dummy texture" : "already opened texture"));
+
+  texture = GLTexture2DManager::instance().create(filename); //FIXME "vertTexCoord"
+  if (false == texture->load(filename, false))
+    {
+      std::string msg("Failed loading the texture '" + filename + "'");
+      LOGF("%s", msg.c_str());
+      LoaderException e(msg);
+    }
+}

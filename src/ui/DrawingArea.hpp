@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -93,6 +93,8 @@ public:
   inline void keyPressed(Direction d) { m_direction[d] = true; }
   //! \brief
   inline void keyReleased(Direction d) { m_direction[d] = false; }
+  //! \brief
+  virtual bool on_button_press_event(GdkEventButton* event) override;
   //! \brief
   bool keyboard();
   //! \brief

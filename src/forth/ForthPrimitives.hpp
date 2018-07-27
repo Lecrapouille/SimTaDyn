@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -155,6 +155,14 @@ enum ForthPrimitives
     FORTH_PRIMITIVE_UDISP,
     FORTH_PRIMITIVE_CARRIAGE_RETURN,
     FORTH_PRIMITIVE_DISPLAY_DSTACK,
+
+    // C lib
+    FORTH_PRIMITIVE_BEGIN_C_LIB,
+    FORTH_PRIMITIVE_END_C_LIB,
+    FORTH_PRIMITIVE_ADD_EXT_C_LIB,
+    FORTH_PRIMITIVE_C_FUNCTION,
+    FORTH_PRIMITIVE_C_CODE,
+    FORTH_PRIMITIVE_EXEC_C_FUNC,
 
     // Files
     FORTH_PRIMITIVE_INCLUDE,

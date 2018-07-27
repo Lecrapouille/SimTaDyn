@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDynContext.
 //
@@ -23,6 +23,7 @@
 
 #  include "Path.hpp"
 #  include "SimTaDynWindow.hpp"
+#  include "CmdParser/cmdparser.hpp"
 
 // **************************************************************
 //! \brief
@@ -38,7 +39,7 @@ public:
   {
     LOGI("New SimTaDynContext");
     PathManager::instance();
-    ResourceManager<Key>::instance();
+    //TODO ResourceManager::instance();
     LoaderManager::instance();
     SimForth::instance();
     ForthEditor::instance();
@@ -63,15 +64,16 @@ public:
     MapEditor::destroy();
     SimForth::destroy();
     LoaderManager::destroy();
-    ResourceManager<Key>::destroy();
+    //TODO ResourceManager::destroy();
     PathManager::destroy();
     Logger::destroy();
   };
 
   //------------------------------------------------------------------
   //! \brief
+  //! \param parser A command line parser (same job than getoption)
   //------------------------------------------------------------------
-  void init();
+  void init(cli::Parser& parser);
 
   //------------------------------------------------------------------
   //! \brief Return the reference of the main UI window.

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -38,7 +38,7 @@ void LoaderTests::tearDown()
 //--------------------------------------------------------------------------
 void LoaderTests::testSimTaDyn()
 {
-  Path path(SIMTADYN_DATA_PATH);
+  Path path(PROJECT_DATA_PATH);
   path.add("data/loaders"); // FIXME ko si uniquement Path path("data/loaders"); Pourquoi
   SimTaDynFileLoader loader;
   SimTaDynMap *map = nullptr;

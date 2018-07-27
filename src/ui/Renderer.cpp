@@ -1,10 +1,10 @@
 //=====================================================================
-// PathManager: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
-// This file is part of PathManager.
+// This file is part of SimTaDyn.
 //
-// PathManager is free software: you can redistribute it and/or modify it
+// SimTaDyn is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -19,7 +19,7 @@
 //=====================================================================
 
 #include "Renderer.hpp"
-#include "PathManager.hpp"
+#include "MapEditor.hpp"
 
 #  ifndef ARRAY_SIZE
 #    define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
@@ -188,6 +188,12 @@ bool GLRenderer::setupGraphics()
     static_cast<float>(screenHeight()));
     m_current_camera = m_default_camera;*/
 
+  // Signals
+  MapEditor::instance().loaded_success.connect(
+     sigc::mem_fun(*this, &GLRenderer::drawMap));
+  MapEditor::instance().m_current_map.signal_changed.connect(
+     sigc::mem_fun(*this, &GLRenderer::drawMap));
+
   return true;
 }
 
@@ -234,4 +240,10 @@ void GLRenderer::draw()
     m_vao.stop();
   }
   m_shader.stop();
+}
+
+void GLRenderer::drawMap(SimTaDynMapPtr map)
+{
+  // TODO ---> DrawingArea::onNotify(){>attachModel(*map);} mais PendingData le fait deja
+  std::cout << "GLRenderer::drawMap() " << map->m_name << std::endl;
 }

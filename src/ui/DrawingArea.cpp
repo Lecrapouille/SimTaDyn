@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -19,7 +19,32 @@
 //=====================================================================
 
 #include "DrawingArea.hpp"
+#include "MapEditor.hpp"
 #include <exception>
+
+// *************************************************************************************************
+//
+// *************************************************************************************************
+bool GLDrawingArea::on_button_press_event(GdkEventButton* event)
+{
+  if (event->type == GDK_BUTTON_PRESS)
+    {
+      switch (event->button)
+        {
+        case 1:
+          MapEditor::instance().button1PressEvent(event->x, event->y);
+          break;
+        case 2:
+          MapEditor::instance().button2PressEvent(event->x, event->y);
+          break;
+        case 3:
+          MapEditor::instance().button3PressEvent(event->x, event->y);
+          break;
+        }
+    }
+
+  return true;
+}
 
 // FIXME: plutot MapEditor::keyboard() ?
 bool GLDrawingArea::keyboard()
@@ -65,6 +90,12 @@ bool GLDrawingArea::onScrollEvent(GdkEventScroll *event)
 
 void GLDrawingArea::onRealize()
 {
+#if ARCHI == OSX
+  // FIXME: sorry OpenGL quartz is not implemented by GTK team
+  m_success_init = false;
+  return ;
+#endif
+
   Gtk::GLArea::make_current();
   SimTaDyn::glStartContext();
   Gtk::GLArea::throw_if_error();
@@ -86,6 +117,9 @@ void GLDrawingArea::onRealize()
 
 void GLDrawingArea::onUnrealize()
 {
+  if (false == m_success_init)
+    return ;
+
   Gtk::GLArea::make_current();
   try
     {
@@ -105,6 +139,9 @@ void GLDrawingArea::onUnrealize()
 
 bool GLDrawingArea::onRender()
 {
+  if (false == m_success_init)
+    return false;
+
   try
     {
       Gtk::GLArea::throw_if_error();

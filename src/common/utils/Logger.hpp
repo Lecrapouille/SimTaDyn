@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -35,7 +35,7 @@ public:
   Logger();
   Logger(std::string const& logfile);
   virtual ~Logger();
-  void changeLog(std::string const& logfile);
+  bool changeLog(std::string const& logfile);
   ILogger& operator<<(const logger::LoggerSeverity& severity);
   ILogger& operator<<(const char *msg);
 
@@ -50,7 +50,7 @@ public:
 
 protected:
 
-  virtual void open(std::string const& filename) override;
+  virtual bool open(std::string const& filename) override;
   virtual void close() override;
 
 private:

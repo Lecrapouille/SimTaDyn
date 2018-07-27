@@ -1,3 +1,8 @@
+July 2018: version 0.3.1
+        * Fix broken unit tests.
+        * Add Map Editor buttons using sigc++ instead of listener.
+        * Forth can load shared libraries.
+
 January 2018: version 0.3
         * Basic spreadsheet functionalities.
 

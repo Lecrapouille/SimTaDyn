@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -412,13 +412,16 @@ std::string ForthDictionary::displayToken(const Cell16 token) const
 // **************************************************************
 //
 // **************************************************************
-void ForthDictionary::display(TextColor& color, const int max_primitives) const
+void ForthDictionary::display(const int max_primitives) const
 {
   int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping, skip;
   bool smudge, immediate;
   bool compiled = false;
   bool truncated = false;
   bool creat = false;
+  ForthConsoleColor color;
+  ForthConsoleColor color1;
+  std::ios_base::fmtflags ifs(std::cout.flags());
 
   std::cout << "Address                          Word  Token    Definition (tokens)    ";
   std::cout << std::setw(11 + 5 * (WORD_GROUPING - 4)) << "Translation" << std::endl;
@@ -432,8 +435,8 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
       creat = false;
 
       // Display dictionary addresses in hex
-      color.grey();
-      std::cout << color << std::setfill('0') << std::setw(4) << std::hex << ptr << " ";
+      std::cout << DICO_ADDRESS_COLOR << std::setfill('0') << std::setw(4) << std::hex << ptr << " ";
+      std::cout.flags(ifs);
 
       // Get word flags
       length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
@@ -448,22 +451,24 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
 
       // Select color depending on word flag bits
       if (immediate)
-        color.yellow();
+        color = IMMEDIATE_WORD_COLOR;
       else if (smudge)
-        color.grey();
+        color = SMUDGED_WORD_COLOR;
       else if (code < max_primitives)
-        color.blue();
+        color = PRIMITIVE_WORD_COLOR;
       else
-        color.red();
+        color = NON_PRIMITIVE_WORD_COLOR;
 
       // Display word name (right centered)
-      std::cout << std::setfill('.') << std::setw(38U - length)
+      std::cout << std::setfill('.') << std::setw(33U - length)
                 << color << " " << (char *) &m_dictionary[ptr + 1U]
                 << " ";
+      std::cout.flags(ifs);
 
       // Display Exec token
-      if (!smudge) color.azul(); // Let color in grey for unused words
+      if (!smudge) color = COLOR_EXEC_TOKEN; // Let color in grey for unused words
       std::cout << color << '(' << std::setfill('0') << std::setw(4) << std::hex << code << ")    ";
+      std::cout.flags(ifs);
 
       // Word definition
       def_length = prev - ptr - length - 3U;
@@ -471,15 +476,14 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
       // primitive
       if (code < max_primitives)
         {
-          color.white();
-          std::cout << color << "primitive" << std::endl;
+          std::cout << DICO_DEFAULT_COLOR << "primitive" << std::endl;
         }
 
       // Skip NFA
       d = dd = 2;
       while (d < def_length)
         {
-          if (!smudge) color.white();
+          if (!smudge) color = DICO_DEFAULT_COLOR;
 
           // Display tokens in hexa
           grouping = WORD_GROUPING;
@@ -488,6 +492,7 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
               token = read16at(ptr + length + 3U + d);
               d += 2U;
               std::cout << color << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+              std::cout.flags(ifs);
             }
 
           // If number of tokens is not a multiple of WORD_GROUPIN add spaces
@@ -495,6 +500,7 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
           if (grouping)
             {
               std::cout << color << std::setfill(' ') << std::setw(grouping * 5) << "    ";
+              std::cout.flags(ifs);
             }
           std::cout << "   ";
 
@@ -510,8 +516,8 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                       uint32_t p = ptr + length + 3U + dd;
                       while (dd < def_length)
                         {
-                          color.green();
-                          std::cout << color << std::setfill('0') << std::setw(2) << std::hex << read8at(p) << " ";
+                          std::cout << LITERAL_COLOR << std::setfill('0') << std::setw(2) << std::hex << read8at(p) << " ";
+                          std::cout.flags(ifs);
                           ++p;
                           ++dd;
                         }
@@ -533,9 +539,9 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                   std::pair<bool, int32_t> res = find(token, true);
                   if (!res.first)
                     {
-                      // Not found. Display token in hex and in grey
-                      color.green();
-                      std::cout << color << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+                      // Not found. Display token in hex
+                      std::cout << LITERAL_COLOR << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+                      std::cout.flags(ifs);
                     }
                   else
                     {
@@ -548,14 +554,14 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                       // Colorize
                       if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
                         {
-                          color.grey();
+                          color = SMUDGED_WORD_COLOR;
                         }
                       else
                         {
                           if (m_dictionary[j] & FLAG_IMMEDIATE)
-                            color.yellow();
+                            color = IMMEDIATE_WORD_COLOR;
                           else
-                            color.red();
+                            color = NON_PRIMITIVE_WORD_COLOR;
                         }
 
                       // Display
@@ -567,26 +573,25 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                   std::pair<bool, int32_t> res = find(token, true);
                   if (!res.first)
                     {
-                      // Not found. Display token in hex and in grey
-                      color.grey();
-                      std::cout << color << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+                      // Not found. Display token in hex
+                      std::cout << SMUDGED_WORD_COLOR << std::setfill('0') << std::setw(4) << std::hex << token << " ";
+                      std::cout.flags(ifs);
                     }
                   else
                     {
                       // Colorize
                       uint32_t j = res.second;
                       // FIXME: ugly but how to fix that ?
-                      TextColor *color1 = color.clone();
-                      color1->green();
+                      color1 = LITERAL_COLOR;
                       if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
                         {
-                          color1->grey();
-                          color.grey();
+                          color1 = SMUDGED_WORD_COLOR;
+                          color = SMUDGED_WORD_COLOR;
                         }
                       else if (m_dictionary[j] & FLAG_IMMEDIATE)
-                        color.yellow();
+                        color = IMMEDIATE_WORD_COLOR;
                       else
-                        color.blue();
+                        color = PRIMITIVE_WORD_COLOR;
                       uint32_t p = ptr + length + 4U + dd;
 
                       // (CREATE) EXIT xx .. yy
@@ -615,7 +620,8 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                               uint16_t data16 = read16at(p);
                               dd += 2U;
                               --grouping;
-                              std::cout << *color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                              std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                              std::cout.flags(ifs);
                             }
                           break;
                         case FORTH_PRIMITIVE_LITERAL_16:
@@ -623,7 +629,8 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                             uint16_t data16 = read16at(p);
                             dd += 2U;
                             --grouping;
-                            std::cout << *color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                            std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
+                            std::cout.flags(ifs);
                           }
                           break;
                         case FORTH_PRIMITIVE_LITERAL_32:
@@ -631,7 +638,8 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                             uint32_t data32 = read32at(p);
                             dd += 4U;
                             --grouping;
-                            std::cout << *color1 << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
+                            std::cout << color1 << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
+                            std::cout.flags(ifs);
                           }
                           break;
                         default:
@@ -641,7 +649,6 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
                         }
                       truncated = (grouping < 0);
                       //if (truncated) std::cout << "|| ";
-                      delete color1;
                     } // if found
                 } // if primitive
             } // while grouping
@@ -651,9 +658,10 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
           if (d < def_length - 1)
             {
               // Dictionary address
-              color.grey();
-              std::cout << color << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + d << "    ";
-              std::cout << color << std::setfill(' ') << std::setw(40U) << "    ";
+              std::cout << DICO_ADDRESS_COLOR << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + d << "    ";
+              std::cout.flags(ifs);
+              std::cout << DICO_ADDRESS_COLOR << std::setfill(' ') << std::setw(40U) << "    ";
+              std::cout.flags(ifs);
             }
         } // while definition
 
@@ -662,8 +670,7 @@ void ForthDictionary::display(TextColor& color, const int max_primitives) const
       ptr = ptr - nfa;
     } while (nfa);
 
-  color.normal();
-  std::cout << color << std::endl;
+  std::cout << FORTH_NORMAL_COLOR << std::endl;
 }
 
 // **************************************************************

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -26,6 +26,7 @@
 
 #  include "ForthStream.hpp"
 #  include "ForthDictionary.hpp"
+#  include "ForthClibrary.hpp"
 #  include <ostream>
 
 // **************************************************************
@@ -47,7 +48,7 @@ class Forth
 public:
   //! \brief Constructor with the reference of a Forth dictionary for
   //! an easier inheritance management.
-  Forth(ForthDictionary& dico, TextColor &color);
+  Forth(ForthDictionary& dico);
   //! \brief Load all Forth primitives in the dictionary.
   virtual void boot();
   //! \brief interprete a new forth word extracted from a stream.
@@ -85,9 +86,9 @@ public:
     return m_streams_stack[m_err_stream].name();
   }
   //!
-  void displayDictionary(TextColor& color)
+  void displayDictionary()
   {
-    dictionary().display(color, maxPrimitives());
+    dictionary().display(maxPrimitives());
   }
 protected:
   virtual void interpreteWordCaseInterprete(std::string const& word);
@@ -150,7 +151,7 @@ protected:
   bool changeDisplayBase(const uint8_t base);
 
 protected:
-  TextColor &m_color;
+
   //! Data stack: store function parameters.
   Cell32  m_data_stack_[STACK_SIZE];
   //! Data stack with a marging of security to prevent against stack underflow.
@@ -180,6 +181,7 @@ protected:
   std::string m_creating_word; //! The Forth word currently in creation.
   Cell32  m_saved_state; //! Save the interpreter state when enetring in a comment.
   ForthStream m_streams_stack[MAX_OPENED_STREAMS]; //! A stack of streams when script file include other files
+  ForthCLib m_dynamic_libs; //! Load C dynamic libs and load them as Forth words.
   uint32_t m_opened_streams; //! Number of streams opened.
   ForthDictionary& m_dictionary; //! Forth dictionary.
   bool  m_trace; //! Trace the execution of a word.

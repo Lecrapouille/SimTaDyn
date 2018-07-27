@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -73,7 +73,8 @@ protected:
   GLDrawingArea                m_drawing_area;
   FindWindow                  *m_findwin = nullptr;
   ReplaceWindow               *m_replacewin = nullptr;
-  GotoLineWindow              *m_gotolinewindow = nullptr;
+  GotoLineWindow              *m_gotolinewindow = nullptr; // FIXME nom:  ajouter des _
+  SceneGraphWindow            *m_scene_graph_window = nullptr;
   PackageExplorer              m_package_explorer;
 };
 

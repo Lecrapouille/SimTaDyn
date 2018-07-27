@@ -1,6 +1,6 @@
 ##=====================================================================
 ## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -20,6 +20,7 @@
 
 ###################################################
 # Executable name
+PROJECT = SimTaDyn
 TARGET = MyExcel
 
 ###################################################
@@ -44,7 +45,7 @@ OBJ_CONTAINERS = PendingData.o
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
 OBJ_CORE       = SimTaDynForth.o ASpreadSheetCell.o ASpreadSheet.o
-OBJ_STANDALONE = ClassicSpreadSheet.o
+OBJ_STANDALONE = ClassicSpreadSheet.o main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_GRAPHS) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_STANDALONE)
 
@@ -58,9 +59,13 @@ CXXFLAGS = -W -Wall -Wextra -std=c++11
 LDFLAGS =
 
 ###################################################
+# Also locate code source files localy
+INCLUDES += -I.
+VPATH += .:
+
+###################################################
 # Common defines
-SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES += $(SIMTADYN_DEFINES)
+DEFINES += -DCHECK_OPENGL
 
 ###################################################
 # Set Libraries compiled in the external/ directory.

@@ -1,7 +1,7 @@
 # -*- mode: makefile -*-
 ##=====================================================================
 ## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -20,7 +20,7 @@
 ##=====================================================================
 
 ###################################################
-# Generate the rapport of the code coverage
+# Generate the code coverage html rapport.
 .PHONY: coverage
 coverage: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
@@ -32,13 +32,13 @@ coverage: $(TARGET)
 	@xdg-open $(DOC)/index.html >/dev/null
 
 ###################################################
-# Generate a header file with the project version
+# Generate a header file with the project version.
 version.h: VERSION
 	@$(call print-from,"Version","$(TARGET)","VERSION","")
 	@./$(M)/version.sh VERSION $(BUILD)/version.h
 
 ###################################################
-# Display the compilator version (g++, clang ...)
+# Display the compilator version and informations.
 .PHONY: which-gcc
 which-gcc:
 	@$(call print-simple,"Version","$(CXX)")

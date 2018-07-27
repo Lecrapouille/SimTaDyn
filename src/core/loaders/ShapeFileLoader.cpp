@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -229,7 +229,7 @@ void ShapefileLoader::getBoundingBox(AABB3f& bbox)
   bbox.m_bbmax.z = readDoubleCastedFloat();
 }
 
-uint32_t ShapefileLoader::getRecordAt(SimTaDynSheet& sheet, const uint32_t offset)
+uint32_t ShapefileLoader::getRecordAt(SimTaDynSheet& /*sheet*/, const uint32_t offset)
 {
   uint32_t record_number, content_length, shape_type;
 
@@ -281,13 +281,25 @@ void ShapefileLoader::getAllRecords(SimTaDynSheet& sheet)
     }
 }
 
-void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynSheet* &current_sheet)
+void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynSheetPtr &current_sheet)
 {
   bool dummy_sheet = (nullptr == current_sheet);
 
-  LOGI("Loading the shapefile '%s' in an %s",
-       filename.c_str(), (dummy_sheet ? "dummy sheet" : "already opened sheet"));
+  LOGI("Loading the shapefile '%s' in an %s", filename.c_str(),
+       (dummy_sheet ? "dummy map" : "already opened map"));
 
+  // Create a map
+  /*FIXME if (dummy_sheet)
+    {
+      current_sheet = SimTaDynMapManager::instance().create(filename, false);
+      if (nullptr == current_sheet)
+        {
+          LoaderException e("Already existing");
+          throw e;
+        }
+        }*/
+
+  // Create a sheet or update
   try
     {
       openShapeFile(filename);
@@ -313,12 +325,12 @@ void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynSheet* &
 
       if (dummy_sheet)
         {
-          current_sheet = sheet;
+          //FIXME current_sheet = sheet;
         }
       else
         {
           // Concat the old sheet with the new one: elements, name and bounding box
-          current_sheet += *sheet;
+          //FIXME current_sheet += *sheet;
           current_sheet->m_bbox = merge(current_sheet->m_bbox, sheet->m_bbox); // TODO a mettre dans le code de +=
 
           if (sheet->m_name != "") // TODO a mettre dans le code de += avec option

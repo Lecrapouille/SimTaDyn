@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -23,23 +23,16 @@
 
 #  include "SimTaDynSheet.hpp"
 #  include "SceneGraph.tpp"
+#  include "Resource.hpp"
+#  include <sigc++/sigc++.h>
 
+using SceneNode_t = SceneNode<SimTaDynSheet, float, 3U>;
+
+// ***********************************************************************************************
+//! \brief
+// ***********************************************************************************************
 class SimTaDynMap;
-typedef SceneNode<SimTaDynSheet, float, 3U> SceneNode_t;
-
-// ***********************************************************************************************
-//! \brief This interface is used to define callbacks from SimTaDyn Map events.
-// ***********************************************************************************************
-class ISimTaDynMapListener
-{
-public:
-
-  //! \brief
-  ISimTaDynMapListener() { };
-
-  //! \brief Callback when the map changed (loaded, graph modified, etc)
-  virtual void onChanged(SimTaDynMap*) = 0;
-};
+using SimTaDynMapPtr = std::shared_ptr<SimTaDynMap>;
 
 // *************************************************************************************************
 //! \brief This class defines a SimTaDyn geographic map. It contains, nodes, arcs, Forth scripts,
@@ -48,7 +41,7 @@ public:
 //! a MVC design pattern, where SimTaDynMap is the model, for the GUI).
 // *************************************************************************************************
 class SimTaDynMap
-  : public IResource<Key>,
+  : public Resource,
     private UniqueID<SimTaDynMap>
 {
   friend class MapEditor;
@@ -57,30 +50,34 @@ public:
 
   //! \brief Empty constructor.
   SimTaDynMap()
-    : IResource(UniqueID<SimTaDynMap>::getID()),
-      m_name("Map_" + std::to_string(m_id))
+    : m_name("Map_" + std::to_string(getID()))
   {
-    LOGI("New SimTaDynMap with generic name '%s' and ID #%u\n", m_name.c_str(), m_id);
+    LOGI("New SimTaDynMap with generic name '%s' and ID #%u\n", m_name.c_str(), getID());
   }
 
   //! \brief Constructor with the desired name for the map.
   SimTaDynMap(std::string const& name)
-    : IResource(UniqueID<SimTaDynMap>::getID()),
-      m_name(name)
+    : m_name(name)
   {
-    LOGI("Creating SimTaDynMap named '%s' with ID #%u\n", m_name.c_str(), m_id);
+    LOGI("Creating SimTaDynMap named '%s' with ID #%u\n", m_name.c_str(), getID());
   }
 
   //! \brief Destructor.
   ~SimTaDynMap()
   {
-    LOGI("Deleting SimTaDynMap #%u named '%s'\n", m_id, m_name.c_str());
+    // FXME: retirer m_full_path du PathManager
+    LOGI("Deleting SimTaDynMap #%u named '%s'\n", getID(), m_name.c_str());
   }
 
   //! \brief Return the unique identifier.
   operator int()
   {
-    return m_id;
+    return getID();
+  }
+
+  const std::string &name() const
+  {
+    return m_name;
   }
 
   void clear()
@@ -96,36 +93,6 @@ public:
     return m_sheets.root()->mesh();
   }
 
-    //! \brief Attach a new listener to map events.
-  void addListener(ISimTaDynMapListener& listener)
-  {
-    m_listeners.push_back(&listener);
-    LOGI("Attaching a listener to the SimTaDynMap #%u %s\n", m_id, m_name.c_str());
-  }
-
-  //! \brief Remove the given listener of map events.
-  void removeListener(ISimTaDynMapListener& listener)
-  {
-    LOGI("Detaching a listener from the SimTaDynMap #%u %s\n", m_id, m_name.c_str());
-    auto it = std::find(m_listeners.begin(), m_listeners.end(), &listener);
-    if (it != m_listeners.end())
-      {
-        m_listeners.erase(it);
-      }
-  }
-
-  //! \brief Notify all listeners that the map changed.
-  void notify()
-  {
-    uint32_t i = m_listeners.size();
-    LOGI("SimTaDynMap #%u %s has changed and notifies %u listener%s\n",
-         m_id, m_name.c_str(), i, (i > 1 ? "s" : ""));
-    while (i--)
-      {
-        m_listeners[i]->onChanged(this);
-      }
-  }
-
   inline bool modified() const
   {
     return (m_nb_graphs_modified > 0U) || (m_nb_scripts_modified > 0U);
@@ -134,7 +101,7 @@ public:
   void draw()
   {
     LOGI("SimTaDynMap.drawnBy 0x%x", this);
-    LOGI("SimTaDynMap #%u %s drawnBy renderer",  m_id, m_name.c_str());
+    LOGI("SimTaDynMap #%u %s drawnBy renderer",  getID(), m_name.c_str());
 
     //if (nullptr != m_sheets.root())
     //  draw(*(m_sheets.root()));
@@ -188,59 +155,7 @@ public:
   uint32_t m_nb_graphs_modified = 0U;
   uint32_t m_nb_scripts_modified = 0U;
 
-private:
-
-  //! \brief List of observers attached to this map events.
-  std::vector<ISimTaDynMapListener*> m_listeners;
-};
-
-// *************************************************************************************************
-//! \brief A class holding the currently edited SimTaDynMap. When
-//! the user changes of map, this class will notifies to observers that
-//! map changed.
-// ***********************************************************************************************
-class SimTaDynMapHolder
-{
-public:
-
-  SimTaDynMapHolder()
-  {
-    m_map = nullptr;
-  }
-
-  void set(SimTaDynMap* p)
-  {
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    if (m_map == p)
-      return ;
-
-    ResourceManager<Key> &rm =
-      ResourceManager<Key>::instance();
-
-    //FIXME MapEditor::save();
-    rm.dispose(m_map->id());
-
-    if (nullptr != p)
-      {
-        m_map = p;
-        rm.acquire(m_map->id());
-        //m_map->notify(); // TODO ---> DrawingArea::onNotify(){>attachModel(*map);} mais PendingData le fait deja
-        // TODO: notify to SimForth to get the address of the scenegraph<SimTaDynSheet>
-      }
-  }
-
-  SimTaDynMap* get()
-  {
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    return m_map;
-  }
-
-protected:
-
-  SimTaDynMap* m_map;
-  std::mutex m_mutex;
+  sigc::signal<void, SimTaDynMapPtr> signal_changed;
 };
 
 #endif /* SIMTADYN_MAP_HPP_ */

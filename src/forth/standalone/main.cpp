@@ -1,6 +1,6 @@
 //=====================================================================
-// SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// SimForth: A Forth for SimTaDyn project.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -38,24 +38,6 @@ static void usage(const char* fun)
   std::cout << "         " << "-x              Do not use color when displaying dictionary" << std::endl;
 }
 
-/*
-typedef void (*HelloFunc)(); // function pointer type
-static void test()
-{
-  //std::string path("/usr/lib/i386-linux-gnu/libGL.so");
-  //path.append(SharedLibrary::suffix()); // adds ".dll" or ".so"
-  //std::cout << path << std::endl;
-
-  SharedLibrary library("/usr/lib/i386-linux-gnu/libGL.so");//path); // will also load the library
-
-  //std::cout << "passed\n";
-
-  HelloFunc func = (HelloFunc) library.getSymbol("glClear");
-  func();
-  library.unload();
-}
-*/
-
 int main(int argc,char *argv[])
 {
   // Call it before Logger constructor
@@ -65,8 +47,6 @@ int main(int argc,char *argv[])
                 << config::tmp_path << "'" << std::endl;
     }
 
-  TextColor* color;
-
   // No option
   if (1 == argc)
   {
@@ -74,26 +54,18 @@ int main(int argc,char *argv[])
     return 1;
   }
 
-  // Look for option -x
-  bool no_color = false;
+  // Enable/disable colorful text displayed on terminal
+  termcolor::enable();
   for (int i = 1; i < argc; ++i)
     {
       if ((argv[i][0] == '-') && (argv[i][1] == 'x'))
         {
-          no_color = true;
+          termcolor::disable();;
         }
-    }
-  if (no_color)
-    {
-      color = new NoColor();
-    }
-  else
-    {
-      color = new PosixColor();
     }
 
   ForthDictionary dico;
-  Forth forth(dico, *color);
+  Forth forth(dico);
   std::pair<bool, std::string> res;
   bool r;
   int opt;
@@ -148,7 +120,7 @@ int main(int argc,char *argv[])
 
         // Pretty print the dictionary
       case 'p':
-        forth.displayDictionary(*color);
+        forth.displayDictionary();
         break;
 
         // Interactive mode
@@ -162,6 +134,5 @@ int main(int argc,char *argv[])
       }
   }
 
-  delete color;
   return 0;
 }

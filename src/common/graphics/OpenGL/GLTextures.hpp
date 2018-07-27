@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -22,13 +22,17 @@
 #  define GLTEXTURES_HPP_
 
 #  include "GLObject.hpp"
+#  include "Resource.hpp"
 #  include "PendingData.hpp"
 #  include "SOIL.h"
 
 // **************************************************************
 //
 // **************************************************************
-class GLTexture: public GLObject, protected PendingData
+class GLTexture
+  : public GLObject,
+    public Resource,
+    protected PendingData
 {
 public:
 

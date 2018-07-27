@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,8 +18,8 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FILETESTS_HPP_
-#  define FILETESTS_HPP_
+#ifndef FILE_TESTS_HPP_
+#  define FILE_TESTS_HPP_
 
 #  include <cppunit/TestFixture.h>
 #  include <cppunit/TestResult.h>
@@ -28,7 +28,6 @@
 #  define protected public
 #  define private public
 #  include "File.hpp"
-#  include "Path.hpp"
 #  undef protected
 #  undef private
 
@@ -37,7 +36,6 @@ class FileTests : public CppUnit::TestFixture
   // CppUnit macros for setting up the test suite
   CPPUNIT_TEST_SUITE(FileTests);
   CPPUNIT_TEST(testfiles);
-  CPPUNIT_TEST(testpath);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -45,7 +43,6 @@ public:
   void tearDown();
 
   void testfiles();
-  void testpath();
 };
 
-#endif /* FILETESTS_HPP_ */
+#endif /* FILE_TESTS_HPP_ */

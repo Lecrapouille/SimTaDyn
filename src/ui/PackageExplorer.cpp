@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -19,8 +19,104 @@
 //=====================================================================
 
 #include "PackageExplorer.hpp"
+#include "MapEditor.hpp"
+
+SceneGraphWindow::SceneGraphWindow(SceneNode_t* node)
+  : m_table(8, 6)
+{
+  m_ok.set_label("Ok");
+  m_cancel.set_label("Cancel");
+
+  m_labels[LabelNames::LabelLayerName].set_text("Layer Name:");
+  m_labels[LabelNames::LabelFilePath].set_text("File Path:");
+  m_labels[LabelNames::LabelScale].set_text("Scale:");
+  m_labels[LabelNames::LabelMapProjection].set_text("Map Projection:");
+  m_labels[LabelNames::LabelMatrix].set_text("World Transform:");
+
+  m_table.attach(m_labels[LabelNames::LabelLayerName], 0, 1, 0, 1);
+  m_table.attach(m_labels[LabelNames::LabelFilePath], 0, 1, 1, 2);
+  m_table.attach(m_labels[LabelNames::LabelScale], 0, 1, 2, 3);
+  m_table.attach(m_labels[LabelNames::LabelMapProjection], 0, 1, 3, 4);
+  m_table.attach(m_labels[LabelNames::LabelMatrix], 0, 1, 4, 5);
+
+  this->node(node);
+
+  m_table.attach(m_entries[EntryNames::EntryLayerName], 1, 5, 0, 1);
+  m_table.attach(m_entries[EntryNames::EntryFilePath], 1, 5, 1, 2);
+  m_table.attach(m_entries[EntryNames::EntryScaleX], 1, 2, 2, 3);
+  m_table.attach(m_entries[EntryNames::EntryScaleY], 2, 3, 2, 3);
+  m_table.attach(m_entries[EntryNames::EntryScaleZ], 3, 4, 2, 3);
+  m_table.attach(m_entries[EntryNames::EntryMapProjection], 1, 5, 3, 4);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix00], 1, 2, 4, 5);
+  m_table.attach(m_entries[EntryNames::EntryMatrix10], 2, 3, 4, 5);
+  m_table.attach(m_entries[EntryNames::EntryMatrix20], 3, 4, 4, 5);
+  m_table.attach(m_entries[EntryNames::EntryMatrix30], 4, 5, 4, 5);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix01], 1, 2, 5, 6);
+  m_table.attach(m_entries[EntryNames::EntryMatrix11], 2, 3, 5, 6);
+  m_table.attach(m_entries[EntryNames::EntryMatrix21], 3, 4, 5, 6);
+  m_table.attach(m_entries[EntryNames::EntryMatrix31], 4, 5, 5, 6);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix02], 1, 2, 6, 7);
+  m_table.attach(m_entries[EntryNames::EntryMatrix12], 2, 3, 6, 7);
+  m_table.attach(m_entries[EntryNames::EntryMatrix22], 3, 4, 6, 7);
+  m_table.attach(m_entries[EntryNames::EntryMatrix32], 4, 5, 6, 7);
+
+  m_table.attach(m_entries[EntryNames::EntryMatrix03], 1, 2, 7, 8);
+  m_table.attach(m_entries[EntryNames::EntryMatrix13], 2, 3, 7, 8);
+  m_table.attach(m_entries[EntryNames::EntryMatrix23], 3, 4, 7, 8);
+  m_table.attach(m_entries[EntryNames::EntryMatrix33], 4, 5, 7, 8);
+
+  set_title("Scene node settings");
+  add(m_table);
+
+  show_all_children();
+}
+
+void SceneGraphWindow::node(SceneNode_t* node)
+{
+  const SimTaDynSheet *sheet = nullptr;
+  m_node = node;
+
+  if (nullptr != node)
+    {
+      Vector<float, 3u> const &v = node->localScale();
+      m_entries[EntryNames::EntryScaleX].set_text(std::to_string(v.x));
+      m_entries[EntryNames::EntryScaleY].set_text(std::to_string(v.y));
+      m_entries[EntryNames::EntryScaleZ].set_text(std::to_string(v.z));
+
+      Matrix<float, 4u, 4u> const &M = node->worldTransform();
+      for (uint8_t i = 0; i < 16u; ++i)
+        m_entries[EntryNames::EntryMatrix00 + i].set_text(std::to_string(M.m_data[i]));
+
+      sheet = node->mesh();
+    }
+  else
+    {
+      m_entries[EntryNames::EntryScaleX].set_text("");
+      m_entries[EntryNames::EntryScaleY].set_text("");
+      m_entries[EntryNames::EntryScaleZ].set_text("");
+      for (uint8_t i = 0; i < 16u; ++i)
+        m_entries[EntryNames::EntryMatrix00 + i].set_text("");
+    }
+
+  if (nullptr != sheet)
+    {
+      m_entries[EntryNames::EntryLayerName].set_text(sheet->name());
+      m_entries[EntryNames::EntryFilePath].set_text(sheet->path());
+      m_entries[EntryNames::EntryMapProjection].set_text(std::to_string(sheet->mapProjectionType()));
+    }
+  else
+    {
+      m_entries[EntryNames::EntryLayerName].set_text("");
+      m_entries[EntryNames::EntryFilePath].set_text("");
+      m_entries[EntryNames::EntryMapProjection].set_text("None");
+    }
+}
 
 PackageExplorer::PackageExplorer()
+  : m_scene_graph_window(nullptr)
 {
   // Preload some icons
   try
@@ -55,7 +151,16 @@ PackageExplorer::PackageExplorer()
   m_tree_view.set_enable_tree_lines();
 
   // Signals
-  m_tree_view.signal_button_press_event().connect(sigc::mem_fun(*this, &PackageExplorer::on_mytreeview_button_press_event));
+  m_tree_view.signal_button_press_event().connect(
+     sigc::mem_fun(*this, &PackageExplorer::on_mytreeview_button_press_event));
+  MapEditor::instance().loaded_success.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onSuccessMapLoaded));
+  MapEditor::instance().loaded_failure.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onFailMapLoaded));
+  MapEditor::instance().saved_success.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onSuccessMapSaved));
+  MapEditor::instance().saved_failure.connect(
+     sigc::mem_fun(*this, &PackageExplorer::onFailMapSaved));
 }
 
 PackageExplorer::~PackageExplorer()
@@ -105,28 +210,36 @@ bool PackageExplorer::on_mytreeview_button_press_event(GdkEventButton *ev)
           // TODO appeller Loader
         }
     }
+
+  //TODO
+  //SceneNode_t *node = new SceneNode_t();
+  //node->move(Vector3f(2.0f));
+  //node->update(0.001f);
+  //m_scene_graph_window.node(node);
+  //m_scene_graph_window.show();
   return false;
 }
 
-void PackageExplorer::onLoadFailure(std::string const& filename, std::string const& msg)
+void PackageExplorer::onSuccessMapLoaded(SimTaDynMapPtr map)
 {
-  std::cout << "PackageExplorer::onLoadFailure '" << filename
-            << "' Reason : '" << msg << "'" << std::endl;
+  std::cout << "PackageExplorer::onLoadSucess '" << map->m_name << "'" << std::endl;
+  addMap(map->m_name);
 }
 
-void PackageExplorer::onLoadSucess(std::string const& filename)
+void PackageExplorer::onFailMapLoaded(const std::string &filename, const std::string &message)
 {
-  std::cout << "PackageExplorer::onLoadSucess '" << filename << "'" << std::endl;
-  addMap(filename);
+  std::cout << "PackageExplorer::onLoadFail '" << filename << "' " << message << std::endl;
+  // TODO: store error in tooltips and change to red the color
 }
 
-void PackageExplorer::onSaveFailure(std::string const& filename, std::string const& msg)
+void PackageExplorer::onSuccessMapSaved(SimTaDynMapPtr map)
 {
-  std::cout << "PackageExplorer::onSaveFailure '" << filename
-            << "' Reason : '" << msg << "'" << std::endl;
+  std::cout << "PackageExplorer::onSaveSucess '" << map->m_name << "'" << std::endl;
+  // TODO: remove the not saved "*" symbol
 }
 
-void PackageExplorer::onSaveSucess(std::string const& filename)
+void PackageExplorer::onFailMapSaved(const std::string &filename, const std::string &message)
 {
-  std::cout << "PackageExplorer::onSaveSucess '" << filename << "'" << std::endl;
+  std::cout << "PackageExplorer::onSaveFail '" << filename << "' " << message << std::endl;
+  // TODO: store error in tooltips and change to red the color
 }

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -47,29 +47,50 @@ Logger::~Logger()
   close();
 }
 
-void Logger::changeLog(std::string const& logfile)
+bool Logger::changeLog(std::string const& logfile)
 {
   close();
-  open(logfile);
+  return open(logfile);
 }
 
-void Logger::open(std::string const& logfile)
+bool Logger::open(std::string const& logfile)
 {
+  std::cerr << "ICI " << config::tmp_path << std::endl;
+
+  // Distinguish behavior between simple file and absolute path.
+  std::string dir = File::dirName(logfile);
+  std::string file(logfile);
+  if (dir.empty())
+    {
+      dir = config::tmp_path;
+      file = dir + file;
+    }
+
+  // Call it before Logger constructor
+  if (!File::mkdir(dir))
+    {
+      std::cerr << "Failed creating the temporary directory '"
+                << config::tmp_path << "'" << std::endl;
+      return false;
+    }
+
   // Try to open the given log path
-  m_file.open(logfile.c_str());
+  m_file.open(file.c_str());
   if (!m_file.is_open())
     {
       std::cerr << "Failed creating the log file '"
-                << logfile << "'. Reason is '"
+                << file << "'. Reason is '"
                 << strerror(errno) << "'"
                 << std::endl;
+      return false;
     }
   else
     {
-      std::cout << "Log created: '" << logfile
+      std::cout << "Log created: '" << file
                 << "'" << std::endl;
       header();
     }
+  return true;
 }
 
 void Logger::close()

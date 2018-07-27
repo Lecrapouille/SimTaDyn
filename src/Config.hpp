@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -35,24 +35,24 @@ namespace config
   static const bool separated_logs = false;
   //! \brief Used for logs and GUI.
   static const std::string project_name("SimTaDyn");
-  //! \brief Major version of SimTaDyn
-  static const uint32_t major_version(SIMTADYN_MAJOR_VERSION);
-  //! \brief Minor version of SimTaDyn
-  static const uint32_t minor_version(SIMTADYN_MINOR_VERSION);
+  //! \brief Major version of project
+  static const uint32_t major_version(PROJECT_MAJOR_VERSION);
+  //! \brief Minor version of project
+  static const uint32_t minor_version(PROJECT_MINOR_VERSION);
   //! \brief Save the git SHA1
-  static const std::string git_sha1(SIMTADYN_SHA1);
+  static const std::string git_sha1(PROJECT_SHA1);
   //! \brief Save the git branch
-  static const std::string git_branch(SIMTADYN_BRANCH);
-  //! \brief Pathes where default SimTaDyn resources have been installed
+  static const std::string git_branch(PROJECT_BRANCH);
+  //! \brief Pathes where default project resources have been installed
   //! (when called  by the shell command: sudo make install).
-  static const std::string data_path(SIMTADYN_DATA_PATH);
+  static const std::string data_path(PROJECT_DATA_PATH);
   //! \brief Location for storing temporary files
   static const std::string tmp_path(false == separated_logs ?
-                                    SIMTADYN_TEMP_DIR :
-                                    File::generateTempFileName(SIMTADYN_TEMP_DIR, "/"));
+                                    PROJECT_TEMP_DIR :
+                                    File::generateTempFileName(PROJECT_TEMP_DIR, "/"));
   //! \brief Give a name to the default project log file.
   static const std::string log_name(project_name + ".log");
-  //! \brief Define the full path for SimTaDyn project.
+  //! \brief Define the full path for the project.
   static const std::string log_path(tmp_path + log_name);
   //! \brief Number of elements by pool in containers
   //! used for storing nodes and arcs in a graph

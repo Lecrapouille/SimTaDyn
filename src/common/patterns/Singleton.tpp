@@ -1,7 +1,7 @@
 // -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -192,6 +192,24 @@ public:
         // if (nullptr == s_instance)
           {
             T* volatile temp = new T;
+            s_instance = temp;
+            s_destroyer.set(*s_instance);
+          }
+      }
+    return *s_instance;
+  }
+
+  //\! brief Create the constructor and pass infinite number of args
+  template<class Fn, class ... Args>
+  static T& instance(Fn&& fn, Args&&... args)
+  {
+    //! See http://www.aristeia.com/Papers/DDJ_Jul_Aug_2004_revised.pdf
+    if (nullptr == s_instance)
+      {
+        //FIXME add lock for thread safe
+        // if (nullptr == s_instance)
+          {
+            T* volatile temp = new T(fn, args...);
             s_instance = temp;
             s_destroyer.set(*s_instance);
           }

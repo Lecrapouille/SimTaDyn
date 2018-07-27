@@ -5,6 +5,11 @@
 #  include "GraphAlgorithm.hpp"
 #  include <initializer_list>
 
+// FIXME: faire qu'une cellule puisse etre aussi une carte (url, download)
+// map a executer (url, carte contenue dans le SceneGraph).
+// Exemple: carte des villes principales et des autoroutes. On clique on
+// a une carte detaillee.
+//FIXME: renomer neighbor par isborderof
 namespace graphtheory
 {
 

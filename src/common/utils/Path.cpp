@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -19,3 +19,108 @@
 //=====================================================================
 
 #include "Path.hpp"
+#include "Logger.hpp"
+#include "File.hpp"
+
+Path::Path()
+{
+}
+
+Path::Path(std::string const& path)
+{
+  split(path);
+}
+
+Path::~Path()
+{
+}
+
+//! \brief add a directory in the path
+void Path::add(std::string const& path)
+{
+  LOGI("Path::add '%s'", path.c_str());
+  split(path);
+}
+
+//! \brief add a directory in the path
+void Path::init(std::string const& path)
+{
+  LOGI("Path::clear()");
+  m_paths.clear();
+  split(path);
+}
+
+void Path::clear()
+{
+  m_paths.clear();
+  m_path.clear();
+}
+
+void Path::remove(std::string const& path)
+{
+  LOGI("Path::remove '%s'", path.c_str());
+  m_paths.remove(path);
+  update();
+}
+
+std::pair<std::string, bool> Path::find(std::string const& filename) const
+{
+  if (File::exist(filename))
+    return std::make_pair(filename, true);
+
+  for (auto it: m_paths)
+    {
+      std::string file(it + filename);
+      if (File::exist(file))
+        return std::make_pair(file, true);
+    }
+
+  // Not found
+  return std::make_pair(std::string(), false);
+}
+
+std::string Path::expand(std::string const& filename) const
+{
+  for (auto it: m_paths)
+    {
+      std::string file(it + filename);
+      if (File::exist(file))
+        return file;
+    }
+
+  return filename;
+}
+
+std::string const &Path::toString() const
+{
+  return m_path;
+}
+
+void Path::update()
+{
+  m_path.clear();
+  for (auto it: m_paths)
+    {
+      m_path += it;
+      m_path.pop_back(); // Remove the '/' char
+      m_path += m_delimiter;
+    }
+}
+
+void Path::split(std::string const& path)
+{
+  std::stringstream ss(path);
+  std::string directory;
+
+  while (std::getline(ss, directory, m_delimiter))
+    {
+      if (directory.empty())
+        continue ;
+
+      if ((*directory.rbegin() == '\\') || (*directory.rbegin() == '/'))
+        m_paths.push_back(directory);
+      else
+        m_paths.push_back(directory + "/");
+    }
+  update();
+}

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -38,8 +38,10 @@ public:
   //-------------------------------------------------------------
   ASpreadSheetCell(std::string const& formulae)
     : m_formulae(formulae),
+      m_evaluatedValue(0),
       m_evaluated(false),
-      m_unresolvedRefs(0)
+      m_unresolvedRefs(0),
+      m_dataKey(0)
   {
     // parse(); // Risque de crash si la cellule n'est pas encore connue
   }
@@ -104,14 +106,19 @@ public:
   //-------------------------------------------------------------
   //! \brief
   //-------------------------------------------------------------
-  inline int32_t value() const
+  inline int32_t rawValue() const
   {
     return m_evaluatedValue;
   }
 
-  inline int32_t& value()
+  inline int32_t& rawValue()
   {
     return m_evaluatedValue;
+  }
+
+  inline std::pair<bool, int32_t> value() const
+  {
+    return std::make_pair(m_evaluated, m_evaluatedValue);
   }
 
   inline std::string& formulae()

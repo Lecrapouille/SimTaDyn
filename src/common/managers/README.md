@@ -1,6 +1,9 @@
 Files:
 
-* IResource.tpp: Template class only managed by the ResourceManager
+* Resource.hpp: class created by a ILoader and only managed by a ResourceManager.
+  A resource can be shared by several classes and is destroyed when nobody is
+  using it.
+
   class (private) for automaticaly self destruct data when nobody uses
   it. A resource is something loadable from a file and storable to a
   file. Examples: textures, sound tracks.

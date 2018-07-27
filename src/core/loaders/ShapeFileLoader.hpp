@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -21,9 +21,8 @@
 #ifndef SHAPEFILELOADER_HPP_
 #  define SHAPEFILELOADER_HPP_
 
-#  include "ILoader.hpp"
+#  include "ILoader.tpp"
 #  include "SimTaDynSheet.hpp"
-#  include "BoundingBox.tpp"
 
 // ***********************************************************************************************
 //! \brief
@@ -38,7 +37,7 @@ public:
     LOGI("Creating a Shapefile loader %p", this);
   }
 
-  virtual void loadFromFile(std::string const& filename, SimTaDynSheet* &sheet) override;
+  virtual void loadFromFile(std::string const& filename, SimTaDynSheetPtr &sheet) override;
 
 protected:
 

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -70,52 +70,40 @@ void FileTests::testfiles()
 
   res = File::extension("common");
   CPPUNIT_ASSERT_EQUAL(true, "" == res);
-
   CPPUNIT_ASSERT_EQUAL(false, File::exist("pouet"));
   CPPUNIT_ASSERT_EQUAL(true, File::exist("/dev/null"));
 
-  CPPUNIT_ASSERT(File::Directory == File::type("/tmp"));
-  CPPUNIT_ASSERT(true == File::isReadable("/tmp"));
-  CPPUNIT_ASSERT(true == File::isWritable("/tmp"));
+  CPPUNIT_ASSERT_EQUAL(true, File::Directory == File::type("/tmp"));
+  CPPUNIT_ASSERT_EQUAL(true, File::isReadable("/tmp"));
+  CPPUNIT_ASSERT_EQUAL(true, File::isWritable("/tmp"));
 
   if (File::exist("/usr/sbin/")) // FIXME: does not exist on Travis-CI docker
     {
-      CPPUNIT_ASSERT(File::Directory == File::type("/usr/sbin/"));
-      CPPUNIT_ASSERT(true == File::isReadable("/usr/sbin/"));
-      //FIXME CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/"));
+      CPPUNIT_ASSERT_EQUAL(true, File::Directory == File::type("/usr/sbin/"));
+      CPPUNIT_ASSERT_EQUAL(true, File::isReadable("/usr/sbin/"));
+      //FIXME CPPUNIT_ASSERT_EQUAL(true, false == File::isWritable("/usr/sbin/"));
     }
-  CPPUNIT_ASSERT(File::DoesNotExist == File::type("/usr/sbin/foobar"));
-  CPPUNIT_ASSERT(false == File::isReadable("/usr/sbin/foobar"));
-  CPPUNIT_ASSERT(false == File::isWritable("/usr/sbin/foobar"));
+  CPPUNIT_ASSERT_EQUAL(true, File::DoesNotExist == File::type("/usr/sbin/foobar"));
+  CPPUNIT_ASSERT_EQUAL(false, File::isReadable("/usr/sbin/foobar"));
+  CPPUNIT_ASSERT_EQUAL(false, File::isWritable("/usr/sbin/foobar"));
 
-  CPPUNIT_ASSERT(File::Document == File::type("/bin/ls"));
-  CPPUNIT_ASSERT(true == File::isReadable("/bin/ls"));
-  //FIXME CPPUNIT_ASSERT(false == File::isWritable("/bin/ls"));
+  CPPUNIT_ASSERT_EQUAL(true, File::Document == File::type("/bin/ls"));
+  CPPUNIT_ASSERT_EQUAL(true, File::isReadable("/bin/ls"));
+  //FIXME CPPUNIT_ASSERT_EQUAL(true, false == File::isWritable("/bin/ls"));
 
-  CPPUNIT_ASSERT(true == File::mkdir("/tmp/qq"));
-  CPPUNIT_ASSERT(true == File::mkdir("/tmp/qq/"));
+  CPPUNIT_ASSERT_EQUAL(true, File::mkdir("/tmp/qq"));
+  CPPUNIT_ASSERT_EQUAL(true, File::mkdir("/tmp/foo/bar/"));
+  CPPUNIT_ASSERT_EQUAL(true, File::mkdir("/tmp/foo/bar/"));
 
-  CPPUNIT_ASSERT(File::dirName("/tmp/foo/bar") == "/tmp/foo/");
-  CPPUNIT_ASSERT(File::dirName("/tmp/foo/") == "/tmp/foo/");
-  CPPUNIT_ASSERT(File::dirName("/tmp/foo") == "/tmp/");
-  CPPUNIT_ASSERT(File::dirName("/tmp/") == "/tmp/");
-  CPPUNIT_ASSERT(File::dirName("/tmp") == "/");
-}
+  CPPUNIT_ASSERT_EQUAL(false, File::mkdir("/dev/null"));
 
-//--------------------------------------------------------------------------
-void FileTests::testpath()
-{
-  Path path1;
-  CPPUNIT_ASSERT_EQUAL(0, path1.toString().compare(""));
-  Path path2("aa:bb:cc::ee::");
-  std::cout << "Path: '" << path2.toString() << "'" << std::endl;
-  path2.init("/usr/bin/");
-  std::cout << "Path: '" << path2.toString() << "'" << std::endl;
-  CPPUNIT_ASSERT_EQUAL(0, path2.toString().compare("/usr/bin:"));
-  path2.add("/usr/share:/bin/");
-  std::cout << "Path: '" << path2.toString() << "'" << std::endl;
-  CPPUNIT_ASSERT_EQUAL(0, path2.toString().compare("/usr/bin:/usr/share:/bin:"));
-  std::pair<std::string, bool> res = path2.find("ls");
-  CPPUNIT_ASSERT_EQUAL(true, res.second);
-  CPPUNIT_ASSERT_EQUAL(0, res.first.compare("/bin/ls"));
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("/tmp/foo/bar") == "/tmp/foo/");
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("/tmp/foo/") == "/tmp/foo/");
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("/tmp/foo") == "/tmp/");
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("/tmp/") == "/tmp/");
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("/tmp") == "/");
+
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("tmp/foo") == "tmp/");
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("tmp/foo/") == "tmp/foo/");
+  CPPUNIT_ASSERT_EQUAL(true, File::dirName("tmp") == "");
 }

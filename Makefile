@@ -1,6 +1,6 @@
 ##=====================================================================
 ## SimTaDyn: A GIS in a spreadsheet.
-## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 ##
 ## This file is part of SimTaDyn.
 ##
@@ -20,7 +20,8 @@
 
 ###################################################
 # Executable name
-TARGET = SimTaDyn
+PROJECT = SimTaDyn
+TARGET = $(PROJECT)
 
 ###################################################
 # Location from the project root directory.
@@ -51,13 +52,13 @@ OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
 OBJ_OPENGL     = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o
 OBJ_OPENGL    += GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o Renderer.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
-OBJ_LOADERS    = LoaderException.o ILoader.o ShapeFileLoader.o SimTaDynFileLoader.o
+OBJ_LOADERS    = LoaderException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDynFileLoader.o TextureFileLoader.o
 # SimTaDynFile.o
 OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
-OBJ_SIMTADYN   = main.o
+OBJ_SIMTADYN   = SimTaDyn.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
@@ -68,9 +69,15 @@ CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourcev
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
-# Common defines
-SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
-DEFINES += $(SIMTADYN_DEFINES) -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+#
+INCLUDES += -I$(P)/src
+VPATH += $(P)/src:
+
+###################################################
+# Project defines
+DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
+# Disable ugly gtkmm compilation warnings
+DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
@@ -112,14 +119,17 @@ endif
 ###################################################
 # Backward allows tracing stack when segfault happens
 ifeq ($(PROJECT_MODE),debug)
+ifneq ($(ARCHI),Darwin)
 OPTIM_FLAGS = -O2 -g
 DEFINES += -DBACKWARD_HAS_DW=1
 LIBS += -ldw
+endif
 else
 OPTIM_FLAGS = -O3
 endif
 
 ###################################################
+#
 all: $(TARGET)
 
 ###################################################
@@ -132,17 +142,17 @@ $(TARGET): $(OBJ)
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
-# Download external projects that SimTaDyn needs
+# Download external projects that SimTaDyn needs.
 .PHONY: download-external-libs
 download-external-libs:
 	@cd external && ./download-external-libs.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
 
 ###################################################
-# Download and compile external projects that SimTaDyn needs
+# Compile external projects that SimTaDyn needs.
 .PHONY: compile-external-libs
 compile-external-libs:
 	@cd external && ./compile-external-libs.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
@@ -155,22 +165,21 @@ compile-external-libs:
 # create a tarball of generated files and to upload the
 # tarball to the website.
 #
-# This rule clean and launch the compilation again and
-# create the tarball. TODO: upload the tarball to Coverity scan
+# Compile again the project for Coverity Scan. An uploadable tarball is created.
 .PHONY: coverity-scan
 coverity-scan: clean
+	@rm -fr SimTaDyn.tgz cov-int 2> /dev/null
 	@cov-build --dir cov-int make -j8 && tar czvf SimTaDyn.tgz cov-int
 
 ###################################################
-# Call the unit tests makefile (in tests/ directory),
-# compile tests, launch them and generate code coverage.
+# Compile and launch unit tests. Then generate the html code coverage.
 .PHONY: unit-tests
 unit-tests:
 	@$(call print-simple,"Compiling unit tests")
 	@make -C tests coverage
 
 ###################################################
-# Run and call address sanitizer (if enabled)
+# Launch the executable with address sanitizer (if enabled).
 .PHONY: run
 run: $(TARGET)
 	$(SANITIZER) ./build/$(TARGET) 2>&1 | ./external/asan_symbolize.py
@@ -185,13 +194,16 @@ doc:
 ###################################################
 # Compress SimTaDyn sources without its .git, build
 # folders and doc generated files. If a tarball
-# already exists, it'll not be smashed.
+# already exists, the older will stay intact and a
+# new one is created. Tarball confict names is managed.
+#
+# Compress the code source into a unique tarball for backup.
 .PHONY: targz
 targz:
 	@./.makefile/targz.sh $(PWD)
 
 ###################################################
-# Create a tarball for OpenSuse Build Service
+# Create an uploadable tarball for the OpenSuse Build Service (OBS).
 .PHONY: obs
 obs:
 	@./.integration/opensuse-build-service.sh
@@ -203,8 +215,9 @@ install: $(TARGET)
 	@$(call print-to,"Installing","data","$(PROJECT_DATA_PATH)","")
 	@rm -fr $(PROJECT_DATA_PATH)
 	@mkdir -p $(PROJECT_DATA_PATH)/forth
-	@cp -r data/* $(PROJECT_DATA_PATH)
 	@cp -r src/forth/core/system.fs $(PROJECT_DATA_PATH)/forth
+	@cp -r src/forth/core/LibC $(PROJECT_DATA_PATH)/forth
+	@cp -r data/* $(PROJECT_DATA_PATH)
 	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
 	@mkdir -p $(PROJECT_DOC_PATH)
 	@cp -r doc/* $(PROJECT_DATA_ROOT)/doc
@@ -214,7 +227,7 @@ install: $(TARGET)
 	@cp $(BUILD)/$(TARGET) $(PROJECT_EXE)
 
 ###################################################
-# Uninstall project. You need to be root user.
+# Uninstall the project. You need to be root.
 .PHONY: uninstall
 uninstall:
 	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
@@ -222,21 +235,25 @@ uninstall:
 	@rm -r $(PROJECT_DATA_ROOT)
 
 ###################################################
+# Clean the build/ directory.
 .PHONY: clean
 clean:
 	@$(call print-simple,"Cleaning","$(PWD)")
 	@rm -fr $(BUILD) 2> /dev/null
 
 ###################################################
-# Cleaning
-.PHONY: distclean
-distclean: clean
+# Clean the whole project.
+.PHONY: veryclean
+veryclean: clean
 	@rm -fr cov-int SimTaDyn.tgz *.log foo 2> /dev/null
 	@cd tests && make -s clean; cd - > /dev/null
 	@cd src/common/graphics/OpenGL/examples/ && make -s clean; cd - > /dev/null
 	@cd src/forth/standalone && make -s clean; cd - > /dev/null
 	@cd src/core/standalone/ClassicSpreadSheet && make -s clean; cd - > /dev/null
+	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
+	@cd doc/ && rm -fr html
 
 ###################################################
 # Sharable informations between all Makefiles
--include $(M)/Makefile.footer
+include $(M)/Makefile.help
+include $(M)/Makefile.footer

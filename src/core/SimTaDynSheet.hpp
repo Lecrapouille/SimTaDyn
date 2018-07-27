@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -21,14 +21,12 @@
 #ifndef CLASSIC_SPREADSHEET_HPP_
 #  define CLASSIC_SPREADSHEET_HPP_
 
-#  include "ResourceManager.tpp"
+#  include "Resource.hpp"
 #  include "SimTaDynCell.hpp"
-#  include "SimTaDynGraph.hpp"
 //#  include "GraphAlgorithm.hpp"
 #  include "BoundingBox.tpp"
 #  include "Vertex.hpp"
 #  include "GLCollection.tpp"
-#  include "Logger.hpp"
 
 //FIXME
 #include "algorithm/SimTaDynBFS.hpp"
@@ -41,39 +39,38 @@ using namespace graphtheory;
 class SimTaDynSheet
   : public ASpreadSheet,
     public SimTaDynGraph<CellNode, CellArc, CellZone>,
-    public IResource<Key>,
+    public Resource,
     private UniqueID<SimTaDynSheet>
 {
 public:
 
+  enum MapProjection { NoMapProjection, WGS84Projection };
+
   SimTaDynSheet(const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name("No name")
   {
     LOGI("New SimTaDynSheet with generic name '%s' and ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(std::string const& name, const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(const char* name, const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(const uint32_t noNodes,
@@ -81,44 +78,41 @@ public:
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name("No name")
   {
     LOGI("New SimTaDynSheet with generic name '%s' and ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(std::string const& name,
-                 const uint32_t noNodes,
-                 const uint32_t noArcs,
-                 const bool directed = true)
+                const uint32_t noNodes,
+                const uint32_t noArcs,
+                const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   SimTaDynSheet(const char *name,
-                 const uint32_t noNodes,
-                 const uint32_t noArcs,
-                 const bool directed = true)
+                const uint32_t noNodes,
+                const uint32_t noArcs,
+                const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      IResource(UniqueID<SimTaDynSheet>::getID()),
       m_name(name)
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   //! \brief Destructor.
   ~SimTaDynSheet()
   {
     LOGI("Deleting SimTaDynSheet named '%s' with ID #%u\n",
-         this->name().c_str(), m_id);
+         this->name().c_str(), getID());
   }
 
   virtual const std::string& name() const override
@@ -126,16 +120,26 @@ public:
     return m_name;
   }
 
+  virtual const std::string& path() const
+  {
+    return m_file_path;
+  }
+
   //! \brief Return the unique identifier.
   operator int()
   {
-    return m_id;
+    return getID();
+  }
+
+  inline MapProjection mapProjectionType() const
+  {
+    return m_projection_type;
   }
 
   void draw(GLuint const /*type*/)
   {
     /*LOGI("SimTaDynMap.drawnBy 0x%x", this);
-    LOGI("SimTaDynMap #%u %s drawnBy renderer",  m_id, m_name.c_str());
+    LOGI("SimTaDynMap #%u %s drawnBy renderer",  getID(), m_name.c_str());
 
     if (pos.blocks() != col.blocks())
       {
@@ -157,6 +161,8 @@ public:
   }
 
   std::string m_name;
+  std::string m_file_path = "FIXME";
+  MapProjection m_projection_type = MapProjection::NoMapProjection;
 
 protected:
 
@@ -234,5 +240,7 @@ private:
   GraphAlgorithmSimTaDynBFS m_graphAlgorithm;
   std::vector<ASpreadSheetCell*> m_cells;
 };
+
+using SimTaDynSheetPtr = std::shared_ptr<SimTaDynSheet>;
 
 #endif

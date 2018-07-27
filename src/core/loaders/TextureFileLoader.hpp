@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,16 +18,30 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNLOADERS_HPP_
-#  define SIMTADYNLOADERS_HPP_
+#ifndef TEXTURE_FILE_LOADER_HPP_
+#  define TEXTURE_FILE_LOADER_HPP_
 
-#  include "ShapeFileLoader.hpp"
-#  include "SimTaDynFileLoader.hpp"
+#  include "ILoader.tpp"
+#  include "GLTextures.hpp"
+#  include "ResourceManager.tpp"
 
-#  include "Utilities/GenHierarchies.h"
+using GLTexture2DPtr = std::shared_ptr<GLTexture2D>;
+using GLTexture2DManager = ResourceManager<GLTexture2D, std::string>;
 
-typedef TYPELIST_2(SimTaDynSheet, SimTaDynMap) ResourceList;
+// ***********************************************************************************************
+//! \brief
+// ***********************************************************************************************
+class TextureLoader
+  : public ILoader<GLTexture2D>
+{
+public:
 
-#  include "LoaderManager.tpp"
+  TextureLoader()
+    : ILoader<GLTexture2D>("OpenGL 2D Texture")
+  {
+    LOGI("Creating an OpenGL loader %p", this);
+  }
+  virtual void loadFromFile(std::string const& filename, GLTexture2DPtr &texture) override;
+};
 
 #endif

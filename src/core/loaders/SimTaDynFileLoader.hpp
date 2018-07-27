@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -21,8 +21,11 @@
 #ifndef SIMTADYNFILELOADER_HPP_
 #  define SIMTADYNFILELOADER_HPP_
 
-#  include "ILoader.hpp"
+#  include "ILoader.tpp"
 #  include "SimTaDynMap.hpp"
+#  include "ResourceManager.tpp"
+
+using SimTaDynMapManager = ResourceManager<SimTaDynMap, std::string>;
 
 // ***********************************************************************************************
 //! \brief
@@ -36,18 +39,14 @@ public:
   {
     LOGI("Creating a SimTaDynMap loader %p", this);
   }
-  virtual void loadFromFile(std::string const& filename, SimTaDynMap* &map) override;
-  virtual void saveToFile(SimTaDynMap const& map, std::string const& filename) override;
+  virtual void loadFromFile(std::string const& filename, SimTaDynMapPtr &map) override;
+  virtual void saveToFile(SimTaDynMapPtr const map, std::string const& filename) override;
 
 protected:
 
-  //! \brief Generate an unique name for creating a temporary
-  //! directory.
-  std::string generateTempDirName() const;
-
   //! \brief
   void unzip(std::string const &zip_file);
-  bool zip(SimTaDynMap const& map, std::string const& filename);
+  bool zip(SimTaDynMapPtr const map, std::string const& filename);
 };
 
 #endif

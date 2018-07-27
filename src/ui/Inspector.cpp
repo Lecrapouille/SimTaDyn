@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -52,7 +52,7 @@ void Inspector::showEmpty()
 
 void Inspector::showCell(const Key nodeID)
 {
-  SimTaDynMap* map = MapEditor::instance().map();
+  SimTaDynMapPtr map = MapEditor::instance().map();
   if (nullptr == map)
     return ;
 
@@ -75,5 +75,13 @@ void Inspector::showCell(const Key nodeID)
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Cost";
-  row[m_columns.m_token] = std::to_string(node.value());
+  auto val = node.value();
+  if (val.first)
+    {
+      row[m_columns.m_token] = std::to_string(node.rawValue());
+    }
+  else
+    {
+      row[m_columns.m_token] = "Cell not yet evaluated";
+    }
 }

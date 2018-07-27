@@ -13,6 +13,7 @@
 Exception::Exception(int code)
   : m_pNested(0), m_code(code)
 {
+  // FIXME: passer en param par default __LINE__ et __FILE__ pour logger d'ou vient l'exception
   LOGE("Exception %u", code);
 }
 

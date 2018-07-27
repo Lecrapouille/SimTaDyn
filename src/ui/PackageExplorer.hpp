@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -21,15 +21,52 @@
 #ifndef PACKAGE_EXPLORER_HPP_
 #  define PACKAGE_EXPLORER_HPP_
 
+#  include "ILoader.tpp"
+#  include "SimTaDynMap.hpp"
 #  include <gtkmm.h>
-#  include "ILoader.hpp"
 
 class SimTaDynMap;
 
 // **************************************************************
 //! \brief
 // **************************************************************
-class PackageExplorer: public ILoaderListener<SimTaDynMap>
+class SceneGraphWindow : public Gtk::Window
+{
+public:
+
+  SceneGraphWindow(SceneNode_t* node);
+  void node(SceneNode_t* node);
+
+private:
+
+  enum LabelNames { LabelLayerName, LabelFilePath, LabelScale,
+                    LabelMapProjection, LabelMatrix,
+                    LabelButtons,
+                    LastLabelNames = LabelButtons };
+  enum EntryNames { EntryLayerName, EntryFilePath,
+                    EntryScaleX, EntryScaleY, EntryScaleZ,
+                    EntryMapProjection,
+                    EntryMatrix00, EntryMatrix01, EntryMatrix02, EntryMatrix03,
+                    EntryMatrix10, EntryMatrix11, EntryMatrix12, EntryMatrix13,
+                    EntryMatrix20, EntryMatrix21, EntryMatrix22, EntryMatrix23,
+                    EntryMatrix30, EntryMatrix31, EntryMatrix32, EntryMatrix33,
+                    LastEntryNames = EntryMatrix33 };
+
+  //Gtk::VBox                m_vbox;
+  //Gtk::HBox                m_hbox[LastLabelNames + 1u];
+  Gtk::Table               m_table;
+  Gtk::Label               m_labels[LastLabelNames + 1u];
+  Gtk::Entry               m_entries[LastEntryNames + 1u];
+  Gtk::Button              m_ok;
+  Gtk::Button              m_cancel;
+
+  SceneNode_t             *m_node;
+};
+
+// **************************************************************
+//! \brief
+// **************************************************************
+class PackageExplorer
 {
 private:
 
@@ -104,6 +141,15 @@ public:
   // }
   // TODO ajouter des observers pour charger/decharger le contenu, appeller changerStatus ...
 
+  void onSuccessMapLoaded(SimTaDynMapPtr map);
+  void onFailMapLoaded(const std::string &filename, const std::string &message);
+  void onSuccessMapSaved(SimTaDynMapPtr map);
+  void onFailMapSaved(const std::string &filename, const std::string &message);
+
+public:
+
+  SceneGraphWindow m_scene_graph_window;
+
 protected:
 
   //! \brief
@@ -124,11 +170,6 @@ protected:
   Gtk::TreeModel::Row m_folders[MaxCategory + 1U];
 
 private:
-
-  virtual void onLoadFailure(std::string const& filename, std::string const& msg) override;
-  virtual void onLoadSucess(std::string const& filename) override;
-  virtual void onSaveFailure(std::string const& filename, std::string const& msg) override;
-  virtual void onSaveSucess(std::string const& filename) override;
 
   //! \brief
   bool on_mytreeview_button_press_event(GdkEventButton *ev);

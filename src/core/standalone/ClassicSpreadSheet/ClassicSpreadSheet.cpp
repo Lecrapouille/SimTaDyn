@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "ClassicSpreadSheet.hpp"
-#include "PathManager.hpp"
 #include <sstream>
 #include <string>
 
@@ -111,9 +110,16 @@ ASpreadSheetCell* ClassicSpreadSheet::addCell(const uint32_t row,
   return node;
 }
 
-void ClassicSpreadSheet::readInput(std::string const filename)
+bool ClassicSpreadSheet::readInput(std::string const filename)
 {
+  LOGD("Read file '%s'", filename.c_str());
   std::ifstream infile(filename);
+  if (infile.fail())
+    {
+      std::cerr << "Failed opening the file '" << filename
+                << "'" << std::endl;
+      return false;
+    }
   std::string line;
 
   // Get spreadsheet dimension array
@@ -134,10 +140,20 @@ void ClassicSpreadSheet::readInput(std::string const filename)
     {
       for (uint32_t col = 0; col < m_col; ++col)
         {
-          std::getline(infile, line);
+          try
+            {
+              std::getline(infile, line);
+            }
+          catch (std::exception const& e)
+            {
+              std::cerr << "Failed reading the file '" << filename
+                        << "'" << std::endl;
+              return false;
+            }
           addCell(row, col, line); //si cellule pas trouvee => a parser plus tard
         }
     }
+  return true;
 }
 
 void ClassicSpreadSheet::displayResult()
@@ -147,35 +163,8 @@ void ClassicSpreadSheet::displayResult()
     {
       for (uint32_t col = 0; col < m_col; ++col)
         {
-          std::cout << m_cellMatrix[row][col]->value() << "  ";
+          std::cout << m_cellMatrix[row][col]->rawValue() << "  ";
         }
       std::cout << std::endl;
     }
-}
-
-int main()
-{
-  if (!File::mkdir(config::tmp_path))
-    {
-      std::cerr << "Failed creating the temporary directory '"
-                << config::tmp_path << "'" << std::endl;
-    }
-  PathManager::instance();
-
-  SimForth& forth = SimForth::instance();
-  ClassicSpreadSheet sheet("Sheet1");
-
-  forth.boot();
-  sheet.readInput("examples/input1.txt");
-
-  LOGI("-----");
-  sheet.parse(forth);
-  std::pair<bool, std::string> res = sheet.evaluate(forth);
-  forth.ok(res);
-  if (res.first)
-    {
-      sheet.displayResult();
-    }
-
-  return 0;
 }

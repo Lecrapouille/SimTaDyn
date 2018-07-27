@@ -20,7 +20,7 @@ Table of contents:
 This document explains the different steps for getting, compiling the SimTaDyn code source take from the git
 [master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master) and install it.
 
-For other SimTaDyn branches, specially for the [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004),
+For other SimTaDyn branches, specially for the [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004),
 please read the INSTALL file associated to this branch.
 
 ##### Step 1: Install packages that SimTaDyn depends on:
@@ -39,33 +39,34 @@ Click on the link matching your operating system, for knowing how to install the
 
 ##### Step 2: Clone the SimTaDyn code source and its external parts:
 
-Not all libraries can be installed from disribution packages like explained in step 1.
-Therefore, you have to download from github and compile them. For reasons not explained here,
-SimTaDyn does use git submodule.
-
 Step 2.1: download the SimTaDyn code source from github <img src="http://i.imgur.com/Cj4rMrS.gif" height="40" alt="Swimming Octocat" title="Games on GitHub">:
 
 ```sh
 git clone https://github.com/Lecrapouille/SimTaDyn.git
 ```
-A `SimTaDyn/` folder should have been created.
+A `SimTaDyn/` folder should have been created and will be refered as the root directory of your project.
+
+Because not all libraries can be installed from disribution packages as explained in step 1,
+you will have to download and compile them from github. For some reasons which will not be explained here,
+SimTaDyn does use git submodule and therefore special options of the Makefile has to be called like
+explained in step 2.20
 
 Step 2.2: download third parts. This is made by two bash scripts which can be called by the main Makefile:
 ```sh
-cd SimTaDyn
+cd SimTaDyn/
 make download-external-libs
 make compile-external-libs
 ```
 
 Note: As alternative, you can do this:
 ```sh
-cd SimTaDyn/external
+cd SimTaDyn/external/
 ./download-external-libs.sh Linux
 ./compile-external-libs.sh Linux
 ```
 
 * If you are not working on Linux, but OSX or Windows: replace `Linux` by `Darwin` or `Windows`.
-* These libraries are not installed in your environnement but if you desire it, you have to go to each directories and type:
+* These libraries are not installed in your environnement. In the case of you desire them, you have to go to each directories and type:
 ```sh
 sudo make install
 ```
@@ -75,12 +76,31 @@ sudo make install
 SimTaDyn does not use ./configure script. Call directly the Makefile:
 
 ```sh
-cd SimTaDyn
+cd SimTaDyn/
 make -j4
 ```
-Note: -jX is optional and is used for compiling faster the code source. X refers to the desired number of threads (usually 2 * number of cores of your computer. For example X = 2 * 2).
+Note:
+* -jX is optional and is used for compiling faster the code source. X refers to the desired number of threads (usually 2 * number of cores of your computer. For example X = 2 * 2).
 
-##### Step 4: Install data that SimTaDyn depends on:
+If you want to compile whith a different compilator use `CXX` like:
+```sh
+make CXX=clang++-3.9 -j4
+```
+
+##### Step 4: getting fun with SimTaDyn:
+From code source:
+```sh
+cd SimTaDyn/
+./build/SimTaDyn
+```
+or directly if SimTaDyn has been installed on your system:
+```sh
+SimTaDyn
+```
+
+Note: for the moment, SimTaDyn does not take options but will in the future.
+
+##### Step 5: Install data that SimTaDyn depends on:
 
 If you like SimTaDyn you can install it by typing:
 ```sh
@@ -89,19 +109,10 @@ sudo make install
 By default:
 * the binary will be placed in `/usr/bin` and named `SimTaDyn-<version>`
 * its data and documentation placed in `/usr/share/SimTaDyn/<version>/`.
+* <version> refers to the content of the file SimTaDyn/VERSION.
+* External libraires needed by SimTaDyn will not be installed.
 
-If you do not like the default location, Give to Makefile options `DESTDIR`, `PREFIX` and `BINDIR` or directly edit the file `.makefile/Makefile.header` (note: touching a makfile file will force a whole project compilation).
-
-##### Step 5: getting fun with SimTaDyn:
-```sh
-./build/SimTaDyn
-```
-or directly:
-```sh
-SimTaDyn
-```
-
-Note: SimTaDyn does take options for the moment but will in the future.
+If you do not like the default location, Pass to Makefile options `DESTDIR`, `PREFIX` and `BINDIR` or directly edit the file `.makefile/Makefile.header` (note: touching a makfile file will force a whole project compilation).
 
 ## Installing packages that SimTaDyn depends on
 
@@ -128,11 +139,12 @@ If you have a 32-bits (which is my case), unfortunately Docker does not support 
 
 ### Mac OS X
 
-SimTaDyn compiles on a MacBook Air and Mac OS X (tested on version 10.9.5). To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. __However the Gtk::GlArea is not fully implemented on this architecture and by consequence the OpenGL context is not created ! I'm sorry it does not depend on me but on gtk+ developpers (for memory, Legacy OpenGL worked perfectly on gtk+2 with gtkglext on 2003 with OSX (see [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004) but again gtk+ developpers seems have made regressions because the whole gtk window is black (even butons) !)__
+SimTaDyn compiles on a MacBook Air and Mac OS X (tested on version 10.9.5). To install gtkmm and other dependencies use the tool [homebrew](https://brew.sh/index_fr.html). The current gtkmm version is 3.22 and no problem occurred during the compilation of these libs. __However the Gtk::GlArea is not fully implemented on this architecture and by consequence the OpenGL context is not created ! I'm sorry it does not depend on me but on gtk+ developpers (for memory, Legacy OpenGL worked perfectly on gtk+2 with gtkglext on 2003 with OSX (see [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004) but again gtk+ developpers seems have made regressions because the whole gtk window is black (even butons) !)__
 
 ### Debian
 
-Is similar to Ubuntu. Recommended version is 9.3 which contains the correct Gtk version.
+Is similar to Ubuntu >= 17.04, so please refer to Ubuntu section.
+The recommended Debian version is >= 9.3 which contains the correct Gtk version.
 
 ### OpenSUSE
 
@@ -243,7 +255,8 @@ Not all distrubutions are yet made but will be done in the future. I cannot test
 
 ### Create RPM and Debian packages
 
-* `make obs` for launching RPM and debian packages compilation with OpenSUSE Build Service.
+* `make obs` for launching RPM and debian packages compilation with OpenSUSE Build Service. Because you'll need my password (that I'll do not give)
+you should adapt the script `SimTaDyn/.integration/opensuse-build-service.sh` for your own repo.
 
 ### Compiling SimTaDyn unit tests
 
@@ -288,7 +301,24 @@ Note 2: With Travis-CI, code coverage is also made (without OpenGL unit tests). 
 
 ### Makefile options
 
-Still for developpers:
-* `coverity-scan` create an archive to be downloaded into [Coverity Scan](https://scan.coverity.com/projects/lecrapouille-simtadyn) for a static analysis of the code.
-* `run` run the binary with adress sanitizer (or valgrind) for dynamic analysis of the code (memory access violation).
-* `make targz` create a backup of SimTaDyn code (without .git, generated doc files or buid files) with the date. If an archive already exists the first is not smashed and a second archive is created.
+Summary for developpers !
+
+* Type `make help` for displaying makefile options. Here main options:
+* `download-external-libs` Download external projects that SimTaDyn needs.
+* `compile-external-libs`  Compile external projects that SimTaDyn needs.
+* `coverity-scan` Clean and compile again the project for static analysis of the code.
+An archive `SimTaDyn.tgz` is created and can be uploaded into the service [Coverity Scan](https://scan.coverity.com/projects/lecrapouille-simtadyn).
+* `unit-tests`Compile and launch unit tests. Then the generate code coverage report.
+* `coverage` Generate the code coverage html rapport.
+* `run` Launch the SimTaDyn executable with address sanitizer (if enabled) for dynamic analysis of the code (memory access violation).
+* `doc` Generate the code source documentation with doxygen.
+* `targz` Compress the code source into a unique tarball for backup (meaning if a backup tarball already exists it will stay intact).
+.git/, build/, generated documentation and other backup tarballs are ignored. The tarball name is SimTaDyn-<VERSION>-<YEAR>-<MONTH>-<DAY>-v<RELEASE>.
+* `obs` Create and upload a tarball to the OBS [OpenSuse Build Service](https://build.opensuse.org/project/show/home:Lecrapouille).
+* `install` Install SimTaDyn project and its data in your system. You need to be root user.
+* `uninstall` Uninstall the project. You need to be root. Please be care of potential errors because it will call `rm` command.
+* `clean` Clean the build/ directory.
+* `veryclean` Clean the whole project.
+* `which-gcc` Display the compilator version and informations.
+
+Note: Modifying a makefile will automaticly force a complete project compilation.

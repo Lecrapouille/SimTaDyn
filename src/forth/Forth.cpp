@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -27,9 +27,8 @@
 //! \param dictionary the reference of (an empty) Forth dictionary.
 //! \param color is a class for rendering words with ansi color.
 // **************************************************************
-Forth::Forth(ForthDictionary& dictionary, TextColor &color)
-  : m_color(color),
-    m_state(forth::Interprete),
+Forth::Forth(ForthDictionary& dictionary)
+  : m_state(forth::Interprete),
     m_dictionary(dictionary)
 {
   LOGI("Creating Forth");
@@ -172,10 +171,8 @@ void Forth::create(std::string const& word)
 {
   if (m_dictionary.exists(word))
     {
-      m_color.yellow();
-      std::cout << m_color << "[WARNING] Redefining '" << word << "'";
-      m_color.normal();
-      std::cout << m_color << std::endl;
+      std::cout << FORTH_WARNING_COLOR << "[WARNING] Redefining '" << word << "'"
+                << FORTH_NORMAL_COLOR << std::endl;
     }
   else
     {
@@ -422,13 +419,10 @@ bool Forth::toNumber(std::string const& word, Cell32& number) const
         number = (negative ? LONG_MIN : LONG_MAX);
 
         std::pair<size_t, size_t> p = STREAM.position();
-
-        m_color.yellow();
-        std::cerr << m_color << "[WARNING] " << STREAM.name() << ":"
+        std::cerr << FORTH_WARNING_COLOR << "[WARNING] " << STREAM.name() << ":"
                   << p.first << ":" << p.second
-                  << " Out of range number '" + word + "' will be truncated";
-        m_color.normal();
-        std::cout << m_color << std::endl;
+                  << " Out of range number '" + word + "' will be truncated"
+                  << FORTH_NORMAL_COLOR << std::endl;
         return true;
       }
 #else // FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE == FORTH_OUT_OF_RANGE_NUMBERS_ARE_WORDS
@@ -671,14 +665,12 @@ void Forth::ok(std::pair<bool, std::string> const& res)
   else
     {
       std::pair<size_t, size_t> p = STREAM.position();
-      m_color.red();
-      std::cerr << m_color << "[ERROR] from "
+      std::cerr << FORTH_ERROR_COLOR << "[ERROR] from "
                 << STREAM.name() << ':'
                 << p.first << ':'
                 << p.second << ' '
-                << res.second;
-      m_color.normal();
-      std::cerr << m_color << std::endl;
+                << res.second
+                << FORTH_NORMAL_COLOR << std::endl;
       abort(); // FIXME bad location
     }
 }
