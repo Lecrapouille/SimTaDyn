@@ -1,13 +1,37 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "ForthClibrary.hpp"
-#include "PathManager.hpp"
+#include "Config.hpp"
+#include "Logger.hpp"
+
+namespace forth
+{
 
 #define ERR_UNBALANCED std::make_pair(false, "Unbalanced C-LIB and END-C-LIB words")
 
-ForthCLib::ForthCLib()
+CLib::CLib()
 {
 }
 
-ForthCLib::~ForthCLib()
+CLib::~CLib()
 {
   if (m_file)
     m_file.close();
@@ -19,7 +43,7 @@ ForthCLib::~ForthCLib()
 //! \param
 // **************************************************************
 std::pair<bool, std::string>
-ForthCLib::code(ForthStream &stream)
+CLib::code(forth::Stream &stream)
 {
    if (!m_file)
     return ERR_UNBALANCED;
@@ -33,7 +57,7 @@ ForthCLib::code(ForthStream &stream)
 //! \param
 // **************************************************************
 std::pair<bool, std::string>
-ForthCLib::function(ForthStream &stream)
+CLib::function(forth::Stream &stream)
 {
 #warning "FIXME: si on passe aucun param et aucun code de retour alors ca bug"
   if (!m_file)
@@ -103,7 +127,7 @@ ForthCLib::function(ForthStream &stream)
       code += ";\n  *pdsp = dsp - " + std::to_string(nb_params);
     }
   holder.func_c_name = "simforth_c_" + func_c_shortname + '_' + param;
-  holder.code = "void " + holder.func_c_name + "(Cell32** pdsp)\n{\n  Cell32* dsp = *pdsp;\n  " + code + ";\n}\n";
+  holder.code = "void " + holder.func_c_name + "(forth::cell** pdsp)\n{\n  forth::cell* dsp = *pdsp;\n  " + code + ";\n}\n";
 
   // Save it in the file
   m_file << holder.code;
@@ -117,7 +141,7 @@ ForthCLib::function(ForthStream &stream)
 //! \param
 // **************************************************************
 std::pair<bool, std::string>
-ForthCLib::extlib(ForthStream &stream)
+CLib::extlib(forth::Stream &stream)
 {
   if (!m_file)
     return ERR_UNBALANCED;
@@ -133,7 +157,7 @@ ForthCLib::extlib(ForthStream &stream)
 //! \param
 // **************************************************************
 std::pair<bool, std::string>
-ForthCLib::begin(ForthStream &stream)
+CLib::begin(forth::Stream &stream)
 {
   if (!m_file)
     return ERR_UNBALANCED;
@@ -151,7 +175,7 @@ ForthCLib::begin(ForthStream &stream)
       return std::make_pair(false, "Failed creating '" + m_sourcepath + "'");
     }
   m_file << "#include <stdint.h>\n";
-  m_file << "typedef uint32_t Cell32;\n"; // FIXME: Adapt automaticaly the size Cell64 ..
+  m_file << "typedef uint32_t forth::cell;\n"; // FIXME: Adapt automaticaly the size Cell64 ..
   return std::make_pair(true, "");
 }
 
@@ -159,7 +183,7 @@ ForthCLib::begin(ForthStream &stream)
 //! \param
 // **************************************************************
 std::pair<bool, std::string>
-ForthCLib::end()
+CLib::end()
 {
   if (!m_file)
     return ERR_UNBALANCED;
@@ -199,3 +223,5 @@ ForthCLib::end()
 
   return std::make_pair(res, msg);
 }
+
+} // namespace

@@ -18,6 +18,7 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
+#include "ForthTerminalColor.hpp"
 #include "Forth.hpp"
 #include "Config.hpp"
 #include <unistd.h>
@@ -64,10 +65,9 @@ int main(int argc,char *argv[])
         }
     }
 
-  ForthDictionary dico;
+  forth::Dictionary dico;
   Forth forth(dico);
   std::pair<bool, std::string> res;
-  bool r;
   int opt;
 
   // Boot the default core. Even if the user will load
@@ -88,22 +88,16 @@ int main(int argc,char *argv[])
         // Load a dictionary
       case 'a':
       case 'l':
-        r = forth.dictionary().load(optarg, ('l' == opt));
-        if (r)
-          {
-            std::cout << "Dictionary successfully loaded from file '"
-                      << optarg << "'" << std::endl;
-          }
+        forth.load(optarg, 'l' == opt);
+        std::cout << "Dictionary successfully loaded from file '"
+                  << optarg << "'" << std::endl;
         break;
 
         // Dump a dictionary
       case 'd':
-        r = forth.dictionary().dump(optarg);
-        if (r)
-          {
-            std::cout << "Dictionary successfully dumped in file '"
-                      << optarg << "'" << std::endl;
-          }
+        forth.save(optarg);
+        std::cout << "Dictionary successfully dumped in file '"
+                  << optarg << "'" << std::endl;
         break;
 
         // Execute a script file

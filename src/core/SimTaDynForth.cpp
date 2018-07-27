@@ -76,13 +76,13 @@ SimForth::interpreteCell(ASpreadSheetCell &cell)
   m_err_stream = 0;
   STREAM.loadString(cell.formulae(), cell.name());
 
-  Cell32 value;
+  forth:cell value;
   std::pair<bool, std::string> res = parseStream();
   if (true == res.first)
     {
       try
         {
-          DPOP(value);
+          value = DPOP();
           isStackUnderOverFlow(forth::DataStack);
           cell.value(value);
         }
@@ -159,7 +159,7 @@ void SimForth::interpreteWordCaseInterprete(std::string const& word)
         {
           abort("Cell not yet evaluated");
         }
-      Cell32 number = cell.second;
+      forth:cell number = cell.second;
       DPUSH(number);
       isStackUnderOverFlow(forth::DataStack);
     }
@@ -182,15 +182,15 @@ void SimForth::interpreteWordCaseCompile(std::string const& word)
         {
           abort("Cell not yet evaluated");
         }
-      Cell32 number = cell.second;
+      forth:cell number = cell.second;
       if (number <= 65535U)
         {
-          m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_16);
+          m_dictionary.appendToken(FORTH_PRIMITIVE_LITERAL_16);
           m_dictionary.appendCell16(number);
         }
       else
         {
-          m_dictionary.appendCell16(FORTH_PRIMITIVE_LITERAL_32);
+          m_dictionary.appendToken(FORTH_PRIMITIVE_LITERAL_32);
           m_dictionary.appendCell32(number);
         }
     }

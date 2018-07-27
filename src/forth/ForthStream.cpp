@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -20,12 +20,15 @@
 
 #include "ForthStream.hpp"
 
+namespace forth
+{
+
 // **************************************************************
 //! When calling this constructor, no stream was opened. You need
-//! to call ForthStream::setFileToParse() or ForthStream::setStringToParse()
+//! to call Stream::setFileToParse() or Stream::setStringToParse()
 //! to init a stream.
 // **************************************************************
-ForthStream::ForthStream()
+Stream::Stream()
 {
   // 64 is enough for storing correct Forth words (32 char max)
   m_word.reserve(64U);
@@ -39,15 +42,15 @@ ForthStream::ForthStream()
 // **************************************************************
 //!
 // **************************************************************
-ForthStream::~ForthStream()
+Stream::~Stream()
 {
-  ForthStream::close();
+  Stream::close();
 }
 
 // **************************************************************
 //! Called by the destructor.
 // **************************************************************
-void ForthStream::close()
+void Stream::close()
 {
   if (READ_FILE != m_mode)
     return ;
@@ -61,10 +64,10 @@ void ForthStream::close()
 }
 
 // **************************************************************
-//! Called by the constructor and ForthStream::setFileToParse()
-//! or ForthStream::setStringToParse()
+//! Called by the constructor and Stream::setFileToParse()
+//! or Stream::setStringToParse()
 // **************************************************************
-void ForthStream::init()
+void Stream::init()
 {
   m_cursor_last = m_cursor_next = m_cursor_prev = m_lines = 0;
   m_eol = m_eof = true;
@@ -76,7 +79,7 @@ void ForthStream::init()
 //! \param filename the script Forth stored in an ascii file.
 //! \return a boolean indicating if the file could be opned with success.
 // **************************************************************
-bool ForthStream::loadFile(std::string const& filename)
+bool Stream::loadFile(std::string const& filename)
 {
   close();
   init();
@@ -97,7 +100,7 @@ bool ForthStream::loadFile(std::string const& filename)
 //! \param name gives a name to the forth script. It's used for
 //! example when diplaying an error.
 // **************************************************************
-void ForthStream::loadString(std::string const& str,
+void Stream::loadString(std::string const& str,
                              std::string const& name)
 {
   close();
@@ -111,7 +114,7 @@ void ForthStream::loadString(std::string const& str,
 // **************************************************************
 //!
 // **************************************************************
-void ForthStream::skipLine()
+void Stream::skipLine()
 {
   m_eol = true;
   //++m_lines;
@@ -134,7 +137,7 @@ void ForthStream::skipLine()
 // **************************************************************
 //!
 // **************************************************************
-std::string ForthStream::getLine()
+std::string Stream::getLine()
 {
   std::string line;
 
@@ -156,13 +159,13 @@ std::string ForthStream::getLine()
 // **************************************************************
 //! \return if next line was loaded.
 // **************************************************************
-bool ForthStream::refill()
+bool Stream::refill()
 {
   // End of line not reached: finish it first
   if (false == m_eol)
     return true;
 
-  // Reading a string or ForthStream not init
+  // Reading a string or Stream not init
   if (READ_FILE != m_mode)
     return false;
 
@@ -189,7 +192,7 @@ bool ForthStream::refill()
 //! \return true if the stream has more data to extract,
 //! else return false.
 // **************************************************************
-bool ForthStream::hasMoreWords()
+bool Stream::hasMoreWords()
 {
   bool res;
 
@@ -212,12 +215,12 @@ bool ForthStream::hasMoreWords()
 //! \return true if a word has been found, else return false.
 //! The word extracted is saved as m_word
 // **************************************************************
-bool ForthStream::split()
+bool Stream::split()
 {
   // Avoid accident by calling several times hasMoreWords() which
   // gives the side effect to drop previous word
   //if (false == m_word_picked)
-  //  {std::cout << "ForthStream::split 1111\n";
+  //  {std::cout << "Stream::split 1111\n";
   //    return true;}
 
   // Be sure to read an opened file
@@ -251,4 +254,6 @@ bool ForthStream::split()
   //m_word_picked = false;
 
   return false;
+}
+
 }

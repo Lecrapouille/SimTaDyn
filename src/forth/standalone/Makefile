@@ -39,8 +39,8 @@ OBJ_EXTERNAL   = backward.o
 else
 OBJ_EXTERNAL   =
 endif
-OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
+OBJ_UTILS      = Exception.o File.o ILogger.o Logger.o Path.o
+OBJ_FORTH      = ForthExceptions.o ForthUtils.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_STANDALONE = main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
@@ -56,7 +56,7 @@ LDFLAGS = `pkg-config --libs gtkmm-3.0`
 ###################################################
 #
 INCLUDES += -I$(P)/src
-VPATH += $(P)/src:
+VPATH += :$(P)/src
 
 ###################################################
 # Project defines

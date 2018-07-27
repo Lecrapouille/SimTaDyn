@@ -18,7 +18,34 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ForthExceptions.hpp"
+#ifndef FORTH_TYPES_HPP_
+#  define FORTH_TYPES_HPP_
 
-//! This macro (from the library POCO) will generate code for members.
-IMPLEMENT_EXCEPTION(ForthException, Exception, "Forth Exception")
+#  include <cstdint>
+
+// FIXME temporaire
+#  define FORTH_PRIMITIVE_LITERAL_16 0
+#  define FORTH_PRIMITIVE_LITERAL_32 1
+
+#  ifndef likely
+#    define likely(x)       __builtin_expect(!!(x),1)
+#  endif
+#  ifndef unlikely
+#    define unlikely(x)     __builtin_expect(!!(x),0)
+# endif
+
+namespace forth
+{
+  typedef uint32_t       cell;
+  typedef uint16_t       token;
+
+#  define appendToken appendCell16
+#  define readToken readCell16
+#  define appendCell appendCell32
+#  define readCell readCell32
+
+  static constexpr int cell_size = sizeof (forth::cell);
+  static constexpr int token_size = sizeof (forth::token);
+}
+
+#endif // FORTH_TYPES_HPP_

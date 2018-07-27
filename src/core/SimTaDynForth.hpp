@@ -29,12 +29,12 @@
 class ASpreadSheetCell;
 class ASpreadSheet;
 
-class SimForthDictionary : public ForthDictionary
+class SimForthDictionary : public forth::Dictionary
 {
 public:
 
   SimForthDictionary()
-    : ForthDictionary()
+    : forth::Dictionary()
   {
     LOGI("Creating SimForthDictionary");
   }
@@ -60,14 +60,14 @@ protected:
   ASpreadSheetCell *isACell(std::string const& word);
   virtual void interpreteWordCaseInterprete(std::string const& word) override;
   virtual void interpreteWordCaseCompile(std::string const& word) override;
-  bool isACell(std::string const& word, Cell32& number);
+  bool isACell(std::string const& word, forth::cell& number);
 
   virtual inline uint32_t maxPrimitives() const override
   {
     return SIMFORTH_MAX_PRIMITIVES;
   }
 
-  virtual void execPrimitive(const Cell16 idPrimitive) override
+  virtual void execPrimitive(const forth::token idPrimitive) override
   {
     switch (idPrimitive)
       {

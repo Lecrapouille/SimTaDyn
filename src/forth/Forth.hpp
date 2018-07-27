@@ -18,193 +18,205 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FORTH_INNER_HPP_
-#  define FORTH_INNER_HPP_
+#ifndef FORTH_INTERPRETER_HPP_
+#  define FORTH_INTERPRETER_HPP_
 
-//! \brief This file contains the root class for the Forth interpretor.
-//! containing other classes like dictionary and stream reader context.
+//------------------------------------------------------------------
+//! \file This file defines the Forth interpreter following the 83
+//! standard: dictionary, data stack, return stack can interprete
+//! scripts from a stream (file or string).
+//------------------------------------------------------------------
 
-#  include "ForthStream.hpp"
+#  include "ForthExceptions.hpp"
 #  include "ForthDictionary.hpp"
-#  include "ForthClibrary.hpp"
-#  include <ostream>
+#  include "ForthStack.tpp"
+#  include "ForthStream.hpp"
+
 
 // **************************************************************
-// When Forth reads a number which does not fit in the expected
-// number of bits, what is the expected strategy ? Ignore it as
-// a number which probably produce an undefined dictionary word
-// or truncated it with a warning message.
-// **************************************************************
-#define FORTH_OUT_OF_RANGE_NUMBERS_ARE_WORDS 0
-#define FORTH_TRUNCATE_OUT_OF_RANGE_NUMBERS  1
-#ifndef FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE
-#  define FORTH_BEHAVIOR_NUMBER_OUT_OF_RANGE FORTH_TRUNCATE_OUT_OF_RANGE_NUMBERS
-#endif
+#define MAX_OPENED_STREAMS   (16U)    // depth of INCLUDE calls
 
-//! \class Forth
-//! \brief class containg the whole Forth interpretor context.
+// **************************************************************
+//! \brief Forth interpreter mode
+// **************************************************************
+namespace forth
+{
+  enum class state
+    {
+      //! \brief Forth interpreter in interpreting mode.
+      Interprete,
+      //! \brief Forth interpreter in compilation mode.
+      Compile,
+      Comment
+    };
+
+  // **************************************************************
+  //! \brief When a Forth interpreter see that a script includes other
+  //! scripts, it will push them in a stack and pop them when the end of
+  //! the file is reached.
+  // **************************************************************
+  struct StreamStack
+  {
+    //! The stack of opened streams.
+    forth::Stream stack[MAX_OPENED_STREAMS];
+    //! Top of the stack pointer. The stack depth indicates the number
+    //! of opened streams.
+    uint32_t    opened;
+    //! When the Forth interpreter detects a fault, save the stream
+    //! which produced the fault.
+    uint32_t    faulty;
+  };
+}
+
+// **************************************************************
+//! \brief Forth interpreter context
+// **************************************************************
 class Forth
 {
 public:
+
+  //------------------------------------------------------------------
   //! \brief Constructor with the reference of a Forth dictionary for
-  //! an easier inheritance management.
-  Forth(ForthDictionary& dico);
+  //! an easier inheritance management. A minimalist Forth is avalaible
+  //! an if you want to load more stuffs on it call the boot() method.
+  //------------------------------------------------------------------
+  Forth(forth::Dictionary& dico);
+
+  //------------------------------------------------------------------
+  //! \brief Destructor
+  //------------------------------------------------------------------
+  ~Forth();
+
   //! \brief Load all Forth primitives in the dictionary.
   virtual void boot();
-  //! \brief interprete a new forth word extracted from a stream.
-  virtual void interpreteWord(std::string const& word);
-  //! \brief interprete a Forth script stored as a string.
-  std::pair<bool, std::string> interpreteString(std::string const& code_fort,
-                                                std::string const& name = "<string>");
-  //! \brief interprete a Forth script stored as a char*.
-  virtual std::pair<bool, std::string> interpreteString(const char* const code_forth,
-                                                std::string const& name = "<string>");
-  //! \brief interprete a Forth script stored in an ascii file.
-  std::pair<bool, std::string> interpreteFile(std::string const& filename);
-  //! \brief Display the result prompt after interpreting a script.
-  virtual void ok(std::pair<bool, std::string> const& res);
-  //! \brief Accessor. Return the reference of the dictionary as const.
-  inline const ForthDictionary& dictionary() const { return m_dictionary; }
-  //! \brief Accessor. Return the reference of the dictionary.
-  inline ForthDictionary& dictionary() { return m_dictionary; }
-  //! \brief Accessor. Get the reference of a new forth dictionary.
-  inline void dictionary(ForthDictionary& dico) { m_dictionary = dico; }
-  //! \brief Complete the name a forth word from the dictionary.
-  const char* completion(std::string const& partial_name);
-  //! \brief Display the data stack.
-  virtual void displayStack(std::ostream& stream, const forth::StackID id) const;
-  //! \brief restore the Forth context to its initial state.
-  void abort();
-  //! \brief restore the Forth context to its initial state and throw
-  //! an exception.
-  void abort(std::string const& msg);
-  //! \brief Try converting a Forth word as a number.
-  bool toNumber(std::string const& word, Cell32& number) const;
-  //! \brief Return the name of the stream which triggereg a fault.
-  inline const std::string& nameStreamInFault() const
-  {
-    return m_streams_stack[m_err_stream].name();
-  }
-  //!
-  void displayDictionary()
-  {
-    dictionary().display(maxPrimitives());
-  }
-protected:
-  virtual void interpreteWordCaseInterprete(std::string const& word);
-  virtual void interpreteWordCaseCompile(std::string const& word);
-  //! \brief Create the header of a Forth word in the dictionary.
-  void create(std::string const& word);
-  //! \brief Get the Forth word in the stream.
-  //! Called by Forth words needed to extract the next word. The
-  //! stream shall contains at least one word else an exception is
-  //! triggered.
-  //! \return the next Forth word in the stream.
-  //! \throw UnfinishedStream
-  inline const std::string& nextWord()
-  {
-    if (!STREAM.hasMoreWords())
-    {
-      UnfinishedStream e(m_state);
-      throw e;
-    }
-    return STREAM.nextWord();
-  }
+
+  //------------------------------------------------------------------
   //! \brief
-  std::pair<bool, std::string> parseStream();
-  //! \brief Parse an included file when parsing a Forth script.
+  //------------------------------------------------------------------
+  inline void save(std::string const& filename) const
+  {
+    m_dictionary.save(filename);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline void load(std::string const& filename, const bool replace)
+  {
+    m_dictionary.load(filename, replace);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline void displayDictionary() const
+  {
+    m_dictionary.display(maxPrimitives());
+  }
+
+  std::pair<bool, std::string> interpreteStream();
+
+  std::pair<bool, std::string>
+  interpreteString(std::string const& forth_script, std::string const& script_name = "<string>");
+
+  std::pair<bool, std::string> interpreteFile(std::string const& filename);
+
+  void ok(std::pair<bool, std::string> const& res);
+
+  inline const char* completeWordName(std::string const& partial_name) const
+  {
+    return m_dictionary.completeWordName(partial_name);
+  }
+
+  //! \brief Accessor. Return the reference of the dictionary as const.
+  inline const forth::Dictionary& dictionary() const { return m_dictionary; }
+  //! \brief Accessor. Return the reference of the dictionary.
+  inline forth::Dictionary& dictionary() { return m_dictionary; }
+
+protected:
+
+  virtual uint32_t maxPrimitives() const;
+
+private:
+
+  //------------------------------------------------------------------
+  //! \brief Reset the Forth context to its initial state.
+  //------------------------------------------------------------------
+  void reset();
+
+  //------------------------------------------------------------------
+  //! \brief When Forth displays numbers on screen, it convert
+  //! them into the current base. This getter allows to change
+  //! the current base.
+  //------------------------------------------------------------------
+  bool setBase(const uint8_t base);
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  bool toNumber(std::string const& word, forth::cell& number) const;
+
+  //------------------------------------------------------------------
+  //! \brief Throw an exception which will abort the Forth
+  //! interpreter.
+  //! \throw ForthException with a message inside.
+  //! \param msg the message to pass in the exception.
+  //------------------------------------------------------------------
+  inline void abort(std::string const& msg) const
+  {
+    throw ForthException(MSG_EXCEPTION_ABORT_FORTH(msg));
+  }
+
+  void executeToken(forth::token const token);
+
+  // FIXME a placer dans le code du mot :
+  void startCompilingWord(std::string const& word);
+
+  void parseStream();
+
   void includeFile(std::string const& filename);
-  //! \brief Perform the action of a Forth primitive.
-  virtual void execPrimitive(const Cell16 idPrimitive);
-  //! \brief Perform the action of a Forth token (byte code).
-  virtual void execToken(const Cell16 token);
-  //! \brief Return the depth of the return stack.
-public: // FIXME
-  inline int32_t stackDepth(const forth::StackID id) const
-  {
-    switch (id)
-      {
-      case forth::DataStack:
-        return m_dsp - m_data_stack;
-      case forth::ReturnStack:
-        return m_rsp - m_return_stack;
-      case forth::AuxStack:
-        return m_asp - m_alternative_stack;
-      default:
-        LOGES("Pretty print this stack %u is not yet implemented", id);
-        return 0;
-      }
-  }
-protected:
-  virtual inline uint32_t maxPrimitives() const
-  {
-    return FORTH_MAX_PRIMITIVES;
-  }
-  //! \brief Return the token is a Forth primitive (or a user defined word).
-  virtual inline bool isPrimitive(const Cell16 token) const
-  {
-    return /*(token >= 0) &&*/ (token < maxPrimitives());
-  }
-  //! \brief Check if the data stack is not under/overflowing.
-  int32_t isStackUnderOverFlow(const forth::StackID id) const; // FIXME: a renommer en checkStack
-  //! \brief Change the base of displayed numbers.
-  bool changeDisplayBase(const uint8_t base);
+  void skipCommentary();
 
-protected:
+  /*inline   forth::Stream& currentStream()
+  {
+    return m_streams.stack[m_streams.opened];
+  }
 
-  //! Data stack: store function parameters.
-  Cell32  m_data_stack_[STACK_SIZE];
-  //! Data stack with a marging of security to prevent against stack underflow.
-  Cell32  *m_data_stack;
-  //! Alternative data stack (secondary stack).
-  Cell32  m_alternative_stack_[STACK_SIZE];
-  //! Alternative stack with a marging of security to prevent against
-  //! stack underflow.
-  Cell32  *m_alternative_stack;
-  //! Return stack: store word tokens (function addresses)
-  Cell32  m_return_stack_[STACK_SIZE];
-  //! Return stack with a marging of security to prevent against stack
-  //! underflow.
-  Cell32  *m_return_stack;
-  //! Top of Stack
-  Cell32  m_tos, m_tos1, m_tos2, m_tos3, m_tos4;
-  // Registers
-  Cell32 *m_dsp;   //! Data stack pointer
-  Cell32 *m_asp;   //! Alternative data stack pointer
-  Cell32 *m_rsp;   //! Return stack pointer
-  Cell16  m_ip;    //! Instruction pointer (CFA of the next word to be executed)
-  int32_t m_base;  //! Base (octal, decimal, hexa) when displaying numbers
-  Cell32  m_state; //! compile/execution
-  int32_t  m_depth_at_colon; //! Save the stack depth before creating a new Forth word.
-  Cell16  m_last_at_colon;   //! Save the last dictionary entry before creating a new Forth word.
-  Cell16  m_here_at_colon;   //! Save the last dictionary free slot before creating a new Forth word.
-  std::string m_creating_word; //! The Forth word currently in creation.
-  Cell32  m_saved_state; //! Save the interpreter state when enetring in a comment.
-  ForthStream m_streams_stack[MAX_OPENED_STREAMS]; //! A stack of streams when script file include other files
-  ForthCLib m_dynamic_libs; //! Load C dynamic libs and load them as Forth words.
-  uint32_t m_opened_streams; //! Number of streams opened.
-  ForthDictionary& m_dictionary; //! Forth dictionary.
-  bool  m_trace; //! Trace the execution of a word.
-  Cell16 m_last_completion;
-  int32_t m_err_stream;
+  inline   forth::Stream const& currentStream() const
+  {
+    return m_streams.stack[m_streams.opened];
+  }
+
+  inline   forth::Stream const& faultyStream() const
+  {
+    return m_streams.stack[m_streams.faulty];
+    }*/
+
+private:
+
+  //! \brief Forth dictionary.
+  forth::Dictionary& m_dictionary;
+  //! \brief Return stack: store word address when executing a word.
+  //! \note while the return stack is made for stoeing tokens, in classic
+  //! Forth it also stores temporarily elements of the data stack and
+  //! therefore the type should be the same.
+  forth::Stack<forth::cell> m_return_stack;
+  //! \brief Data stack: store function parameters (operands).
+  forth::Stack<forth::cell> m_data_stack;
+  //! \brief Alternative data stack (secondary stack).
+  //ForthStack<forth::cell> m_auxiliary_stack;
+  //! \brief Registers: Top Of Stack
+  forth::cell m_tos, m_tos1, m_tos2, m_tos3, m_tos4;
+  //! \brief Instruction pointer (CFA of the next word to be executed)
+  forth::token m_ip;
+  //! \brief Current and previous Forth interpreter state: compile, execution
+  forth::state m_state[2];
+  //! \brief Current base (octal, decimal, hexa) when displaying numbers
+  uint8_t m_base;
+  //! \brief Save informations on streams currently reading by Forth.
+  forth::StreamStack m_streams;
+  //! \brief Load C dynamic libs and load them as Forth words.
+  //ForthCLib m_clibs;
 };
 
-class ForthStackDiplayer
-{
-public:
-  ForthStackDiplayer(const Forth *const forth, const forth::StackID id)
-    : m_forth(forth), m_id(id)
-  {
-  }
-
-  const Forth *const m_forth;
-  forth::StackID m_id;
-};
-
-inline std::ostream& operator<<(std::ostream& os, const ForthStackDiplayer& s)
-{
-  s.m_forth->displayStack(os, s.m_id);
-  return os;
-}
-
-#endif /* FORTH_INNER_HPP_ */
+#endif

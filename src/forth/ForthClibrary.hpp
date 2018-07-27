@@ -1,12 +1,36 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef FORTHCLIBRARY_HPP
 #  define FORTHCLIBRARY_HPP
 
+#  include "ForthTypes.hpp"
 #  include "ForthStream.hpp"
 #  include <glibmm/module.h>
 #  include <vector>
 #  include <utility>
 
-typedef void (*forth_c_function)(Cell32**);
+namespace forth
+{
+
+  typedef void (*forth_c_function)(forth::cell**);
 
 // A siplifier std::string
 struct CFuncHolder
@@ -20,12 +44,12 @@ struct CFuncHolder
 // **************************************************************
 //! \brief
 // **************************************************************
-class ForthCLib
+class CLib
 {
 public:
 
-  ForthCLib();
-  ~ForthCLib();
+  CLib();
+  ~CLib();
 
   //------------------------------------------------------------------
   //! \brief Start a C library interface with name.
@@ -36,8 +60,8 @@ public:
   //! C-LIB library-name
   //! \return true if the temporary file has been created, else false.
   //------------------------------------------------------------------
-  std::pair<bool, std::string> begin(ForthStream &stream);
-  std::pair<bool, std::string> extlib(ForthStream &stream);
+  std::pair<bool, std::string> begin(forth::Stream &stream);
+  std::pair<bool, std::string> extlib(forth::Stream &stream);
 
   //------------------------------------------------------------------
   //! \brief Append a line of C code in the temporary c file created by
@@ -46,12 +70,12 @@ public:
   //! Forth code example:
   //! \c #include <stdio.h>
   //------------------------------------------------------------------
-  std::pair<bool, std::string> code(ForthStream &stream);
+  std::pair<bool, std::string> code(forth::Stream &stream);
 
   //------------------------------------------------------------------
   //! \brief Mandatory by design.
   //------------------------------------------------------------------
-  std::pair<bool, std::string> function(ForthStream &stream);
+  std::pair<bool, std::string> function(forth::Stream &stream);
 
   //------------------------------------------------------------------
   //! \brief Finish and (if necessary) build the latest C library interface.
@@ -72,5 +96,7 @@ private:
   bool m_closed;
   Glib::Module *m_module; // Yeah pointer else local will close file and lost func pointers
 };
+
+} // namespace
 
 #endif

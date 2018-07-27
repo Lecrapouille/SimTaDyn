@@ -21,153 +21,100 @@
 #ifndef FORTH_PRIMITIVES_HPP_
 #  define FORTH_PRIMITIVES_HPP_
 
-#define FORTH_DICO_ENTRY(a) a, ((sizeof a) - 1U)
+//------------------------------------------------------------------
+//! \file This file defines two ways for defining primitives:
+//! -- the first uses a classic switch(token) { case XXX: ... }
+//! -- the second uses computed goto with is 25% faster than switch
+//------------------------------------------------------------------
 
 enum ForthPrimitives
   {
     // Dummy word and comments
-    FORTH_PRIMITIVE_NOP = 0,
-    FORTH_PRIMITIVE_LPARENTHESIS,
-    FORTH_PRIMITIVE_RPARENTHESIS,
-    FORTH_PRIMITIVE_COMMENTARY,
-
-    FORTH_PRIMITIVE_LOAD_SHARED_LIB,
-    FORTH_PRIMITIVE_SYMBOL,
-
-    // Words for definitions
-    FORTH_PRIMITIVE_COLON,
-    FORTH_PRIMITIVE_SEMICOLON,
-    FORTH_PRIMITIVE_PCREATE,
-    FORTH_PRIMITIVE_CREATE,
-    FORTH_PRIMITIVE_BUILDS,
-    FORTH_PRIMITIVE_DOES,
-    FORTH_PRIMITIVE_IMMEDIATE,
-    FORTH_PRIMITIVE_SMUDGE,
-    FORTH_PRIMITIVE_STATE,
-    FORTH_PRIMITIVE_TRACE_ON,
-    FORTH_PRIMITIVE_TRACE_OFF,
-
-    // Words
-    FORTH_PRIMITIVE_TICK,
-    FORTH_PRIMITIVE_COMPILE,
-    FORTH_PRIMITIVE_ICOMPILE,
-    FORTH_PRIMITIVE_POSTPONE,
-    FORTH_PRIMITIVE_ABORT,
-    FORTH_PRIMITIVE_EXECUTE,
-    FORTH_PRIMITIVE_LBRACKET,
-    FORTH_PRIMITIVE_RBRACKET,
-
-    // Dictionnary manipulation
-    FORTH_PRIMITIVE_LAST,
-    FORTH_PRIMITIVE_HERE,
-    FORTH_PRIMITIVE_ALLOT,
-    FORTH_PRIMITIVE_COMMA8,
-    FORTH_PRIMITIVE_COMMA16,
-    FORTH_PRIMITIVE_COMMA32,
-    FORTH_PRIMITIVE_FETCH,
-    FORTH_PRIMITIVE_STORE8,
-    FORTH_PRIMITIVE_STORE16,
-    FORTH_PRIMITIVE_STORE32,
-    FORTH_PRIMITIVE_CMOVE,
-
-    // Words changing IP
-    FORTH_PRIMITIVE_EXIT,
-    FORTH_PRIMITIVE_BRANCH,
-    FORTH_PRIMITIVE_0BRANCH,
-
-    // Return Stack
-    FORTH_PRIMITIVE_TO_RSTACK,
-    FORTH_PRIMITIVE_FROM_RSTACK,
-    FORTH_PRIMITIVE_2TO_RSTACK,
-    FORTH_PRIMITIVE_2FROM_RSTACK,
-
-    // Loops
-    //FORTH_PRIMITIVE_DO,
-    //FORTH_PRIMITIVE_LOOP,
-    FORTH_PRIMITIVE_I,
-    FORTH_PRIMITIVE_J,
-
-    // cell sizeof
-    FORTH_PRIMITIVE_CELL,
-    FORTH_PRIMITIVE_CELLS,
-
-    // Literals
-    FORTH_PRIMITIVE_LITERAL_16,
-    FORTH_PRIMITIVE_LITERAL_32,
-
-    // Arithmetic
-    FORTH_PRIMITIVE_ABS,
-    FORTH_PRIMITIVE_NEGATE,
-    FORTH_PRIMITIVE_MIN,
-    FORTH_PRIMITIVE_MAX,
-    FORTH_PRIMITIVE_PLUS,
-    FORTH_PRIMITIVE_1PLUS,
-    FORTH_PRIMITIVE_2PLUS,
-    FORTH_PRIMITIVE_MINUS,
-    FORTH_PRIMITIVE_1MINUS,
-    FORTH_PRIMITIVE_2MINUS,
-    FORTH_PRIMITIVE_TIMES,
-    FORTH_PRIMITIVE_DIV,
-    FORTH_PRIMITIVE_RSHIFT,
-    FORTH_PRIMITIVE_LSHIFT,
-
-    // Base
-    FORTH_PRIMITIVE_BINARY,
-    FORTH_PRIMITIVE_OCTAL,
-    FORTH_PRIMITIVE_HEXADECIMAL,
-    FORTH_PRIMITIVE_DECIMAL,
-    FORTH_PRIMITIVE_SET_BASE,
-    FORTH_PRIMITIVE_GET_BASE,
-
-    // Logic
-    FORTH_PRIMITIVE_FALSE,
-    FORTH_PRIMITIVE_TRUE,
-    FORTH_PRIMITIVE_GREATER,
-    FORTH_PRIMITIVE_GREATER_EQUAL,
-    FORTH_PRIMITIVE_LOWER,
-    FORTH_PRIMITIVE_LOWER_EQUAL,
-    FORTH_PRIMITIVE_EQUAL,
-    FORTH_PRIMITIVE_0EQUAL,
-    FORTH_PRIMITIVE_NOT_EQUAL,
-    FORTH_PRIMITIVE_AND,
-    FORTH_PRIMITIVE_OR,
-    FORTH_PRIMITIVE_XOR,
-
-    // Data Stack
-    FORTH_PRIMITIVE_DEPTH,
-    FORTH_PRIMITIVE_ROLL,
-    FORTH_PRIMITIVE_NIP,
-    FORTH_PRIMITIVE_PICK,
-    FORTH_PRIMITIVE_DUP,
-    FORTH_PRIMITIVE_QDUP,
-    FORTH_PRIMITIVE_DROP,
-    FORTH_PRIMITIVE_SWAP,
-    FORTH_PRIMITIVE_OVER,
-    FORTH_PRIMITIVE_ROT,
-    FORTH_PRIMITIVE_TUCK,
-    FORTH_PRIMITIVE_2DUP,
-    FORTH_PRIMITIVE_2SWAP,
-    FORTH_PRIMITIVE_2DROP,
-    FORTH_PRIMITIVE_2OVER,
-
-    // Printf
-    FORTH_PRIMITIVE_DISP,
-    FORTH_PRIMITIVE_UDISP,
-    FORTH_PRIMITIVE_CARRIAGE_RETURN,
-    FORTH_PRIMITIVE_DISPLAY_DSTACK,
-
-    // C lib
-    FORTH_PRIMITIVE_BEGIN_C_LIB,
-    FORTH_PRIMITIVE_END_C_LIB,
-    FORTH_PRIMITIVE_ADD_EXT_C_LIB,
-    FORTH_PRIMITIVE_C_FUNCTION,
-    FORTH_PRIMITIVE_C_CODE,
-    FORTH_PRIMITIVE_EXEC_C_FUNC,
-
-    // Files
-    FORTH_PRIMITIVE_INCLUDE,
-
+    TOK_NOOP = 0,
+    TOK_DUP,
+    TOK_ADD,
+    TOK_DISP,
     FORTH_MAX_PRIMITIVES
   };
 
-#endif /* FORTH_PRIMITIVES_HPP_ */
+// **************************************************************
+// Data stack (function parameters manipulation)
+#  define DPUSH(n) m_data_stack.push(n)             // Store the cell value on the top of stack
+#  define DDROP()  m_data_stack.drop()              // Discard the top of the stack
+#  define DPOP()   m_data_stack.pop()               // Discard the top of the stack and save its value in the register r
+#  define DPICK(n) m_data_stack.pick(n)             // Look at the nth element (n >= 1) of the stack from the top (1 = 1st element)
+
+// **************************************************************
+// Return stack
+#  define RPUSH(n) m_return_stack.push(n)             // Store the cell value on the top of stack
+#  define RDROP()  m_return_stack.drop()              // Discard the top of the stack
+#  define RPOP( )  m_return_stack.pop()               // Discard the top of the stack and save its value in the register r
+#  define RPICK(n) m_return_stack.pick(n)             // Look at the nth element (n >= 1) of the stack from the top (1 = 1st element)
+
+#  ifdef USE_COMPUTED_GOTO
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define DISPATCH(xt) goto *c_primitives[xt]
+
+// #   define DEF_LABEL(a) c_primitives[TOK_##a] = &&L_##a
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define CODE(a)    /*DEF_LABEL(a);*/ L_##a:
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define NEXT                                                        \
+  if (*m_ip < FORTH_MAX_PRIMITIVES) goto *c_primitives[*m_ip++];        \
+  else throw ForthException("unknown token");
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define UNKNOWN    L_UNKNOWN:
+
+//------------------------------------------------------------------
+//! \brief Dispatch table Forth primitives.
+//------------------------------------------------------------------
+#   define DECLARE_DISPATCH_TABLE                       \
+  static void *c_primitives[FORTH_MAX_PRIMITIVES] =     \
+    {                                                   \
+      [TOK_NOOP] = &&L_NOOP,                            \
+      #include "primitives/dstack.h"                    \
+    };
+
+// *****************************************************************
+#  else // !USE_COMPUTED_GOTO
+// *****************************************************************
+
+//------------------------------------------------------------------
+//! \brief No dispatch table Forth primitives (only for computed goto)
+//------------------------------------------------------------------
+#   define DECLARE_DISPATCH_TABLE
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define DISPATCH(xt) switch (xt)
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define CODE(a)    case TOK_##a:
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define NEXT       break
+
+//------------------------------------------------------------------
+//! \brief
+//------------------------------------------------------------------
+#    define UNKNOWN    default:
+
+#  endif // USE_COMPUTED_GOTO
+#endif // FORTH_PRIMITIVES_HPP_

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,22 +18,25 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FORTH_READER_HPP_
-#  define FORTH_READER_HPP_
+#ifndef FORTH_STREAM_HPP_
+#  define FORTH_STREAM_HPP_
 
 //! \brief This file contains the class managing a stream for feeding a
 //! Forth interpreter. See this class like a word splitter.
 
-#  include "ForthHelper.hpp"
-// #  include <fstream>
+#  include <fstream>
+#  include <string>
 
-class ForthStream
+namespace forth
+{
+
+class Stream
 {
 public:
   //! \brief Constructor. No stream are yet opened.
-  ForthStream();
+  Stream();
   //! \brief Destructor. Close the opened stream.
-  ~ForthStream();
+  ~Stream();
   //! \brief For feeding a Forth interpreter with an ascii file.
   bool loadFile(std::string const& filename);
   //! \brief For feeding a Forth interpreter with a string.
@@ -46,7 +49,7 @@ public:
   //! \brief Return the current line
   std::string getLine();
   //! \brief Accessor. Return the current extracted Forth word
-  //! called by ForthStream::hasMoreWords().
+  //! called by Stream::hasMoreWords().
   inline const std::string& nextWord() const
   {
     //m_word_picked = true;
@@ -112,4 +115,6 @@ public:
   int32_t m_base;         // Save the base (octal, decimal, hexa) for displaying numbers
 };
 
-#endif /* FORTH_READER_HPP_ */
+} // namespace
+
+#endif /* FORTH_STREAM_HPP_ */

@@ -18,96 +18,251 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
+#include "Logger.hpp"
+#include "ForthStream.hpp"
 #include "ForthDictionary.hpp"
-#include <cstring>
+#include "ForthExceptions.hpp"
+#include "ForthTerminalColor.hpp"
+#include <cstring> // for memset
 
-// **************************************************************
-//! Initialize dictionary states to obtain an empty dictionary
-//! (with no Forth words inside).
-// **************************************************************
-ForthDictionary::ForthDictionary()
+namespace forth
+{
+
+//------------------------------------------------------------------
+//! Original Forth structure is:
+//! - 1 byte for flags:
+//!   - 8th bit: always set to 1 for finding the begining of the word
+//!              definition in the dictionary.
+//!   - 7th bit: precedence bit: when set to 1 the word is immediatly
+//!              computed even if the interpreter is in compilation
+//!              mode.
+//!   - 6th bit: smudge bit: when set to 1 that means the word is valid
+//!   - 5th bit -- 1st bit: are used for storing the word name length.
+//------------------------------------------------------------------
+#define STARTING_BIT          (0x80) // A word has always this bit set (historical)
+#define IMMEDIATE_BIT         (0x40) // A word immediate is interpreted during the compilation
+#define SMUDGE_BIT            (0x20) // When set this word is forgotten by the dictionnary
+#define MASK_FORTH_NAME_SIZE  (0x1F) // 5 first bits are used to store the word name length
+#define MASK_FORTH_FLAGS      (0x7F) // Mask for removing STARTING_BIT and word name length
+
+//------------------------------------------------------------------
+//! Memory operation helpers
+//------------------------------------------------------------------
+//! \brief Bit swapping for changing the endianness of a 32-bit word
+#define BSWAP32(x) (((x) & 0xff) << 24 | ((x) & 0xff00) << 8 | ((x) & 0xff0000) >> 8 | ((x) >> 24) & 0xff)
+//! \brief Bit swapping for changing the endianness of a 16-bit word
+#define BSWAP16(x) (((x) & 0xff) << 8 | (((x) & 0xff00) >> 8))
+//! \brief Used for aligning 32-bits addresses
+#define NEXT_MULTIPLE_OF_4(x) (((x) + 3) & ~0x03)
+//! \brief Used for aligning 16-bits addresses
+#define NEXT_MULTIPLE_OF_2(x) (((x) + 1) & ~0x01)
+
+//------------------------------------------------------------------
+Dictionary::Dictionary()
 {
   LOGI("Creating Forth dictionnary");
+  static_assert(FORTH_DICTIONARY_SIZE <= FORTH_DICTIONARY_MAX_SIZE);
   m_here = 0U;
   m_last = 0U;
-
-  // Useless but valgrind is complaining else
-  std::memset(m_dictionary, 0u, DICTIONARY_SIZE);
+  std::memset(m_dictionary, 0u, FORTH_DICTIONARY_SIZE);
 }
 
-ForthDictionary::~ForthDictionary()
+Dictionary::~Dictionary()
 {
   LOGI("Destroying Forth dictionnary");
 }
 
-// **************************************************************
-//! The new entry is stored at the end of the dictionary (the
-//! location given ForthDictionary::m_here which is updated as well
-//! ForthDictionary::m_last).
-//! \param token either the CFA of a none primitive word or the value
-//! of enum ForthPrimitives.
+//------------------------------------------------------------------
+//! Save the dictionnary in a binary file. The user can use the
+//! command hexdump -C filename for debuging the dictionary.
+//! \param filename the file name where the dictionary will be stored.
+//! \return a boolean indicating if the process succeeded.
+//------------------------------------------------------------------
+void Dictionary::save(std::string const& filename) const
+{
+  std::ofstream out(filename, std::ios::out | std::ios::binary | std::ios::trunc);
+
+  if (!out.is_open())
+    throw ForthException(MSG_EXCEPTION_FORTH_SAVE_DICO_NO_FILE(filename));
+
+  // Store all the dictionary
+  out.write((char*) m_dictionary, m_here + forth::token_size);
+  out.close();
+
+  // Append LAST word
+  uint8_t buffer[2] = { uint8_t(m_last >> 8), uint8_t(m_last) }; // FIXME: casse si token != Cell16
+  out.write((char*) buffer, sizeof (buffer));
+}
+
+//------------------------------------------------------------------
+//! Load a dictionnary from a binary file.
+//! \param filename the filename containing a dictionary. Note: no
+//! verification is made for checking if the dictionary image is well
+//! formed or is a real dictionary file.
+//! \param replace if true the old dictionary is smashed else the
+//! new dictionary is appened to the old one.
+//! \return a boolean indicating if the process succeeded.
+//------------------------------------------------------------------
+void Dictionary::load(std::string const& filename, const bool replace)
+{
+  std::ifstream in(filename, std::ios::in | std::ios::binary);
+
+  if (!in.is_open())
+    throw ForthException(MSG_EXCEPTION_FORTH_LOAD_DICO_NO_FILE(filename));
+
+  // Get the length of file
+  in.seekg(0, in.end);
+  uint32_t length(in.tellg());
+  in.seekg(0, in.beg);
+
+  // Empty file ?
+  if (length == 0)
+    return ;
+
+  // Failure ?
+  if (((int) length) < 0)
+    throw ForthException(MSG_EXCEPTION_FORTH_FAILED_LOADING_DICO(filename));
+
+  // Load the dictionary containing an additional token: the content
+  // of Forth word LAST.
+  if (replace)
+    {
+      // Check for space
+      if (length > FORTH_DICTIONARY_SIZE)
+        throw ForthException(MSG_EXCEPTION_FORTH_LOAD_DICO_NO_SPACE(filename));
+
+      // Smash the old dictionary
+      in.read((char*) m_dictionary, length);
+
+      // Update Forth words LAST and HERE.
+      // Remove token_size because LAST was stored in file.
+      m_here = m_here - forth::token_size;
+      m_last = read16at(m_here);
+    }
+  else
+    {
+      // Check for space
+      if (m_here + length > FORTH_DICTIONARY_SIZE)
+        throw ForthException(MSG_EXCEPTION_FORTH_LOAD_DICO_NO_SPACE(filename));
+
+      // Append the dictionary
+      in.read((char*) m_dictionary + m_here, length);
+
+      // Link the PFA of 1st entry of the new dictionary to
+      // the PFA of the last entry of the previous dictionary
+      forth::cell word_length = m_dictionary[m_here] & MASK_FORTH_NAME_SIZE;
+      write16at(m_here + word_length + 1U, m_here - m_last);
+
+      // Update Forth words LAST and HERE.
+      // Remove token_size because LAST was stored in file.
+      m_here = m_here + length - forth::token_size;
+      m_last = length - forth::token_size + read16at(m_here);
+    }
+}
+
+//------------------------------------------------------------------
+//! The new Forth word entry is stored at the end of the dictionary
+//! (the location given Dictionary::m_here which is updated as
+//! well Dictionary::m_last).
+//!
+//! \param token either the CFA of a none primitive word or the enum
+//! of a Forth primitive.
+//!
 //! \param name of the Forth word.
-//! \param immediate a boolean indicating if the word shall be interpreted when compiled.
+//!
+//! \param immediate a boolean indicating if the word shall be interpreted
+//! during the compilation.
+//!
 //! \throw MalformedForthWord is the name of the word length is not <= 31
 //! characters.
 //! \throw NoSpaceDictionary if the dictionary is full.
-// **************************************************************
-void ForthDictionary::add(const Cell16 token, std::string const& name, const bool immediate)
-{
-  add(token, name.c_str(), name.size(), immediate);
-}
-
-void ForthDictionary::add(const Cell16 token, char const* name, const bool immediate)
-{
-  add(token, name, strlen(name), immediate);
-}
-
-void ForthDictionary::add(const Cell16 token, char const* name, const uint32_t length, const bool immediate)
+//------------------------------------------------------------------
+void Dictionary::compileWord(const forth::token token, char const* name,
+                                  const uint32_t length, const bool immediate)
 {
   // Forth words are max 31 bytes long
-  if ((length > 31U) || (0U == length))
-    {
-      MalformedForthWord e(name); throw e;
-    }
+  if (unlikely((MASK_FORTH_NAME_SIZE < length) || (0U == length)))
+    throw ForthException(MSG_EXCEPTION_FORTH_NAME_TOO_LONG(name));
 
   // No more space in the m_dictionary ?
-  if (length + 8U > DICTIONARY_SIZE) // 8U = padded(1: flags, 2: NFA, 2: token, 2: EXIT)
-    {
-      NoSpaceDictionary e; throw e;
-    }
+  // 8U = padding_of(1 bit: flags + 2 bits: NFA + 2 bits: token + 2: EXIT) // FIXME: casse si token != Cell16
+  if (unlikely(m_here + length + 8U > FORTH_DICTIONARY_SIZE))
+    throw ForthException(MSG_EXCEPTION_FORTH_DICTIONARY_IS_FULL);
 
-  Cell32 nfa = m_here - m_last;
+  // Words are stored as list link
+  forth::cell lfa = m_here - m_last;
   m_last = m_here;
 
   // Store the word header
-  appendCell8((1U << 7U) | (immediate << 6U) | length);
+  appendCell8(STARTING_BIT | (immediate ? IMMEDIATE_BIT : 0) | length);
 
   // Store the word name
   for (uint8_t i = 0; i < length; ++i)
-    {
-      appendCell8(name[i]);
-    }
+    appendCell8(name[i]);
 
-  // Store the NFA of the preceding word
-  appendCell16(nfa);
+  // Store the link with the preceding word
+  appendToken(lfa);
 
-  // Store the token
-  appendCell16(token);
+  // Store the execution token (allow to distinguish between primitive
+  // and user word
+  appendToken(token);
 }
 
-// **************************************************************
-//! Convert a string into a token.
-//! \param name (in) the name of the Forth word.
+//------------------------------------------------------------------
+//! The new Forth word entry is stored at the end of the dictionary
+//! (the location given Dictionary::m_here which is updated as
+//! well Dictionary::m_last).
+//!
+//! \param name of the Forth word.
+//------------------------------------------------------------------
+void Dictionary::compileWord(std::string const& word)
+{
+  forth::token size = m_here + word.size() + 3U; // 3U: flags + NFA // FIXME: casse si token != Cell16
+  compileWord(size, word.c_str(), word.size(), false);
+}
+
+//------------------------------------------------------------------
+//! \param token.
+//------------------------------------------------------------------
+void Dictionary::compileToken(forth::token const token)
+{
+  appendToken(token);
+}
+
+//------------------------------------------------------------------
+//! \param value.
+//------------------------------------------------------------------
+void Dictionary::compileLiteral(forth::cell const value)
+{
+  // Optimize dictionary size
+  if (value <= 65535U)
+    {
+      appendToken(FORTH_PRIMITIVE_LITERAL_16);
+      appendCell16(value);
+    }
+  else
+    {
+      appendToken(FORTH_PRIMITIVE_LITERAL_32);
+      appendCell32(value);
+    }
+}
+
+//------------------------------------------------------------------
+//! Look for a word and if found get its informations: token, immediate.
+//! \param name (in) the name of the Forth word to look for.
 //! \param token (out) returns the token value if the word was found.
 //! \param immediate (out) returns if the found word is immediate.
 //! \return true if the word was found in the dictionary, else return false.
-// **************************************************************
-bool ForthDictionary::find(std::string const& name, Cell16& token, bool& immediate) const
+//! and in this case do use paramtoken and immediate their values are
+//! undefined.
+//------------------------------------------------------------------
+bool Dictionary::find(std::string const& name, forth::token& token, bool& immediate) const
 {
-  Cell32 nfa;
-  Cell32 length;
+  LOGI("find %s\n", name.c_str());
+  forth::cell nfa;
 
-  // last is a Cell16 but for computation with minus operator we need 32bits
+  // m_last contains the NFA of the last inserted word. So it is a
+  // forth::token but for computation with minus operator we need 32bits
   int32_t ptr = m_last;
 
   // 0 (aka NULL) meaning the last m_dictionary entry.  Because we are
@@ -115,68 +270,70 @@ bool ForthDictionary::find(std::string const& name, Cell16& token, bool& immedia
   // NULL
   do
     {
-      // Get the length of the forth name
-      length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+      LOGI("find ptr %d", ptr);
 
-      // Ignore words with the SMUDGE bit */
-      if (!(m_dictionary[ptr] & FLAG_SMUDGE))
+      // Get the length of the forth name
+      forth::token length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+
+      // Ignore words with the SMUDGE bit
+      if (likely(0 == (m_dictionary[ptr] & SMUDGE_BIT)))
         {
           // Compare name lengths before comparing strings
-          if (length == name.size())
+          if (unlikely(length == name.size()))
             {
-              // Same length, check if names mismatch
-              if (0 == std::strncmp(name.c_str(), (char*) &m_dictionary[ptr + 1U], length))
+              // Same length, check if names match
+              if (unlikely(0 == std::strncmp(name.c_str(), (char*) &m_dictionary[ptr + 1U], length)))
                 {
                   // Set the param if the word is immediate
-                  immediate = (m_dictionary[ptr] & FLAG_IMMEDIATE);
+                  immediate = (m_dictionary[ptr] & IMMEDIATE_BIT);
 
-                  // Word found in dictionnary
-                  token = read16at(ptr + length + 3U);
+                  // Success: word found in the dictionnary
+                  const forth::token cfa = ptr + length + 3U;
+                  token = read16at(cfa);
                   return true;
                 }
             }
         }
 
-      // Not found: go to the previous word
-      nfa = read16at(ptr + length + 1U);
+      // Not found: go to the NFA of previous word by reading the LFA
+      const forth::token lfa = ptr + length + 1U;
+      nfa = read16at(lfa);
       ptr = ptr - nfa;
     } while (nfa);
 
+  // Not found !
   return false;
 }
 
-// **************************************************************
-//! \param last start the search at the LFA of a word (can be m_last for example).
-//! \param partial_name the begining of a forth word.
-//! \return the address of the first matching name, else return nullptr.
-// **************************************************************
-const char* ForthDictionary::completion(Cell16& last, std::string const& partial_name) const
+//------------------------------------------------------------------
+//! Look for a word name match form the partial name passed in param.
+//! \param partial_name (in) the name of the Forth word to look for.
+//! \param last (in/out) initaly m_last but then the last position of
+//! the NFA of the word matching param partial_name.
+//! \return if found return the Forth name completed else return nullptr.
+//------------------------------------------------------------------
+const char* Dictionary::findPartialWord(forth::token& last, std::string const& partial_name) const
 {
-  Cell32 nfa;
-  Cell32 length;
-
-  // last is a Cell16 but for computation with minus operator we need 32bits
+  forth::cell nfa;
+  forth::cell length;
   int32_t ptr = last;
 
-  // 0 (aka NULL) meaning the last m_dictionary entry.  Because we are
-  // using relative addresses as uint16_t to save space we cannot use
-  // NULL
   do
     {
       // Get the length of the forth name
       length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
 
-      // Ignore words with the SMUDGE bit */
-      if (!(m_dictionary[ptr] & FLAG_SMUDGE))
+      // Ignore words with the SMUDGE bit
+      if (likely(0 == (m_dictionary[ptr] & SMUDGE_BIT)))
         {
           // Check if names mismatch
-          if (0 == std::strncmp(partial_name.c_str(),
-                                (char*) &m_dictionary[ptr + 1U],
-                                partial_name.length()))
+          if (unlikely(0 == std::strncmp(partial_name.c_str(),
+                                         (char*) &m_dictionary[ptr + 1U],
+                                         partial_name.length())))
             {
-              // Go to the previous word
+              // Return the match
               nfa = read16at(ptr + length + 1U);
-              last = (Cell16) ptr - nfa;
+              last = (forth::token) ptr - nfa;
 
               return (char*) &m_dictionary[ptr + 1U];
             }
@@ -187,39 +344,88 @@ const char* ForthDictionary::completion(Cell16& last, std::string const& partial
       ptr = ptr - nfa;
     } while (nfa);
 
-  last = (Cell16) ptr;
+  last = (forth::token) ptr;
   return nullptr;
 }
 
-// **************************************************************
-//! Toggle the Smudge bit in the flags location.
-//! \param name (in) the name of the Forth word.
-//! \return true if the word exists (even hidden), else false.
-// **************************************************************
-bool ForthDictionary::smudge(std::string const& name)
+//------------------------------------------------------------------
+//! \param last (in/out) initaly m_last but then the last position of
+//! the NFA of the word matching param partial_name.
+//! \return if found return the Forth name completed else return nullptr.
+//------------------------------------------------------------------
+const char* Dictionary::completeWordName(std::string const& partial_name) const
 {
-  Cell32 nfa;
-  Cell32 length;
+  static forth::token last = m_last;
+  const bool initial_position = (last == m_last);
+  const char* complete_name = findPartialWord(last, partial_name);
+  if (unlikely(nullptr == complete_name))
+    {
+      last = m_last;
+      if (!initial_position)
+        complete_name = findPartialWord(last, partial_name);
+    }
+  return complete_name;
+}
 
-  // last is a Cell16 but for computation with minus operator we need 32bits
+//------------------------------------------------------------------
+//!
+std::pair<bool, int32_t>
+Dictionary::findToken(const forth::token token, const bool even_smudge) const
+{
+  forth::cell nfa;
   int32_t ptr = m_last;
 
-  // 0 (aka NULL) meaning the last m_dictionary entry.  Because we are
-  // using relative addresses as uint16_t to save space we cannot use
-  // NULL
+  do
+    {
+      // Get the length of the forth name
+      forth::cell length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
+
+      // Ignore words with the SMUDGE bit (if not explicitly asked)
+      if (unlikely((0 == (m_dictionary[ptr] & SMUDGE_BIT)) || (even_smudge)))
+        {
+          // Success: found the token !
+          const forth::token cfa = ptr + length + 3U;
+          if (unlikely(token == read16at(cfa)))
+            return std::make_pair(true, ptr);
+
+          // Not found: go to the previous word
+          const forth::token lfa = ptr + length + 1U;
+          nfa = read16at(lfa);
+          // Relative address
+          ptr = ptr - nfa;
+        }
+    } while (nfa);
+
+  // Not found !
+  return std::make_pair(false, 0);
+}
+
+//------------------------------------------------------------------
+//!
+bool Dictionary::smudge(std::string const& name)
+{
+  forth::cell nfa;
+  forth::cell length;
+  int32_t ptr = m_last;
+
   do
     {
       // Get the length of the forth name
       length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
 
       // Compare name lengths before comparing strings
-      if (length == name.size())
+      if (unlikely(((size_t) length) == name.size()))
         {
           // Same length, check if names mismatch
-          if (0 == std::strncmp(name.c_str(), (char*) &m_dictionary[ptr + 1U], length))
+          if (unlikely(0 == std::strncmp(name.c_str(),
+                                         (char*) &m_dictionary[ptr + 1U],
+                                         length)))
             {
               // Toogle the smudge bit
-              m_dictionary[ptr] ^= FLAG_SMUDGE;
+              m_dictionary[ptr] ^= SMUDGE_BIT;
+              std::cout << FORTH_WARNING_COLOR
+                        << ((m_dictionary[ptr] & SMUDGE_BIT) ? "smudged " : "unsmudged ")
+                        << name << "'" << FORTH_NORMAL_COLOR << std::endl;
               return true;
             }
         }
@@ -229,575 +435,53 @@ bool ForthDictionary::smudge(std::string const& name)
       ptr = ptr - nfa;
     } while (nfa);
 
+  std::cout << FORTH_WARNING_COLOR << "[WARNING] Cannot toogle smudge bit of "
+    " unknown word " << name << FORTH_NORMAL_COLOR << std::endl;
   return false;
 }
 
-// **************************************************************
-//! \param name (in) the name of the Forth word.
-//! \return ForthDictionary::find.
-// **************************************************************
-bool ForthDictionary::exists(std::string const& name) const
-{
-  Cell16 token;
-  bool immediate;
-
-  return ForthDictionary::find(name, token, immediate);
-}
-
-// **************************************************************
-//! Looking for the Forth word name from its token.
-//! \param token the CFA to look for in the dictionary.
-//! \param even_smudge if false ignore smudged definitions.
-//! \return the pair a boolean if the token was found and the address
-//! of the name.
-// **************************************************************
-std::pair<bool, int32_t> ForthDictionary::find(const Cell16 token, const bool even_smudge) const
-{
-  Cell32 nfa;
-  Cell32 length;
-
-  // last is a Cell16 but for computation with minus operator we need 32bits
-  int32_t ptr = m_last;
-
-  // 0 (aka NULL) meaning the last m_dictionary entry.  Because we are
-  // using relative addresses as uint16_t to save space we cannot use
-  // NULL
-  do
-    {
-      // Get the length of the forth name
-      length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
-
-      // Ignore words with the SMUDGE bit */
-      if ((0 == (m_dictionary[ptr] & FLAG_SMUDGE)) || (even_smudge))
-        {
-          // Compare name lengths before comparing strings
-          if (token == read16at(ptr + length + 3U))
-            {
-              // Word found in dictionnary
-              return std::make_pair(true, ptr);
-            }
-        }
-
-      // Not found: go to the previous word
-      nfa = read16at(ptr + length + 1U);
-      ptr = ptr - nfa;
-    } while (nfa);
-
-  return std::make_pair(false, ptr);
-}
-
-// **************************************************************
-//! Save the dictionnary in a binary file. The user can use the
-//! command hexdump -C filename for debuging the dictionary.
-//! \param filename the file name where the dictionary will be stored.
-//! \return a boolean indicating if the process succeeded.
-// **************************************************************
-bool ForthDictionary::dump(std::string const& filename) // FIXME const
-{
-  std::ofstream out(filename, std::ios::out | std::ios::binary | std::ios::trunc);
-
-  if (out.is_open())
-    {
-      // Hack: store LAST word at the end of the dictionnary to
-      // be sure that LAST will be splited in correct endian but
-      // break the const-ness of the function.
-      // TODO: ajouter un param ou commence la sauvegarde dans le dico (ex: skip primitives)
-      write16at(m_here, m_last);
-
-      // Store all the dictionary including LAST
-      out.write((char*) m_dictionary, (m_here + 2U) * sizeof (Cell8));
-      out.close();
-      return true;
-    }
-  else
-    {
-      std::cerr << "Cannot save the dictionary in file '"
-                << filename
-                << "'. Reason is '" << std::strerror(errno) << "'"
-                << std::endl;
-      return false;
-    }
-}
-
-// **************************************************************
-//! Load a dictionnary from a binary file.
-//! \param filename the filename containing a dictionary. Note: no
-//! verification is made for checking if the dictionary image is well
-//! formed or is a real dictionary file.
-//! \param replace if true the old dictionary is smashed else the
-//! new dictionary is appened to the old one.
-//! \return a boolean indicating if the process succeeded.
-// **************************************************************
-bool ForthDictionary::load(std::string const& filename, const bool replace)
-{
-  std::ifstream in(filename, std::ios::in | std::ios::binary);
-
-  if (in.is_open())
-    {
-      // Get the length of file
-      in.seekg(0, in.end);
-      Cell32 length = in.tellg();
-      in.seekg(0, in.beg);
-
-      // Load the dictionary with LAST
-      if (replace)
-        {
-          // Smash the old dictionary
-          in.read((char*) m_dictionary, length);
-
-          // Update Forth words LAST and HERE
-          m_here = m_here - 2U; // 2U because LAST was stored in file
-          m_last = read16at(m_here);
-        }
-      else
-        {
-          // Append the dictionary
-          in.read((char*) m_dictionary + m_here, length);
-
-          // Link the PFA of 1st entry of the new dictionary to
-          // the PFA of the last entry of the previous dictionary
-          Cell32 word_length = m_dictionary[m_here] & MASK_FORTH_NAME_SIZE;
-          try
-            {
-              write16at(m_here + word_length + 1U, m_here - m_last);
-            }
-          catch (const OutOfBoundDictionary& e)
-            {
-              std::cerr << "Cannot load the dictionary from the file '"
-                        << filename
-                        << "'. Reason is the image is bigger than the dictionary size."
-                        << std::endl;
-              in.close();
-              return false;
-            }
-
-          // Update Forth words LAST and HERE
-          m_here = m_here + length - 2U; // 2U because LAST was stored in file
-          m_last = length - 2U + read16at(m_here);
-        }
-
-      in.close();
-      return true;
-    }
-  else
-    {
-      std::cerr << "Cannot load the dictionary from the file '"
-                << filename
-                << "'. Reason is '" << strerror(errno) << "'"
-                << std::endl;
-      return false;
-    }
-}
-
-// **************************************************************
-//! \param token
-// **************************************************************
-std::string ForthDictionary::displayToken(const Cell16 token) const
-{
-  std::ostringstream stream;
-  std::pair<bool, int32_t> res = find(token);
-  if (res.first)
-    {
-      stream << "'" << (char *) &m_dictionary[res.second + 1U] << "' ("
-             << std::hex << (int) token << ')';
-    }
-  else
-    {
-      stream << "Bad token (" << std::setfill('0') << std::setw(4)
-             << std::hex << token << ") ";
-    }
-  return stream.str();
-}
-
-// **************************************************************
-//
-// **************************************************************
-void ForthDictionary::display(const int max_primitives) const
-{
-  int def_length, length, token, nfa, ptr, code, prev, d, dd, grouping, skip;
-  bool smudge, immediate;
-  bool compiled = false;
-  bool truncated = false;
-  bool creat = false;
-  ForthConsoleColor color;
-  ForthConsoleColor color1;
-  std::ios_base::fmtflags ifs(std::cout.flags());
-
-  std::cout << "Address                          Word  Token    Definition (tokens)    ";
-  std::cout << std::setw(11 + 5 * (WORD_GROUPING - 4)) << "Translation" << std::endl;
-  std::cout << std::setfill('=') << std::setw(83 + 5 * (WORD_GROUPING - 4));
-  std::cout << " " << std::endl;
-
-  prev = m_here;
-  ptr = m_last;
-  do
-    {
-      creat = false;
-
-      // Display dictionary addresses in hex
-      std::cout << DICO_ADDRESS_COLOR << std::setfill('0') << std::setw(4) << std::hex << ptr << " ";
-      std::cout.flags(ifs);
-
-      // Get word flags
-      length = m_dictionary[ptr] & MASK_FORTH_NAME_SIZE;
-      smudge = m_dictionary[ptr] & FLAG_SMUDGE;
-      immediate = m_dictionary[ptr] & FLAG_IMMEDIATE;
-
-      // Next word in the dictionary (relative address)
-      nfa = read16at(ptr + length + 1U);
-
-      // Code Pointer (Exec token)
-      code = read16at(ptr + length + 3U);
-
-      // Select color depending on word flag bits
-      if (immediate)
-        color = IMMEDIATE_WORD_COLOR;
-      else if (smudge)
-        color = SMUDGED_WORD_COLOR;
-      else if (code < max_primitives)
-        color = PRIMITIVE_WORD_COLOR;
-      else
-        color = NON_PRIMITIVE_WORD_COLOR;
-
-      // Display word name (right centered)
-      std::cout << std::setfill('.') << std::setw(33U - length)
-                << color << " " << (char *) &m_dictionary[ptr + 1U]
-                << " ";
-      std::cout.flags(ifs);
-
-      // Display Exec token
-      if (!smudge) color = COLOR_EXEC_TOKEN; // Let color in grey for unused words
-      std::cout << color << '(' << std::setfill('0') << std::setw(4) << std::hex << code << ")    ";
-      std::cout.flags(ifs);
-
-      // Word definition
-      def_length = prev - ptr - length - 3U;
-
-      // primitive
-      if (code < max_primitives)
-        {
-          std::cout << DICO_DEFAULT_COLOR << "primitive" << std::endl;
-        }
-
-      // Skip NFA
-      d = dd = 2;
-      while (d < def_length)
-        {
-          if (!smudge) color = DICO_DEFAULT_COLOR;
-
-          // Display tokens in hexa
-          grouping = WORD_GROUPING;
-          while ((grouping--) && (d < def_length))
-            {
-              token = read16at(ptr + length + 3U + d);
-              d += 2U;
-              std::cout << color << std::setfill('0') << std::setw(4) << std::hex << token << " ";
-              std::cout.flags(ifs);
-            }
-
-          // If number of tokens is not a multiple of WORD_GROUPIN add spaces
-          ++grouping;
-          if (grouping)
-            {
-              std::cout << color << std::setfill(' ') << std::setw(grouping * 5) << "    ";
-              std::cout.flags(ifs);
-            }
-          std::cout << "   ";
-
-          // Tokens name
-          grouping = WORD_GROUPING;
-          while ((grouping-- > 0) && (dd < def_length))
-            {
-              // (CREATE) EXIT xx .. yy
-              if (creat)
-                {
-                  if (0 == skip)
-                    {
-                      uint32_t p = ptr + length + 3U + dd;
-                      while (dd < def_length)
-                        {
-                          std::cout << LITERAL_COLOR << std::setfill('0') << std::setw(2) << std::hex << read8at(p) << " ";
-                          std::cout.flags(ifs);
-                          ++p;
-                          ++dd;
-                        }
-                      continue;
-                    }
-                  else
-                    {
-                      --skip; // skipping (CREATE) EXIT
-                    }
-                }
-
-              if (truncated) { truncated = false; grouping--; }
-              token = read16at(ptr + length + 3U + dd);
-              dd += 2U;
-
-              // Not a primitive: display the name
-              if (token >= max_primitives)
-                {
-                  std::pair<bool, int32_t> res = find(token, true);
-                  if (!res.first)
-                    {
-                      // Not found. Display token in hex
-                      std::cout << LITERAL_COLOR << std::setfill('0') << std::setw(4) << std::hex << token << " ";
-                      std::cout.flags(ifs);
-                    }
-                  else
-                    {
-                      // From NFA, go back to the begin of word definition
-                      // To get flags
-                      uint32_t j = token - 2U; // -2 fir skiping NFA
-                      while (0 == (m_dictionary[j] & 0x80))
-                        --j;
-
-                      // Colorize
-                      if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
-                        {
-                          color = SMUDGED_WORD_COLOR;
-                        }
-                      else
-                        {
-                          if (m_dictionary[j] & FLAG_IMMEDIATE)
-                            color = IMMEDIATE_WORD_COLOR;
-                          else
-                            color = NON_PRIMITIVE_WORD_COLOR;
-                        }
-
-                      // Display
-                      std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
-                    }
-                }
-              else // primitive words
-                {
-                  std::pair<bool, int32_t> res = find(token, true);
-                  if (!res.first)
-                    {
-                      // Not found. Display token in hex
-                      std::cout << SMUDGED_WORD_COLOR << std::setfill('0') << std::setw(4) << std::hex << token << " ";
-                      std::cout.flags(ifs);
-                    }
-                  else
-                    {
-                      // Colorize
-                      uint32_t j = res.second;
-                      // FIXME: ugly but how to fix that ?
-                      color1 = LITERAL_COLOR;
-                      if ((smudge) || (m_dictionary[j] & FLAG_SMUDGE))
-                        {
-                          color1 = SMUDGED_WORD_COLOR;
-                          color = SMUDGED_WORD_COLOR;
-                        }
-                      else if (m_dictionary[j] & FLAG_IMMEDIATE)
-                        color = IMMEDIATE_WORD_COLOR;
-                      else
-                        color = PRIMITIVE_WORD_COLOR;
-                      uint32_t p = ptr + length + 4U + dd;
-
-                      // (CREATE) EXIT xx .. yy
-                      if ((FORTH_PRIMITIVE_PCREATE == token) && (FORTH_PRIMITIVE_EXIT == read16at(p-1)))
-                        {
-                          creat = true;
-                          skip = 1;
-                        }
-
-                      // Several strategies
-                      switch (token)
-                        {
-                        case FORTH_PRIMITIVE_COMPILE:
-                          std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
-                          compiled = true;
-                          break;
-                        case FORTH_PRIMITIVE_0BRANCH:
-                        case FORTH_PRIMITIVE_BRANCH:
-                          std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
-                          if (compiled)
-                            {
-                              compiled = false;
-                            }
-                          else
-                            {
-                              uint16_t data16 = read16at(p);
-                              dd += 2U;
-                              --grouping;
-                              std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
-                              std::cout.flags(ifs);
-                            }
-                          break;
-                        case FORTH_PRIMITIVE_LITERAL_16:
-                          {
-                            uint16_t data16 = read16at(p);
-                            dd += 2U;
-                            --grouping;
-                            std::cout << color1 << std::setfill('0') << std::setw(4) << std::hex << data16 << " ";
-                            std::cout.flags(ifs);
-                          }
-                          break;
-                        case FORTH_PRIMITIVE_LITERAL_32:
-                          {
-                            uint32_t data32 = read32at(p);
-                            dd += 4U;
-                            --grouping;
-                            std::cout << color1 << std::setfill('0') << std::setw(8) << std::hex << data32 << " ";
-                            std::cout.flags(ifs);
-                          }
-                          break;
-                        default:
-                          compiled = false;
-                          std::cout << color << (char *) &m_dictionary[j + 1U] << " ";
-                          break;
-                        }
-                      truncated = (grouping < 0);
-                      //if (truncated) std::cout << "|| ";
-                    } // if found
-                } // if primitive
-            } // while grouping
-
-          // End of line of group of words
-          std::cout << std::endl;
-          if (d < def_length - 1)
-            {
-              // Dictionary address
-              std::cout << DICO_ADDRESS_COLOR << std::setfill('0') << std::setw(4) << std::hex << ptr + length + 1U + d << "    ";
-              std::cout.flags(ifs);
-              std::cout << DICO_ADDRESS_COLOR << std::setfill(' ') << std::setw(40U) << "    ";
-              std::cout.flags(ifs);
-            }
-        } // while definition
-
-      // Go to the previous entry
-      prev = ptr;
-      ptr = ptr - nfa;
-    } while (nfa);
-
-  std::cout << FORTH_NORMAL_COLOR << std::endl;
-}
-
-// **************************************************************
-//! This function does not return a boolean but throw an exception
-//! if the given range of address overflows/underflows the dictionary.
-//! \param addr the dictionary to check
-//! \param nb_bytes positive or negative offset to adr.
-//! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// **************************************************************
-void ForthDictionary::checkBounds(const uint32_t addr, const int32_t nb_bytes) const
-{
-  // FIXME: proteger en ecriture les anciens mots definis
-  // FIXME: autoriser en lecture toutes les addr du dico
-  if (/*(addr < m_here_at_colon) &&*/ (addr + nb_bytes >= DICTIONARY_SIZE))
-    {
-      OutOfBoundDictionary e(addr); throw e;
-    }
-}
-
-// **************************************************************
-//! \param data is a 32-bits data to store as Cell8 at the given
-//! address.
-//! \param addr the desired dictionary address.
-//! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// FIXME: au lieu de addr >= &m_dictionary[maxPrimitives()]
-// faire addr >= &m_dictionary[m_last + m_last_def_size]
-// **************************************************************
-void ForthDictionary::write8at(const uint32_t addr, const Cell32 data)
-{
-  checkBounds(addr, 0U);
-  m_dictionary[addr] = (data >> 0) & 0xFF;
-}
-
-// **************************************************************
-//! \param data is a 32-bits data to store as Cell16 at the given
-//! address.
-//! \param addr the desired dictionary address.
-//! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// **************************************************************
-void ForthDictionary::write16at(const uint32_t addr, const Cell32 data)
-{
-  checkBounds(addr, 1U);
-  m_dictionary[addr + 0U] = (data >> 8) & 0xFF;
-  m_dictionary[addr + 1U] = (data >> 0) & 0xFF;
-}
-
-// **************************************************************
-//! \param data is a 32-bits data to store at the given address.
-//! \param addr the desired dictionary address.
-//! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// **************************************************************
-void ForthDictionary::write32at(const uint32_t addr, const Cell32 data)
-{
-  checkBounds(addr, 3U);
-  m_dictionary[addr + 0U] = (data >> 24) & 0xFF;
-  m_dictionary[addr + 1U] = (data >> 16) & 0xFF;
-  m_dictionary[addr + 2U] = (data >> 8) & 0xFF;
-  m_dictionary[addr + 3U] = (data >> 0) & 0xFF;
-}
-
-// **************************************************************
-//! \param addr the desired dictionary address.
-//! \return the 8-bits data casted as Cell32 read at the given address.
-//! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// **************************************************************
-Cell32 ForthDictionary::read8at(const uint32_t addr) const
-{
-  checkBounds(addr, 0U);
-  return m_dictionary[addr];
-}
-
-// **************************************************************
-//! \param addr the desired dictionary address.
-//! \return the 16-bits data casted as Cell32 read at the given address.
-//! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// **************************************************************
-Cell32 ForthDictionary::read16at(const uint32_t addr) const
-{
-  checkBounds(addr, 1U);
-  Cell32 res =
-    (m_dictionary[addr + 0U] << 8U) |
-    (m_dictionary[addr + 1U] << 0U);
-
-  return res;
-}
-
-// **************************************************************
-//! \param addr the desired dictionary address.
-//! \return the 32-bits data read at the given address.
-//! \throw OutOfBoundDictionary if overflows/underflows is detected.
-// **************************************************************
-Cell32 ForthDictionary::read32at(const uint32_t addr) const
-{
-  // FIXME Cell8 *const addr
-  checkBounds(addr, 3U);
-  Cell32 res =
-    (m_dictionary[addr + 0U] << 24UL) |
-    (m_dictionary[addr + 1U] << 16UL) |
-    (m_dictionary[addr + 2U] << 8UL) |
-    (m_dictionary[addr + 3U] << 0UL);
-
-  return res;
-}
-
-// **************************************************************
+//------------------------------------------------------------------
 //! Reserve or release a consecutive number of bytes starting at
-//! ForthDictionary::m_here. Then ForthDictionary::m_here is updated. Values
+//! Dictionary::m_here. Then Dictionary::m_here is updated. Values
 //! inside the reserved memory are not cleared.
 //! \param nb_bytes the number of consecutive bytes needed: if > 0
 //! memory is reserved, else if < 0 release the memory. if = 0 nothing
 //! is made.
 //! \throw OutOfBoundDictionary when attempting to go outside the dictionary bounds.
-// **************************************************************
-void ForthDictionary::allot(const int32_t nb_bytes)
+//------------------------------------------------------------------
+void Dictionary::allot(const int32_t nb_bytes)
 {
-  if (nb_bytes > 0)
+  if (unlikely(nb_bytes == 0))
+    return ;
+
+  // checkBounds(m_here, nb_bytes);
+  if (likely(nb_bytes > 0))
     {
-      checkBounds(m_here, nb_bytes);
-      m_here = m_here + nb_bytes;
+      m_here += nb_bytes;
     }
-  else if (nb_bytes < 0)
+  else // (nb_bytes < 0)
     {
-      checkBounds(m_here - nb_bytes, nb_bytes);
-      m_here = m_here - nb_bytes;
-    }
-  else // 0 == nb_bytes
-    {
-      // Do nothing
+      m_here -= nb_bytes;
     }
 }
+
+//------------------------------------------------------------------
+void Dictionary::saveContext(size_t line, size_t column)
+{
+  //m_save.depth = m_data_stack.depth();
+  //m_save.name = word;
+  m_save.last = m_last;
+  m_save.here = m_here;
+  m_save.line = line;//STREAM.position().first;
+  m_save.column = column;//STREAM.position().second;
+}
+
+//------------------------------------------------------------------
+void Dictionary::restoreContext()
+{
+  //m_data_stack.depth() = m_save.depth;
+  m_last = m_save.last;
+  m_here = m_save.here;
+}
+
+} // namespace

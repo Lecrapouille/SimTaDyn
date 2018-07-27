@@ -24,6 +24,9 @@
 #  include "version.h"
 #  include "File.hpp"
 
+//namespace simtadyn
+//{
+#warning "ConfSim"
 namespace config
 {
   //! \brief
@@ -58,5 +61,7 @@ namespace config
   //! used for storing nodes and arcs in a graph
   static const uint32_t graph_container_nb_elements(8U);
 }
+
+//}
 
 #endif /* CONFIG_HPP_ */

@@ -1,0 +1,4 @@
+/* A mettre dans mot '(' skipCommentary()
+ A mettre dans mot ')' throw ForthException(MSG_EXCEPTION_UNBALANCE_FORTH_COMMENT);
+
+A mettre dans mot ':' ForthInterpreter::startCompilingWord(

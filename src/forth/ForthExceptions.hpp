@@ -21,174 +21,77 @@
 #ifndef FORTH_EXCEPTIONS_HPP_
 #  define FORTH_EXCEPTIONS_HPP_
 
+//------------------------------------------------------------------
 //! \brief This file defined all exceptions used for the Forth parser.
-//! Exceptions are derived from the project common ancestor SimTaDyn::Exception
-//! which is also derived from the POCO library execption.
+//! Exceptions are derived from the project common ancestor
+//! SimTaDyn::Exception which is also derived from the POCO library
+//! execption.
+//------------------------------------------------------------------
 
 #  include "Exception.hpp"
-#  include "ForthHelper.hpp"
 
 //! This macro (from the library POCO) will declare a class
 //! ForthException derived from simtadyn::Exception.
 DECLARE_EXCEPTION(ForthException, Exception)
 
-// **************************************************************
-//
-// **************************************************************
-class UnfinishedStream: public ForthException
-{
-public:
-  UnfinishedStream(const Cell32 Forthstate)
-    : ForthException(42)
-  {
-    switch (Forthstate)
-      {
-      case forth::Compile:
-        m_msg = "Word definition not terminated when reaching the end of the stream";
-        break;
-      case forth::Comment:
-        m_msg = "Commentary not terminated when reaching the end of the stream";
-        break;
-      case forth::Interprete:
-      default:
-        // This case is not possible
-        assert(1);
-        break;
-      }
-  }
-};
+#  define MSG_EXCEPTION_ABORT_FORTH(msg)            \
+  "Abort with message '" + msg + "'"
 
-// **************************************************************
-//
-// **************************************************************
-class TooManyOpenedStreams: public ForthException
-{
-public:
-  TooManyOpenedStreams()
-    : ForthException(41)
-  {
-    m_msg = "Including nested files too deeply: too many opened streams";
-  }
-};
+#  define MSG_EXCEPTION_UNKNOWN_FORTH_WORD(word)    \
+  "Unrecognized word '" + word + "'"
 
+#  define MSG_EXCEPTION_UNKNOWN_FORTH_PRIMITIVE(xt, word)               \
+  "Tried to execute an unknown token " +                                \
+  std::to_string((uint32_t) xt) + " from " + word;
 
-// **************************************************************
-//
-// **************************************************************
-class ModifiedStackDepth: public ForthException
-{
-public:
-  ModifiedStackDepth(std::string const& word)
-    : ForthException(41)
-  {
-    m_msg = "Stack depth changed during the definition of the word '" + word + "' probably unbalanced condition";
-  }
-};
+#  define MSG_EXCEPTION_FORTH_STACK_OVERFLOW(stack)     \
+  std::string(stack) + " overflow"
 
-// **************************************************************
-//
-// **************************************************************
-class ForthDefinition: public ForthException
-{
-public:
-  ForthDefinition(std::string const& word)
-    : ForthException(40)
-  {
-    m_msg = "Exception from SimTaDynForth: word '" + word + "' contains more than 2^16 words.";
-  }
-};
+#  define MSG_EXCEPTION_FORTH_STACK_UNDERFLOW(stack)    \
+  std::string(stack) + " underflow"
 
-// **************************************************************
-//
-// **************************************************************
-class MalformedForthWord: public ForthException
-{
-public:
-  MalformedForthWord(std::string const& word)
-    : ForthException(39)
-  {
-    m_msg = "Exception from SimTaDynForth: word '" + word + "' is mal formed. It shall contain 1 ... 31 characters.";
-  }
-};
+#  define MSG_EXCEPTION_FORTH_STACK_CHANGED_DURING_DEF(word)       \
+  "Data stack depth changed during the definition of the word '"   \
+  + word + "' probably unbalanced conditionals"
 
-// **************************************************************
-//
-// **************************************************************
-class OutOfBoundDictionary: public ForthException
-{
-public:
-  OutOfBoundDictionary(const uint32_t addr)
-    : ForthException(38)
-  {
-    m_msg = "Trying to access out of the dictionary bounds ("
-      + std::to_string(addr) + ')';
-  }
-};
+#  define MSG_EXCEPTION_FORTH_DICTIONARY_IS_FULL                \
+  "The Forth dictionary is full"
 
-// **************************************************************
-//
-// **************************************************************
-class NoSpaceDictionary: public ForthException
-{
-public:
-  NoSpaceDictionary()
-    : ForthException(37)
-  {
-    m_msg = "The Forth dictionary is full";
-  }
-};
+#  define MSG_EXCEPTION_FORTH_DICTIONARY_OUT_OF_BOUND           \
+  "Tried to access dictionary memory " + std::to_string(addr)   \
+  + " outside its bounds"
 
-// **************************************************************
-//
-// **************************************************************
-class OutOfBoundStack: public ForthException
-{
-public:
+#  define MSG_EXCEPTION_TOO_MANY_OPENED_FORTH_STREAMS   \
+  "Reached the max depth of file inclusions"
 
-  OutOfBoundStack(const forth::StackID stack_id, const int32_t depth);
+#  define MSG_EXCEPTION_UNFINISHED_FORTH_COMMENT(line, column)          \
+  "Commentary started at " + std::to_string(line) + ":"                 \
+  + std::to_string(column) + " not terminated when reaching the end of the stream"
 
-  uint32_t m_stack_id;
-};
+#  define MSG_EXCEPTION_UNFINISHED_FORTH_DEFINITION(line, column)       \
+  "Word definition started at " + std::to_string(line) + ":"            \
+  + std::to_string(column) + " not terminated when reaching the end of the stream"
 
+#  define MSG_EXCEPTION_FORTH_NAME_TOO_LONG(word)               \
+  "Length name for '" + std::string(word) + "' contains more than 31 chars"
 
-// **************************************************************
-//
-// **************************************************************
-class UnknownForthPrimitive: public ForthException
-{
-public:
-  UnknownForthPrimitive(const Cell16 badToken, std::string const& funcName)
-    : ForthException(36)
-  {
-    m_msg = "Exception from SimTaDynForth: try to execute an unknown primitive "
-      + std::to_string((uint32_t) badToken) + " in " + funcName;
-  }
-};
+#  define MSG_EXCEPTION_FORTH_DEFINITION_TOO_LONG                       \
+  "Tried to create a word containing more than 2^16 words on its definition"
 
-// **************************************************************
-//
-// **************************************************************
-class UnknownForthWord: public ForthException
-{
-public:
-  UnknownForthWord(std::string const& word)
-    : ForthException(35)
-  {
-    m_msg = "Unrecognized word '" + word + "'";
-  }
-};
+#  define MSG_EXCEPTION_FORTH_SAVE_DICO_NO_FILE(filename)       \
+  "Cannot save the dictionary to the file '" + filename       \
+  + "'. Reason is '" + strerror(errno) + "'"
 
-// **************************************************************
-//
-// **************************************************************
-class AbortForth: public ForthException
-{
-public:
-  AbortForth(std::string const& msg)
-    : ForthException(34)
-  {
-    m_msg = "Aborting '" + msg + "'";
-  }
-};
+#  define MSG_EXCEPTION_FORTH_FAILED_LOADING_DICO(filename)             \
+  "Failed when loading the dictionary with the file '" + filename       \
+  + "'. Reason is '" + strerror(errno) + "'"
 
-#endif /* FORTH_EXCEPTIONS_HPP_ */
+#  define MSG_EXCEPTION_FORTH_LOAD_DICO_NO_FILE(filename)       \
+  "Cannot load the dictionary from the file '" + filename       \
+  + "'. Reason is '" + strerror(errno) + "'"
+
+#  define MSG_EXCEPTION_FORTH_LOAD_DICO_NO_SPACE(filename)              \
+  "Cannot load the dictionary from the file '" + filename               \
+  + "'. Reason is the image is bigger than the dictionary size"
+
+#endif // FORTH_EXCEPTIONS_HPP_

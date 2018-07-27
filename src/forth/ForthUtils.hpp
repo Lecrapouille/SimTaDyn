@@ -18,7 +18,17 @@
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ForthExceptions.hpp"
+#ifndef FORTH_UTILS_HPP_
+#  define FORTH_UTILS_HPP_
 
-//! This macro (from the library POCO) will generate code for members.
-IMPLEMENT_EXCEPTION(ForthException, Exception, "Forth Exception")
+#  include "ForthTypes.hpp"
+#  include <string>
+
+namespace forth
+{
+
+bool toNumber(std::string const& word, uint8_t current_base, forth::cell& number, const char*& msg);
+
+}
+
+#endif // FORTH_UTILS_HPP_
