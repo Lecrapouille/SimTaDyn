@@ -1,6 +1,6 @@
 # Credits
 
-SimTaDyn got its inspiration from the following documents:
+SimTaDyn code source gots its inspiration from the following documents and code source:
 
 ## GIS as Spreadsheet
 
@@ -13,29 +13,19 @@ The algebra used in rasterized maps.
 ## Spreadsheet
 
 * https://github.com/rohitsinha54/Spreadsheet-Calculator
-A simple textual spreadsheet calculator in Java.
+A very basic textual spreadsheet calculator made in Java with circular references detection.
+Formuleas use the reverse polish notation.
 
 * http://www.cs.sjsu.edu/~pearce/modules/cases/ss/ss.htm
-A simple spreasheet made for explaining how observers work.
+Explain how cells use the pattern observer for notifying other their value changed.
 
+* https://github.com/tiluser/Creole-Forth-For-Excel
+A scripting language built on top of VBA for Excel based on the Forth language.
 
 ## Forth
 
-* Book [Forth](https://www.amazon.fr/Forth-Walid-P-Salman/dp/B0007CEVYM):
-Walid P. Salman, Olivier Tisserand, Bruno Toulout.
-Edition: Eyrolles 1984 (french),
-Edition: Macmillan 1983 (english).
-Excellent book describing how a Forth is implemented with lot of Forth words coded in Forth.
-
-
-* [JonesForth](http://git.annexia.org/?p=jonesforth.git;a=blob;f=jonesforth.S;h=45e6e854a5d2a4c3f26af264dfce56379d401425;hb=HEAD):
-Tutorial explaining how a (ligth) Forth is implemented with better explanations than the book Walid P. Salman, Olivier Tisserand, Bruno Toulout.
-
 * [pforth](https://github.com/philburk/pforth):
-Portable Forth in C
-
-* [wikiversity](https://fr.wikiversity.org/wiki/Forth/Conserver_des_donn%C3%A9es)
-(french only) Clear explanations conserning the CREATE word. Reused examples for my unit tests.
+Portable Forth in C. SimTaDyn Forth mainly inspires of its code.
 
 * [reforth](https://github.com/seanpringle/reforth):
 Lot of good ideas for upgrading the Forth syntax.
@@ -43,24 +33,36 @@ Lot of good ideas for upgrading the Forth syntax.
 * [4th](https://thebeez.home.xs4all.nl/4tH/)
 The crashproof Forth
 
+* [JonesForth](http://git.annexia.org/?p=jonesforth.git;a=blob;f=jonesforth.S;h=45e6e854a5d2a4c3f26af264dfce56379d401425;hb=HEAD):
+Tutorial explaining how a (ligth) Forth is implemented with better explanations than the book Walid P. Salman, Olivier Tisserand, Bruno Toulout.
+
+* [wikiversity](https://fr.wikiversity.org/wiki/Forth/Conserver_des_donn%C3%A9es)
+(french only) Clear explanations conserning the CREATE word. Reused examples for my unit tests.
+
+* Book [Forth](https://www.amazon.fr/Forth-Walid-P-Salman/dp/B0007CEVYM):
+Walid P. Salman, Olivier Tisserand, Bruno Toulout.
+Edition: Eyrolles 1984 (french),
+Edition: Macmillan 1983 (english).
+Excellent book describing how a Forth is implemented with lot of Forth words coded in Forth.
+
 * [ForthFreak](https://github.com/ForthHub/ForthFreak/wiki/Forthfreak-wiki)
 
 ## Graph structure and Graph-Theory IDE
 
-* [Gephi](https://gephi.org/)
-The Open Graph Viz Platform.
-
-* [VivaGraphJS](https://github.com/anvaka/VivaGraphJS)
-Powerful graph vizualisation in JS and WebGL.
+* [rocs](https://github.com/KDE/rocs)
+Rocs is the closest graph IDE to SimTaDyn. Written in C++ and QT mixing a drawn interface with a scripting module manipulating the drawn graph. The script is QtScript Java Script.
 
 * [The Stanford slib](http://stanford.edu/~stepp/cppdoc/BasicGraph-class.html)
 A complete class for graph written in C++.
 
-* [graphosaurus](https://github.com/frewsxcv/graphosaurus)
-D graph viewer powered by WebGL with three.js
+* [VivaGraphJS](https://github.com/anvaka/VivaGraphJS)
+Powerful graph vizualisation in JS and WebGL.
 
-* [rocs](https://github.com/KDE/rocs)
-Is a graph IDE written in C++ and QT mixing a drawn interface with a scripting module manipulating the drawn graph. The script is QtScript Java Script. This IDE is the closest idea to SimTaDyn.
+* [Gephi](https://gephi.org/)
+The Open Graph Viz Platform.
+
+* [graphosaurus](https://github.com/frewsxcv/graphosaurus)
+A graph viewer powered by WebGL with three.js
 
 ## RTree
 
@@ -136,14 +138,16 @@ Interactive, thoroughly customizable maps in the browser, powered by vector tile
 
 ## OpenGL tutorials and 2D libraries
 
+* [glumpy](https://github.com/glumpy/glumpy)
+Python + Numpy + modern OpenGL: fast, scalable and beautiful scientific visualization.
+SimTaDyn mainly inspired of its class hiearchy, which is in my opinion the best and simplest OpenGL wrapper.
+
 * [Programming for Games](https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/)
-Tutorials from the module on Programming for Games of the Newcastle University.
+Tutorials from the module on Programming for Games of the Newcastle
+University. SimTaDyn uses their implementation of Scene graph.
 
 * [SFML](http://www.sfml-dev.org/index-fr.php)
 Simple and Fast Multimedia Library.
-
-* [glumpy](https://github.com/glumpy/glumpy)
-Python + Numpy + modern OpenGL: fast, scalable and beautiful scientific visualization.
 
 * [ThinMatrix](https://www.youtube.com/user/ThinMatrix)
 Modern OpenGL tutorials on Youtube.
@@ -179,6 +183,11 @@ More than a tutorial on 3D game engine, it explains manager classes in C++ which
 
 * [POCO](https://pocoproject.org/)
 Modern, powerful open source C++ class libraries for building network- and internet-based applications that run on desktop, server, mobile and embedded systems.
+
+### Shared library
+
+* [RuntimeCompiledCPlusPlus](https://github.com/RuntimeCompiledCPlusPlus/RuntimeCompiledCPlusPlus)
+Make a C code to mimic the behavior of an interpreted language (hot compile and load C code).
 
 ### Trace function calls when segfault
 

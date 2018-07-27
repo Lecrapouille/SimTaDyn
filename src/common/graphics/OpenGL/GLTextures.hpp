@@ -1,9 +1,29 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef GLTEXTURES_HPP_
 #  define GLTEXTURES_HPP_
 
 #  include "GLObject.hpp"
 #  include "PendingData.hpp"
-#  include <SOIL/SOIL.h>
+#  include "SOIL.h"
 
 // **************************************************************
 //
@@ -49,6 +69,9 @@ public:
     m_wrapping = wrap;
     m_need_setup = true;
   }
+
+  // TODO:
+  // virtual bool load(std::string const& filename, const bool rename = false) = 0;
 
 protected:
 
@@ -106,6 +129,14 @@ public:
   {
   }
 
+  virtual ~GLTexture2D()
+  {
+    if (nullptr != m_buffer)
+      {
+        SOIL_free_image_data(m_buffer);
+      }
+  }
+
   inline bool load(std::string const& filename, const bool rename = false)
   {
     return load(filename.c_str(), rename);
@@ -138,8 +169,18 @@ public:
       }
     else
       {
-        LOGES("Failed loading picture file '%s'", filename);
-        res = false;
+        if (m_throw_enable)
+          {
+            std::string msg("Failed loading picture file '");
+            msg += filename; msg += "'";
+            OpenGLException e(msg);
+            throw e;
+          }
+        else
+          {
+            LOGES("Failed loading picture file '%s'", filename);
+            res = false;
+          }
       }
     m_need_update = (nullptr != m_buffer);
     return res;

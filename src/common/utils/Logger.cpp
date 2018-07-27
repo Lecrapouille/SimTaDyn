@@ -1,4 +1,25 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "Logger.hpp"
+#include <cstring>
 
 static const char *c_str_severity[logger::MaxLoggerSeverity + 1] =
   {
@@ -16,20 +37,37 @@ Logger::Logger(std::string const& filename)
   open(filename);
 }
 
+Logger::Logger()
+{
+  open(config::log_path);
+}
+
 Logger::~Logger()
 {
   close();
 }
 
-void Logger::open(std::string const& filename)
+void Logger::changeLog(std::string const& logfile)
 {
-  m_file.open(filename.c_str());
+  close();
+  open(logfile);
+}
+
+void Logger::open(std::string const& logfile)
+{
+  // Try to open the given log path
+  m_file.open(logfile.c_str());
   if (!m_file.is_open())
     {
-      m_file.open(config::tmp_log_path);
+      std::cerr << "Failed creating the log file '"
+                << logfile << "'. Reason is '"
+                << strerror(errno) << "'"
+                << std::endl;
     }
-  if (m_file.is_open())
+  else
     {
+      std::cout << "Log created: '" << logfile
+                << "'" << std::endl;
       header();
     }
 }
@@ -68,22 +106,28 @@ void Logger::beginLine()
 void Logger::header()
 {
   currentDate();
-  log("===============================================\n"
-      "  %s %u.%u - Event log - %s\n"
-      "===============================================\n\n",
-      config::project_name,
+  log("======================================================\n"
+      "  %s %s %u.%u - Event log - %s\n"
+      "  git branch: %s\n"
+      "  git SHA1: %s\n"
+      "======================================================\n\n",
+      config::project_name.c_str(),
+      config::Debug == config::mode ? "Debug" : "Release",
       config::major_version,
       config::minor_version,
-      m_buffer_time);
+      m_buffer_time,
+      config::git_branch.c_str(),
+      config::git_sha1.c_str());
 }
 
 void Logger::footer()
 {
   currentTime();
-  log("\n===============================================\n"
+  log("\n======================================================\n"
       "  %s log closed at %s\n"
-      "===============================================\n\n",
-      config::project_name, m_buffer_time);
+      "======================================================\n\n",
+      config::project_name.c_str(),
+      m_buffer_time);
 }
 
 ILogger& Logger::operator<<(const logger::LoggerSeverity& severity)

@@ -1,6 +1,7 @@
 #include "Example01.hpp"
 
-//! \file Draw a colorfull triangle and allow the user to move one its vertices.
+//! \file Example01.cpp
+//! Draw a colorfull triangle and allow the user to move one its vertices.
 
 // Vertices for drawing a triangle
 static GLfloat vertexData[] =

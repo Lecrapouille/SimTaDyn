@@ -1,102 +1,123 @@
-.PHONY: clean build coverage with-code-coverage
+##=====================================================================
+## SimTaDyn: A GIS in a spreadsheet.
+## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+##
+## This file is part of SimTaDyn.
+##
+## SimTaDyn is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+##=====================================================================
 
 ###################################################
-# Color
-CLR_DEFAULT := $(shell echo '\033[00m')
-CLR_RED     := $(shell echo '\033[31m')
-CLR_GREEN   := $(shell echo '\033[32m')
-CLR_YELLOW  := $(shell echo '\033[33m')
-CLR_BLUE    := $(shell echo '\033[34m')
-CLR_PURPLE  := $(shell echo '\033[35m')
-CLR_CYAN    := $(shell echo '\033[36m')
-print-comp = \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) <= $(CLR_YELLOW)$3$(CLR_DEFAULT)"
-print-link= \
-	@echo "$(CLR_PURPLE)*** $1:$(CLR_DEFAULT) $(CLR_CYAN)$2$(CLR_DEFAULT) => $(CLR_YELLOW)$3$(CLR_DEFAULT) $4"
+# Executable name
+TARGET = SimForth
 
 ###################################################
-# Path where to store *.o files. Default: ./build/
-ifeq ($(BUILD),)
-BUILD = build
+# Location from the project root directory.
+P=../../..
+
+###################################################
+# Sharable informations between all Makefiles
+M=$(P)/.makefile
+-include $(M)/Makefile.header
+
+###################################################
+# List of files to compile. Splited by directories
+ifeq ($(PROJECT_MODE),debug)
+OBJ_EXTERNAL   = backward.o
+else
+OBJ_EXTERNAL   =
 endif
+OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+OBJ_STANDALONE = main.o
+OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
 ###################################################
-# Set include paths
-INCLUDES = -I. -I.. -I../../.. -I../../../Common -I../../../SimTaDyn -I../../../Common/SharedLibrary -I../../../../tools
+# Debug mode or Release mode
+PROJECT_MODE = debug
 
 ###################################################
-# Path for Makefile to find *.o
-VPATH=.:$(BUILD):..:../../../Common:../../../SimTaDyn:../../../Common/SharedLibrary:../../../../tools
+# Compilation options.
+CXXFLAGS = -W -Wall -Wextra -std=c++11
+LDFLAGS =
 
 ###################################################
-# Set objects architecture specific
-OBJECTS_POCO       = Backward.o Logger.o SimTaDynLogger.o Exception.o SharedLibrary_UNIX.o SharedLibrary.o
-OBJECTS_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJECTS_STANDALONE = TextColor.o
-OBJECTS            = $(OBJECTS_POCO) $(OBJECTS_FORTH) $(OBJECTS_STANDALONE) main.o
-TARGET             = SimForth
+# Common defines
+SIMTADYN_DEFINES=-DCHECK_OPENGL -DSIMTADYN_TEMP_DIR=\"/tmp/SimTaDyn/\" -DSIMTADYN_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += $(SIMTADYN_DEFINES)
 
 ###################################################
-# Compil options
-CXX = g++
-CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11
-LDFLAGS = -ldl -ldw
-DEFINES =
-
-###################################################
-# Set Libraries
+# Set Libraries compiled in the external/ directory.
+# For knowing which libraries is needed please read
+# the doc/Install.md file.
 LIBS =
 
 ###################################################
-# Files dependencies
-DEPFLAGS = -MT $@ -MMD -MP -MF $(BUILD)/$*.Td
-POSTCOMPILE = mv -f $(BUILD)/$*.Td $(BUILD)/$*.d
+# Set Libraries. For knowing which libraries
+# is needed please read the external/README.md file.
 
-###################################################
-# Code coverage
-ifneq ($(filter with-code-coverage, $(MAKECMDGOALS)),)
-CXXFLAGS += --coverage
-LDFLAGS += --coverage
+## OS X
+ifeq ($(ARCHI),Darwin)
+LIBS += -L/usr/local/lib
+
+## Linux
+else ifeq ($(ARCHI),Linux)
+LIBS += -ldl
+
+## Windows
+else
+
+#$(error Unknown architecture)
 endif
 
 ###################################################
-# Main entry
+# Backward allows tracing stack when segfault happens
+ifeq ($(PROJECT_MODE),debug)
+OPTIM_FLAGS = -O2 -g
+DEFINES += -DBACKWARD_HAS_DW=1
+LIBS += -ldw
+else
+OPTIM_FLAGS = -O3
+endif
+
+###################################################
+# Code coverage. Uncomment if desired
+# CXXFLAGS += --coverage
+# LDFLAGS += --coverage
+
+###################################################
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
-	@$(call print-link,"Linking","$(TARGET)","$(BUILD)/$@","")
-	@cd $(BUILD) && $(CXX) $(OBJECTS) -o $(TARGET) $(LIBS) $(LDFLAGS)
+###################################################
+# Link sources
+$(TARGET): $(OBJ)
+	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
+	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
-%.o: %.cpp
-%.o: %.cpp $(BUILD)/%.d
-	@$(call print-comp,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+###################################################
+# Compile sources
+%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
+	@$(call print-from,"Compiling C++","$(TARGET)","$<")
+	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################
-# Code coverage
-with-code-coverage: all
-
-coverage-report: $(TARGET)
-	@mkdir -p coverage_report 2> /dev/null
-	@rm -fr coverage_report/* 2> /dev/null
-	@gcovr -r ../../. --html -o coverage_report/coverage.html --html-details
-	@firefox coverage_report/coverage.html
-
-###################################################
-# Clean Target
+.PHONY: clean
 clean:
-	@echo "*** Cleaning"
-	@rm -fr *~ ../*~ $(BUILD) coverage_report 2> /dev/null
+	@$(call print-simple,"Cleaning","$(PWD)")
+	@rm -fr *~ ../*~ $(BUILD) 2> /dev/null
 
 ###################################################
-# Create a temporary folder to store *.o
-$(DEPFILES): | $(BUILD)
-$(OBJECTS): | $(BUILD)
-$(BUILD):
-	@mkdir -p $(BUILD)
-
-$(BUILD)/%.d: ;
-.PRECIOUS: $(BUILD)/%.d
-
--include $(patsubst %,$(BUILD)/%.d,$(basename $(OBJECTS)))
+# Sharable informations between all Makefiles
+-include $(M)/Makefile.footer

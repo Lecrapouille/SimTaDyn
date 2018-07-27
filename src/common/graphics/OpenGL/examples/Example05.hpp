@@ -2,11 +2,14 @@
 #  define EXAMPLE_05_HPP_
 
 #  include "GLWindow.hpp"
-#  include "GLShader.hpp"
 #  include "Cube.hpp"
 #  include "SceneGraph.tpp"
 
-class CubicRobot: public SceneNode<float, 3U>
+//! define a 3D Scene node (matrix 4x4 of float)
+typedef SceneNode<Mesh, float, 3U> SceneNode_t;
+
+//!
+class CubicRobot: public SceneNode_t
 {
 public:
 
@@ -77,13 +80,13 @@ public:
 
 protected:
 
-  MeshCube              m_cube;
-  SceneNode<float, 3U> *m_body;
-  SceneNode<float, 3U> *m_head;
-  SceneNode<float, 3U> *m_leftArm;
-  SceneNode<float, 3U> *m_rightArm;
-  SceneNode<float, 3U> *m_leftLeg;
-  SceneNode<float, 3U> *m_rightLeg;
+  MeshCube     m_cube;
+  SceneNode_t *m_body;
+  SceneNode_t *m_head;
+  SceneNode_t *m_leftArm;
+  SceneNode_t *m_rightArm;
+  SceneNode_t *m_leftLeg;
+  SceneNode_t *m_rightLeg;
   float degreesRotated = 0.0f;
 };
 
@@ -94,7 +97,7 @@ public:
   GLExample05()
     : m_shader("Shader05")
   {
-    m_root = new SceneNode<float, 3U>("Root");
+    m_root = new SceneNode_t("Root");
     m_robot1 = new CubicRobot("CubicRobot1");
     m_robot2 = new CubicRobot("CubicRobot2");
     m_robot3 = new CubicRobot("CubicRobot3");
@@ -114,14 +117,14 @@ public:
 
   virtual bool setup() override;
   virtual bool draw() override;
-  void drawNode(SceneNode<float, 3U> &node);
+  void drawNode(SceneNode_t &node);
   void setUniform(const char *name, Matrix44f const &mat);
 
-  GLShader m_shader;
-  CubicRobot *m_robot1;
-  CubicRobot *m_robot2;
-  CubicRobot *m_robot3;
-  SceneNode<float, 3U> *m_root;
+  GLShader     m_shader;
+  CubicRobot  *m_robot1;
+  CubicRobot  *m_robot2;
+  CubicRobot  *m_robot3;
+  SceneNode_t *m_root;
 };
 
 #  endif /* EXAMPLE_05_HPP_ */

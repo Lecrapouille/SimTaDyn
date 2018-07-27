@@ -2,10 +2,8 @@
 #  define EXAMPLE_03_HPP_
 
 #  include "GLWindow.hpp"
-#  include "GLShader.hpp"
 #  include "GLVertexArray.hpp"
 #  include "GLVertexBuffer.hpp"
-#  include "GLAttrib.hpp"
 #  include "GLTextures.hpp"
 #  include "Movable.tpp"
 

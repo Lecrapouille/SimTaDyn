@@ -5,7 +5,6 @@
 #  include "GLVertexArray.hpp"
 #  include "GLShader.hpp"
 #  include "GLVertexBuffer.hpp"
-#  include "GLAttrib.hpp"
 #  include "GLTextures.hpp"
 
 class GLExample01: public IGLWindow

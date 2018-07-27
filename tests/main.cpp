@@ -1,4 +1,25 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "FileTests.hpp"
+#include "LoggerTests.hpp"
 #include "VectorTests.hpp"
 #include "MatrixTests.hpp"
 #include "TransformationTests.hpp"
@@ -6,20 +27,25 @@
 #include "ColorTests.hpp"
 #include "SetTests.hpp"
 #include "CollectionTests.hpp"
-#include "BasicNodeTests.hpp"
+/*#include "BasicNodeTests.hpp"
 #include "BasicArcTests.hpp"
 #include "BasicGraphTests.hpp"
-#include "GraphAlgoTests.hpp"
+#include "GraphAlgoTests.hpp"*/
 #include "GLBufferTests.hpp"
 #include "OpenGLTests.hpp"
 #include "FilteringTests.hpp"
 #include "ResourcesTests.hpp"
+#include "SimTaDynFileLoaderTests.hpp"
 #include <cppunit/ui/text/TestRunner.h>
 
 //--------------------------------------------------------------------------
 static void testUtils(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
+
+  suite = new CppUnit::TestSuite("LoggerTests");
+  suite->addTest(new CppUnit::TestCaller<LoggerTests>("Logger tests", &LoggerTests::testlog));
+  runner.addTest(suite);
 
   suite = new CppUnit::TestSuite("FileTests");
   suite->addTest(new CppUnit::TestCaller<FileTests>("File tests", &FileTests::testfiles));
@@ -93,7 +119,7 @@ static void testContainer(CppUnit::TextUi::TestRunner& runner)
 }
 
 //--------------------------------------------------------------------------
-static void testGraph(CppUnit::TextUi::TestRunner& runner)
+/*static void testGraph(CppUnit::TextUi::TestRunner& runner)
 {
   CppUnit::TestSuite* suite;
 
@@ -113,7 +139,7 @@ static void testGraph(CppUnit::TextUi::TestRunner& runner)
   suite = new CppUnit::TestSuite("GraphAlgoTests");
   suite->addTest(new CppUnit::TestCaller<GraphAlgoTests>("test", &GraphAlgoTests::test));
   runner.addTest(suite);
-}
+  }*/
 
 //--------------------------------------------------------------------------
 static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
@@ -156,15 +182,34 @@ static void testResourceManager(CppUnit::TextUi::TestRunner& runner)
   runner.addTest(suite);
 }
 
+//--------------------------------------------------------------------------
+static void testLoader(CppUnit::TextUi::TestRunner& runner)
+{
+  CppUnit::TestSuite* suite;
+
+  suite = new CppUnit::TestSuite("LoaderTests");
+  suite->addTest(new CppUnit::TestCaller<LoaderTests>("Loader", &LoaderTests::testSimTaDyn));
+  runner.addTest(suite);
+}
+
+//--------------------------------------------------------------------------
 static bool run_tests(bool const has_xdisplay)
 {
   CppUnit::TextUi::TestRunner runner;
 
-  /*testUtils(runner);
+  // Call it before Logger constructor
+  if (!File::mkdir(config::tmp_path))
+    {
+      std::cerr << "Failed creating the temporary directory '"
+                << config::tmp_path << "'" << std::endl;
+    }
+
+  //testUtils(runner);
   testResourceManager(runner);
+  //testLoader(runner);
   testMath(runner);
   testContainer(runner);
-  testGraph(runner);*/
+  //testGraph(runner);
 
   // Travis-CI does not support export display
   if (has_xdisplay)
@@ -217,5 +262,13 @@ int main(int argc, char *argv[])
     }
 
   bool wasSucessful = run_tests(has_xdisplay);
+  if (wasSucessful)
+    {
+      std::cout << "*** Congratulation: all tests passed ***" << std::endl;
+    }
+  else
+    {
+      std::cout << "*** Sorry but not all tests passed ***" << std::endl;
+    }
   return wasSucessful ? 0 : 1;
 }

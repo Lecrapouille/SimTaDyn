@@ -1,6 +1,24 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "MapEditor.hpp"
-#include "ShapeFile.hpp"
-#include "Names.hpp"
 
 // *************************************************************************************************
 //
@@ -96,8 +114,8 @@ MapEditor::MapEditor()
   // Pack all stuffs together
   {
     m_vbox.pack_start(m_inspector.m_scrolledwindow, Gtk::PACK_SHRINK);
-    pack_start(m_vbox);
-    pack_start(m_toolbar, Gtk::PACK_SHRINK);
+    m_hbox.pack_start(m_vbox);
+    m_hbox.pack_start(m_toolbar, Gtk::PACK_SHRINK);
   }
 }
 
@@ -117,6 +135,7 @@ void MapEditor::registerLoaders()
 {
   LoaderManager &lm = LoaderManager::instance();
   lm.registerLoader(new ShapefileLoader(), "shp");
+  lm.registerLoader(new SimTaDynFileLoader(), "spak");
 }
 
 // *************************************************************************************************
@@ -199,7 +218,7 @@ bool MapEditor::dialogLoadMap(const bool new_map, const bool reset_map)
   // Open the dialog window and set the SimTaDyn path as current
   // folder instead of using the "smart-current-folder" strategy
   // thiugh by GTK+ developpers.
-  dialog.set_current_folder(Config::instance().m_data_path);
+  dialog.set_current_folder(config::data_path);
 
   // Fill filters for selecting type of file. Use the loader manager
   // for filling these filters because its knows all loaders which
@@ -243,7 +262,7 @@ bool MapEditor::doOpen(std::string const& filename, const bool new_map, const bo
     {
       if (reset_map)
         {
-          map->m_name = File::shortName(filename);
+          map->m_name = File::baseName(filename);
         }
 
       //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
@@ -300,24 +319,27 @@ bool MapEditor::load(std::string const& filename, SimTaDynMap* &map)
 // *************************************************************************************************
 bool MapEditor::exec() // FIXME: Exec(typeCell, nodeID)
 {
-  bool res;
-
   SimForth &forth = SimForth::instance();
-  SimTaDynNode& n1 = map()->m_graph.getNode(1); // FIXME far all cells + faire un ancetre commun aux cell pour eviter de faire un switch
-  n1.forthWord("N#1 N#2 N#3 + +");
+  SimTaDynSheet *sheet = map()->sheet();
+
+  if (nullptr == sheet)
+    return false;
 
   // FIXME: should be called outside each cell: optimisation
   // Disable compilation mode
   forth.dictionary().smudge(":");
   forth.dictionary().smudge("INCLUDE");
 
-  res = n1.interprete(forth);
+  forth.m_spreadsheet = sheet;
+  sheet->parse(SimForth::instance());
+  std::pair<bool, std::string> res = sheet->evaluate(forth);
+  forth.ok(res);
 
   // Enable compilation mode
   forth.dictionary().smudge("INCLUDE");
   forth.dictionary().smudge(":");
 
-  return res;
+  return res.first;
 }
 
 // *************************************************************************************************
@@ -330,7 +352,7 @@ void MapEditor::saveAs()
   dialog.set_transient_for((Gtk::Window&) (*m_vbox.get_toplevel()));
 
   // Set to the SimTaDyn path while no longer the GTK team strategy.
-  dialog.set_current_folder(Config::instance().m_data_path);
+  dialog.set_current_folder(config::data_path);
 
   // Add response buttons the the dialog:
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

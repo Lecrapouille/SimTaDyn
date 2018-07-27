@@ -1,3 +1,23 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 // ===========================================================================
 // Input signal
 t=-%pi:0.05:%pi;
@@ -41,33 +61,7 @@ y(i)=mean(X(max([1 i-Nb_pt_filt]):i,1));
 end
 fprintfMat("./generated/RollingAverageFilter.h", [u', y], '%.20f,');
 
-// ===========================================================================
-function [p,cr] = polyfit(x,y,n)
-  if prod(size(x))<>prod(size(y))  then
-    error('x and y  must be with the same size')
-  end
-
-  if(size(x,1) == 1) then x=x';end;
-  if(size(y,1) == 1) then y=y';end;
-  nx=prod(size(x));ny=prod(size(y));
-
-  vander = zeros(nx,n+1);
-  vander(:,n+1) = ones(nx,1);
-  for j = n:-1:1,
-    vander(:,j) = x.*vander(:,j+1);
-  end;
-  [Q,R] = qr(vander,'e');
-  Q = Q(:,1:size(R,2))
-  R = R(1:size(R,2),:)
-  p = R\(Q'*y);
-  r = y - vander*p; //residuals
-  p = p($:-1:1);    //cofficients of the polynomial
-  p=p';
-  freed = ny - (n+1); //degree of freedom
-
-  //on return : choleski factor and the norm of residuals
-  cr = [R; [freed zeros(1,n)]; [norm(r) zeros(1,n)]];
-endfunction
+exec('polyfit.sci');
 
 
 x=[1:10];

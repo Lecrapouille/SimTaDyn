@@ -1,8 +1,29 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef GLOBJECT_HPP_
 #  define GLOBJECT_HPP_
 
 // **************************************************************
-//! \file This class get its inspiration from the Glumpy project
+//! \file GLObject.hpp
+//! This class get its inspiration from the Glumpy project
 //! code (Python + Numpy + modern OpenGL: a fast, scalable and
 //! beautiful scientific visualization): https://github.com/glumpy/glumpy
 //!
@@ -11,34 +32,16 @@
 //! Distributed under the (new) BSD License.
 // **************************************************************
 
-#  include "Exception.hpp"
 #  include "OpenGL.hpp"
 #  include "ClassCounter.tpp"
 #  include "Logger.hpp"
 #  include <assert.h>
 #  include <cstdint>
 
-//! This macro (from the library POCO) will declare a class
-//! GLObjectException derived from simtadyn::Exception.
-POCO_DECLARE_EXCEPTION(GLObjectException, simtadyn::Exception)
-
 // **************************************************************
-//! \brief
-// **************************************************************
-class GLObjectExceptionNotCreated: public GLObjectException
-{
-public:
-
-  GLObjectExceptionNotCreated(std::string const& name)
-  {
-    m_msg = "OpenGL Object '" + name + "' has not been correctly created";
-  }
-};
-
-
-// **************************************************************
-//! \brief \class GLObject is an interface for managing a generic
-//! OpenGL object.
+//! \class GLObject GLObject.hpp
+//! \brief GLObject is an interface for managing a generic OpenGL
+//! object.
 // **************************************************************
 class GLObject
 {
@@ -100,7 +103,10 @@ public:
       }
     else if (m_throw_enable)
       {
-        GLObjectExceptionNotCreated e(m_name);
+        std::string msg("OpenGL Object '");
+        msg += m_name;
+        msg += "' has not been correctly created";
+        OpenGLException e(msg);
         throw e;
       }
 

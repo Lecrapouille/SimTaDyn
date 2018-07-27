@@ -1,36 +1,27 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef GLATTRIB_HPP_
 #  define GLATTRIB_HPP_
 
 #  include "GLShader.hpp"
-
-// **************************************************************
-//! \brief
-// **************************************************************
-class GLObjectExceptionNotLocated: public GLObjectException
-{
-public:
-
-  GLObjectExceptionNotLocated(std::string const& GLObject_name, std::string const& GLShader_name)
-  {
-    m_msg = "The OpenGL attribute '" + GLObject_name + "' has not been correctly located in the shader program '"
-      + GLShader_name + "'";
-  }
-};
-
-// **************************************************************
-//! \brief
-// **************************************************************
-class GLObjectExceptionNoShader: public GLObjectException
-{
-public:
-
-  GLObjectExceptionNoShader(std::string const& GLObject_name)
-  {
-    m_msg = "The OpenGL attribute '" + GLObject_name + "' failed because no shader program was given. "
-      "Call setup((GLShader& program, const GLint size, const GLenum type, const GLboolean) before calling"
-      "start() method";
-  }
-};
 
 // **************************************************************
 //! \brief
@@ -119,7 +110,10 @@ protected:
       {
         if (m_throw_enable)
           {
-            GLObjectExceptionNoShader e(m_name);
+            std::string msg("The OpenGL attribute '" + m_name + "' failed because no shader program was given. "
+                            "Call setup((GLShader& program, const GLint size, const GLenum type, const GLboolean) before calling"
+                            "start() method");
+            OpenGLException e(msg);
             throw e;
           }
         else
@@ -140,7 +134,9 @@ protected:
       }
     else if (m_throw_enable)
       {
-        GLObjectExceptionNotLocated e(m_name, m_program->m_name);
+        std::string msg("The OpenGL attribute '" + m_name + "' has not been correctly located in the shader program '"
+                        + m_program->m_name + "'");
+        OpenGLException e(msg);
         throw e;
       }
     else

@@ -1,4 +1,24 @@
-#include "Inspector.hpp"
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
+// FIXME MapEditor.hpp includes #include "Inspector.hpp"
 #include "MapEditor.hpp"
 
 Inspector::Inspector()
@@ -36,9 +56,12 @@ void Inspector::showCell(const Key nodeID)
   if (nullptr == map)
     return ;
 
-  if (!map->m_graph.hasNode(nodeID))
-    return ;
-  SimTaDynNode& node = map->m_graph.getNode(nodeID);
+  // FIXME: parcours du SceneGraph
+  //SimTaDynSheet *sheet = map->sheet();
+  //if ((nullptr == sheet) || (!sheet->hasNode(nodeID)))
+  //  return ;
+
+  CellNode node;//FIXME CellNode& node = sheet->getNode(nodeID);
 
   m_ref_tree_model->clear();
 
@@ -48,9 +71,9 @@ void Inspector::showCell(const Key nodeID)
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Forth";
-  row[m_columns.m_token] = node.forthWord();
+  row[m_columns.m_token] = node.formulae();
 
   row = *(m_ref_tree_model->append());
   row[m_columns.m_word] = "Cost";
-  row[m_columns.m_token] = std::to_string(node.m_cost);
+  row[m_columns.m_token] = std::to_string(node.value());
 }

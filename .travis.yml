@@ -3,26 +3,24 @@ dist: trusty
 language: cpp
 
 compiler:
-  - g++
+  - gcc
+  - clang
 
 services:
   - docker
 
-addons:
-  apt:
-    packages:
-    - xvfb
-
 os:
   - linux
-#  - osx
+  - osx
 
-before_script:
-  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; sleep 3 # give xvfb some time to start
+matrix:
+  exclude: # On OSX g++ is a symlink to clang++ by default
+    - os: osx
+      compiler: gcc
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull ubuntu:16.04 ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --name travis-ci -v $TRAVIS_BUILD_DIR:/SimTaDyn -td ubuntu:16.04 /bin/bash ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull ubuntu:17.04 ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -e CXX="$CXX" -e TRAVIS=$TRAVIS -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID --name travis-ci -v $TRAVIS_BUILD_DIR:/SimTaDyn -td ubuntu:16.04 /bin/bash ; fi
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-install-linux.sh" ; fi
@@ -31,6 +29,9 @@ install:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-launch_tests.sh" ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.integration/travis-launch_tests.sh ; fi
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CXX" == "g++" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-deploy.sh" ; fi
 
 after_script:
   - docker stop travis-ci

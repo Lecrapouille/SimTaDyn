@@ -1,3 +1,23 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "Maths.hpp"
 
 namespace maths
@@ -6,6 +26,8 @@ namespace maths
   uint32_t maxUlps = 4U;
   bool fastSqrt = false;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
   bool almostEqual(float const A, float const B)
   {
     if (A == B)
@@ -15,14 +37,14 @@ namespace maths
     // default NAN won't compare as equal to anything.
     assert(maths::maxUlps < 4U * 1024U * 1024U);
 
-    int aInt = *(int*)&A;
+    int aInt = *(int*) &A;
 
     // Make aInt lexicographically ordered as a twos-complement int
     if (aInt < 0)
       aInt = 0x80000000 - aInt;
 
     // Make bInt lexicographically ordered as a twos-complement int
-    int bInt = *(int*)&B;
+    int bInt = *(int*) &B;
 
     if (bInt < 0)
       bInt = 0x80000000 - bInt;
@@ -32,6 +54,7 @@ namespace maths
         return true;
     return false;
   }
+#pragma GCC diagnostic pop
 
   bool almostZero(float const A)
   {

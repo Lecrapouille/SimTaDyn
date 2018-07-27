@@ -1,0 +1,3 @@
+Graph traversal needs a stack. Is it ok to expose its content (aka "not yet visited" nodes) to the Forth programmer like the return stack with words like >R and R> ? And if yes the stack should be protected against several threads (traversal with threads)
+
+Creer une pile pour le parcours de graphe. cette pile doit etre vue par Forth. Les algorithmes sur les graphes prennent la cellule stockee dedans. Ou stocker le resultat (autre pile) ? 

@@ -1,3 +1,23 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "MatrixTests.hpp"
 
 // Register the test suite
@@ -397,10 +417,9 @@ void MatrixTests::testOperations()
       -0.8151346,  -0.3008722,    0.5816799,    1.0,
     };
 
-  Matrix44g LL, UU, P;
+  Matrix44g LL(11111.0), UU(22222.0), P(333.3); // Init with random values
   matrix::LUdecomposition(Ra, LL, UU, P);
   maths::maxUlps = 1U;
-
   compareMatricesEps(LL, L);
   compareMatricesEps(UU, U);
 

@@ -1,0 +1,172 @@
+@startuml
+
+class "BasicGraph<Node,Arc>" as BasicGraph
+class BasicGraph {
+-directed: bool
+-nodes: Node[]
+-arcs: Arc[]
++addNode(node: UniqueNodeID)
++addArc(from: UniqueNodeID, to: UniqueNodeID)
++removeNode(node: UniqueNodeID)
++removeArc(arc: UniqueArcID)
++removeArc(from: UniqueNodeID, to: UniqueNodeID)
++hasNode(node: UniqueNodeID) : bool
++hasArc(arc: UniqueArcID) : bool
++hasArc(from: UniqueNodeID, to: UniqueNodeID) : bool
++neighborsNode(node: UniqueNodeID) : Arc[]
++markNode(node: UniqueNodeID)
++markArc(arc: UniqueArcID)
++unmarkNode(node: UniqueNodeID)
++unmarkArc(arc: UniqueArcID)
+}
+
+class "ExtendedGraph<Node,Arc,Zone>" as ExtendedGraph
+class ExtendedGraph {
+-zones: Zone[]
++addZone(arcs: Arc[])
++addZone(arcs: UniqueArcID[])
++removeZone(zone: UniqueArcID)
++removeZone(arcs: Arc[])
++hasZone(zone: UniqueZoneID) : bool
++hasZone(arcs: Arc[]) : bool
++markZone(zone: UniqueZoneID)
++unmarkZone(zone: UniqueZoneID)
+}
+
+class BasicNode {
+-id: UniqueNodeID
+-neighbors: BasicArc[]
++addNeighbor(arc: BasicArc)
++addNeighbor(arc: UniqueID)
++removeNeighbor(arc: UniqueID)
+}
+
+class BasicArc {
+-id: UniqueArcID
+-from: BasicNode
+-to BasicNode
++BasicArc(id: UniqueID, from: BasicNode, to BasicNode)
++from(): BasicNode
++to(): BasicNode
+}
+
+class ExtendedArc {
+-neighbors: BasicZone[]
++addNeighbor(zone: BasicZone)
++addNeighbor(zone: UniqueZoneID)
++removeNeighbor(zone: UniqueZoneID)
+}
+
+class BasicZone {
+-arcs: BasicArc[]
+}
+
+class SpreadSheetCell {
+-formulae: string
+-Value: double
++setformulae(formulae: string)
++setValue(value: double)
++eval(): double
+}
+
+class GraphCell {
++BasicArc(id: UniqueID, from: BasicNode, to BasicNode)
++from(): BasicNode
++to(): BasicNode
++addNeighbor(arc: BasicArc)
++addNeighbor(arc: UniqueID)
++addNeighbor(zone: BasicZone)
++addNeighbor(zone: UniqueZoneID)
++removeNeighbor(zone: UniqueZoneID)
++removeNeighbor(arc: UniqueID)
+}
+
+class SpreadSheet {
++evaluateBy(SimForth)
+}
+
+class SimForth {
++eval(SpreadSheet)
++eval(GraphCell)
+}
+
+SpreadSheetCell <|-- GraphCell
+BasicArc <|-- ExtendedArc
+GraphCell <|-- CellNode
+GraphCell <|-- CellArc
+GraphCell <|-- CellZone
+CellNode --|> BasicNode
+ExtendedArc <|-- CellArc
+CellZone --|> BasicZone
+
+
+BasicGraph <|-- ExtendedGraph
+ExtendedGraph <|- SpreadSheet
+SpreadSheet .> SimForth
+SimForth .> GraphCell
+ExtendedGraph <.. CellArc
+ExtendedGraph <.. CellNode
+ExtendedGraph <.. CellZone
+
+@enduml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class BasicNode {
+-id: UniqueID
+-neighbors: BasicArcs[]
++addNeighbor(arc: BasicArc)
++removeNeighbor(arc: UniqueID)
+}
+
+class ForthNode {
+}
+
+ForthNode --|> SpreadSheetCellForth
+ForthNode --|> BasicNode
+ForthZone --|> SpreadSheetCellForth
+
+class BasicArc {
+-id: UniqueID
+-from: BasicNode
+-to BasicNode
++BasicArc(id: UniqueID, from: BasicNode, to BasicNode)
++from(): BasicNode
++to(): BasicNode
+}
+
+class ForthArc {
+-neighbors: ForthZone[]
++addNeighbor(zone: BasicZone)
++addNeighbor(zone: UniqueID)
++removeNeighbor(zone: UniqueID)
+}
+
+class ForthZone {
+-arcs: ForthArc[]
+}
+
+' ForthNode "2" <-> "*" ForthArc
+SpreadSheetCellForth <|-- ForthArc
+BasicArc <|-- ForthArc
+
+
+
+BasicGraph <|-- SimGraph
+SimGraph <.. ForthArc
+SimGraph <.. ForthNode
+SimGraph <.. ForthZone
+
+@enduml

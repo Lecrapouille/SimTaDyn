@@ -1,4 +1,24 @@
 // -*- c++ -*- Coloration Syntaxique pour Emacs
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef MATRIX_TPP_
 #  define MATRIX_TPP_
 
@@ -515,8 +535,7 @@ namespace matrix
                        Matrix<T, rows, cols> &U,
                        Matrix<T, rows, cols> &P)
   {
-    uint32_t i, j, pivot, k;
-    double max;
+    uint32_t i, j;
 
     // Set matrices to 0
     L *= T(0);
@@ -527,8 +546,8 @@ namespace matrix
 
     for (i = 0; i < rows - 1; ++i)
       {
-        max = maths::abs(A[i][i]);
-        pivot = i;
+        double max = maths::abs(A[i][i]);
+        uint32_t pivot = i;
 
         for (j = i + 1U; j < rows; ++j)
           {
@@ -554,7 +573,7 @@ namespace matrix
             for (j = i + 1U; j < rows; ++j)
               {
                 A[j][i] = A[j][i] / A[i][i];
-                for (k = i + 1U; k < rows; ++k)
+                for (uint32_t k = i + 1U; k < rows; ++k)
                   {
                     A[j][k] = A[j][k] - A[j][i] * A[i][k];
                   }

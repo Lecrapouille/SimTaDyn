@@ -8,18 +8,19 @@
 
 
 #include "Exception.hpp"
-
-namespace simtadyn {
+#include "Logger.hpp"
 
 Exception::Exception(int code)
   : m_pNested(0), m_code(code)
 {
+  LOGE("Exception %u", code);
 }
 
 
 Exception::Exception(const std::string& msg, int code)
   : m_msg(msg), m_pNested(0), m_code(code)
 {
+  LOGE("Exception %u '%s'", code, msg.c_str());
 }
 
 
@@ -31,6 +32,7 @@ Exception::Exception(const std::string& msg, const std::string& arg, int code)
       m_msg.append(": ");
       m_msg.append(arg);
     }
+  LOGE("Exception %u '%s'", code, m_msg.c_str());
 }
 
 
@@ -119,5 +121,3 @@ void Exception::rethrow() const
 {
   throw *this;
 }
-
-} // namespace SimTaDyn

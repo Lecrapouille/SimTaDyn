@@ -1,4 +1,24 @@
 // -*- c++ -*- Coloration Syntaxique pour Emacs
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef BOUNDINGBOX_TPP_
 #  define BOUNDINGBOX_TPP_
 
@@ -492,8 +512,8 @@ inline AABB<T, n> clamp(AABB<T, n> const &a, AABB<T, n> const &b)
 template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::DUMMY(Vector<T, n>(NAN), Vector<T, n>(NAN));
 template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::ZERO(Vector<T, n>(0), Vector<T, n>(0));
 template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::UNIT_SCALE(Vector<T, n>(-0.5f), Vector<T, n>(0.5f));
-template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::INFINITE(Vector<T, n>(std::numeric_limits<T>::lowest()),
-                                                                        Vector<T, n>(std::numeric_limits<T>::max()));
+template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::INFINITE(Vector<T, n>((T) std::numeric_limits<T>::lowest()),
+                                                                        Vector<T, n>((T) std::numeric_limits<T>::max()));
 
 typedef AABB<int32_t, 2U> AABB2i;
 typedef AABB<int32_t, 3U> AABB3i;

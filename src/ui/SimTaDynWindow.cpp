@@ -1,7 +1,26 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "SimTaDynWindow.hpp"
 #include "MapEditor.hpp"
-#include "ForthEditor.hpp"
-#include "Config.hpp"
+#include "PathManager.hpp"
 
 // *************************************************************************************************
 // SimTaDyn main window
@@ -16,7 +35,7 @@ SimTaDynWindow::SimTaDynWindow()
     set_title(config::project_name);
     set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
-    setTitleIcon();
+    setTitleIcon("icons/SimTaDyn.png");
 
     // Connect signals
     add_events(Gdk::KEY_RELEASE_MASK);
@@ -68,7 +87,7 @@ SimTaDynWindow::SimTaDynWindow()
   {
     // Left:
     MapEditor::instance().attachView(m_drawing_area);
-    m_hpaned.pack1(MapEditor::instance());
+    m_hpaned.pack1(MapEditor::instance().widget());
 
     // Right:
     m_box.pack_start(m_menubar, Gtk::PACK_SHRINK);
@@ -99,17 +118,17 @@ bool SimTaDynWindow::onExitClicked(GdkEventAny*)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void SimTaDynWindow::setTitleIcon()
+void SimTaDynWindow::setTitleIcon(std::string const &icon_name)
 {
-  std::string path = Config::instance().data_path("icons/SimTaDyn.png");
+  std::pair<std::string, bool> res = PathManager::instance().find(icon_name);
 
-  if (File::exist(path))
+  if (res.second)
     {
-      set_icon_from_file(path);
+      set_icon_from_file(res.first);
     }
   else
     {
-      LOGW("SimTaDynWindow: Icon '%s' does not exist\n", path.c_str());
+      LOGW("SimTaDynWindow: Icon '%s' does not exist\n", icon_name.c_str());
     }
 }
 

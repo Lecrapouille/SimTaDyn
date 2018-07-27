@@ -1,3 +1,23 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "DrawingArea.hpp"
 #include <exception>
 
@@ -48,8 +68,17 @@ void GLDrawingArea::onRealize()
   Gtk::GLArea::make_current();
   SimTaDyn::glStartContext();
   Gtk::GLArea::throw_if_error();
-  m_success_init = GLRenderer::setupGraphics();
-  if (!m_success_init)
+  try
+    {
+      m_success_init = GLRenderer::setupGraphics();
+    }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the realize callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+      m_success_init = false;
+    }
+  if (false == m_success_init)
     {
       LOGES("During the setup of SimTaDyn graphic renderer");
     }
@@ -67,6 +96,11 @@ void GLDrawingArea::onUnrealize()
       std::cerr << "[FAILED] An error occured making the context current during unrealize" << std::endl;
       std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
     }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+    }
 }
 
 bool GLDrawingArea::onRender()
@@ -79,8 +113,6 @@ bool GLDrawingArea::onRender()
         {
           GLRenderer::draw();
         }
-
-      return true;
     }
   catch (const Gdk::GLError& gle)
     {
@@ -88,4 +120,12 @@ bool GLDrawingArea::onRender()
       std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
       return false;
     }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+      return false;
+    }
+
+  return true;
 }

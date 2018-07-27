@@ -1,3 +1,23 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef MAPEDITOR_HPP_
 #  define MAPEDITOR_HPP_
 
@@ -12,8 +32,7 @@ class LoaderManager;
 // This class implements a Controler pattern of the Model-View-Controler (MVC) design pattern.
 // *************************************************************************************************
 class MapEditor
-  : public Gtk::HBox,
-    public Singleton<MapEditor>
+  : public Singleton<MapEditor>
 {
 private:
 
@@ -54,6 +73,11 @@ protected:
   };
 
 public:
+
+  inline Gtk::Widget &widget()
+  {
+    return m_hbox;
+  }
 
   //! \brief Return the current map
   inline SimTaDynMap* map()
@@ -154,6 +178,7 @@ protected:
   Gtk::Toolbar           m_toolbar;
   Inspector              m_inspector;
   Gtk::VBox              m_vbox;
+  Gtk::HBox              m_hbox;
   SimTaDynMapListener    m_listener;
 };
 

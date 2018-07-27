@@ -1,3 +1,23 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #ifndef GLSHADER_HPP_
 #  define GLSHADER_HPP_
 
@@ -7,20 +27,8 @@
 #  include "GLObject.hpp"
 
 // **************************************************************
-//!
-// **************************************************************
-class GLShaderNotLoadedException: public GLObjectException
-{
-public:
-
-  GLShaderNotLoadedException(std::string const& name)
-  {
-    m_msg = "No vertex and fragment shaders have been given for the GLShader '" + name + "'";
-  }
-};
-
-// **************************************************************
-//! \class GLShader is a class for managing OpenGL shader scripts
+//! \class GLShader GLShader.hpp
+//! \brief GLShader is a class for managing OpenGL shader scripts
 //! (like loading them into the GPU).
 //!
 //! Shaders are scripts running in the GPU manipulating vertices,
@@ -70,7 +78,8 @@ protected:
       {
         if (m_throw_enable)
           {
-            GLShaderNotLoadedException e(m_name);
+            std::string msg("No vertex and fragment shaders have been given for the GLShader '" + m_name + "'");
+            OpenGLException e(msg);
             throw e;
           }
         return true;
@@ -123,7 +132,7 @@ public:
   //! being replacing by the new one.
   //! \param vertex_shader_filename the path of the file containing
   //! the vertex shader script.
-  //! \param fragement_shader_filename the path of the file containing
+  //! \param fragment_shader_filename the path of the file containing
   //! the vertex fragment script.
   //! \param geometry_shader_filename the path of the file containing
   //! the vertex geometry script.

@@ -45,5 +45,25 @@
 # Logs
 *.log
 
+# Tarball
+*.tgz
+*.tar.gz
+*.zip
+*.deb
+
+# SimTaDyn specifics
+build/*
+tests/build/*
+src/common/graphics/OpenGL/examples/build/*
+src/core/standalone/ClassicSpreadSheet/build/*
+src/forth/standalone/build/*
+external/zipper
+external/SOIL
+external/backward-cpp
+doc/html/*
+doc/coverage/*
+_*
+
 # Debian packages
 doc-pak
+description-pak

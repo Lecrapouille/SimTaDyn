@@ -1,17 +1,35 @@
 // -*- c++ -*- Coloration Syntaxique pour Emacs
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
 
 #ifndef LOADER_MANAGER_TPP_
 #  define LOADER_MANAGER_TPP_
 
-#include "ILoader.hpp"
-#include "Path.hpp"
-#include "Logger.hpp"
-//#include "Utilities/GenHierarchies.h"
+#  include "ILoader.hpp"
+#  include "PathManager.hpp"
+#  include "Logger.hpp"
 
-using namespace Yes;
 // Inspired by: http://loulou.developpez.com/tutoriels/moteur3d/
 // document: "Part 4: Gestion des ressources" and its code "YesEngine"
 // but this current code is different than the original code.
+using namespace Yes;
 
 // **************************************************************
 //! \brief Define a class managing a list of ILoader<T>.
@@ -25,7 +43,6 @@ using namespace Yes;
 // **************************************************************
 class LoaderManager
   : public Singleton<LoaderManager>,
-    public Path,
     public CScatteredHierarchy<ResourceList, LoaderHolder>
 {
 private:
@@ -79,7 +96,7 @@ public:
   void loadFromFile(std::string const& filename, T* &object) const
   {
     LOGI("Loading file '%s'", filename.c_str());
-    std::pair<std::string, bool> full_path = Path::find(filename);
+    std::pair<std::string, bool> full_path = PathManager::instance().find(filename);
     if (!full_path.second)
       {
         // Note: probably useless because if the file does not exist
@@ -87,7 +104,7 @@ public:
         // a different message.
         std::string msg("The file '" + filename +
                         "' cannot be found in the given search path '" +
-                        toString() + "'");
+                        PathManager::instance().toString() + "'");
         notifyLoadFailure<T>(filename, msg);
         throw LoaderException(msg);
       }
@@ -95,14 +112,24 @@ public:
       {
         ILoader<T>& loader = getLoader<T>(File::extension(full_path.first));
         loader.loadFromFile(full_path.first, object);
-        LOGI("Sucessfuly loaded the file '%s'", filename.c_str());
-        notifyLoadSucess<T>(full_path.first);
+        if (nullptr == object)
+          {
+            std::string msg("Get a nullptr object after loading the file '"
+                            + filename + "'");
+            throw LoaderException(msg);
+          }
+        else
+          {
+            LOGI("Sucessfuly loaded the file '%s'", filename.c_str());
+            notifyLoadSucess<T>(full_path.first);
+          }
       }
     catch (LoaderException const &e)
       {
-        LOGF("Failed loading the file '%s'", filename.c_str());
+        LOGF("Failed loading the file '%s'. Reason is '%s'",
+             filename.c_str(), e.what());
         notifyLoadFailure<T>(full_path.first, e.what());
-        throw e;
+        e.rethrow();
       }
   }
 

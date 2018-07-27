@@ -1,0 +1,77 @@
+@startuml
+
+class "Resource<uniqueID>" as Resource
+class Resource {
+-friend: ResourceManager
+-id: uniqueID
+-owners: int
++Resource(id: uniqueID)
++id(): uniqueID
++owners(): int
++acquire()
++dispose()
+}
+
+class ResourceManager {
+-Resource[]
+-add(resource: Resource)
+-acquire(id: uniqueID) : Resource*
+-dispose(id: uniqueID)
+}
+
+ResourceManager --> "*" Resource
+
+class "ILoader<Resource>" as ILoader
+class ILoader {
++{abstract} loadFromFile(filename: String) : Resource
++{abstract} saveToFile(filename: String, resource: Resource)
+}
+
+class "LoaderManager<Resource1, Resource2, ..., ResourceN>" as LoaderManager
+class LoaderManager {
+-Loader<Resource1>[]
+-Loader<Resource2>[]
+-Loader<ResourceN>[]
++registerLoader(loader: ILoader<Resource>, fileExtension: String)
++loadFromFile(filename: String) : Resource
++saveToFile(filename: String, resource: Resource)
++hasLoader(fileExtension: String) : bool
+}
+
+class "ShapeFileLoader<Resource=SimTaDynGraph>" as ShapeFileLoader
+class ShapeFileLoader {
++loadFromFile(filename: String) : ShapeFileLoader
++saveToFile(filename: String, resource: ShapeFileLoader)
+}
+
+class "SimTaDynFileLoader<Resource=SimTaDynMap>" as SimTaDynFileLoader
+class SimTaDynFileLoader {
++loadFromFile(filename: String) : SimTaDynFileLoader
++saveToFile(filename: String, resource: SimTaDynFileLoader)
+}
+
+class "TextureFileLoader<Resource=GLTexture>" as TextureFileLoader
+class TextureFileLoader {
++loadFromFile(filename: String) : TextureFileLoader
++saveToFile(filename: String, resource: TextureFileLoader)
+}
+
+class "ForthFileLoader<Resource=ForthFile>" as ForthFileLoader
+class ForthFileLoader {
++loadFromFile(filename: String) : ForthFileLoader
++saveToFile(filename: String, resource: ForthFileLoader)
+}
+
+LoaderManager --> "*" ILoader
+ILoader .> Resource
+ILoader <|-- ShapeFileLoader
+ILoader <|-- SimTaDynFileLoader
+ILoader <|-- TextureFileLoader
+ILoader <|-- ForthFileLoader
+
+Resource <|-- SimTaDynGraph
+Resource <|-- SimTaDynMap
+Resource <|-- GLTexture
+Resource <|-- ForthFile
+
+@enduml

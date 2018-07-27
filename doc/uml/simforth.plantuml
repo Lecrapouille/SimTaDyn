@@ -1,0 +1,53 @@
+@startuml
+
+class Forth {
++Forth(Dictionary*)
++{abstract} boot()
++{abstract} interpreteString(script: String)
++{abstract} interpreteFile(filename: String)
+#{abstract} execPrimitive(idPrimitive: Cell16)
+#{abstract} execPrimitive(token: Cell16)
+}
+
+class Stack {
++push(Value)
++pop(): Value
++pick(): Value
+}
+
+class Dictionary {
+
+}
+
+class SimForth {
++SimForth(Dictionary*)
++{abstract} boot()
++interpreteSpreadSheet(sheet: SpreadSheet)
++{abstract} interpreteString(script: String)
++{abstract} interpreteFile(filename: String)
+#{abstract} execPrimitive(idPrimitive: Cell16)
+#{abstract} execPrimitive(token: Cell16)
+}
+
+class SimDictionary {
+
+}
+
+abstract class SpreadSheet {
+
+}
+
+DataStack "1" <-- Forth
+ReturnStack "1" <-- Forth
+Dictionary "1" <- Forth
+SimDictionary "1" <- SimForth
+Forth <|-- SimForth
+Dictionary <|-- SimDictionary
+Stack <|-- DataStack
+Stack <|-- ReturnStack
+Stack <|-- SpreadSheetCellStack
+SpreadSheetCellStack "1" <-- SimForth
+SimForth "1" <- SimTaDyn
+SpreadSheet "*" <-- SimTaDyn
+SimForth ..> SpreadSheet : interprete
+@enduml

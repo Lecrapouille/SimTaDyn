@@ -1,6 +1,7 @@
 #include "Example05.hpp"
 
-//! \file Draw several animated robots
+//! \file Example05.cpp
+//! Draw several animated robots
 
 // FIXME
 void GLExample05::setUniform(const char *name, Matrix44f const &mat)
@@ -47,7 +48,7 @@ bool GLExample05::setup()
 }
 
 // Draw recursively a node from a scene graph
-void GLExample05::drawNode(SceneNode<float, 3U> &node)
+void GLExample05::drawNode(SceneNode_t &node)
 {
   LOGI("Renderer:drawNode '%s'", node.m_name.c_str());
 
@@ -59,7 +60,7 @@ void GLExample05::drawNode(SceneNode<float, 3U> &node)
       m->draw(GL_TRIANGLES);
     }
 
-  std::vector<SceneNode<float, 3U>*> const &children = node.children();
+  std::vector<SceneNode_t*> const &children = node.children();
   for (auto i: children)
     {
       drawNode(*i);

@@ -1,9 +1,47 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
 #include "GLWindow.hpp"
-#include <sstream>
 
 static void onError(int /*errorCode*/, const char* msg)
 {
   throw std::runtime_error(msg);
+}
+
+IGLWindow::IGLWindow()
+{
+}
+
+/* Close OpenGL window and terminate GLFW */
+IGLWindow::~IGLWindow()
+{
+  if (m_opengl_context)
+    {
+      release();
+      glfwTerminate();
+    }
+}
+
+void IGLWindow::release()
+{
+  /* By default no 3D resources has to released */
 }
 
 void IGLWindow::FPS()
@@ -25,8 +63,16 @@ void IGLWindow::FPS()
     }
 }
 
-int IGLWindow::create()
+bool IGLWindow::start()
 {
+  if (m_opengl_context)
+    {
+      std::cerr << "Warning you called twice start(). "
+                << "OpenGL context already created"
+                << std::endl;
+      goto l_update;
+    }
+
   int res;
 
   // Initialise GLFW
@@ -34,8 +80,7 @@ int IGLWindow::create()
   if (!glfwInit())
     {
       std::cerr << "Failed to initialize GLFW" << std::endl;
-      getchar();
-      return -1;
+      return false;
     }
 
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -48,9 +93,8 @@ int IGLWindow::create()
   if (nullptr == m_window)
     {
       std::cerr << "Failed to open GLFW window" << std::endl;
-      getchar();
       glfwTerminate();
-      return -1;
+      return false;
     }
   glfwMakeContextCurrent(m_window);
 
@@ -59,9 +103,8 @@ int IGLWindow::create()
   if (GLEW_OK != glewInit())
     {
       std::cerr << "Failed to initialize GLFW" << std::endl;
-      getchar();
       glfwTerminate();
-      return -1;
+      return false;
     }
 
   // print out some info about the graphics drivers
@@ -74,9 +117,8 @@ int IGLWindow::create()
   if (!GLEW_VERSION_3_2)
     {
       std::cerr << "OpenGL 3.2 API is not available." << std::endl;
-      getchar();
       glfwTerminate();
-      return -1;
+      return false;
     }
 
   // Ensure we can capture the escape key being pressed below
@@ -85,7 +127,7 @@ int IGLWindow::create()
     {
       res = setup();
     }
-  catch (const GLObjectException& e)
+  catch (const OpenGLException& e)
     {
       LOGIS("%s", e.message().c_str());
       res = false;
@@ -94,7 +136,8 @@ int IGLWindow::create()
   if (false == res)
     {
       std::cerr << "Failed setting-up graphics" << std::endl;
-      return -1;
+      glfwTerminate();
+      return res;
     }
 
   // init FPS
@@ -102,9 +145,11 @@ int IGLWindow::create()
   m_lastFrameTime = m_lastTime;
   m_nbFrames = 0;
 
+  m_opengl_context = true;
+
+l_update:
   update();
-  close();
-  return 0;
+  return true;
 }
 
 void IGLWindow::update()
@@ -127,14 +172,8 @@ void IGLWindow::update()
       while ((GLFW_PRESS != glfwGetKey(m_window, GLFW_KEY_ESCAPE)) &&
              (0 == glfwWindowShouldClose(m_window)));
     }
-  catch (const GLObjectException& e)
+  catch (const OpenGLException& e)
     {
       LOGIS("%s", e.message().c_str());
     }
-}
-
-// Close OpenGL window and terminate GLFW
-void IGLWindow::close()
-{
-  glfwTerminate();
 }

@@ -1,7 +1,29 @@
 #!/bin/bash
+##=====================================================================
+## SimTaDyn: A GIS in a spreadsheet.
+## Copyright 2017 Quentin Quadrat <lecrapouille@gmail.com>
+##
+## This file is part of SimTaDyn.
+##
+## SimTaDyn is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+##=====================================================================
 
-### Generate build/version.h from the VERSION file
+### Commentary:
+# Generate build/version.h from the VERSION file and git SHA1 and
+# git branch
 
+### Get the version
 VERSION=`grep "[0-9]\+\.[0-9]\+" $1 2> /dev/null`
 if [ "$VERSION" == "" ];
 then
@@ -12,14 +34,24 @@ fi
 MAJOR_VERSION=`echo "$VERSION" | cut -d'.' -f1`
 MINOR_VERSION=`echo "$VERSION" | cut -d'.' -f2`
 
-echo "SimTaDyn version $MAJOR_VERSION.$MINOR_VERSION"
+### Get git SHA1 and branch
+SHA1=`git log 2> /dev/null | head -n1 | cut -d" " -f2`
+BRANCH=`git branch 2> /dev/null | head -n1 | cut -d" " -f2`
 
-echo "#ifndef VERSION_H_" > $2
-echo "#  define VERSION_H_" >> $2
-echo "" >> $2
-echo "#  define SIMTADYN_MAJOR_VERSION $MAJOR_VERSION""u" >> $2
-echo "#  define SIMTADYN_MINOR_VERSION $MINOR_VERSION""u" >> $2
-echo "" >> $2
-echo "#endif /* VERSION_H_ */" >> $2
+echo "SimTaDyn version: $MAJOR_VERSION.$MINOR_VERSION"
+echo "git: $BRANCH $SHA1"
+echo ""
+
+cat <<EOF >$2
+#ifndef VERSION_H_
+#  define VERSION_H_
+
+#  define SIMTADYN_MAJOR_VERSION ${MAJOR_VERSION}u
+#  define SIMTADYN_MINOR_VERSION ${MINOR_VERSION}u
+#  define SIMTADYN_BRANCH "$BRANCH"
+#  define SIMTADYN_SHA1 "$SHA1"
+
+#endif /* VERSION_H_ */
+EOF
 
 exit 0
