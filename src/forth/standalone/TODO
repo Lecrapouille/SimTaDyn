@@ -1,0 +1,101 @@
+Mots CORE forth a faire:
+========================
+
+." TYPE SOURCE WORD
+ABORT BYE
+THROW CATCH
+
+*/ --> : % 100 */ ; et passer par un calcul 64 bits
+*/MOD
+/MOD
++!
+2@
+0<
+DOES
+RECURSE ---> utilise la definition en cours. Sinon utiliser le nom en cours de deifinition donc modifier la fonction find pour commencer a chercher a partir du mot en cours de definition 
+FIND
+C-FUNCTION
+
+Il faut vraiement faire les espaces de noms DUP est equivalent SYS:DUP
+
+Mots SimTaDyn forth a faire:
+============================
+
+Forth ajouter mots -- et --> 
+C1 C2 -> pour dire que C1 et C2 sont en relation orienté ou non. Rique de conflit de nom avec celui des tests unitaires.
+
+Conflit de nom entre CELL de Forth et SimTaDynCell
+
+add buton calling a Foth command (token et string et file). Add a menu item instead of button (= plugins)
+
+Mot OpenGL
+
+BUG/FIXME/TBD
+=============
+
+Securite: champs de bits (ou matrice creuse) pour indiquer les endroits ou la memoire ne peut pas etre ecrite (par defaut tout a 1 sauf avec ALLOT qui met des 0 pour indiquer que l'on peut ecrire dedans. Comme ca on evite de mettre un int32 dans int16. Mais aussi uniformiser le type int32 (C, et , meme chose) comme en 4th
+
+gforth et pforth gerent des mots de taille > 32 char pas moi
+
+Remplacer le code ideux de gestion des ( ) par : (   ')' word drop ; immediate
+
+Le . affiche dans l'endian de l'ordi. DEvrait utiliser le meme endian que le dico
+
+::toupper pas mis au bon endroit mais ou ?
+
+Fermer correctement les stream quand on finit de parser un INCLUDE
+
+Ajouter la protection contre les inclusions multiples et verifier l'etat de la pile quand on termine un fichier
+
+
+Bug d'affichage du dico avec un literal en 4em position fait planter
+: MULT
+  1 10 0 DO 
+  DUP 1+
+  1 10 0 DO
+    DUP 1+ 
+	OVER OVER * .
+  LOOP DROP CR
+LOOP DROP ;
+
+Exception quand on veut executer un mot compile-only ? dans le code ou dans un flag comme SMUDGE ?
+
+A tester:
+( COMMENTAIRE ( OUI ) POUET ) pforth et gforth plantent 
+==> faut il une var qui compte les parentheses ? Cas idiot: )
+
+Dump du dictionnaire, c'est cool mais pas mieux de ne charger que les mots apres le coeur ? Ce sera mieux pour les fichiers SimTaDyn
+
+Ajouter un CRC dans en fin de dico ?
+
+Tests
+==========
+
+Faire un tableau de comparaison entre gforth, pforth reforth avec le code qui plante ou reprise sur erreur meilleure
+Par exemple 42 >R R> .
+ou 1234567891234567 .
+
+gforth: 16 BASE ! Avantage ils peuvent sauver et restaurer la base apres un INCLUDE pas moi
+moi: 16 BASE. Avantage moins de code
+
+Evolution
+==========
+
+Ajouter un mode interactif au standalone
+
+Faire une sauvegarde de LAST et HERE avant de parser un fichier afin de pouvoir restaurer le dico
+
+Ecrire HEX et DECIMAL dans des fichiers qui s'incluent c'est prendre le risque d'un effet de bord ==> empiler m_base quand on parse un nouveau stream
+
+Faire une fenetre special Forth "interactive" et qui demande pas de sauvegarder a la fin de la session.
+
+Ajouter un historic des commandes avec les touches haut/bas ainsi que la touche TAB complete un mot et autorise une tabulation si on est en debut de ligne (ou char espaces) sinon elle est inactive.
+
+Comparer : positionner dup position = if drop exit then droite positionner ;
+avec : positionner begin dup position <> while droite repeat drop ;
+
+Color syntaxique Forth. Bouton clique droit sur include pour ouvrir le fichier et voir la definition (ainsi que la ligne du dictionnaire si mot compilé).
+
+Selectionner une portion de code puis cliquer sur executer
+
+Mode tutorial: comme les demos Scilab: texte qui s'affiche, l'utilisateur appuie sur return et une anim se passe. Ideeprendre le controle de la souris

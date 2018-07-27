@@ -1,14 +1,22 @@
+[![Build Status](https://travis-ci.org/Lecrapouille/SimTaDyn.svg?branch=master)](https://travis-ci.org/Lecrapouille/SimTaDyn) [![Coverity scan](https://scan.coverity.com/projects/13000/badge.svg)](https://scan.coverity.com/projects/lecrapouille-simtadyn)
+
 # SimTaDyn
 
-SIMulateur TAbleur DYNamique
+SimTaDyn is a proof of concept project for a geographic information system (GIS) allowing to draw geographic maps and manipulate them like we do with a spreadsheet page in the aim to design dynamical geographic simulations.
 
-Compilation (Linux or OS X):
-cd src/ and call one of the script shell depending on your OS:
-./build-osx.sh
-or:
-./build-ubuntu.sh
+Note: the source of the functional version is on this [Original-Version-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004)
 
-Note concerning OSX:
-* if an error message "ld: library not found for -lssl clang: error: linker command failed with exit code 1 (use -v to see invocation)" try to type in your console:
-xcode-select --install
-* OpenGL is now badly supported with GTK+ (while working well in 2004): the current bug is the OpenGL background color covering all GTK+ widgets :(
+The master branch is a redesign of the branch Original-Version-EPITA-2004 but for the moment the developpement is starting and there is no graphical features.
+
+* [Introduction to SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.md)
+* [How to install SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Install.md)
+* [SimTaDyn Known Bugs](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md)
+* [SimTaDyn GUI shortcuts](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Shortcuts.md)
+* [SimTaDyn Forth scripting](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/forth/doc/forth.md)
+* [Forth standalone](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/forth/doc/standalone.md)
+* [SimTaDyn architecture for developpers](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Architecture.md)
+* [Credits](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Credits.md)
+
+![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.jpg)
+*This screenshot comes from the legacy version of SimTaDyn*
+

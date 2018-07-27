@@ -1,0 +1,3 @@
+Vector and Matrix: Tested with float never with integer. Cases using NaN can be boring to translate into integers.
+Transformation: Todo for 2D. Only tested for 3D and float.
+Maybe explicitily use static_cast<T>(x) instead of T(x).

@@ -1,0 +1,17 @@
+: 0ABORT 0= IF ABORT THEN ;
+: BASE? ( n -- ) BASE = 0ABORT ;
+: BASE2? 2 BASE? ;
+: BASE8? 8 BASE? ;
+: BASE10? 10 BASE? ;
+: BASE16? 16 BASE? ;
+
+OCTAL
+BASE8?
+
+INCLUDE f2.fs
+
+BASE8?
+
+INCLUDE f3.fs
+
+BASE8?

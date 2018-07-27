@@ -1,0 +1,13 @@
+Tests unitaires KO:
+======================
+
+T{ -1 0> -> FALSE }T
+
+T{ 1S 1 LSHIFT 1 XOR -> 1S }T
+
+ROLL a faire
+WITHIN a faire
+MOD a faire
+R@
+
+

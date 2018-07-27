@@ -1,0 +1,36 @@
+sudo: required
+dist: trusty
+language: cpp
+
+compiler:
+  - g++
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+    - xvfb
+
+os:
+  - linux
+#  - osx
+
+before_script:
+  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; sleep 3 # give xvfb some time to start
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull ubuntu:16.04 ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --name travis-ci -v $TRAVIS_BUILD_DIR:/SimTaDyn -td ubuntu:16.04 /bin/bash ; fi
+
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-install-linux.sh" ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.integration/travis-install-osx.sh ; fi
+
+script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker exec -ti travis-ci bash -c "cd SimTaDyn && ./.integration/travis-launch_tests.sh" ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.integration/travis-launch_tests.sh ; fi
+
+after_script:
+  - docker stop travis-ci

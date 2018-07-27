@@ -1,0 +1,8 @@
+Textures come from:
+http://www.tomdalling.com/blog/modern-opengl/01-getting-started-in-xcode-and-visual-cpp/
+
+Inspiration for Example01 .. Example04 comes from:
+http://www.tomdalling.com/blog/modern-opengl/01-getting-started-in-xcode-and-visual-cpp/
+
+Inspiration for Example05 comes from:
+https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
