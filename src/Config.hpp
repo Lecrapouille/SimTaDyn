@@ -26,7 +26,7 @@
 
 //namespace simtadyn
 //{
-#warning "ConfSim"
+
 namespace config
 {
   //! \brief

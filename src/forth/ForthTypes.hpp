@@ -36,7 +36,8 @@
 
 namespace forth
 {
-  typedef uint32_t       cell;
+  typedef int32_t        cell;
+  typedef uint32_t       ucell;
   typedef uint16_t       token;
 
 #  define appendToken appendCell16

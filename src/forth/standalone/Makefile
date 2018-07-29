@@ -40,7 +40,7 @@ else
 OBJ_EXTERNAL   =
 endif
 OBJ_UTILS      = Exception.o File.o ILogger.o Logger.o Path.o
-OBJ_FORTH      = ForthExceptions.o ForthUtils.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
+OBJ_FORTH      = ForthExceptions.o ForthUtils.o ForthStream.o ForthDictionary.o ForthClibrary.o ForthPrimitives.o Forth.o
 OBJ_STANDALONE = main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
@@ -63,6 +63,7 @@ VPATH += :$(P)/src
 DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+DEFINES += -DUSE_COMPUTED_GOTO
 
 ###################################################
 # Set Libraries compiled in the external/ directory.

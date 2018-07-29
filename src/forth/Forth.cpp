@@ -21,7 +21,6 @@
 #include "Forth.hpp"
 #include "ForthTerminalColor.hpp"
 #include "ForthUtils.hpp"
-#include "ForthPrimitives.hpp"
 #include "Logger.hpp"
 #include <iomanip> // setbase
 
@@ -48,11 +47,6 @@ Forth::Forth(forth::Dictionary& dictionary)
 Forth::~Forth()
 {
   LOGI("Destroying Forth interpreter");
-}
-
-uint32_t Forth::maxPrimitives() const
-{
-  return FORTH_MAX_PRIMITIVES;
 }
 
 //------------------------------------------------------------------
@@ -135,20 +129,6 @@ void Forth::startCompilingWord(std::string const& word)
 
   // Append an entry of the word in the dictionary
   m_dictionary.compileWord(word);
-}
-
-//------------------------------------------------------------------
-//! \param token.
-//------------------------------------------------------------------
-void Forth::executeToken(forth::token const xt)
-{
-  // Only if macro USE_COMPUTED_GOTO is defines
-  DECLARE_DISPATCH_TABLE;
-
-  /*  DISPATCH(xt)
-    {
-#include "primitives/dstack.c"
-}*/
 }
 
 //------------------------------------------------------------------

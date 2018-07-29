@@ -1,107 +1,172 @@
 // ----------------------------------------
-CODE(DUP)
-DPUSH(DPOP());
+CODE(DEPTH) DPUSH(m_data_stack.depth()); NEXT;
+
+// ----------------------------------------
+// ( ... n -- sp(n) )
+CODE(PICK) DPUSH(DPICK(DPOP())); NEXT;
+
+// ----------------------------------------
+CODE(ROLL)
+#if 0
+m_tos = DPOP();
+m_tos1 = DPICK(m_tos);
+forth::cell* src = &DPICK(m_tos - 1);
+forth::cell* dst = &DPICK(m_tos);
+forth::cell ri = m_tos;
+while (ri--)
+  {
+    *dst-- = *src--;
+  }
+m_tos = m_tos1;
+++m_dsp;
+DPUSH(m_tos);
+#endif
 NEXT;
 
 // ----------------------------------------
-CODE(ADD)
-DPUSH(DPOP() + DPOP());
+// nip ( a b -- b ) swap drop
+CODE(NIP) m_tos = DPOP(); DDROP(); DPUSH(m_tos); NEXT;
+
+// ----------------------------------------
+// swap ( a b -- b a )
+CODE(SWAP)
+m_tos2 = DPOP();
+m_tos = DPOP();
+DPUSH(m_tos2);
+DPUSH(m_tos);
 NEXT;
+
+// ----------------------------------------
+// over ( a b -- a b a )
+CODE(OVER)
+DPUSH(DPICK(1));
+NEXT;
+
+// ----------------------------------------
+CODE(QDUP)
+m_tos = DPOP();
+if (m_tos) { DPUSH(m_tos); }
+NEXT;
+
+// ----------------------------------------
+// dup ( a -- a a )
+CODE(DUP) DPUSH(DPICK(0)); NEXT;
+
+// ----------------------------------------
+// drop ( a -- )
+CODE(DROP) DDROP(); NEXT;
+
+// ----------------------------------------
+// 2drop ( a b -- ) drop drop
+CODE(2DROP) DDROP(); DDROP(); NEXT;
+
+// ----------------------------------------
+CODE(AND) BINARY_I_OP(&); NEXT;
+
+// ----------------------------------------
+CODE(OR) BINARY_I_OP(|); NEXT;
+
+// ----------------------------------------
+CODE(XOR) BINARY_I_OP(^); NEXT;
+
+// ----------------------------------------
+CODE(PLUS) BINARY_I_OP(+); NEXT;
+
+// ----------------------------------------
+CODE(MINUS) BINARY_I_OP(-); NEXT;
+
+// ----------------------------------------
+CODE(DIV) BINARY_I_OP(/); NEXT;
+
+// ----------------------------------------
+CODE(TIMES) BINARY_I_OP(*); NEXT;
+
+// ----------------------------------------
+CODE(RSHIFT) BINARY_I_OP(>>); NEXT;
+
+// ----------------------------------------
+CODE(LSHIFT) BINARY_I_OP(<<); NEXT;
+
+// ----------------------------------------
+CODE(ABS) UNARY_I_FUN(std::abs); NEXT;
+
+// ----------------------------------------
+CODE(MIN) BINARY_I_FUN(std::min); NEXT;
+
+// ----------------------------------------
+CODE(MAX) BINARY_I_FUN(std::max); NEXT;
+
+// ----------------------------------------
+CODE(TRUE) DPUSH(-1); NEXT;
+
+// ----------------------------------------
+CODE(FALSE) DPUSH(0); NEXT;
+
+// ----------------------------------------
+CODE(GREATER_EQUAL) LOGICAL_I_OP(>=); NEXT;
+
+// ----------------------------------------
+CODE(GREATER) LOGICAL_I_OP(>); NEXT;
+
+// ----------------------------------------
+CODE(LOWER_EQUAL) LOGICAL_I_OP(<=); NEXT;
+
+// ----------------------------------------
+CODE(LOWER) LOGICAL_I_OP(<); NEXT;
+
+// ----------------------------------------
+CODE(0EQUAL) L_UNARY_I_OP(0==); NEXT;
+
+// ----------------------------------------
+CODE(EQUAL) LOGICAL_I_OP(==); NEXT;
+
+// ----------------------------------------
+CODE(NOT_EQUAL) LOGICAL_I_OP(!=); NEXT;
+
+// ----------------------------------------
+CODE(NEGATE) L_UNARY_I_OP(-); NEXT;
+
+// ----------------------------------------
+CODE(1MINUS) R_UNARY_I_OP(-1); NEXT;
+
+// ----------------------------------------
+CODE(1PLUS) R_UNARY_I_OP(+1); NEXT;
 
 // ----------------------------------------
 CODE(DISP)
 //std::ios_base::fmtflags ifs(os.flags());
-std::cout << std::setbase(m_base) << (int32_t) DPOP() << " ";
+std::cout //<< std::setbase(m_base)
+<< static_cast<forth::cell>(DPOP()) << " ";
 //os.flags(ifs);
 NEXT;
 
+// ----------------------------------------
+CODE(UDISP)
+//std::ios_base::fmtflags ifs(os.flags());
+std::cout //<< std::setbase(m_base)
+<< static_cast<forth::ucell>(DPOP()) << " ";
+//os.flags(ifs);
+NEXT;
+
+// ----------------------------------------
+CODE(DISP_STACK)
+//std::ios_base::fmtflags ifs(os.flags());
+std::cout //<< std::setbase(m_base)
+          << m_data_stack
+          << std::endl;
+//os.flags(ifs);
+NEXT;
+
+#if 0
     case FORTH_PRIMITIVE_NEGATE:
       m_tos = -m_tos;
       break;
-    case FORTH_PRIMITIVE_ABS:
-      m_tos = std::abs((int32_t) m_tos);
-      break;
 
-    case FORTH_PRIMITIVE_PLUS:
-      BINARY_OP(+);
-      break;
-    case FORTH_PRIMITIVE_MINUS:
-      BINARY_OP(-);
-      break;
-    case FORTH_PRIMITIVE_DIV:
-      BINARY_OP(/);
-      break;
-    case FORTH_PRIMITIVE_TIMES:
-      BINARY_OP(*);
-      break;
-    case FORTH_PRIMITIVE_RSHIFT:
-      BINARY_OP(>>);
-      break;
-    case FORTH_PRIMITIVE_LSHIFT:
-      BINARY_OP(<<);
-      break;
-    case FORTH_PRIMITIVE_FALSE:
-      m_tos = 0;
-      DPUSH(m_tos);
-      break;
-    case FORTH_PRIMITIVE_TRUE:
-      m_tos = -1;
-      DPUSH(m_tos);
-      break;
-    case FORTH_PRIMITIVE_GREATER_EQUAL:
-      LOGICAL_OP(>=);
-      break;
-    case FORTH_PRIMITIVE_LOWER_EQUAL:
-      LOGICAL_OP(<=);
-      break;
-    case FORTH_PRIMITIVE_GREATER:
-      LOGICAL_OP(>);
-      break;
-    case FORTH_PRIMITIVE_LOWER:
-      LOGICAL_OP(<);
-      break;
-    case FORTH_PRIMITIVE_EQUAL:
-      LOGICAL_OP(==);
-      break;
-    case FORTH_PRIMITIVE_0EQUAL:
-      DPUSH(0U);
-      LOGICAL_OP(==);
-      break;
-    case FORTH_PRIMITIVE_NOT_EQUAL:
-      LOGICAL_OP(!=);
-      break;
-    case FORTH_PRIMITIVE_AND:
-      BINARY_OP(&);
-      break;
-    case FORTH_PRIMITIVE_OR:
-      BINARY_OP(|);
-      break;
-    case FORTH_PRIMITIVE_XOR:
-      BINARY_OP(^);
-      break;
-    case FORTH_PRIMITIVE_MIN:
-      DPOP(m_tos1);
-      m_tos = ((int32_t) m_tos < (int32_t) m_tos1) ? m_tos : m_tos1;
-      break;
-    case FORTH_PRIMITIVE_MAX:
-      DPOP(m_tos1);
-      m_tos = ((int32_t) m_tos > (int32_t) m_tos1) ? m_tos : m_tos1;
-      break;
 
-    case FORTH_PRIMITIVE_DISP:
-      std::cout << std::setbase(m_base) << (int32_t) m_tos << " ";
-      DPOP(m_tos);
-      break;
-    case FORTH_PRIMITIVE_UDISP:
-      std::cout << std::setbase(m_base) << (uint32_t) m_tos << " ";
-      DPOP(m_tos);
-      break;
 
-    case FORTH_PRIMITIVE_DISPLAY_DSTACK:
-      DPUSH(m_tos);
-      displayStack(std::cout, forth::DataStack);
-      DPOP(m_tos);
-      break;
+
+
+
 
       // Push in data stack the next free slot in the dictionary
     case FORTH_PRIMITIVE_PCREATE:
@@ -109,77 +174,12 @@ NEXT;
       m_tos = m_ip + 4U;
       break;
 
-    case FORTH_PRIMITIVE_1MINUS:
-      --m_tos;
-      break;
-    case FORTH_PRIMITIVE_1PLUS:
-      ++m_tos;
-      break;
+
     case FORTH_PRIMITIVE_2MINUS:
       m_tos -= 2;
       break;
     case FORTH_PRIMITIVE_2PLUS:
       m_tos += 2;
-      break;
-
-      // drop ( a -- )
-    case FORTH_PRIMITIVE_DROP:
-      DPOP(m_tos);
-      break;
-
-    case FORTH_PRIMITIVE_DEPTH:
-      DPUSH(m_tos);
-      m_tos = stackDepth(forth::DataStack);
-      break;
-
-      // nip ( a b -- b ) swap drop ;
-    case FORTH_PRIMITIVE_NIP:
-      DPOP(m_tos1);
-      break;
-
-    case FORTH_PRIMITIVE_ROLL:
-      {
-        m_tos1 = DPICK(m_tos);
-        uint32_t *src = &DPICK(m_tos - 1);
-        uint32_t *dst = &DPICK(m_tos);
-        uint32_t ri = m_tos;
-        while (ri--)
-          {
-            *dst-- = *src--;
-          }
-        m_tos = m_tos1;
-        ++m_dsp;
-      }
-      break;
-
-      // ( ... n -- sp(n) )
-    case FORTH_PRIMITIVE_PICK:
-      m_tos = DPICK(m_tos);
-      break;
-
-      // dup ( a -- a a )
-    case FORTH_PRIMITIVE_DUP:
-      DPUSH(m_tos);
-      break;
-
-    case FORTH_PRIMITIVE_QDUP:
-      if (m_tos)
-        {
-          DPUSH(m_tos);
-        }
-      break;
-
-      // swap ( a b -- b a )
-    case FORTH_PRIMITIVE_SWAP:
-      m_tos2 = m_tos;
-      DPOP(m_tos);
-      DPUSH(m_tos2);
-      break;
-
-      // over ( a b -- a b a )
-    case FORTH_PRIMITIVE_OVER:
-      DPUSH(m_tos);
-      m_tos = DPICK(1);
       break;
 
       // rot ( a b c -- b c a )
@@ -223,9 +223,4 @@ NEXT;
       DPUSH(m_tos3);
       m_tos = m_tos2;
       break;
-
-      // 2drop ( a b -- ) drop drop ;
-    case FORTH_PRIMITIVE_2DROP:
-      DPOP(m_tos);
-      DPOP(m_tos);
-      break;
+#endif
