@@ -20,6 +20,9 @@
 
 #include "Forth.hpp"
 #include "ForthPrimitives.hpp"
+#include "primitives/defword.h"
+#include "primitives/rstack.h"
+#include "primitives/fstack.h"
 #include "primitives/dstack.h"
 #include "Logger.hpp"
 
@@ -27,13 +30,20 @@ enum ForthPrimitives
   {
     // Dummy word and comments
     TOK_NOOP = 0,
+    ALL_BRANCHING_TOKENS,
+    ALL_IO_TOKENS,
+    ALL_CLIB_TOKENS,
+    ALL_DICO_TOKENS,
+    ALL_DEFWORD_TOKENS,
+    ALL_RSTACK_TOKENS,
+    ALL_FSTACK_TOKENS,
     ALL_DSTACK_TOKENS,
-    FORTH_MAX_PRIMITIVES
+    FORTH_MAX_TOKENS
   };
 
 uint32_t Forth::maxPrimitives() const
 {
-  return FORTH_MAX_PRIMITIVES;
+  return FORTH_MAX_TOKENS;
 }
 
 // **************************************************************
@@ -45,6 +55,9 @@ void Forth::boot()
 {
   LOGI("Forth booting ...");
   PRIMITIVE(NOOP, "NOOP");
+  ALL_DEFWORD_PRIMITIVES;
+  ALL_RSTACK_PRIMITIVES;
+  ALL_FSTACK_PRIMITIVES;
   ALL_DSTACK_PRIMITIVES;
 }
 
@@ -55,9 +68,12 @@ void Forth::executeToken(forth::token const xt)
 {
   // Only if macro USE_COMPUTED_GOTO is defines
 #ifdef USE_COMPUTED_GOTO
-  static void *c_primitives[FORTH_MAX_PRIMITIVES] =
+  static void *c_primitives[FORTH_MAX_TOKENS] =
     {
       LABELIZE(NOOP),
+      ALL_DEFWORD_LABELS,
+      ALL_RSTACK_LABELS,
+      ALL_FSTACK_LABELS,
       ALL_DSTACK_LABELS,
     };
 #endif
@@ -65,6 +81,9 @@ void Forth::executeToken(forth::token const xt)
   DISPATCH(xt)
   {
     CODE(NOOP) NEXT;
+#include "primitives/defword.c"
+#include "primitives/rstack.c"
+#include "primitives/fstack.c"
 #include "primitives/dstack.c"
     UNKNOWN: NEXT;
   }

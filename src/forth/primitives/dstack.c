@@ -1,3 +1,28 @@
+//
+CODE(BINARY)
+changeDisplayBase(2U);
+NEXT;
+
+CODE(OCTAL)
+changeDisplayBase(8U);
+NEXT;
+
+CODE(HEXADECIMAL)
+changeDisplayBase(16U);
+NEXT;
+
+CODE(DECIMAL)
+changeDisplayBase(10U);
+NEXT;
+
+CODE(GET_BASE)
+DPUSH(m_base);
+NEXT;
+
+CODE(SET_BASE)
+changeDisplayBase(DPOP());
+NEXT;
+
 // ----------------------------------------
 CODE(DEPTH) DPUSH(m_data_stack.depth()); NEXT;
 
@@ -158,9 +183,9 @@ std::cout //<< std::setbase(m_base)
 NEXT;
 
 #if 0
-    case FORTH_PRIMITIVE_NEGATE:
+    CODE(NEGATE)
       m_tos = -m_tos;
-      break;
+      NEXT;
 
 
 
@@ -169,52 +194,52 @@ NEXT;
 
 
       // Push in data stack the next free slot in the dictionary
-    case FORTH_PRIMITIVE_PCREATE:
+    CODE(PCREATE)
       DPUSH(m_tos);
       m_tos = m_ip + 4U;
-      break;
+      NEXT;
 
 
-    case FORTH_PRIMITIVE_2MINUS:
+    CODE(2MINUS)
       m_tos -= 2;
-      break;
-    case FORTH_PRIMITIVE_2PLUS:
+      NEXT;
+    CODE(2PLUS)
       m_tos += 2;
-      break;
+      NEXT;
 
       // rot ( a b c -- b c a )
-    case FORTH_PRIMITIVE_ROT:
+    CODE(ROT)
       DPOP(m_tos2);
       DPOP(m_tos3);
       DPUSH(m_tos2);
       DPUSH(m_tos);
       m_tos = m_tos3;
-      break;
+      NEXT;
 
       // tuck ( a b -- b a b ) swap over ;
-    case FORTH_PRIMITIVE_TUCK:
+    CODE(TUCK)
       DPOP(m_tos2);
       DPUSH(m_tos);
       DPUSH(m_tos2);
-      break;
+      NEXT;
 
       // 2dup ( a b -- a b a b ) over over ;
-    case FORTH_PRIMITIVE_2DUP:
+    CODE(2DUP)
       DPUSH(m_tos);
       m_tos2 = DPICK(1);
       DPUSH(m_tos2);
-      break;
+      NEXT;
 
       // 2over ( a b c d -- a b c d a b )
-    case FORTH_PRIMITIVE_2OVER:
+    CODE(2OVER)
       DPUSH(m_tos);
       m_tos2 = DPICK(3);
       DPUSH(m_tos2);
       m_tos = DPICK(3);
-      break;
+      NEXT;
 
       // 2swap ( a b c d -- c d a b )
-    case FORTH_PRIMITIVE_2SWAP:
+    CODE(2SWAP)
       DPOP(m_tos1);
       DPOP(m_tos2);
       DPOP(m_tos3);
@@ -222,5 +247,5 @@ NEXT;
       DPUSH(m_tos);
       DPUSH(m_tos3);
       m_tos = m_tos2;
-      break;
+      NEXT;
 #endif

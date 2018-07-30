@@ -401,6 +401,13 @@ Dictionary::findToken(const forth::token token, const bool even_smudge) const
 }
 
 //------------------------------------------------------------------
+//! TODO: ajouter des securites (m_last defini) comme sur gofth ?
+void Dictionary::immediate()
+{
+  m_dictionary[m_dictionary.m_last] |= FLAG_IMMEDIATE;
+}
+
+//------------------------------------------------------------------
 //!
 bool Dictionary::smudge(std::string const& name)
 {

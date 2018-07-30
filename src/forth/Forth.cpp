@@ -86,6 +86,9 @@ bool Forth::setBase(const uint8_t base)
       m_base = base;
       return true;
     }
+  std::cerr << FORTH_WARNING_COLOR << "[WARNING] '"
+            << (int) base << "' is an invalid base and shall be [2..36]. Ignored !";
+
   return false;
 }
 

@@ -63,7 +63,7 @@
 //! \brief
 //------------------------------------------------------------------
 #    define NEXT return
-  //if (m_ip < FORTH_MAX_PRIMITIVES) goto *c_primitives[m_ip++];      \
+  //if (*m_ip < FORTH_MAX_PRIMITIVES) goto *c_primitives[*m_ip++];      \
   //else throw ForthException("unknown token");
 
 //------------------------------------------------------------------
