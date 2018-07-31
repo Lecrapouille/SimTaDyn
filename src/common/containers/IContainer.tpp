@@ -31,7 +31,7 @@
 // **************************************************************
 //! \brief
 // **************************************************************
-typedef uint32_t ContainerBitField;
+typedef size_t ContainerBitField;
 
 // **************************************************************
 //! \brief this class defines a block of M elements of type T. M
@@ -39,7 +39,7 @@ typedef uint32_t ContainerBitField;
 //! bitfield indicating which elements are stored in the block.
 //! By block we mean a contigious memory of elements liek an array.
 // **************************************************************
-template<typename T, const uint32_t N>
+template<typename T, const size_t N>
 class Block: public PendingData
 {
 protected:
@@ -72,23 +72,23 @@ public:
 
     while (i--)
       {
-        m_occupied[i] = 0U;
+        m_occupied[i] = 0ul;
       }
     clearPending();
   }
 
   //! \brief Return the number of elements a block can store
-  inline uint32_t size() const
+  inline size_t size() const
   {
     return M;
   }
 
   //! \brief Return the number of elements currently stored
-  uint32_t occupation() const // FIXME renommer en used()
+  size_t occupation() const // FIXME renommer en used()
   {
     ContainerBitField i;
-    ContainerBitField total = 0U;
-    const ContainerBitField full = (1U << B) - 1U;
+    ContainerBitField total = 0ul;
+    const ContainerBitField full = (1ul << B) - 1;
 
     for (i = 0; i < E; ++i)
       {
@@ -114,15 +114,16 @@ private:
  //! \return the number of set bits.
   ContainerBitField hammingWeight(const ContainerBitField val) const
   {
-    ContainerBitField bitCount = 0;
+    ContainerBitField bitCount = 0ul;
     ContainerBitField value = val;
 
-    while (value > 0)
+    while (value > 0ul)
       {
-        if (1U == (value & 1U))
+        if (1ul == (value & 1ul))
           ++bitCount;
-        value >>= 1U;
+        value >>= 1ul;
       }
+
     return bitCount;
 }
 
@@ -148,8 +149,8 @@ public:
 //! delete the block, so it's made in constant time. Empty blocks
 //! can be all garbage in once by a specific command.
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
 class IContainer
 {
 private:
@@ -157,18 +158,13 @@ private:
 
 protected:
 
-  //! \brief Number of elements by block: 2^N
-  enum { M = (1U << N) };
-  //! \brief Number of bytes by integer: 4 for uint32_t, 8 for uint64_t
-  enum { B = sizeof (ContainerBitField) };
-  //! \brief Number of bits by integer: 32 bits for uint32_t
-  enum { S = B * 8U };
+#  include "ContainerEnums.ipp"
 
 public:
 
   //! \brief Constructor: allocate the given number of elements of
   //! type T.
-  IContainer(const uint32_t reserve_elements = 1);
+  IContainer(const size_t reserve_elements = 1);
 
   //! \brief Destructor. Release all created blocks.
   ~IContainer()
@@ -188,47 +184,47 @@ public:
   }
 
   //! \brief Allocate the given number of elements of type T.
-  void reserve(const uint32_t reserve_elements);
+  void reserve(const size_t reserve_elements);
 
   //! \brief Check if the given index is incorrect (outside the
   //! definition range of the container). Complexity is O(1) in
   //! number of elements.
-  virtual bool outofbound(const uint32_t nth) const = 0;
+  virtual bool outofbound(const size_t nth) const = 0;
 
   //! \brief Check if the given index is occupied by an element.
   //! Complexity is O(1) in number of elements.
-  bool occupied(const uint32_t nth) const;
+  bool occupied(const size_t nth) const;
 
   //! \brief Force the given index to be not empty.
   //! Complexity is O(1) in number of elements.
-  virtual void occupy(const uint32_t nth);
+  virtual void occupy(const size_t nth);
 
   //! \brief get the n'th element of the container. Complexity
   //! is O(1) in number of elements.
-  virtual T& get(const uint32_t nth);
+  virtual T& get(const size_t nth);
 
   //! \brief get the n'th element of the container. Complexity
   //! is O(1) in number of elements.
-  virtual T const& get(const uint32_t nth) const;
+  virtual T const& get(const size_t nth) const;
 
   //! \brief Update the n'th element of the container. Complexity
   //! is O(1) in number of elements.
-  virtual void modify(const uint32_t nth, T const& e) const;
+  virtual void modify(const size_t nth, T const& e) const;
 
   //! \brief Return the number of elements currently stored.
-  inline uint32_t used() const
+  inline size_t used() const
   {
     return m_stored_elements;
   }
 
   //! \brief Return the number of allocated blocks
-  inline uint32_t blocks() const
+  inline size_t blocks() const
   {
     return m_allocated_blocks;
   }
 
   //! \brief Return the nth block
-  inline block_t *block(const uint32_t nth) const
+  inline block_t *block(const size_t nth) const
   {
     if (nth < m_allocated_blocks)
       return m_blocks[nth];
@@ -236,7 +232,7 @@ public:
   }
 
   //! \brief Return the number of elements currently empty.
-  inline uint32_t remaining() const
+  inline size_t remaining() const
   {
     return (m_allocated_blocks << N) - m_stored_elements;
   }
@@ -244,7 +240,7 @@ public:
   //! \brief Check if the container is empty.
   inline bool empty() const
   {
-    return 0 == m_stored_elements;
+    return 0ul == m_stored_elements;
   }
 
   //! \brief Check if the container is full.
@@ -258,12 +254,12 @@ public:
   //! are not deleted from memory.
   virtual inline void clear()
   {
-    uint32_t i = m_allocated_blocks;
+    size_t i = m_allocated_blocks;
     while (i--)
       {
         m_blocks[i]->clear();
       }
-    m_stored_elements = 0;
+    m_stored_elements = 0ul;
   }
 
   //! \brief Get the nth element of the container but
@@ -290,14 +286,14 @@ protected:
 
   //! \brief Reserve memory corresponding to the given number of
   //! blocks of typed-T elements.
-  void reserveBlocks(const uint32_t reserve_blocks);
+  void reserveBlocks(const size_t reserve_blocks);
 
   //! \brief List of blocks of templated elements.
   std::vector<block_t*> m_blocks;
   //! \brief Number of elements T currently stored.
-  uint32_t              m_stored_elements;
+  size_t              m_stored_elements;
   //! \brief m_blocks size
-  uint32_t              m_allocated_blocks;
+  size_t              m_allocated_blocks;
 };
 
 #  include "IContainer.ipp"

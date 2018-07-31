@@ -79,7 +79,7 @@ ASpreadSheet::evaluate(SimForth &forth)
 
   // Evaluate cells which does not contain references on
   // other cells.
-  uint32_t unsolvedCells = howManyCells();
+  size_t unsolvedCells = howManyCells();
   //std::cout << std::endl << "2nd step -------------" << std::endl;
   //std::cout << "  unsolved cells " << unsolvedCells << std::endl;
   try

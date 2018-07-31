@@ -66,7 +66,7 @@ public:
   inline virtual Key id() const { return m_id; }
 
   //! \brief Return the unique identifier.
-  operator int() { return m_id; }
+  operator size_t() { return m_id; }
 
   //! \brief Return the unique type.
   inline virtual GraphElementId type() const
@@ -89,7 +89,7 @@ public:
   //! \param nth the nth element of the vector of neighbor.
   //! \return the address of the elt, else nullptr if the index is
   //! incorrect.
-  /*inline GraphElement *neighbor(const uint32_t nth)
+  /*inline GraphElement *neighbor(const size_t nth)
   {
     if (nth < m_neighbors.size())
       {
@@ -103,7 +103,7 @@ public:
   //! \param nth the nth element of the vector of neighbor.
   //! \return the address of the elt, else nullptr if the index is
   //! incorrect.
-  inline const GraphElement *neighbor(const uint32_t nth) const
+  inline const GraphElement *neighbor(const size_t nth) const
   {
     if (nth < m_neighbors.size())
       {
@@ -112,17 +112,17 @@ public:
     return nullptr;
   }
 
-  inline const GraphElement &nthNeighbor(const uint32_t nth) const
+  inline const GraphElement &nthNeighbor(const size_t nth) const
   {
     return *(m_neighbors[nth]);
   }
 
-  /*inline GraphElement &nthNeighbor(const uint32_t nth)
+  /*inline GraphElement &nthNeighbor(const size_t nth)
   {
     return *(m_neighbors[nth]);
     }*/
 
-  inline uint32_t howManyNeighbors() const
+  inline size_t howManyNeighbors() const
   {
     return m_neighbors.size();
   }
@@ -142,7 +142,7 @@ public:
   //! \param nth the nth element of the vector of neighbor.
   //! \return the address of the elt, else nullptr if the index is
   //! incorrect.
-  /*inline GraphElement *border(const uint32_t nth)
+  /*inline GraphElement *border(const size_t nth)
   {
     if (nth < m_borders.size())
       {
@@ -156,7 +156,7 @@ public:
   //! \param nth the nth element of the vector of neighbor.
   //! \return the address of the elt, else nullptr if the index is
   //! incorrect.
-  inline const GraphElement *border(const uint32_t nth) const
+  inline const GraphElement *border(const size_t nth) const
   {
     if (nth < m_borders.size())
       {
@@ -165,17 +165,17 @@ public:
     return nullptr;
   }
 
-  inline const GraphElement &nthBorder(const uint32_t nth) const
+  inline const GraphElement &nthBorder(const size_t nth) const
   {
     return *(m_borders[nth]);
   }
 
-  /*inline GraphElement &nthBorder(const uint32_t nth)
+  /*inline GraphElement &nthBorder(const size_t nth)
   {
     return *(m_borders[nth]);
     }*/
 
-  inline uint32_t howManyBorders() const
+  inline size_t howManyBorders() const
   {
     return m_borders.size();
   }
@@ -258,12 +258,13 @@ public:
   //! index if incorrect no error is returned and nothing is
   //! done. Complexity is O(1).
   //! \param nth the nth element of the vector of neighbor.
-  inline void removeNthNeighbor(const uint32_t nth)
+  inline void removeNthNeighbor(const size_t nth)
   {
     LOGIS("Node ID %u: Remove its %u'nth ID neighbor\n", m_id, nth);
     if (nth < m_neighbors.size())
       {
-        privateRemoveNeighbors(m_neighbors.begin() + nth);
+        // FIXME: enlever cast
+        privateRemoveNeighbors(m_neighbors.begin() + static_cast<int>(nth));
       }
   }
 
@@ -348,12 +349,13 @@ public:
   //! index if incorrect no error is returned and nothing is
   //! done. Complexity is O(1).
   //! \param nth the nth element of the vector of neighbor.
-  inline void removeNthBorder(const uint32_t nth)
+  inline void removeNthBorder(const size_t nth)
   {
     LOGIS("Node ID %u: Remove its %u'nth ID neighbor\n", m_id, nth);
     if (nth < m_borders.size())
       {
-        privateRemoveBorders(m_borders.begin() + nth);
+        // FIXME: enlever cast
+        privateRemoveBorders(m_borders.begin() + static_cast<int>(nth));
       }
   }
 
@@ -454,7 +456,7 @@ public:
   }
 
   //! \brief Return the number of neighbors. Complexity is O(1).
-  inline uint32_t degree() const
+  inline size_t degree() const
   {
     return m_neighbors.size();
   }
@@ -630,12 +632,12 @@ inline std::ostream& operator<<(std::ostream& os, const Node& n)
 {
   os << "Node " << n.id();
 
-  uint32_t deg = n.degree();
+  size_t deg = n.degree();
   if (0 == deg)
     return os;
 
   os << " { ";
-  for (uint32_t i = 0; i < deg; ++i)
+  for (size_t i = 0; i < deg; ++i)
     {
       os << n.nthNeighbor(i)/*.to()*/.id() << ' ';
     }
@@ -697,8 +699,8 @@ public:
 
   //! \brief Constructor. Reserve memory for the given
   //! number of nodes and arcs.
-  Graph(const uint32_t noNodes,
-        const uint32_t noArcs,
+  Graph(const size_t noNodes,
+        const size_t noArcs,
         const bool directed = true)
     : m_nodes(noNodes), m_neighbors(noArcs), m_directed(directed)
   {
@@ -707,8 +709,8 @@ public:
   }
 
   /*Graph(std::string const& name,
-        const uint32_t noNodes,
-        const uint32_t noArcs,
+        const size_t noNodes,
+        const size_t noArcs,
         const bool directed = true)
     : m_nodes(noNodes), m_neighbors(noArcs), m_directed(directed), m_name(name)
   {
@@ -717,8 +719,8 @@ public:
   }
 
   Graph(const char* name,
-        const uint32_t noNodes,
-        const uint32_t noArcs,
+        const size_t noNodes,
+        const size_t noArcs,
         const bool directed = true)
     : m_nodes(noNodes), m_neighbors(noArcs), m_directed(directed), m_name(name)
   {
@@ -759,7 +761,7 @@ public:
   //! \brief
   Node& addNode()
   {
-    const uint32_t last = m_nodes.last() + 1U;
+    const size_t last = m_nodes.last() + 1U;
     m_nodes.insert(last);
     return getNode(last);
   }
@@ -824,7 +826,7 @@ public:
 
   //! \brief Return the number of nodes constituing the
   //! graph. Complexity is O(1).
-  inline uint32_t howManyNodes() const
+  inline size_t howManyNodes() const
   {
     return m_nodes.used();
   }
@@ -916,7 +918,7 @@ public:
       return false;
 
     Node const& node = m_nodes[fromNodeID];
-    uint32_t i = node.degree();
+    size_t i = node.degree();
     while (i--)
       {
         Arc const& arc = m_neighbors[node.neighbor(i)->id()];
@@ -957,7 +959,7 @@ public:
       return nullptr;
 
     Node const& node = m_nodes[fromNodeID];
-    uint32_t i = node.degree();
+    size_t i = node.degree();
     while (i--)
       {
         Arc& arc = m_neighbors[node.neighbor(i)->id()];
@@ -1066,7 +1068,7 @@ private:
   //! \brief Shared function by two public functions.
   void private_addArc(Node &fromNode, Node &toNode)
   {
-    const uint32_t last = m_neighbors.last() + 1U;// FIXME degeux car Collection est non pas Set
+    const size_t last = m_neighbors.last() + 1U;// FIXME degeux car Collection est non pas Set
     m_neighbors.insert(A(last, fromNode, toNode)); // FIXME degeux: faire Set.append
     Arc& arc = m_neighbors.get(last);// FIXME degeux
 

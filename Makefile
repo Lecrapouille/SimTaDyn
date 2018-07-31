@@ -39,7 +39,7 @@ PROJECT_MODE = debug
 ###################################################
 # List of files to compile. Splited by directories
 ifeq ($(PROJECT_MODE),debug)
-OBJ_EXTERNAL   = backward.o
+#OBJ_EXTERNAL   = backward.o
 else
 OBJ_EXTERNAL   =
 endif
@@ -65,8 +65,20 @@ OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ
 
 ###################################################
 # Compilation options.
-CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+CXXSTD      = -std=c++11
+PKG_CFLAGS  = `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+PKG_LIBS    = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+# http://shitalshah.com/p/how-to-enable-and-use-gcc-strict-mode-compilation/
+CXXFLAGS   += -Wall -Wextra -Wstrict-aliasing -Wunreachable-code -Wcast-align -Wcast-qual -Wsign-compare -Wsign-conversion -Wsign-promo -Wconversion
+# -Wctor-dtor-privacy -Wnon-virtual-dtor -Wfloat-equal
+
+#-Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Wsign-compare -Wsign-conversion -Wsign-promo -Wconversion -Wfloat-equal -Winline
+# https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc/
+CXXFLAGS   += -fasynchronous-unwind-tables -fexceptions -Werror=implicit-function-declaration
+# Specific for gcc-7.5, gcc-8: CXXFLAGS   += -fstack-clash-protection
+ifeq ($(ARCHI),Linux)
+LDFLAGS    += -Wl,-z,defs
+endif
 
 ###################################################
 #
@@ -119,13 +131,16 @@ endif
 ###################################################
 # Backward allows tracing stack when segfault happens
 ifeq ($(PROJECT_MODE),debug)
-ifneq ($(ARCHI),Darwin)
-OPTIM_FLAGS = -O2 -g
-DEFINES += -DBACKWARD_HAS_DW=1
-LIBS += -ldw
+ifeq ($(ARCHI),Linux)
+OPTIM_FLAGS = -D_GLIBCXX_ASSERTIONS -D_FORTIFY_SOURCE=2 -O2 -g -UNDEBUG -Wstack-protector -fstack-protector-strong 
+# -fplugin=annobin
+DEFINES    += -DBACKWARD_HAS_DW=1
+LIBS       += -ldw
 endif
+else ifeq ($(PROJECT_MODE),release)
+OPTIM_FLAGS  = -O2 -DNDEBUG -fpie
+CXXLDFLAGS  += -Wl,-pie
 else
-OPTIM_FLAGS = -O3
 endif
 
 ###################################################
@@ -133,16 +148,21 @@ endif
 all: $(TARGET)
 
 ###################################################
-# Link sources
+# Link sources. Strip the binary to save space as
+# explained here http://reverse.lostrealm.com/protect/strip.html
 $(TARGET): $(OBJ)
 	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
+	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(PKG_LIBS) $(LIBS) $(LDFLAGS)
+ifeq ($(PROJECT_MODE),release)
+	@$(call print-to,"Stripping","$(TARGET)","$(BUILD)/$@","")
+	@cd $(BUILD) && strip -R .comment -R .note -R .note.ABI-tag $(TARGET)
+endif
 
 ###################################################
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	@$(CXX) $(CXXSTD) $(DEPFLAGS) $(CXXFLAGS) $(OPTIM_FLAGS) $(PKG_CFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################

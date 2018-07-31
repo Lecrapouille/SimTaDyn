@@ -43,15 +43,19 @@
 //! \brief GLObject is an interface for managing a generic OpenGL
 //! object.
 // **************************************************************
+template<class T>
 class GLObject
 {
+private:
+
+  inline void init();
+
 public:
 
-  //! \brief Empty constructor with no name.
-  //! Note: name is public and is used for debug purpose.
   GLObject()
   {
-    //LOGI("New GLObject with no name");
+    //LOGI("New GLObject GLenum with no name");
+    init();
   }
 
   //! \brief Constructor with the name of the object.
@@ -60,6 +64,7 @@ public:
     : m_name(name)
   {
     //LOGI("New GLObject with name '%s'", name.c_str());
+    init();
   }
 
   //! \brief Constuctor with the name of the object.
@@ -69,10 +74,11 @@ public:
   {
     assert(nullptr != name);
     //LOGI("New GLObject with name '%s'", name);
+    init();
   }
 
   //! \brief Return the GPU reference of the object.
-  operator int()
+  inline T getID() const
   {
     return m_handle;
   }
@@ -127,12 +133,8 @@ public:
     deactivate();
   }
 
-  //! \brief
-  virtual inline bool isValid() const
-  {
-    //LOGI("GLObject named '%s' is valid ? %u", m_name.c_str(), m_handle > 0U);
-    return m_handle > 0U;
-  }
+  //template<T>
+  inline bool isValid() const;
 
 protected:
 
@@ -196,7 +198,7 @@ protected:
   }
 
   //! \brief OpenGL object identifer GPU side.
-  GLenum m_handle = 0U;
+  /*GLenum*/ T m_handle;// = 0U;
   //! \brief the type of object on the GPU.
   GLenum m_target = 0U;
   //! \brief
@@ -212,5 +214,32 @@ public:
   //! Object name for debug purpose.
   std::string m_name;
 };
+
+//! \brief
+template<>
+inline void GLObject<GLenum>::init()
+{
+  m_handle = 0U;
+}
+
+template<>
+inline void GLObject<GLint>::init()
+{
+  m_handle = -1;
+}
+
+//! \brief
+template<>
+inline bool GLObject<GLenum>::isValid() const
+{
+  //LOGI("GLObject named '%s' is valid ? %u", m_name.c_str(), m_handle > 0U);
+  return m_handle > 0U;
+}
+
+template<>
+inline bool GLObject<GLint>::isValid() const
+{
+  return m_handle != -1;
+}
 
 #endif /* GLOBJECT_HPP_ */

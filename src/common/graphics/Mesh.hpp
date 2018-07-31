@@ -77,13 +77,13 @@ public:
       //m_col.start();
 
       // Set to 0 because the texture is bound to GL_TEXTURE0
-      TextureID = glCheck(glGetUniformLocation(*m_shader, "tex"));
-      glCheck(glUniform1i(TextureID, 0));
+      m_texture_id = glCheck(glGetUniformLocation(m_shader->getID(), "tex"));
+      glCheck(glUniform1i(m_texture_id, 0));
       glCheck(glActiveTexture(GL_TEXTURE0));
       m_texture.start();
 
       //std::cout << m_pos.size() << std::endl;
-      glCheck(glDrawArrays(type, 0, m_pos.size() / 3));
+      glCheck(glDrawArrays(type, 0, static_cast<GLsizei>(m_pos.size() / 3)));
 
       m_texture.stop();
       //m_col.stop();
@@ -100,7 +100,7 @@ public:
 
 protected:
 
-  GLint TextureID;
+  GLint         m_texture_id;
   GLVertexArray m_vao;
 };
 

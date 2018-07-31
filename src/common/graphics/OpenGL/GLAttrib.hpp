@@ -26,7 +26,7 @@
 // **************************************************************
 //! \brief
 // **************************************************************
-class GLAttrib: public GLObject
+class GLAttrib: public GLObject<GLint>
 {
 public:
 
@@ -34,21 +34,18 @@ public:
   GLAttrib()
     : GLObject()
   {
-    m_handle = (GLenum) -1;
   }
 
   //! \brief Constructor with the object name
   GLAttrib(std::string const& name)
     : GLObject(name)
   {
-    m_handle = (GLenum) -1;
   }
 
   //! \brief Constructor with the object name
   GLAttrib(const char *name)
     : GLObject(name)
   {
-    m_handle = (GLenum) -1;
   }
 
   //! \brief Destructor: release data from the GPU and CPU memory.
@@ -68,17 +65,12 @@ public:
     // constructor.
     //if ('a' != m_identifier[0]) return true;
     //if (!m_program.getTypeOf(m_identifier.c_str(), &m_size, &m_type)) {
-    //  m_handle = (GLenum) -1; return false; }
+    //  m_handle = static_cast<GLenum>(-1); return false; }
     m_size = size;
     m_type = type;
 
     m_need_setup = true;
     //m_need_setup = setup();
-  }
-
-  virtual bool isValid() const override
-  {
-    return ((GLint) m_handle) != -1;
   }
 
 protected:
@@ -94,8 +86,9 @@ protected:
 
   virtual void activate() override
   {
-    glCheck(glEnableVertexAttribArray((GLint) m_handle));
-    glCheck(glVertexAttribPointer((GLint) m_handle, m_size, m_type, m_normalized, 0, nullptr));
+    // Note: cast for GLint to GLenum with -1 is protected by isValide()
+    glCheck(glEnableVertexAttribArray(static_cast<GLenum>(m_handle)));
+    glCheck(glVertexAttribPointer(static_cast<GLenum>(m_handle), m_size, m_type, m_normalized, 0, nullptr));
   }
 
   virtual void deactivate() override
@@ -123,11 +116,13 @@ protected:
           }
       }
 
-    m_handle = (GLenum) m_program->locateAttrib(m_name.c_str());
+    // Note: glGetAttribLocation return a GLint while glEnableVertexAttribArray
+    // uses a GLenum !
+    m_handle = m_program->locateAttrib(m_name.c_str());
     if (isValid() && (0 != m_size) && (0 != m_type))
       {
         activate();
-        glCheck(glVertexAttribPointer((GLint) m_handle, m_size, m_type, m_normalized, 0, nullptr));
+        glCheck(glVertexAttribPointer(static_cast<GLenum>(m_handle), m_size, m_type, m_normalized, 0, nullptr));
         //deactivate();
 
         return false;

@@ -24,7 +24,7 @@
 
 #  include "IContainer.tpp"
 
-#  define INITIAL_INDEX ((uint32_t) -1)
+#  define INITIAL_INDEX  static_cast<size_t>(-1)
 
 // **************************************************************
 //! \brief A set is similar to the std::vector and it's push_back()
@@ -39,8 +39,8 @@
 //! is not important. A case is to transfer datum to the GPU of for
 //! SGBD.
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
 class Set: public IContainer<T, N, Block>
 {
 protected:
@@ -51,7 +51,7 @@ public:
 
   //! \brief Constructor: allocate the given number of elements of
   //! type T.
-  Set(const uint32_t reserve_elements = 1)
+  Set(const size_t reserve_elements = 1)
     : IContainer<T, N, Block>(reserve_elements)
   {
     m_index = m_subindex = m_last = INITIAL_INDEX;
@@ -63,9 +63,9 @@ public:
   {
     m_index = m_subindex = m_last = INITIAL_INDEX;
 
-    const uint32_t m = uint32_t(initList.size());
+    const size_t m = size_t(initList.size());
     auto iter = initList.begin();
-    for (uint32_t i = 0; i < m; ++i)
+    for (size_t i = 0ul; i < m; ++i)
       {
         append(*iter);
         ++iter;
@@ -79,9 +79,9 @@ public:
   //! \brief Append elements from a given array.
   //! \param array an not nullptr address of the array.
   //! \param size the number of elements of the array.
-  virtual void append(const T *array, const uint32_t size)
+  virtual void append(const T *array, const size_t size)
   {
-    for (uint32_t i = 0; i < size; ++i)
+    for (size_t i = 0; i < size; ++i)
       {
         append(array[i]);
       }
@@ -91,8 +91,8 @@ public:
   //! \param vect
   virtual void append(std::vector<T> &vect)
   {
-    const uint32_t size = vect.size();
-    for (uint32_t i = 0; i < size; ++i)
+    const size_t size = vect.size();
+    for (size_t i = 0ul; i < size; ++i)
       {
         append(vect[i]);
       }
@@ -102,7 +102,7 @@ public:
   //! definition range of the container). Complexity is O(1) in
   //! number of elements.
   //! \return false if nth is before is inside, else return true.
-  virtual inline bool outofbound(const uint32_t nth) const override
+  virtual inline bool outofbound(const size_t nth) const override
   {
     return (nth > m_last) || (INITIAL_INDEX == m_last);
   }
@@ -114,7 +114,7 @@ public:
   //! element. Note: no deallocation is made (this will be done by the
   //! destructor). Note: Nothing is made if nth is incorrect or if the
   //! element has already been removed.
-  virtual void remove(const uint32_t nth);
+  virtual void remove(const size_t nth);
 
   //! \brief Remove the last inserted element.
   virtual inline void remove()
@@ -130,13 +130,13 @@ public:
   //! incorrect or indexes have the same value.
   //! \return true is case of sucess, else return false if one given
   //! index is incorrect.
-  bool swap(const uint32_t index1, const uint32_t index2);
+  bool swap(const size_t index1, const size_t index2);
 
   //! \brief Return the current position of the index.
-  inline uint32_t index() const
+  inline size_t index() const
   {
     if (INITIAL_INDEX == m_last)
-      return 0;
+      return 0ul;
     return m_last;
   }
 
@@ -175,11 +175,11 @@ private:
 protected:
 
   //! \brief Iter on allocated blocks.
-  uint32_t              m_index;
+  size_t              m_index;
   //! \brief Iter on elements of the block.
-  uint32_t              m_subindex;
+  size_t              m_subindex;
   //! \brief Refer the last inserted element.
-  uint32_t              m_last;
+  size_t              m_last;
 };
 
 #  include "Set.ipp"

@@ -54,20 +54,20 @@ public:
     return m_cellMatrix;
   }
 
-  inline int rawValue(const uint32_t row, const uint32_t col) const
+  inline int rawValue(const size_t row, const size_t col) const
   {
     return m_cellMatrix[row][col]->rawValue();
   }
 
-  inline  std::pair<bool, int32_t> value(const uint32_t row, const uint32_t col) const
+  inline  std::pair<bool, int32_t> value(const size_t row, const size_t col) const
   {
     return m_cellMatrix[row][col]->value();
   }
 
 protected:
 
-  ASpreadSheetCell* addCell(const uint32_t row,
-                            const uint32_t col,
+  ASpreadSheetCell* addCell(const size_t row,
+                            const size_t col,
                             std::string const& formulae);
 
   virtual void resetCellIterator() override
@@ -95,7 +95,7 @@ protected:
     return cell;
   }
 
-  virtual uint32_t howManyCells() const override
+  virtual size_t howManyCells() const override
   {
     return m_row * m_col;
   }
@@ -105,10 +105,10 @@ public:
 
   std::string m_name;
   std::vector<std::vector<ASpreadSheetCell*>> m_cellMatrix;
-  uint32_t m_row;
-  uint32_t m_col;
-  mutable uint32_t m_itrow;
-  mutable uint32_t m_itcol;
+  size_t m_row;
+  size_t m_col;
+  mutable size_t m_itrow;
+  mutable size_t m_itcol;
 };
 
 #endif

@@ -24,9 +24,9 @@
 
 ClassicSpreadSheet::~ClassicSpreadSheet()
 {
-  for (uint32_t row = 0; row < m_row; ++row)
+  for (size_t row = 0; row < m_row; ++row)
     {
-      for (uint32_t col = 0; col < m_col; ++col)
+      for (size_t col = 0; col < m_col; ++col)
         {
           delete m_cellMatrix[row][col];
         }
@@ -37,7 +37,7 @@ ClassicSpreadSheet::~ClassicSpreadSheet()
 static bool regexpCell(std::string const& word)
 {
   bool res = false;
-  uint32_t i = 0;
+  size_t i = 0;
 
   // Regexp: [a-zA-Z]+
   while ((word[i] != '\0') && (word[i] >= 'A') && (word[i] <= 'Z'))
@@ -46,7 +46,7 @@ static bool regexpCell(std::string const& word)
   // Regexp: \d+
   if (i >= 1)
     {
-      uint32_t j = i;
+      size_t j = i;
       while ((word[i] != '\0') && (word[i] >= '0') && (word[i] <= '9'))
         ++i;
       res = ((i >= j + 1) && (word[i] == '\0'));
@@ -66,9 +66,9 @@ ASpreadSheetCell *ClassicSpreadSheet::isACell(std::string const& word)
       return nullptr;
     }
 
-  uint32_t row = 0;
-  uint32_t col = 0;
-  uint32_t i = 0;
+  size_t row = 0;
+  size_t col = 0;
+  size_t i = 0;
 
   // Base 26
   while ((word[i] >= 'A') && (word[i] <= 'Z'))
@@ -96,8 +96,8 @@ ASpreadSheetCell *ClassicSpreadSheet::isACell(std::string const& word)
   return m_cellMatrix[row][col];
 }
 
-ASpreadSheetCell* ClassicSpreadSheet::addCell(const uint32_t row,
-                                              const uint32_t col,
+ASpreadSheetCell* ClassicSpreadSheet::addCell(const size_t row,
+                                              const size_t col,
                                               std::string const& formulae)
 {
   //std::cerr << "new CellNode " << formulae << std::endl;
@@ -130,15 +130,15 @@ bool ClassicSpreadSheet::readInput(std::string const filename)
 
   // Resize the size of the spreadsheet
   m_cellMatrix.resize(m_row);
-  for (uint32_t i = 0; i < m_row; ++i)
+  for (size_t i = 0; i < m_row; ++i)
     {
       m_cellMatrix[i].resize(m_col);
     }
 
   // Fill spreadsheet cells
-  for (uint32_t row = 0; row < m_row; ++row)
+  for (size_t row = 0; row < m_row; ++row)
     {
-      for (uint32_t col = 0; col < m_col; ++col)
+      for (size_t col = 0; col < m_col; ++col)
         {
           try
             {
@@ -159,9 +159,9 @@ bool ClassicSpreadSheet::readInput(std::string const filename)
 void ClassicSpreadSheet::displayResult()
 {
   std::cout << "SpreadSheet result:" << std::endl;
-  for (uint32_t row = 0; row < m_row; ++row)
+  for (size_t row = 0; row < m_row; ++row)
     {
-      for (uint32_t col = 0; col < m_col; ++col)
+      for (size_t col = 0; col < m_col; ++col)
         {
           std::cout << m_cellMatrix[row][col]->rawValue() << "  ";
         }

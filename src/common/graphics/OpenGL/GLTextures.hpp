@@ -30,7 +30,7 @@
 //
 // **************************************************************
 class GLTexture
-  : public GLObject,
+  : public GLObject<GLenum>,
     public Resource,
     protected PendingData
 {
@@ -161,8 +161,8 @@ public:
     // Success
     if (nullptr != m_buffer)
       {
-        m_width = width;
-        m_height = height;
+        m_width = static_cast<uint32_t>(width);
+        m_height = static_cast<uint32_t>(height);
         if (rename || m_name.empty())
           {
             m_name = filename;
@@ -221,7 +221,9 @@ protected:
   virtual bool setup() override
   {
     bool b = GLTexture::setup();
-    glCheck(glTexImage2D(m_target, 0, m_gpu_format, m_width, m_height,
+    glCheck(glTexImage2D(m_target, 0, m_gpu_format,
+                         static_cast<GLsizei>(m_width),
+                         static_cast<GLsizei>(m_height),
                          0, m_cpu_format, m_type, m_buffer));
     return b;
   }
@@ -233,15 +235,15 @@ protected:
 
   virtual bool update() override
   {
-    uint32_t pos_start;
-    uint32_t pos_end;
+    size_t pos_start;
+    size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);
 
     // FIXME: TODO pendingData --> x,y,width,height
-    const uint32_t x = 0U;
-    const uint32_t y = 0U;
-    const uint32_t width = m_width;
-    const uint32_t height = m_height;
+    const GLint x = 0U;
+    const GLint y = 0U;
+    const GLsizei width = static_cast<GLsizei>(m_width);
+    const GLsizei height = static_cast<GLsizei>(m_height);
 
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
@@ -253,8 +255,8 @@ protected:
 
   uint32_t m_width = 0;
   uint32_t m_height = 0;
-  GLint m_cpu_format = GL_RGBA;
-  GLenum m_gpu_format = GL_RGBA;
+  GLenum m_cpu_format = GL_RGBA;
+  GLint m_gpu_format = GL_RGBA;
   GLenum m_type = GL_UNSIGNED_BYTE;
   unsigned char* m_buffer = nullptr;
 };

@@ -28,6 +28,10 @@ namespace maths
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
   bool almostEqual(float const A, float const B)
   {
     if (A == B)
@@ -91,7 +95,6 @@ namespace maths
     return 0.5f * conv.f * (3.0f - number * conv.f * conv.f);
 #endif
   }
-
-};
+}
 
 #include "Maths.hpp"

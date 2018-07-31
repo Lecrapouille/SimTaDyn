@@ -23,20 +23,20 @@
 // ESRI Shapefile Technical Description:
 // https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
 
-int32_t ShapefileLoader::readBigEndianInt()
+uint32_t ShapefileLoader::readBigEndianInt()
 {
   char buf[4];
 
   m_infile.read(buf, 4);
-  return (((buf[0] & 0xFF) << 24) | ((buf[1] & 0xFF) << 16) | ((buf[2] & 0xFF) << 8) | (buf[3] & 0xFF));
+  return static_cast<uint32_t>(((buf[0] & 0xFF) << 24) | ((buf[1] & 0xFF) << 16) | ((buf[2] & 0xFF) << 8) | (buf[3] & 0xFF));
 }
 
-int32_t ShapefileLoader::readLittleEndianInt()
+uint32_t ShapefileLoader::readLittleEndianInt()
 {
   char buf[4];
 
   m_infile.read(buf, 4);
-  return (((buf[3] & 0xFF) << 24) | ((buf[2] & 0xFF) << 16) | ((buf[1] & 0xFF) << 8) | (buf[0] & 0xFF));
+  return static_cast<uint32_t>(((buf[3] & 0xFF) << 24) | ((buf[2] & 0xFF) << 16) | ((buf[1] & 0xFF) << 8) | (buf[0] & 0xFF));
 }
 
 double ShapefileLoader::readDouble()
@@ -82,7 +82,7 @@ void ShapefileLoader::skypeNBytes(const uint32_t offset)
     }
 }
 
-const std::string ShapefileLoader::shapeTypes(const int id)
+const std::string ShapefileLoader::shapeTypes(const uint32_t id)
 {
   std::string shape;
 
@@ -139,40 +139,46 @@ const std::string ShapefileLoader::shapeTypes(const int id)
 
 void ShapefileLoader::checkFileSize()
 {
-  uint32_t value32b;
+  uint32_t value32b = 0;
 
   // Get the file size from the file system
   m_infile.seekg(0, std::ios::end);
-  m_file_length = (uint32_t)  m_infile.tellg();
+  m_filelength = m_infile.tellg();
   m_infile.seekg(0, std::ios::beg);
+
+  // Malformed file
+  if (m_filelength <= 0)
+    goto l_err;
 
   // Get the file size stored inside the file
   goToByte(24);
-  value32b = readBigEndianInt() * sizeof (uint16_t);
+  value32b = readBigEndianInt();
+  value32b = value32b * static_cast<uint32_t>(sizeof (uint16_t));
 
-  // Expect to have same values
-  if (value32b == m_file_length)
+  // Wellformed size
+  if (value32b == m_filelength)
     {
-      //std::cout << "File Length: " << m_file_length << std::endl;
+      //success:
+      //std::cout << "File Length: " << m_filelength << std::endl;
+      return ;
     }
-  else
-    {
-      LOGF("ShapefileLoaderBadLength");
-      std::string msg("Incorrect Shapefile size. Expected ");
-      msg += std::to_string(m_file_length);
-      msg += " bytes but detected ";
-      msg += value32b;
-      msg += " bytes";
-      LoaderException e(msg);
-      throw e;
-    }
+
+l_err:
+  LOGF("ShapefileLoaderBadLength");
+  std::string msg("Incorrect Shapefile size. Expected ");
+  msg += std::to_string(m_filelength);
+  msg += " bytes but detected ";
+  msg += std::to_string(value32b);
+  msg += " bytes";
+  LoaderException e(msg);
+  throw e;
 }
 
 void ShapefileLoader::openShapeFile(const std::string& filename)
 {
   uint32_t value32b;
 
-  m_file_length = 0;
+  m_filelength = 0;
   m_filename = filename;
 
   m_infile.open(filename, std::ios::binary | std::ios::in);
@@ -187,7 +193,7 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
 
   goToByte(0U);
   value32b = readBigEndianInt();
-  if (9994 != value32b)
+  if (9994u != value32b)
     {
       LOGF("ShapefileLoaderBadId");
       LoaderException e("Bad Shapefile ID: read " + std::to_string(value32b) + " instead of 9994");
@@ -235,7 +241,7 @@ uint32_t ShapefileLoader::getRecordAt(SimTaDynSheet& /*sheet*/, const uint32_t o
 
   goToByte(offset);
   record_number = readBigEndianInt();
-  content_length = readBigEndianInt() * sizeof (uint16_t);
+  content_length = readBigEndianInt() * static_cast<uint32_t>(sizeof (uint16_t));
   shape_type = readLittleEndianInt();
 
   //std::cout << "Record Number: " << record_number << ", Content Length: " << content_length << ":" << std::endl;
@@ -271,7 +277,7 @@ void ShapefileLoader::getAllRecords(SimTaDynSheet& sheet)
   uint32_t content_length;
   uint32_t offset = 100U;
 
-  while (offset < m_file_length)
+  while (offset < m_filelength)
     {
       if (m_infile.eof())
         break;

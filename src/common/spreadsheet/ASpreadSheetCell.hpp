@@ -159,7 +159,7 @@ private:
   std::vector<ASpreadSheetCell *> m_references;
 
 public:
-  uint32_t                 m_unresolvedRefs;
+  size_t                 m_unresolvedRefs;
 
 protected:
 

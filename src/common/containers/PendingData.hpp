@@ -47,16 +47,16 @@ public:
   //! has chnaged.
   inline bool hasPendingData() const
   {
-    bool res = ((uint32_t) -1 != m_pending_start);
+    bool res = ((size_t) -1 != m_pending_start);
     return res;
   }
 
   //! \brief Return the smallest contiguous area that needs to be
   //! uploaded. If there is no pending data, pos_start will be set to
   //! -1. You can call hasPendingData() before this method.
-  void getPendingData(uint32_t &pos_start, uint32_t &pos_end) const
+  void getPendingData(size_t &pos_start, size_t &pos_end) const
   {
-    if ((uint32_t) -1 != m_pending_start)
+    if ((size_t) -1 != m_pending_start)
     {
       pos_start = m_pending_start;
       pos_end = m_pending_end;
@@ -71,14 +71,14 @@ public:
   //! \brief Call this function when changed elements have been uploaded.
   void clearPending()
   {
-    m_pending_start = (uint32_t) -1;
-    m_pending_end = (uint32_t) -1;
+    m_pending_start = (size_t) -1;
+    m_pending_end = (size_t) -1;
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  void addPendingData(const uint32_t pos_start, const uint32_t pos_end)
+  void addPendingData(const size_t pos_start, const size_t pos_end)
   {
-    if ((uint32_t) -1 == m_pending_start)
+    if ((size_t) -1 == m_pending_start)
       {
         m_pending_start = pos_start;
         m_pending_end = pos_end;
@@ -91,7 +91,7 @@ public:
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  inline void addPendingData(const uint32_t pos_start)
+  inline void addPendingData(const size_t pos_start)
   {
     addPendingData(pos_start, pos_start);
   }
@@ -99,7 +99,7 @@ public:
 protected:
 
   //! Indicate which elements have been changed.
-  uint32_t m_pending_start, m_pending_end;
+  size_t m_pending_start, m_pending_end;
 };
 
 #endif

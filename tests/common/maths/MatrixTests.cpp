@@ -135,27 +135,27 @@ static Vector3f A_times_v(22, 58, 94);
 static Vector3f v_times_A(42, 54, 66);
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t r, uint32_t c>
+template <typename T, size_t r, size_t c>
 static void compareMatricesEps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
 {
-  for (uint32_t i = 0U; i < r * c; ++i)
+  for (size_t i = 0U; i < r * c; ++i)
     {
       CPPUNIT_ASSERT_EQUAL(true, maths::abs(a.m_data[i] - b.m_data[i]) < T(0.000001));
     }
 }
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t r, uint32_t c>
+template <typename T, size_t r, size_t c>
 static void compareMatricesUlps(Matrix<T,r,c> const &a, Matrix<T,r,c> const &b)
 {
-  for (uint32_t i = 0U; i < r * c; ++i)
+  for (size_t i = 0U; i < r * c; ++i)
     {
       CPPUNIT_ASSERT_EQUAL(true, maths::almostEqual(a.m_data[i], b.m_data[i]));
     }
 }
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t r, uint32_t c>
+template <typename T, size_t r, size_t c>
 static inline void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b, const bool expected)
 {
   std::cout << "Comparing: " << std::endl << a
@@ -163,7 +163,7 @@ static inline void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b
             << std::endl;
 
   Matrix<bool,r,c> res = (a == b);
-  for (uint32_t i = 0; i < r * c; ++i)
+  for (size_t i = 0; i < r * c; ++i)
     {
       //CPPUNIT_ASSERT_EQUAL(true, res.m_data[i]);
       if (expected != res.m_data[i])
@@ -175,14 +175,14 @@ static inline void compareMatrix_(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b
 }
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t r, uint32_t c>
+template <typename T, size_t r, size_t c>
 static inline void isTrueMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
 {
   compareMatrix_(a, b, true);
 }
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t r, uint32_t c>
+template <typename T, size_t r, size_t c>
 static inline void isFalseMatrix(Matrix<T,r,c> const& a, Matrix<T,r,c> const& b)
 {
   compareMatrix_(a, b, false);
@@ -225,16 +225,16 @@ void MatrixTests::tearDown()
 //--------------------------------------------------------------------------
 void MatrixTests::testCreator()
 {
-  uint32_t rows = 0;
-  uint32_t cols = 0;
+  size_t rows = 0;
+  size_t cols = 0;
 
   B4.size(rows, cols);
-  CPPUNIT_ASSERT_EQUAL(4U, rows);
-  CPPUNIT_ASSERT_EQUAL(4U, cols);
+  CPPUNIT_ASSERT_EQUAL(4ul, rows);
+  CPPUNIT_ASSERT_EQUAL(4ul, cols);
 
   B.size(rows, cols);
-  CPPUNIT_ASSERT_EQUAL(3U, rows);
-  CPPUNIT_ASSERT_EQUAL(3U, cols);
+  CPPUNIT_ASSERT_EQUAL(3ul, rows);
+  CPPUNIT_ASSERT_EQUAL(3ul, cols);
 
   // Check accessor
   checkVector3f(I3[0], 1.0f, 0.0f, 0.0f);

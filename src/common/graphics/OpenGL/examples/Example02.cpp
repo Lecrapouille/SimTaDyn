@@ -86,7 +86,7 @@ bool GLExample02::draw()
     m_col.start();
 
     // Set to 0 because the texture is bound to GL_TEXTURE0
-    GLint TextureID = glCheck(glGetUniformLocation(m_shader, "tex"));
+    GLint TextureID = glCheck(glGetUniformLocation(m_shader.getID(), "tex"));
     glCheck(glUniform1i(TextureID, 0));
     glCheck(glActiveTexture(GL_TEXTURE0));
     m_texture.start();

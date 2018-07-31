@@ -47,7 +47,7 @@ namespace SimTaDyn
     catch (const Gdk::GLError& gle)
       {
         LOGES("An error occured during the creation of OpenGL context:");
-        std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
+        std::cerr << gle.domain() << "-" << (int) gle.code() << "-" << gle.what() << std::endl;
       }
   }
 

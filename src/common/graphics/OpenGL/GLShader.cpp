@@ -26,7 +26,9 @@
 //! \param fragment the identifer of the loaded fragment shader.
 //! \param geometry the identifer of the loaded geometry shader.
 // **************************************************************
-void GLShader::cleanShader(GLuint vertex, GLuint fragment, GLuint geometry)
+void GLShader::cleanShader(GLuint const vertex,
+                           GLuint const fragment,
+                           GLuint const geometry)
 {
   if (0U != vertex) {
     glCheck(glDetachShader(m_handle, vertex));
@@ -58,19 +60,26 @@ void GLShader::release()
 }
 
 // **************************************************************
-//! \param obj the identifer of the loaded shader.
-//! \return true if case of success, else return false.
+//!
 // **************************************************************
-bool GLShader::checkShaderCompileStatus(GLuint obj)
+bool GLShader::checkStatus(GLuint const obj, GLenum const pname)
 {
   GLint status;
 
-  glCheck(glGetShaderiv(obj, GL_COMPILE_STATUS, &status));
+  if (GL_COMPILE_STATUS == pname)
+    {
+      glCheck(glGetShaderiv(obj, GL_COMPILE_STATUS, &status));
+    }
+  else
+    {
+      glCheck(glGetProgramiv(obj, GL_LINK_STATUS, &status));
+    }
+
   if (GL_FALSE == status)
     {
       GLint length;
       glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length));
-      std::vector<char> log(length);
+      std::vector<char> log(static_cast<size_t>(length));
       glCheck(glGetShaderInfoLog(obj, length, &length, &log[0]));
       std::cerr << "[FAILED] " << std::endl << &log[0U];
       return false;
@@ -81,24 +90,20 @@ bool GLShader::checkShaderCompileStatus(GLuint obj)
 }
 
 // **************************************************************
+//! \param obj the identifer of the loaded shader.
 //! \return true if case of success, else return false.
 // **************************************************************
-bool GLShader::checkProgramLinkStatus(GLuint obj)
+bool GLShader::checkShaderCompileStatus(GLuint const obj)
 {
-  GLint status;
+  return checkStatus(obj, GL_COMPILE_STATUS);
+}
 
-  glCheck(glGetProgramiv(obj, GL_LINK_STATUS, &status));
-  if (GL_FALSE == status)
-    {
-      GLint length;
-      glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
-      std::vector<char> log(length);
-      glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
-      std::cerr << "[FAILED] " << &log[0U];
-      return false;
-    }
-  std::cout << "[DONE]" << std::endl;
-  return true;
+// **************************************************************
+//! \return true if case of success, else return false.
+// **************************************************************
+bool GLShader::checkProgramLinkStatus(GLuint const obj)
+{
+  return checkStatus(obj, GL_LINK_STATUS);
 }
 
 // **************************************************************
@@ -106,7 +111,8 @@ bool GLShader::checkProgramLinkStatus(GLuint obj)
 //! @param shader_filename the filename of the shader to compile
 //! @return 0U if failed. Else return the ID of the compiled shader
 // **************************************************************
-GLuint GLShader::createShader(int shader_type, const char* shader_filename)
+GLuint GLShader::createShader(GLenum const shader_type,
+                              const char* shader_filename)
 {
   if (nullptr == shader_filename)
     return 0U;
@@ -132,9 +138,14 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
   if (infile.is_open())
     {
       infile.seekg(0, std::ios::end);
-      shader_code.resize((unsigned int) infile.tellg());
-      infile.seekg(0, std::ios::beg);
-      infile.read(&shader_code[0U], shader_code.size());
+      std::streampos pos = infile.tellg();
+      if (pos > 0)
+        {
+          shader_code.resize(static_cast<size_t>(pos));
+          infile.seekg(0, std::ios::beg);
+          infile.read(&shader_code[0U],
+                      static_cast<std::streamsize>(shader_code.size()));
+        }
       infile.close();
     }
   else
@@ -146,7 +157,7 @@ GLuint GLShader::createShader(int shader_type, const char* shader_filename)
 
   // Create and compile the shader
   char const *source = shader_code.c_str();
-  int length = shader_code.size();
+  GLint length = static_cast<GLint>(shader_code.size());
   GLuint shader = glCheck(glCreateShader(shader_type));
   glCheck(glShaderSource(shader, 1, &source, &length));
   glCheck(glCompileShader(shader));

@@ -40,7 +40,7 @@
 //! This class loads into the GPU a pair of vertex and fragment shader
 //! and optionaly a geometry shader.
 // **************************************************************
-class GLShader: public GLObject
+class GLShader: public GLObject<GLenum>
 {
 public:
 
@@ -175,19 +175,21 @@ public:
 
 private:
 
+  bool checkStatus(GLuint const obj, GLenum const pname);
+
   //! \brief Check and display for shader compiler errors.
-  bool checkShaderCompileStatus(GLuint obj);
+  bool checkShaderCompileStatus(GLuint const obj);
 
   //! \brief Check and display for shader linker error.
-  bool checkProgramLinkStatus(GLuint obj);
+  bool checkProgramLinkStatus(GLuint const obj);
 
   //! \brief Read a shader script file, compile it and load it in the
   //! GPU memory.
-  GLuint createShader(int shader_type, const char* shader_filename);
+  GLuint createShader(GLenum const shader_type, const char* shader_filename);
 
   //! \brief Once shaders are loaded as unique program, release the
   //! GPU memory.
-  void cleanShader(GLuint vertex, GLuint fragment, GLuint geometry);
+  void cleanShader(GLuint const vertex, GLuint const fragment, GLuint const geometry);
 };
 
 #endif /* SHADERHPP_ */

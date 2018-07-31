@@ -63,12 +63,12 @@ public:
 
   inline uint32_t screenWidth() const override
   {
-    return Gtk::GLArea::get_width();
+    return static_cast<uint32_t>(Gtk::GLArea::get_width());
   }
 
   inline uint32_t screenHeight() const override
   {
-    return Gtk::GLArea::get_height();
+    return static_cast<uint32_t>(Gtk::GLArea::get_height());
   }
 
   //FIXME protected:

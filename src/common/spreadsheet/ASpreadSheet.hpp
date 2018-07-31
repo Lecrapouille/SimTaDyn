@@ -55,7 +55,7 @@ protected:
   virtual void resetCellIterator() = 0;
   virtual bool hasCell() const = 0;
   virtual ASpreadSheetCell* nextCell() /*const*/ = 0; // FIXME
-  virtual uint32_t howManyCells() const = 0;
+  virtual size_t howManyCells() const = 0;
 
 private:
 

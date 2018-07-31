@@ -24,7 +24,7 @@
 
 #  include "IContainer.tpp"
 
-#  define INITIAL_INDEX ((uint32_t) -1)
+#  define INITIAL_INDEX  static_cast<size_t>(-1)
 
 // **************************************************************
 //! \brief A set is similar to the class Set but holes in elements
@@ -32,8 +32,8 @@
 //! elements like a graph without getting too much overhead due to
 //! memory allocation and minimising defragementation of the memory.
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
 class Collection: public IContainer<T, N, Block>
 {
 protected:
@@ -48,7 +48,7 @@ public:
   //! pre-allocate. This value is automaticly rounded up to have at
   //! least one block of elements created. Note: 0 is a possible value
   //! in this case no blocks are allocated. Default value is 1.
-  Collection(const uint32_t reserve_elements = 1)
+  Collection(const size_t reserve_elements = 1)
     : IContainer<T, N, Block>(reserve_elements)
   {
     m_begin = INITIAL_INDEX;
@@ -61,9 +61,9 @@ public:
     m_begin = INITIAL_INDEX;
     m_end = 0;
 
-    const uint32_t m = uint32_t(initList.size());
+    const size_t m = size_t(initList.size());
     auto iter = initList.begin();
-    for (uint32_t i = 0; i < m; ++i)
+    for (size_t i = 0; i < m; ++i)
       {
         append(*iter);
         ++iter;
@@ -72,7 +72,7 @@ public:
 
   //! \brief Insert an element at the given index. Complexity
   //! is O(1) of elements iteration.
-  void insert(const uint32_t index, T const& elt);
+  void insert(const size_t index, T const& elt);
   void insert(T const& elt);
 
   //! \brief Remove the n'th element. Complexity is O(1) of elements
@@ -83,11 +83,11 @@ public:
   //! the last element. Note: no deallocation is made (this will be
   //! done by the destructor). Note: Nothing is made if nth is
   //! incorrect or if the element has already been removed.
-  void remove(const uint32_t nth);
+  void remove(const size_t nth);
 
   //! \brief Check if the given index is outisde the container bound.
   //! \return false if nth is before is inside, else return true.
-  virtual inline bool outofbound(const uint32_t nth) const override
+  virtual inline bool outofbound(const size_t nth) const override
   {
     return (nth + 1) > (IContainer<T, N, Block>::m_allocated_blocks << N);
   }
@@ -104,9 +104,9 @@ public:
 
   //! \brief Force the given index to be not empty.
   //! Complexity is O(1) in number of elements.
-  virtual void occupy(const uint32_t nth) override;
+  virtual void occupy(const size_t nth) override;
 
-  inline uint32_t last() { return m_end - 1U; }
+  inline size_t last() { return m_end - 1U; }
 
   //! Include iterators
 #include "CollectionIterator.ipp"
@@ -129,9 +129,9 @@ public:
 protected:
 
   //! \brief iterator.
-  uint32_t m_begin;
+  size_t m_begin;
   //! \brief iterator.
-  uint32_t m_end;
+  size_t m_end;
 };
 
 #  include "Collection.ipp"
