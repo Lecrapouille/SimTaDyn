@@ -26,6 +26,7 @@ template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block>
 void Collection<T,N,Block>::insert(const uint32_t nth, T const& elt)
 {
+  constexpr bool lazy_allocation = false;
   const uint32_t id = nth >> N;
   const uint32_t sid = MODULO(nth, M);
 
@@ -33,11 +34,13 @@ void Collection<T,N,Block>::insert(const uint32_t nth, T const& elt)
   // occupied.
   if (id >= IContainer<T,N,Block>::m_allocated_blocks)
     {
-      IContainer<T,N,Block>::reserveBlocks(1U + id - IContainer<T,N,Block>::m_allocated_blocks);
+      IContainer<T,N,Block>::allocateBlocks(1u + id -
+         IContainer<T,N,Block>::m_allocated_blocks,
+         lazy_allocation);
     }
 
   // Insert element and add the 'Occupied' flag
-  IContainer<T,N,Block>::m_blocks[id]->m_block[sid] = elt;
+  IContainer<T,N,Block>::m_blocks[id]->nth(sid) = elt;
   if (!IS_OCCUPIED(id, sid))
     {
       SET_OCCUPIED(id, sid);

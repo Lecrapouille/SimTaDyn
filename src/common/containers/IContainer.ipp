@@ -40,7 +40,7 @@
 // **************************************************************
 template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block>
-IContainer<T,N,Block>::IContainer(const uint32_t nb_elts)
+  IContainer<T,N,Block>::IContainer(const uint32_t nb_elts)
 {
   m_stored_elements = 0;
   m_allocated_blocks = 0;
@@ -57,7 +57,8 @@ template<typename T, const uint32_t N,
 void IContainer<T,N,Block>::reserve(const uint32_t nb_elts)
 {
   std::cout << "Reserving (" << nb_elts << " + " << M << " - 1) >> " << N << " blocks\n";
-  reserveBlocks((nb_elts + M - 1) >> N);
+  constexpr bool lazy_allocation = false;
+  allocateBlocks((nb_elts + M - 1) >> N, lazy_allocation);
 }
 
 // **************************************************************
@@ -66,7 +67,8 @@ void IContainer<T,N,Block>::reserve(const uint32_t nb_elts)
 // **************************************************************
 template<typename T, const uint32_t N,
          template<typename X, const uint32_t Y> class Block>
-void IContainer<T,N,Block>::reserveBlocks(const uint32_t nb_blocks)
+void IContainer<T,N,Block>::allocateBlocks(const uint32_t nb_blocks,
+                                           const bool lazy_allocation)
 {
   std::cout << "Reserving " << nb_blocks << " blocks\n";
   assert(nb_blocks < 16U);
@@ -75,7 +77,7 @@ void IContainer<T,N,Block>::reserveBlocks(const uint32_t nb_blocks)
   uint32_t i = nb_blocks;
   while (i--)
     {
-      m_blocks.push_back(newBlock());
+      m_blocks.push_back(newBlock(lazy_allocation));
     }
   m_allocated_blocks += nb_blocks;
   assert(m_allocated_blocks == m_blocks.size());
@@ -105,7 +107,7 @@ T& IContainer<T,N,Block>::get(const uint32_t nth)
     {
       throw std::out_of_range("Empty element at index " + std::to_string(nth));
     }
-  return m_blocks[id]->m_block[sid];
+  return m_blocks[id]->nth(sid);
 }
 
 // **************************************************************
@@ -127,7 +129,7 @@ T const& IContainer<T,N,Block>::get(const uint32_t nth) const
     {
       throw std::out_of_range("Empty element at index " + std::to_string(nth));
     }
-  return m_blocks[id]->m_block[sid];
+  return m_blocks[id]->nth(sid);
 }
 
 // **************************************************************
@@ -149,8 +151,8 @@ void IContainer<T,N,Block>::modify(const uint32_t nth, T const& e) const
     {
       throw std::out_of_range("Empty element at index " + std::to_string(nth));
     }
-  m_blocks[id]->m_block[sid] = e;
-  m_blocks[id]->addPendingData(sid);
+  m_blocks[id]->nth(sid) = e;
+  m_blocks[id]->tagAsPending(sid);
 }
 
 // **************************************************************
@@ -163,7 +165,7 @@ const T& IContainer<T,N,Block>::operator[](size_t nth) const
   const uint32_t id = nth >> N;
   const uint32_t sid = MODULO(nth, M);
 
-  return m_blocks[id]->m_block[sid];
+  return m_blocks[id]->nth(sid);
 }
 
 // **************************************************************
@@ -176,7 +178,7 @@ T& IContainer<T,N,Block>::operator[](size_t nth)
   const uint32_t id = nth >> N;
   const uint32_t sid = MODULO(nth, M);
 
-  return m_blocks[id]->m_block[sid];
+  return m_blocks[id]->nth(sid);
 }
 
 // **************************************************************
@@ -270,7 +272,7 @@ void IContainer<T,N,Block>::debug() const
         {
           if (IS_OCCUPIED(index, subindex))
             {
-              std::cout << " " << m_blocks[index]->m_block[subindex]
+              std::cout << " " << m_blocks[index]->nth(subindex)
                         << std::endl;
             }
           else

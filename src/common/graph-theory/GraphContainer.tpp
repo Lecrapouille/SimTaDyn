@@ -41,8 +41,8 @@ protected:
 
 public:
 
-  GraphBlock()
-    : Block<T, N>()
+  GraphBlock(const bool lazy_allocation)
+    : Block<T, N>(lazy_allocation)
   {
   }
 
@@ -90,7 +90,8 @@ public:
     const uint32_t index = nth / M;
     const uint32_t subindex = MODULO(nth, M);
 
-    return 0 != (Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S] & (1 << (MODULO(subindex, S))));
+    return 0 != (Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S]
+                 & (1 << (MODULO(subindex, S))));
   }
 
   //! \brief Mark an element as marked
@@ -102,7 +103,8 @@ public:
     const uint32_t index = nth / M;
     const uint32_t subindex = MODULO(nth, M);
 
-    Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S] |= (1 << (MODULO(subindex, S)));
+    Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S]
+      |= (1 << (MODULO(subindex, S)));
   }
 
   void unmark(const uint32_t nth)
@@ -115,7 +117,8 @@ public:
 
     if ((index < Collection<T, N, Block>::blocks()) && (subindex < M))
       {
-        Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S] &= ~(1 << (MODULO(subindex, S)));
+        Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S]
+          &= ~(1 << (MODULO(subindex, S)));
       }
   }
 

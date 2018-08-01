@@ -30,6 +30,10 @@
 // **************************************************************
 class PendingData
 {
+private:
+
+  static constexpr uint32_t initial_position = static_cast<uint32_t>(-1);
+
 public:
 
   //! \brief Empty constructor: no pending data.
@@ -47,8 +51,7 @@ public:
   //! has chnaged.
   inline bool hasPendingData() const
   {
-    bool res = ((uint32_t) -1 != m_pending_start);
-    return res;
+    return (initial_position != m_pending_start);
   }
 
   //! \brief Return the smallest contiguous area that needs to be
@@ -56,29 +59,29 @@ public:
   //! -1. You can call hasPendingData() before this method.
   void getPendingData(uint32_t &pos_start, uint32_t &pos_end) const
   {
-    if ((uint32_t) -1 != m_pending_start)
-    {
-      pos_start = m_pending_start;
-      pos_end = m_pending_end;
-    }
+    if (hasPendingData())
+      {
+        pos_start = m_pending_start;
+        pos_end = m_pending_end;
+      }
     else
-    {
-      pos_start = 0;
-      pos_end = 0;
-    }
+      {
+        pos_start = 0;
+        pos_end = 0;
+      }
   }
 
   //! \brief Call this function when changed elements have been uploaded.
   void clearPending()
   {
-    m_pending_start = (uint32_t) -1;
-    m_pending_end = (uint32_t) -1;
+    m_pending_start = initial_position;
+    m_pending_end = initial_position;
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  void addPendingData(const uint32_t pos_start, const uint32_t pos_end)
+  void tagAsPending(const uint32_t pos_start, const uint32_t pos_end)
   {
-    if ((uint32_t) -1 == m_pending_start)
+    if (!hasPendingData())
       {
         m_pending_start = pos_start;
         m_pending_end = pos_end;
@@ -91,9 +94,9 @@ public:
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  inline void addPendingData(const uint32_t pos_start)
+  inline void tagAsPending(const uint32_t pos_start)
   {
-    addPendingData(pos_start, pos_start);
+    tagAsPending(pos_start, pos_start);
   }
 
 protected:

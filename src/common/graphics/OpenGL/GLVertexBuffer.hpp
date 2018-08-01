@@ -94,7 +94,7 @@ public:
       {
         reserve(nth);
       }
-    PendingData::addPendingData(nth);
+    PendingData::tagAsPending(nth);
     return m_data[nth];
   }
 
@@ -106,7 +106,7 @@ public:
   inline void push_back(T const &e)
   {
     m_data.push_back(e);
-    PendingData::addPendingData(m_data.size() - 1U);
+    PendingData::tagAsPending(m_data.size() - 1U);
   }
 
   inline void pop_back()
@@ -118,7 +118,7 @@ public:
   {
     auto it = m_data.begin();
     m_data.insert(it, e);
-    PendingData::addPendingData(0U, m_data.size() - 1U);
+    PendingData::tagAsPending(0U, m_data.size() - 1U);
   }
 
   //! \brief Return the number of elements a block can store
@@ -143,7 +143,7 @@ public:
       }
 
     uint32_t offset = m_data.size();
-    PendingData::addPendingData(offset, offset + size);
+    PendingData::tagAsPending(offset, offset + size);
 
     while (size--)
       {
@@ -159,7 +159,7 @@ public:
       }
 
     uint32_t offset = m_data.size();
-    PendingData::addPendingData(offset, offset + size);
+    PendingData::tagAsPending(offset, offset + size);
 
     for (uint32_t s = 0U; s < size; ++s)
       {

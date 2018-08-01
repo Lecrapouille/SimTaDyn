@@ -30,9 +30,9 @@ class GLWindow: public IGLWindow
 public:
 
   GLWindow()
-    : block1(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW),
-      block2(GL_DYNAMIC_DRAW),
-      block3(GL_STATIC_DRAW),
+    : block1(true, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW),
+      block2(true, GL_DYNAMIC_DRAW),
+      block3(true, GL_STATIC_DRAW),
       vbo1(0U)
   {
     std::cout << "GLWindow()" << std::endl;
@@ -162,7 +162,7 @@ void GLBufferTests::testDummy()
   CPPUNIT_ASSERT_EQUAL(0U, pos_start);
   CPPUNIT_ASSERT_EQUAL(0U, pos_end);
 
-  b->addPendingData(pos_start, pos_end);
+  b->tagAsPending(pos_start, pos_end);
   pos_start = 0U;
   pos_end = 1U;
   CPPUNIT_ASSERT_EQUAL(true, b->hasPendingData());
@@ -184,7 +184,7 @@ void GLBufferTests::testPendingData()
   uint32_t pos_end = 41U;
 
   // Pending data
-  win->block1.addPendingData(pos_start, pos_end);
+  win->block1.tagAsPending(pos_start, pos_end);
   pos_start = 0U;
   pos_end = 1U;
   CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
@@ -206,7 +206,7 @@ void GLBufferTests::testPendingData()
   // Pending data
   pos_start = 40U;
   pos_end = 41U;
-  win->block1.addPendingData(pos_start, pos_end);
+  win->block1.tagAsPending(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
   win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
@@ -216,7 +216,7 @@ void GLBufferTests::testPendingData()
   // Extending pending data
   pos_start = 40U;
   pos_end = 42U;
-  win->block1.addPendingData(pos_start, pos_end);
+  win->block1.tagAsPending(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
   win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(40U, pos_start);
@@ -226,7 +226,7 @@ void GLBufferTests::testPendingData()
   // Extending pending data
   pos_start = 2U;
   pos_end = 44U;
-  win->block1.addPendingData(pos_start, pos_end);
+  win->block1.tagAsPending(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(true, win->block1.hasPendingData());
   win->block1.getPendingData(pos_start, pos_end);
   CPPUNIT_ASSERT_EQUAL(2U, pos_start);

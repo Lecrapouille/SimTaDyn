@@ -167,7 +167,7 @@ public:
           {
             m_name = filename;
           }
-        PendingData::addPendingData(0U, m_width * m_height);
+        PendingData::tagAsPending(0U, m_width * m_height);
         LOGI("Successfuly load picture file '%s'", filename);
         res = true;
       }
@@ -197,7 +197,7 @@ public:
     //  {
     //    reserve(nth);
     //  }
-    PendingData::addPendingData(nth);
+    PendingData::tagAsPending(nth);
     return m_buffer[nth];
   }
 

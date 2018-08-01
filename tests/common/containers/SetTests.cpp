@@ -153,8 +153,8 @@ void SetTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(0U, set1.index());
   CPPUNIT_ASSERT_EQUAL(41, set1.get(0U));
   CPPUNIT_ASSERT_THROW(set1.get(1U), std::out_of_range);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0]);
-  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0u]);
+  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0u]->occupation());
 
   // Modify an element. Check it was changed.
   set1.modify(0, 42);
@@ -170,8 +170,8 @@ void SetTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(0U, set1.index());
   CPPUNIT_ASSERT_EQUAL(42, set1.get(0U));
   CPPUNIT_ASSERT_THROW(set1.get(1U), std::out_of_range);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0]);
-  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0u]);
+  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0u]->occupation());
 
   // Modify (restore previous value). Check it was restored.
   set1.modify(0, 41);
@@ -187,8 +187,8 @@ void SetTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(0U, set1.index());
   CPPUNIT_ASSERT_EQUAL(41, set1.get(0U));
   CPPUNIT_ASSERT_THROW(set1.get(1U), std::out_of_range);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0]);
-  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0u]);
+  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0u]->occupation());
 
   // Insert an element. Check it was inserted.
   set1.append(42);
@@ -207,7 +207,7 @@ void SetTests::testInsert()
   CPPUNIT_ASSERT_EQUAL(41, set1.get(0U));
   CPPUNIT_ASSERT_EQUAL(42, set1.get(1U));
   CPPUNIT_ASSERT_THROW(set1.get(2U), std::out_of_range);
-  CPPUNIT_ASSERT_EQUAL(2U, set1.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(2U, set1.m_blocks[0u]->occupation());
 
   // Insert an element. Check it was inserted.
   set1.append(43);
@@ -599,8 +599,8 @@ void SetTests::testInsertArr()
   CPPUNIT_ASSERT_EQUAL(0U, set1.index());
   CPPUNIT_ASSERT_EQUAL(41, set1.get(0U));
   CPPUNIT_ASSERT_THROW(set1.get(1U), std::out_of_range);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0]);
-  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.m_blocks[0u]);
+  CPPUNIT_ASSERT_EQUAL(1U, set1.m_blocks[0u]->occupation());
 
   // Append an array of elements. Check elements have been inserted.
   const int array[] = { 1, 2, 3 };
@@ -623,7 +623,7 @@ void SetTests::testInsertArr()
   CPPUNIT_ASSERT_THROW(set1.get(4U), std::out_of_range);
   CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.block(0));
   CPPUNIT_ASSERT_EQUAL(true, nullptr == set1.block(1));
-  CPPUNIT_ASSERT_EQUAL(4U, set1.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(4U, set1.m_blocks[0u]->occupation());
 
   // Append nullptr array. Check nothing was done.
   set1.append(nullptr, 0);
@@ -656,8 +656,8 @@ void SetTests::testInsertArr()
   CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.block(0));
   CPPUNIT_ASSERT_EQUAL(true, nullptr != set1.block(1));
   CPPUNIT_ASSERT_EQUAL(true, nullptr == set1.block(2));
-  CPPUNIT_ASSERT_EQUAL(4U, set1.m_blocks[0]->occupation());
-  CPPUNIT_ASSERT_EQUAL(3U, set1.m_blocks[1]->occupation());
+  CPPUNIT_ASSERT_EQUAL(4U, set1.m_blocks[0u]->occupation());
+  CPPUNIT_ASSERT_EQUAL(3U, set1.m_blocks[1u]->occupation());
 
   // Append more data on different container sizes.
   const int array2[64] = { 0 };
@@ -666,7 +666,7 @@ void SetTests::testInsertArr()
   CPPUNIT_ASSERT_EQUAL(1U, set4.blocks());
   CPPUNIT_ASSERT_EQUAL(0U, set4.remaining());
   CPPUNIT_ASSERT_EQUAL(true, nullptr != set4.block(0));
-  CPPUNIT_ASSERT_EQUAL(16U, set4.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(16U, set4.m_blocks[0u]->occupation());
   CPPUNIT_ASSERT_EQUAL(true, nullptr == set4.block(1));
 
   // Append more data on different container sizes.
@@ -677,14 +677,14 @@ void SetTests::testInsertArr()
   CPPUNIT_ASSERT_EQUAL(true, nullptr != set5.block(0));
   CPPUNIT_ASSERT_EQUAL(true, nullptr != set5.block(1));
   CPPUNIT_ASSERT_EQUAL(true, nullptr == set5.block(2));
-  CPPUNIT_ASSERT_EQUAL(32U, set5.m_blocks[0]->occupation());
-  CPPUNIT_ASSERT_EQUAL(32U, set5.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(32U, set5.m_blocks[0u]->occupation());
+  CPPUNIT_ASSERT_EQUAL(32U, set5.m_blocks[0u]->occupation());
 
   set6.append(array2, 64);
   CPPUNIT_ASSERT_EQUAL(64U, set6.used());
   CPPUNIT_ASSERT_EQUAL(1U, set6.blocks());
   CPPUNIT_ASSERT_EQUAL(0U, set6.remaining());
   CPPUNIT_ASSERT_EQUAL(true, nullptr != set6.block(0));
-  CPPUNIT_ASSERT_EQUAL(64U, set6.m_blocks[0]->occupation());
+  CPPUNIT_ASSERT_EQUAL(64U, set6.m_blocks[0u]->occupation());
   CPPUNIT_ASSERT_EQUAL(true, nullptr == set6.block(1));
 }

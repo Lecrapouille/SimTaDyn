@@ -52,9 +52,17 @@ protected:
 public:
 
   //! \brief Default constructor to create an empty block.
-  Block()
+  Block(const bool lazy_allocation)
     : PendingData()
   {
+    if (lazy_allocation)
+      {
+        m_block = nullptr;
+      }
+    else
+      {
+        m_block = new T[M];
+      }
     clear(); // FIXME: this call twice clearPending();
   }
 
@@ -63,6 +71,10 @@ public:
   //! job to do it.
   virtual ~Block()
   {
+    if (nullptr != m_block)
+      {
+        delete[] m_block;
+      }
   }
 
   //! \brief clear the bitfield to have an empty block.
@@ -107,11 +119,33 @@ public:
     return total;
   }
 
+  //! \brief Access to the nth row in write mode.
+  inline T& nth(uint32_t i)
+  {
+    assert(i < M);
+    if (nullptr == m_block)
+      {
+        m_block = new T[M];
+      }
+    return m_block[i];
+  }
+
+  //! \brief Acces to the nth row in read mode.
+  inline const T& nth(uint32_t i) const
+  {
+    assert(i < M);
+    if (nullptr == m_block)
+      {
+        m_block = new T[M];
+      }
+    return m_block[i];
+  }
+
 private:
 
   //! \brief Count the number of bit '1' in a number.
   //! \param val the number to count set bits.
- //! \return the number of set bits.
+  //! \return the number of set bits.
   ContainerBitField hammingWeight(const ContainerBitField val) const
   {
     ContainerBitField bitCount = 0;
@@ -124,12 +158,12 @@ private:
         value >>= 1U;
       }
     return bitCount;
-}
+  }
 
 public:
 
-  //! Pre-allocated block
-  T                 m_block[M];
+  //! Lazy allocation of block of elements
+  T                 *m_block;
   //! Indicate which elements are occupied.
   ContainerBitField m_occupied[E];
 };
@@ -178,13 +212,6 @@ public:
         delete block;
       }
     m_blocks.clear();
-  }
-
-  //! \brief Allocate a new block. Use virtual to allow inheritance
-  //! of the class Block.
-  inline virtual block_t *newBlock() const
-  {
-    return new block_t;
   }
 
   //! \brief Allocate the given number of elements of type T.
@@ -288,9 +315,16 @@ public:
 
 protected:
 
+  //! \brief Allocate a new block. Use virtual to allow inheritance
+  //! of the class Block.
+  inline virtual block_t *newBlock(const bool lazy) const
+  {
+    return new block_t(lazy);
+  }
+
   //! \brief Reserve memory corresponding to the given number of
   //! blocks of typed-T elements.
-  void reserveBlocks(const uint32_t reserve_blocks);
+  void allocateBlocks(const uint32_t reserve_blocks, const bool lazy);
 
   //! \brief List of blocks of templated elements.
   std::vector<block_t*> m_blocks;

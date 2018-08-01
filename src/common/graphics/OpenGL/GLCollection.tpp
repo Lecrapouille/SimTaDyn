@@ -50,22 +50,22 @@ public:
 
   //! \brief A GLBlockBuffer is an interface used to upload data to a GPU
   //! array buffer (GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER).
-  GLBlockBuffer(const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLObject("GLBlockBuffer"), Block<T, N>()
+  GLBlockBuffer(const bool lazy, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLObject("GLBlockBuffer"), Block<T, N>(lazy)
   {
     m_target = target;
     m_usage = usage;
   }
 
-  GLBlockBuffer(std::string const& name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLObject(name), Block<T, N>()
+  GLBlockBuffer(const bool lazy, std::string const& name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLObject(name), Block<T, N>(lazy)
   {
     m_target = target;
     m_usage = usage;
   }
 
-  GLBlockBuffer(const char *name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLObject(name), Block<T, N>()
+  GLBlockBuffer(const bool lazy, const char *name, const GLenum target, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLObject(name), Block<T, N>(lazy)
   {
     m_target = target;
     m_usage = usage;
@@ -158,18 +158,18 @@ class GLVertexBlockBuffer: public GLBlockBuffer<T, N>
 {
 public:
 
-  GLVertexBlockBuffer(const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLBlockBuffer<T, N>("GLVertexBlockBuffer", GL_ARRAY_BUFFER, usage)
+  GLVertexBlockBuffer(const bool lazy, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(lazy, "GLVertexBlockBuffer", GL_ARRAY_BUFFER, usage)
   {
   }
 
-  GLVertexBlockBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLBlockBuffer<T, N>(name, GL_ARRAY_BUFFER, usage)
+  GLVertexBlockBuffer(const bool lazy, std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(lazy, name, GL_ARRAY_BUFFER, usage)
   {
   }
 
-  GLVertexBlockBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLBlockBuffer<T, N>(name, GL_ARRAY_BUFFER, usage)
+  GLVertexBlockBuffer(const bool lazy, const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(lazy, name, GL_ARRAY_BUFFER, usage)
   {
   }
 };
@@ -182,18 +182,18 @@ class GLIndexBlockBuffer: public GLBlockBuffer<T, N>
 {
 public:
 
-  GLIndexBlockBuffer(const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLBlockBuffer<T, N>("GLIndexBlockBuffer", GL_ELEMENT_ARRAY_BUFFER, usage)
+  GLIndexBlockBuffer(const bool lazy, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(lazy, "GLIndexBlockBuffer", GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
 
-  GLIndexBlockBuffer(std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLBlockBuffer<T, N>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
+  GLIndexBlockBuffer(const bool lazy, std::string const& name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(lazy, name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
 
-  GLIndexBlockBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
-    : GLBlockBuffer<T, N>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
+  GLIndexBlockBuffer(const bool lazy, const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
+    : GLBlockBuffer<T, N>(lazy, name, GL_ELEMENT_ARRAY_BUFFER, usage)
   {
   }
 };
