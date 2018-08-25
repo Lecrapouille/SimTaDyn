@@ -61,24 +61,24 @@
   }                                                                     \
                                                                         \
   /*! \brief Constructor with uniform value */                          \
-  explicit Vector(T const a)                                            \
+  explicit Vector(T const scalar)                                       \
   {                                                                     \
     size_t i = N;                                                       \
     while (i--)                                                         \
       {                                                                 \
-        m_data[i] = a;                                                  \
+        m_data[i] = scalar;                                             \
       }                                                                 \
   }                                                                     \
                                                                         \
   /*! \brief Constructor by copy */                                     \
   template <typename U, size_t nOther>                                  \
-  explicit Vector(Vector<U, nOther> const &v)                           \
+  explicit Vector(Vector<U, nOther> const &other)                       \
   {                                                                     \
     const size_t m = std::min(static_cast<size_t>(N), nOther);  /* FIXME cast */              \
     size_t i = m;                                                       \
     while (i--)                                                         \
       {                                                                 \
-        m_data[i] = T(v[i]);                                            \
+        m_data[i] = T(other[i]);                                        \
       }                                                                 \
                                                                         \
     /* Zero-fill any remaining elements */                              \
@@ -130,10 +130,10 @@ class Vector<T, 2u>
 {
 public:
 
-  Vector(const T x, const T y)
+  Vector(const T scalar_x, const T scalar_y)
   {
-    this->x = x;
-    this->y = y;
+    x = scalar_x;
+    y = scalar_y;
   }
 
   VECTOR_DIM(2u);
@@ -143,8 +143,8 @@ public:
   union
   {
     T m_data[2u];
-    struct { T x, y; };
-    struct { T u, v; };
+    struct { T x; T y; };
+    struct { T u; T v; };
   };
 
   const static Vector<T, 2u> DUMMY;
@@ -175,18 +175,18 @@ class Vector<T, 3u>
 {
 public:
 
-  Vector(Vector<T, 2u> const &v, const T z = T(0))
+  Vector(Vector<T, 2u> const &v, const T scalar_z = T(0))
   {
-    this->x = v.x;
-    this->y = v.y;
-    this->z = z;
+    x = v.x;
+    y = v.y;
+    z = scalar_z;
   }
 
-  Vector(const T x, const T y, const T z = T(0))
+  Vector(const T scalar_x, const T scalar_y, const T scalar_z = T(0))
   {
-    this->x = x;
-    this->y = y;
-    this->z = z;
+    x = scalar_x;
+    y = scalar_y;
+    z = scalar_z;
   }
 
   VECTOR_DIM(3u);
@@ -196,8 +196,8 @@ public:
   union
   {
     T m_data[3u];
-    struct { T x, y, z; };
-    struct { T r, g, b; };
+    struct { T x; T y; T z; };
+    struct { T r; T g; T b; };
   };
 
   const static Vector<T, 3u> DUMMY;
@@ -231,20 +231,20 @@ class Vector<T, 4u>
 {
 public:
 
-  Vector(Vector<T, 3u> const &v, const T w = T(0))
+  Vector(Vector<T, 3u> const &v, const T scalar_w = T(0))
   {
-    this->x = v.x;
-    this->y = v.y;
-    this->z = v.z;
-    this->w = w;
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    w = scalar_w;
   }
 
-  Vector(const T x, const T y, const T z, const T w)
+  Vector(const T scalar_x, const T scalar_y, const T scalar_z, const T scalar_w)
   {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->w = w;
+    x = scalar_x;
+    y = scalar_y;
+    z = scalar_z;
+    w = scalar_w;
   }
 
   VECTOR_DIM(4u);
@@ -254,8 +254,8 @@ public:
   union
   {
     T m_data[4u];
-    struct { T x, y, z, w; };
-    struct { T r, g, b, a; };
+    struct { T x; T y; T z; T w; };
+    struct { T r; T g; T b; T a; };
   };
 
   const static Vector<T, 4u> DUMMY;

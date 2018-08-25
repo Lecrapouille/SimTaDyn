@@ -24,8 +24,13 @@
 #  include "Names.hpp"
 #  include "Logger.hpp"
 #  include "Config.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
 #  include <gtkmm.h>
 #  include <gtksourceviewmm.h>
+#pragma GCC diagnostic pop
 #  include <cstdint>
 
 class TextDocument;
@@ -41,6 +46,7 @@ class GotoLineWindow : public Gtk::Window
 {
 public:
   GotoLineWindow(Gsv::View* document);
+  ~GotoLineWindow() {}
   void document(Gsv::View* document);
   void gotoLine();
   inline void title(std::string const& text)
@@ -63,6 +69,7 @@ class Find : public Gtk::Window
 {
 public:
   Find(Gsv::View* document);
+  ~Find() {}
   void document(Gsv::View* document);
   void findNext();
   void findFirst();
@@ -83,6 +90,7 @@ class FindWindow : public Find
 {
 public:
   FindWindow(Gsv::View* document);
+  ~FindWindow() {}
   inline void title(std::string const& text)
   {
     set_title("Find in " + text);
@@ -102,6 +110,7 @@ class ReplaceWindow : public Find
 {
 public:
   ReplaceWindow(Gsv::View* document);
+  ~ReplaceWindow() {}
   void replace();
   void replaceAll();
   void find();
@@ -128,6 +137,7 @@ class CloseLabel : public Gtk::Box
 {
 public:
   CloseLabel(std::string const& text);
+  ~CloseLabel() {}
   //! Kind of button.signal_clicked().connect(sigc::bind<T>(sigc::mem_fun(*this, &CloseLabel::onClicked), T));
   inline void link(TextEditor *editor, Gtk::Widget *widget)
   {

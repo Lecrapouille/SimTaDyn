@@ -72,7 +72,8 @@ PKG_LIBS    = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 CXXFLAGS   += -Wall -Wextra -Wstrict-aliasing -Wunreachable-code -Wcast-align -Wcast-qual -Wsign-compare -Wsign-conversion -Wsign-promo -Wconversion
 # -Wctor-dtor-privacy -Wnon-virtual-dtor -Wfloat-equal
 
-#-Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Wsign-compare -Wsign-conversion -Wsign-promo -Wconversion -Wfloat-equal -Winline
+CXXFLAGS   += -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Winline
+
 # https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc/
 CXXFLAGS   += -fasynchronous-unwind-tables -fexceptions -Werror=implicit-function-declaration
 # Specific for gcc-7.5, gcc-8: CXXFLAGS   += -fstack-clash-protection

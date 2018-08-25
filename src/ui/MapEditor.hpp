@@ -39,9 +39,8 @@ class SimTaDynMapHolder
 {
 public:
 
-  SimTaDynMapHolder()
-  {
-  }
+  SimTaDynMapHolder() {}
+  ~SimTaDynMapHolder() {}
 
   void set(SimTaDynMapPtr p)
   {
@@ -203,19 +202,19 @@ public:
 
   void button1PressEvent(const gdouble x, const gdouble y)
   {
-    LOGD("Bouton1 click %d %d", (int) x, (int) y);
+    LOGD("Bouton1 click %d %d", static_cast<int>(x), static_cast<int>(y));
     m_edition_tools[actionType()]->exec1(x, y);
   }
 
   void button2PressEvent(const gdouble x, const gdouble y)
   {
-    LOGD("Bouton2 click %d %d", (int) x, (int) y);
+    LOGD("Bouton2 click %d %d", static_cast<int>(x), static_cast<int>(y));
     m_edition_tools[actionType()]->exec2(x, y);
   }
 
   void button3PressEvent(const gdouble x, const gdouble y)
   {
-    LOGD("Bouton3 click %d %d", (int) x, (int) y);
+    LOGD("Bouton3 click %d %d", static_cast<int>(x), static_cast<int>(y));
     m_edition_tools[actionType()]->exec3(x, y);
   }
 

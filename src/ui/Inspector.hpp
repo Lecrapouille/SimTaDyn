@@ -21,7 +21,12 @@
 #ifndef INSPECTOR_HPP_
 #  define INSPECTOR_HPP_
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #  include <gtkmm.h>
+#pragma GCC diagnostic pop
 
 class Inspector
 {

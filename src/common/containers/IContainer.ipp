@@ -56,7 +56,9 @@ template<typename T, const size_t N,
          template<typename X, const size_t Y> class Block>
 void IContainer<T,N,Block>::reserve(const size_t nb_elts)
 {
-  std::cout << "Reserving (" << nb_elts << " + " << (int) M << " - 1) >> " << (int) N << " blocks\n";
+  std::cout << "Reserving (" << static_cast<unsigned>(nb_elts)
+            << " + " << static_cast<unsigned>(M) << " - 1) >> "
+            << static_cast<unsigned>(N) << " blocks\n";
   reserveBlocks((nb_elts + M - 1) >> N);
 }
 

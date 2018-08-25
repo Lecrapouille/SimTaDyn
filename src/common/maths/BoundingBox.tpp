@@ -512,8 +512,8 @@ inline AABB<T, n> clamp(AABB<T, n> const &a, AABB<T, n> const &b)
 template <typename T, size_t n> const AABB<T, n> AABB<T, n>::DUMMY(Vector<T, n>(NAN), Vector<T, n>(NAN));
 template <typename T, size_t n> const AABB<T, n> AABB<T, n>::ZERO(Vector<T, n>(0), Vector<T, n>(0));
 template <typename T, size_t n> const AABB<T, n> AABB<T, n>::UNIT_SCALE(Vector<T, n>(-0.5f), Vector<T, n>(0.5f));
-template <typename T, size_t n> const AABB<T, n> AABB<T, n>::INFINITE(Vector<T, n>((T) std::numeric_limits<T>::lowest()),
-                                                                        Vector<T, n>((T) std::numeric_limits<T>::max()));
+template <typename T, size_t n> const AABB<T, n> AABB<T, n>::INFINITE(Vector<T, n>(static_cast<T>(std::numeric_limits<T>::lowest())),
+                                                                      Vector<T, n>(static_cast<T>(std::numeric_limits<T>::max())));
 
 typedef AABB<int32_t, 2U> AABB2i;
 typedef AABB<int32_t, 3U> AABB3i;

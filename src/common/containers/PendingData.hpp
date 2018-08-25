@@ -23,6 +23,8 @@
 
 #  include "Maths.hpp"
 
+#  define INITIAL_INDEX  static_cast<size_t>(-1)
+
 // **************************************************************
 //! \brief Define an interface class keeping track of the smallest
 //! contiguous area that have been changed and needs to be
@@ -47,7 +49,7 @@ public:
   //! has chnaged.
   inline bool hasPendingData() const
   {
-    bool res = ((size_t) -1 != m_pending_start);
+    bool res = (INITIAL_INDEX != m_pending_start);
     return res;
   }
 
@@ -56,7 +58,7 @@ public:
   //! -1. You can call hasPendingData() before this method.
   void getPendingData(size_t &pos_start, size_t &pos_end) const
   {
-    if ((size_t) -1 != m_pending_start)
+    if (INITIAL_INDEX != m_pending_start)
     {
       pos_start = m_pending_start;
       pos_end = m_pending_end;
@@ -71,14 +73,14 @@ public:
   //! \brief Call this function when changed elements have been uploaded.
   void clearPending()
   {
-    m_pending_start = (size_t) -1;
-    m_pending_end = (size_t) -1;
+    m_pending_start = INITIAL_INDEX;
+    m_pending_end = INITIAL_INDEX;
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
   void addPendingData(const size_t pos_start, const size_t pos_end)
   {
-    if ((size_t) -1 == m_pending_start)
+    if (INITIAL_INDEX == m_pending_start)
       {
         m_pending_start = pos_start;
         m_pending_end = pos_end;

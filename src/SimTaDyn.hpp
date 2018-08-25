@@ -23,7 +23,10 @@
 
 #  include "Path.hpp"
 #  include "SimTaDynWindow.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
 #  include "CmdParser/cmdparser.hpp"
+#pragma GCC diagnostic pop
 
 // **************************************************************
 //! \brief

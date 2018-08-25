@@ -22,7 +22,12 @@
 #  define RED_HPP_
 
 #  include <cstdint>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #  include <gtkmm/textview.h>
+#pragma GCC diagnostic pop
 
 // http://gtk.10911.n7.nabble.com/Redirecting-cout-to-a-TextBuffer-td42437.html
 // TODO: set_color() ?
@@ -49,7 +54,7 @@ protected:
   inline int overflow(int ch = traits_type::eof()) override
   {
     const int ret = sync();
-    *pptr() = ch;
+    *pptr() = static_cast<char>(ch);
     pbump(1);
     return ret;
   }

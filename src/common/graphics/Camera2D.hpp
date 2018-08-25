@@ -39,7 +39,7 @@ public:
   {
     // World observation
     lookAt(x, y, width, height);
-    zoom_ = 1.0f;
+    m_zoom = 1.0f;
 
     // Screen ratio
     displayAt(0.0f, 0.0f, 1.0f, 1.0f);
@@ -49,7 +49,7 @@ public:
   {
     // World observation
     lookAt(400, 300, 800, 600);
-    zoom_ = 1.0f;
+    m_zoom = 1.0f;
 
     // Screen ratio
     displayAt(0.0f, 0.0f, 1.0f, 1.0f);
@@ -66,10 +66,10 @@ public:
       }
     else
       {
-        display_at_x_ = x;
-        display_at_y_ = y;
-        display_at_width_ = width;
-        display_at_height_ = height;
+        m_display_at_x = x;
+        m_display_at_y = y;
+        m_display_at_width = width;
+        m_display_at_height = height;
       }
   }
 
@@ -78,10 +78,10 @@ public:
   // *************************************************************************************************
   void lookAt(const float x, const float y, const float width, const float height)
   {
-    look_at_x_ = x;
-    look_at_y_ = y;
-    look_at_width_ = width;
-    look_at_height_ = height;
+    m_look_at_x = x;
+    m_look_at_y = y;
+    m_look_at_width = width;
+    m_look_at_height = height;
   }
 
   // *************************************************************************************************
@@ -89,8 +89,8 @@ public:
   // *************************************************************************************************
   void lookAt(const float x, const float y)
   {
-    look_at_x_ = x;
-    look_at_y_ = y;
+    m_look_at_x = x;
+    m_look_at_y = y;
   }
 
   // *************************************************************************************************
@@ -98,8 +98,8 @@ public:
   // *************************************************************************************************
   void moveOffset(const float offsetX, const float offsetY)
   {
-    look_at_x_ += offsetX;
-    look_at_y_ += offsetY;
+    m_look_at_x += offsetX;
+    m_look_at_y += offsetY;
   }
 
   // *************************************************************************************************
@@ -107,8 +107,8 @@ public:
   // *************************************************************************************************
   void setDimension(const float width, const float height)
   {
-    look_at_width_ = width;
-    look_at_height_ = height;
+    m_look_at_width = width;
+    m_look_at_height = height;
   }
 
   // *************************************************************************************************
@@ -118,13 +118,13 @@ public:
   {
     if (factor < MIN_ZOOM)
       {
-        zoom_ = MIN_ZOOM;
+        m_zoom = MIN_ZOOM;
       }
     else
       {
-        zoom_ = factor;
+        m_zoom = factor;
       }
-    std::cout << "New zoom " << zoom_ << "\n";
+    std::cout << "New zoom " << m_zoom << "\n";
   }
 
   // *************************************************************************************************
@@ -132,7 +132,7 @@ public:
   // *************************************************************************************************
   void zoomOffset(const float factor)
   {
-    zoom_ = zoom_ * (1.0f + factor);
+    m_zoom = m_zoom * (1.0f + factor);
   }
 
   // *************************************************************************************************
@@ -164,7 +164,7 @@ public:
   // *************************************************************************************************
   float getZoom() const
   {
-    return zoom_;
+    return m_zoom;
   }
 
   // *************************************************************************************************
@@ -173,24 +173,24 @@ public:
   const float* getTransform();
 
   //private:
-  float zoom_;
-  float look_at_x_;          // in pixel
-  float look_at_y_;          // in pixel
-  float look_at_width_;      // in pixel
-  float look_at_height_;     // in pixel
+  float m_zoom;
+  float m_look_at_x;          // in pixel
+  float m_look_at_y;          // in pixel
+  float m_look_at_width;      // in pixel
+  float m_look_at_height;     // in pixel
 
-  float display_at_x_;       // screen ratio
-  float display_at_y_;       // screen ratio
-  float display_at_width_;   // screen ratio
-  float display_at_height_;  // screen ratio
+  float m_display_at_x;       // screen ratio
+  float m_display_at_y;       // screen ratio
+  float m_display_at_width;   // screen ratio
+  float m_display_at_height;  // screen ratio
 
-  float matrix[16];
+  float m_matrix[16];
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Camera2D& c)
 {
-  os << "Camera2D((x: " << c.look_at_x_ << ", y: " << c.look_at_y_
-     << "), (W: " << c.look_at_width_ << ", H: " << c.look_at_height_
+  os << "Camera2D((x: " << c.m_look_at_x << ", y: " << c.m_look_at_y
+     << "), (W: " << c.m_look_at_width << ", H: " << c.m_look_at_height
      << "))";
   return os;
 }

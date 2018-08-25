@@ -125,7 +125,7 @@ void Collection<T,N,Block>::remove(const size_t nth)
         }
       if (m_end == m_begin)
         {
-          m_begin = (size_t) -1;
+          m_begin = INITIAL_INDEX;
           m_end = 0;
         }
       std::cout << "after removing ==> Min: " << m_begin << "  Max: " << m_end << "\n";

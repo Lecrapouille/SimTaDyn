@@ -128,7 +128,7 @@ void GLDrawingArea::onUnrealize()
   catch (const Gdk::GLError& gle)
     {
       std::cerr << "[FAILED] An error occured making the context current during unrealize" << std::endl;
-      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
+      std::cerr << gle.domain() << "-" << static_cast<unsigned>(gle.code()) << "-" << gle.what() << std::endl;
     }
   catch (const OpenGLException& e)
     {
@@ -154,7 +154,7 @@ bool GLDrawingArea::onRender()
   catch (const Gdk::GLError& gle)
     {
       std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
-      std::cerr << gle.domain() << "-" << gle.code() << "-" << gle.what() << std::endl;
+      std::cerr << gle.domain() << "-" << static_cast<unsigned>(gle.code()) << "-" << gle.what() << std::endl;
       return false;
     }
   catch (const OpenGLException& e)

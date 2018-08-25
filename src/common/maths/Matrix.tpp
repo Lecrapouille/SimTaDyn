@@ -78,15 +78,19 @@ public:
   //! \brief Constructor for identity matrix.
   explicit Matrix(const matrix::MatrixType type)
   {
+    size_t i;
+
     switch (type)
       {
       case matrix::Identity:
         static_assert(rows == cols, "Can't construct identity for a non-square matrix");
-        size_t i = rows * cols;
+        i = rows * cols;
         while (i--)
           {
             m_data[i] = (i % (rows + 1u) == 0) ? T(1) : T(0);
           }
+        break;
+      default:
         break;
       };
   }
