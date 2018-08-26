@@ -101,7 +101,7 @@ bool Stream::loadFile(std::string const& filename)
 //! example when diplaying an error.
 // **************************************************************
 void Stream::loadString(std::string const& str,
-                             std::string const& name)
+                        std::string const& name)
 {
   close();
   init();

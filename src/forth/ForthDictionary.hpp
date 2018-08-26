@@ -22,8 +22,10 @@
 #  define FORTH_DICTIONARY_HPP_
 
 //------------------------------------------------------------------
-//! \file This file defines the Forth dictionary which is virtual
-//! machine containing the byte code.
+//! \file ForthDictionary.hpp
+//! \brief This file defines the class for the Forth dictionary: a
+//! continuous block of memory used for saving Forth definitions as
+//! byte code.
 //------------------------------------------------------------------
 
 #  include "ForthTypes.hpp"
@@ -32,16 +34,23 @@ namespace forth
 {
 
 //------------------------------------------------------------------
-//! \brief Memory size of the Forth dictionnary. Because addresses
-//! are coded with forth::token (so 16 bits) the maximal reachable address
-//! is 2^16 bits (= 64 ko).
+//! \brief Memory maximum size for the Forth dictionnary. Because
+//! addresses are coded with forth::token (16 bits) the maximal
+//! reachable address is 2^16 bits = 64 KB.
 //------------------------------------------------------------------
 #  define FORTH_DICTIONARY_MAX_SIZE (1u << (8u * sizeof (forth::token)))
-#  define FORTH_DICTIONARY_SIZE FORTH_DICTIONARY_MAX_SIZE
+
+//------------------------------------------------------------------
+//! \brief Allow to define a customized dictionary size. Requested size
+//! is checked during the compilation for avoiding pathological case.
+//------------------------------------------------------------------
+#  ifndef FORTH_DICTIONARY_SIZE
+#    define FORTH_DICTIONARY_SIZE FORTH_DICTIONARY_MAX_SIZE
+#  endif
 
 // **************************************************************
-//! \brief Save information before starting compiling a new Forth
-//! word. In case of error we can restore the context.
+//! \brief Save some dictionary states before compiling a new Forth
+//! word. In case of error, the dictionary state can be restored.
 // **************************************************************
 struct BackupContext
 {
@@ -58,9 +67,10 @@ struct BackupContext
 };
 
 // **************************************************************
-//! \brief The Forth dictionnary is a block of memory storing
-//! known Forth words as well as their byt codes. it can be seen
-//! as a virtual machine.
+//! \brief The Forth dictionary is a block of memory for storing
+//! Forth word definitions. Forth words are compiled into tokens
+//! (also known as byte code for Java). Dictionary can be seen
+//! as a virtual machine for the whole Forth system.
 // **************************************************************
 class Dictionary
 {
@@ -71,7 +81,8 @@ private:
 public:
 
   //------------------------------------------------------------------
-  //! \brief Constructor. Start with an empty dictionary.
+  //! \brief Constructor. Start with a totaly dummy dictionary. You
+  //! have to call boot() for having minimalist Forth environement.
   //------------------------------------------------------------------
   Dictionary();
 
@@ -81,19 +92,29 @@ public:
   ~Dictionary();
 
   //------------------------------------------------------------------
-  //! \brief
+  //! \brief Save the dictionnary in a binary file. The user can use
+  //! the command hexdump -C filename for debuging the dictionary.
   //------------------------------------------------------------------
   void save(std::string const& filename) const;
 
   //------------------------------------------------------------------
-  //! \brief
+  //! \brief Load a Forth dictionnary from a binary file.
   //------------------------------------------------------------------
   void load(std::string const& filename, const bool replace);
 
-  void display(const int max_primitives) {} // FIXME: a finir
+  //------------------------------------------------------------------
+  //! \brief Pretty print the Forth dictionary in the console. Colors
+  //! are used for helping understanding the developer but can be
+  //! disabled with std::cout << termcolor::state::Off
+  //------------------------------------------------------------------
+  void display();
 
   //------------------------------------------------------------------
   //! \brief Read a byte at given address in the dictionnary.
+  //! No dictionary out of bound security is performed against incorrect
+  //! address.
+  //! \param addr the address of the dictionary.
+  //! \return the read byte converted as Forth cell.
   //------------------------------------------------------------------
   inline forth::cell read8at(forth::token const addr) const
   {
@@ -102,6 +123,9 @@ public:
 
   //------------------------------------------------------------------
   //! \brief Store a byte at given address in the dictionnary.
+  //! No dictionary out of bound security is performed against incorrect
+  //! address.
+  //! \param addr the address of the dictionary.
   //------------------------------------------------------------------
   inline void write8at(forth::token const addr, forth::cell const data)
   {
@@ -109,9 +133,9 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! \brief Store a byte at the end of the dictionnary and m_here is
-  //! moved. No check is made to check if m_here is outside the dictionary
-  //! bounds.
+  //! \brief Store a byte at the end of the dictionnary indicated by
+  //! m_here, then move m_here of one byte. No check is made to check
+  //! if m_here is outside the dictionary bounds.
   //! \param data is a 32-bits data (casted into Cell8) to store at
   //! location Dictionary::m_here
   //------------------------------------------------------------------
@@ -122,7 +146,11 @@ public:
 
   //------------------------------------------------------------------
   //! \brief Read two consecutive bytes at given address in the
-  //! dictionnary. Endianess is hiden.
+  //! dictionnary. Endianess and memory alignement are hiden.
+  //! No dictionary out of bound security is performed against incorrect
+  //! address.
+  //! \param addr the address of the dictionary.
+  //! \return the read bytes converted as Forth cell.
   //------------------------------------------------------------------
   forth::cell read16at(forth::token const addr) const
   {
@@ -133,7 +161,8 @@ public:
 
   //------------------------------------------------------------------
   //! \brief Store two consecutive bytes at given address in the
-  //! dictionnary. Endianess is hiden.
+  //! dictionnary. Endianess and memory alignement are hiden.
+  //! \param addr the address of the dictionary.
   //------------------------------------------------------------------
   inline void write16at(forth::token const addr, forth::cell const data)
   {
@@ -156,7 +185,11 @@ public:
 
   //------------------------------------------------------------------
   //! \brief Read four consecutive bytes at given address in the
-  //! dictionnary. Endianess is hiden.
+  //! dictionnary. Endianess and memory alignement are hiden.
+  //! No dictionary out of bound security is performed against incorrect
+  //! address.
+  //! \param addr the address of the dictionary.
+  //! \return the read bytes converted as Forth cell.
   //------------------------------------------------------------------
   inline forth::cell read32at(forth::token const addr) const
   {
@@ -196,10 +229,12 @@ public:
 
   //------------------------------------------------------------------
   //! \brief Reserve or release a chunk of memory in the dictionary.
+  //! Bytes are keep intact. This method just displace m_here.
   //------------------------------------------------------------------
   void allot(const int32_t nb_bytes);
 
   //------------------------------------------------------------------
+  //! \brief Look for the
   //------------------------------------------------------------------
   std::pair<bool, int32_t>
   findToken(const forth::token token, const bool even_smudge) const;
@@ -218,10 +253,11 @@ public:
   //------------------------------------------------------------------
   //! \brief Append a literal value in the current word definition
   //------------------------------------------------------------------
-  void compileLiteral(forth::cell const value);
+  //void compileLiteral(forth::cell const value);
 
   //------------------------------------------------------------------
-  //! \brief Append a token value in the current word definition
+  //! \brief Append a token value in the current word definition.
+  //! This is an alias method for appendToken().
   //------------------------------------------------------------------
   void compileToken(forth::token const token);
 
@@ -231,7 +267,8 @@ public:
   bool find(std::string const& name, forth::token& token, bool& immediate) const;
 
   //------------------------------------------------------------------
-  //! \brief Look for a word exits.
+  //! \brief Look for a word exits. This method is equivalent to find()
+  //! but result of the method are ignored.
   //------------------------------------------------------------------
   inline bool find(std::string const& name) const
   {
@@ -240,12 +277,26 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! Look for a word name match form the partial name passed in param.
-  //! Use for completing the begining of a Forth word.
+  //! \brief Look for if the partial Forth name given in param matches
+  //! an word entry in the dictionnary. This function is used for
+  //! completing a forth name when the developper is writting a Forth
+  //! script.
   //------------------------------------------------------------------
   const char* completeWordName(std::string const& partial_name) const;
 
-bool smudge(std::string const& name);
+  //------------------------------------------------------------------
+  //! \brief Hide the forth definition (if present in the dictionnary)
+  //! or active it if the definition was hidden. This function allows
+  //! the Forth developper to discard and restore a Forth definition.
+  //! The definition is not deleted from the dictionnary but just hide.
+  //------------------------------------------------------------------
+  bool smudge(std::string const& name);
+
+  //------------------------------------------------------------------
+  //! \brief Set immediate the last valid forth definition inserted in
+  //! the dictionnary.
+  //------------------------------------------------------------------
+  void immediate();
 
 private:
 
@@ -270,28 +321,36 @@ public:
   //------------------------------------------------------------------
   void restoreContext();
 
+  //! \brief Accessor. Return the most recent entry in the dictionary.
+  inline forth::token last() const { return m_last; }
+
+  //! \brief Accessor. Return the address of the first free location in the dictionary.
+  inline forth::token here() const { return m_here; }
+
 protected:
 
   //------------------------------------------------------------------
-  //! \brief The memory of the dictionary containing the byte code.
+  //! \brief The memory of the dictionary containing Forth definitions
+  //! compiled as byte code.
   //------------------------------------------------------------------
   uint8_t   m_dictionary[FORTH_DICTIONARY_SIZE];
 
   //------------------------------------------------------------------
   //! \brief Name Field Address (NFA) of the most recently entry (Forth
-  //! word: LAST).
+  //! word: LAST). This is the head of the linked list of Forth word
+  //! names used for searching a word.
   //------------------------------------------------------------------
   forth::token  m_last;
 
   //------------------------------------------------------------------
   //! \brief Address of the first free location in the dictionary (Forth
-  //! word: HERE, DP).
+  //! word: HERE, DP). It is used for appendind byte code in the dictionary.
   //------------------------------------------------------------------
   forth::token  m_here;
 
   //------------------------------------------------------------------
   //! \brief Save dictionary states before compiling a new word. In
-  //! case of failure, we can restore dictionary in the previous state.
+  //! case of failure, we can restore dictionary to its nominal state.
   //------------------------------------------------------------------
   BackupContext m_save;
 };

@@ -57,12 +57,21 @@ DECLARE_EXCEPTION(ForthException, Exception)
 #  define MSG_EXCEPTION_FORTH_DICTIONARY_IS_FULL                \
   "The Forth dictionary is full"
 
-#  define MSG_EXCEPTION_FORTH_DICTIONARY_OUT_OF_BOUND           \
+#  define MSG_EXCEPTION_FORTH_DICTIONARY_ALLOT  \
+  "Cannot allot memory in the dictionary: not enough space"
+
+#  define MSG_EXCEPTION_FORTH_DICTIONARY_FREE  \
+  "Cannot free memory in the dictionary: bounding error"
+
+#  define MSG_EXCEPTION_FORTH_DICTIONARY_OUT_OF_BOUND(addr)     \
   "Tried to access dictionary memory " + std::to_string(addr)   \
   + " outside its bounds"
 
 #  define MSG_EXCEPTION_TOO_MANY_OPENED_FORTH_STREAMS   \
   "Reached the max depth of file inclusions"
+
+#  define MSG_EXCEPTION_UNFINISHED_STREAM       \
+  "Unfinished stream"
 
 #  define MSG_EXCEPTION_UNFINISHED_FORTH_COMMENT(line, column)          \
   "Commentary started at " + std::to_string(line) + ":"                 \

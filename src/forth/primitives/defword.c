@@ -2,7 +2,8 @@
 // Set Forth in interpretation mode
 CODE(LBRACKET)
 {
-  m_state = forth::state::interprete;
+  m_state[SAVED] = m_state[CURRENT];
+  m_state[CURRENT] = forth::state::Interprete;
 }
 NEXT;
 
@@ -10,7 +11,8 @@ NEXT;
 // Set Forth in compilation mode
 CODE(RBRACKET)
 {
-  m_state = forth::state::compile;
+  m_state[SAVED] = m_state[CURRENT];
+  m_state[CURRENT] = forth::state::Compile;
 }
 NEXT;
 
@@ -18,10 +20,11 @@ NEXT;
 // Interprete the token stored in the datastack
 CODE(EXECUTE)
 {
-  forth::token xt = DPOP();
-  if (xt <= maxPrimitives())
-    execToken(xt);
-  throw ForthException(MSG_EXCEPTION_UNKNOWN_FORTH_PRIMITIVE(xt, ""));
+  //FIXME
+  //forth::token xt = DPOP();
+  //if (xt <= maxPrimitives())
+  //  execToken(xt);
+  //throw ForthException(MSG_EXCEPTION_UNKNOWN_FORTH_PRIMITIVE(xt, ""));
 }
 NEXT;
 
@@ -29,40 +32,41 @@ NEXT;
 // Compile a token
 CODE(COMPILE)
 {
-  m_ip += 2;
+  m_ip += forth::token_size;
   m_dictionary.appendToken(m_dictionary.readToken(m_ip));
-  NEXT;
 }
+NEXT;
 
 //=====================================================================
 // Append to the dictionary the next word
 CODE(ICOMPILE)
 {
-  Cell16 token;
+  /*forth::cell token;
   bool immediate;
-  std::string const& word = nextWord();
 
-  //m_ip += 2;
-  if (m_dictionary.find(word, token, immediate))
+  //m_ip += forth::token_size;
+  std::string const& word = nextWord();
+  if (likely(m_dictionary.find(word, token, immediate)))
     {
       m_dictionary.appendToken(token);
     }
   else
     {
-      UnknownForthWord e(word); throw e;
-    }
+      throw ForthException(MSG_EXCEPTION_UNKNOWN_FORTH_WORD(word));
+      }*/
 }
 NEXT;
 
 //=====================================================================
-// ANSI word to replace [COMPILE] and COMPILE
+// ANSI word to replace [COMPILE] and COMPILE depending if the word is
+// immediate or not !
 CODE(POSTPONE)
-{
-  Cell16 token;
+{/*
+  forth::cell token;
   bool immediate;
-  std::string const& word = nextWord();
 
-  if (m_dictionary.find(word, token, immediate))
+  std::string const& word = nextWord();
+  if (likely(m_dictionary.find(word, token, immediate)))
     {
       if (immediate)
         {
@@ -70,14 +74,14 @@ CODE(POSTPONE)
         }
       else
         {
-          m_ip += 2;
+          m_ip += token_size;
           m_dictionary.appendToken(m_dictionary.readToken(m_ip));
         }
     }
   else
     {
-      UnknownForthWord e(word); throw e;
-    }
+      throw ForthException(MSG_EXCEPTION_UNKNOWN_FORTH_WORD(word));
+      }*/
 }
 NEXT;
 
@@ -85,7 +89,8 @@ NEXT;
 // Start the definition of a new Forth word
 CODE(COLON)
 {
-  m_state = forth::state::compile;
+  m_state[SAVED] = m_state[CURRENT];
+  m_state[CURRENT] = forth::state::Compile;
   startCompilingWord(nextWord());
 }
 NEXT;
@@ -94,8 +99,9 @@ NEXT;
 // First codeworde in
 CODE(DOCOL)
 {
-  RPUSH(m_ip);
-  m_ip = readToken();
+  throw ForthException("TODO");
+  //RPUSH(m_ip);
+  //m_ip = m_dictionary.readToken();
 }
 NEXT;
 
@@ -103,17 +109,19 @@ NEXT;
 // Terminate the definition of the courrently compiling Forth word
 CODE(SEMICOLON)
 {
-  if (m_state == forth::state::interprete)
+  if (m_state[CURRENT] == forth::state::Interprete)
     abort("Tried to interpret a compile-only word");
 
   m_dictionary.saveContext(0,0);
-  m_dictionary.appendToken(TOK_EXIT);
-  m_state = forth::state::interprete;
-  if (m_depth_at_colon != stackDepth(forth::DataStack))
-    {
-      m_dictionary.restoreContext();
-      throw ForthException(MSG_EXCEPTION_FORTH_STACK_CHANGED_DURING_DEF(m_creating_word));
-    }
+  m_dictionary.appendToken(TOK_DOSEMI);
+  m_state[SAVED] = m_state[CURRENT];
+  m_state[CURRENT] = forth::state::Interprete;
+  //TODO
+  //if (m_depth_at_colon != stackDepth(forth::DataStack))
+  //  {
+  //   m_dictionary.restoreContext();
+  //   throw ForthException(MSG_EXCEPTION_FORTH_STACK_CHANGED_DURING_DEF(m_creating_word));
+  // }
 }
 NEXT;
 
@@ -176,9 +184,9 @@ NEXT;
 // https://fr.wikiversity.org/wiki/Forth/Conserver_des_donn%C3%A9es
 CODE(CREATE)
 {
-  startCompilingWord(nextWord());
-  m_dictionary.appendToken(TOK_PCREATE);
-  m_dictionary.appendToken(TOK_EXIT);
+  //startCompilingWord(nextWord());
+  //m_dictionary.appendToken(TOK_PCREATE);
+  //m_dictionary.appendToken(TOK_EXIT);
 }
 NEXT;
 
@@ -201,11 +209,19 @@ NEXT;
 //=====================================================================
 //
 CODE(TICK)
-{
+{/*
+  forth::token token;
+  bool immediate;
+
   std::string const& word = nextWord();
-  if (false == m_dictionary.exist(word))
-    throw ForthException("Tried to CFA of an unknown word '"
-                         + word + "'");
-  DPUSH(token);
+  if (likely(m_dictionary.find(word, token, immediate)))
+    {
+      m_dictionary.appendToken(token);
+    }
+  else
+    {
+      throw ForthException("Tried to CFA of an unknown word '"
+                           + word + "'");
+                           }*/
 }
 NEXT;

@@ -36,6 +36,8 @@
 // **************************************************************
 #define MAX_OPENED_STREAMS   (16U)    // depth of INCLUDE calls
 
+enum S { CURRENT, SAVED };
+
 // **************************************************************
 //! \brief Forth interpreter mode
 // **************************************************************
@@ -111,7 +113,7 @@ public:
   //------------------------------------------------------------------
   inline void displayDictionary() const
   {
-    m_dictionary.display(maxPrimitives());
+    m_dictionary.display(); //FIXME maxPrimitives());
   }
 
   std::pair<bool, std::string> interpreteStream();
@@ -135,6 +137,7 @@ public:
 
 protected:
 
+  const std::string& nextWord();
   virtual uint32_t maxPrimitives() const;
 
 private:
@@ -149,7 +152,7 @@ private:
   //! them into the current base. This getter allows to change
   //! the current base.
   //------------------------------------------------------------------
-  bool setBase(const uint8_t base);
+  bool setDisplayBase(const uint8_t base);
 
   //------------------------------------------------------------------
   //! \brief

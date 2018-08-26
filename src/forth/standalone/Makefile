@@ -40,7 +40,7 @@ else
 OBJ_EXTERNAL   =
 endif
 OBJ_UTILS      = Exception.o File.o ILogger.o Logger.o Path.o
-OBJ_FORTH      = ForthExceptions.o ForthUtils.o ForthStream.o ForthDictionary.o ForthClibrary.o ForthPrimitives.o Forth.o
+OBJ_FORTH      = ForthExceptions.o ForthUtils.o ForthStream.o ForthDictionary.o ForthClibrary.o Forth.o
 OBJ_STANDALONE = main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 

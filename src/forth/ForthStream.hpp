@@ -88,11 +88,11 @@ protected:
   bool split();
 
   enum Mode
-  {
-    NOTHING_TO_READ,
-    READ_FILE,
-    READ_STRING
-  };
+    {
+      NOTHING_TO_READ,
+      READ_FILE,
+      READ_STRING
+    };
 
   // white-space characters (from isspace() doc)
   const std::string m_delimiters = " \t\n\v\f\r";

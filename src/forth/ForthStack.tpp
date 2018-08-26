@@ -96,7 +96,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Check if the stack has overflowed.
   //------------------------------------------------------------------
-  inline bool overflow() const
+  inline bool hasOverflowed() const
   {
     return depth() > ((int32_t) (FORTH_STACK_DEPTH - (2 * FORTH_STACK_SECURITY_MARGIN)));
   }
@@ -104,7 +104,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Check if the stack has underflowed.
   //------------------------------------------------------------------
-  inline bool underflow() const { return depth() < -1; }
+  inline bool hasUnderflowed() const { return depth() < -1; }
 
   //------------------------------------------------------------------
   //! \brief Check if the stack has overflowed or underflowed. Trigger
@@ -112,10 +112,10 @@ public:
   //------------------------------------------------------------------
   void check()
   {
-    if (overflow())
+    if (hasOverflowed())
       throw ForthException(MSG_EXCEPTION_FORTH_STACK_OVERFLOW(m_name));
 
-    if (underflow())
+    if (hasUnderflowed())
       throw ForthException(MSG_EXCEPTION_FORTH_STACK_UNDERFLOW(m_name));
   }
 
@@ -126,9 +126,9 @@ public:
   friend std::ostream& operator<<(std::ostream& os, Stack<T>& stack)
   {
     os << stack.m_name;
-    if (stack.overflow())
+    if (stack.hasOverflowed())
       os << "<overflowed>";
-    else if (stack.underflow())
+    else if (stack.hasUnderflowed())
       os << "<underflowed>";
     else
       {

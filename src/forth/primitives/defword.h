@@ -17,7 +17,7 @@
     TOK_CREATE,                                     \
     TOK_BUILDS,                                     \
     TOK_DOES,                                       \
-    TOK_TICK,                                       \
+    TOK_TICK
 
 #define ALL_DEFWORD_LABELS                                  \
   LABELIZE(LBRACKET),                                       \
@@ -39,3 +39,24 @@
     LABELIZE(BUILDS),                                       \
     LABELIZE(DOES),                                         \
     LABELIZE(TICK)
+
+#define ALL_DEFWORD_PRIMITIVES                   \
+  PRIMITIVE(LBRACKET, "[");                                       \
+    PRIMITIVE(RBRACKET, "]");                                     \
+    PRIMITIVE(EXECUTE, "EXECUTE");                                      \
+    PRIMITIVE(COMPILE, "COMPILE");                                      \
+    PRIMITIVE(ICOMPILE, "[COMPILE]");                                     \
+    PRIMITIVE(POSTPONE, "POSTPONE");                                     \
+    PRIMITIVE(COLON, ":");                                        \
+    PRIMITIVE(DOCOL, "(:)");                                        \
+    PRIMITIVE(SEMICOLON, ";");                                    \
+    PRIMITIVE(DOSEMI, "(;)");                                       \
+    PRIMITIVE(LITERAL16, "LIT16");                                    \
+    PRIMITIVE(LITERAL32, "LIT32");                                    \
+    PRIMITIVE(IMMEDIATE, "IMMEDIATE");                                    \
+    PRIMITIVE(SMUDGE, "SMUDGE");                                       \
+    PRIMITIVE(LAST, "LAST");                                         \
+    PRIMITIVE(CREATE, "CREATE");                                       \
+    PRIMITIVE(BUILDS, "<BUILDS");                                       \
+    PRIMITIVE(DOES, "DOES>");                                         \
+    PRIMITIVE(TICK, "'");

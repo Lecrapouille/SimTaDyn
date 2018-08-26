@@ -21,13 +21,80 @@
 #include "Forth.hpp"
 #include "ForthTerminalColor.hpp"
 #include "ForthUtils.hpp"
+#include "primitives/ForthPrimitives.hpp"
+#include "primitives/defword.h"
+#include "primitives/rstack.h"
+#include "primitives/dstack.h"
+//#include "primitives/fstack.h"
 #include "Logger.hpp"
 #include <iomanip> // setbase
 
-enum S { CURRENT, SAVED };
-
 #define currentStream() m_streams.stack[m_streams.opened]
 #define faultyStream() m_streams.stack[m_streams.faulty]
+
+enum ForthPrimitives
+  {
+    // Dummy word and comments
+    TOK_NOOP = 0,
+    //ALL_BRANCHING_TOKENS,
+    //ALL_IO_TOKENS,
+    //ALL_CLIB_TOKENS,
+    //ALL_DICO_TOKENS,
+    ALL_DEFWORD_TOKENS,
+    ALL_RSTACK_TOKENS,
+    //ALL_FSTACK_TOKENS,
+    ALL_DSTACK_TOKENS,
+    FORTH_MAX_TOKENS
+  };
+
+uint32_t Forth::maxPrimitives() const
+{
+  return FORTH_MAX_TOKENS;
+}
+
+// **************************************************************
+//! This method should be called after the contructor Forth()
+//! and has been separated from the constructor to load the
+//! dictionary at the desired moment.
+// **************************************************************
+void Forth::boot()
+{
+  LOGI("Forth booting ...");
+  PRIMITIVE(NOOP, "NOOP");
+  ALL_DEFWORD_PRIMITIVES;
+  ALL_RSTACK_PRIMITIVES;
+  //ALL_FSTACK_PRIMITIVES;
+  ALL_DSTACK_PRIMITIVES;
+}
+
+//------------------------------------------------------------------
+//! \param token.
+//------------------------------------------------------------------
+void Forth::executeToken(forth::token const xt)
+{
+  // Only if macro USE_COMPUTED_GOTO is defines
+#ifdef USE_COMPUTED_GOTO
+  static void *c_primitives[FORTH_MAX_TOKENS + 1u] =
+    {
+      LABELIZE(NOOP),
+      ALL_DEFWORD_LABELS,
+      ALL_RSTACK_LABELS,
+      //ALL_FSTACK_LABELS,
+      //LABELIZE(UNKNOWN),
+      ALL_DSTACK_LABELS
+    };
+#endif
+
+  DISPATCH(xt)
+  {
+    CODE(NOOP) NEXT;
+#include "primitives/defword.c"
+#include "primitives/rstack.c"
+    //#include "primitives/fstack.c"
+#include "primitives/dstack.c"
+      //CODE(UNKNOWN) NEXT;
+  }
+}
 
 // **************************************************************
 //! Initialize the Forth interpretor context. The dictionary is given
@@ -79,26 +146,28 @@ void Forth::reset()
 //! \return true if the new base can be used. Else return false
 //! and the older base is not changed.
 // **************************************************************
-bool Forth::setBase(const uint8_t base)
+bool Forth::setDisplayBase(const uint8_t base)
 {
-  if ((base >= 2) && (base <= 36))
+  if (likely((base >= 2) && (base <= 36)))
     {
       m_base = base;
       return true;
     }
-  std::cerr << FORTH_WARNING_COLOR << "[WARNING] '"
-            << (int) base << "' is an invalid base and shall be [2..36]. Ignored !";
-
-  return false;
+  else
+    {
+      std::cerr << FORTH_WARNING_COLOR << "[WARNING] '"
+                << (int) base << "' is an invalid base and shall be [2..36]. Ignored !";
+      return false;
+    }
 }
 
 bool Forth::toNumber(std::string const& word, forth::cell& number) const
 {
   const char* msg = nullptr;
   bool res = forth::toNumber(word, m_base, number, msg);
-  if (res)
+  if (unlikely(res))
     {
-      if (nullptr != msg)
+      if (unlikely(nullptr != msg))
         {
           std::pair<size_t, size_t> p = currentStream().position();
           std::cerr << FORTH_WARNING_COLOR << "[WARNING] " << currentStream().name() << ":"
@@ -108,7 +177,7 @@ bool Forth::toNumber(std::string const& word, forth::cell& number) const
         }
     }
   // Malformed number
-  else if (nullptr != msg)
+  else if (unlikely(nullptr != msg))
     throw ForthException(msg);
 
   return res;
@@ -120,7 +189,7 @@ bool Forth::toNumber(std::string const& word, forth::cell& number) const
 // **************************************************************
 void Forth::startCompilingWord(std::string const& word)
 {
-  if (m_dictionary.find(word))
+  if (unlikely(m_dictionary.find(word)))
     {
       std::cout << FORTH_WARNING_COLOR << "[WARNING] Redefining '" << word << "'"
                 << FORTH_NORMAL_COLOR << std::endl;
@@ -143,30 +212,38 @@ void Forth::parseStream()
   forth::token token;
   bool immediate;
 
-  while (currentStream().hasMoreWords())
+  while (likely(currentStream().hasMoreWords()))
     {
       std::string const& word = currentStream().nextWord();
-      if (m_dictionary.find(word, token, immediate))
+      if (likely(m_dictionary.find(word, token, immediate)))
         {
-          if ((forth::state::Interprete == m_state[CURRENT]) || (immediate))
+          if (unlikely((forth::state::Interprete == m_state[CURRENT]) || (immediate)))
             {
               executeToken(token);
             }
-          else if (forth::state::Compile == m_state[CURRENT])
+          else
             {
+              assert(forth::state::Compile == m_state[CURRENT]);
               m_dictionary.compileToken(token);
             }
         }
       else if (toNumber(word, number))
         {
-          if (forth::state::Interprete == m_state[CURRENT])
+          if (likely(forth::state::Interprete == m_state[CURRENT]))
             {
               m_data_stack.push(number);
-              //FIXME m_data_stack.checkOverflow();
+              m_data_stack.hasOverflowed();
+            }
+          else if ((number >= std::numeric_limits<int16_t>::min()) &&
+                   (number <= std::numeric_limits<int16_t>::max()))
+            {
+              m_dictionary.compileToken(TOK_LITERAL16);
+              m_dictionary.appendCell16(number);
             }
           else
             {
-              m_dictionary.compileLiteral(number);
+              m_dictionary.compileToken(TOK_LITERAL32);
+              m_dictionary.appendCell32(number);
             }
         }
       else
@@ -176,11 +253,19 @@ void Forth::parseStream()
     }
 
   // Unfinished script detection
-  if (forth::state::Interprete != m_state[CURRENT])
+  if (unlikely(forth::state::Interprete != m_state[CURRENT]))
     {
       if (forth::state::Compile == m_state[CURRENT])
         throw ForthException(MSG_EXCEPTION_UNFINISHED_FORTH_DEFINITION(0,0)); // FIXME
     }
+}
+
+const std::string& Forth::nextWord()
+{
+  if (likely(currentStream().hasMoreWords()))
+    return currentStream().nextWord();
+
+  throw ForthException(MSG_EXCEPTION_UNFINISHED_STREAM);
 }
 
 //------------------------------------------------------------------
@@ -226,7 +311,7 @@ std::pair<bool, std::string>
 Forth::interpreteFile(std::string const& filename)
 {
   LOGI("Forth is interpreting the file '%s'", filename.c_str());
-  if (currentStream().loadFile(filename))
+  if (likely(currentStream().loadFile(filename)))
     {
       return interpreteStream();
     }
@@ -245,7 +330,7 @@ Forth::interpreteFile(std::string const& filename)
 //------------------------------------------------------------------
 void Forth::ok(std::pair<bool, std::string> const& res)
 {
-  if (res.first)
+  if (likely(res.first))
     {
       std::cout << "    " << res.second << std::endl;
     }
@@ -272,7 +357,7 @@ void Forth::ok(std::pair<bool, std::string> const& res)
 void Forth::includeFile(std::string const& filename)
 {
   // Reached maximum depth of include file including file including ... etc
-  if (m_streams.opened >= MAX_OPENED_STREAMS - 1U)
+  if (unlikely(m_streams.opened >= MAX_OPENED_STREAMS - 1U))
     throw ForthException(MSG_EXCEPTION_TOO_MANY_OPENED_FORTH_STREAMS);
 
   // Save the current base in the stream before 'stack'ing it
@@ -284,7 +369,7 @@ void Forth::includeFile(std::string const& filename)
 
   // Parse the included file (recursive)
   std::pair<bool, std::string> res = interpreteFile(filename);
-  if (res.first)
+  if (likely(res.first))
     {
       // Succes
       res.second += " parsed ";
@@ -325,10 +410,10 @@ void Forth::skipCommentary()
   size_t column = currentStream().position().second;
   size_t parenthesis = 1;
 
-  while (currentStream().hasMoreWords())
+  while (likely(currentStream().hasMoreWords()))
     {
       std::string const& word = currentStream().nextWord();
-      if (0 == word.compare(")"))
+      if (unlikely(0 == word.compare(")")))
         {
           --parenthesis;
 
@@ -336,7 +421,7 @@ void Forth::skipCommentary()
           if (0 == parenthesis)
             return ;
         }
-      else if (0 == word.compare("("))
+      else if (unlikely(0 == word.compare("(")))
         {
           ++parenthesis;
         }
@@ -347,6 +432,6 @@ void Forth::skipCommentary()
     }
 
   // Still in a Forth comment when reaching the end of the stream
-  if (parenthesis)
+  if (unlikely(parenthesis))
     throw ForthException(MSG_EXCEPTION_UNFINISHED_FORTH_COMMENT(line, column));
 }

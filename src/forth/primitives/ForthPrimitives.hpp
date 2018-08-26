@@ -28,14 +28,14 @@
 #define IMMEDIATE_PRIMITIVE(token, name) COMPILE(token, name, true)
 
 // **************************************************************
-// Data stack (function parameters manipulation)
+// Data stack (function parameters manipulation) short names
 #  define DPUSH(n) m_data_stack.push(n)             // Store the cell value on the top of stack
 #  define DDROP()  m_data_stack.drop()              // Discard the top of the stack
 #  define DPOP()   m_data_stack.pop()               // Discard the top of the stack and save its value in the register r
 #  define DPICK(n) m_data_stack.pick(n)             // Look at the nth element (n >= 1) of the stack from the top (1 = 1st element)
 
 // **************************************************************
-// Return stack
+// Return stack (word addresses manipulation) short names
 #  define RPUSH(n) m_return_stack.push(n)             // Store the cell value on the top of stack
 #  define RDROP()  m_return_stack.drop()              // Discard the top of the stack
 #  define RPOP( )  m_return_stack.pop()               // Discard the top of the stack and save its value in the register r
@@ -63,7 +63,7 @@
 //! \brief
 //------------------------------------------------------------------
 #    define NEXT return
-  //if (*m_ip < FORTH_MAX_PRIMITIVES) goto *c_primitives[*m_ip++];      \
+  //if (*m_ip < FORTH_MAX_PRIMITIVES) goto *c_primitives[*m_ip++];
   //else throw ForthException("unknown token");
 
 //------------------------------------------------------------------

@@ -67,16 +67,17 @@ Dictionary::Dictionary()
   std::memset(m_dictionary, 0u, FORTH_DICTIONARY_SIZE);
 }
 
+//------------------------------------------------------------------
 Dictionary::~Dictionary()
 {
   LOGI("Destroying Forth dictionnary");
 }
 
 //------------------------------------------------------------------
-//! Save the dictionnary in a binary file. The user can use the
-//! command hexdump -C filename for debuging the dictionary.
-//! \param filename the file name where the dictionary will be stored.
-//! \return a boolean indicating if the process succeeded.
+//! \param filename the path of the binary file in which the
+//! dictionary will be stored.
+//!
+//! \throw ForthException if an error occured during the process.
 //------------------------------------------------------------------
 void Dictionary::save(std::string const& filename) const
 {
@@ -87,21 +88,23 @@ void Dictionary::save(std::string const& filename) const
 
   // Store all the dictionary
   out.write((char*) m_dictionary, m_here + forth::token_size);
-  out.close();
 
   // Append LAST word
   uint8_t buffer[2] = { uint8_t(m_last >> 8), uint8_t(m_last) }; // FIXME: casse si token != Cell16
   out.write((char*) buffer, sizeof (buffer));
+  out.close();
 }
 
 //------------------------------------------------------------------
-//! Load a dictionnary from a binary file.
-//! \param filename the filename containing a dictionary. Note: no
-//! verification is made for checking if the dictionary image is well
-//! formed or is a real dictionary file.
-//! \param replace if true the old dictionary is smashed else the
-//! new dictionary is appened to the old one.
-//! \return a boolean indicating if the process succeeded.
+//! \param filename the path of the binary file containing a
+//! dictionary. Note that no verification is made for checking if the
+//! dictionary image is well formed or is a real dictionary file.
+//!
+//! \param replace if true the old dictionary is totaly replaced by
+//! the new one. If false the new dictionary is inserted after the
+//! current to the old one (which stay intact).
+//!
+//! \throw ForthException if an error occured during the process.
 //------------------------------------------------------------------
 void Dictionary::load(std::string const& filename, const bool replace)
 {
@@ -222,29 +225,12 @@ void Dictionary::compileWord(std::string const& word)
 }
 
 //------------------------------------------------------------------
-//! \param token.
+//! \param token byte code to append in the Forth definition currently
+//! compiling.
 //------------------------------------------------------------------
 void Dictionary::compileToken(forth::token const token)
 {
   appendToken(token);
-}
-
-//------------------------------------------------------------------
-//! \param value.
-//------------------------------------------------------------------
-void Dictionary::compileLiteral(forth::cell const value)
-{
-  // Optimize dictionary size
-  if (value <= 65535U)
-    {
-      appendToken(FORTH_PRIMITIVE_LITERAL_16);
-      appendCell16(value);
-    }
-  else
-    {
-      appendToken(FORTH_PRIMITIVE_LITERAL_32);
-      appendCell32(value);
-    }
 }
 
 //------------------------------------------------------------------
@@ -404,7 +390,7 @@ Dictionary::findToken(const forth::token token, const bool even_smudge) const
 //! TODO: ajouter des securites (m_last defini) comme sur gofth ?
 void Dictionary::immediate()
 {
-  m_dictionary[m_dictionary.m_last] |= FLAG_IMMEDIATE;
+  m_dictionary[m_last] |= IMMEDIATE_BIT;
 }
 
 //------------------------------------------------------------------
@@ -448,13 +434,15 @@ bool Dictionary::smudge(std::string const& name)
 }
 
 //------------------------------------------------------------------
-//! Reserve or release a consecutive number of bytes starting at
-//! Dictionary::m_here. Then Dictionary::m_here is updated. Values
-//! inside the reserved memory are not cleared.
-//! \param nb_bytes the number of consecutive bytes needed: if > 0
-//! memory is reserved, else if < 0 release the memory. if = 0 nothing
-//! is made.
-//! \throw OutOfBoundDictionary when attempting to go outside the dictionary bounds.
+//! \param nb_bytes is an offset aka the number of consecutive bytes
+//! to displace m_here: if nb_bytes > 0 then memory is reserved, else
+//! if nb_bytes < 0 then memory is released, else if nb_bytes == 0
+//! nothing is done. Security is made against dictionary bounds. No
+//! security is made against negative offsets and the whole dictionary
+//! can be erased.
+//!
+//! \throw ForthException when attempting to go outside the dictionary
+//! bounds.
 //------------------------------------------------------------------
 void Dictionary::allot(const int32_t nb_bytes)
 {
@@ -464,11 +452,21 @@ void Dictionary::allot(const int32_t nb_bytes)
   // checkBounds(m_here, nb_bytes);
   if (likely(nb_bytes > 0))
     {
+      if (unlikely(m_here >= FORTH_DICTIONARY_SIZE - nb_bytes))
+        throw ForthException(MSG_EXCEPTION_FORTH_DICTIONARY_ALLOT);
+
       m_here += nb_bytes;
     }
-  else // (nb_bytes < 0)
+  else if (nb_bytes < 0)
     {
+      if (unlikely(m_here < static_cast<forth::token>(-nb_bytes)))
+        throw ForthException(MSG_EXCEPTION_FORTH_DICTIONARY_FREE);
+
       m_here -= nb_bytes;
+    }
+  else // nb_bytes == 0
+    {
+      // Do nothing
     }
 }
 
@@ -489,6 +487,13 @@ void Dictionary::restoreContext()
   //m_data_stack.depth() = m_save.depth;
   m_last = m_save.last;
   m_here = m_save.here;
+}
+
+//------------------------------------------------------------------
+void Dictionary::display()
+{
+  // FIXME a finir
+  // maxPrimitives()
 }
 
 } // namespace

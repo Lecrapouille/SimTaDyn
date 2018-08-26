@@ -1,18 +1,18 @@
 //
 CODE(BINARY)
-changeDisplayBase(2U);
+setDisplayBase(2U);
 NEXT;
 
 CODE(OCTAL)
-changeDisplayBase(8U);
+setDisplayBase(8U);
 NEXT;
 
 CODE(HEXADECIMAL)
-changeDisplayBase(16U);
+setDisplayBase(16U);
 NEXT;
 
 CODE(DECIMAL)
-changeDisplayBase(10U);
+setDisplayBase(10U);
 NEXT;
 
 CODE(GET_BASE)
@@ -20,7 +20,7 @@ DPUSH(m_base);
 NEXT;
 
 CODE(SET_BASE)
-changeDisplayBase(DPOP());
+setDisplayBase(DPOP());
 NEXT;
 
 // ----------------------------------------
@@ -140,7 +140,7 @@ CODE(LOWER_EQUAL) LOGICAL_I_OP(<=); NEXT;
 CODE(LOWER) LOGICAL_I_OP(<); NEXT;
 
 // ----------------------------------------
-CODE(0EQUAL) L_UNARY_I_OP(0==); NEXT;
+CODE(ZEROEQUAL) L_UNARY_I_OP(0==); NEXT;
 
 // ----------------------------------------
 CODE(EQUAL) LOGICAL_I_OP(==); NEXT;

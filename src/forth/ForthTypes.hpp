@@ -40,10 +40,10 @@ namespace forth
   typedef uint32_t       ucell;
   typedef uint16_t       token;
 
-#  define appendToken appendCell16
-#  define readToken readCell16
+#  define appendToken appendCell16 // FIXME ajouter la securite
+#  define readToken read16at
 #  define appendCell appendCell32
-#  define readCell readCell32
+#  define readCell read32at
 
   static constexpr int cell_size = sizeof (forth::cell);
   static constexpr int token_size = sizeof (forth::token);
