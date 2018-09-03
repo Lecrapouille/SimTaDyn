@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+
+<title>Interpreteur Forth de Quentin QUADRAT</title>
+<meta name="keywords" content="Forth" />
+<meta name="description" content="Interpreteur Forth de Quentin QUADRAT" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/styles.css" rel="stylesheet" type="text/css" />
+</head><body>
+
+<p id="output" />
+		<script>
+			var ForthCode = prompt('Entrez votre code Forth :');
+			var Module = {
+				arguments: ["-x", "-e", ForthCode],
+				print: (function() {
+					var element = document.getElementById('output');
+					return function(text) {
+						element.innerHTML += text + "<br>";
+					};
+				})(),
+				printErr: function(text) {
+					  if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+					  if (0) { // XXX disabled for safety typeof dump == 'function') {
+					    dump(text + '\n'); // fast, straight to the real console
+					  } else {
+					    console.error(text);
+					  }
+					},
+				canvas: (function() {
+					var canvas = document.getElementById('canvas');
+					return canvas;
+				})()
+			};
+		</script>
+		<script src="SimForth.js"></script>
+</body> </html>

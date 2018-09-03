@@ -665,7 +665,7 @@ void Forth::ok(std::pair<bool, std::string> const& res)
   else
     {
       std::pair<size_t, size_t> p = STREAM.position();
-      std::cerr << FORTH_ERROR_COLOR << "[ERROR] from "
+      std::cout << FORTH_ERROR_COLOR << "[ERROR] from "
                 << STREAM.name() << ':'
                 << p.first << ':'
                 << p.second << ' '

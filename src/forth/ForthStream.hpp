@@ -38,7 +38,7 @@ public:
   bool loadFile(std::string const& filename);
   //! \brief For feeding a Forth interpreter with a string.
   void loadString(std::string const& str,
-                  std::string const& name = "<string>");
+                  std::string const& name = "string");
   //! \brief Drop the current line and load the next one.
   void skipLine();
   //! \brief Check if a word can be extracted it's extracted.

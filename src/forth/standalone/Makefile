@@ -40,7 +40,8 @@ else
 OBJ_EXTERNAL   =
 endif
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
-OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
+# ForthClibrary.o
 OBJ_STANDALONE = main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
@@ -50,8 +51,10 @@ PROJECT_MODE = debug
 
 ###################################################
 # Compilation options.
-CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -std=c++11
+#  `pkg-config --cflags gtkmm-3.0`
+LDFLAGS =
+# `pkg-config --libs gtkmm-3.0`
 
 ###################################################
 #
@@ -94,7 +97,7 @@ ifeq ($(PROJECT_MODE),debug)
 ifneq ($(ARCHI),Darwin)
 OPTIM_FLAGS = -O2 -g
 DEFINES += -DBACKWARD_HAS_DW=1
-LIBS += -ldw
+#LIBS += -ldw
 endif
 else
 OPTIM_FLAGS = -O3
@@ -112,13 +115,13 @@ all: $(TARGET)
 # Link sources
 $(TARGET): $(OBJ)
 	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
+	@cd $(BUILD) && $(CXX) $(OBJ) -s WASM=0 -s DISABLE_EXCEPTION_CATCHING=0 -o $(TARGET).html $(LIBS) $(LDFLAGS)
 
 ###################################################
 # Compile sources
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
+	$(CXX) -s WASM=0 -s DISABLE_EXCEPTION_CATCHING=0 $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
 	@$(POSTCOMPILE)
 
 ###################################################

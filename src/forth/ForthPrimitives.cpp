@@ -657,6 +657,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       displayStack(std::cout, forth::DataStack);
       DPOP(m_tos);
       break;
+#if 0
     case FORTH_PRIMITIVE_BEGIN_C_LIB:
       {
         std::pair<bool, std::string> res = m_dynamic_libs.begin(STREAM);
@@ -726,6 +727,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
           }
       }
       break;
+#endif
     default:
       UnknownForthPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;
       break;
@@ -880,12 +882,12 @@ void Forth::boot()
   m_dictionary.add(FORTH_PRIMITIVE_DISPLAY_DSTACK, FORTH_DICO_ENTRY(".S"), 0);
 
   // C dynamic lib
-  m_dictionary.add(FORTH_PRIMITIVE_BEGIN_C_LIB, FORTH_DICO_ENTRY("C-LIB"), 0);
+  /*m_dictionary.add(FORTH_PRIMITIVE_BEGIN_C_LIB, FORTH_DICO_ENTRY("C-LIB"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_END_C_LIB, FORTH_DICO_ENTRY("END-C-LIB"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_ADD_EXT_C_LIB, FORTH_DICO_ENTRY("ADD-LIB"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_C_FUNCTION, FORTH_DICO_ENTRY("C-FUNCTION"), 0);
   m_dictionary.add(FORTH_PRIMITIVE_C_CODE, FORTH_DICO_ENTRY("\\C"), 0);
-  m_dictionary.add(FORTH_PRIMITIVE_EXEC_C_FUNC, FORTH_DICO_ENTRY("(EXEC-C)"), 0);
+  m_dictionary.add(FORTH_PRIMITIVE_EXEC_C_FUNC, FORTH_DICO_ENTRY("(EXEC-C)"), 0);*/
 
   // Hide some words to user
   m_dictionary.smudge("(CREATE)");
