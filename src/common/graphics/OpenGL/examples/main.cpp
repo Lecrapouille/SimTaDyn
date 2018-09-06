@@ -3,10 +3,11 @@
 #include "Example03.hpp"
 #include "Example04.hpp"
 #include "Example05.hpp"
-//#include "Example06.hpp"
+#include "Example06.hpp"
+//#include "Example07.hpp"
 #include <memory>
 
-#define MAX_EXAMPLES 6
+#define MAX_EXAMPLES 7
 
 static void usage(char *argv[])
 {
@@ -47,8 +48,11 @@ int main(int argc, char *argv[])
     case 5:
       win = new GLExample05();
       break;
+    case 6:
+      win = new GLExample06();
+      break;
     default:
-      win = new GLExample05(); // FIXME new GLExample06();
+      win = new GLExample06(); // FIXME new GLExample07();
       break;
     }
 

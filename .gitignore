@@ -61,6 +61,7 @@ external/zipper
 external/SOIL
 external/CmdParser
 external/backward-cpp
+external/imgui
 doc/html/*
 doc/coverage/*
 _*

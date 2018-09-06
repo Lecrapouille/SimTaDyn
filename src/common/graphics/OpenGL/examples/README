@@ -22,3 +22,7 @@ comes from the Mesh class.
 Example 05:
 ============
 Example of graph scene: moving robots.
+
+Example 06:
+============
+Use imgui lib for adding HMI buttons made in OpenGL.

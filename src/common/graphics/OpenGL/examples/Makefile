@@ -47,8 +47,9 @@ OBJ_UTILS    = Exception.o PendingData.o ILogger.o Logger.o
 OBJ_OPENGL   = OpenGLException.o OpenGL.o GLObject.o GLShader.o         \
                GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o \
                GLWindow.o
-OBJ          = $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) \
-               Example01.o Example02.o Example03.o Example04.o Example05.o main.o
+IMGUI        = imgui_draw.o imgui_widgets.o imgui.o imgui_impl_glfw.o imgui_impl_opengl3.o
+OBJ          = $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) $(IMGUI) \
+               Example01.o Example02.o Example03.o Example04.o Example05.o Example06.o main.o
 
 ###################################################
 # Compilation options.
@@ -57,14 +58,15 @@ LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
 #
-INCLUDES += -I$(P)/src
-VPATH += $(P)/src:
+INCLUDES += -I$(P)/src -I$(P)/external/imgui
+VPATH += $(P)/src:$(P)/external/imgui
 
 ###################################################
 # Project defines
 DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
