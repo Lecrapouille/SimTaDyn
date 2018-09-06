@@ -73,7 +73,7 @@ private:
 
   double m_lastTime;
   double m_lastFrameTime;
-  int m_nbFrames;
+  int m_fps;
   float m_deltaTime;
   bool m_opengl_context = false;
 

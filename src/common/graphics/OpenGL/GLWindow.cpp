@@ -46,19 +46,21 @@ void IGLWindow::release()
 
 void IGLWindow::FPS()
 {
+  static int nbFrames = 0;
   double currentTime = glfwGetTime();
   m_deltaTime = static_cast<float>(currentTime - m_lastFrameTime);
   m_lastFrameTime = currentTime;
-  ++m_nbFrames;
+  ++nbFrames;
 
   if (currentTime - m_lastTime >= 1.0)
     {
       // If last prinf() was more than 1sec ago printf and reset
       std::ostringstream oss;
-      int fps = static_cast<int>(1000.0 / static_cast<double>(m_nbFrames));
-      oss << '[' << fps << " FPS] " << m_title;
+      m_fps = nbFrames;
+      int ms_by_frame = static_cast<int>(1000.0 / static_cast<double>(m_fps));
+      oss << '[' << m_fps << " FPS, " << ms_by_frame << " ms] " << m_title;
       glfwSetWindowTitle(m_window, oss.str().c_str());
-      m_nbFrames = 0;
+      nbFrames = 0;
       m_lastTime += 1.0;
     }
 }
@@ -97,6 +99,7 @@ bool IGLWindow::start()
       return false;
     }
   glfwMakeContextCurrent(m_window);
+  glfwSwapInterval(1); // Enable vsync
 
   // Initialize GLEW
   glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
@@ -143,7 +146,7 @@ bool IGLWindow::start()
   // init FPS
   m_lastTime = glfwGetTime();
   m_lastFrameTime = m_lastTime;
-  m_nbFrames = 0;
+  m_fps = 0;
 
   m_opengl_context = true;
 
