@@ -1,13 +1,17 @@
 #ifndef EXAMPLE_06_HPP_
 #  define EXAMPLE_06_HPP_
 
-#  include "GLWindow.hpp"
+#  include "GLImGUI.hpp"
 #  include "Cube.hpp"
 #  include "SceneGraph.tpp"
 #  include "Example05.hpp"
-#  include "imgui/imgui.h"
-#  include "imgui/imgui_impl_glfw.h"
-#  include "imgui/imgui_impl_opengl3.h"
+
+class GLImGUI: public IGLImGUI
+{
+protected:
+
+  virtual bool render() override;
+};
 
 class GLExample06: public IGLWindow
 {
@@ -41,6 +45,7 @@ public:
   CubicRobot  *m_robot2;
   CubicRobot  *m_robot3;
   SceneNode_t *m_root;
+  GLImGUI      m_gui;
 };
 
 #  endif /* EXAMPLE_06_HPP_ */

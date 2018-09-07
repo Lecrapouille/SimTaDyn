@@ -3,12 +3,23 @@
 //! \file Example06.cpp
 //! Use Example06.cpp but add HMI made in OpenGL
 
+bool GLImGUI::render()
+{
+  ImGui::Begin("Hello, world!");
+  ImGui::Text("This is some useful text.");
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+  if (ImGui::Button("Hello"))
+    {
+      std::cout << "Hello" << std::endl;
+    }
+  ImGui::End();
+
+  return true;
+}
+
 GLExample06::~GLExample06()
 {
   delete m_root;
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
-  std::cout << "Bye" << std::endl;
 }
 
 // FIXME
@@ -22,10 +33,9 @@ bool GLExample06::setup()
 {
   LOGI("GLExample06::setup()");
 
-  ImGui::CreateContext();
-  ImGui_ImplGlfw_InitForOpenGL(m_window, true);
-  ImGui_ImplOpenGL3_Init(NULL);
-  ImGui::StyleColorsDark();
+  // Init the context of the library
+  if (false == m_gui.setup(*this))
+    return false;
 
   // Enable the depth buffer
   glEnable(GL_DEPTH_TEST);
@@ -80,27 +90,6 @@ void GLExample06::drawNode(SceneNode_t &node)
     }
 }
 
-void GLExample06::hmi()
-{
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
-  {
-    ImGui::Begin("Hello, world!");
-    ImGui::Text("This is some useful text.");
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    if (ImGui::Button("Hello"))
-      {
-        std::cout << "Hello" << std::endl;
-      }
-    ImGui::End();
-  }
-
-  ImGui::Render();
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
 // Draw scene graph (made of robots)
 bool GLExample06::draw()
 {
@@ -118,6 +107,8 @@ bool GLExample06::draw()
   }
   m_shader.stop();
 
-  hmi();
+  if (false == m_gui.draw())
+    return false;
+
   return true;
 }
