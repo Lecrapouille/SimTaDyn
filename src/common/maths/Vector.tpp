@@ -726,7 +726,7 @@ inline std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
   os << "Vector";
   for (uint32_t i = 0; i < n; ++i)
     {
-      std::cout << ' ' << v[i];
+      os << ' ' << v[i];
     }
   return os;
 }

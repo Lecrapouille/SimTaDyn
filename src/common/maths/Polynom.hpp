@@ -100,7 +100,7 @@ inline std::ostream& operator<<(std::ostream& os, Polynom const& p)
   os << "Degree: " << p.degree() << std::endl;
   for (size_t i = 0; i < p.size(); ++i)
     {
-       std::cout << "  P[" << i << "]: " << p[i] << std::endl;
+       os << "  P[" << i << "]: " << p[i] << std::endl;
     }
   return os;
 }
