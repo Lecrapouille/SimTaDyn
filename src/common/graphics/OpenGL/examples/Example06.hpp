@@ -8,9 +8,22 @@
 
 class GLImGUI: public IGLImGUI
 {
+public:
+
+  GLImGUI();
+  inline void setNode(SceneNode_t &root)
+  {
+    m_root = &root;
+  }
+
 protected:
 
   virtual bool render() override;
+  void drawNode(SceneNode_t &node);
+
+private:
+
+  SceneNode_t *m_root;
 };
 
 class GLExample06: public IGLWindow

@@ -3,17 +3,61 @@
 //! \file Example06.cpp
 //! Use Example06.cpp but add HMI made in OpenGL
 
+GLImGUI::GLImGUI()
+  : m_root(nullptr)
+{
+}
+
+void GLImGUI::drawNode(SceneNode_t &node)
+{
+  if (ImGui::TreeNode(node.m_name.c_str()))
+    {
+      Mesh *m = node.mesh();
+      if (nullptr != m)
+        {
+          ImGui::Text("Mesh:");
+        }
+      else
+        {
+          ImGui::Text("No Mesh");
+        }
+
+      if (ImGui::TreeNode("Transf. Matrix"))
+        {
+          std::stringstream ss;
+          ss << node.worldTransform();
+          ImGui::Text(ss.str().c_str());
+          ImGui::TreePop();
+        }
+
+      if (ImGui::TreeNode("Child"))
+        {
+          std::vector<SceneNode_t*> const &children = node.children();
+          for (auto i: children)
+            {
+              drawNode(*i);
+            }
+          ImGui::TreePop();
+        }
+      ImGui::TreePop();
+    }
+}
+
 bool GLImGUI::render()
 {
   ImGui::Begin("Hello, world!");
-  ImGui::Text("This is some useful text.");
-  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-  if (ImGui::Button("Hello"))
-    {
-      std::cout << "Hello" << std::endl;
-    }
-  ImGui::End();
 
+  if (ImGui::TreeNode("Scene graph"))
+    {
+      if (nullptr != m_root)
+        {
+          drawNode(*m_root);
+        }
+      ImGui::TreePop();
+    }
+  ImGui::Separator();
+
+  ImGui::End();
   return true;
 }
 
@@ -66,6 +110,7 @@ bool GLExample06::setup()
     setUniform("camera", m);
   }
   m_shader.stop();
+  m_gui.setNode(*m_root);
 
   return true;
 }
