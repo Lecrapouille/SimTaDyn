@@ -23,7 +23,12 @@
 
 #  include "ILoader.tpp"
 #  include "SimTaDynMap.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
 #  include <gtkmm.h>
+#pragma GCC diagnostic pop
 
 class SimTaDynMap;
 

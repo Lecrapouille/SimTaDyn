@@ -132,7 +132,7 @@ static GLfloat textureData[] = {
 // FIXME: m_shader::setUniform
 void GLRenderer::setUniform(const char *name, Matrix44f const &mat)
 {
-  GLint id = glCheck(glGetUniformLocation(m_shader, name));
+  GLint id = glCheck(glGetUniformLocation(m_shader.getID(), name));
   glCheck(glUniformMatrix4fv(id, 1, GL_FALSE, &mat[0U][0U]));
 }
 
@@ -226,7 +226,7 @@ void GLRenderer::draw()
       setUniform("camera", camera);
 
       //set to 0 because the texture is bound to GL_TEXTURE0
-      GLint TextureID = glCheck(glGetUniformLocation(m_shader, "tex"));
+      GLint TextureID = glCheck(glGetUniformLocation(m_shader.getID(), "tex"));
       glCheck(glUniform1i(TextureID, 0));
       glCheck(glActiveTexture(GL_TEXTURE0));
       m_texture.start();

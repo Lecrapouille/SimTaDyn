@@ -32,7 +32,7 @@
 //! from images or the framebuffer, and a variety of other things.
 // **************************************************************
 template<typename T>
-class GLBuffer: public GLObject, protected PendingData
+class GLBuffer: public GLObject<GLenum>, protected PendingData
 {
 public:
 
@@ -70,8 +70,8 @@ public:
   {
     if (GLObject::m_need_create)
       {
-        uint32_t s = m_data.capacity();
-        m_data.reserve(nth - s + 1U);
+        size_t s = m_data.capacity();
+        m_data.reserve(nth - s + 1_z);
         while (s--)
           {
             m_data.push_back(m_data[0]);
@@ -79,7 +79,7 @@ public:
       }
     else
       {
-        const uint32_t s = m_data.capacity();
+        const size_t s = m_data.capacity();
         std::string msg = "GLBuffer " + m_name + "["
           + std::to_string(nth) + "], max elt: "
           + std::to_string(s);
@@ -106,7 +106,7 @@ public:
   inline void push_back(T const &e)
   {
     m_data.push_back(e);
-    PendingData::tagAsPending(m_data.size() - 1U);
+    PendingData::tagAsPending(m_data.size() - 1_z);
   }
 
   inline void pop_back()
@@ -118,16 +118,16 @@ public:
   {
     auto it = m_data.begin();
     m_data.insert(it, e);
-    PendingData::tagAsPending(0U, m_data.size() - 1U);
+    PendingData::tagAsPending(0_z, m_data.size() - 1_z);
   }
 
   //! \brief Return the number of elements a block can store
-  inline uint32_t size() const
+  inline size_t size() const
   {
     return m_data.size();
   }
 
-  inline uint32_t capacity() const
+  inline size_t capacity() const
   {
     return m_data.capacity();
   }
@@ -136,13 +136,13 @@ public:
   //! \param vect
   void add(std::vector<T> &vect)
   {
-    uint32_t size = vect.size();
+    size_t size = vect.size();
     if (size > m_data.capacity())
       {
         reserve(size);
       }
 
-    uint32_t offset = m_data.size();
+    size_t offset = m_data.size();
     PendingData::tagAsPending(offset, offset + size);
 
     while (size--)
@@ -151,17 +151,17 @@ public:
       }
   }
 
-  void add(const T *array, const uint32_t size)
+  void add(const T *array, const size_t size)
   {
     if (size > m_data.capacity())
       {
         reserve(size);
       }
 
-    uint32_t offset = m_data.size();
+    size_t offset = m_data.size();
     PendingData::tagAsPending(offset, offset + size);
 
-    for (uint32_t s = 0U; s < size; ++s)
+    for (size_t s = 0_z; s < size; ++s)
       {
         m_data.push_back(array[s]);
       }
@@ -188,10 +188,11 @@ protected:
 
   virtual bool create() override
   {
-    const uint32_t bytes = m_data.capacity() * sizeof (T);
+    const size_t bytes = m_data.capacity() * sizeof (T);
     glCheck(glGenBuffers(1, &m_handle));
     activate();
-    glCheck(glBufferData(m_target, bytes, nullptr, m_usage));
+    glCheck(glBufferData(m_target, static_cast<GLsizeiptr>(bytes),
+                         NULL, m_usage));
     //deactivate();
     return false;
   }
@@ -223,13 +224,15 @@ protected:
 
   virtual bool update() override
   {
-    uint32_t pos_start;
-    uint32_t pos_end;
+    size_t pos_start;
+    size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);
 
-    uint32_t offset = sizeof (T) * pos_start;
-    uint32_t nbytes = sizeof (T) * (pos_end - pos_start + 1U);
-    glCheck(glBufferSubData(m_target, offset, nbytes, &m_data[0]));
+    size_t offset = sizeof (T) * pos_start;
+    size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
+    glCheck(glBufferSubData(m_target, static_cast<GLintptr>(offset),
+                            static_cast<GLsizeiptr>(nbytes),
+                            &m_data[0]));
     PendingData::clearPending();
     return false;
   }

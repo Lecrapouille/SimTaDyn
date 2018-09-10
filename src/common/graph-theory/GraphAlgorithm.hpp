@@ -73,8 +73,11 @@ public:
 
     // Empty the result and reserve the space for storing nodes
     m_result.clear();
-    int32_t reserving = m_graph->howManyNodes() - m_result.capacity();
-    m_result.reserve(std::max(0, reserving));
+    if (m_graph->howManyNodes() > m_result.capacity())
+      {
+        size_t reserving = m_graph->howManyNodes() - m_result.capacity();
+        m_result.reserve(std::max(0_z, reserving));
+      }
 
     // Empty the queue ...
     m_queue.clear();

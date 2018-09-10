@@ -21,6 +21,7 @@
 #ifndef POLYNOM_HPP_
 #  define POLYNOM_HPP_
 
+#  include "NonCppStd.hpp"
 #  include <vector>
 #  include <iostream>
 
@@ -45,15 +46,15 @@ public:
   }
 
   //! \brief Return the container size of the polynom.
-  inline uint32_t size() const
+  inline size_t size() const
   {
     return m_coefs.size();
   }
 
   //! \brief Return the degree of the polynom.
-  inline uint32_t degree() const
+  inline size_t degree() const
   {
-    uint32_t deg = m_coefs.size();
+    size_t deg = m_coefs.size();
 
     while ((0.0 != m_coefs[deg]) && deg)
       --deg;
@@ -66,11 +67,11 @@ public:
   //! than the current degree.
   inline double& operator[](size_t nth)
   {
-    const uint32_t s = m_coefs.size(); // FIXME capacity
+    const size_t s = m_coefs.size(); // FIXME capacity
     if (nth >= s)
       {
         // Insert zeros
-        uint32_t i = nth - s + 1U;
+        size_t i = nth - s + 1U;
         m_coefs.reserve(i);
         while (i--)
           {

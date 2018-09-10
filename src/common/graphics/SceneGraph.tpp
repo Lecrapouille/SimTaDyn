@@ -93,7 +93,7 @@ public:
   //! \brief Destructor. Free all 3D entites.
   virtual ~SceneNode()
   {
-    uint32_t i = m_children.size();
+    size_t i = m_children.size();
     while (i--)
       {
         delete m_children[i];

@@ -73,8 +73,8 @@ public:
          this->name().c_str(), getID());
   }
 
-  SimTaDynSheet(const uint32_t noNodes,
-                const uint32_t noArcs,
+  SimTaDynSheet(const size_t noNodes,
+                const size_t noArcs,
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
@@ -85,8 +85,8 @@ public:
   }
 
   SimTaDynSheet(std::string const& name,
-                const uint32_t noNodes,
-                const uint32_t noArcs,
+                const size_t noNodes,
+                const size_t noArcs,
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
@@ -97,8 +97,8 @@ public:
   }
 
   SimTaDynSheet(const char *name,
-                const uint32_t noNodes,
-                const uint32_t noArcs,
+                const size_t noNodes,
+                const size_t noArcs,
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
@@ -126,7 +126,7 @@ public:
   }
 
   //! \brief Return the unique identifier.
-  operator int()
+  operator size_t()
   {
     return getID();
   }
@@ -148,7 +148,7 @@ public:
       }
 
     // Draw nodes
-    uint32_t i = pos.blocks();
+    size_t i = pos.blocks();
     while (i--)
       {
         col.block(i)->begin();
@@ -203,7 +203,7 @@ protected:
     return cell;
   }
 
-  virtual uint32_t howManyCells() const override
+  virtual size_t howManyCells() const override
   {
     LOGI("howManyCell(): %u", howManyNodes() + howManyArcs() + howManyZones());
     return howManyNodes() + howManyArcs() + howManyZones();

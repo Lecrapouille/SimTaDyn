@@ -39,8 +39,8 @@
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t N>
-class GLBlockBuffer: public GLObject, public Block<T, N>
+template<typename T, const size_t N>
+class GLBlockBuffer: public GLObject<GLenum>, public Block<T, N>
 {
 protected:
 
@@ -83,7 +83,7 @@ protected:
   virtual bool create() override
   {
     // Total size of the container
-    const uint32_t bytes = Block<T, N>::size() * sizeof (T);
+    const size_t bytes = Block<T, N>::size() * sizeof (T);
 
     glCheck(glGenBuffers(1, &m_handle));
     activate();
@@ -119,8 +119,8 @@ protected:
   //! \brief Upload all pending data to GPU.
   virtual inline bool update() override
   {
-    uint32_t pos_start;
-    uint32_t pos_end;
+    size_t pos_start;
+    size_t pos_end;
 
     PendingData::getPendingData(pos_start, pos_end);
     LOGI("GLVertexBuffer named '%s' updating %u --> %u", m_name.c_str(), pos_start, pos_end);
@@ -143,7 +143,7 @@ protected:
 private:
 
   //! Indicate which elements have been changed.
-  uint32_t m_offset, m_nbytes;
+  size_t m_offset, m_nbytes;
 
 protected:
 
@@ -153,7 +153,7 @@ protected:
 // **************************************************************
 //! \brief Buffer for vertex attribute data.
 // **************************************************************
-template<typename T, const uint32_t N>
+template<typename T, const size_t N>
 class GLVertexBlockBuffer: public GLBlockBuffer<T, N>
 {
 public:
@@ -177,7 +177,7 @@ public:
 // **************************************************************
 //! \brief Buffer for index data.
 // **************************************************************
-template<typename T, const uint32_t N>
+template<typename T, const size_t N>
 class GLIndexBlockBuffer: public GLBlockBuffer<T, N>
 {
 public:
@@ -201,18 +201,18 @@ public:
 // **************************************************************
 //! \brief
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block = GLBlockBuffer>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block = GLBlockBuffer>
 class GLCollection: public GLAttrib, public Set<T, N, Block>
 {
 public:
 
-  GLCollection(std::string const& name, const uint32_t reserve_elements = 1)
+  GLCollection(std::string const& name, const size_t reserve_elements = 1)
     : GLAttrib(name), Set<T,N,Block>(reserve_elements)
   {
   }
 
-  GLCollection(const char *name, const uint32_t reserve_elements = 1)
+  GLCollection(const char *name, const size_t reserve_elements = 1)
     : GLAttrib(name), Set<T,N,Block>(reserve_elements)
   {
   }
@@ -241,25 +241,25 @@ public:
 // **************************************************************
 //! \brief
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block = GLVertexBlockBuffer>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block = GLVertexBlockBuffer>
 class GLVertexCollection: public GLCollection<T, N, Block>
 {
 public:
 
-  GLVertexCollection(const uint32_t reserve_elements = 1)
+  GLVertexCollection(const size_t reserve_elements = 1)
     : GLCollection<T,N,Block>("GLVertexCollection", reserve_elements)
   {
     LOGI("New GLVertexCollection with %u elements", reserve_elements);
   }
 
-  GLVertexCollection(const char *name, const uint32_t reserve_elements = 1)
+  GLVertexCollection(const char *name, const size_t reserve_elements = 1)
     : GLCollection<T,N,Block>(name, reserve_elements)
   {
     LOGI("New GLVertexCollection with %u elements", reserve_elements);
   }
 
-  GLVertexCollection(std::string const& name, const uint32_t reserve_elements = 1)
+  GLVertexCollection(std::string const& name, const size_t reserve_elements = 1)
     : GLCollection<T,N,Block>(name, reserve_elements)
   {
     LOGI("New GLVertexCollection with %u elements", reserve_elements);
@@ -269,25 +269,25 @@ public:
 // **************************************************************
 //! \brief
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block = GLIndexBlockBuffer>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block = GLIndexBlockBuffer>
 class GLIndexCollection: public GLCollection<T, N, Block>
 {
 public:
 
-  GLIndexCollection(const uint32_t reserve_elements = 1)
+  GLIndexCollection(const size_t reserve_elements = 1)
     : GLCollection<T,N,Block>("GLIndexCollection", reserve_elements)
   {
     LOGI("New GLIndexCollection with %u elements", reserve_elements);
   }
 
-  GLIndexCollection(const char *name, const uint32_t reserve_elements = 1)
+  GLIndexCollection(const char *name, const size_t reserve_elements = 1)
     : GLCollection<T,N,Block>(name, reserve_elements)
   {
     LOGI("New GLIndexCollection with %u elements", reserve_elements);
   }
 
-  GLIndexCollection(std::string const& name, const uint32_t reserve_elements = 1)
+  GLIndexCollection(std::string const& name, const size_t reserve_elements = 1)
     : GLCollection<T,N,Block>(name, reserve_elements)
   {
     LOGI("New GLIndexCollection with %u elements", reserve_elements);

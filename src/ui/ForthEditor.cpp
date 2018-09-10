@@ -118,7 +118,7 @@ void ForthDocument::skipBackwardWord(Gtk::TextBuffer::iterator& iter)
       if (!iter.backward_char())
         return ;
 
-      if (isspace(iter.get_char()))
+      if (g_unichar_isspace(iter.get_char()))
         {
           iter.forward_char();
           return ;
@@ -136,7 +136,7 @@ void ForthDocument::skipBackwardSpaces(Gtk::TextBuffer::iterator& iter)
       if (!iter.backward_char())
         return ;
 
-      if (!isspace(iter.get_char()))
+      if (!g_unichar_isspace(iter.get_char()))
         {
           iter.forward_char();
           return ;
@@ -626,7 +626,7 @@ void ForthEditor::execButton(Gtk::ToolButton* button)
 
   if (ForthEditor::exec_(button->get_label().raw(), name))
     {
-      TextDocument *doc = TextEditor::addTab(name);
+      doc = TextEditor::addTab(name);
       doc->clear();
       doc->appendText(button->get_label());
       doc->modified(false);

@@ -69,12 +69,6 @@ public:
     LOGI("Deleting SimTaDynMap #%u named '%s'\n", getID(), m_name.c_str());
   }
 
-  //! \brief Return the unique identifier.
-  operator int()
-  {
-    return getID();
-  }
-
   const std::string &name() const
   {
     return m_name;

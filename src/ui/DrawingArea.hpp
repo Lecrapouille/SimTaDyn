@@ -22,8 +22,13 @@
 #  define DRAWINGAREA_HPP_
 
 #  include "Renderer.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
 #  include <gtkmm/glarea.h>
 #  include <glibmm.h>
+#pragma GCC diagnostic pop
 
 // *************************************************************************************************
 //! \brief Class for OpenGL renderer area
@@ -63,12 +68,12 @@ public:
 
   inline uint32_t screenWidth() const override
   {
-    return Gtk::GLArea::get_width();
+    return static_cast<uint32_t>(Gtk::GLArea::get_width());
   }
 
   inline uint32_t screenHeight() const override
   {
-    return Gtk::GLArea::get_height();
+    return static_cast<uint32_t>(Gtk::GLArea::get_height());
   }
 
   //FIXME protected:

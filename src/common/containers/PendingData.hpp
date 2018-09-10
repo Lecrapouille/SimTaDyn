@@ -32,7 +32,7 @@ class PendingData
 {
 private:
 
-  static constexpr uint32_t initial_position = static_cast<uint32_t>(-1);
+  static constexpr size_t c_initial_position = static_cast<size_t>(-1);
 
 public:
 
@@ -51,35 +51,35 @@ public:
   //! has chnaged.
   inline bool hasPendingData() const
   {
-    return (initial_position != m_pending_start);
+    return (c_initial_position != m_pending_start);
   }
 
   //! \brief Return the smallest contiguous area that needs to be
   //! uploaded. If there is no pending data, pos_start will be set to
   //! -1. You can call hasPendingData() before this method.
-  void getPendingData(uint32_t &pos_start, uint32_t &pos_end) const
+  void getPendingData(size_t &pos_start, size_t &pos_end) const
   {
     if (hasPendingData())
-      {
-        pos_start = m_pending_start;
-        pos_end = m_pending_end;
-      }
+    {
+      pos_start = m_pending_start;
+      pos_end = m_pending_end;
+    }
     else
-      {
-        pos_start = 0;
-        pos_end = 0;
-      }
+    {
+      pos_start = 0;
+      pos_end = 0;
+    }
   }
 
   //! \brief Call this function when changed elements have been uploaded.
   void clearPending()
   {
-    m_pending_start = initial_position;
-    m_pending_end = initial_position;
+    m_pending_start = c_initial_position;
+    m_pending_end = c_initial_position;
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  void tagAsPending(const uint32_t pos_start, const uint32_t pos_end)
+  void tagAsPending(const size_t pos_start, const size_t pos_end)
   {
     if (!hasPendingData())
       {
@@ -94,7 +94,7 @@ public:
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  inline void tagAsPending(const uint32_t pos_start)
+  inline void tagAsPending(const size_t pos_start)
   {
     tagAsPending(pos_start, pos_start);
   }
@@ -102,7 +102,7 @@ public:
 protected:
 
   //! Indicate which elements have been changed.
-  uint32_t m_pending_start, m_pending_end;
+  size_t m_pending_start, m_pending_end;
 };
 
 #endif

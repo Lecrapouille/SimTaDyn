@@ -106,7 +106,7 @@ public:
   void add(const Cell16 token, char const* name, const bool immediate);
   //! \brief Append a new Forth entry in the dictionary.
   void add(const Cell16 token, std::string const& word, const bool immediate);
-  void add(const Cell16 token, char const* name, const uint32_t length, const bool immediate);
+  void add(const Cell16 token, char const* name, const size_t length, const bool immediate);
   //! \brief Look for a word in the dictionary.
   bool find(std::string const& word, Cell16& token, bool& immediate) const;
   //! \brief Interface for ForthDictionary::find but hiding output parameters.
@@ -138,7 +138,11 @@ public:
   inline void appendCell8(const Cell32 data)
   {
     write8at(m_here, data);
-    m_here += 1U;
+    ++m_here;
+  }
+  inline void appendCell8(const char data)
+  {
+    m_dictionary[m_here++] = static_cast<uint8_t>(data);
   }
   //! \brief Store two consecutive bytes at the end of the dictionnary. Endianess is hiden.
   //! ForthDictionary::m_here is updated.
@@ -147,7 +151,8 @@ public:
   inline void appendCell16(const Cell32 data)
   {
     write16at(m_here, data);
-    m_here += 2U;
+    ++m_here;
+    ++m_here;
   }
   //! \brief Store four consecutive bytes at the end of the dictionnary. Endianess is hiden.
   //! ForthDictionary::m_here is updated.
@@ -156,7 +161,10 @@ public:
   inline void appendCell32(const Cell32 data)
   {
     write32at(m_here, data);
-    m_here += 4U;
+    ++m_here;
+    ++m_here;
+    ++m_here;
+    ++m_here;
   }
   //! \brief Read a byte at given address in the dictionnary. Endianess is hiden.
   Cell32 read8at(const uint32_t addr) const;
@@ -186,7 +194,7 @@ protected:
   //! \brief Store four consecutive bytes at given address in the dictionnary. Endianess is hiden.
   void write32at(const uint32_t addr, const Cell32 data);
   //! \brief Safe guard. Check if given address is inside the dictionary.
-  void checkBounds(const uint32_t addr, const int32_t nb_bytes) const;
+  void checkBounds(const uint32_t addr, const uint32_t nb_bytes) const;
 
   //! \brief Allow the Forth context class to modify the dictionary.
   friend class Forth;

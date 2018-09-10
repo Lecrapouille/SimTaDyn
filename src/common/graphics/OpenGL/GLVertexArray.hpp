@@ -23,7 +23,7 @@
 
 #  include "GLObject.hpp"
 
-class GLVertexArray: public GLObject
+class GLVertexArray: public GLObject<GLenum>
 {
 public:
 

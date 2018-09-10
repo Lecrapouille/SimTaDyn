@@ -27,12 +27,10 @@
 namespace graphtheory
 {
 
-#define MODULO(a, b)             ((a) & ((b) - 1U))
-
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t N>
+template<typename T, const size_t N>
 class GraphBlock: public Block<T, N>
 {
 protected:
@@ -69,8 +67,8 @@ public:
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
 class GraphContainer: public Collection<T, N, Block>
 {
 protected:
@@ -79,53 +77,53 @@ protected:
 
 public:
 
-  GraphContainer(const uint32_t reserve_elements = 1)
+  GraphContainer(const size_t reserve_elements = 1)
     : Collection<T, N, Block>(reserve_elements)
   {
   }
 
   //! \brief Check if the element have been marked
-  bool marked(const uint32_t nth) const
+  bool marked(const size_t nth) const
   {
-    const uint32_t index = nth / M;
-    const uint32_t subindex = MODULO(nth, M);
+    const size_t index = nth / M;
+    const size_t subindex = MODULO(nth, M);
 
     return 0 != (Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S]
-                 & (1 << (MODULO(subindex, S))));
+                 & (1_z << (MODULO(subindex, S))));
   }
 
   //! \brief Mark an element as marked
-  void mark(const uint32_t nth)
+  void mark(const size_t nth)
   {
     if (Collection<T, N, Block>::outofbound(nth))
       return ;
 
-    const uint32_t index = nth / M;
-    const uint32_t subindex = MODULO(nth, M);
+    const size_t index = nth / M;
+    const size_t subindex = MODULO(nth, M);
 
     Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S]
-      |= (1 << (MODULO(subindex, S)));
+      |= (1_z << (MODULO(subindex, S)));
   }
 
-  void unmark(const uint32_t nth)
+  void unmark(const size_t nth)
   {
     if (Collection<T, N, Block>::outofbound(nth))
       return ;
 
-    const uint32_t index = nth / M;
-    const uint32_t subindex = MODULO(nth, M);
+    const size_t index = nth / M;
+    const size_t subindex = MODULO(nth, M);
 
     if ((index < Collection<T, N, Block>::blocks()) && (subindex < M))
       {
         Collection<T, N, Block>::m_blocks[index]->m_marked[subindex / S]
-          &= ~(1 << (MODULO(subindex, S)));
+          &= ~(1_z << (MODULO(subindex, S)));
       }
   }
 
   //!
   void unmarkAll()
   {
-    uint32_t index = Collection<T, N, Block>::blocks();
+    size_t index = Collection<T, N, Block>::blocks();
     while (index--)
       {
         Collection<T, N, Block>::m_blocks[index]->clearMarks();

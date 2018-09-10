@@ -3,7 +3,7 @@
 // FIXME
 void GLExample04::setUniform(const char *name, Matrix44f const &mat)
 {
-  GLint id  = glCheck(glGetUniformLocation(m_shader, name));
+  GLint id  = glCheck(glGetUniformLocation(m_shader.getID(), name));
   glCheck(glUniformMatrix4fv(id, 1, GL_FALSE, &mat[0U][0U]));
 }
 

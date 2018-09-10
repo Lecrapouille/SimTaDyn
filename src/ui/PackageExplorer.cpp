@@ -105,7 +105,8 @@ void SceneGraphWindow::node(SceneNode_t* node)
     {
       m_entries[EntryNames::EntryLayerName].set_text(sheet->name());
       m_entries[EntryNames::EntryFilePath].set_text(sheet->path());
-      m_entries[EntryNames::EntryMapProjection].set_text(std::to_string(sheet->mapProjectionType()));
+      m_entries[EntryNames::EntryMapProjection].set_text(
+        std::to_string(static_cast<unsigned>(sheet->mapProjectionType())));
     }
   else
     {

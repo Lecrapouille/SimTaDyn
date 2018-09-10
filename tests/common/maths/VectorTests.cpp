@@ -70,8 +70,7 @@ void VectorTests::tearDown()
 void VectorTests::testCreator()
 {
   // Check the size
-  uint32_t size = (uint32_t) sizeof (Vector3f);
-  CPPUNIT_ASSERT_EQUAL(12U, size);
+  CPPUNIT_ASSERT_EQUAL(12_z, sizeof (Vector3f));
 
   // Check values passed to the constructor
   CHECK_NAN_VECTOR3F(dummy);
@@ -81,7 +80,7 @@ void VectorTests::testCreator()
   CHECK_VECTOR3F(v4, 4.0f, 5.0f, 6.0f);
   CHECK_VECTOR3F(v5, 1.0f, 2.0f, 3.0f);
   CHECK_VECTOR3F(v6, -4.0f, 5.0f, -6.0f);
-  CPPUNIT_ASSERT_EQUAL(3U, v1.size());
+  CPPUNIT_ASSERT_EQUAL(3_z, v1.size());
 
   // Check the union [x,y,z] == [r,g,b]
   CPPUNIT_ASSERT_EQUAL(v1.r, v1.x);

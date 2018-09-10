@@ -28,7 +28,7 @@ streamgui::streamgui(std::ostream &stream,
     m_buffer_size(buffer_size)
 {
   // Alloc buffer and set its boundaries
-  m_buffer = (char*) malloc(sizeof (char) * buffer_size);
+  m_buffer = static_cast<char*>(malloc(sizeof (char) * buffer_size));
   setp(m_buffer, m_buffer + buffer_size);
 
   // Save the old buffer stream and redirect the old stream

@@ -51,7 +51,7 @@ public:
     CPPUNIT_ASSERT_EQUAL(true, vao.needUpdate());
     CPPUNIT_ASSERT_EQUAL(false, vao.canBeReleased());
     CPPUNIT_ASSERT_EQUAL(0U, vao.m_handle);
-    CPPUNIT_ASSERT_EQUAL(true, 0U == vao);
+    CPPUNIT_ASSERT_EQUAL(true, 0U == vao.getID());
     CPPUNIT_ASSERT_EQUAL(0U, vao.m_target);
     CPPUNIT_ASSERT_EQUAL(0, vao.m_name.compare("VAO"));
     CPPUNIT_ASSERT_EQUAL(false, vao.isValid());
@@ -65,8 +65,8 @@ public:
     CPPUNIT_ASSERT_EQUAL(true, attrib.needSetup());
     CPPUNIT_ASSERT_EQUAL(true, attrib.needUpdate());
     CPPUNIT_ASSERT_EQUAL(false, attrib.canBeReleased());
-    CPPUNIT_ASSERT_EQUAL((GLenum) -1, attrib.m_handle);
-    CPPUNIT_ASSERT_EQUAL(true, -1 == attrib);
+    CPPUNIT_ASSERT_EQUAL(-1, attrib.m_handle);
+    CPPUNIT_ASSERT_EQUAL(true, -1 == attrib.getID());
     CPPUNIT_ASSERT_EQUAL(0U, attrib.m_target);
     CPPUNIT_ASSERT_EQUAL(0, attrib.m_name.compare("attrib"));
     CPPUNIT_ASSERT_EQUAL(false, attrib.isValid());
@@ -86,7 +86,7 @@ public:
     CPPUNIT_ASSERT_EQUAL(false, vao.needUpdate());
     CPPUNIT_ASSERT_EQUAL(true, vao.canBeReleased());
     CPPUNIT_ASSERT_EQUAL(0U, vao.m_handle);
-    CPPUNIT_ASSERT_EQUAL(true, 0 == vao);
+    CPPUNIT_ASSERT_EQUAL(true, 0 == vao.getID());
     CPPUNIT_ASSERT_EQUAL(0U, vao.m_target);
     CPPUNIT_ASSERT_EQUAL(0, vao.m_name.compare("VAO"));
     CPPUNIT_ASSERT_EQUAL(false, vao.isValid());
@@ -106,7 +106,7 @@ public:
     CPPUNIT_ASSERT_EQUAL(false, vao.needUpdate());
     CPPUNIT_ASSERT_EQUAL(true, vao.canBeReleased());
     CPPUNIT_ASSERT_EQUAL(1U, vao.m_handle);
-    CPPUNIT_ASSERT_EQUAL(true, 1U == vao);
+    CPPUNIT_ASSERT_EQUAL(true, 1U == vao.getID());
     CPPUNIT_ASSERT_EQUAL(0U, vao.m_target);
     CPPUNIT_ASSERT_EQUAL(0, vao.m_name.compare("VAO"));
     CPPUNIT_ASSERT_EQUAL(true, vao.isValid());
@@ -122,8 +122,8 @@ public:
     CPPUNIT_ASSERT_EQUAL(true, attrib.needSetup());
     CPPUNIT_ASSERT_EQUAL(true, attrib.needUpdate());
     CPPUNIT_ASSERT_EQUAL(true, attrib.canBeReleased());
-    CPPUNIT_ASSERT_EQUAL((GLenum) -1, attrib.m_handle);
-    CPPUNIT_ASSERT_EQUAL(true, -1 == attrib);
+    CPPUNIT_ASSERT_EQUAL(-1, attrib.m_handle);
+    CPPUNIT_ASSERT_EQUAL(true, -1 == attrib.getID());
     CPPUNIT_ASSERT_EQUAL(0U, attrib.m_target);
     CPPUNIT_ASSERT_EQUAL(0, attrib.m_name.compare("attrib"));
     CPPUNIT_ASSERT_EQUAL(false, attrib.isValid());

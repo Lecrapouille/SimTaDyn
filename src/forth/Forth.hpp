@@ -49,6 +49,7 @@ public:
   //! \brief Constructor with the reference of a Forth dictionary for
   //! an easier inheritance management.
   Forth(ForthDictionary& dico);
+  ~Forth() { }
   //! \brief Load all Forth primitives in the dictionary.
   virtual void boot();
   //! \brief interprete a new forth word extracted from a stream.

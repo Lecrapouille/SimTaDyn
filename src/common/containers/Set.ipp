@@ -22,14 +22,14 @@
 // **************************************************************
 //! \param elt is the element of type T to insert.
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
 void Set<T,N,Block>::append(T const& elt)
 {
   constexpr bool lazy_allocation = false;
 
   // Next element
-  m_subindex = MODULO(m_subindex + 1U, M);
+  m_subindex = MODULO(m_subindex + 1_z, M);
   m_index += !m_subindex;
   ++m_last;
 
@@ -53,9 +53,9 @@ void Set<T,N,Block>::append(T const& elt)
 //! \param nth the n'th element (index) of the IContainer we want
 //! to remove.
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
-void Set<T,N,Block>::remove(const uint32_t nth)
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
+void Set<T,N,Block>::remove(const size_t nth)
 {
   if (outofbound(nth))
     return ;
@@ -63,8 +63,8 @@ void Set<T,N,Block>::remove(const uint32_t nth)
   // Replace the nth 'th element by the last inserted element
   if (nth != m_last)
     {
-      const uint32_t id = nth / M;
-      const uint32_t sid = MODULO(nth, M);
+      const size_t id = nth / M;
+      const size_t sid = MODULO(nth, M);
 
       IContainer<T,N,Block>::m_blocks[id]->nth(sid) =
         IContainer<T,N,Block>::m_blocks[m_index]->nth(m_subindex);
@@ -80,8 +80,8 @@ void Set<T,N,Block>::remove(const uint32_t nth)
 // **************************************************************
 //!
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
 void Set<T,N,Block>::removeLast()
 {
   // Empty the last inserted element
@@ -91,7 +91,7 @@ void Set<T,N,Block>::removeLast()
   // IContainer<T,N,Block>::m_blocks[m_index]->tagAsPending(m_subindex, m_subindex);
 
   // Restore index
-  if ((0 == m_last) || (INITIAL_INDEX == m_last))
+  if ((0_z == m_last) || (INITIAL_INDEX == m_last))
     {
       m_index = m_subindex = m_last = INITIAL_INDEX;
     }
@@ -111,9 +111,9 @@ void Set<T,N,Block>::removeLast()
 //! \param index1 index of the 1st element to swap.
 //! \param index2 index of the 2nd element to swap.
 // **************************************************************
-template<typename T, const uint32_t N,
-         template<typename X, const uint32_t Y> class Block>
-bool Set<T,N,Block>::swap(const uint32_t index1, const uint32_t index2)
+template<typename T, const size_t N,
+         template<typename X, const size_t Y> class Block>
+bool Set<T,N,Block>::swap(const size_t index1, const size_t index2)
 {
   // Do not swapt itself
   if (index1 == index2)
@@ -123,10 +123,10 @@ bool Set<T,N,Block>::swap(const uint32_t index1, const uint32_t index2)
   if (outofbound(index2))
     return false;
 
-  const uint32_t id1 = index1 / M;
-  const uint32_t sid1 = MODULO(index1, M);
-  const uint32_t id2 = index2 / M;
-  const uint32_t sid2 = MODULO(index2, M);
+  const size_t id1 = index1 / M;
+  const size_t sid1 = MODULO(index1, M);
+  const size_t id2 = index2 / M;
+  const size_t sid2 = MODULO(index2, M);
 
   T elt = IContainer<T,N,Block>::m_blocks[id2]->nth(sid2);
   IContainer<T,N,Block>::m_blocks[id2]->nth(sid2) = IContainer<T,N,Block>::m_blocks[id1]->nth(sid1);

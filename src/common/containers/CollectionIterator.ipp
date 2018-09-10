@@ -143,5 +143,5 @@ protected:
   Collection<T, N, Block>* m_container;
 
   //! \brief the iterator.
-  uint32_t m_itr;
+  size_t m_itr;
 };
