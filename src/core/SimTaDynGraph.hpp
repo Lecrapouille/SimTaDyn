@@ -323,6 +323,7 @@ public:
 
   Node& addNode(const std::string formulae)
   {
+    std::cout << "SimTaDynGraph::addNode" << std::endl;
     Node& n = Graph<Node, Arc>::addNode();
     n.formulae(formulae);
     return n;

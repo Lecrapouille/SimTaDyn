@@ -26,9 +26,9 @@
 #  include "Inspector.hpp"
 #  include "DrawingArea.hpp"
 #  include "ToggleButtons.hpp"
-#  include "MapEditionTools.hpp"
 
 class LoaderManager;
+class MapEditionTools;
 
 // *************************************************************************************************
 //! \brief A class holding the currently edited by SimTaDynMap. When
@@ -200,23 +200,10 @@ public:
       }
   }
 
-  void button1PressEvent(const gdouble x, const gdouble y)
-  {
-    LOGD("Bouton1 click %d %d", static_cast<int>(x), static_cast<int>(y));
-    m_edition_tools[actionType()]->exec1(x, y);
-  }
+  void button1PressEvent(const gdouble x, const gdouble y);
+  void button2PressEvent(const gdouble x, const gdouble y);
+  void button3PressEvent(const gdouble x, const gdouble y);
 
-  void button2PressEvent(const gdouble x, const gdouble y)
-  {
-    LOGD("Bouton2 click %d %d", static_cast<int>(x), static_cast<int>(y));
-    m_edition_tools[actionType()]->exec2(x, y);
-  }
-
-  void button3PressEvent(const gdouble x, const gdouble y)
-  {
-    LOGD("Bouton3 click %d %d", static_cast<int>(x), static_cast<int>(y));
-    m_edition_tools[actionType()]->exec3(x, y);
-  }
 
   //! \brief Close the current map and activate the previous one (if
   //! present)

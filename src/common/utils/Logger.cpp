@@ -55,8 +55,6 @@ bool Logger::changeLog(std::string const& logfile)
 
 bool Logger::open(std::string const& logfile)
 {
-  std::cerr << "ICI " << config::tmp_path << std::endl;
-
   // Distinguish behavior between simple file and absolute path.
   std::string dir = File::dirName(logfile);
   std::string file(logfile);

@@ -19,6 +19,7 @@
 //=====================================================================
 
 #include "MapEditor.hpp"
+#include "MapEditionTools.hpp"
 #include <functional>
 
 // *************************************************************************************************
@@ -161,6 +162,25 @@ void MapEditor::onActionTypeSelected_(const ActionType id)
   LOGI("ActionTypeSelected %u", id);
   // TODO changer le curseur
 }
+
+  void  MapEditor::button1PressEvent(const gdouble x, const gdouble y)
+  {
+    std::cout << "MapEditor::Bouton1 click " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
+    m_edition_tools[actionType()]->exec1(x, y);
+  }
+
+  void  MapEditor::button2PressEvent(const gdouble x, const gdouble y)
+  {
+    std::cout << "MapEditor::Bouton2 click " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
+    m_edition_tools[actionType()]->exec2(x, y);
+  }
+
+  void  MapEditor::button3PressEvent(const gdouble x, const gdouble y)
+  {
+    std::cout << "MapEditor::Bouton3 click " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
+    m_edition_tools[actionType()]->exec3(x, y);
+  }
+
 
 // *************************************************************************************************
 //!

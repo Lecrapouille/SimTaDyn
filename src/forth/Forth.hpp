@@ -24,7 +24,6 @@
 //! \brief This file contains the root class for the Forth interpretor.
 //! containing other classes like dictionary and stream reader context.
 
-#  include "ForthStream.hpp"
 #  include "ForthDictionary.hpp"
 #  include "ForthClibrary.hpp"
 #  include <ostream>

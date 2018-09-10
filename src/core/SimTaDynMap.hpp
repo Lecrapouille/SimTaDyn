@@ -23,7 +23,6 @@
 
 #  include "SimTaDynSheet.hpp"
 #  include "SceneGraph.tpp"
-#  include "Resource.hpp"
 #  include <sigc++/sigc++.h>
 
 using SceneNode_t = SceneNode<SimTaDynSheet, float, 3U>;
@@ -138,6 +137,7 @@ public:
 
   //! \brief the map structured as a graph.
   SceneGraph<SimTaDynSheet, float, 3U> m_sheets; // FIXME *m_sheets ???
+  SimTaDynSheet m_sheet; //FIXME temporaire
 
   //! \brief List of Forth scripts.
   std::vector<std::string> m_scripts_forth;

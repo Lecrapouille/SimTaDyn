@@ -1,7 +1,7 @@
 #ifndef NONCPPSTD_HPP
 #  define NONCPPSTD_HPP
 
-#  include <cstdint>
+#  include <cstddef>
 
 //! \brief Allows to create literal values of type std::size_t
 //! In the same way than U, LL or UL macros. Indeed size_t can
