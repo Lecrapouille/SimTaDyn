@@ -1,21 +1,14 @@
 #ifndef EXAMPLE_01_HPP_
 #  define EXAMPLE_01_HPP_
 
-#  include "GLWindow.hpp"
-#  include "GLVertexArray.hpp"
-#  include "GLShader.hpp"
-#  include "GLVertexBuffer.hpp"
-#  include "GLTextures.hpp"
+#  include "OpenGL.hpp"
 
 class GLExample01: public IGLWindow
 {
 public:
 
   GLExample01()
-    : m_shader("Shader01"),
-      m_vao("VAO"),
-      m_pos("vert"),
-      m_col("color")
+    : m_quad("quad")
   {
   }
 
@@ -27,16 +20,11 @@ public:
   virtual bool setup() override;
   virtual bool draw() override;
 
-private:
-
-  void moveMe();
-
 public:
 
-  GLShader m_shader;
-  GLVertexArray m_vao;
-  GLVertexBuffer<float> m_pos;
-  GLVertexBuffer<float> m_col;
+  GLVertexShader   m_vs;
+  GLFragmentShader m_fs;
+  GLProgram        m_quad;
 };
 
 #  endif /* EXAMPLE_01_HPP_ */

@@ -23,13 +23,7 @@
 
 #  include <GL/glew.h>
 #  include <GLFW/glfw3.h>
-#  include "GLObject.hpp"
-
-// FIXME: move outside this code
-// Return the number of elements in an array
-#  ifndef ARRAY_SIZE
-#    define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
-#  endif
+#  include "GLException.hpp"
 
 // **************************************************************
 //! \brief
@@ -83,7 +77,6 @@ private:
   double m_lastFrameTime;
   int m_fps;
   float m_deltaTime;
-  bool m_opengl_context = false;
 
 protected:
 

@@ -19,24 +19,55 @@
 //=====================================================================
 
 #ifndef OPENGL_HPP
-#define OPENGL_HPP
+#  define OPENGL_HPP
 
-#  include "OpenGLException.hpp"
 #  include <GL/glew.h>
+#  include <GLFW/glfw3.h>
+#  include <cstdint>
 
-namespace SimTaDyn
+namespace opengl
 {
+  //! \brief Create an OpenGL context. Call it before drawing
+  //! primitives.
+  void  createContext();
 
+  //! \brief Return if the OpenGL has been created or has not been
+  //! created or has failed creating.
+  bool& hasCreatedContext();
+
+  //! \brief Allow to detect if the last OpenGL command succeeded or
+  //! not. In the case of failure an error is displayed and logged.
+  void  checkError(const char* file, uint32_t line, const char* expression);
+
+  //! Macro encapsuling the OpenGL command and the fault checker.
 #  ifdef CHECK_OPENGL
-#    define glCheck(expr) expr; SimTaDyn::glCheckError(__FILE__, __LINE__, #expr);
+#    define glCheck(expr) expr; opengl::checkError(SHORT_FILENAME, __LINE__, #expr);
 #  else
 #    define glCheck(expr) expr;
 #  endif
 
-  void glCheckError(const char* file, uint32_t line, const char* expression);
-  void glStartContext();
-  bool glIsFunctional();
+} // namespace opengl
 
-} // namespace
+#  include "IGLObject.hpp"
+#  include "GLVAO.hpp"
+#  include "GLVBO.hpp"
+#  include "GLTextures.hpp"
+#  include "GLVariables.tpp"
+#  include "GLShaders.hpp"
+#  include "GLProgram.hpp"
+#  include "GLImGUI.hpp"
+#  include "GLWindow.hpp"
+
+template<class T>
+inline void glBegin(T& obj)
+{
+  obj.begin();
+}
+
+template<class T>
+inline void glEnd(T& obj)
+{
+  obj.end();
+}
 
 #endif

@@ -1,110 +1,72 @@
 #include "Example01.hpp"
 
-//! \file Example01.cpp
-//! Draw a colorfull triangle and allow the user to move one its vertices.
-
-// Vertices for drawing a triangle
-static GLfloat vertexData[] =
-{
-  // X      Y     Z
-  0.0f,  0.8f, 0.0f,
- -0.8f, -0.8f, 0.0f,
-  0.8f, -0.8f, 0.0f,
-};
-
-// Color for each triangle vertices
-static GLfloat colorData[] =
-{
-  // R     G     B
-  1.0f, 0.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 0.0f, 1.0f,
-};
-
 bool GLExample01::setup()
 {
-  LOGI("GLExample01::setup()");
+  LOGE("GLExample01::setup");
+  m_vs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
+  m_fs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
+  std::cout << "VS: " << m_vs.gpuID() << std::endl;
+  std::cout << "FS: " << m_fs.gpuID() << std::endl;
 
-  // Copy arrays inside the VBO class
-  m_pos.add(vertexData, ARRAY_SIZE(vertexData));
-  m_col.add(colorData, ARRAY_SIZE(colorData));
+  m_quad.attachShader(m_vs).attachShader(m_fs);
+  m_quad.begin();
 
-  // Compile a shader program
-  if (0U == m_shader.load("Example01.vertex", "Example01.fragment"))
-    return false;
-
-  // Tell to OpenGL how to manage VBO values. This fixes the size
-  // of the VBO container to its current capacity (ie. now the VBO
-  // size no longer be larger): the GPU have allocated static memory.
-  m_pos.setup(m_shader, 3, GL_FLOAT);
-  m_col.setup(m_shader, 3, GL_FLOAT);
-
-  //for (uint32_t i = 0U; i < 9U; ++i)
-  //  {
-  //    std::cout << m_pos.m_data[i] << std::endl;
-  //  }
-
-  m_shader.start();
-  {
-    // Bind VBOs to the VAO. It's now enough for drawing primitives.
-    m_vao.start();
+  if (!m_quad.hasUniform("scale"))
     {
-      m_pos.start();
-      m_col.start();
+      std::cout << "perdu" << std::endl;
+      return false;
     }
-    m_vao.stop();
-  }
-  m_shader.stop();
+
+  std::cout << m_quad["scale"].name() << std::endl;
+  std::cout << typeid(m_quad["scale"]).name() << std::endl;
+
+  /*
+  ** TODO: m_quad["scale"] = 4.0f;
+  ** GLUniform<float> &scale = m_quad["scale"];
+  ** scale = 2.0f;
+  */
+
+  //std::cout << "AVANT " << m_quad.getUniformVal<float>("scale") << std::endl;
+  m_quad.setUniformVal("scale", 4.0f);
+  std::cout << "Apres " << m_quad.getUniformVal<float>("scale") << std::endl;
+  m_quad.uniform<float>("scale") = 2.0f;
+  std::cout << "Apres " << m_quad.getUniformVal<float>("scale") << std::endl;
+
+  /*
+  ** m_quad["color"] = {
+  **   Vector4f(1, 0, 0, 1), Vector4f(0, 1, 0, 1),
+  **   Vector4f(0, 0, 1, 1), Vector4f(1, 1, 0, 1)
+  ** };
+  */
+
+  GLVertexBuffer<Vector4f> vbo("gg");
+  vbo.qq = { Vector4f(4.0f), Vector4f(3.0f), Vector4f(2.0f) };
+  std::cout << vbo.qq << std::endl;
+
+  m_quad.attribute<Vector4f>("color")/*.data().qq*/ =
+    {
+      Vector4f(1, 0, 0, 1), Vector4f(0, 1, 0, 1),
+      Vector4f(0, 0, 1, 1), Vector4f(1, 1, 0, 1)
+    };
+
+  std::cout << "COLOR: " << m_quad.attribute<Vector4f>("color").cdata().qq << std::endl;
+
+  m_quad.attribute<Vector2f>("position") =
+    {
+      Vector2f(-1, -1), Vector2f(-1, +1),
+      Vector2f(+1, -1), Vector2f(+1, +1)
+    };
+
   return true;
 }
 
-// Allow the user to displace one vertex with
-// UP/DOWN key of the keyboard. Vertices new
-// positions are automaticly updated to the GPU
-// with the ::start() method.
-void GLExample01::moveMe()
-{
-  const float deltaTime = dt();
-
-  if (glfwGetKey(m_window, GLFW_KEY_UP))
-    {
-      m_pos[0] += deltaTime / 2.0f;
-    }
-  else if (glfwGetKey(m_window, GLFW_KEY_DOWN))
-    {
-      m_pos[0] -= deltaTime / 2.0f;
-    }
-  else
-    {
-      // Do nothing
-    }
-}
-
-// Draw the triangle
 bool GLExample01::draw()
 {
-  LOGI("GLExample01::draw()");
-
+  LOGE("GLExample01::draw");
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-  m_shader.start();
-  {
-    m_vao.start();
-    {
-      m_pos.start();
-      m_col.start();
-
-      moveMe();
-
-      glCheck(glDrawArrays(GL_TRIANGLES, 0, 3));
-
-      m_col.stop();
-      m_pos.stop();
-    }
-    m_vao.stop();
-  }
-  m_shader.stop();
+  m_quad.draw(GL_TRIANGLE_STRIP, 0, 4);
 
   return true;
 }

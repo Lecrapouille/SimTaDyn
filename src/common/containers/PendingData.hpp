@@ -42,6 +42,14 @@ public:
     clearPending();
   }
 
+  //! \brief Empty constructor: no pending data.
+  PendingData(size_t pos_start, size_t pos_end)
+  {
+    assert(pos_start <= pos_end);
+    m_pending_start = pos_start;
+    m_pending_end = pos_end;
+  }
+
   //! \brief Pure virtual destructor, but with a definition. The class
   //! will be abstract, but any inheriting classes will not by default
   //! be abstract.
@@ -66,8 +74,23 @@ public:
     }
     else
     {
-      pos_start = 0;
-      pos_end = 0;
+      pos_start = 0_z;
+      pos_end = 0_z;
+    }
+  }
+
+  //! \brief Return the smallest contiguous area that needs to be
+  //! uploaded. If there is no pending data, pos_start will be set to
+  //! -1. You can call hasPendingData() before this method.
+  std::pair<size_t, size_t> getPendingData() const
+  {
+    if (hasPendingData())
+    {
+      return std::make_pair(m_pending_start, m_pending_end);
+    }
+    else
+    {
+      return std::make_pair(0_z, 0_z);
     }
   }
 

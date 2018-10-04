@@ -21,40 +21,37 @@
 #ifndef GL_VERTEX_ARRAY_HPP_
 #  define GL_VERTEX_ARRAY_HPP_
 
-#  include "GLObject.hpp"
+#  include "IGLObject.hpp"
 
-class GLVertexArray: public GLObject<GLenum>
+class GLVAO: public IGLObject<GLenum>
 {
 public:
 
   //! \brief Empty constructor without name
-  GLVertexArray()
-    : GLObject()
+  GLVAO()
+    : IGLObject()
   {
   }
 
   //! \brief Constructor with the object name
-  GLVertexArray(std::string const& name)
-    : GLObject(name)
+  GLVAO(std::string const& name)
+    : IGLObject(name)
   {
   }
 
   //! \brief Constructor with the object name
-  GLVertexArray(const char *name)
-    : GLObject(name)
+  GLVAO(const char *name)
+    : IGLObject(name)
   {
   }
 
-  //! \brief Destructor: release data from the GPU and CPU memory.
-  virtual ~GLVertexArray()
-  {
-    destroy();
-  }
+  virtual ~GLVAO() override { destroy(); }
 
-protected:
+private:
 
   virtual bool create() override
   {
+    LOGD("VAO '%s' create", name().c_str());
     glCheck(glGenVertexArrays(1, &m_handle));
     return false;
   }
@@ -66,11 +63,13 @@ protected:
 
   virtual void activate() override
   {
+    LOGD("VAO '%s' activate", name().c_str());
     glCheck(glBindVertexArray(m_handle));
   }
 
   virtual void deactivate() override
   {
+    LOGD("VAO '%s' deactivate", name().c_str());
     glCheck(glBindVertexArray(0U));
   }
 

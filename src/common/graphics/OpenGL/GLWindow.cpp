@@ -19,6 +19,8 @@
 //=====================================================================
 
 #include "GLWindow.hpp"
+#include "OpenGL.hpp" //FIXME
+#include <sstream>
 
 static void onError(int /*errorCode*/, const char* msg)
 {
@@ -27,12 +29,13 @@ static void onError(int /*errorCode*/, const char* msg)
 
 IGLWindow::IGLWindow()
 {
+  opengl::hasCreatedContext() = false; // FIXME
 }
 
 /* Close OpenGL window and terminate GLFW */
 IGLWindow::~IGLWindow()
 {
-  if (m_opengl_context)
+  if (opengl::hasCreatedContext())
     {
       release();
       glfwTerminate();
@@ -67,7 +70,7 @@ void IGLWindow::FPS()
 
 bool IGLWindow::start()
 {
-  if (m_opengl_context)
+  if (opengl::hasCreatedContext())
     {
       std::cerr << "Warning you called twice start(). "
                 << "OpenGL context already created"
@@ -128,11 +131,15 @@ bool IGLWindow::start()
   glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
   try
     {
+      // This is an awful hack but this is to be sure to flush OpenGL
+      // errors before using this function on real OpenGL routines else a
+      // fake error is returned on the first OpenGL routines while valid.
+      glGetError();
       res = setup();
     }
   catch (const OpenGLException& e)
     {
-      LOGIS("%s", e.message().c_str());
+      std::cerr << e.message() << std::endl;
       res = false;
     }
 
@@ -148,7 +155,7 @@ bool IGLWindow::start()
   m_lastFrameTime = m_lastTime;
   m_fps = 0;
 
-  m_opengl_context = true;
+  opengl::hasCreatedContext() = true;
 
 l_update:
   update();
@@ -177,6 +184,6 @@ void IGLWindow::update()
     }
   catch (const OpenGLException& e)
     {
-      LOGIS("%s", e.message().c_str());
+      std::cerr << e.message() << std::endl;
     }
 }

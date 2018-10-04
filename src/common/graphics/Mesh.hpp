@@ -45,7 +45,7 @@ public:
   {
   }
 
-  bool setup(GLShader &shader)
+  bool setup(_GLShader &shader)
   {
     m_shader = &shader;
 
@@ -96,7 +96,7 @@ public:
   //GLVertexBuffer<float> m_col;
   GLVertexBuffer<float> m_tex;
   GLTexture2D m_texture;
-  GLShader *m_shader;
+  _GLShader *m_shader;
 
 protected:
 

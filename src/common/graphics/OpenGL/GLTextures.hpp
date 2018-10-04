@@ -21,35 +21,34 @@
 #ifndef GLTEXTURES_HPP_
 #  define GLTEXTURES_HPP_
 
-#  include "GLObject.hpp"
-#  include "Resource.hpp"
+#  include "IGLObject.hpp"
+//#  include "Resource.hpp"
 #  include "PendingData.hpp"
-#  include "SOIL.h"
+#  include "SOIL/SOIL.h"
 
 // **************************************************************
 //
 // **************************************************************
-class GLTexture
-  : public GLObject<GLenum>,
-    public Resource,
+class IGLTexture
+  : public IGLObject<GLenum>,
+    //public Resource,
     protected PendingData
 {
 public:
 
-  GLTexture(const GLenum target)
-    : GLObject()
+  IGLTexture(const GLenum target)
+    : IGLObject()
   {
     m_target = target;
   }
 
-  GLTexture(std::string const& name, const GLenum target)
-    : GLObject(name)
+  IGLTexture(std::string const& name, const GLenum target)
+    : IGLObject(name)
   {
     m_target = target;
   }
 
-  //! \brief Destructor: release data from the GPU and CPU memory.
-  virtual ~GLTexture()
+  virtual ~IGLTexture()
   {
     destroy();
   }
@@ -58,26 +57,39 @@ public:
   {
     m_min_filter = min_filter;
     m_mag_filter = mag_filter;
-    m_need_setup = true;
+    redoSetup();
   }
 
   void interpolation(const float min_filter)
   {
     m_min_filter = min_filter;
     m_mag_filter = min_filter;
-    m_need_setup = true;
+    redoSetup();
   }
 
   void wrapping(const float wrap)
   {
     m_wrapping = wrap;
-    m_need_setup = true;
+    redoSetup();
   }
 
-  // TODO:
-  // virtual bool load(std::string const& filename, const bool rename = false) = 0;
-
 protected:
+
+  void applyParam()
+  {
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, m_min_filter));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, m_mag_filter));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_S, m_wrapping));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_T, m_wrapping));
+    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+  }
+
+private:
+
+  virtual inline bool needUpdate() const override
+  {
+    return PendingData::hasPendingData();
+  }
 
   virtual bool create() override
   {
@@ -102,12 +114,7 @@ protected:
 
   virtual bool setup() override
   {
-    activate();
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, m_min_filter));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, m_mag_filter));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_S, m_wrapping));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_T, m_wrapping));
-    glCheck(glTexParameterf(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+    applyParam();
     return false;
   }
 
@@ -119,26 +126,31 @@ protected:
 // **************************************************************
 //!
 // **************************************************************
-class GLTexture2D: public GLTexture
+class GLTexture2D: public IGLTexture
 {
 public:
 
   GLTexture2D()
-    : GLTexture(GL_TEXTURE_2D)
+    : IGLTexture(GL_TEXTURE_2D)
   {
   }
 
   GLTexture2D(std::string const& name)
-    : GLTexture(name, GL_TEXTURE_2D)
+    : IGLTexture(name, GL_TEXTURE_2D)
   {
   }
 
   virtual ~GLTexture2D()
   {
-    if (nullptr != m_buffer)
+    if (likely(nullptr != m_buffer))
       {
         SOIL_free_image_data(m_buffer);
       }
+  }
+
+  inline bool loaded() const
+  {
+    return nullptr != m_buffer;
   }
 
   inline bool load(std::string const& filename, const bool rename = false)
@@ -159,13 +171,13 @@ public:
     m_buffer = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA);
 
     // Success
-    if (nullptr != m_buffer)
+    if (likely(nullptr != m_buffer))
       {
         m_width = static_cast<uint32_t>(width);
         m_height = static_cast<uint32_t>(height);
-        if (rename || m_name.empty())
+        if (rename || name().empty())
           {
-            m_name = filename;
+            name() = filename;
           }
         PendingData::tagAsPending(0U, m_width * m_height);
         LOGI("Successfuly load picture file '%s'", filename);
@@ -173,20 +185,20 @@ public:
       }
     else
       {
-        if (m_throw_enable)
+        /*if (m_throw_enable)
           {
             std::string msg("Failed loading picture file '");
             msg += filename; msg += "'";
             OpenGLException e(msg);
             throw e;
           }
-        else
+          else*/
           {
             LOGES("Failed loading picture file '%s'", filename);
             res = false;
           }
       }
-    m_need_update = (nullptr != m_buffer);
+
     return res;
   }
 
@@ -216,21 +228,19 @@ public:
     return m_height;
   }
 
-protected:
+private:
 
   virtual bool setup() override
   {
-    bool b = GLTexture::setup();
+    if (unlikely(!loaded()))
+      return true;
+
+    applyParam();
     glCheck(glTexImage2D(m_target, 0, m_gpu_format,
                          static_cast<GLsizei>(m_width),
                          static_cast<GLsizei>(m_height),
                          0, m_cpu_format, m_type, m_buffer));
-    return b;
-  }
-
-  virtual inline bool needUpdate() const override
-  {
-    return PendingData::hasPendingData();
+    return false;
   }
 
   virtual bool update() override
@@ -239,7 +249,9 @@ protected:
     size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);
 
-    // FIXME: TODO pendingData --> x,y,width,height
+    // FIXME: pour le moment on envoie toute la texture entiere
+    // au lieu du rectangle modifie.
+    // TODO pendingData --> x,y,width,height
     const GLint x = 0U;
     const GLint y = 0U;
     const GLsizei width = static_cast<GLsizei>(m_width);
@@ -258,18 +270,19 @@ protected:
   GLenum m_cpu_format = GL_RGBA;
   GLint m_gpu_format = GL_RGBA;
   GLenum m_type = GL_UNSIGNED_BYTE;
+  // TODO smart pointer + deleter=SOIL_free_image_data
   unsigned char* m_buffer = nullptr;
 };
 
 // **************************************************************
 //!
 // **************************************************************
-class GLTextureDepth2D: public GLTexture2D
+/*class GLTextureDepth2D: public GLTexture2D
 {
   GLTextureDepth2D()
     : GLTexture2D()
   {
-    m_gpu_format = GL_DEPTH_COMPONENT;
+    m_gpu_format = GL_DEPTH_COMPONENT; // FIXME incompatible avec load() ??
     m_cpu_format = GL_DEPTH_COMPONENT;
   }
 
@@ -279,6 +292,6 @@ class GLTextureDepth2D: public GLTexture2D
     m_gpu_format = GL_DEPTH_COMPONENT;
     m_cpu_format = GL_DEPTH_COMPONENT;
   }
-};
+  };*/
 
 #endif /* GLTEXTURES_HPP_ */
