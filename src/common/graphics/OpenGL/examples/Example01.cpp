@@ -29,7 +29,7 @@ bool GLExample01::setup()
   //std::cout << "AVANT " << m_quad.getUniformVal<float>("scale") << std::endl;
   m_quad.setUniformVal("scale", 4.0f);
   std::cout << "Apres " << m_quad.getUniformVal<float>("scale") << std::endl;
-  m_quad.uniform<float>("scale") = 2.0f;
+  m_quad.uniform<float>("scale") = 1.0f;
   std::cout << "Apres " << m_quad.getUniformVal<float>("scale") << std::endl;
 
   /*
@@ -66,7 +66,7 @@ bool GLExample01::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
 
-  m_quad.draw(GL_TRIANGLE_STRIP, 0, 4);
+  m_quad.draw(GL_TRIANGLES, 0, 4);
 
   return true;
 }

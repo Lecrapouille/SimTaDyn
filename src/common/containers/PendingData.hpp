@@ -22,7 +22,7 @@
 #  define PENDINGDATA_HPP_
 
 #  include "Maths.hpp"
-
+#  include "Logger.hpp"
 // **************************************************************
 //! \brief Define an interface class keeping track of the smallest
 //! contiguous area that have been changed and needs to be
@@ -42,12 +42,10 @@ public:
     clearPending();
   }
 
-  //! \brief Empty constructor: no pending data.
-  PendingData(size_t pos_start, size_t pos_end)
+  //! \brief Constructor: number of elements of the container.
+  PendingData(size_t nb_elt)
   {
-    assert(pos_start <= pos_end);
-    m_pending_start = pos_start;
-    m_pending_end = pos_end;
+    clearPending(nb_elt);
   }
 
   //! \brief Pure virtual destructor, but with a definition. The class
@@ -99,6 +97,20 @@ public:
   {
     m_pending_start = c_initial_position;
     m_pending_end = c_initial_position;
+  }
+
+  void clearPending(size_t nb_elt)
+  {
+    if (0_z == nb_elt)
+    {
+      m_pending_start = c_initial_position;
+      m_pending_end = c_initial_position;
+    }
+    else
+    {
+      m_pending_start = 0_z;
+      m_pending_end = nb_elt - 1_z;
+    }
   }
 
   //! \brief Update the range indexes of changed elements with a new range.

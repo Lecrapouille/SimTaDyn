@@ -106,6 +106,7 @@ private:
   virtual bool create() override
   {
     m_handle = glCheck(glGetAttribLocation(m_program, name().c_str()));
+    LOGD("Attrib '%s' create %d", name().c_str(), m_handle);
     return false;
   }
 
@@ -116,7 +117,7 @@ private:
   virtual void activate() override
   {
     LOGD("Attrib '%s' activate %d", name().c_str(), m_handle);
-    m_data.activate();
+    m_data.begin();
     glCheck(glEnableVertexAttribArray(m_handle));
     glCheck(glVertexAttribPointer(m_handle,
                                   m_data.qq.size(),
@@ -129,7 +130,7 @@ private:
   virtual void deactivate() override
   {
     LOGD("Attrib '%s' deactivate", name().c_str());
-    m_data.deactivate();
+    m_data.end();
     if (isValid() /* && m_data.isVBO() */)
       {
         glCheck(glDisableVertexAttribArray(m_handle));
@@ -143,9 +144,9 @@ private:
 
   virtual bool update() override
   {
-    LOGD("Attrib '%s' update", name().c_str());
+    //LOGD("Attrib '%s' update", name().c_str());
     //setValue(m_data);
-    m_data.update();
+    //m_data.update();
     return false;
   }
 

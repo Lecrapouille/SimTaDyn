@@ -145,10 +145,13 @@ public:
 
   inline void draw(GLenum mode, GLint first, GLsizei count)
   {
+    LOGD("%s: draw", name().c_str());
+    m_vao.begin();
     begin();
     glCheck(glDrawArrays(mode, first, count));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
+    m_vao.end();
   }
 
   /*inline void draw(GLenum mode)
@@ -385,23 +388,19 @@ private:
         printf("Attribute #%d Type: %u Name: %s\n", i, type, name);
         if (GL_FLOAT == type) // FIXME leak
           {
-            m_variables[name] = new GLAttribute<float>(name, type, gpuID());
+            m_variables[name] = new GLAttribute<float>(name, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC2 == type)
           {
-            m_variables[name] = new GLAttribute<Vector2f>(name, type, gpuID());
+            m_variables[name] = new GLAttribute<Vector2f>(name, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC3 == type)
           {
-            auto p = new GLAttribute<Vector3f>(name, type, gpuID());
-            printf("New Attrib V3f %p\n", p);
-            m_variables[name] = p;
+            m_variables[name] = new GLAttribute<Vector3f>(name, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC4 == type)
           {
-            auto p = new GLAttribute<Vector4f>(name, type, gpuID());
-            printf("New Attrib V4f %s: %p\n", name, p);
-            m_variables[name] = p;
+            m_variables[name] = new GLAttribute<Vector4f>(name, GL_FLOAT, gpuID());
           }
       }
     m_indexed = true;

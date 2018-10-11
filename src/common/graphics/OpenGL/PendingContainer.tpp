@@ -36,16 +36,16 @@ public:
 
   ~PendingContainer() {}
   PendingContainer() : PendingData() {}
-  explicit PendingContainer(std::size_t count) : PendingData(0_z, count), m_container(count) {}
-  PendingContainer(const T& val, std::size_t count) : PendingData(0_z, count), m_container(val, count) {}
-  PendingContainer(const T* vals, std::size_t count) : PendingData(0_z, count), m_container(vals, count) {}
-  PendingContainer(const std::valarray<T>& other) : PendingData(0_z, other.size()), m_container(other) {}
-  PendingContainer(std::valarray<T>&& other) noexcept : PendingData(0_z, other.size()), m_container(other) {}
-  PendingContainer(const std::slice_array<T>& sa) : PendingData(0_z, sa.size()), m_container(sa) {}
-  PendingContainer(const std::gslice_array<T>& ga) : PendingData(0_z, ga.size()), m_container(ga) {}
-  PendingContainer(const std::mask_array<T>& ma) : PendingData(0_z, ma.size()), m_container(ma) {}
-  PendingContainer(const std::indirect_array<T>& ia) : PendingData(0_z, ia.size()), m_container(ia) {}
-  PendingContainer(std::initializer_list<T> il) : PendingData(0_z, il.size()), m_container(il) {}
+  explicit PendingContainer(std::size_t count) : PendingData(count), m_container(count) {}
+  PendingContainer(const T& val, std::size_t count) : PendingData(count), m_container(val, count) {}
+  PendingContainer(const T* vals, std::size_t count) : PendingData(count), m_container(vals, count) {}
+  PendingContainer(const std::valarray<T>& other) : PendingData(other.size()), m_container(other) {}
+  PendingContainer(std::valarray<T>&& other) noexcept : PendingData(other.size()), m_container(other) {}
+  PendingContainer(const std::slice_array<T>& sa) : PendingData(sa.size()), m_container(sa) {}
+  PendingContainer(const std::gslice_array<T>& ga) : PendingData(ga.size()), m_container(ga) {}
+  PendingContainer(const std::mask_array<T>& ma) : PendingData(ma.size()), m_container(ma) {}
+  PendingContainer(const std::indirect_array<T>& ia) : PendingData(ia.size()), m_container(ia) {}
+  PendingContainer(std::initializer_list<T> il) : PendingData(il.size()), m_container(il) {}
 
   inline const T& operator[](size_t n) const { return m_container.operator[](n); }
   inline T& operator[](size_t n) { tagAsPending(n); return m_container.operator[](n); }
@@ -91,63 +91,63 @@ public:
   inline T max() const { return m_container.max(); }
 
   inline std::valarray<T>& operator*=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator*=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator*=(rhs); }
   inline std::valarray<T>& operator/=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator/=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator/=(rhs); }
   inline std::valarray<T>& operator%=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator%=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator%=(rhs); }
   inline std::valarray<T>& operator+=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator+=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator+=(rhs); }
   inline std::valarray<T>& operator-=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator-=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator-=(rhs); }
   inline std::valarray<T>& operator^=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator^=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator^=(rhs); }
   inline std::valarray<T>& operator&=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator&=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator&=(rhs); }
   inline std::valarray<T>& operator|=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator|=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator|=(rhs); }
   inline std::valarray<T>& operator<<=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator<<=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator<<=(rhs); }
   inline std::valarray<T>& operator>>=(const std::valarray<T>& rhs)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator>>=(rhs); }
+  { clearPending(m_container.size()); return m_container.operator>>=(rhs); }
 
   inline std::valarray<T>& operator*=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator*=(val); }
+  { clearPending(m_container.size()); return m_container.operator*=(val); }
   inline std::valarray<T>& operator/=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator/=(val); }
+  { clearPending(m_container.size()); return m_container.operator/=(val); }
   inline std::valarray<T>& operator%=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator%=(val); }
+  { clearPending(m_container.size()); return m_container.operator%=(val); }
   inline std::valarray<T>& operator+=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator+=(val); }
+  { clearPending(m_container.size()); return m_container.operator+=(val); }
   inline std::valarray<T>& operator-=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator-=(val); }
+  { clearPending(m_container.size()); return m_container.operator-=(val); }
   inline std::valarray<T>& operator^=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator^=(val); }
+  { clearPending(m_container.size()); return m_container.operator^=(val); }
   inline std::valarray<T>& operator&=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator&=(val); }
+  { clearPending(m_container.size()); return m_container.operator&=(val); }
   inline std::valarray<T>& operator|=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator|=(val); }
+  { clearPending(m_container.size()); return m_container.operator|=(val); }
   inline std::valarray<T>& operator<<=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator<<=(val); }
+  { clearPending(m_container.size()); return m_container.operator<<=(val); }
   inline std::valarray<T>& operator>>=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator>>=(val); }
+  { clearPending(m_container.size()); return m_container.operator>>=(val); }
 
   inline std::valarray<T>& operator=(const std::valarray<T>& other)
-  { tagAsPending(0_z, other.size()); return m_container.operator=(other); }
+  { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(std::valarray<T>&& other) noexcept
-  { tagAsPending(0_z, other.size()); return m_container.operator=(other); }
+  { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(const T& val)
-  { tagAsPending(0_z, m_container.size()); return m_container.operator=(val); }
+  { clearPending(m_container.size()); return m_container.operator=(val); }
   inline std::valarray<T>& operator=(const std::slice_array<T>& other)
-  { tagAsPending(0_z, other.size()); return m_container.operator=(other); }
+  { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(const std::gslice_array<T>& other)
-  { tagAsPending(0_z, other.size()); return m_container.operator=(other); }
+  { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(const std::mask_array<T>& other)
-  { tagAsPending(0_z, other.size()); return m_container.operator=(other); }
+  { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(const std::indirect_array<T>& other)
-  { tagAsPending(0_z, other.size()); return m_container.operator=(other); }
+  { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(std::initializer_list<T> il)
-  { tagAsPending(0_z, il.size()); return m_container.operator=(il); }
+  { clearPending(il.size()); return m_container.operator=(il); }
 
   std::valarray<T> m_container;
 };

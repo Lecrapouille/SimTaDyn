@@ -58,21 +58,25 @@ public:
   virtual bool create() override
   {
     glCheck(glGenBuffers(1, &m_handle));
+    LOGD("VBO '%s' create %d", name().c_str(), m_handle);
     return false;
   }
 
   virtual void release() override
   {
+    LOGD("VBO '%s' release", name().c_str());
     glCheck(glDeleteBuffers(1, &m_handle));
   }
 
   virtual void activate() override
   {
+    LOGD("VBO '%s' activate", name().c_str());
     glCheck(glBindBuffer(m_target, m_handle));
   }
 
   virtual void deactivate() override
   {
+    LOGD("VBO '%s' deactivate", name().c_str());
     glCheck(glBindBuffer(m_target, 0));
   }
 
@@ -80,6 +84,7 @@ public:
   {
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
       (qq.capacity() * sizeof (T));
+    LOGD("VBO '%s' setup for %u elements %u", name().c_str(), qq.capacity(), bytes);
 
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
 
@@ -88,17 +93,21 @@ public:
 
   virtual inline bool needUpdate() const override
   {
-    return qq.hasPendingData();
+bool tt = qq.hasPendingData();
+   LOGD("VBO needUpdate %d", tt);
+    return tt;
   }
 
   virtual bool update() override
   {
+    LOGD("VBO '%s' update", name().c_str());
     size_t pos_start, pos_end;
     qq.getPendingData(pos_start, pos_end);
     qq.clearPending();
-
+LOGD("VBO::update: Pending %u %u", pos_start, pos_end);
     size_t offset = sizeof (T) * pos_start;
     size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
+LOGD("VBO::update: off %u byte %u", offset, nbytes);
     glCheck(glBufferSubData(m_target,
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),

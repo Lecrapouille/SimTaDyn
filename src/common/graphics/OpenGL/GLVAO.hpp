@@ -51,8 +51,8 @@ private:
 
   virtual bool create() override
   {
-    LOGD("VAO '%s' create", name().c_str());
     glCheck(glGenVertexArrays(1, &m_handle));
+    LOGD("VAO '%s' create %d", name().c_str(), m_handle);
     return false;
   }
 
