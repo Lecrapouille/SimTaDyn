@@ -107,7 +107,7 @@ public:
     if (nullptr == p)
       {
         throw std::out_of_range("Name '" + std::string(name) +
-         "' is not an valid shader variable (or your failed with its template)");
+                                "' is not an valid shader variable (or your failed with its template)");
       }
     return *p;
   }
@@ -135,23 +135,24 @@ public:
   }
 
   /*inline IGLVariable const& operator[](std::string const& name) const
-  {
+    {
     if (m_variables.end() == m_variables.find(name))
-      {
-        throw std::out_of_range("Name '" + name + "' is not an shader variable");
-      }
+    {
+    throw std::out_of_range("Name '" + name + "' is not an shader variable");
+    }
     return *m_variables[name];
     }*/
 
   inline void draw(GLenum mode, GLint first, GLsizei count)
   {
-    LOGD("%s: draw", name().c_str());
-    m_vao.begin();
+    LOGD("%s: draw {", name().c_str());
+    m_vao.begin(); // FIXME
     begin();
     glCheck(glDrawArrays(mode, first, count));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
     m_vao.end();
+    LOGD("} %s: draw", name().c_str());
   }
 
   /*inline void draw(GLenum mode)
@@ -182,16 +183,11 @@ protected:
   //! been loaded into a program (else nothing is done).
   virtual void activate() override
   {
+    LOGD("%s: activate {", name().c_str());
     if (!needSetup()) // FIXME or call glUseProgram(0) is setup()
       {
-        LOGD("%s: activate", name().c_str());
-        glCheck(glUseProgram(m_handle));
-
         m_vao.begin();
-        for (auto& it: m_variables)
-          {
-            it.second->begin();
-          }
+        glCheck(glUseProgram(m_handle));
         for (auto& it: m_variables)
           {
             it.second->begin();
@@ -201,11 +197,12 @@ protected:
       {
         LOGD("%s: failed activate: need setup", name().c_str());
       }
+    LOGD("} %s: activate", name().c_str());
   }
 
   virtual bool setup() override
   {
-    LOGD("%s: setup", name().c_str());
+    LOGD("%s: setup {", name().c_str());
     // --- Check if we have scripts of vertex and frag shaders
     if (!m_vertex_shader.loaded())
       {
@@ -268,6 +265,7 @@ protected:
     // --- Detach shaders
     LOGD("Detach shaders");
     detachAllShaders();
+    LOGD("} %s: setup", name().c_str());
     return false;
 
   l_try_again:
@@ -279,7 +277,7 @@ protected:
 
   virtual bool update() override
   {
-    LOGD("%s: update", name().c_str());
+    //LOGD("%s: update", name().c_str());
     return false;
   }
 
@@ -287,17 +285,14 @@ protected:
   //! been loaded into a program (else nothing is done).
   virtual void deactivate() override
   {
-    LOGD("%s: deactivate", name().c_str());
+    LOGD("%s: deactivate {", name().c_str());
     glCheck(glUseProgram(0U));
     for (auto& it: m_variables)
       {
         it.second->end();
       }
-    for (auto& it: m_variables)
-      {
-        it.second->end();
-      }
     m_vao.end();
+    LOGD("} %s: deactivate", name().c_str());
   }
 
   //! \brief Once program is no longer used, release it from the GPU
@@ -342,67 +337,95 @@ private:
     GLint count = 0;
     GLchar name[bufSize];
     GLenum type;
+    IGLVariable* glvariable;
 
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     m_total = count;
-    printf("Active Uniforms: %d\n", count);
+    LOGD("Number of Uniforms: %d", count);
     for (GLint i = 0; i < count; ++i)
       {
         glCheck(glGetActiveUniform(m_handle, (GLuint)i, bufSize, &length, &size, &type, name));
-        printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
+        LOGD("Uniform #%d Type: %u Name: %s", i, type, name);
         if (GL_FLOAT == type) // FIXME leak
-          m_variables[name] = new GLUniform<float>(name, type, gpuID());
+          glvariable = new GLUniform<float>(name, type, gpuID());
         else if (GL_FLOAT_VEC2 == type)
-          m_variables[name] = new GLUniform<Vector2f>(name, type, gpuID());
+          glvariable = new GLUniform<Vector2f>(name, type, gpuID());
         else if (GL_FLOAT_VEC3 == type)
-          m_variables[name] = new GLUniform<Vector3f>(name, type, gpuID());
+          glvariable = new GLUniform<Vector3f>(name, type, gpuID());
         else if (GL_FLOAT_VEC4 == type)
-          m_variables[name] = new GLUniform<Vector4f>(name, type, gpuID());
+          glvariable = new GLUniform<Vector4f>(name, type, gpuID());
         else if (GL_INT == type)
-          m_variables[name] = new GLUniform<int>(name, type, gpuID());
+          glvariable = new GLUniform<int>(name, type, gpuID());
         else if (GL_INT_VEC2 == type)
-          m_variables[name] = new GLUniform<Vector2i>(name, type, gpuID());
+          glvariable = new GLUniform<Vector2i>(name, type, gpuID());
         else if (GL_INT_VEC3 == type)
-          m_variables[name] = new GLUniform<Vector3i>(name, type, gpuID());
+          glvariable = new GLUniform<Vector3i>(name, type, gpuID());
         else if (GL_INT_VEC4 == type)
-          m_variables[name] = new GLUniform<Vector4i>(name, type, gpuID());
+          glvariable = new GLUniform<Vector4i>(name, type, gpuID());
         //else if (GL_BOOL == type)
-        //  m_variables[name] = new GLUniform<bool>(name, type, gpuID());
+        //  glvariable = new GLUniform<bool>(name, type, gpuID());
         //else if (GL_BOOL_VEC2 == type)
-        //  m_variables[name] = new GLUniform<Vector2b>(name, type, gpuID());
+        //  glvariable = new GLUniform<Vector2b>(name, type, gpuID());
         else if (GL_FLOAT_MAT2 == type)
-          m_variables[name] = new GLUniform<Matrix22f>(name, type, gpuID());
+          glvariable = new GLUniform<Matrix22f>(name, type, gpuID());
         else if (GL_FLOAT_MAT3 == type)
-          m_variables[name] = new GLUniform<Matrix33f>(name, type, gpuID());
+          glvariable = new GLUniform<Matrix33f>(name, type, gpuID());
         else if (GL_FLOAT_MAT4 == type)
-        m_variables[name] = new GLUniform<Matrix44f>(name, type, gpuID());
+          glvariable = new GLUniform<Matrix44f>(name, type, gpuID());
         // else if gl.GL_SAMPLER_1D, gl.GL_SAMPLER_2D, GL_SAMPLER_CUBE
+        else
+          {
+            LOGES("Uniform %s: type not managed", name);
+            glvariable = nullptr;
+          }
+
+        if (nullptr != glvariable)
+          {
+            m_variables[name] = glvariable;
+            //glvariable->begin();
+          }
       }
 
+    //Ajputer m_variables[name].begin();
+
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
-    printf("Active Attributes: %d\n", count);
+    LOGD("Number of Attributes: %d", count);
     m_total += count;
     for (GLint i = 0; i < count; ++i)
       {
         glCheck(glGetActiveAttrib(m_handle, (GLuint)i, bufSize, &length, &size, &type, name));
-        printf("Attribute #%d Type: %u Name: %s\n", i, type, name);
+        LOGD("Attribute #%d Type: %u Name: %s", i, type, name);
         if (GL_FLOAT == type) // FIXME leak
           {
-            m_variables[name] = new GLAttribute<float>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<float>(name, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC2 == type)
           {
-            m_variables[name] = new GLAttribute<Vector2f>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<Vector2f>(name, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC3 == type)
           {
-            m_variables[name] = new GLAttribute<Vector3f>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<Vector3f>(name, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC4 == type)
           {
-            m_variables[name] = new GLAttribute<Vector4f>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<Vector4f>(name, GL_FLOAT, gpuID());
+          }
+        else
+          {
+            LOGES("Attribute %s: type not managed", name);
+            glvariable = nullptr;
+          }
+
+        if (nullptr != glvariable)
+          {
+            m_variables[name] = glvariable;
+            //glvariable->begin();
           }
       }
+
+    //Ajputer m_variables[derniere].end();
+
     m_indexed = true;
     return m_total;
   }

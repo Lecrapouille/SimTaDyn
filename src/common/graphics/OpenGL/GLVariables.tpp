@@ -123,7 +123,7 @@ private:
                                   m_data.qq.size(),
                                   m_gltype,
                                   GL_FALSE,
-                                  sizeof (m_data), // stride
+                                  0,// sizeof (m_data), // stride
                                   (const GLvoid*) 0)); // offset
   }
 
@@ -144,7 +144,7 @@ private:
 
   virtual bool update() override
   {
-    //LOGD("Attrib '%s' update", name().c_str());
+    LOGD("Attrib '%s' update TODO", name().c_str());
     //setValue(m_data);
     //m_data.update();
     return false;

@@ -111,7 +111,7 @@ public:
   //! if needed.
   void begin()
   {
-    LOGD("O::begin");
+    //LOGD("O::begin");
     /* FIXME if (unlikely(!opengl::hasCreatedContext()))
       {
         LOGD("O::begin perdu");
@@ -120,7 +120,7 @@ public:
 
     if (likely(isValid()))
       {
-        LOGD("O::fastbegin");
+        //LOGD("O::fastbegin");
         activate();
         if (needUpdate())
           {
@@ -157,7 +157,7 @@ public:
   //! \brief Deactivate the object on the GPU.
   inline void end()
   {
-    LOGD("O::end");
+    //LOGD("O::end");
     /*if (unlikely(!opengl::hasCreatedContext()))
       return ;*/
 

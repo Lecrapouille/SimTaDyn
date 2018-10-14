@@ -112,6 +112,10 @@ LOGD("VBO::update: off %u byte %u", offset, nbytes);
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),
                             &qq.m_container[0]));
+    for (size_t i = 0; i < qq.m_container.size(); ++i)
+      {
+        CPP_LOG(logger::Debug) << "VBO[" << (int) i << "] = " << qq.m_container[i] << "\n";
+      }
     return false;
   }
 

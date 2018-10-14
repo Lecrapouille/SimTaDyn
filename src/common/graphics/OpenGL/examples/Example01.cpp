@@ -1,4 +1,5 @@
 #include "Example01.hpp"
+#include <math.h>
 
 bool GLExample01::setup()
 {
@@ -65,6 +66,18 @@ bool GLExample01::draw()
   LOGE("GLExample01::draw");
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT));
+
+  const float deltaTime = dt();
+  static float time = 0.0f;
+  time += deltaTime;
+  m_quad.uniform<float>("scale") = cosf(time);
+
+  float ct = cosf(time) / 2.0f + 0.5f;
+  float st = sinf(time) / 2.0f + 0.5f;
+m_quad.attribute<Vector4f>("color") = { 
+  Vector4f(ct, st, st, 1), Vector4f(st, ct, st, 1),
+  Vector4f(st, st, ct, 1), Vector4f(ct, ct, st, 1)
+};
 
   m_quad.draw(GL_TRIANGLES, 0, 4);
 
