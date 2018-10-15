@@ -166,3 +166,9 @@ loader manager manages a collection of loaders indexed by the file
 extension. A loader creates a new resource from a file (loading) and
 saves a resource in file. For example the texture loader creates
 OpenGL objects from jpeg, png, bmp files.
+
+## Renderer
+
+Wraps OpenGL 3.3 API as described the following figure 
+
+![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/uml/opengl.png)
