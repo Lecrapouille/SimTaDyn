@@ -178,6 +178,7 @@ public:
         if (rename || name().empty())
           {
             name() = filename;
+            LOGI("Renaming texture '%s'", filename);
           }
         PendingData::tagAsPending(0U, m_width * m_height);
         LOGI("Successfuly load picture file '%s'", filename);
@@ -232,6 +233,7 @@ private:
 
   virtual bool setup() override
   {
+    LOGD("Texture '%s' setup", name().c_str());
     if (unlikely(!loaded()))
       return true;
 
@@ -245,6 +247,7 @@ private:
 
   virtual bool update() override
   {
+    LOGD("Texture '%s' update", name().c_str());
     size_t pos_start;
     size_t pos_end;
     PendingData::getPendingData(pos_start, pos_end);

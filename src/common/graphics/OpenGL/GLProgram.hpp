@@ -100,7 +100,7 @@ public:
   }
 
   template<class T>
-  inline GLAttribute<T>& attribute(const char *name)
+  inline GLAttribute<T>& attribute(const char *name) // FIXME: Retourner le pointer pas la reference (si le prog n'a pas ete charge avec success)
   {
     auto* p = dynamic_cast<GLAttribute<T>*>(m_variables[name]);
     printf("Get attib %p\n", p);
@@ -143,6 +143,19 @@ public:
     return *m_variables[name];
     }*/
 
+  // TODO function qui verifie que tous les attrib ont la meme taille et ont ete init
+  /*bool
+    size_t size = 0_z;
+    for (const auto& it = m_variables)
+    {
+       if (GLVariable::ATTRIBUTE == it->second->kind())
+       {
+          size =
+       }
+    }
+*/
+
+// FIXME: ca prend 43 appels OpenGL alors qu'avant il suffisait de 35
   inline void draw(GLenum mode, GLint first, GLsizei count)
   {
     LOGD("%s: draw {", name().c_str());
@@ -156,10 +169,11 @@ public:
   }
 
   /*inline void draw(GLenum mode)
-    {
-    draw(mode, 0, );
-    }
+  {
+    draw(mode, 0, getAttribSize());
+  }*/
 
+/*
     inline void draw(GLenum mode, GLIndexBuffer index)
     {
     begin();
@@ -186,7 +200,7 @@ protected:
     LOGD("%s: activate {", name().c_str());
     if (!needSetup()) // FIXME or call glUseProgram(0) is setup()
       {
-        m_vao.begin();
+        //m_vao.begin();
         glCheck(glUseProgram(m_handle));
         for (auto& it: m_variables)
           {
@@ -252,7 +266,7 @@ protected:
         glCheck(glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &length));
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetShaderInfoLog(m_handle, length, &length, &log[0]));
-        LOGE("[FAILED] %s\n", &log[0U]);
+        LOGE("[FAILED] %s\n", &log[0U]); // FIXME: si program echoue alors acceder aux attrib va faire planter le prog
         goto l_try_again;
       }
 
@@ -277,7 +291,7 @@ protected:
 
   virtual bool update() override
   {
-    //LOGD("%s: update", name().c_str());
+    LOGD("%s: update", name().c_str());
     return false;
   }
 
@@ -291,7 +305,8 @@ protected:
       {
         it.second->end();
       }
-    m_vao.end();
+
+    //m_vao.end();
     LOGD("} %s: deactivate", name().c_str());
   }
 
@@ -308,7 +323,7 @@ private:
 
   void detachAllShaders()
   {
-    LOGD("%s: detach all sahders", name().c_str());
+    LOGD("%s: detach all shaders", name().c_str());
     if (0 < m_vertex_shader.gpuID()) {
       glCheck(glDetachShader(m_handle, m_vertex_shader.gpuID()));
     }
@@ -342,10 +357,11 @@ private:
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     m_total = count;
     LOGD("Number of Uniforms: %d", count);
+    uint32_t texture_count = 0;
     for (GLint i = 0; i < count; ++i)
       {
         glCheck(glGetActiveUniform(m_handle, (GLuint)i, bufSize, &length, &size, &type, name));
-        LOGD("Uniform #%d Type: %u Name: %s", i, type, name);
+        LOGD("Uniform #%d Type: %u Name: %s L:%d S:%d", i, type, name, size, length);
         if (GL_FLOAT == type) // FIXME leak
           glvariable = new GLUniform<float>(name, type, gpuID());
         else if (GL_FLOAT_VEC2 == type)
@@ -372,7 +388,13 @@ private:
           glvariable = new GLUniform<Matrix33f>(name, type, gpuID());
         else if (GL_FLOAT_MAT4 == type)
           glvariable = new GLUniform<Matrix44f>(name, type, gpuID());
-        // else if gl.GL_SAMPLER_1D, gl.GL_SAMPLER_2D, GL_SAMPLER_CUBE
+        else if ((GL_SAMPLER_1D == type) || (GL_SAMPLER_2D == type) || (GL_SAMPLER_CUBE == type))
+          {
+            GLUniform</*GLTexture2D*/float>* gluni = new GLUniform</*GLTexture2D*/float>(name, type, gpuID());
+            gluni->m_texture_unit = texture_count;
+            texture_count += 1u;
+            glvariable = gluni;
+          }
         else
           {
             LOGES("Uniform %s: type not managed", name);
@@ -394,22 +416,22 @@ private:
     for (GLint i = 0; i < count; ++i)
       {
         glCheck(glGetActiveAttrib(m_handle, (GLuint)i, bufSize, &length, &size, &type, name));
-        LOGD("Attribute #%d Type: %u Name: %s", i, type, name);
+        LOGD("Attribute #%d Type: %u Name: %s L:%d S:%d", i, type, name, size, length);
         if (GL_FLOAT == type) // FIXME leak
           {
-            glvariable = new GLAttribute<float>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<float>(name, 1u, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC2 == type)
           {
-            glvariable = new GLAttribute<Vector2f>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<Vector2f>(name, 2u, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC3 == type)
           {
-            glvariable = new GLAttribute<Vector3f>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<Vector3f>(name, 3u, GL_FLOAT, gpuID());
           }
         else if (GL_FLOAT_VEC4 == type)
           {
-            glvariable = new GLAttribute<Vector4f>(name, GL_FLOAT, gpuID());
+            glvariable = new GLAttribute<Vector4f>(name, 4u, GL_FLOAT, gpuID());
           }
         else
           {

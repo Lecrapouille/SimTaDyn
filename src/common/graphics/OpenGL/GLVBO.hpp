@@ -104,18 +104,18 @@ bool tt = qq.hasPendingData();
     size_t pos_start, pos_end;
     qq.getPendingData(pos_start, pos_end);
     qq.clearPending();
-LOGD("VBO::update: Pending %u %u", pos_start, pos_end);
+//LOGD("VBO::update: Pending %u %u", pos_start, pos_end);
     size_t offset = sizeof (T) * pos_start;
     size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
-LOGD("VBO::update: off %u byte %u", offset, nbytes);
+//LOGD("VBO::update: off %u byte %u", offset, nbytes);
     glCheck(glBufferSubData(m_target,
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),
                             &qq.m_container[0]));
-    for (size_t i = 0; i < qq.m_container.size(); ++i)
+    /*for (size_t i = 0; i < qq.m_container.size(); ++i)
       {
         CPP_LOG(logger::Debug) << "VBO[" << (int) i << "] = " << qq.m_container[i] << "\n";
-      }
+      }*/
     return false;
   }
 

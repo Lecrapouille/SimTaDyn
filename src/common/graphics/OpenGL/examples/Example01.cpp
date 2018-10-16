@@ -1,85 +1,172 @@
 #include "Example01.hpp"
 #include <math.h>
 
+
 bool GLExample01::setup()
 {
-  LOGE("GLExample01::setup");
+  LOGD("GLExample01::setup");
+
+  // Enable the depth buffer
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glLineWidth(10.0f);
+
   m_vs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
   m_fs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
-  std::cout << "VS: " << m_vs.gpuID() << std::endl;
-  std::cout << "FS: " << m_fs.gpuID() << std::endl;
-
   m_quad.attachShader(m_vs).attachShader(m_fs);
-  m_quad.begin();
+  m_quad.begin(); // FIXME a enlever
 
-  if (!m_quad.hasUniform("scale"))
+// TODO tester index
+  // TODO Faire qu'automatiquement on charge une liste de float en vector3f
+  m_quad.attribute<Vector3f>("a_position") =
     {
-      std::cout << "perdu" << std::endl;
-      return false;
-    }
+	  //  X     Y     Z
+	  // bottom
+	  Vector3f(-1.0f,-1.0f,-1.0f),
+	  Vector3f(1.0f,-1.0f,-1.0f),
+	  Vector3f(-1.0f,-1.0f, 1.0f),
+	  Vector3f(1.0f,-1.0f,-1.0f),
+	  Vector3f(1.0f,-1.0f, 1.0f),
+	  Vector3f(-1.0f,-1.0f, 1.0f),
 
-  std::cout << m_quad["scale"].name() << std::endl;
-  std::cout << typeid(m_quad["scale"]).name() << std::endl;
+	  // top
+	  Vector3f(-1.0f, 1.0f,-1.0f),
+	  Vector3f(-1.0f, 1.0f, 1.0f),
+	  Vector3f(1.0f, 1.0f,-1.0f),
+	  Vector3f(1.0f, 1.0f,-1.0f),
+	  Vector3f(-1.0f, 1.0f, 1.0f),
+	  Vector3f(1.0f, 1.0f, 1.0f),
 
-  /*
-  ** TODO: m_quad["scale"] = 4.0f;
-  ** GLUniform<float> &scale = m_quad["scale"];
-  ** scale = 2.0f;
-  */
+	  // front
+	  Vector3f(-1.0f,-1.0f, 1.0f),
+	  Vector3f(1.0f,-1.0f, 1.0f),
+	  Vector3f(-1.0f, 1.0f, 1.0f),
+	  Vector3f(1.0f,-1.0f, 1.0f),
+	  Vector3f(1.0f, 1.0f, 1.0f),
+	  Vector3f(-1.0f, 1.0f, 1.0f),
 
-  //std::cout << "AVANT " << m_quad.getUniformVal<float>("scale") << std::endl;
-  m_quad.setUniformVal("scale", 4.0f);
-  std::cout << "Apres " << m_quad.getUniformVal<float>("scale") << std::endl;
-  m_quad.uniform<float>("scale") = 1.0f;
-  std::cout << "Apres " << m_quad.getUniformVal<float>("scale") << std::endl;
+	  // back
+	  Vector3f(-1.0f,-1.0f,-1.0f),
+	  Vector3f(-1.0f, 1.0f,-1.0f),
+	  Vector3f(1.0f,-1.0f,-1.0f),
+	  Vector3f(1.0f,-1.0f,-1.0f),
+	  Vector3f(-1.0f, 1.0f,-1.0f),
+	  Vector3f(1.0f, 1.0f,-1.0f),
 
-  /*
-  ** m_quad["color"] = {
-  **   Vector4f(1, 0, 0, 1), Vector4f(0, 1, 0, 1),
-  **   Vector4f(0, 0, 1, 1), Vector4f(1, 1, 0, 1)
-  ** };
-  */
+	  // left
+	  Vector3f(-1.0f,-1.0f, 1.0f),
+	  Vector3f(-1.0f, 1.0f,-1.0f),
+	  Vector3f(-1.0f,-1.0f,-1.0f),
+	  Vector3f(-1.0f,-1.0f, 1.0f),
+	  Vector3f(-1.0f, 1.0f, 1.0f),
+	  Vector3f(-1.0f, 1.0f,-1.0f),
 
-  GLVertexBuffer<Vector4f> vbo("gg");
-  vbo.qq = { Vector4f(4.0f), Vector4f(3.0f), Vector4f(2.0f) };
-  std::cout << vbo.qq << std::endl;
+	  // right
+	  Vector3f(1.0f,-1.0f, 1.0f),
+	  Vector3f(1.0f,-1.0f,-1.0f),
+	  Vector3f(1.0f, 1.0f,-1.0f),
+	  Vector3f(1.0f,-1.0f, 1.0f),
+	  Vector3f(1.0f, 1.0f,-1.0f),
+	  Vector3f(1.0f, 1.0f, 1.0f),
+   };
 
-  m_quad.attribute<Vector4f>("color")/*.data().qq*/ =
-    {
-      Vector4f(1, 0, 0, 1), Vector4f(0, 1, 0, 1),
-      Vector4f(0, 0, 1, 1), Vector4f(1, 1, 0, 1)
-    };
+  m_quad.attribute<Vector2f>("a_texcoord") =
+  {
+	  //  U     V
+	  // bottom
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(1.0f, 1.0f),
+	  Vector2f(0.0f, 1.0f),
 
-  std::cout << "COLOR: " << m_quad.attribute<Vector4f>("color").cdata().qq << std::endl;
+	  // top
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 1.0f),
 
-  m_quad.attribute<Vector2f>("position") =
-    {
-      Vector2f(-1, -1), Vector2f(-1, +1),
-      Vector2f(+1, -1), Vector2f(+1, +1)
-    };
+	  // front
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(1.0f, 1.0f),
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 1.0f),
+
+	  // back
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 1.0f),
+
+	  // left
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f),
+	  Vector2f(1.0f, 1.0f),
+	  Vector2f(1.0f, 0.0f),
+
+	  // right
+	  Vector2f(1.0f, 1.0f),
+	  Vector2f(1.0f, 0.0f),
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(1.0f, 1.0f),
+	  Vector2f(0.0f, 0.0f),
+	  Vector2f(0.0f, 1.0f)
+   };
+
+// FIXME ugly
+  m_quad.uniform<float>("u_texture").m_tex.interpolation(GL_LINEAR);
+  m_quad.uniform<float>("u_texture").m_tex.wrapping(GL_CLAMP_TO_EDGE);
+  if (false == m_quad.uniform<float>("u_texture").m_tex.load("wooden-crate.jpg"))
+    return false;
+// FIXME ugly
+
+  m_quad.uniform<float>("u_scale") = 1.0f;
+  float ratio = ((float) m_width) / ((float) m_height);
+  m_quad.uniform<Matrix44f>("u_projection") =
+    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+  m_quad.uniform<Matrix44f>("u_model") = m_movable.transform();
+  m_quad.uniform<Matrix44f>("u_view") =
+    matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
   return true;
 }
 
 bool GLExample01::draw()
 {
-  LOGE("GLExample01::draw");
+  LOGD("GLExample01::draw");
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
-  glCheck(glClear(GL_COLOR_BUFFER_BIT));
+  glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  const float deltaTime = dt();
   static float time = 0.0f;
-  time += deltaTime;
-  m_quad.uniform<float>("scale") = cosf(time);
+  time += dt();
+  m_movable.rotate(4.0f * cosf(time), Vector3f(0, 1, 0));
+  m_quad.uniform<Matrix44f>("u_model") = m_movable.transform();
 
-  float ct = cosf(time) / 2.0f + 0.5f;
-  float st = sinf(time) / 2.0f + 0.5f;
-m_quad.attribute<Vector4f>("color") = { 
-  Vector4f(ct, st, st, 1), Vector4f(st, ct, st, 1),
-  Vector4f(st, st, ct, 1), Vector4f(ct, ct, st, 1)
-};
+  // Filled cube
+  glDisable(GL_BLEND);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_POLYGON_OFFSET_FILL);
+  m_quad.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_quad.draw(GL_TRIANGLES, 0, 36);
 
-  m_quad.draw(GL_TRIANGLES, 0, 4);
+  // Outlined cube
+  glDisable(GL_POLYGON_OFFSET_FILL);
+  glEnable(GL_BLEND);
+  glDepthMask(GL_FALSE);
+  m_quad.uniform<Vector4f>("u_color") = Vector4f(1, 0, 0, 1);
+  m_quad.draw(GL_LINES, 0, 36);
+  glDepthMask(GL_TRUE);
 
   return true;
 }

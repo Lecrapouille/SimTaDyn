@@ -71,10 +71,12 @@ class GLAttribute: public IGLVariable
 {
 public:
 
-  GLAttribute(const char *name, GLenum gltype, GLuint prog)
+  GLAttribute(const char *name, uint8_t dim, GLenum gltype, GLuint prog)
     : IGLVariable(name, gltype, prog, ATTRIBUTE),
       m_data("VBO_" + std::string(name))
   {
+    assert((dim >= 1u) && (dim <= 4u));
+    m_dim = dim;
   }
 
   virtual ~GLAttribute() override { destroy(); }
@@ -116,25 +118,27 @@ private:
 
   virtual void activate() override
   {
-    LOGD("Attrib '%s' activate %d", name().c_str(), m_handle);
+    LOGD("Attrib '%s' activate %d {", name().c_str(), m_handle);
     m_data.begin();
     glCheck(glEnableVertexAttribArray(m_handle));
     glCheck(glVertexAttribPointer(m_handle,
-                                  m_data.qq.size(),
+                                  m_dim,
                                   m_gltype,
                                   GL_FALSE,
-                                  0,// sizeof (m_data), // stride
+                                  0, // stride
                                   (const GLvoid*) 0)); // offset
+    LOGD("} Attrib '%s' activate %d", name().c_str(), m_handle);
   }
 
   virtual void deactivate() override
   {
-    LOGD("Attrib '%s' deactivate", name().c_str());
+    LOGD("Attrib '%s' deactivate {", name().c_str());
     m_data.end();
     if (isValid() /* && m_data.isVBO() */)
       {
         glCheck(glDisableVertexAttribArray(m_handle));
       }
+    LOGD("} Attrib '%s' deactivate", name().c_str());
   }
 
   virtual bool setup() override
@@ -153,6 +157,7 @@ private:
 private:
 
   GLVertexBuffer<T> m_data;
+  uint8_t m_dim;
 };
 
 /*
@@ -213,26 +218,30 @@ private:
 
   virtual bool create() override
   {
+    LOGD("Uniform::create");
     m_handle = glCheck(glGetUniformLocation(m_program, name().c_str()));
+    LOGD("glGetUniformLocation %d %s => %d", m_program, name().c_str(), m_handle);
+
     return false;
   }
 
   virtual void release() override
   {
+    LOGD("Uniform::release");
   }
 
-  // FIXME: specialization pour Texture
   virtual void activate() override
   {
-    LOGD("Uniform '%s' activate", name().c_str());
+    LOGD("Uniform::activate");
     switch (m_gltype)
       {
       case GL_SAMPLER_1D:
       case GL_SAMPLER_2D:
       case GL_SAMPLER_CUBE:
-        std::cerr << "Texture pas encore geree" << std::endl;
-        glCheck(glActiveTexture(GL_TEXTURE0 /*+ m_texture_unit*/));
-        //m_data.activate();
+        LOGD("Uniform '%s' texture activate", name().c_str());
+        glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_unit));
+        m_tex.begin(); //FIXME m_data.begin
+        //TODO: utile ou pas glCheck(glUniform1i(m_handle, m_texture_unit)); ?
         break;
       }
   }
@@ -244,19 +253,36 @@ private:
 
   virtual bool setup() override
   {
+    LOGD("Uniform::setup");
     return false;
   }
 
   virtual bool update() override
   {
-    LOGD("Uniform '%s' update", name().c_str());
-    setValue(m_data);
-    return false;
+    LOGD("Uniform::update %s", name().c_str());
+    switch (m_gltype)
+      {
+      case GL_SAMPLER_1D:
+      case GL_SAMPLER_2D:
+      case GL_SAMPLER_CUBE:
+         LOGD("Uniform '%s' texture update", name().c_str());
+         glCheck(glUniform1i(m_handle, m_texture_unit));
+         break;
+      default:
+        LOGD("Uniform '%s' update", name().c_str());
+        setValue(m_data);
+        break;
+     }
+   return false;
   }
+
+//FIXME private:
+public:
+  uint32_t m_texture_unit = 0;
+    GLTexture2D m_tex;
 
 private:
 
-  int m_texture_unit = 0;
   T m_data;
 };
 

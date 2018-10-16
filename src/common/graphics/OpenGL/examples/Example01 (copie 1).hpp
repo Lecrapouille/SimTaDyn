@@ -2,7 +2,6 @@
 #  define EXAMPLE_01_HPP_
 
 #  include "OpenGL.hpp"
-#  include "Movable.tpp"
 
 class GLExample01: public IGLWindow
 {
@@ -23,10 +22,9 @@ public:
 
 public:
 
-  GLVertexShader     m_vs;
-  GLFragmentShader   m_fs;
-  GLProgram          m_quad;
-  Movable<float, 3U> m_movable;
+  GLVertexShader   m_vs;
+  GLFragmentShader m_fs;
+  GLProgram        m_quad;
 };
 
 #  endif /* EXAMPLE_01_HPP_ */
