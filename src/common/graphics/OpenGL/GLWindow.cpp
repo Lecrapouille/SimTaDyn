@@ -29,7 +29,7 @@ static void onError(int /*errorCode*/, const char* msg)
 
 IGLWindow::IGLWindow()
 {
-  opengl::hasCreatedContext() = false; // FIXME
+  opengl::hasCreatedContext() = false;
 }
 
 /* Close OpenGL window and terminate GLFW */

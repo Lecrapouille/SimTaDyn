@@ -131,7 +131,6 @@ public:
   { clearPending(m_container.size()); return m_container.operator<<=(val); }
   inline std::valarray<T>& operator>>=(const T& val)
   { clearPending(m_container.size()); return m_container.operator>>=(val); }
-
   inline std::valarray<T>& operator=(const std::valarray<T>& other)
   { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(std::valarray<T>&& other) noexcept

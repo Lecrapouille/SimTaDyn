@@ -81,34 +81,42 @@ public:
 
   virtual ~GLAttribute() override { destroy(); }
 
-  inline GLVertexBuffer<T> const& cdata() const { return m_data; }
-  inline GLVertexBuffer<T>& data() { return m_data; }
-
-  // Manipule donnee depuis le CPU
-  template<class U>
-  GLAttribute& operator=(const U& val)
+  inline GLVertexBuffer<T> const& cdata() const
   {
-    m_data.qq = T(val);
-    forceUpdate();
+    return m_data;
+  }
+
+  inline GLVertexBuffer<T>& data()
+  {
+    return m_data;
+  }
+
+  GLAttribute<T>& operator=(std::initializer_list<T> il)
+  {
+    std::cout << "jkjkjk" << std::endl;
+    m_data = il;
+    return *this;
+  }
+
+  GLAttribute<T>& operator=(const T& val)
+  {
+    m_data = val;
     return *this;
   }
 
   template<class U>
-  GLAttribute& operator=(std::initializer_list<U> il)
+  GLAttribute<T>& operator*=(const U& val)
   {
-    m_data.qq = il;
-    forceUpdate();
+    //m_data *= val;
+    //GLVertexBuffer<T>::operator*=(val);
     return *this;
   }
 
 private:
 
-  //inline void setValue(const T& value) const;
-
   virtual bool create() override
   {
     m_handle = glCheck(glGetAttribLocation(m_program, name().c_str()));
-    LOGD("Attrib '%s' create %d", name().c_str(), m_handle);
     return false;
   }
 
@@ -118,7 +126,6 @@ private:
 
   virtual void activate() override
   {
-    LOGD("Attrib '%s' activate %d {", name().c_str(), m_handle);
     m_data.begin();
     glCheck(glEnableVertexAttribArray(m_handle));
     glCheck(glVertexAttribPointer(m_handle,
@@ -127,18 +134,15 @@ private:
                                   GL_FALSE,
                                   0, // stride
                                   (const GLvoid*) 0)); // offset
-    LOGD("} Attrib '%s' activate %d", name().c_str(), m_handle);
   }
 
   virtual void deactivate() override
   {
-    LOGD("Attrib '%s' deactivate {", name().c_str());
     m_data.end();
     if (isValid() /* && m_data.isVBO() */)
       {
         glCheck(glDisableVertexAttribArray(m_handle));
       }
-    LOGD("} Attrib '%s' deactivate", name().c_str());
   }
 
   virtual bool setup() override
@@ -148,9 +152,6 @@ private:
 
   virtual bool update() override
   {
-    LOGD("Attrib '%s' update TODO", name().c_str());
-    //setValue(m_data);
-    //m_data.update();
     return false;
   }
 
@@ -160,31 +161,6 @@ private:
   uint8_t m_dim;
 };
 
-/*
-template<>
-inline void GLAttribute<float>::setValue(const float& value) const
-{
-  glCheck(glVertexAttrib1f(m_handle, value));
-}
-
-template<>
-inline void GLAttribute<Vector2f>::setValue(const Vector2f& value) const
-{
-  glCheck(glVertexAttrib2f(m_handle, value.x, value.y));
-}
-
-template<>
-inline void GLAttribute<Vector3f>::setValue(const Vector3f& value) const
-{
-  glCheck(glVertexAttrib3f(m_handle, value.x, value.y, value.z));
-}
-
-template<>
-inline void GLAttribute<Vector4f>::setValue(const Vector4f& value) const
-{
-  glCheck(glVertexAttrib4f(m_handle, value.x, value.y, value.z, value.w));
-  }*/
-
 // **************************************************************
 //!
 // **************************************************************
@@ -193,24 +169,26 @@ class GLUniform: public IGLVariable
 {
 public:
 
+  // Note T and gltype shall match. Not checks are made
   GLUniform(const char *name, GLenum gltype, GLuint prog)
     : IGLVariable(name, gltype, prog, UNIFORM)
   {
-    // FIXME T et gltype doivent correspondre
   }
 
   virtual ~GLUniform() override { destroy(); }
 
-  inline T const& data() const { return m_data; }
+  inline T const& cdata() const { return m_data; }
+  inline T& data() { forceUpdate(); return m_data; }
 
   // Manipule donnee depuis le CPU
   template<class U>
   GLUniform& operator=(const U& val)
   {
+std::cout << "Unif ope =" << val << std::endl;
     m_data = T(val);
     forceUpdate();
     return *this;
-  }
+    }
 
 private:
 
@@ -218,58 +196,46 @@ private:
 
   virtual bool create() override
   {
-    LOGD("Uniform::create");
     m_handle = glCheck(glGetUniformLocation(m_program, name().c_str()));
-    LOGD("glGetUniformLocation %d %s => %d", m_program, name().c_str(), m_handle);
-
     return false;
   }
 
   virtual void release() override
   {
-    LOGD("Uniform::release");
   }
 
   virtual void activate() override
   {
-    LOGD("Uniform::activate");
     switch (m_gltype)
       {
       case GL_SAMPLER_1D:
       case GL_SAMPLER_2D:
       case GL_SAMPLER_CUBE:
-        LOGD("Uniform '%s' texture activate", name().c_str());
         glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_unit));
-        m_tex.begin(); //FIXME m_data.begin
-        //TODO: utile ou pas glCheck(glUniform1i(m_handle, m_texture_unit)); ?
+        m_tex.begin();
         break;
       }
   }
 
   virtual void deactivate() override
   {
-    LOGD("Uniform '%s' deactivate", name().c_str());
   }
 
   virtual bool setup() override
   {
-    LOGD("Uniform::setup");
     return false;
   }
 
   virtual bool update() override
   {
-    LOGD("Uniform::update %s", name().c_str());
     switch (m_gltype)
       {
       case GL_SAMPLER_1D:
       case GL_SAMPLER_2D:
       case GL_SAMPLER_CUBE:
-         LOGD("Uniform '%s' texture update", name().c_str());
          glCheck(glUniform1i(m_handle, m_texture_unit));
          break;
       default:
-        LOGD("Uniform '%s' update", name().c_str());
         setValue(m_data);
         break;
      }

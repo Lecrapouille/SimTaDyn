@@ -52,7 +52,6 @@ private:
   virtual bool create() override
   {
     glCheck(glGenVertexArrays(1, &m_handle));
-    LOGD("VAO '%s' create %d", name().c_str(), m_handle);
     return false;
   }
 
@@ -63,13 +62,11 @@ private:
 
   virtual void activate() override
   {
-    LOGD("VAO '%s' activate", name().c_str());
     glCheck(glBindVertexArray(m_handle));
   }
 
   virtual void deactivate() override
   {
-    LOGD("VAO '%s' deactivate", name().c_str());
     glCheck(glBindVertexArray(0U));
   }
 

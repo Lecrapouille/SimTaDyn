@@ -28,9 +28,6 @@
 #include <GL/glew.h>
 #pragma GCC diagnostic pop
 
-//! This macro will generate code for members.
-IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
-
 namespace opengl
 {
   //! \return true if the OpenGL context has been created

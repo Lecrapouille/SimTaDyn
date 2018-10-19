@@ -25,6 +25,70 @@ public:
 
   virtual ~GLProgram() override { destroy(); }
 
+  template<class T>
+  inline GLUniform<T>& getUniform(const char *name)
+  {
+    if (unlikely(nullptr == name))
+      {
+        throw std::invalid_argument("nullptr passed to getUniform");
+      }
+
+    auto ptr = m_variables[name];
+    if (unlikely(nullptr == ptr))
+      {
+        throw std::out_of_range("GLUniform '" + std::string(name) + "' does not exist");
+      }
+
+    GLUniform<T> *uniform_ptr = dynamic_cast<GLUniform<T>*>(ptr);
+    if (unlikely(nullptr == uniform_ptr))
+      {
+        throw std::out_of_range("GLUniform '" + std::string(name) + "' exists but has wrong template type");
+      }
+    return *uniform_ptr;
+  }
+
+  template<class T>
+  inline T& uniform(const char *name)
+  {
+    return getUniform<T>(name).data();
+  }
+
+  template<class T>
+  inline GLAttribute<T>& getAttribute(const char *name)
+  {
+    if (unlikely(nullptr == name))
+      {
+        throw std::invalid_argument("nullptr passed to getAttribute");
+      }
+
+    auto ptr = m_variables[name];
+    if (unlikely(nullptr == ptr))
+      {
+        throw std::out_of_range("GLAttribute '" + std::string(name) + "' does not exist");
+      }
+
+    GLAttribute<T> *attrib_ptr = dynamic_cast<GLAttribute<T>*>(ptr);
+    if (unlikely(nullptr == attrib_ptr))
+      {
+        throw std::out_of_range("GLAttribute '" + std::string(name) + "' exists but has wrong template type");
+      }
+    return *attrib_ptr;
+  }
+
+  template<class T>
+  inline GLVertexBuffer<T>& attribute(const char *name)
+  {
+    return getAttribute<T>(name).data();
+  }
+
+
+
+
+
+
+
+
+
   GLProgram& attachShader(GLVertexShader& shader)
   {
     if (!needSetup())
@@ -72,6 +136,10 @@ public:
       (IGLVariable::UNIFORM == it->second->kind());
   }
 
+
+
+#if 0
+
   template<class T>
   inline GLUniform<T>& uniform(const char *name)
   {
@@ -89,6 +157,7 @@ public:
   {
     *dynamic_cast<GLUniform<T>*>(m_variables[name]) = val;
   }
+#endif
 
   // FIXME if begin() a reussi
   // FIXME: peut on avoir un nom doublon attrib / unifo ??
@@ -99,6 +168,7 @@ public:
       (IGLVariable::ATTRIBUTE == it->second->kind());
   }
 
+#if 0
   template<class T>
   inline GLAttribute<T>& attribute(const char *name) // FIXME: Retourner le pointer pas la reference (si le prog n'a pas ete charge avec success)
   {
@@ -123,6 +193,7 @@ public:
   {
     *dynamic_cast<GLAttribute<T>*>(m_variables[name]) = val;
   }
+#endif
 
   // TODO GLProgram prog; prog['position'] = std::vector(...);
   inline IGLVariable& operator[](std::string const& name)

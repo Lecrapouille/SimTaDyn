@@ -7,11 +7,10 @@ bool GLExample01::setup()
   LOGD("GLExample01::setup");
 
   // Enable the depth buffer
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glLineWidth(10.0f);
+  glCheck(glEnable(GL_DEPTH_TEST));
+  glCheck(glDepthFunc(GL_LESS));
+  glCheck(glEnable(GL_BLEND));
+  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
   m_vs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
   m_fs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
@@ -22,112 +21,113 @@ bool GLExample01::setup()
   // TODO Faire qu'automatiquement on charge une liste de float en vector3f
   m_quad.attribute<Vector3f>("a_position") =
     {
-	  //  X     Y     Z
-	  // bottom
-	  Vector3f(-1.0f,-1.0f,-1.0f),
-	  Vector3f(1.0f,-1.0f,-1.0f),
-	  Vector3f(-1.0f,-1.0f, 1.0f),
-	  Vector3f(1.0f,-1.0f,-1.0f),
-	  Vector3f(1.0f,-1.0f, 1.0f),
-	  Vector3f(-1.0f,-1.0f, 1.0f),
+          //  X     Y     Z
+          // bottom
+          Vector3f(-1.0f,-1.0f,-1.0f),
+          Vector3f(1.0f,-1.0f,-1.0f),
+          Vector3f(-1.0f,-1.0f, 1.0f),
+          Vector3f(1.0f,-1.0f,-1.0f),
+          Vector3f(1.0f,-1.0f, 1.0f),
+          Vector3f(-1.0f,-1.0f, 1.0f),
 
-	  // top
-	  Vector3f(-1.0f, 1.0f,-1.0f),
-	  Vector3f(-1.0f, 1.0f, 1.0f),
-	  Vector3f(1.0f, 1.0f,-1.0f),
-	  Vector3f(1.0f, 1.0f,-1.0f),
-	  Vector3f(-1.0f, 1.0f, 1.0f),
-	  Vector3f(1.0f, 1.0f, 1.0f),
+          // top
+          Vector3f(-1.0f, 1.0f,-1.0f),
+          Vector3f(-1.0f, 1.0f, 1.0f),
+          Vector3f(1.0f, 1.0f,-1.0f),
+          Vector3f(1.0f, 1.0f,-1.0f),
+          Vector3f(-1.0f, 1.0f, 1.0f),
+          Vector3f(1.0f, 1.0f, 1.0f),
 
-	  // front
-	  Vector3f(-1.0f,-1.0f, 1.0f),
-	  Vector3f(1.0f,-1.0f, 1.0f),
-	  Vector3f(-1.0f, 1.0f, 1.0f),
-	  Vector3f(1.0f,-1.0f, 1.0f),
-	  Vector3f(1.0f, 1.0f, 1.0f),
-	  Vector3f(-1.0f, 1.0f, 1.0f),
+          // front
+          Vector3f(-1.0f,-1.0f, 1.0f),
+          Vector3f(1.0f,-1.0f, 1.0f),
+          Vector3f(-1.0f, 1.0f, 1.0f),
+          Vector3f(1.0f,-1.0f, 1.0f),
+          Vector3f(1.0f, 1.0f, 1.0f),
+          Vector3f(-1.0f, 1.0f, 1.0f),
 
-	  // back
-	  Vector3f(-1.0f,-1.0f,-1.0f),
-	  Vector3f(-1.0f, 1.0f,-1.0f),
-	  Vector3f(1.0f,-1.0f,-1.0f),
-	  Vector3f(1.0f,-1.0f,-1.0f),
-	  Vector3f(-1.0f, 1.0f,-1.0f),
-	  Vector3f(1.0f, 1.0f,-1.0f),
+          // back
+          Vector3f(-1.0f,-1.0f,-1.0f),
+          Vector3f(-1.0f, 1.0f,-1.0f),
+          Vector3f(1.0f,-1.0f,-1.0f),
+          Vector3f(1.0f,-1.0f,-1.0f),
+          Vector3f(-1.0f, 1.0f,-1.0f),
+          Vector3f(1.0f, 1.0f,-1.0f),
 
-	  // left
-	  Vector3f(-1.0f,-1.0f, 1.0f),
-	  Vector3f(-1.0f, 1.0f,-1.0f),
-	  Vector3f(-1.0f,-1.0f,-1.0f),
-	  Vector3f(-1.0f,-1.0f, 1.0f),
-	  Vector3f(-1.0f, 1.0f, 1.0f),
-	  Vector3f(-1.0f, 1.0f,-1.0f),
+          // left
+          Vector3f(-1.0f,-1.0f, 1.0f),
+          Vector3f(-1.0f, 1.0f,-1.0f),
+          Vector3f(-1.0f,-1.0f,-1.0f),
+          Vector3f(-1.0f,-1.0f, 1.0f),
+          Vector3f(-1.0f, 1.0f, 1.0f),
+          Vector3f(-1.0f, 1.0f,-1.0f),
 
-	  // right
-	  Vector3f(1.0f,-1.0f, 1.0f),
-	  Vector3f(1.0f,-1.0f,-1.0f),
-	  Vector3f(1.0f, 1.0f,-1.0f),
-	  Vector3f(1.0f,-1.0f, 1.0f),
-	  Vector3f(1.0f, 1.0f,-1.0f),
-	  Vector3f(1.0f, 1.0f, 1.0f),
+          // right
+          Vector3f(1.0f,-1.0f, 1.0f),
+          Vector3f(1.0f,-1.0f,-1.0f),
+          Vector3f(1.0f, 1.0f,-1.0f),
+          Vector3f(1.0f,-1.0f, 1.0f),
+          Vector3f(1.0f, 1.0f,-1.0f),
+          Vector3f(1.0f, 1.0f, 1.0f),
    };
 
   m_quad.attribute<Vector2f>("a_texcoord") =
   {
-	  //  U     V
-	  // bottom
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(1.0f, 1.0f),
-	  Vector2f(0.0f, 1.0f),
+          //  U     V
+          // bottom
+          Vector2f(0.0f, 0.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(1.0f, 1.0f),
+          Vector2f(0.0f, 1.0f),
 
-	  // top
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 1.0f),
+          // top
+          Vector2f(0.0f, 0.0f),
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 1.0f),
 
-	  // front
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(1.0f, 1.0f),
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 1.0f),
+          // front
+          Vector2f(1.0f, 0.0f),
+          Vector2f(0.0f, 0.0f),
+          Vector2f(1.0f, 1.0f),
+          Vector2f(0.0f, 0.0f),
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 1.0f),
 
-	  // back
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 1.0f),
+          // back
+          Vector2f(0.0f, 0.0f),
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 1.0f),
 
-	  // left
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f),
-	  Vector2f(1.0f, 1.0f),
-	  Vector2f(1.0f, 0.0f),
+          // left
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(0.0f, 0.0f),
+          Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 1.0f),
+          Vector2f(1.0f, 0.0f),
 
-	  // right
-	  Vector2f(1.0f, 1.0f),
-	  Vector2f(1.0f, 0.0f),
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(1.0f, 1.0f),
-	  Vector2f(0.0f, 0.0f),
-	  Vector2f(0.0f, 1.0f)
+          // right
+          Vector2f(1.0f, 1.0f),
+          Vector2f(1.0f, 0.0f),
+          Vector2f(0.0f, 0.0f),
+          Vector2f(1.0f, 1.0f),
+          Vector2f(0.0f, 0.0f),
+          Vector2f(0.0f, 1.0f)
    };
 
 // FIXME ugly
-  m_quad.uniform<float>("u_texture").m_tex.interpolation(GL_LINEAR);
-  m_quad.uniform<float>("u_texture").m_tex.wrapping(GL_CLAMP_TO_EDGE);
-  if (false == m_quad.uniform<float>("u_texture").m_tex.load("wooden-crate.jpg"))
+  m_quad.attribute<Vector3f>("a_position") *= Vector3f(1.5f);
+  m_quad.getUniform<float>("u_texture").m_tex.interpolation(GL_LINEAR);
+  m_quad.getUniform<float>("u_texture").m_tex.wrapping(GL_CLAMP_TO_EDGE);
+  if (false == m_quad.getUniform<float>("u_texture").m_tex.load("wooden-crate.jpg"))
     return false;
 // FIXME ugly
 
@@ -150,23 +150,25 @@ bool GLExample01::draw()
 
   static float time = 0.0f;
   time += dt();
-  m_movable.rotate(4.0f * cosf(time), Vector3f(0, 1, 0));
+  float ct = cosf(time);
+
+  m_movable.rotate(4.0f * ct, Vector3f(0, 1, 0));
   m_quad.uniform<Matrix44f>("u_model") = m_movable.transform();
 
   // Filled cube
-  glDisable(GL_BLEND);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_POLYGON_OFFSET_FILL);
+  glCheck(glDisable(GL_BLEND));
+  glCheck(glEnable(GL_DEPTH_TEST));
+  glCheck(glEnable(GL_POLYGON_OFFSET_FILL));
   m_quad.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
   m_quad.draw(GL_TRIANGLES, 0, 36);
 
   // Outlined cube
-  glDisable(GL_POLYGON_OFFSET_FILL);
-  glEnable(GL_BLEND);
-  glDepthMask(GL_FALSE);
+  glCheck(glDisable(GL_POLYGON_OFFSET_FILL));
+  glCheck(glEnable(GL_BLEND));
+  glCheck(glDepthMask(GL_FALSE));
   m_quad.uniform<Vector4f>("u_color") = Vector4f(1, 0, 0, 1);
   m_quad.draw(GL_LINES, 0, 36);
-  glDepthMask(GL_TRUE);
+  glCheck(glDepthMask(GL_TRUE));
 
   return true;
 }
