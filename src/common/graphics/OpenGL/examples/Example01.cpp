@@ -12,10 +12,10 @@ bool GLExample01::setup()
   glCheck(glEnable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-  m_vs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
-  m_fs.loadFromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
-  m_quad.attachShader(m_vs).attachShader(m_fs);
-  m_quad.begin(); // FIXME a enlever
+  m_vs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
+  m_fs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
+  m_quad.attachShaders(m_vs, m_fs);
+  //m_quad.begin(); // FIXME a enlever
 
 // TODO tester index
   // TODO Faire qu'automatiquement on charge une liste de float en vector3f

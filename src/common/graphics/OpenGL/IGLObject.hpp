@@ -171,6 +171,13 @@ public:
       }
     init();
   }
+
+  //! \brief Valid object is an OpenGL has created with success.
+  inline virtual bool isValid() const
+  {
+    return m_handle > handle_reset_value();
+  }
+
 protected:
 
   //! \brief
@@ -183,12 +190,6 @@ protected:
   inline void forceUpdate()
   {
     m_need_update = true;
-  }
-
-  //! \brief Valid object is an OpenGL has created with success.
-  inline bool isValid() const
-  {
-    return m_handle > handle_reset_value();
   }
 
 private:

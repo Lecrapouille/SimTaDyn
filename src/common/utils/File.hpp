@@ -90,6 +90,11 @@ public:
   }
 
   //------------------------------------------------------------------
+  //! \brief Read the whole file and store its content as string.
+  //------------------------------------------------------------------
+  static bool readAllFile(std::string const& filename, std::string& buffer);
+
+  //------------------------------------------------------------------
   //! \brief give the file name with its extension from a given path
   //------------------------------------------------------------------
   inline static std::string fileName(std::string const& path)

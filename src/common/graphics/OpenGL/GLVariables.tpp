@@ -24,6 +24,9 @@
 
 #  include "Matrix.tpp"
 
+// TODO: quand un Attribute a change alors prevenir son GLProgram
+// afin qu'il recalcule les tailles.
+
 // **************************************************************
 //!
 // **************************************************************

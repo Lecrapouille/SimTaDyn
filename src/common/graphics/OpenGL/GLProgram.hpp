@@ -17,14 +17,501 @@ class GLProgram: public IGLObject<GLenum>
 {
 public:
 
+  //------------------------------------------------------------------
   //! \brief Empty constructor. Do nothing.
+  //------------------------------------------------------------------
   GLProgram(std::string const& name)
     : IGLObject(name), m_vao("VAO_" + name)
   {
   }
 
-  virtual ~GLProgram() override { destroy(); }
+  //------------------------------------------------------------------
+  //! \brief Destructor. Release GPU memory
+  //------------------------------------------------------------------
+  virtual ~GLProgram() override
+  {
+    destroy();
+  }
 
+  GLProgram& attachShaders(GLVertexShader&   vertex_shader,
+                           GLFragmentShader& fragment_shader,
+                           GLGeometryShader& geometry_shader)
+  {
+    m_shaders.push_back(vertex_shader);
+    m_shaders.push_back(fragment_shader);
+    m_shaders.push_back(geometry_shader);
+    return *this;
+  }
+
+  GLProgram& attachShaders(GLVertexShader&   vertex_shader,
+                           GLFragmentShader& fragment_shader)
+  {
+    m_shaders.push_back(vertex_shader);
+    m_shaders.push_back(fragment_shader);
+    return *this;
+  }
+
+  GLProgram& attachShader(GLShader& shader)
+  {
+    m_shaders.push_back(shader);
+    return *this;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Check if the program has been linked with success.
+  //! Note: the method name is compiled() but should be linked() because
+  //! compile is reserved for shaders.
+  //------------------------------------------------------------------
+  inline bool compiled() const
+  {
+    return m_compiled;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the shader error message
+  //------------------------------------------------------------------
+  inline bool hasErrored() const
+  {
+    return !m_error_msg.empty();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the shader error message. member variable is then
+  //! cleared.
+  //------------------------------------------------------------------
+  inline std::string error()
+  {
+    std::string tmp(m_error_msg);
+    m_error_msg.clear();
+    return tmp;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the list of shader names
+  //------------------------------------------------------------------
+  std::vector<std::string> shaderNames()
+  {
+    std::vector<std::string> list;
+    for (auto &it: m_shaders)
+      {
+        list.push_back(it.name());
+      }
+    return list;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the list of failed shaders
+  //------------------------------------------------------------------
+  std::vector<std::string> failedShaders()
+  {
+    std::vector<std::string> list;
+    for (auto &it: m_shaders)
+      {
+        if (!it.compiled())
+          {
+            list.push_back(it.name());
+          }
+      }
+    return list;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Check if the uniform variable exists in the shader code
+  //------------------------------------------------------------------
+  inline bool hasUniform(const char *name) const
+  {
+    return m_uniforms.end() != m_uniforms.find(name);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Locate the uniform variable by its name and its type T.
+  //! Return the reference of the data.
+  //------------------------------------------------------------------
+  template<class T>
+  inline T& uniform(const char *name)
+  {
+    return getUniform<T>(name).data();
+  }
+
+  //------------------------------------------------------------------
+   //! \brief Check if the attribute variable exists in the shader code
+  // FIXME if begin() a reussi
+  // FIXME: peut on avoir un nom doublon attrib / unifo ??
+  //------------------------------------------------------------------
+  inline bool hasAttribute(const char *name) const
+  {
+    return m_attributes.end() != m_attributes.find(name);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Locate the attribute variable by its name and its type T.
+  //! Return the reference of the VBO.
+  //------------------------------------------------------------------
+  template<class T>
+  inline GLVertexBuffer<T>& attribute(const char *name)
+  {
+    return getAttribute<T>(name).data();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Get the shader variable. If the name does not refer to a
+  //! valid variable an exception is triggered.
+  //! Example GLProgram prog; prog["position"] = { ... };
+  //------------------------------------------------------------------
+  inline IGLVariable& operator[](std::string const& name)
+  {
+    auto it_uniform = m_uniforms.find(name);
+    auto it_attribute = m_attributes.find(name);
+
+    if ((it_uniform != m_uniforms.end()) &&
+        (it_attribute != m_attributes.end()))
+      {
+        throw std::out_of_range("OpenGL variable '" + name +
+                                "' can be either attribute or uniform");
+      }
+    else if (it_uniform != m_uniforms.end())
+      {
+        return *(it_uniform->second);
+      }
+    else if (it_attribute != m_attributes.end())
+      {
+        return *(it_attribute->second);
+      }
+    else
+      {
+        throw std::out_of_range("Name '" + name + "' is not an shader variable");
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void throw_if_not_compiled()
+  {
+    if (unlikely(!compiled()))
+      {
+        throw OpenGLException("Failed OpenGL program has not been compiled");
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief check if all GLAttribute have their VBO with the
+  //! same size. TODO change this method to a callback: on_GLVariable_changed()
+  //------------------------------------------------------------------
+  void throw_if_inconsitency_attrib_sizes(/* updated_size */)
+  {
+    /* TODO
+    if (likely(!GLVariable_modified)) return ;
+
+    for (auto& it: m_attributes)
+      {
+        if (it.size() != updated_size)
+          {
+            throw OpenGLException("Failed OpenGL attributes have not the same size");
+          }
+      }
+    */
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Render primitives
+  //------------------------------------------------------------------
+  void draw(GLenum mode, GLint first, GLsizei count)
+  {
+    throw_if_not_compiled();
+    throw_if_inconsitency_attrib_sizes();
+
+    // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
+    // il suffisait entre 16 et 35
+    m_vao.begin();
+    begin();
+    glCheck(glDrawArrays(mode, first, count));
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    end();
+    m_vao.end();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Render all primitives
+  //------------------------------------------------------------------
+  inline void draw(GLenum /*mode*/)
+  {
+    //throw_if_not_compiled();
+    //throw_if_inconsitency_attrib_sizes();
+    //draw(mode, 0, m_attributes.begin()->second->size());
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Render primitives from their indices
+  //------------------------------------------------------------------
+  template<class T>
+  void draw(GLenum mode, GLIndexBuffer<T> const& index)
+  {
+    throw_if_not_compiled();
+    throw_if_inconsitency_attrib_sizes();
+
+    m_vao.begin();
+    begin();
+    index.begin();
+    glCheck(glDrawElements(mode, index.size(), index.type(), 0));
+    index.end();
+    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    end();
+    m_vao.end();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline virtual bool isValid() const override
+  {
+    return compiled();
+  }
+
+private:
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  virtual bool create() override
+  {
+    m_handle = glCheck(glCreateProgram());
+    return false;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  virtual bool setup() override
+  {
+    bool failure = false;
+
+    // Compile shaders if they have not yet compiled
+    for (auto &it: m_shaders)
+      {
+        it.begin();
+        if (it.hasErrored())
+          {
+            m_error_msg += "Shader '" + it.name() +
+              "' has not been compiled. Reason is '" +
+              it.error() + "'";
+            failure = true;
+          }
+      }
+
+    if (!failure)
+      {
+        // Attach shaders to program
+        for (auto &it: m_shaders)
+          {
+            glCheck(glAttachShader(m_handle, it.gpuID()));
+          }
+
+        // Compile the program
+        glCheck(glLinkProgram(m_handle));
+        m_compiled = checkLinkageStatus(m_handle);
+        if (m_compiled)
+          {
+            m_error_msg.clear();
+            // Create the list of attributes and uniforms
+            getAllAttributesAndUniforms();
+            // Release shaders stored in GPU.
+            detachAllShaders();
+          }
+      }
+
+    return !m_compiled;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  virtual void activate() override
+  {
+    glCheck(glUseProgram(m_handle));
+    for (auto& it: m_attributes)
+      {
+        it.second->begin();
+      }
+    for (auto& it: m_uniforms)
+      {
+        it.second->begin();
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Dummy method.
+  //------------------------------------------------------------------
+  virtual bool update() override
+  {
+    return false;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief A program can be desactivated if and only if shaders have
+  //! been loaded into a program (else nothing is done).
+  //------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+    glCheck(glUseProgram(0U));
+
+    for (auto& it: m_attributes)
+      {
+        it.second->end();
+      }
+    for (auto& it: m_uniforms)
+      {
+        it.second->end();
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Once program is no longer used, release it from the GPU
+  //! memory. Can be used to abort the shader.
+  //------------------------------------------------------------------
+  virtual void release() override
+  {
+    detachAllShaders();
+    glCheck(glDeleteProgram(m_handle));
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Create Attribute and Uniform instances
+  //------------------------------------------------------------------
+  void getAllAttributesAndUniforms()
+  {
+    const GLsizei bufSize = 64;
+    GLchar name[bufSize];
+    GLsizei length = 0;
+    GLint size = 0;
+    GLint count = 0;
+    GLenum type;
+
+    // Get all uniforms
+    glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
+    for (GLint i = 0; i < count; ++i)
+      {
+        glCheck(glGetActiveUniform(m_handle, (GLuint)i, bufSize,
+                                   &length, &size, &type, name));
+        LOGD("Uniform #%d Type: %u Name: %s", i, type, name);
+        m_uniforms[name] = factoryUniform(type, name);
+      }
+
+    // Get all attributes
+    glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
+    for (GLint i = 0; i < count; ++i)
+      {
+        glCheck(glGetActiveAttrib(m_handle, (GLuint)i, bufSize,
+                                  &length, &size, &type, name));
+        LOGD("Attribute #%d Type: %u Name: %s", i, type, name);
+        m_attributes[name] = factoryAttribute(type, name);
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Create Attribute instances
+  //------------------------------------------------------------------
+  IGLVariable* factoryAttribute(GLenum type, const char *name)
+  {
+    IGLVariable* glvariable;
+
+    switch (type)
+      {
+      case GL_FLOAT:
+        glvariable = new GLAttribute<float>(name, 1u, GL_FLOAT, gpuID());
+        break;
+      case GL_FLOAT_VEC2:
+        glvariable = new GLAttribute<Vector2f>(name, 2u, GL_FLOAT, gpuID());
+        break;
+      case GL_FLOAT_VEC3:
+        glvariable = new GLAttribute<Vector3f>(name, 3u, GL_FLOAT, gpuID());
+        break;
+      case GL_FLOAT_VEC4:
+        glvariable = new GLAttribute<Vector4f>(name, 4u, GL_FLOAT, gpuID());
+        break;
+      default:
+        m_error_msg += "\nAttribute '" + std::string(name) +
+          "' type is not managed";
+        glvariable = nullptr;
+        break;
+      }
+
+    return glvariable;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Create Uniform instances
+  //------------------------------------------------------------------
+  IGLVariable* factoryUniform(GLenum type, const char *name)
+  {
+    IGLVariable* glvariable;
+
+    switch (type)
+      {
+      case GL_FLOAT:
+        glvariable = new GLUniform<float>(name, type, gpuID()); // FIXME: std_unique
+        break;
+      case GL_FLOAT_VEC2:
+        glvariable = new GLUniform<Vector2f>(name, type, gpuID());
+        break;
+      case GL_FLOAT_VEC3:
+        glvariable = new GLUniform<Vector3f>(name, type, gpuID());
+        break;
+      case GL_FLOAT_VEC4:
+        glvariable = new GLUniform<Vector4f>(name, type, gpuID());
+        break;
+      case GL_INT:
+        glvariable = new GLUniform<int>(name, type, gpuID());
+        break;
+      case GL_INT_VEC2:
+        glvariable = new GLUniform<Vector2i>(name, type, gpuID());
+        break;
+      case GL_INT_VEC3:
+        glvariable = new GLUniform<Vector3i>(name, type, gpuID());
+        break;
+      case GL_INT_VEC4:
+        glvariable = new GLUniform<Vector4i>(name, type, gpuID());
+        break;
+        //case GL_BOOL:
+        //glvariable = new GLUniform<bool>(name, type, gpuID());
+        //break;
+        //case GL_BOOL_VEC2:
+        //glvariable = new GLUniform<Vector2b>(name, type, gpuID());
+        //break;
+      case GL_FLOAT_MAT2:
+        glvariable = new GLUniform<Matrix22f>(name, type, gpuID());
+        break;
+      case GL_FLOAT_MAT3:
+        glvariable = new GLUniform<Matrix33f>(name, type, gpuID());
+        break;
+      case GL_FLOAT_MAT4:
+        glvariable = new GLUniform<Matrix44f>(name, type, gpuID());
+        break;
+      case GL_SAMPLER_1D:
+      case GL_SAMPLER_2D:
+      case GL_SAMPLER_CUBE:
+        {
+          GLUniform</*GLTexture2D*/float>* gluni =
+            new GLUniform</*GLTexture2D*/float>(name, type, gpuID());
+          gluni->m_texture_unit = m_textures_count;
+          m_textures_count += 1u;
+          glvariable = gluni;
+        }
+      default:
+        m_error_msg += "\nUniform '" + std::string(name) +
+          "' type is not managed";
+        glvariable = nullptr;
+        break;
+      }
+    return glvariable;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Locate the uniform variable by its name and its type T.
+  //! \return the uniform instance if found else throw the exception
+  //! std::out_of_range
+  //------------------------------------------------------------------
+public: //FIXME
   template<class T>
   inline GLUniform<T>& getUniform(const char *name)
   {
@@ -33,26 +520,29 @@ public:
         throw std::invalid_argument("nullptr passed to getUniform");
       }
 
-    auto ptr = m_variables[name];
+    auto ptr = m_uniforms[name];
     if (unlikely(nullptr == ptr))
       {
-        throw std::out_of_range("GLUniform '" + std::string(name) + "' does not exist");
+        throw std::out_of_range("GLUniform '" + std::string(name) +
+                                "' does not exist");
       }
 
     GLUniform<T> *uniform_ptr = dynamic_cast<GLUniform<T>*>(ptr);
     if (unlikely(nullptr == uniform_ptr))
       {
-        throw std::out_of_range("GLUniform '" + std::string(name) + "' exists but has wrong template type");
+        throw std::out_of_range("GLUniform '" + std::string(name) +
+                                "' exists but has wrong template type");
       }
     return *uniform_ptr;
   }
 
-  template<class T>
-  inline T& uniform(const char *name)
-  {
-    return getUniform<T>(name).data();
-  }
+private:
 
+  //------------------------------------------------------------------
+  //! \brief Locate the attribute variable by its name and its type T.
+  //! \return the uniform instance if found else throw the exception
+  //! std::out_of_range
+  //------------------------------------------------------------------
   template<class T>
   inline GLAttribute<T>& getAttribute(const char *name)
   {
@@ -61,477 +551,66 @@ public:
         throw std::invalid_argument("nullptr passed to getAttribute");
       }
 
-    auto ptr = m_variables[name];
+    auto ptr = m_attributes[name];
     if (unlikely(nullptr == ptr))
       {
-        throw std::out_of_range("GLAttribute '" + std::string(name) + "' does not exist");
+        throw std::out_of_range("GLAttribute '" + std::string(name) +
+                                "' does not exist");
       }
 
     GLAttribute<T> *attrib_ptr = dynamic_cast<GLAttribute<T>*>(ptr);
     if (unlikely(nullptr == attrib_ptr))
       {
-        throw std::out_of_range("GLAttribute '" + std::string(name) + "' exists but has wrong template type");
+        throw std::out_of_range("GLAttribute '" + std::string(name) +
+                                "' exists but has wrong template type");
       }
     return *attrib_ptr;
   }
 
-  template<class T>
-  inline GLVertexBuffer<T>& attribute(const char *name)
+  void detachAllShaders()
   {
-    return getAttribute<T>(name).data();
-  }
-
-
-
-
-
-
-
-
-
-  GLProgram& attachShader(GLVertexShader& shader)
-  {
-    if (!needSetup())
+    for (auto &it: m_shaders)
       {
-        LOGE("Failed Shader already compiled");
-        //throw OpenGLException("Failed Shader already compiled");
-      }
-    m_vertex_shader = std::move(shader);
-    //m_vertex_shader.begin(); FIXME: A faire ?
-    std::cout << "P::VS: " << m_vertex_shader.gpuID() << std::endl;
-    return *this;
-  }
-
-  GLProgram& attachShader(GLFragmentShader& shader)
-  {
-    if (!needSetup())
-      {
-        LOGE("Failed Shader already compiled");
-        //throw OpenGLException("Failed Shader already compiled");
-      }
-    m_fragment_shader = std::move(shader);
-    return *this;
-  }
-
-  GLProgram& attachShader(GLGeometryShader& shader)
-  {
-    if (!needSetup())
-      {
-        LOGE("Failed Shader already compiled");
-        //throw OpenGLException("Failed Shader already compiled");
-      }
-    m_geometry_shader = std::move(shader);
-    return *this;
-  }
-
-  inline bool compiled() const
-  {
-    return !needSetup();
-  }
-
-  inline bool hasUniform(const char *name) const
-  {
-    auto const& it = m_variables.find(name);
-    return (m_variables.end() != it) &&
-      (IGLVariable::UNIFORM == it->second->kind());
-  }
-
-
-
-#if 0
-
-  template<class T>
-  inline GLUniform<T>& uniform(const char *name)
-  {
-    return *dynamic_cast<GLUniform<T>*>(m_variables[name]);
-  }
-
-  template<class T>
-  inline T const& getUniformVal(const char *name)
-  {
-    return dynamic_cast<GLUniform<T>*>(m_variables[name])->data();
-  }
-
-  template<class T>
-  void setUniformVal(const char *name, T const& val)
-  {
-    *dynamic_cast<GLUniform<T>*>(m_variables[name]) = val;
-  }
-#endif
-
-  // FIXME if begin() a reussi
-  // FIXME: peut on avoir un nom doublon attrib / unifo ??
-  inline bool hasAttribute(const char *name) const
-  {
-    auto const& it = m_variables.find(name);
-    return (m_variables.end() != it) &&
-      (IGLVariable::ATTRIBUTE == it->second->kind());
-  }
-
-#if 0
-  template<class T>
-  inline GLAttribute<T>& attribute(const char *name) // FIXME: Retourner le pointer pas la reference (si le prog n'a pas ete charge avec success)
-  {
-    auto* p = dynamic_cast<GLAttribute<T>*>(m_variables[name]);
-    printf("Get attib %p\n", p);
-    if (nullptr == p)
-      {
-        throw std::out_of_range("Name '" + std::string(name) +
-                                "' is not an valid shader variable (or your failed with its template)");
-      }
-    return *p;
-  }
-
-  template<class T>
-  inline T& getAttribVal(const char *name)
-  {
-    return dynamic_cast<GLAttribute<T>*>(m_variables[name])->data();
-  }
-
-  template<class T>
-  void setAttribVal(const char *name, T const& val)
-  {
-    *dynamic_cast<GLAttribute<T>*>(m_variables[name]) = val;
-  }
-#endif
-
-  // TODO GLProgram prog; prog['position'] = std::vector(...);
-  inline IGLVariable& operator[](std::string const& name)
-  {
-    if (m_variables.end() == m_variables.find(name))
-      {
-        throw std::out_of_range("Name '" + name + "' is not an shader variable");
-      }
-    return *m_variables[name];
-  }
-
-  /*inline IGLVariable const& operator[](std::string const& name) const
-    {
-    if (m_variables.end() == m_variables.find(name))
-    {
-    throw std::out_of_range("Name '" + name + "' is not an shader variable");
-    }
-    return *m_variables[name];
-    }*/
-
-  // TODO function qui verifie que tous les attrib ont la meme taille et ont ete init
-  /*bool
-    size_t size = 0_z;
-    for (const auto& it = m_variables)
-    {
-       if (GLVariable::ATTRIBUTE == it->second->kind())
-       {
-          size =
-       }
-    }
-*/
-
-// FIXME: ca prend 43 appels OpenGL alors qu'avant il suffisait de 35
-  inline void draw(GLenum mode, GLint first, GLsizei count)
-  {
-    LOGD("%s: draw {", name().c_str());
-    m_vao.begin(); // FIXME
-    begin();
-    glCheck(glDrawArrays(mode, first, count));
-    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    end();
-    m_vao.end();
-    LOGD("} %s: draw", name().c_str());
-  }
-
-  /*inline void draw(GLenum mode)
-  {
-    draw(mode, 0, getAttribSize());
-  }*/
-
-/*
-    inline void draw(GLenum mode, GLIndexBuffer index)
-    {
-    begin();
-    index.begin();
-    glCheck(glDrawElements(mode, indices.size(), index.type(), 0));
-    index.end();
-    glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    end();
-    }*/
-
-protected:
-
-  virtual bool create() override
-  {
-    LOGD("%s: create", name().c_str());
-    m_handle = glCheck(glCreateProgram());
-    return false;
-  }
-
-  //! \brief A program can be activated if and only if shaders have
-  //! been loaded into a program (else nothing is done).
-  virtual void activate() override
-  {
-    LOGD("%s: activate {", name().c_str());
-    if (!needSetup()) // FIXME or call glUseProgram(0) is setup()
-      {
-        //m_vao.begin();
-        glCheck(glUseProgram(m_handle));
-        for (auto& it: m_variables)
+        if (it.isValid())
           {
-            it.second->begin();
+            glCheck(glDetachShader(m_handle, it.gpuID()));
           }
       }
-    else
-      {
-        LOGD("%s: failed activate: need setup", name().c_str());
-      }
-    LOGD("} %s: activate", name().c_str());
   }
 
-  virtual bool setup() override
+  //------------------------------------------------------------------
+  //! \return true if case of success, else return false.
+  //------------------------------------------------------------------
+  bool checkLinkageStatus(GLuint obj)
   {
-    LOGD("%s: setup {", name().c_str());
-    // --- Check if we have scripts of vertex and frag shaders
-    if (!m_vertex_shader.loaded())
-      {
-        LOGE("No vertex shader has been given");
-        return true;
-      }
-
-    if (!m_fragment_shader.loaded())
-      {
-        LOGE("No Fragment shader has been given");
-        return true;
-      }
-
-    // --- Compile and attach vertex and frag shaders
-    LOGD("Compile and attach vertex and frag shaders");
-    m_vertex_shader.begin();
-    m_fragment_shader.begin();
-
-    if (!m_vertex_shader.compiled() || !m_fragment_shader.compiled())
-      {
-        LOGE("Program shader failed compiling at least one shader");
-        goto l_try_again;
-      }
-    glCheck(glAttachShader(m_handle, m_vertex_shader.gpuID()));
-    glCheck(glAttachShader(m_handle, m_fragment_shader.gpuID()));
-
-    // --- Compile and attach geometry shader
-    if (m_geometry_shader.loaded())
-      {
-        m_geometry_shader.begin();
-        if (!m_geometry_shader.compiled())
-          {
-            LOGE("Program shader failed compiling at least one shader");
-            goto l_try_again;
-          }
-        glCheck(glAttachShader(m_handle, m_geometry_shader.gpuID()));
-      }
-
-    // --- Link shaders into a single program
-    LOGD("Link shaders into a single program");
     GLint status;
-    glCheck(glLinkProgram(m_handle));
-    glCheck(glGetProgramiv(m_handle, GL_LINK_STATUS, &status));
+
+    glCheck(glGetProgramiv(obj, GL_LINK_STATUS, &status));
     if (GL_FALSE == status)
       {
         GLint length;
-        glCheck(glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &length));
-        std::vector<char> log(static_cast<size_t>(length));
-        glCheck(glGetShaderInfoLog(m_handle, length, &length, &log[0]));
-        LOGE("[FAILED] %s\n", &log[0U]); // FIXME: si program echoue alors acceder aux attrib va faire planter le prog
-        goto l_try_again;
+        glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
+        std::vector<char> log(length);
+        glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
+        m_error_msg += &log[0U];
+        LOGES("%s", m_error_msg.c_str());
       }
-
-    // TODO: glValidateProgram(m_handle);
-
-    // --- Construct list of uniforms and attributes
-    LOGD("Index attrib and uniform variables");
-    indexVariables();
-
-    // --- Detach shaders
-    LOGD("Detach shaders");
-    detachAllShaders();
-    LOGD("} %s: setup", name().c_str());
-    return false;
-
-  l_try_again:
-    m_vertex_shader.destroy();
-    m_fragment_shader.destroy();
-    m_geometry_shader.destroy();
-    return true;
-  }
-
-  virtual bool update() override
-  {
-    LOGD("%s: update", name().c_str());
-    return false;
-  }
-
-  //! \brief A program can be desactivated if and only if shaders have
-  //! been loaded into a program (else nothing is done).
-  virtual void deactivate() override
-  {
-    LOGD("%s: deactivate {", name().c_str());
-    glCheck(glUseProgram(0U));
-    for (auto& it: m_variables)
+    else
       {
-        it.second->end();
+        m_error_msg.clear();
       }
-
-    //m_vao.end();
-    LOGD("} %s: deactivate", name().c_str());
-  }
-
-  //! \brief Once program is no longer used, release it from the GPU
-  //! memory. Can be used to abort the shader.
-  virtual void release() override
-  {
-    LOGD("%s: release", name().c_str());
-    //FIXME detachAllShaders();
-    glCheck(glDeleteProgram(m_handle));
+    return status;
   }
 
 private:
 
-  void detachAllShaders()
-  {
-    LOGD("%s: detach all shaders", name().c_str());
-    if (0 < m_vertex_shader.gpuID()) {
-      glCheck(glDetachShader(m_handle, m_vertex_shader.gpuID()));
-    }
-
-    if (0 < m_fragment_shader.gpuID()) {
-      glCheck(glDetachShader(m_handle, m_fragment_shader.gpuID()));
-    }
-
-    if (0 < m_geometry_shader.gpuID()) {
-      glCheck(glDetachShader(m_handle, m_geometry_shader.gpuID()));
-    }
-  }
-
-  // shader = VertexShader("uniform float color[2];")
-  //   ==> "color[0]", gl.GL_FLOAT
-  //   ==> "color[1]", gl.GL_FLOAT
-  // "uniform vec4 color;" ==> "color", gl.GL_FLOAT_VEC4
-  uint32_t indexVariables()
-  {
-    if (likely(m_indexed))
-      return m_total;
-
-    GLsizei length = 0;
-    const GLsizei bufSize = 16;
-    GLint size = 0;
-    GLint count = 0;
-    GLchar name[bufSize];
-    GLenum type;
-    IGLVariable* glvariable;
-
-    glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
-    m_total = count;
-    LOGD("Number of Uniforms: %d", count);
-    uint32_t texture_count = 0;
-    for (GLint i = 0; i < count; ++i)
-      {
-        glCheck(glGetActiveUniform(m_handle, (GLuint)i, bufSize, &length, &size, &type, name));
-        LOGD("Uniform #%d Type: %u Name: %s L:%d S:%d", i, type, name, size, length);
-        if (GL_FLOAT == type) // FIXME leak
-          glvariable = new GLUniform<float>(name, type, gpuID());
-        else if (GL_FLOAT_VEC2 == type)
-          glvariable = new GLUniform<Vector2f>(name, type, gpuID());
-        else if (GL_FLOAT_VEC3 == type)
-          glvariable = new GLUniform<Vector3f>(name, type, gpuID());
-        else if (GL_FLOAT_VEC4 == type)
-          glvariable = new GLUniform<Vector4f>(name, type, gpuID());
-        else if (GL_INT == type)
-          glvariable = new GLUniform<int>(name, type, gpuID());
-        else if (GL_INT_VEC2 == type)
-          glvariable = new GLUniform<Vector2i>(name, type, gpuID());
-        else if (GL_INT_VEC3 == type)
-          glvariable = new GLUniform<Vector3i>(name, type, gpuID());
-        else if (GL_INT_VEC4 == type)
-          glvariable = new GLUniform<Vector4i>(name, type, gpuID());
-        //else if (GL_BOOL == type)
-        //  glvariable = new GLUniform<bool>(name, type, gpuID());
-        //else if (GL_BOOL_VEC2 == type)
-        //  glvariable = new GLUniform<Vector2b>(name, type, gpuID());
-        else if (GL_FLOAT_MAT2 == type)
-          glvariable = new GLUniform<Matrix22f>(name, type, gpuID());
-        else if (GL_FLOAT_MAT3 == type)
-          glvariable = new GLUniform<Matrix33f>(name, type, gpuID());
-        else if (GL_FLOAT_MAT4 == type)
-          glvariable = new GLUniform<Matrix44f>(name, type, gpuID());
-        else if ((GL_SAMPLER_1D == type) || (GL_SAMPLER_2D == type) || (GL_SAMPLER_CUBE == type))
-          {
-            GLUniform</*GLTexture2D*/float>* gluni = new GLUniform</*GLTexture2D*/float>(name, type, gpuID());
-            gluni->m_texture_unit = texture_count;
-            texture_count += 1u;
-            glvariable = gluni;
-          }
-        else
-          {
-            LOGES("Uniform %s: type not managed", name);
-            glvariable = nullptr;
-          }
-
-        if (nullptr != glvariable)
-          {
-            m_variables[name] = glvariable;
-            //glvariable->begin();
-          }
-      }
-
-    //Ajputer m_variables[name].begin();
-
-    glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
-    LOGD("Number of Attributes: %d", count);
-    m_total += count;
-    for (GLint i = 0; i < count; ++i)
-      {
-        glCheck(glGetActiveAttrib(m_handle, (GLuint)i, bufSize, &length, &size, &type, name));
-        LOGD("Attribute #%d Type: %u Name: %s L:%d S:%d", i, type, name, size, length);
-        if (GL_FLOAT == type) // FIXME leak
-          {
-            glvariable = new GLAttribute<float>(name, 1u, GL_FLOAT, gpuID());
-          }
-        else if (GL_FLOAT_VEC2 == type)
-          {
-            glvariable = new GLAttribute<Vector2f>(name, 2u, GL_FLOAT, gpuID());
-          }
-        else if (GL_FLOAT_VEC3 == type)
-          {
-            glvariable = new GLAttribute<Vector3f>(name, 3u, GL_FLOAT, gpuID());
-          }
-        else if (GL_FLOAT_VEC4 == type)
-          {
-            glvariable = new GLAttribute<Vector4f>(name, 4u, GL_FLOAT, gpuID());
-          }
-        else
-          {
-            LOGES("Attribute %s: type not managed", name);
-            glvariable = nullptr;
-          }
-
-        if (nullptr != glvariable)
-          {
-            m_variables[name] = glvariable;
-            //glvariable->begin();
-          }
-      }
-
-    //Ajputer m_variables[derniere].end();
-
-    m_indexed = true;
-    return m_total;
-  }
-
-private:
-
-  GLVAO            m_vao;
-  GLVertexShader   m_vertex_shader;
-  GLFragmentShader m_fragment_shader;
-  GLGeometryShader m_geometry_shader;
-  std::map<std::string, IGLVariable*> m_variables;
-  bool m_indexed = false;
-  size_t m_total = 0_z;
+  std::map<std::string, IGLVariable*> m_attributes;
+  std::map<std::string, IGLVariable*> m_uniforms;
+  std::vector<GLShader>               m_shaders;
+  GLVAO                               m_vao;
+  std::string                         m_error_msg;
+  bool                                m_compiled = false;
+  uint32_t                            m_textures_count = 0u;
 };
 
 #endif /* GLPROGRAM_HPP_ */

@@ -48,6 +48,7 @@ namespace opengl
 
 } // namespace opengl
 
+#  include "GLException.hpp"
 #  include "IGLObject.hpp"
 #  include "GLVAO.hpp"
 #  include "GLVBO.hpp"

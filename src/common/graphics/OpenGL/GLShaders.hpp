@@ -21,44 +21,52 @@
 #ifndef GLSHADER_HPP_
 #  define GLSHADER_HPP_
 
-//! \brief This file contains the class managing OpenGL shaders :
-//! read, compile, load into the GPU.
-
 #  include "IGLObject.hpp"
 #  include "File.hpp"
 #  include <vector>
 
 // **************************************************************
-//! \class GLShader GLShader.hpp
-//! \brief
+//! \class GLShader GLShader.hpp this class allows to load a
+//! shader (vertex, fragment, geometry) and compile it. This class
+//! is managed by GLProgram.
 // **************************************************************
 class GLShader: public IGLObject<GLuint>
 {
 public:
 
+  //------------------------------------------------------------------
   //! \brief Empty constructor. Do nothing.
+  //------------------------------------------------------------------
   GLShader(const GLenum target) noexcept
     : IGLObject()
   {
     m_target = target;
   }
 
+  //------------------------------------------------------------------
+  //! \brief Constructor. Do nothing.
+  //------------------------------------------------------------------
   GLShader(std::string const& name, const GLenum target) noexcept
     : IGLObject(name)
   {
     m_target = target;
   }
 
-  virtual ~GLShader() override { destroy(); }
-
-  void loadFromString(std::string const& script)
+  //------------------------------------------------------------------
+  //! \brief Release GPU memory.
+  //------------------------------------------------------------------
+  virtual ~GLShader() override
   {
-    if (!needSetup())
-      {
-        LOGE("Failed Shader already compiled");
-        //throw OpenGLException("Failed Shader already compiled");
-      }
+    destroy();
+  }
 
+  //------------------------------------------------------------------
+  //! \brief Copy the shader code given as string into the class
+  //! member variable. Note: the shader code compilation is delayed.
+  //------------------------------------------------------------------
+  void fromString(std::string const& script)
+  {
+    throw_if_already_compiled();
     m_shader_code = script;
     if (name().empty())
       {
@@ -66,47 +74,127 @@ public:
       }
   }
 
-  void loadFromFile(std::string const& filename)
+  //------------------------------------------------------------------
+  //! \brief Read the whole shader code from the given ascii file.
+  //! Note: the shader code compilation is delayed. The code is only
+  //! store in the member variable.
+  //! \param the path of the shader code.
+  //! \return true if the whole file has been read, else return false.
+  //! An error message is set and can be read through error().
+  //------------------------------------------------------------------
+  bool fromFile(std::string const& filename)
   {
-    if (!needSetup())
+    throw_if_already_compiled();
+    bool loaded = File::readAllFile(filename, m_shader_code);
+    if (false == loaded)
       {
-        LOGE("Failed Shader already compiled");
-        //throw OpenGLException("Failed Shader already compiled");
+        m_error_msg += "failed loading shader code from '"
+          + filename + "'";
       }
-
-    std::ifstream infile;
-    bool res = false;
-
-    // Read the shader code from a file
-    infile.open(filename, std::ifstream::in);
-    if (infile.is_open())
+    else if (name().empty())
       {
-        infile.seekg(0, std::ios::end);
-        std::streampos pos = infile.tellg();
-        if (pos > 0)
-          {
-            m_shader_code.resize(static_cast<size_t>(pos));
-            infile.seekg(0, std::ios::beg);
-            infile.read(&m_shader_code[0U],
-                        static_cast<std::streamsize>(m_shader_code.size()));
-            res = true;
-            if (name().empty())
-              {
-                name() = File::fileName(filename);
-              }
-          }
-        infile.close();
+        name() = File::fileName(filename);
       }
+    return loaded;
+  }
 
-    if (!res)
+  //------------------------------------------------------------------
+  //! \brief Check if the shader has been compiled with success by
+  //! OpenGL.
+  //------------------------------------------------------------------
+  inline bool compiled() const
+  {
+    return m_compiled;
+  }
+
+  //------------------------------------------------------------------
+  //! \return the shader code
+  //------------------------------------------------------------------
+  inline std::string const& code() const
+  {
+    return m_shader_code;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the shader error message
+  //------------------------------------------------------------------
+  inline bool hasErrored() const
+  {
+    return !m_error_msg.empty();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the shader error message. member variable is then
+  //! cleared.
+  //------------------------------------------------------------------
+  inline std::string error()
+  {
+    std::string tmp(m_error_msg);
+    m_error_msg.clear();
+    return tmp;
+  }
+
+private:
+
+  //------------------------------------------------------------------
+  //! \brief The shader is created inside the GPU.
+  //------------------------------------------------------------------
+  virtual bool create() override
+  {
+    m_handle = glCheck(glCreateShader(m_target));
+    return false;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief The shader is released from the GPU.
+  //------------------------------------------------------------------
+  virtual void release() override
+  {
+    glCheck(glDeleteShader(m_handle));
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Dummy method.
+  //------------------------------------------------------------------
+  virtual void activate() override
+  {
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Dummy method.
+  //------------------------------------------------------------------
+  virtual void deactivate() override
+  {
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Compile the shader code in the GPU.
+  //! \return true if the compilation succeeded. Else return false.
+  //! An error message is set and can be read through error().
+  //------------------------------------------------------------------
+  virtual bool setup() override
+  {
+    if (loaded() && !compiled())
       {
-        LOGE("Failed open file '%s'", filename.c_str());
-        //throw OpenGLException("Failed open file '" + filename + "'");
+        char const *source = m_shader_code.c_str();
+        GLint length = static_cast<GLint>(m_shader_code.size());
+        glCheck(glShaderSource(m_handle, 1, &source, &length));
+        glCheck(glCompileShader(m_handle));
+        m_compiled = checkCompilationStatus(m_handle);
       }
     else
       {
-        LOGI("Shader file '%s' loaded", filename.c_str());
+        m_error_msg +=
+          "Cannot compile the shader %s. Reason is "
+          "'already compiled or no shader code attached'";
+        LOGW("%s", m_error_msg.c_str());
       }
+    return !m_compiled;
+  }
+
+  virtual bool update() override
+  {
+    return false;
   }
 
   inline bool loaded() const
@@ -114,85 +202,53 @@ public:
     return !m_shader_code.empty();
   }
 
-  inline bool compiled() const
+  //------------------------------------------------------------------
+  //! \param obj the identifer of the loaded shader.
+  //! \return true if case of success, else return false.
+  //! An error message is set and can be read through error().
+  //------------------------------------------------------------------
+  bool checkCompilationStatus(GLuint obj)
   {
-    return !needSetup();
-  }
-
-  inline std::string const& code() const
-  {
-    return m_shader_code;
-  }
-
-private:
-
-  virtual bool create() override
-  {
-    LOGD("%s: create", name().c_str());
-    m_handle = glCheck(glCreateShader(m_target));
-    LOGD("handle = %u", m_handle);
-    return false;
-  }
-
-  virtual void release() override
-  {
-    LOGD("%s: release", name().c_str());
-    glCheck(glDeleteShader(m_handle));
-  }
-
-  //! \brief Empty method.
-  virtual void activate() override
-  {
-    //LOGD("%s: activate", name().c_str());
-  }
-
-  //! \brief Empty method.
-  virtual void deactivate() override
-  {
-    //LOGD("%s: deactivate", name().c_str());
-  }
-
-  //! \brief Empty method.
-  virtual bool setup() override
-  {
-    LOGD("%s: setup", name().c_str());
-    // Nothing to compile ? Try again later
-    if (m_shader_code.empty())
-      {
-        LOGD("Shader code source empty");
-        return true;
-      }
-
     GLint status;
-    char const *source = m_shader_code.c_str();
-    GLint length = static_cast<GLint>(m_shader_code.size());
-    glCheck(glShaderSource(m_handle, 1, &source, &length));
-    glCheck(glCompileShader(m_handle));
-    glCheck(glGetShaderiv(m_handle, GL_COMPILE_STATUS, &status));
+
+    glCheck(glGetShaderiv(obj, GL_COMPILE_STATUS, &status));
     if (GL_FALSE == status)
       {
-        glCheck(glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &length));
-        std::vector<char> log(static_cast<size_t>(length));
-        glCheck(glGetShaderInfoLog(m_handle, length, &length, &log[0]));
-        LOGE("[FAILED] %s\n", &log[0U]);
-        // In case of failure, let the ability to load
-        // a new script
-        m_shader_code.clear();
-        return true;
+        GLint length;
+        glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length));
+        std::vector<char> log(length);
+        glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
+        m_error_msg += &log[0U];
+        LOGES("%s", m_error_msg.c_str());
       }
-    return false;
+    else
+      {
+        m_error_msg.clear();
+      }
+    return status;
   }
 
-  virtual bool update() override
+  void throw_if_not_loaded()
   {
-    LOGD("%s: update", name().c_str());
-    return false;
-    //FIXME return needSetup ? true : false;
+    if (unlikely(!loaded()))
+      {
+        throw OpenGLException("No code attached to the shader");
+      }
+  }
+
+  void throw_if_already_compiled()
+  {
+    if (unlikely(!needSetup()))
+      {
+        throw OpenGLException("Failed Shader already compiled");
+      }
   }
 
 private:
 
   std::string m_shader_code;
+  std::string m_error_msg;
+  bool m_compiled = false;
 };
 
 // **************************************************************
