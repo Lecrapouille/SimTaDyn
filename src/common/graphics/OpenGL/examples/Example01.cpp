@@ -15,7 +15,7 @@ bool GLExample01::setup()
   m_vs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
   m_fs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
   m_quad.attachShaders(m_vs, m_fs);
-  //m_quad.begin(); // FIXME a enlever
+  m_quad.begin(); // FIXME a enlever
 
 // TODO tester index
   // TODO Faire qu'automatiquement on charge une liste de float en vector3f
@@ -123,13 +123,13 @@ bool GLExample01::setup()
           Vector2f(0.0f, 1.0f)
    };
 
-// FIXME ugly
   m_quad.attribute<Vector3f>("a_position") *= Vector3f(1.5f);
-  m_quad.getUniform<float>("u_texture").m_tex.interpolation(GL_LINEAR);
-  m_quad.getUniform<float>("u_texture").m_tex.wrapping(GL_CLAMP_TO_EDGE);
-  if (false == m_quad.getUniform<float>("u_texture").m_tex.load("wooden-crate.jpg"))
+
+  // texture
+  m_quad.uniform<GLTexture2D>("u_texture").interpolation(GL_LINEAR);
+  m_quad.uniform<GLTexture2D>("u_texture").wrapping(GL_CLAMP_TO_EDGE);
+  if (false == m_quad.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
     return false;
-// FIXME ugly
 
   m_quad.uniform<float>("u_scale") = 1.0f;
   float ratio = ((float) m_width) / ((float) m_height);

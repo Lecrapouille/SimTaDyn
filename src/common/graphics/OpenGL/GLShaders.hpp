@@ -86,10 +86,13 @@ public:
   {
     throw_if_already_compiled();
     bool loaded = File::readAllFile(filename, m_shader_code);
+    LOGI("FromFile: Shader: '" + m_shader_code + "'");
     if (false == loaded)
       {
-        m_error_msg += "failed loading shader code from '"
+        std::string msg = "failed loading shader code from '"
           + filename + "'";
+        LOGES("%s", msg.c_str());
+        m_error_msg += msg;
       }
     else if (name().empty())
       {
@@ -134,6 +137,19 @@ public:
     return tmp;
   }
 
+  //------------------------------------------------------------------
+  //! \brief (Information) Attached by a prog. Pass 0 for detached
+  //------------------------------------------------------------------
+  inline void attached(GLenum prog)
+  {
+    m_attached = prog;
+  }
+
+  inline GLenum attached() const
+  {
+    return m_attached;
+  }
+
 private:
 
   //------------------------------------------------------------------
@@ -141,6 +157,7 @@ private:
   //------------------------------------------------------------------
   virtual bool create() override
   {
+    LOGD("Shader::create %s", name().c_str());
     m_handle = glCheck(glCreateShader(m_target));
     return false;
   }
@@ -150,6 +167,7 @@ private:
   //------------------------------------------------------------------
   virtual void release() override
   {
+    LOGD("Shader::release");
     glCheck(glDeleteShader(m_handle));
   }
 
@@ -174,6 +192,7 @@ private:
   //------------------------------------------------------------------
   virtual bool setup() override
   {
+    LOGD("Shader::setup %s", name().c_str());
     if (loaded() && !compiled())
       {
         char const *source = m_shader_code.c_str();
@@ -181,13 +200,15 @@ private:
         glCheck(glShaderSource(m_handle, 1, &source, &length));
         glCheck(glCompileShader(m_handle));
         m_compiled = checkCompilationStatus(m_handle);
+        LOGD("Shader::setup %d", m_compiled);
       }
     else
       {
-        m_error_msg +=
+        std::string msg =
           "Cannot compile the shader %s. Reason is "
           "'already compiled or no shader code attached'";
-        LOGW("%s", m_error_msg.c_str());
+        m_error_msg += msg;
+        LOGW("%s", msg.c_str());
       }
     return !m_compiled;
   }
@@ -218,8 +239,9 @@ private:
         glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length));
         std::vector<char> log(length);
         glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
-        m_error_msg += &log[0U];
-        LOGES("%s", m_error_msg.c_str());
+        std::string msg = &log[0U];
+        m_error_msg += msg;
+        LOGES("%s", msg.c_str());
       }
     else
       {
@@ -249,6 +271,7 @@ private:
   std::string m_shader_code;
   std::string m_error_msg;
   bool m_compiled = false;
+  GLenum m_attached = 0;
 };
 
 // **************************************************************

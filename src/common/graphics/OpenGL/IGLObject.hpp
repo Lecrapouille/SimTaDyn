@@ -136,7 +136,6 @@ public:
           {
             activate();
 
-            // FIXME pour GLProgram setup a faire avant activate
             if (unlikely(needSetup()))
               {
                 m_need_setup = setup();
@@ -173,7 +172,7 @@ public:
   }
 
   //! \brief Valid object is an OpenGL has created with success.
-  inline virtual bool isValid() const
+  inline bool isValid() const
   {
     return m_handle > handle_reset_value();
   }

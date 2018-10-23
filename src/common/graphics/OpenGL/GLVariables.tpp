@@ -34,15 +34,12 @@ class IGLVariable: public IGLObject<GLint>
 {
 public:
 
-  enum Kind { ATTRIBUTE, UNIFORM };
-
   //! \brief
-  IGLVariable(const char *name, GLenum gltype, GLuint prog, Kind kind)
+  IGLVariable(const char *name, GLenum gltype, GLuint prog)
     : IGLObject(name)
   {
     m_gltype = gltype;
     m_program = prog;
-    m_kind = kind;
   }
 
   /* FIXME: pouvoir faire prog["color"] = 2.0f; au lieu de
@@ -57,11 +54,8 @@ public:
     return *this;
     }*/
 
-  inline Kind kind() const { return m_kind; }
-
 protected:
 
-  Kind m_kind;
   GLenum  m_gltype;
   GLuint  m_program;
 };
@@ -75,7 +69,7 @@ class GLAttribute: public IGLVariable
 public:
 
   GLAttribute(const char *name, uint8_t dim, GLenum gltype, GLuint prog)
-    : IGLVariable(name, gltype, prog, ATTRIBUTE),
+    : IGLVariable(name, gltype, prog),
       m_data("VBO_" + std::string(name))
   {
     assert((dim >= 1u) && (dim <= 4u));
@@ -174,7 +168,7 @@ public:
 
   // Note T and gltype shall match. Not checks are made
   GLUniform(const char *name, GLenum gltype, GLuint prog)
-    : IGLVariable(name, gltype, prog, UNIFORM)
+    : IGLVariable(name, gltype, prog)
   {
   }
 
@@ -187,7 +181,6 @@ public:
   template<class U>
   GLUniform& operator=(const U& val)
   {
-std::cout << "Unif ope =" << val << std::endl;
     m_data = T(val);
     forceUpdate();
     return *this;
@@ -209,15 +202,6 @@ private:
 
   virtual void activate() override
   {
-    switch (m_gltype)
-      {
-      case GL_SAMPLER_1D:
-      case GL_SAMPLER_2D:
-      case GL_SAMPLER_CUBE:
-        glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_unit));
-        m_tex.begin();
-        break;
-      }
   }
 
   virtual void deactivate() override
@@ -231,26 +215,12 @@ private:
 
   virtual bool update() override
   {
-    switch (m_gltype)
-      {
-      case GL_SAMPLER_1D:
-      case GL_SAMPLER_2D:
-      case GL_SAMPLER_CUBE:
-         glCheck(glUniform1i(m_handle, m_texture_unit));
-         break;
-      default:
-        setValue(m_data);
-        break;
-     }
-   return false;
+    setValue(m_data);
+    return false;
   }
 
-//FIXME private:
+  //private: //FIXME
 public:
-  uint32_t m_texture_unit = 0;
-    GLTexture2D m_tex;
-
-private:
 
   T m_data;
 };
@@ -347,9 +317,86 @@ inline void GLUniform<Matrix44f>::setValue(const Matrix44f& value) const
   glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, &value[0][0]));
 }
 
+template<>
+inline void GLUniform<GLTexture2D>::setValue(const GLTexture2D&) const
+{
+  // TODO ???
+}
+
+// **************************************************************
+//! \brief A GLSampler is an Opengl uniform for texture
+// **************************************************************
+template<class T>
+class GLSampler: public GLUniform<T>
+{
+public:
+
+  GLSampler(const char *name, GLenum gltype, uint32_t texture_count, GLuint prog)
+    : GLUniform<T>(name, gltype, prog)
+  {
+    m_texture_unit = texture_count;
+  }
+
+private:
+
+  virtual void activate() override
+  {
+    glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_unit));
+    GLUniform<T>::m_data.begin();
+  }
+
+  virtual bool update() override
+  {
+    glCheck(glUniform1i(GLUniform<T>::m_handle, m_texture_unit));
+    return false;
+  }
+
+private:
+
+  uint32_t m_texture_unit = 0;
+};
+
+// **************************************************************
+//! TODO
+// **************************************************************
+#if 0
+class GLSampler1D: public GLSampler<GLTexture1D>
+{
+public:
+
+  GLSampler1D(const char *name, uint32_t texture_count, GLuint prog)
+    : GLSampler<GLTexture1D>(name, GL_SAMPLER_1D, texture_count, prog)
+  {
+  }
+};
+#endif
+
 // **************************************************************
 //!
 // **************************************************************
+class GLSampler2D: public GLSampler<GLTexture2D>
+{
+public:
 
+  GLSampler2D(const char *name, uint32_t texture_count, GLuint prog)
+    : GLSampler<GLTexture2D>(name, GL_SAMPLER_2D, texture_count, prog)
+  {
+  }
+};
+
+// **************************************************************
+//!
+// **************************************************************
+#if 0
+class GLSampler3D: public GLSampler<GLTexture3D>
+{
+public:
+
+  GLSampler2D(const char *name, uint32_t texture_count, GLuint prog)
+    : GLSampler<GLTexture3D>(name, GL_SAMPLER_CUBE, texture_count, prog)
+  {
+  }
+};
+#endif
 
 #endif

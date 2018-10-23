@@ -33,10 +33,18 @@ public:
     destroy();
   }
 
+  GLProgram& attachShader(GLShader& shader)
+  {
+    LOGD("Prog::attachShader");
+    m_shaders.push_back(shader);
+    return *this;
+  }
+
   GLProgram& attachShaders(GLVertexShader&   vertex_shader,
                            GLFragmentShader& fragment_shader,
                            GLGeometryShader& geometry_shader)
   {
+    LOGD("Prog::attachShaders");
     m_shaders.push_back(vertex_shader);
     m_shaders.push_back(fragment_shader);
     m_shaders.push_back(geometry_shader);
@@ -46,14 +54,9 @@ public:
   GLProgram& attachShaders(GLVertexShader&   vertex_shader,
                            GLFragmentShader& fragment_shader)
   {
+    LOGD("Prog::attachShaders");
     m_shaders.push_back(vertex_shader);
     m_shaders.push_back(fragment_shader);
-    return *this;
-  }
-
-  GLProgram& attachShader(GLShader& shader)
-  {
-    m_shaders.push_back(shader);
     return *this;
   }
 
@@ -218,12 +221,15 @@ public:
   //------------------------------------------------------------------
   void draw(GLenum mode, GLint first, GLsizei count)
   {
+    LOGD("Prog::draw");
     throw_if_not_compiled();
     throw_if_inconsitency_attrib_sizes();
 
     // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
     // il suffisait entre 16 et 35
+    LOGD("VAO beg {");
     m_vao.begin();
+    LOGD("} VAO beg");
     begin();
     glCheck(glDrawArrays(mode, first, count));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
@@ -247,6 +253,7 @@ public:
   template<class T>
   void draw(GLenum mode, GLIndexBuffer<T> const& index)
   {
+    LOGD("Prog::drawIndex");
     throw_if_not_compiled();
     throw_if_inconsitency_attrib_sizes();
 
@@ -263,10 +270,11 @@ public:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  inline virtual bool isValid() const override
+  /*inline virtual bool isValid() const override
   {
+    LOGD("Prog::isValid %d", compiled());
     return compiled();
-  }
+    }*/
 
 private:
 
@@ -275,8 +283,11 @@ private:
   //------------------------------------------------------------------
   virtual bool create() override
   {
+    LOGD("Prog::create");
     m_handle = glCheck(glCreateProgram());
-    return false;
+    // Note: Contrary to VBO, GLProgram has to perform
+    // its setup() before calling activate() !
+    return setup();
   }
 
   //------------------------------------------------------------------
@@ -287,14 +298,18 @@ private:
     bool failure = false;
 
     // Compile shaders if they have not yet compiled
+    LOGD("Prog::setup compile shaders");
     for (auto &it: m_shaders)
       {
         it.begin();
         if (it.hasErrored())
           {
-            m_error_msg += "Shader '" + it.name() +
+            std::string msg =
+              "Shader '" + it.name() +
               "' has not been compiled. Reason is '" +
               it.error() + "'";
+            LOGE("%s", msg.c_str());
+            m_error_msg += msg;
             failure = true;
           }
       }
@@ -302,12 +317,15 @@ private:
     if (!failure)
       {
         // Attach shaders to program
+        LOGD("Prog::setup attach shaders");
         for (auto &it: m_shaders)
           {
             glCheck(glAttachShader(m_handle, it.gpuID()));
+            it.attached(m_handle);
           }
 
         // Compile the program
+        LOGD("Prog::setup compile prog");
         glCheck(glLinkProgram(m_handle));
         m_compiled = checkLinkageStatus(m_handle);
         if (m_compiled)
@@ -328,6 +346,11 @@ private:
   //------------------------------------------------------------------
   virtual void activate() override
   {
+    //if (unlikely(!compiled()))
+    //  return ;
+
+    LOGD("Prog::activate");
+    m_vao.begin();
     glCheck(glUseProgram(m_handle));
     for (auto& it: m_attributes)
       {
@@ -353,6 +376,7 @@ private:
   //------------------------------------------------------------------
   virtual void deactivate() override
   {
+    LOGD("Prog::deactivate");
     glCheck(glUseProgram(0U));
 
     for (auto& it: m_attributes)
@@ -363,6 +387,7 @@ private:
       {
         it.second->end();
       }
+    m_vao.end();
   }
 
   //------------------------------------------------------------------
@@ -371,6 +396,7 @@ private:
   //------------------------------------------------------------------
   virtual void release() override
   {
+    LOGD("Prog::release");
     detachAllShaders();
     glCheck(glDeleteProgram(m_handle));
   }
@@ -388,6 +414,7 @@ private:
     GLenum type;
 
     // Get all uniforms
+    LOGD("Prog::get all attrib and uniform");
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     for (GLint i = 0; i < count; ++i)
       {
@@ -430,8 +457,10 @@ private:
         glvariable = new GLAttribute<Vector4f>(name, 4u, GL_FLOAT, gpuID());
         break;
       default:
-        m_error_msg += "\nAttribute '" + std::string(name) +
+        std::string msg = "Attribute '" + std::string(name) +
           "' type is not managed";
+        LOGE("%s", msg.c_str());
+        m_error_msg += '\n' + msg;
         glvariable = nullptr;
         break;
       }
@@ -487,19 +516,23 @@ private:
       case GL_FLOAT_MAT4:
         glvariable = new GLUniform<Matrix44f>(name, type, gpuID());
         break;
-      case GL_SAMPLER_1D:
+        /*case GL_SAMPLER_1D:
+        glvariable = new GLSampler1D(name, m_textures_count, gpuID());
+        m_textures_count += 1u;
+        break;*/
       case GL_SAMPLER_2D:
-      case GL_SAMPLER_CUBE:
-        {
-          GLUniform</*GLTexture2D*/float>* gluni =
-            new GLUniform</*GLTexture2D*/float>(name, type, gpuID());
-          gluni->m_texture_unit = m_textures_count;
-          m_textures_count += 1u;
-          glvariable = gluni;
-        }
+        glvariable = new GLSampler2D(name, m_textures_count, gpuID());
+        m_textures_count += 1u;
+        break;
+        /*case GL_SAMPLER_CUBE:
+        glvariable = new GLSampler3D(name, m_textures_count, gpuID());
+        m_textures_count += 1u;
+        break;*/
       default:
-        m_error_msg += "\nUniform '" + std::string(name) +
+        std::string msg = "Uniform '" + std::string(name) +
           "' type is not managed";
+        LOGE("%s", msg.c_str());
+        m_error_msg += '\n' + msg;
         glvariable = nullptr;
         break;
       }
@@ -515,6 +548,12 @@ public: //FIXME
   template<class T>
   inline GLUniform<T>& getUniform(const char *name)
   {
+    if (unlikely(!compiled()))
+      {
+        begin();
+        // TODO: check if now compiled() == true
+      }
+
     if (unlikely(nullptr == name))
       {
         throw std::invalid_argument("nullptr passed to getUniform");
@@ -523,6 +562,8 @@ public: //FIXME
     auto ptr = m_uniforms[name];
     if (unlikely(nullptr == ptr))
       {
+        // TODO: create the variable: call factoryUniform
+        // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
         throw std::out_of_range("GLUniform '" + std::string(name) +
                                 "' does not exist");
       }
@@ -546,6 +587,11 @@ private:
   template<class T>
   inline GLAttribute<T>& getAttribute(const char *name)
   {
+    if (unlikely(!compiled()))
+      {
+        begin();
+      }
+
     if (unlikely(nullptr == name))
       {
         throw std::invalid_argument("nullptr passed to getAttribute");
@@ -569,11 +615,13 @@ private:
 
   void detachAllShaders()
   {
+    LOGD("Prog::detachAllshaders");
     for (auto &it: m_shaders)
       {
-        if (it.isValid())
+        if (m_handle == it.attached())
           {
             glCheck(glDetachShader(m_handle, it.gpuID()));
+            it.attached(0);
           }
       }
   }
