@@ -15,6 +15,9 @@
 // **************************************************************
 class GLProgram: public IGLObject<GLenum>
 {
+  using IGLVariablePtr = std::unique_ptr<IGLVariable>;
+  using map_t = std::map<std::string, IGLVariablePtr>;
+
 public:
 
   //------------------------------------------------------------------
@@ -287,7 +290,7 @@ private:
     m_handle = glCheck(glCreateProgram());
     // Note: Contrary to VBO, GLProgram has to perform
     // its setup() before calling activate() !
-    return setup();
+    return false;
   }
 
   //------------------------------------------------------------------
@@ -346,8 +349,8 @@ private:
   //------------------------------------------------------------------
   virtual void activate() override
   {
-    //if (unlikely(!compiled()))
-    //  return ;
+    if (unlikely(!compiled()))
+      return ;
 
     LOGD("Prog::activate");
     m_vao.begin();
@@ -421,7 +424,7 @@ private:
         glCheck(glGetActiveUniform(m_handle, (GLuint)i, bufSize,
                                    &length, &size, &type, name));
         LOGD("Uniform #%d Type: %u Name: %s", i, type, name);
-        m_uniforms[name] = factoryUniform(type, name);
+        addNewUniform(type, name);
       }
 
     // Get all attributes
@@ -431,112 +434,101 @@ private:
         glCheck(glGetActiveAttrib(m_handle, (GLuint)i, bufSize,
                                   &length, &size, &type, name));
         LOGD("Attribute #%d Type: %u Name: %s", i, type, name);
-        m_attributes[name] = factoryAttribute(type, name);
+        addNewAttribute(type, name);
       }
   }
 
   //------------------------------------------------------------------
   //! \brief Create Attribute instances
   //------------------------------------------------------------------
-  IGLVariable* factoryAttribute(GLenum type, const char *name)
+  void addNewAttribute(GLenum type, const char *name)
   {
-    IGLVariable* glvariable;
-
     switch (type)
       {
       case GL_FLOAT:
-        glvariable = new GLAttribute<float>(name, 1u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<float>>(name, 1u, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC2:
-        glvariable = new GLAttribute<Vector2f>(name, 2u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<Vector2f>>(name, 2u, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC3:
-        glvariable = new GLAttribute<Vector3f>(name, 3u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<Vector3f>>(name, 3u, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC4:
-        glvariable = new GLAttribute<Vector4f>(name, 4u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<Vector4f>>(name, 4u, GL_FLOAT, gpuID());
         break;
       default:
-        std::string msg = "Attribute '" + std::string(name) +
-          "' type is not managed";
+        std::string msg = "Attribute '" + std::string(name) + "' type is not managed";
         LOGE("%s", msg.c_str());
         m_error_msg += '\n' + msg;
-        glvariable = nullptr;
         break;
       }
-
-    return glvariable;
   }
 
   //------------------------------------------------------------------
   //! \brief Create Uniform instances
   //------------------------------------------------------------------
-  IGLVariable* factoryUniform(GLenum type, const char *name)
+  void addNewUniform(GLenum type, const char *name)
   {
-    IGLVariable* glvariable;
-
     switch (type)
       {
       case GL_FLOAT:
-        glvariable = new GLUniform<float>(name, type, gpuID()); // FIXME: std_unique
+        m_uniforms[name] = std::make_unique<GLUniform<float>>(name, type, gpuID());
         break;
       case GL_FLOAT_VEC2:
-        glvariable = new GLUniform<Vector2f>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector2f>>(name, type, gpuID());
         break;
       case GL_FLOAT_VEC3:
-        glvariable = new GLUniform<Vector3f>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector3f>>(name, type, gpuID());
         break;
       case GL_FLOAT_VEC4:
-        glvariable = new GLUniform<Vector4f>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector4f>>(name, type, gpuID());
         break;
       case GL_INT:
-        glvariable = new GLUniform<int>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<int>>(name, type, gpuID());
         break;
       case GL_INT_VEC2:
-        glvariable = new GLUniform<Vector2i>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector2i>>(name, type, gpuID());
         break;
       case GL_INT_VEC3:
-        glvariable = new GLUniform<Vector3i>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector3i>>(name, type, gpuID());
         break;
       case GL_INT_VEC4:
-        glvariable = new GLUniform<Vector4i>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector4i>>(name, type, gpuID());
         break;
         //case GL_BOOL:
-        //glvariable = new GLUniform<bool>(name, type, gpuID());
+        //m_uniforms[name] = std::make_unique<GLUniform<bool>>(name, type, gpuID());
         //break;
         //case GL_BOOL_VEC2:
-        //glvariable = new GLUniform<Vector2b>(name, type, gpuID());
+        //m_uniforms[name] = std::make_unique<GLUniform<Vector2b>>(name, type, gpuID());
         //break;
       case GL_FLOAT_MAT2:
-        glvariable = new GLUniform<Matrix22f>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Matrix22f>>(name, type, gpuID());
         break;
       case GL_FLOAT_MAT3:
-        glvariable = new GLUniform<Matrix33f>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Matrix33f>>(name, type, gpuID());
         break;
       case GL_FLOAT_MAT4:
-        glvariable = new GLUniform<Matrix44f>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, type, gpuID());
         break;
         /*case GL_SAMPLER_1D:
-        glvariable = new GLSampler1D(name, m_textures_count, gpuID());
+        m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_textures_count, gpuID());
         m_textures_count += 1u;
         break;*/
       case GL_SAMPLER_2D:
-        glvariable = new GLSampler2D(name, m_textures_count, gpuID());
+        m_uniforms[name] = std::make_unique<GLSampler2D>(name, m_textures_count, gpuID());
         m_textures_count += 1u;
         break;
         /*case GL_SAMPLER_CUBE:
-        glvariable = new GLSampler3D(name, m_textures_count, gpuID());
+        m_uniforms[name] = std::make_unique<GLSampler3D>(name, m_textures_count, gpuID());
         m_textures_count += 1u;
         break;*/
       default:
-        std::string msg = "Uniform '" + std::string(name) +
-          "' type is not managed";
+        std::string msg = "Uniform '" + std::string(name) + "' type is not managed";
         LOGE("%s", msg.c_str());
         m_error_msg += '\n' + msg;
-        glvariable = nullptr;
         break;
       }
-    return glvariable;
   }
 
   //------------------------------------------------------------------
@@ -545,6 +537,7 @@ private:
   //! std::out_of_range
   //------------------------------------------------------------------
 public: //FIXME
+
   template<class T>
   inline GLUniform<T>& getUniform(const char *name)
   {
@@ -559,10 +552,10 @@ public: //FIXME
         throw std::invalid_argument("nullptr passed to getUniform");
       }
 
-    auto ptr = m_uniforms[name];
+    auto ptr = m_uniforms[name].get();
     if (unlikely(nullptr == ptr))
       {
-        // TODO: create the variable: call factoryUniform
+        // TODO: create the variable: call addNewUniform
         // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
         throw std::out_of_range("GLUniform '" + std::string(name) +
                                 "' does not exist");
@@ -597,7 +590,7 @@ private:
         throw std::invalid_argument("nullptr passed to getAttribute");
       }
 
-    auto ptr = m_attributes[name];
+    auto ptr = m_attributes[name].get();
     if (unlikely(nullptr == ptr))
       {
         throw std::out_of_range("GLAttribute '" + std::string(name) +
@@ -652,13 +645,13 @@ private:
 
 private:
 
-  std::map<std::string, IGLVariable*> m_attributes;
-  std::map<std::string, IGLVariable*> m_uniforms;
-  std::vector<GLShader>               m_shaders;
-  GLVAO                               m_vao;
-  std::string                         m_error_msg;
-  bool                                m_compiled = false;
-  uint32_t                            m_textures_count = 0u;
+  map_t                  m_attributes;
+  map_t                  m_uniforms;
+  std::vector<GLShader>  m_shaders;
+  GLVAO                  m_vao;
+  std::string            m_error_msg;
+  bool                   m_compiled = false;
+  uint32_t               m_textures_count = 0u;
 };
 
 #endif /* GLPROGRAM_HPP_ */

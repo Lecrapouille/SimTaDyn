@@ -15,10 +15,13 @@ constexpr std::size_t operator "" _z (unsigned long long n) { return n; }
 // **************************************************************
 //! https://stackoverflow.com/questions/17902405/how-to-implement-make-unique-function-in-c11
 // **************************************************************
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
+namespace std
 {
+  template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args)
+  {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+  }
 }
 
 // **************************************************************
