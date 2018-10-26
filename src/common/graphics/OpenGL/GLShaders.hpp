@@ -237,7 +237,7 @@ private:
       {
         GLint length;
         glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &length));
-        std::vector<char> log(length);
+        std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
         std::string msg = &log[0U];
         m_error_msg += msg;

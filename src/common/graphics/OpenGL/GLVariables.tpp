@@ -53,7 +53,6 @@ public:
     forceUpdate();
     return *this;
     }*/
-
 protected:
 
   GLenum  m_gltype;
@@ -63,16 +62,16 @@ protected:
 // **************************************************************
 //!
 // **************************************************************
-template<class T> // T = VBO<X> | VAO  et X=float|vector2/3/4f
+template<class T>
 class GLAttribute: public IGLVariable
 {
 public:
 
-  GLAttribute(const char *name, uint8_t dim, GLenum gltype, GLuint prog)
+  GLAttribute(const char *name, GLint dim, GLenum gltype, GLuint prog)
     : IGLVariable(name, gltype, prog),
       m_data("VBO_" + std::string(name))
   {
-    assert((dim >= 1u) && (dim <= 4u));
+    assert((dim >= 1) && (dim <= 4));
     m_dim = dim;
   }
 
@@ -90,7 +89,6 @@ public:
 
   GLAttribute<T>& operator=(std::initializer_list<T> il)
   {
-    std::cout << "jkjkjk" << std::endl;
     m_data = il;
     return *this;
   }
@@ -114,6 +112,7 @@ private:
   virtual bool create() override
   {
     m_handle = glCheck(glGetAttribLocation(m_program, name().c_str()));
+    m_index = static_cast<GLuint>(m_handle);
     return false;
   }
 
@@ -124,13 +123,13 @@ private:
   virtual void activate() override
   {
     m_data.begin();
-    glCheck(glEnableVertexAttribArray(m_handle));
-    glCheck(glVertexAttribPointer(m_handle,
+    glCheck(glEnableVertexAttribArray(m_index));
+    glCheck(glVertexAttribPointer(m_index,
                                   m_dim,
                                   m_gltype,
                                   GL_FALSE,
-                                  0, // stride
-                                  (const GLvoid*) 0)); // offset
+                                  0, // default stride
+                                  static_cast<const GLvoid*>(0))); // no offset
   }
 
   virtual void deactivate() override
@@ -138,7 +137,7 @@ private:
     m_data.end();
     if (isValid() /* && m_data.isVBO() */)
       {
-        glCheck(glDisableVertexAttribArray(m_handle));
+        glCheck(glDisableVertexAttribArray(m_index));
       }
   }
 
@@ -155,7 +154,8 @@ private:
 private:
 
   GLVertexBuffer<T> m_data;
-  uint8_t m_dim;
+  GLint m_dim;
+  GLuint m_index;
 };
 
 // **************************************************************
@@ -347,7 +347,8 @@ private:
 
   virtual bool update() override
   {
-    glCheck(glUniform1i(GLUniform<T>::m_handle, m_texture_unit));
+    glCheck(glUniform1i(GLUniform<T>::m_handle,
+                        static_cast<GLint>(m_texture_unit)));
     return false;
   }
 
@@ -392,7 +393,7 @@ class GLSampler3D: public GLSampler<GLTexture3D>
 {
 public:
 
-  GLSampler2D(const char *name, uint32_t texture_count, GLuint prog)
+  GLSampler3D(const char *name, uint32_t texture_count, GLuint prog)
     : GLSampler<GLTexture3D>(name, GL_SAMPLER_CUBE, texture_count, prog)
   {
   }

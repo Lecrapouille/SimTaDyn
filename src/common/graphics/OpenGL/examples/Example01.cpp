@@ -132,7 +132,7 @@ bool GLExample01::setup()
     return false;
 
   m_quad.uniform<float>("u_scale") = 1.0f;
-  float ratio = ((float) m_width) / ((float) m_height);
+  float ratio = static_cast<float>(m_width) / static_cast<float>(m_height);
   m_quad.uniform<Matrix44f>("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
   m_quad.uniform<Matrix44f>("u_model") = m_movable.transform();

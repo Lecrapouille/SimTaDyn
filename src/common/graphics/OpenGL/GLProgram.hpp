@@ -414,26 +414,29 @@ private:
     GLsizei length = 0;
     GLint size = 0;
     GLint count = 0;
+    GLuint i;
     GLenum type;
 
     // Get all uniforms
     LOGD("Prog::get all attrib and uniform");
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
-    for (GLint i = 0; i < count; ++i)
+    i = static_cast<GLuint>(count);
+    while (i--)
       {
-        glCheck(glGetActiveUniform(m_handle, (GLuint)i, bufSize,
-                                   &length, &size, &type, name));
-        LOGD("Uniform #%d Type: %u Name: %s", i, type, name);
+        glCheck(glGetActiveUniform(m_handle, i, bufSize, &length,
+                                   &size, &type, name));
+        LOGD("Uniform #%u Type: %u Name: %s", i, type, name);
         addNewUniform(type, name);
       }
 
     // Get all attributes
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
-    for (GLint i = 0; i < count; ++i)
+    i = static_cast<GLuint>(count);
+    while (i--)
       {
-        glCheck(glGetActiveAttrib(m_handle, (GLuint)i, bufSize,
-                                  &length, &size, &type, name));
-        LOGD("Attribute #%d Type: %u Name: %s", i, type, name);
+        glCheck(glGetActiveAttrib(m_handle, i, bufSize, &length,
+                                  &size, &type, name));
+        LOGD("Attribute #%u Type: %u Name: %s", i, type, name);
         addNewAttribute(type, name);
       }
   }
@@ -443,19 +446,20 @@ private:
   //------------------------------------------------------------------
   void addNewAttribute(GLenum type, const char *name)
   {
+    GLenum EGL_FLOAT = static_cast<GLenum>(GL_FLOAT);
     switch (type)
       {
       case GL_FLOAT:
-        m_attributes[name] = std::make_unique<GLAttribute<float>>(name, 1u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<float>>(name, 1, EGL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC2:
-        m_attributes[name] = std::make_unique<GLAttribute<Vector2f>>(name, 2u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<Vector2f>>(name, 2, EGL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC3:
-        m_attributes[name] = std::make_unique<GLAttribute<Vector3f>>(name, 3u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<Vector3f>>(name, 3, EGL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC4:
-        m_attributes[name] = std::make_unique<GLAttribute<Vector4f>>(name, 4u, GL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute<Vector4f>>(name, 4, EGL_FLOAT, gpuID());
         break;
       default:
         std::string msg = "Attribute '" + std::string(name) + "' type is not managed";
@@ -631,7 +635,7 @@ private:
       {
         GLint length;
         glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
-        std::vector<char> log(length);
+        std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
         m_error_msg += &log[0U];
         LOGES("%s", m_error_msg.c_str());
