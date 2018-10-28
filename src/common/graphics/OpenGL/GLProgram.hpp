@@ -9,6 +9,7 @@
 #  include "GLVariables.tpp"
 #  include <map>
 
+// TODO: verifier les GLVariables non init dans le GPU
 // **************************************************************
 //! \class GLShader GLShader.hpp
 //! \brief
@@ -24,7 +25,7 @@ public:
   //! \brief Empty constructor. Do nothing.
   //------------------------------------------------------------------
   GLProgram(std::string const& name)
-    : IGLObject(name), m_vao("VAO_" + name)
+    : IGLObject(name)
   {
   }
 
@@ -61,6 +62,31 @@ public:
     m_shaders.push_back(vertex_shader);
     m_shaders.push_back(fragment_shader);
     return *this;
+  }
+
+  inline void bind(GLVAO& vao)
+  {
+#if 1
+    m_vao = &vao;
+    m_binded = true;
+#else
+    LOGD("Prog::bind VAO");
+    m_vao = &vao;
+    m_vao->name() = "VAO_" + name();
+    m_vao->begin();
+    if (!m_vao->isValid())
+      {
+        LOGE("Failed binding VAO '%s' to Program '%s'",
+             m_vao->name().c_str(), name().c_str());
+        m_vao = nullptr;
+      }
+    m_binded = (nullptr != m_vao);
+#endif
+  }
+
+  inline bool binded() const
+  {
+    return m_binded;
   }
 
   //------------------------------------------------------------------
@@ -117,6 +143,32 @@ public:
           {
             list.push_back(it.name());
           }
+      }
+    return list;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the list of unifom names
+  //------------------------------------------------------------------
+  std::vector<std::string> uniformNames()
+  {
+    std::vector<std::string> list;
+    for (auto &it: m_uniforms)
+      {
+        list.push_back(it.first);
+      }
+    return list;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the list of unifom names
+  //------------------------------------------------------------------
+  std::vector<std::string> attributeNames()
+  {
+    std::vector<std::string> list;
+    for (auto &it: m_attributes)
+      {
+        list.push_back(it.first);
       }
     return list;
   }
@@ -201,6 +253,17 @@ public:
   }
 
   //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void throw_if_not_binded()
+  {
+    if (unlikely(!binded()))
+      {
+        throw OpenGLException("Failed OpenGL program has not been binded to a VAO");
+      }
+  }
+
+  //------------------------------------------------------------------
   //! \brief check if all GLAttribute have their VBO with the
   //! same size. TODO change this method to a callback: on_GLVariable_changed()
   //------------------------------------------------------------------
@@ -226,18 +289,17 @@ public:
   {
     LOGD("Prog::draw");
     throw_if_not_compiled();
+    throw_if_not_binded();
     throw_if_inconsitency_attrib_sizes();
 
     // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
     // il suffisait entre 16 et 35
-    LOGD("VAO beg {");
-    m_vao.begin();
-    LOGD("} VAO beg");
+    m_vao->begin();
     begin();
     glCheck(glDrawArrays(mode, first, count));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
-    m_vao.end();
+    m_vao->end();
   }
 
   //------------------------------------------------------------------
@@ -258,16 +320,17 @@ public:
   {
     LOGD("Prog::drawIndex");
     throw_if_not_compiled();
+    throw_if_not_binded();
     throw_if_inconsitency_attrib_sizes();
 
-    m_vao.begin();
+    m_vao->begin();
     begin();
     index.begin();
     glCheck(glDrawElements(mode, index.size(), index.type(), 0));
     index.end();
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
-    m_vao.end();
+    m_vao->end();
   }
 
   //------------------------------------------------------------------
@@ -351,9 +414,11 @@ private:
   {
     if (unlikely(!compiled()))
       return ;
+    if (unlikely(!binded()))
+      return ;
 
     LOGD("Prog::activate");
-    m_vao.begin();
+    m_vao->begin();
     glCheck(glUseProgram(m_handle));
     for (auto& it: m_attributes)
       {
@@ -390,7 +455,7 @@ private:
       {
         it.second->end();
       }
-    m_vao.end();
+    GLVAO::unbind();
   }
 
   //------------------------------------------------------------------
@@ -652,10 +717,11 @@ private:
   map_t                  m_attributes;
   map_t                  m_uniforms;
   std::vector<GLShader>  m_shaders;
-  GLVAO                  m_vao;
+  GLVAO                 *m_vao = nullptr;
   std::string            m_error_msg;
-  bool                   m_compiled = false;
   uint32_t               m_textures_count = 0u;
+  bool                   m_compiled = false;
+  bool                   m_binded = false;
 };
 
 #endif /* GLPROGRAM_HPP_ */

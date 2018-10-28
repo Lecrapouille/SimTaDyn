@@ -24,6 +24,7 @@ public:
 
 public:
 
+  GLVAO              m_vao;
   GLVertexShader     m_vs;
   GLFragmentShader   m_fs;
   GLProgram          m_quad;

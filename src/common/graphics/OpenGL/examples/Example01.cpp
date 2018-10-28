@@ -22,9 +22,9 @@ bool GLExample01::setup()
   m_vs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
   m_fs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
   m_quad.attachShaders(m_vs, m_fs);
-  m_quad.begin(); // FIXME a enlever
+  m_quad.bind(m_vao);
 
-// TODO tester index
+  // TODO tester index
   // TODO Faire qu'automatiquement on charge une liste de float en vector3f
   m_quad.attribute<Vector3f>("a_position") =
     {

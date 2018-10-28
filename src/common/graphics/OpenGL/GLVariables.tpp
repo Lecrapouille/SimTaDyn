@@ -89,6 +89,8 @@ public:
 
   GLAttribute<T>& operator=(std::initializer_list<T> il)
   {
+    //FIXME operator=(VBO) soit en creer un partage
+    // m_data = new GLVBO(il);
     m_data = il;
     return *this;
   }
@@ -128,8 +130,8 @@ private:
                                   m_dim,
                                   m_gltype,
                                   GL_FALSE,
-                                  0, // default stride
-                                  static_cast<const GLvoid*>(0))); // no offset
+                                  m_stride,
+                                  (const GLvoid*) m_offset));
   }
 
   virtual void deactivate() override
@@ -150,6 +152,11 @@ private:
   {
     return false;
   }
+
+public:
+
+  size_t m_stride = 0;
+  size_t m_offset = 0;
 
 private:
 

@@ -47,6 +47,11 @@ public:
 
   virtual ~GLVAO() override { destroy(); }
 
+  static void unbind()
+  {
+    glCheck(glBindVertexArray(0U));
+  }
+
 private:
 
   virtual bool create() override
