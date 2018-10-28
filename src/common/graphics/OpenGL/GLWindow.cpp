@@ -22,9 +22,23 @@
 #include "OpenGL.hpp" //FIXME
 #include <sstream>
 
-static void onError(int /*errorCode*/, const char* msg)
+static void on_error(int /*errorCode*/, const char* msg)
 {
   throw std::runtime_error(msg);
+}
+
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
+  if (width < 0)
+    {
+      width = 1;
+    }
+  if (height < 0)
+    {
+      height = 1;
+    }
+  obj->onWindowSizeChanged(static_cast<float>(width), static_cast<float>(height));
 }
 
 IGLWindow::IGLWindow()
@@ -81,7 +95,7 @@ bool IGLWindow::start()
   int res;
 
   // Initialise GLFW
-  glfwSetErrorCallback(onError);
+  glfwSetErrorCallback(on_error);
   if (!glfwInit())
     {
       std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -113,13 +127,13 @@ bool IGLWindow::start()
       return false;
     }
 
-  // print out some info about the graphics drivers
+  // Print out some info about the graphics drivers
   std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
   std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
   std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
   std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
-  // make sure OpenGL version 3.2 API is available
+  // Make sure OpenGL version 3.2 API is available
   if (!GLEW_VERSION_3_2)
     {
       std::cerr << "OpenGL 3.2 API is not available." << std::endl;
@@ -127,7 +141,14 @@ bool IGLWindow::start()
       return false;
     }
 
-  // Ensure we can capture the escape key being pressed below
+  // Save the class address to "cast" function callback into a method
+  // callback
+  glfwSetWindowUserPointer(m_window, this);
+  glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
+  //glfwSetCursorPosCallback(m_window, mouse_callback);
+  //glfwSetScrollCallback(m_window, scroll_callback);
+
+  // Ensure we can capture keyboard being pressed below
   glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
   try
     {

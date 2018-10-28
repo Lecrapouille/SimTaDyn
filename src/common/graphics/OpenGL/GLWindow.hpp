@@ -65,6 +65,13 @@ public:
     return m_window;
   }
 
+  //------------------------------------------------------------------
+  //! \brief Callback when the window has its size changed
+  //! \param width is never <= 0
+  //! \param height is never <= 0
+  //------------------------------------------------------------------
+  virtual void onWindowSizeChanged(const float width, const float height) = 0;
+
 private:
 
   //------------------------------------------------------------------

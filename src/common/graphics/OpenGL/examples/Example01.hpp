@@ -18,6 +18,7 @@ public:
     std::cout << "Bye" << std::endl;
   }
 
+  virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
 
