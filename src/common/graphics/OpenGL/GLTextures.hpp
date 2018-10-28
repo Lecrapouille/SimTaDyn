@@ -21,6 +21,8 @@
 #ifndef GLTEXTURES_HPP_
 #  define GLTEXTURES_HPP_
 
+#  include "NonCppStd.hpp"
+#  include <memory>
 #  include "IGLObject.hpp"
 //#  include "Resource.hpp"
 #  include "PendingData.hpp"
@@ -75,7 +77,7 @@ public:
 
 protected:
 
-  void applyParam()
+  void applyTextureParam()
   {
     glCheck(glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, m_min_filter));
     glCheck(glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, m_mag_filter));
@@ -114,7 +116,7 @@ private:
 
   virtual bool setup() override
   {
-    applyParam();
+    applyTextureParam();
     return false;
   }
 
@@ -128,6 +130,18 @@ private:
 // **************************************************************
 class GLTexture2D: public IGLTexture
 {
+  struct SOILDeleter
+  {
+    void operator()(unsigned char* buf)
+    {
+      std::cout << "Texture deleter" << std::endl;
+      if (buf != nullptr)
+        SOIL_free_image_data(buf);
+    }
+  };
+
+  using TextBufPtr = std::unique_ptr<unsigned char, SOILDeleter>;
+
 public:
 
   GLTexture2D()
@@ -142,15 +156,11 @@ public:
 
   virtual ~GLTexture2D()
   {
-    if (likely(nullptr != m_buffer))
-      {
-        SOIL_free_image_data(m_buffer);
-      }
   }
 
   inline bool loaded() const
   {
-    return nullptr != m_buffer;
+    return nullptr != m_buffer.get();
   }
 
   inline bool load(std::string const& filename, const bool rename = false)
@@ -164,14 +174,12 @@ public:
     bool res;
 
     LOGI("Loading texture '%s'", filename);
-    if (nullptr != m_buffer)
-      {
-        SOIL_free_image_data(m_buffer);
-      }
-    m_buffer = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA);
+
+    TextBufPtr buf(SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGBA));
+    m_buffer = std::move(buf);
 
     // Success
-    if (likely(nullptr != m_buffer))
+    if (likely(nullptr != m_buffer.get()))
       {
         m_width = static_cast<uint32_t>(width);
         m_height = static_cast<uint32_t>(height);
@@ -180,24 +188,14 @@ public:
             name() = filename;
             LOGI("Renaming texture '%s'", filename);
           }
-        PendingData::tagAsPending(0U, m_width * m_height);
+        PendingData::tagAsPending(0_z, m_width * m_height);
         LOGI("Successfuly load picture file '%s'", filename);
         res = true;
       }
     else
       {
-        /*if (m_throw_enable)
-          {
-            std::string msg("Failed loading picture file '");
-            msg += filename; msg += "'";
-            OpenGLException e(msg);
-            throw e;
-          }
-          else*/
-          {
-            LOGES("Failed loading picture file '%s'", filename);
-            res = false;
-          }
+        LOGES("Failed loading picture file '%s'", filename);
+        res = false;
       }
 
     return res;
@@ -211,12 +209,12 @@ public:
     //    reserve(nth);
     //  }
     PendingData::tagAsPending(nth);
-    return m_buffer[nth];
+    return m_buffer.get()[nth];
   }
 
   inline const unsigned char& operator[](size_t nth) const
   {
-    return m_buffer[nth];
+    return m_buffer.get()[nth];
   }
 
   inline uint32_t width() const
@@ -234,14 +232,19 @@ private:
   virtual bool setup() override
   {
     LOGD("Texture '%s' setup", name().c_str());
-    if (unlikely(!loaded()))
-      return true;
 
-    applyParam();
+    // Note: m_buffer can nullptr
+    if (unlikely((0 == m_width) || (0 == m_height)))
+      {
+        LOGE("Cannot setup texture with width or hieght set to 0");
+        return true;
+      }
+
+    applyTextureParam();
     glCheck(glTexImage2D(m_target, 0, m_gpu_format,
                          static_cast<GLsizei>(m_width),
                          static_cast<GLsizei>(m_height),
-                         0, m_cpu_format, m_type, m_buffer));
+                         0, m_cpu_format, m_type, m_buffer.get()));
     return false;
   }
 
@@ -262,7 +265,7 @@ private:
 
     glCheck(glBindTexture(m_target, m_handle));
     glCheck(glTexSubImage2D(m_target, 0, x, y, width, height,
-                            m_cpu_format, m_type, m_buffer));
+                            m_cpu_format, m_type, m_buffer.get()));
 
     PendingData::clearPending();
     return false;
@@ -273,8 +276,7 @@ private:
   GLenum m_cpu_format = GL_RGBA;
   GLint m_gpu_format = GL_RGBA;
   GLenum m_type = GL_UNSIGNED_BYTE;
-  // TODO smart pointer + deleter=SOIL_free_image_data
-  unsigned char* m_buffer = nullptr;
+  TextBufPtr m_buffer;
 };
 
 // **************************************************************

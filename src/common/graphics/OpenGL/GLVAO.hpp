@@ -31,21 +31,20 @@ public:
   GLVAO()
     : IGLObject()
   {
-  }
-
-  //! \brief Constructor with the object name
-  GLVAO(std::string const& name)
-    : IGLObject(name)
-  {
+    m_target = GL_ARRAY_BUFFER;
   }
 
   //! \brief Constructor with the object name
   GLVAO(const char *name)
     : IGLObject(name)
   {
+    m_target = GL_ARRAY_BUFFER;
   }
 
-  virtual ~GLVAO() override { destroy(); }
+  virtual ~GLVAO() override
+  {
+    destroy();
+  }
 
   static void unbind()
   {

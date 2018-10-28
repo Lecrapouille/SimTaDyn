@@ -191,7 +191,7 @@ public:
     m_data = T(val);
     forceUpdate();
     return *this;
-    }
+  }
 
 private:
 
