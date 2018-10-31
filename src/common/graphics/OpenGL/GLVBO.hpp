@@ -31,8 +31,7 @@
 //! from images or the framebuffer, and a variety of other things.
 // **************************************************************
 template<typename T>
-class GLBuffer: public IGLObject<GLenum>,
-                public PendingContainer<T>
+class GLBuffer: public IGLObject<GLenum>
 {
 public:
 
@@ -85,7 +84,7 @@ private:
   virtual bool setup() override
   {
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
-      (PendingContainer<T>::capacity() * sizeof (T));
+      (m_container.capacity() * sizeof (T));
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
 
     return false;
@@ -93,78 +92,84 @@ private:
 
   virtual inline bool needUpdate() const override
   {
-    return PendingContainer<T>::hasPendingData();
+    return m_container.hasPendingData();
   }
 
   virtual bool update() override
   {
     size_t pos_start, pos_end;
-    PendingContainer<T>::getPendingData(pos_start, pos_end);
-    PendingContainer<T>::clearPending();
+    m_container.getPendingData(pos_start, pos_end);
+    m_container.clearPending();
 
     size_t offset = sizeof (T) * pos_start;
     size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
     glCheck(glBufferSubData(m_target,
                             static_cast<GLintptr>(offset),
                             static_cast<GLsizeiptr>(nbytes),
-                            &PendingContainer<T>::m_container[0]));
+                            &(m_container.m_container[0])));
     return false;
-  }
-
-  inline const T& operator[](size_t n) const
-  {
-    return PendingContainer<T>::operator[](n);
-  }
-
-  inline T& operator[](size_t nth)
-  {
-    if (nth > PendingContainer<T>::capacity())
-      {
-        reserve(nth);
-      }
-    return PendingContainer<T>::operator[](nth);
-  }
-
-  //! \brief Append elements from a given vector.
-  //! \param vect
-  /*void append(std::vector<T> &vect)
-  {
-    append(&vect[0], vect.size());
-  }
-
-  void append(const T *array, const size_t size)
-  {
-    tryExpand();
-    qq.append(array, size);
-  }*/
-
-private:
-
-  void tryExpand() const
-  {
-    if (!IGLObject::needCreate())
-      {
-        throw std::out_of_range("Cannot change buffer size once loaded on GPU");
-      }
-  }
-
-  //! if nth is lower than the current size. The nth is updated.
-  //! Else (if nth is greater than the current size) two possible
-  //! cases:
-  //! -- Either the container size has not been reserved into the GPU
-  //! (ie, if the method start() have not been called): the container
-  //! size will change if In the case.
-  //! -- the method start() have not been called, and so the container
-  //! size cannot increase. A out_of_range exception is called.
-  void reserve(size_t nth)
-  {
-    tryExpand();
-    PendingContainer<T>::resize(nth);
   }
 
 private:
 
   GLenum m_usage;
+
+public:
+  PendingContainer<T> m_container;
+
+
+  /*
+    dtype = [("position", np.float32, 3),
+              ("color",    np.float32, 4)]
+     V = np.zeros(4,dtype).view(gloo.VertexBuffer)
+
+doit donner:
+
+V.tofile("qq.bin")
+00000000  00 00 5c 42 00 00 5c 42  00 00 5c 42 00 00 00 00  |..\B..\B..\B....|
+00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00000070
+
+et V['position'] pointe sur element 0 alors que V['color'] pointe sur
+
+   */
+
+  //TODO std::map<std::string, PendingContainer<T>> m_containers;
+  //TODO PendingContainer<T>& operator[](std::string const& name)
+  /*
+     dtype = [("position", np.float32, 3),
+              ("color",    np.float32, 4)]
+     V = np.zeros(4,dtype).view(gloo.VertexBuffer)
+
+V['position']
+VertexBuffer([[ 55.,  55.,  55.],
+       [  0.,   0.,   0.],
+       [  0.,   0.,   0.],
+       [  0.,   0.,   0.]], dtype=float32)
+
+VertexBuffer([[ 0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.]], dtype=float32)
+
+
+V.pending_data
+(0, 112) // 112 = 4 * (sizeof(Vect3f) + sizeof(Vector4f))
+V._pending_data = None
+
+V['position'][0] = 42
+V.pending_data
+(0, 12)
+
+VertexBuffer([([ 42.,  42.,  42.], [ 0.,  0.,  0.,  0.]),
+       ([  0.,   0.,   0.], [ 0.,  0.,  0.,  0.]),
+       ([  0.,   0.,   0.], [ 0.,  0.,  0.,  0.]),
+       ([  0.,   0.,   0.], [ 0.,  0.,  0.,  0.])],
+      dtype=[('position', '<f4', (3,)), ('color', '<f4', (4,))])
+
+
+   */
 };
 
 // **************************************************************
@@ -185,24 +190,6 @@ public:
   GLVertexBuffer(const char *name, const GLenum usage = GL_DYNAMIC_DRAW)
     : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
   {
-  }
-
-  GLVertexBuffer& operator=(std::initializer_list<T> il)
-  {
-    PendingContainer<T>::operator=(il);
-    return *this;
-  }
-
-  GLVertexBuffer& operator=(const T& val)
-  {
-    PendingContainer<T>::operator=(val);
-    return *this;
-  }
-
-  GLVertexBuffer& operator*=(const T& val)
-  {
-    PendingContainer<T>::operator*=(val);
-    return *this;
   }
 };
 

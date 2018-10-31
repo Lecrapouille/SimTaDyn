@@ -77,36 +77,14 @@ public:
 
   virtual ~GLAttribute() override { destroy(); }
 
-  inline GLVertexBuffer<T> const& cdata() const
+  inline PendingContainer<T> const& cdata() const
   {
-    return m_data;
+    return m_data.m_container;
   }
 
-  inline GLVertexBuffer<T>& data()
+  inline PendingContainer<T>& data()
   {
-    return m_data;
-  }
-
-  GLAttribute<T>& operator=(std::initializer_list<T> il)
-  {
-    //FIXME operator=(VBO) soit en creer un partage
-    // m_data = new GLVBO(il);
-    m_data = il;
-    return *this;
-  }
-
-  GLAttribute<T>& operator=(const T& val)
-  {
-    m_data = val;
-    return *this;
-  }
-
-  template<class U>
-  GLAttribute<T>& operator*=(const U& val)
-  {
-    //m_data *= val;
-    //GLVertexBuffer<T>::operator*=(val);
-    return *this;
+    return m_data.m_container;
   }
 
 private:

@@ -47,8 +47,18 @@ public:
   PendingContainer(const std::indirect_array<T>& ia) : PendingData(ia.size()), m_container(ia) {}
   PendingContainer(std::initializer_list<T> il) : PendingData(il.size()), m_container(il) {}
 
-  inline const T& operator[](size_t n) const { return m_container.operator[](n); }
-  inline T& operator[](size_t n) { tagAsPending(n); return m_container.operator[](n); }
+  inline const T& operator[](size_t nth) const { return m_container.operator[](nth); }
+  inline T& operator[](size_t nth)
+  {
+     if (nth > PendingContainer<T>::capacity())
+      {
+        throw_if_cannot_expand();
+        m_container.resize(nth);
+      }
+    tagAsPending(nth);
+    return m_container.operator[](nth);
+  }
+
   friend std::ostream& operator<<(std::ostream& stream, const PendingContainer& cont)
   {
     if (0_z != cont.size())
@@ -58,6 +68,17 @@ public:
           stream << ", " << cont[i];
       }
     return stream;
+  }
+
+  inline void throw_if_cannot_expand()
+  {
+     if (likely(!m_can_expand))
+       throw std::out_of_range("Cannot change buffer size once loaded on GPU");
+  }
+
+  inline void set_cannot_expand()
+  {
+    m_can_expand = false;
   }
 
   void append(std::initializer_list<T> il)
@@ -149,6 +170,11 @@ public:
   { clearPending(il.size()); return m_container.operator=(il); }
 
   std::valarray<T> m_container;
+
+private:
+
+  bool m_can_expand = true;
+
 };
 
 #endif

@@ -206,7 +206,7 @@ public:
   //! Return the reference of the VBO.
   //------------------------------------------------------------------
   template<class T>
-  inline GLVertexBuffer<T>& attribute(const char *name)
+  inline PendingContainer<T>& attribute(const char *name)
   {
     return getAttribute<T>(name).data();
   }
