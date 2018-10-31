@@ -191,6 +191,12 @@ public:
     return getUniform<T>(name).data();
   }
 
+  template<class T>
+  inline const T& uniform(const char *name) const
+  {
+    return getUniform<T>(name).data();
+  }
+
   //------------------------------------------------------------------
    //! \brief Check if the attribute variable exists in the shader code
   // FIXME if begin() a reussi
@@ -605,10 +611,9 @@ private:
   //! \return the uniform instance if found else throw the exception
   //! std::out_of_range
   //------------------------------------------------------------------
-public: //FIXME
 
   template<class T>
-  inline GLUniform<T>& getUniform(const char *name)
+  inline IGLUniform<T>& getUniform(const char *name)
   {
     if (unlikely(!compiled()))
       {
@@ -630,7 +635,7 @@ public: //FIXME
                                 "' does not exist");
       }
 
-    GLUniform<T> *uniform_ptr = dynamic_cast<GLUniform<T>*>(ptr);
+    IGLUniform<T> *uniform_ptr = dynamic_cast<IGLUniform<T>*>(ptr);
     if (unlikely(nullptr == uniform_ptr))
       {
         throw std::out_of_range("GLUniform '" + std::string(name) +

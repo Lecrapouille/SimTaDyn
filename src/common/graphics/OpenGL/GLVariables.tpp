@@ -147,33 +147,35 @@ private:
 //!
 // **************************************************************
 template<class T>
-class GLUniform: public IGLVariable
+class IGLUniform: public IGLVariable
 {
 public:
 
   // Note T and gltype shall match. Not checks are made
-  GLUniform(const char *name, GLenum gltype, GLuint prog)
+  IGLUniform(const char *name, GLenum gltype, GLuint prog)
     : IGLVariable(name, gltype, prog)
   {
   }
 
-  virtual ~GLUniform() override { destroy(); }
-
-  inline T const& cdata() const { return m_data; }
-  inline T& data() { forceUpdate(); return m_data; }
-
-  // Manipule donnee depuis le CPU
-  template<class U>
-  GLUniform& operator=(const U& val)
+  virtual ~IGLUniform() override
   {
-    m_data = T(val);
+    destroy();
+  }
+
+  inline T const& data() const
+  {
+    return m_data;
+  }
+
+  inline T& data()
+  {
+    // FIXME always modified ?
     forceUpdate();
-    return *this;
+
+    return m_data;
   }
 
 private:
-
-  inline void setValue(const T& value) const;
 
   virtual bool create() override
   {
@@ -200,14 +202,44 @@ private:
 
   virtual bool update() override
   {
-    setValue(m_data);
     return false;
   }
 
-  //private: //FIXME
-public:
+protected:
 
   T m_data;
+};
+
+// **************************************************************
+//!
+// **************************************************************
+template<class T>
+class GLUniform: public IGLUniform<T>
+{
+public:
+
+  GLUniform(const char *name, GLenum gltype, GLuint prog)
+    : IGLUniform<T>(name, gltype, prog)
+  {
+  }
+
+  // Manipule donnee depuis le CPU
+  template<class U>
+  GLUniform<T>& operator=(const U& val)
+  {
+    IGLUniform<T>::data() = T(val);
+    return *this;
+  }
+
+private:
+
+  virtual bool update() override
+  {
+    setValue(IGLUniform<T>::m_data);
+    return false;
+  }
+
+  inline void setValue(const T& value) const;
 };
 
 template<>
@@ -302,44 +334,43 @@ inline void GLUniform<Matrix44f>::setValue(const Matrix44f& value) const
   glCheck(glUniformMatrix4fv(m_handle, 1, GL_FALSE, &value[0][0]));
 }
 
-template<>
-inline void GLUniform<GLTexture2D>::setValue(const GLTexture2D&) const
-{
-  // TODO ???
-}
-
 // **************************************************************
 //! \brief A GLSampler is an Opengl uniform for texture
 // **************************************************************
 template<class T>
-class GLSampler: public GLUniform<T>
+class GLSampler: public IGLUniform<T>
 {
 public:
 
   GLSampler(const char *name, GLenum gltype, uint32_t texture_count, GLuint prog)
-    : GLUniform<T>(name, gltype, prog)
+    : IGLUniform<T>(name, gltype, prog)
   {
-    m_texture_unit = texture_count;
+    m_texture_count = texture_count;
+  }
+
+  inline uint32_t textureID() const
+  {
+    return m_texture_count;
   }
 
 private:
 
   virtual void activate() override
   {
-    glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_unit));
-    GLUniform<T>::m_data.begin();
+    glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_count));
+    IGLUniform<T>::m_data.begin();
   }
 
   virtual bool update() override
   {
-    glCheck(glUniform1i(GLUniform<T>::m_handle,
-                        static_cast<GLint>(m_texture_unit)));
+    glCheck(glUniform1i(IGLUniform<T>::m_handle,
+                        static_cast<GLint>(m_texture_count)));
     return false;
   }
 
 private:
 
-  uint32_t m_texture_unit = 0;
+  uint32_t m_texture_count = 0;
 };
 
 // **************************************************************

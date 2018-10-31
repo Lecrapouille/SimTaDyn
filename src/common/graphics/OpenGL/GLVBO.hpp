@@ -115,6 +115,7 @@ private:
   GLenum m_usage;
 
 public:
+
   PendingContainer<T> m_container;
 
 

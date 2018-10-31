@@ -29,7 +29,7 @@ public:
 public:
 
   GLVAO              m_cubeVAO;
-  GLVAO              m_planeVAO;
+  GLVAO              m_floorVAO;
   GLVAO              m_screenVAO;
   GLVertexShader     m_vs[2];
   GLFragmentShader   m_fs[2];

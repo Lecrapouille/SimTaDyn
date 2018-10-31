@@ -121,14 +121,58 @@ bool GLExample02::setup()
 
   // Meshes
   auto pos = m_prog0.attribute<Vector3f>("aPos");
-  pos = cubeVertices;
-  pos.m_stride = 5 * sizeof (float);
-  pos.m_offset = 0;
+  pos = {
+    // positions
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f
+  };
+  // pos = cubeVertices;
+  //pos.m_stride = 5 * sizeof (float);
+  //pos.m_offset = 0;
 
   auto tex = m_prog0.attribute<Vector2f>("aTexCoords");
-  tex = cubeVertices;
-  tex.m_stride = 5 * sizeof (float);
-  tex.m_offset = 3 * sizeof (float);
+  //tex = cubeVertices;
+  //tex.m_stride = 5 * sizeof (float);
+  //tex.m_offset = 3 * sizeof (float);
 
 #if 0
   m_vs[SCREEN].fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/framebuffers_screen.vs");
@@ -170,16 +214,16 @@ bool GLExample02::draw()
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  auto model = m_prog.uniform<Matrix44f>("model");
+  auto model = m_prog0.uniform<Matrix44f>("model");
 
   // Cube 1
   m_prog0.bind(m_cubeVAO);
-  m_movable.position(Vector3f(-1.0f, 0.0f, -1.0f));
-  model = m_movable.transform();
+  //m_movable.position(Vector3f(-1.0f, 0.0f, -1.0f));
+  //model = m_movable.transform();
   m_prog0.draw(GL_TRIANGLES, 0, 36);
 
   // Cube 2
-  m_movable.position(Vector3f(2.0f, 0.0f, 0.0f));
+  /*m_movable.position(Vector3f(2.0f, 0.0f, 0.0f));
   model = m_movable.transform();
   m_prog0.draw(GL_TRIANGLES, 0, 36);
 
@@ -187,7 +231,7 @@ bool GLExample02::draw()
   m_prog0.bind(m_floorVAO);
   m_movable.position(Vector3f(1.0f, 1.0f, 1.0f));
   model = m_movable.transform();
-  m_prog0.draw(GL_TRIANGLES, 0, 36);
+  m_prog0.draw(GL_TRIANGLES, 0, 36);*/
 
   return true;
 }
