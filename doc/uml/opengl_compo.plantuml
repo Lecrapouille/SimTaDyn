@@ -1,0 +1,30 @@
+@startuml
+
+' OpenGL class composition
+
+class GLVertexShader
+class GLFragmentShader
+class GLGeometryShader
+class GLProgram
+class GLUniform
+class GLAttribute
+class GLVAO
+class GLVBO
+
+GLVertexShader --> GLProgram : attach
+GLFragmentShader --> GLProgram : attach
+GLGeometryShader ..> GLProgram : attach
+
+GLProgram -> GLProgram : compile
+
+GLProgram --> GLUniform :  create
+GLProgram --> GLAttribute: create
+GLProgram --> GLVAO: create
+GLProgram --> GLVBO: create
+' GLVAO <- GLProgram: create
+
+GLAttribute <-- GLVBO: locate
+GLVAO --* "*" GLVBO: has
+ 
+
+@enduml

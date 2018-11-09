@@ -64,7 +64,7 @@ private:
 
   virtual void activate() override
   {
-    glBindRenderbuffer(GL_RENDERBUFFER, m_handle);
+    glBindRenderbuffer(m_target, m_handle);
     if (m_need_resize)
       {
         glRenderbufferStorage(m_target, m_format,
@@ -80,7 +80,7 @@ private:
 
   virtual void deactivate() override
   {
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindRenderbuffer(m_target, 0);
   }
 
 private:

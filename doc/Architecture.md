@@ -169,6 +169,12 @@ OpenGL objects from jpeg, png, bmp files.
 
 ## Renderer
 
-Wraps OpenGL 3.3 API as described the following figure 
+### OpenGL Wrapper
 
-![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/uml/opengl.png)
+Wraps OpenGL 3.3 API into a C++ class. More informations are given in [this page](https://github.com/Lecrapouille/SimTaDyn/blob/dev-new-opengl/doc/OpenGL.md)
+
+### Renderer
+
+Use an OpenGL Wrapper.
+SimTaDyn maps are stored withing a [SceneGraph](https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf)
+and displayed with the OpenGL wrapper.

@@ -1,5 +1,7 @@
 @startuml
 
+' OpenGL class inheritance
+
 note as NoteBegin
 T is GLenum or GLint. handle is set by create()
 
@@ -84,6 +86,11 @@ class GLTexture3D {
 +IGLTexture(GL_TEXTURE_CUBE_MAP)
 }
 
+class GLTexture1D {
++IGLTexture(GL_TEXTURE_1D)
+}
+
+IGLTexture <|-- GLTexture1D
 IGLTexture <|-- GLTexture2D
 GLTexture2D <|-- GLTextureDepth2D
 IGLTexture <|-- GLTexture3D
@@ -128,11 +135,11 @@ class GLProgram<GLenum> {
 -GLShaders shaders
 }
 
-GLProgram .> GLShaders
-IGLVariable <- "list" GLProgram
-GLProgram --> "1" GLVertexShader
-GLProgram --> "1" GLFragmentShader
-GLProgram --> "0..1" GLGeometryShader
+' GLProgram .> GLShaders
+' IGLVariable <- "list" GLProgram
+' GLProgram --> "1" GLVertexShader
+' GLProgram --> "1" GLFragmentShader
+' GLProgram --> "0..1" GLGeometryShader
 
 class GLVAO<GLenum> {
 -{abstract} create(): bool
@@ -143,7 +150,7 @@ class GLVAO<GLenum> {
 -{abstract} release(): bool
 }
 
-class GLRenderBuffer {
+class GLRenderBuffer<GLenum> {
 + GLRenderBuffer(target : GLenum)
 -{abstract} create(): bool
 -{abstract} setup(): bool
@@ -197,12 +204,12 @@ class GLAttribute<C> {
 IGLVariable <|-- GLUniform
 IGLVariable <|-- GLAttribute
 
-IGLObject <|-- IGLTexture
 PendingData <|-- IGLTexture
+IGLObject <|-- IGLTexture
 IGLObject <|-- GLVBO
-GLVBO <-- GLAttribute
-PendingContainer <- GLVBO
-IGLObject <|- GLVAO
+' GLVBO <-- GLAttribute
+' PendingContainer <- GLVBO
+IGLObject <|-- GLVAO
 IGLObject <|-- GLShaders
 IGLObject <|-- GLProgram
 IGLVariable -|> IGLObject

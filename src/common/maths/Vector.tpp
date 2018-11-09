@@ -721,11 +721,12 @@ namespace vector
 template <typename T, size_t n>
 inline std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
 {
-  os << "Vector";
-  for (size_t i = 0; i < n; ++i)
+  os << "Vector(" << v[0];
+  for (size_t i = 1; i < n; ++i)
     {
-      os << ' ' << v[i];
+      os << ", " << v[i];
     }
+  os << ')';
   return os;
 }
 
