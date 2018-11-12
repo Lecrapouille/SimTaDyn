@@ -1,6 +1,19 @@
-# Known bugs
+# SimTaDyn Bugs
 
-## 1
+## Reporting a bug
+
+Feel free to open issues in github ! There are different traces than you can add with the issue for helping solving faster the issue:
+* In debug mode, SimTaDyn is compiled with [backward](https://github.com/bombela/backward-cpp) a beautiful stack trace pretty printer for C++.
+When a crash occurs a stack trace is printed on the console.
+* SimTaDyn creates a log file. When starting SimTaDyn writes on the console the location of the logfile. For example
+```
+Log created: '/tmp/SimTaDyn/SimTaDyn.log'
+```
+* You also can call valgrind on SimTaDyn, this will help tracing memory corruptions.
+
+## Known bugs
+
+### Bug 1
 
 > Q: The OpenGL context cannot be created.
 
@@ -14,13 +27,13 @@ Type:
 ``glxinfo | grep version``
 and look for OpenGL version string which shall be >= 3.0
 
-## 2
+### Bug 2
 
 > Q: I have a graphic card compatible with OpenGL 3.0 but when I run SimTaDyn I have no OpenGL graphic and an error says "OpenGL context creation failed" and a message in the console GLib-GObject-CRITICAL **: g_value_take_object: assertion 'G_IS_OBJECT (v_object)' failed
 
 A: With Ubuntu 16.04 gtkmm-3.18 is installed and an bug is present: the Gtk::GLArea widget (the gtkmm OpenGL area) cannot be derived and if it is the case an issue produces this message error. For more information see the [bug report](https://www.mail-archive.com/gtkmm-list@gnome.org/msg19689.html) In SimTaDyn we made the choice to create a class heriting both from Gtk::GLArea and a rendering class because that was the better way to do things and hoping Ubuntu will updates gtkmm version because fixed in gtkmm >= 3.20. I'm not sure but Ubuntu 16.10 has the good version and for Ubuntu 16.04 gtkmm-3.22 can be easily installed from http://www.linuxfromscratch.org/blfs/view/svn/x/gtkmm3.html but be careful gtk >= 3.20 is known to break gtk-3.18 themes giving awful GUIs with tons of warning messages and missing icons. (Yeah again Qt is better than GTK).
 
-## 3
+### Bug 3
 
 > Q: When I run a script I have for example unrecognized words like 'DO' !
 

@@ -1,21 +1,23 @@
 # Architecture
 
-This documents is a general architectural description of the main
-parts of the SimTaDyn code source. While this document is updating at
-the same time the code source evolves, algorithms in code source can
-be a little different from this document (updates, method names,
-etc). For more architecture details, please, refer to following
-documents:
+This documents is a general architectural description of principal
+parts of the SimTaDyn code source. This document is supposed to be
+updated at the same time the code source evolves but algorithms in
+code source can be a little different from this document (updates,
+method names, etc). For more architecture details, please, refer to
+following documents:
 
-* README.md located on each sub-directories. These files
-give more details on implemented algorithms.
-* commentaries in the header files where you can generate the html files
-with Doxygen (command to type: `make doc`).
+* README.md located on each sub-directories. These files give more
+details on implemented algorithms.
+* Commentaries in the header files where you can generate the html
+files with Doxygen (command to type: `make doc`).
 
 Note concerning class diagram symbols for the following figures on this document:
 * C for C++ Class.
 * I for C++ Interface class (containing only pure virtual methods).
 * A for C++ Abstract class (containing a mixture of pure virtual methods and concrete methods).
+* I personally make not difference between an Interface class and Abstract class. In this document
+they are synonyms.
 * white array: inheritance.
 * filled array: composition of class.
 * dot array: interaction between classes.
