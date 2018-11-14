@@ -6,26 +6,28 @@
 
 #  include "NonCppStd.hpp"
 #  include "GLShaders.hpp"
-#  include "GLVariables.tpp"
+#  include "GLLocation.hpp"
 #  include <map>
 
 // TODO: verifier les GLVariables non init dans le GPU
+
 // **************************************************************
 //! \class GLShader GLShader.hpp
 //! \brief
 // **************************************************************
 class GLProgram: public IGLObject<GLenum>
 {
-  using IGLVariablePtr = std::unique_ptr<IGLVariable>;
-  using map_t = std::map<std::string, IGLVariablePtr>;
+  using GLLocationPtr = std::unique_ptr<GLLocation>;
+  using mapGLLocation = std::map<std::string, GLLocationPtr>;
 
 public:
 
   //------------------------------------------------------------------
   //! \brief Empty constructor. Do nothing.
   //------------------------------------------------------------------
-  GLProgram(std::string const& name)
+  GLProgram(std::string const& name)//, size_t nbVertices=3)
     : IGLObject(name)
+      //TODO m_vbo_size(std::max(3, nbVertices))
   {
   }
 
@@ -66,27 +68,19 @@ public:
 
   inline void bind(GLVAO& vao)
   {
-#if 1
-    m_vao = &vao;
-    m_binded = true;
-#else
-    LOGD("Prog::bind VAO");
-    m_vao = &vao;
-    m_vao->name() = "VAO_" + name();
-    m_vao->begin();
-    if (!m_vao->isValid())
+    if (m_vao != &vao)
       {
-        LOGE("Failed binding VAO '%s' to Program '%s'",
-             m_vao->name().c_str(), name().c_str());
-        m_vao = nullptr;
+        // TODO: ajouter une verif pour eviter d'attcher un VAO au mauvais
+        // program.
+        // if (m_list_of_created_vaos.find(vao.gpuID()) != end()) {
+        m_vao = &vao;
+        m_binding = true;
       }
-    m_binded = (nullptr != m_vao);
-#endif
   }
 
   inline bool binded() const
   {
-    return m_binded;
+    return nullptr != m_vao;
   }
 
   //------------------------------------------------------------------
@@ -97,6 +91,18 @@ public:
   inline bool compiled() const
   {
     return m_compiled;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Compile the program (aka for begin() method but with a
+  //! more explicit name).
+  //! \return true if the progam has been succesfully compiled, else
+  //! return false.
+  //------------------------------------------------------------------
+  inline bool compile()
+  {
+    begin();
+    return compiled();
   }
 
   //------------------------------------------------------------------
@@ -136,7 +142,7 @@ public:
   //------------------------------------------------------------------
   std::vector<std::string> failedShaders()
   {
-    std::vector<std::string> list;
+    std::vector<std::string> list(4_z);
     for (auto &it: m_shaders)
       {
         if (!it.compiled())
@@ -152,8 +158,8 @@ public:
   //------------------------------------------------------------------
   std::vector<std::string> uniformNames()
   {
-    std::vector<std::string> list;
-    for (auto &it: m_uniforms)
+    std::vector<std::string> list(m_uniforms.size());
+    for (auto& it: m_uniforms)
       {
         list.push_back(it.first);
       }
@@ -163,10 +169,10 @@ public:
   //------------------------------------------------------------------
   //! \brief Return the list of unifom names
   //------------------------------------------------------------------
-  std::vector<std::string> attributeNames()
+  std::vector<std::string> getAttributeNames()
   {
-    std::vector<std::string> list;
-    for (auto &it: m_attributes)
+    std::vector<std::string> list(m_attributes.size());
+    for (auto& it: m_attributes)
       {
         list.push_back(it.first);
       }
@@ -214,7 +220,13 @@ public:
   template<class T>
   inline PendingContainer<T>& attribute(const char *name)
   {
-    return getAttribute<T>(name).data();
+    return getVBO<T>(name).m_container;
+  }
+
+  template<class T>
+  inline const PendingContainer<T>& attribute(const char *name) const
+  {
+    return getVBO<T>(name).m_container;
   }
 
   //------------------------------------------------------------------
@@ -222,7 +234,7 @@ public:
   //! valid variable an exception is triggered.
   //! Example GLProgram prog; prog["position"] = { ... };
   //------------------------------------------------------------------
-  inline IGLVariable& operator[](std::string const& name)
+  /*inline GLLocation& operator[](std::string const& name)
   {
     auto it_uniform = m_uniforms.find(name);
     auto it_attribute = m_attributes.find(name);
@@ -241,11 +253,11 @@ public:
       {
         return *(it_attribute->second);
       }
-    else
+    else // TODO if (!compiled()) { create() + m_unused = true } else
       {
         throw std::out_of_range("Name '" + name + "' is not an shader variable");
       }
-  }
+      }*/
 
   //------------------------------------------------------------------
   //! \brief
@@ -261,7 +273,7 @@ public:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  void throw_if_not_binded()
+  void throw_if_not_vao_binded()
   {
     if (unlikely(!binded()))
       {
@@ -291,11 +303,11 @@ public:
   //------------------------------------------------------------------
   //! \brief Render primitives
   //------------------------------------------------------------------
-  void draw(GLenum mode, GLint first, GLsizei count)
+  void draw(GLenum mode, GLint first, GLsizei count) // FIXME pass VAO en param au lieu de bind()
   {
     LOGD("Prog::draw");
     throw_if_not_compiled();
-    throw_if_not_binded();
+    throw_if_not_vao_binded();
     throw_if_inconsitency_attrib_sizes();
 
     // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
@@ -306,6 +318,7 @@ public:
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
     m_vao->end();
+    m_binding = false;
   }
 
   //------------------------------------------------------------------
@@ -326,7 +339,7 @@ public:
   {
     LOGD("Prog::drawIndex");
     throw_if_not_compiled();
-    throw_if_not_binded();
+    throw_if_not_vao_binded();
     throw_if_inconsitency_attrib_sizes();
 
     m_vao->begin();
@@ -348,17 +361,58 @@ public:
     return compiled();
     }*/
 
+  //------------------------------------------------------------------
+  //! \brief Create the VAO which will contain the list of VBOs. The
+  //! list of VBOs is created in accordance of the list of attributes.
+  //------------------------------------------------------------------
+  // FIXME vector<std::unique<VAO>> m_vaos pour sauvegarder les VAO puis retourner *vao
+  GLVAO* createVAO(const char *name)
+  {
+    throw_if_not_compiled();
+
+    GLVAO* vao = new GLVAO(name);
+
+    // Create VBOs and attach them in the VAO.
+    for (auto& it: m_attributes)
+      {
+        const char *name = it.first.c_str();
+        switch (it.second->dim())
+          {
+          case 1:
+            vao->createVBO<float>(name);
+            break;
+          case 2:
+            vao->createVBO<Vector2f>(name);
+            break;
+          case 3:
+            vao->createVBO<Vector3f>(name);
+            break;
+          case 4:
+            vao->createVBO<Vector4f>(name);
+            break;
+          }
+      }
+
+    // Bind if has no VAO binded
+    if (unlikely(nullptr == m_vao))
+      {
+        m_vao = vao;
+      }
+
+    return vao;
+  }
+
 private:
 
   //------------------------------------------------------------------
   //! \brief
+  //! \note Contrary to VBO, GLProgram has to perform its setup() before
+  //! calling activate()
   //------------------------------------------------------------------
   virtual bool create() override
   {
     LOGD("Prog::create");
     m_handle = glCheck(glCreateProgram());
-    // Note: Contrary to VBO, GLProgram has to perform
-    // its setup() before calling activate() !
     return false;
   }
 
@@ -404,7 +458,7 @@ private:
           {
             m_error_msg.clear();
             // Create the list of attributes and uniforms
-            getAllAttributesAndUniforms();
+            createAllLists();
             // Release shaders stored in GPU.
             detachAllShaders();
           }
@@ -428,6 +482,8 @@ private:
     glCheck(glUseProgram(m_handle));
     for (auto& it: m_attributes)
       {
+        m_vao->m_vbos[it.first]->begin();
+        //m_vao->VBO<float>(it.first.c_str()).begin(); // FIXME
         it.second->begin();
       }
     for (auto& it: m_uniforms)
@@ -455,13 +511,15 @@ private:
 
     for (auto& it: m_attributes)
       {
+        m_vao->m_vbos[it.first]->end();
+        //m_vao->VBO<float>(it.first.c_str()).end(); // FIXME
         it.second->end();
       }
     for (auto& it: m_uniforms)
       {
         it.second->end();
       }
-    GLVAO::unbind();
+    m_vao->end();
   }
 
   //------------------------------------------------------------------
@@ -478,7 +536,7 @@ private:
   //------------------------------------------------------------------
   //! \brief Create Attribute and Uniform instances
   //------------------------------------------------------------------
-  void getAllAttributesAndUniforms()
+  void createAllLists()
   {
     const GLsizei bufSize = 64;
     GLchar name[bufSize];
@@ -488,7 +546,7 @@ private:
     GLuint i;
     GLenum type;
 
-    // Get all uniforms
+    // Create the list of uniforms
     LOGD("Prog::get all attrib and uniform");
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_UNIFORMS, &count));
     i = static_cast<GLuint>(count);
@@ -500,7 +558,7 @@ private:
         addNewUniform(type, name);
       }
 
-    // Get all attributes
+    // Create the list of attributes and list of VBOs
     glCheck(glGetProgramiv(m_handle, GL_ACTIVE_ATTRIBUTES, &count));
     i = static_cast<GLuint>(count);
     while (i--)
@@ -518,19 +576,20 @@ private:
   void addNewAttribute(GLenum type, const char *name)
   {
     GLenum EGL_FLOAT = static_cast<GLenum>(GL_FLOAT);
+
     switch (type)
       {
       case GL_FLOAT:
-        m_attributes[name] = std::make_unique<GLAttribute<float>>(name, 1, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 1, EGL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC2:
-        m_attributes[name] = std::make_unique<GLAttribute<Vector2f>>(name, 2, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 2, EGL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC3:
-        m_attributes[name] = std::make_unique<GLAttribute<Vector3f>>(name, 3, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 3, EGL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC4:
-        m_attributes[name] = std::make_unique<GLAttribute<Vector4f>>(name, 4, EGL_FLOAT, gpuID());
+        m_attributes[name] = std::make_unique<GLAttribute>(name, 4, EGL_FLOAT, gpuID());
         break;
       default:
         std::string msg = "Attribute '" + std::string(name) + "' type is not managed";
@@ -548,43 +607,37 @@ private:
     switch (type)
       {
       case GL_FLOAT:
-        m_uniforms[name] = std::make_unique<GLUniform<float>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<float>>(name, 1, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC2:
-        m_uniforms[name] = std::make_unique<GLUniform<Vector2f>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector2f>>(name, 2, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC3:
-        m_uniforms[name] = std::make_unique<GLUniform<Vector3f>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector3f>>(name, 3, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_VEC4:
-        m_uniforms[name] = std::make_unique<GLUniform<Vector4f>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector4f>>(name, 4, GL_FLOAT, gpuID());
         break;
       case GL_INT:
-        m_uniforms[name] = std::make_unique<GLUniform<int>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<int>>(name, 1, GL_INT, gpuID());
         break;
       case GL_INT_VEC2:
-        m_uniforms[name] = std::make_unique<GLUniform<Vector2i>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector2i>>(name, 2, GL_INT, gpuID());
         break;
       case GL_INT_VEC3:
-        m_uniforms[name] = std::make_unique<GLUniform<Vector3i>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector3i>>(name, 3, GL_INT, gpuID());
         break;
       case GL_INT_VEC4:
-        m_uniforms[name] = std::make_unique<GLUniform<Vector4i>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Vector4i>>(name, 4, GL_INT, gpuID());
         break;
-        //case GL_BOOL:
-        //m_uniforms[name] = std::make_unique<GLUniform<bool>>(name, type, gpuID());
-        //break;
-        //case GL_BOOL_VEC2:
-        //m_uniforms[name] = std::make_unique<GLUniform<Vector2b>>(name, type, gpuID());
-        //break;
       case GL_FLOAT_MAT2:
-        m_uniforms[name] = std::make_unique<GLUniform<Matrix22f>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Matrix22f>>(name, 4, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_MAT3:
-        m_uniforms[name] = std::make_unique<GLUniform<Matrix33f>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Matrix33f>>(name, 9, GL_FLOAT, gpuID());
         break;
       case GL_FLOAT_MAT4:
-        m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, type, gpuID());
+        m_uniforms[name] = std::make_unique<GLUniform<Matrix44f>>(name, 16, GL_FLOAT, gpuID());
         break;
         /*case GL_SAMPLER_1D:
         m_uniforms[name] = std::make_unique<GLSampler1D>(name, m_textures_count, gpuID());
@@ -613,7 +666,7 @@ private:
   //------------------------------------------------------------------
 
   template<class T>
-  inline IGLUniform<T>& getUniform(const char *name)
+  IGLUniform<T>& getUniform(const char *name)
   {
     if (unlikely(!compiled()))
       {
@@ -652,32 +705,14 @@ private:
   //! std::out_of_range
   //------------------------------------------------------------------
   template<class T>
-  inline GLAttribute<T>& getAttribute(const char *name)
+  GLVertexBuffer<T>& getVBO(const char *name)
   {
     if (unlikely(!compiled()))
       {
         begin();
       }
-
-    if (unlikely(nullptr == name))
-      {
-        throw std::invalid_argument("nullptr passed to getAttribute");
-      }
-
-    auto ptr = m_attributes[name].get();
-    if (unlikely(nullptr == ptr))
-      {
-        throw std::out_of_range("GLAttribute '" + std::string(name) +
-                                "' does not exist");
-      }
-
-    GLAttribute<T> *attrib_ptr = dynamic_cast<GLAttribute<T>*>(ptr);
-    if (unlikely(nullptr == attrib_ptr))
-      {
-        throw std::out_of_range("GLAttribute '" + std::string(name) +
-                                "' exists but has wrong template type");
-      }
-    return *attrib_ptr;
+    throw_if_not_vao_binded();
+    return m_vao->VBO<T>(name);
   }
 
   void detachAllShaders()
@@ -719,14 +754,14 @@ private:
 
 private:
 
-  map_t                  m_attributes;
-  map_t                  m_uniforms;
+  mapGLLocation          m_attributes;
+  mapGLLocation          m_uniforms;
   std::vector<GLShader>  m_shaders;
   GLVAO                 *m_vao = nullptr;
   std::string            m_error_msg;
   uint32_t               m_textures_count = 0u;
   bool                   m_compiled = false;
-  bool                   m_binded = false;
+  bool                   m_binding = false;
 };
 
 #endif /* GLPROGRAM_HPP_ */

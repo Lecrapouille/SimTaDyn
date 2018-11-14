@@ -21,7 +21,8 @@
 #ifndef GL_VERTEX_ARRAY_HPP_
 #  define GL_VERTEX_ARRAY_HPP_
 
-#  include "IGLObject.hpp"
+#  include "GLVBO.hpp"
+#  include <map>
 
 class GLVAO: public IGLObject<GLenum>
 {
@@ -49,6 +50,43 @@ public:
   static void unbind()
   {
     glCheck(glBindVertexArray(0U));
+  }
+
+  //FIXME: private + friend GLProg
+  //FIXME: ajouter nombre de vertex pour reserver taille
+  template<typename T>
+  void createVBO(const char *name)
+  {
+    m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name);
+  }
+
+  inline bool hasVBO(const char *name) const
+  {
+    return m_vbos.end() != m_vbos.find(name);
+  }
+
+  template<typename T>
+  GLVertexBuffer<T>& VBO(const char *name)
+  {
+    if (unlikely(nullptr == name))
+      {
+        throw std::invalid_argument("nullptr passed to getVBO");
+      }
+
+    auto ptr = m_vbos[name].get();
+    if (unlikely(nullptr == ptr))
+      {
+        throw std::out_of_range("GLVertexBuffer '" + std::string(name) +
+                                "' does not exist");
+      }
+
+    GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
+    if (unlikely(nullptr == vbo))
+      {
+        throw std::out_of_range("GLVertexBuffer '" + std::string(name) +
+                                "' exists but has wrong template type");
+      }
+    return *vbo;
   }
 
 private:
@@ -83,6 +121,11 @@ private:
   {
     return false;
   }
+
+private:
+public: //FIXME
+
+  std::map<std::string, std::unique_ptr<IGLObject>> m_vbos;
 };
 
 #endif /* GL_VERTEX_ARRAY_HPP_ */

@@ -5,7 +5,7 @@ void GLExample01::onWindowSizeChanged(const float width, const float height)
 {
   float ratio = width / height;
 
-  m_quad.uniform<Matrix44f>("u_projection") =
+  m_prog.uniform<Matrix44f>("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
@@ -19,14 +19,19 @@ bool GLExample01::setup()
   glCheck(glEnable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-  m_vs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
-  m_fs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
-  m_quad.attachShaders(m_vs, m_fs);
-  m_quad.bind(m_vao);
+  vs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
+  fs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.fragment");
+  if (!m_prog.attachShaders(vs, fs).compile())
+    {
+      std::cerr << "failed compiling OpenGL program. Reason was '"
+                << m_prog.error() << "'" << std::endl;
+      return false;
+    }
 
-  // TODO tester index
-  // TODO Faire qu'automatiquement on charge une liste de float en vector3f
-  m_quad.attribute<Vector3f>("a_position") =
+  // Model #1
+  m_vao_quad = m_prog.createVAO("VAO_quad"); // FIXME m_prog.initVAO(&m_vao_quad); // ou alors m_prog.bind(m_vao_quad)
+  //m_vao_quad->VBO<Vector3f>("a_position").m_container = // FIXME 
+  m_prog.attribute<Vector3f>("a_position") =
     {
           //  X     Y     Z
           // bottom
@@ -75,11 +80,10 @@ bool GLExample01::setup()
           Vector3f(1.0f, 1.0f,-1.0f),
           Vector3f(1.0f,-1.0f, 1.0f),
           Vector3f(1.0f, 1.0f,-1.0f),
-          Vector3f(1.0f, 1.0f, 1.0f),
-   };
-
-  m_quad.attribute<Vector2f>("a_texcoord") =
-  {
+          Vector3f(1.0f, 1.0f, 1.0f)
+    };
+  m_vao_quad->VBO<Vector2f>("a_texcoord").m_container =
+    {
           //  U     V
           // bottom
           Vector2f(0.0f, 0.0f),
@@ -128,22 +132,34 @@ bool GLExample01::setup()
           Vector2f(1.0f, 1.0f),
           Vector2f(0.0f, 0.0f),
           Vector2f(0.0f, 1.0f)
-   };
+    };
 
-  m_quad.attribute<Vector3f>("a_position") *= Vector3f(1.5f);
+  // Model #2
+  m_vao_floor = m_prog.createVAO("VAO_floor");
+  m_vao_floor->VBO<Vector3f>("a_position").m_container =
+    {
+          Vector3f(5, -0.5,  5), Vector3f(-5, -0.5,  5), Vector3f(-5, -0.5, -5),
+          Vector3f(5, -0.5,  5), Vector3f(-5, -0.5, -5), Vector3f(5, -0.5, -5)
+    };
+  m_vao_floor->VBO<Vector2f>("a_texcoord").m_container =
+    {
+          Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(0.0f, 1.0f),
+          Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
+    };
 
-  // texture
-  m_quad.uniform<GLTexture2D>("u_texture").interpolation(GL_LINEAR);
-  m_quad.uniform<GLTexture2D>("u_texture").wrapping(GL_CLAMP_TO_EDGE);
-  if (false == m_quad.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
+  // Texture FIXME 1 texture par VAO
+  m_prog.uniform<GLTexture2D>("u_texture").interpolation(GL_LINEAR);
+  m_prog.uniform<GLTexture2D>("u_texture").wrapping(GL_CLAMP_TO_EDGE);
+  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
     return false;
 
-  m_quad.uniform<float>("u_scale") = 1.0f;
+  // Uniforms
+  m_prog.uniform<float>("u_scale") = 1.0f;
   float ratio = static_cast<float>(m_width) / (static_cast<float>(m_height) + 0.1f);
-  m_quad.uniform<Matrix44f>("u_projection") =
+  m_prog.uniform<Matrix44f>("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
-  m_quad.uniform<Matrix44f>("u_model") = m_movable.transform();
-  m_quad.uniform<Matrix44f>("u_view") =
+  m_prog.uniform<Matrix44f>("u_model") = m_movable.transform();
+  m_prog.uniform<Matrix44f>("u_view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
   return true;
@@ -160,22 +176,15 @@ bool GLExample01::draw()
   float ct = cosf(time);
 
   m_movable.rotate(4.0f * ct, Vector3f(0, 1, 0));
-  m_quad.uniform<Matrix44f>("u_model") = m_movable.transform();
+  m_prog.uniform<Matrix44f>("u_model") = m_movable.transform();
 
-  // Filled cube
-  glCheck(glDisable(GL_BLEND));
-  glCheck(glEnable(GL_DEPTH_TEST));
-  glCheck(glEnable(GL_POLYGON_OFFSET_FILL));
-  m_quad.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-  m_quad.draw(GL_TRIANGLES, 0, 36);
+  // Draw cube
+  m_prog.bind(*m_vao_quad);
+  m_prog.draw(GL_TRIANGLES, 0, 36);
 
-  // Outlined cube
-  glCheck(glDisable(GL_POLYGON_OFFSET_FILL));
-  glCheck(glEnable(GL_BLEND));
-  glCheck(glDepthMask(GL_FALSE));
-  m_quad.uniform<Vector4f>("u_color") = Vector4f(1, 0, 0, 1);
-  m_quad.draw(GL_LINES, 0, 36);
-  glCheck(glDepthMask(GL_TRUE));
+  // Draw floor
+  m_prog.bind(*m_vao_floor);
+  m_prog.draw(GL_TRIANGLES, 0, 2);
 
   return true;
 }

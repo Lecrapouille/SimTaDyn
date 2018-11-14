@@ -52,7 +52,7 @@ namespace opengl
 #  include "GLVAO.hpp"
 #  include "GLVBO.hpp"
 #  include "GLTextures.hpp"
-#  include "GLVariables.tpp"
+#  include "GLLocation.hpp"
 #  include "GLShaders.hpp"
 #  include "GLProgram.hpp"
 #  include "GLImGUI.hpp"

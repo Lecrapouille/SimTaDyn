@@ -67,6 +67,7 @@ class IGLTexture<GLenum> {
 }
 
 class GLTexture2D {
+-image[]: byte
 +IGLTexture(GL_TEXTURE_2D)
 +load(filename: string): bool
 +operator[](uint32_t): uint8_t&
@@ -207,6 +208,7 @@ IGLVariable <|-- GLAttribute
 PendingData <|-- IGLTexture
 IGLObject <|-- IGLTexture
 IGLObject <|-- GLVBO
+PendingContainer <|-- GLVBO
 ' GLVBO <-- GLAttribute
 ' PendingContainer <- GLVBO
 IGLObject <|-- GLVAO
