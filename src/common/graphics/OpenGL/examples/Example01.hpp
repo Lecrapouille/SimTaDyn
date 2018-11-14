@@ -31,7 +31,9 @@ public:
   GLVAO              m_vao_quad;
   GLVAO              m_vao_floor;
   GLProgram          m_prog;
-  Movable<float, 3U> m_movable;
+  Movable<float, 3U> m_movable1;
+  Movable<float, 3U> m_movable2;
+  Movable<float, 3U> m_movable3;
 };
 
 #  endif /* EXAMPLE_01_HPP_ */

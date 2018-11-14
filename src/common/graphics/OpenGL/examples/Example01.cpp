@@ -11,12 +11,12 @@ void GLExample01::onWindowSizeChanged(const float width, const float height)
 
 bool GLExample01::setup()
 {
-  LOGD("GLExample01::setup");
+  LOGD("*********************** GLExample01::setup");
 
   // Enable the depth buffer
   glCheck(glEnable(GL_DEPTH_TEST));
   glCheck(glDepthFunc(GL_LESS));
-  glCheck(glEnable(GL_BLEND));
+  glCheck(glDisable(GL_BLEND));
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
   vs.fromFile("/home/qq/SimTaDyn/src/common/graphics/OpenGL/examples/shaders/Example01.vertex");
@@ -135,15 +135,16 @@ bool GLExample01::setup()
 
   // Model #2
   m_prog.bind(m_vao_floor);
-  m_prog.attribute<Vector3f>("a_position").m_container =
+  m_prog.attribute<Vector3f>("a_position") =
     {
-          Vector3f(5, -0.5,  5), Vector3f(-5, -0.5,  5), Vector3f(-5, -0.5, -5),
-          Vector3f(5, -0.5,  5), Vector3f(-5, -0.5, -5), Vector3f(5, -0.5, -5)
+      Vector3f(5, -1.5,  5), Vector3f(-5, -1.5,  5), Vector3f(-5, -1.5, -5),
+      Vector3f(5, -1.5,  5), Vector3f(-5, -1.5, -5), Vector3f(5, -1.5, -5)
     };
-  m_prog.attribute<Vector2f>("a_texcoord").m_container =
+  m_prog.attribute<Vector3f>("a_position") *= Vector3f(2.0f, 1.0, 2.0f);
+  m_prog.attribute<Vector2f>("a_texcoord") =
     {
-          Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(0.0f, 1.0f),
-          Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
+      Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(0.0f, 1.0f),
+      Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
     };
 
   // Texture FIXME 1 texture par VAO
@@ -157,16 +158,26 @@ bool GLExample01::setup()
   float ratio = static_cast<float>(m_width) / (static_cast<float>(m_height) + 0.1f);
   m_prog.uniform<Matrix44f>("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
-  m_prog.uniform<Matrix44f>("u_model") = m_movable.transform();
+  m_prog.uniform<Matrix44f>("u_model") = m_movable1.transform();
   m_prog.uniform<Matrix44f>("u_view") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
+
+  // Debug
+  LOGD("Instropection:");
+  std::vector<std::string> vbos = m_vao_quad.VBONames();
+  for (auto& it: vbos)
+    {
+      std::cout << "VAO has VBO named '" << it << "'" << std::endl;
+    }
+
+  // TODO Check if everything is ok (attrib/uniform are set, prog compiled ...)
 
   return true;
 }
 
 bool GLExample01::draw()
 {
-  LOGD("GLExample01::draw");
+  LOGD("*********************** GLExample01::draw");
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
@@ -174,16 +185,36 @@ bool GLExample01::draw()
   time += dt();
   float ct = cosf(time);
 
-  m_movable.rotate(4.0f * ct, Vector3f(0, 1, 0));
-  m_prog.uniform<Matrix44f>("u_model") = m_movable.transform();
+  // FIXME: a ameliorer
+  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("hazard.png"))
+    return false;
 
-  // Draw cube
+  // Draw turning "pinkished" cube
   m_prog.bind(m_vao_quad);
-  m_prog.draw(GL_TRIANGLES, 0, 36); // TODO: Passer vao en param
+  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.8f, 0.2f, 0.8f, 0.8f);
+  m_movable1.rotate(4.0f * ct, Vector3f(0, 1, 0));
+  m_movable1.position(Vector3f(-1.0f, 0.0f, -1.0f));
+  m_prog.uniform<Matrix44f>("u_model") = m_movable1.transform();
+  m_prog.draw(GL_TRIANGLES, 0, 36);
+
+  // Draw fixed "darkished" cube
+  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_movable2.reset();
+  m_movable2.position(Vector3f(3.0f, 0.0f, 0.0f));
+  m_prog.uniform<Matrix44f>("u_model") = m_movable2.transform();
+  m_prog.bind(m_vao_quad);
+  m_prog.draw(GL_TRIANGLES, 0, 36);
 
   // Draw floor
+  if (false == m_prog.uniform<GLTexture2D>("u_texture").load("wooden-crate.jpg"))
+    return false;
+
   m_prog.bind(m_vao_floor);
-  m_prog.draw(GL_TRIANGLES, 0, 2);
+  m_prog.uniform<Vector4f>("u_color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
+  m_movable3.reset();
+  m_movable3.position(Vector3f(0.0f, 0.0f, 0.0f));
+  m_prog.uniform<Matrix44f>("u_model") = m_movable3.transform();
+  m_prog.draw(GL_TRIANGLES, 0, 6);
 
   return true;
 }
