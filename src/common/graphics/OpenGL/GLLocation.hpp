@@ -147,6 +147,7 @@ public:
     destroy();
   }
 
+  //TODO a deplacer dans GLUniform car on distingue GLSampler::texture
   inline T const& data() const
   {
     return m_data;
@@ -310,6 +311,16 @@ public:
   inline uint32_t textureID() const
   {
     return m_texture_count;
+  }
+
+  inline T const& texture() const
+  {
+    return IGLUniform<T>::data();
+  }
+
+  inline T& texture()
+  {
+    return IGLUniform<T>::data();
   }
 
 private:

@@ -32,6 +32,7 @@ public:
   GLVAO()
     : IGLObject()
   {
+    prog = 0;
     m_target = GL_ARRAY_BUFFER;
   }
 
@@ -39,6 +40,7 @@ public:
   GLVAO(const char *name)
     : IGLObject(name)
   {
+    prog = 0;
     m_target = GL_ARRAY_BUFFER;
   }
 
@@ -126,6 +128,7 @@ private:
 public: //FIXME
 
   std::map<std::string, std::unique_ptr<IGLObject>> m_vbos;
+  GLenum prog; // attached prog
 };
 
 #endif /* GL_VERTEX_ARRAY_HPP_ */

@@ -9,7 +9,9 @@ class GLExample01: public IGLWindow
 public:
 
   GLExample01()
-    : m_prog("prog")
+    : m_vao_quad("VAO_quad"),
+      m_vao_floor("VAO_floor"),
+      m_prog("prog")
   {
   }
 
@@ -26,8 +28,8 @@ public:
 
   GLVertexShader     vs;
   GLFragmentShader   fs;
-  GLVAO             *m_vao_quad;
-  GLVAO             *m_vao_floor;
+  GLVAO              m_vao_quad;
+  GLVAO              m_vao_floor;
   GLProgram          m_prog;
   Movable<float, 3U> m_movable;
 };

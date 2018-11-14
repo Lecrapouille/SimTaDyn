@@ -66,16 +66,21 @@ public:
     return *this;
   }
 
-  inline void bind(GLVAO& vao)
+  // TODO: verifier si VAO est compatible au prog
+  inline bool bind(GLVAO& vao)
   {
-    if (m_vao != &vao)
+    if (!compiled())
       {
-        // TODO: ajouter une verif pour eviter d'attcher un VAO au mauvais
-        // program.
-        // if (m_list_of_created_vaos.find(vao.gpuID()) != end()) {
-        m_vao = &vao;
-        m_binding = true;
+        LOGE("Binding VAO on non compiled GLProgram");
+        return false;
       }
+
+    if (vao.prog != m_handle)
+      {
+        initVAO(vao);
+      }
+    m_vao = &vao;
+    return true;
   }
 
   inline bool binded() const
@@ -318,7 +323,6 @@ public:
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
     m_vao->end();
-    m_binding = false;
   }
 
   //------------------------------------------------------------------
@@ -335,7 +339,7 @@ public:
   //! \brief Render primitives from their indices
   //------------------------------------------------------------------
   template<class T>
-  void draw(GLenum mode, GLIndexBuffer<T> const& index)
+  void draw(GLenum mode, GLIndexBuffer<T> const& index) // FIXME: wrapper mode pour eviter des modes non desires
   {
     LOGD("Prog::drawIndex");
     throw_if_not_compiled();
@@ -365,12 +369,9 @@ public:
   //! \brief Create the VAO which will contain the list of VBOs. The
   //! list of VBOs is created in accordance of the list of attributes.
   //------------------------------------------------------------------
-  // FIXME vector<std::unique<VAO>> m_vaos pour sauvegarder les VAO puis retourner *vao
-  GLVAO* createVAO(const char *name)
+  void initVAO(GLVAO& vao)
   {
     throw_if_not_compiled();
-
-    GLVAO* vao = new GLVAO(name);
 
     // Create VBOs and attach them in the VAO.
     for (auto& it: m_attributes)
@@ -379,27 +380,24 @@ public:
         switch (it.second->dim())
           {
           case 1:
-            vao->createVBO<float>(name);
+            vao.createVBO<float>(name);
             break;
           case 2:
-            vao->createVBO<Vector2f>(name);
+            vao.createVBO<Vector2f>(name);
             break;
           case 3:
-            vao->createVBO<Vector3f>(name);
+            vao.createVBO<Vector3f>(name);
             break;
           case 4:
-            vao->createVBO<Vector4f>(name);
+            vao.createVBO<Vector4f>(name);
             break;
           }
       }
 
-    // Bind if has no VAO binded
-    if (unlikely(nullptr == m_vao))
-      {
-        m_vao = vao;
-      }
-
-    return vao;
+    // TODO Get all texture samplers
+    // for (auto& it: m_samplers) ???
+    // vao.textures[] = it.texture().gpuID()
+    vao.prog = m_handle;
   }
 
 private:
@@ -761,7 +759,6 @@ private:
   std::string            m_error_msg;
   uint32_t               m_textures_count = 0u;
   bool                   m_compiled = false;
-  bool                   m_binding = false;
 };
 
 #endif /* GLPROGRAM_HPP_ */

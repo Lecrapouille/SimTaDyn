@@ -29,8 +29,7 @@ bool GLExample01::setup()
     }
 
   // Model #1
-  m_vao_quad = m_prog.createVAO("VAO_quad"); // FIXME m_prog.initVAO(&m_vao_quad); // ou alors m_prog.bind(m_vao_quad)
-  //m_vao_quad->VBO<Vector3f>("a_position").m_container = // FIXME 
+  m_prog.bind(m_vao_quad);
   m_prog.attribute<Vector3f>("a_position") =
     {
           //  X     Y     Z
@@ -82,7 +81,7 @@ bool GLExample01::setup()
           Vector3f(1.0f, 1.0f,-1.0f),
           Vector3f(1.0f, 1.0f, 1.0f)
     };
-  m_vao_quad->VBO<Vector2f>("a_texcoord").m_container =
+  m_prog.attribute<Vector2f>("a_texcoord") =
     {
           //  U     V
           // bottom
@@ -135,13 +134,13 @@ bool GLExample01::setup()
     };
 
   // Model #2
-  m_vao_floor = m_prog.createVAO("VAO_floor");
-  m_vao_floor->VBO<Vector3f>("a_position").m_container =
+  m_prog.bind(m_vao_floor);
+  m_prog.attribute<Vector3f>("a_position").m_container =
     {
           Vector3f(5, -0.5,  5), Vector3f(-5, -0.5,  5), Vector3f(-5, -0.5, -5),
           Vector3f(5, -0.5,  5), Vector3f(-5, -0.5, -5), Vector3f(5, -0.5, -5)
     };
-  m_vao_floor->VBO<Vector2f>("a_texcoord").m_container =
+  m_prog.attribute<Vector2f>("a_texcoord").m_container =
     {
           Vector2f(0.0f, 0.0f), Vector2f(1.0f, 0.0f), Vector2f(0.0f, 1.0f),
           Vector2f(1.0f, 0.0f), Vector2f(1.0f, 1.0f), Vector2f(0.0f, 1.0f),
@@ -179,11 +178,11 @@ bool GLExample01::draw()
   m_prog.uniform<Matrix44f>("u_model") = m_movable.transform();
 
   // Draw cube
-  m_prog.bind(*m_vao_quad);
-  m_prog.draw(GL_TRIANGLES, 0, 36);
+  m_prog.bind(m_vao_quad);
+  m_prog.draw(GL_TRIANGLES, 0, 36); // TODO: Passer vao en param
 
   // Draw floor
-  m_prog.bind(*m_vao_floor);
+  m_prog.bind(m_vao_floor);
   m_prog.draw(GL_TRIANGLES, 0, 2);
 
   return true;
