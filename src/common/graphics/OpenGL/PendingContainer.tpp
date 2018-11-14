@@ -167,7 +167,7 @@ public:
   inline std::valarray<T>& operator=(const std::indirect_array<T>& other)
   { clearPending(other.size()); return m_container.operator=(other); }
   inline std::valarray<T>& operator=(std::initializer_list<T> il)
-  { clearPending(il.size()); return m_container.operator=(il); }
+  { LOGD("PendingContainer initializer list"); clearPending(il.size()); return m_container.operator=(il); }
 
   std::valarray<T> m_container;
 

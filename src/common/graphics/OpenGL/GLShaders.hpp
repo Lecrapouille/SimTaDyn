@@ -67,11 +67,8 @@ public:
   void fromString(std::string const& script)
   {
     throw_if_already_compiled();
+    name() = "shader script"; // FIXME: "Vertex Shader" ou "Frag Shader" selon le type
     m_shader_code = script;
-    if (name().empty())
-      {
-        name() = "shader script";
-      }
   }
 
   //------------------------------------------------------------------
@@ -85,18 +82,17 @@ public:
   bool fromFile(std::string const& filename)
   {
     throw_if_already_compiled();
+
+    name() = File::fileName(filename);
+
     bool loaded = File::readAllFile(filename, m_shader_code);
     LOGI("FromFile: Shader: '" + m_shader_code + "'");
     if (false == loaded)
       {
-        std::string msg = "failed loading shader code from '"
+        std::string msg = "Failed loading shader code '"
           + filename + "'";
         LOGES("%s", msg.c_str());
-        m_error_msg += msg;
-      }
-    else if (name().empty())
-      {
-        name() = File::fileName(filename);
+        m_error_msg += '\n' + msg;
       }
     return loaded;
   }
@@ -207,7 +203,7 @@ private:
         std::string msg =
           "Cannot compile the shader %s. Reason is "
           "'already compiled or no shader code attached'";
-        m_error_msg += msg;
+        m_error_msg += '\n' + msg;
         LOGW("%s", msg.c_str());
       }
     return !m_compiled;
@@ -240,7 +236,7 @@ private:
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
         std::string msg = &log[0U];
-        m_error_msg += msg;
+        m_error_msg += '\n' + msg;
         LOGES("%s", msg.c_str());
       }
     else

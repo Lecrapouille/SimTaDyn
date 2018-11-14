@@ -83,6 +83,7 @@ private:
 
   virtual bool create() override
   {
+    LOGD("Attrib '%s' create", name().c_str());
     m_handle = glCheck(glGetAttribLocation(m_program, name().c_str()));
     m_index = static_cast<GLuint>(m_handle);
     return false;
@@ -94,6 +95,7 @@ private:
 
   virtual void activate() override
   {
+    LOGD("Attrib '%s' activate", name().c_str());
     glCheck(glEnableVertexAttribArray(m_index));
     glCheck(glVertexAttribPointer(m_index,
                                   m_dim,
@@ -105,6 +107,7 @@ private:
 
   virtual void deactivate() override
   {
+    LOGD("Attrib '%s' deactivate", name().c_str());
     if (likely(isValid()))
       {
         glCheck(glDisableVertexAttribArray(m_index));
@@ -165,6 +168,7 @@ private:
 
   virtual bool create() override
   {
+    LOGD("Uniform '%s' create", name().c_str());
     m_handle = glCheck(glGetUniformLocation(m_program, name().c_str()));
     return false;
   }
@@ -221,6 +225,7 @@ private:
 
   virtual bool update() override
   {
+    LOGD("Uniform '%s' update", IGLUniform<T>::name().c_str());
     setValue(IGLUniform<T>::m_data);
     return false;
   }
@@ -327,12 +332,14 @@ private:
 
   virtual void activate() override
   {
+    LOGD("Sampler '%s' activate", IGLUniform<T>::name().c_str());
     glCheck(glActiveTexture(GL_TEXTURE0 + m_texture_count));
     IGLUniform<T>::m_data.begin();
   }
 
   virtual bool update() override
   {
+    LOGD("Sampler '%s' update", IGLUniform<T>::name().c_str());
     glCheck(glUniform1i(IGLUniform<T>::m_handle,
                         static_cast<GLint>(m_texture_count)));
     return false;

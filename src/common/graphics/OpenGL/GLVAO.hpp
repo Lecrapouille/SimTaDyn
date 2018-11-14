@@ -23,6 +23,7 @@
 
 #  include "GLVBO.hpp"
 #  include <map>
+#  include <vector>
 
 class GLVAO: public IGLObject<GLenum>
 {
@@ -49,6 +50,20 @@ public:
     destroy();
   }
 
+  //------------------------------------------------------------------
+  //! \brief Return the list of VBO names
+  //------------------------------------------------------------------
+  std::vector<std::string> VBONames()
+  {
+    std::vector<std::string> list;
+    list.reserve(m_vbos.size());
+    for (auto& it: m_vbos)
+      {
+        list.push_back(it.first);
+      }
+    return list;
+  }
+
   static void unbind()
   {
     glCheck(glBindVertexArray(0U));
@@ -60,6 +75,7 @@ public:
   void createVBO(const char *name)
   {
     m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name);
+    LOGD("allocate new VBO '%s' %p", name, m_vbos[name].get());
   }
 
   inline bool hasVBO(const char *name) const
@@ -88,6 +104,8 @@ public:
         throw std::out_of_range("GLVertexBuffer '" + std::string(name) +
                                 "' exists but has wrong template type");
       }
+
+    LOGD("VAO::GetVBO '%s' %p", name, vbo);
     return *vbo;
   }
 
@@ -95,22 +113,26 @@ private:
 
   virtual bool create() override
   {
+    LOGD("VAO '%s' create", name().c_str());
     glCheck(glGenVertexArrays(1, &m_handle));
     return false;
   }
 
   virtual void release() override
   {
+    LOGD("VAO '%s' release", name().c_str());
     glCheck(glDeleteVertexArrays(1, &m_handle));
   }
 
   virtual void activate() override
   {
+    LOGD("VAO '%s' activate", name().c_str());
     glCheck(glBindVertexArray(m_handle));
   }
 
   virtual void deactivate() override
   {
+    LOGD("VAO '%s' deactivate", name().c_str());
     glCheck(glBindVertexArray(0U));
   }
 

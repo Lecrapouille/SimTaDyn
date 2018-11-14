@@ -69,6 +69,7 @@ public:
   // TODO: verifier si VAO est compatible au prog
   inline bool bind(GLVAO& vao)
   {
+    LOGD("Gonna bind Prog '%s' with VAO named '%s'", name().c_str(), vao.name().c_str());
     if (!compiled())
       {
         LOGE("Binding VAO on non compiled GLProgram");
@@ -77,6 +78,7 @@ public:
 
     if (vao.prog != m_handle)
       {
+        LOGD("Prog '%s' will init VAO named '%s'", name().c_str(), vao.name().c_str());
         initVAO(vao);
       }
     m_vao = &vao;
@@ -135,6 +137,8 @@ public:
   std::vector<std::string> shaderNames()
   {
     std::vector<std::string> list;
+
+    list.reserve(m_shaders.size());
     for (auto &it: m_shaders)
       {
         list.push_back(it.name());
@@ -147,7 +151,9 @@ public:
   //------------------------------------------------------------------
   std::vector<std::string> failedShaders()
   {
-    std::vector<std::string> list(4_z);
+    std::vector<std::string> list;
+
+    list.reserve(4_z);
     for (auto &it: m_shaders)
       {
         if (!it.compiled())
@@ -163,7 +169,9 @@ public:
   //------------------------------------------------------------------
   std::vector<std::string> uniformNames()
   {
-    std::vector<std::string> list(m_uniforms.size());
+    std::vector<std::string> list;
+
+    list.reserve(m_uniforms.size());
     for (auto& it: m_uniforms)
       {
         list.push_back(it.first);
@@ -176,7 +184,9 @@ public:
   //------------------------------------------------------------------
   std::vector<std::string> getAttributeNames()
   {
-    std::vector<std::string> list(m_attributes.size());
+    std::vector<std::string> list;
+
+    list.reserve(m_attributes.size());
     for (auto& it: m_attributes)
       {
         list.push_back(it.first);
@@ -310,19 +320,20 @@ public:
   //------------------------------------------------------------------
   void draw(GLenum mode, GLint first, GLsizei count) // FIXME pass VAO en param au lieu de bind()
   {
-    LOGD("Prog::draw");
+    LOGD("Prog '%s' draw {", name().c_str());
     throw_if_not_compiled();
     throw_if_not_vao_binded();
     throw_if_inconsitency_attrib_sizes();
 
     // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
     // il suffisait entre 16 et 35
-    m_vao->begin();
     begin();
+    //m_vao->begin();
     glCheck(glDrawArrays(mode, first, count));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    //m_vao->end();
     end();
-    m_vao->end();
+    LOGD("} Prog '%s' draw", name().c_str());
   }
 
   //------------------------------------------------------------------
@@ -346,14 +357,14 @@ public:
     throw_if_not_vao_binded();
     throw_if_inconsitency_attrib_sizes();
 
-    m_vao->begin();
+    //m_vao->begin();
     begin();
     index.begin();
     glCheck(glDrawElements(mode, index.size(), index.type(), 0));
     index.end();
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
-    m_vao->end();
+    //m_vao->end();
   }
 
   //------------------------------------------------------------------
@@ -409,7 +420,7 @@ private:
   //------------------------------------------------------------------
   virtual bool create() override
   {
-    LOGD("Prog::create");
+    LOGD("Prog '%s' create", name().c_str());
     m_handle = glCheck(glCreateProgram());
     return false;
   }
@@ -422,7 +433,7 @@ private:
     bool failure = false;
 
     // Compile shaders if they have not yet compiled
-    LOGD("Prog::setup compile shaders");
+    LOGD("Prog '%s' setup: compile shaders", name().c_str());
     for (auto &it: m_shaders)
       {
         it.begin();
@@ -430,10 +441,10 @@ private:
           {
             std::string msg =
               "Shader '" + it.name() +
-              "' has not been compiled. Reason is '" +
+              "' has not been compiled: reason was '" +
               it.error() + "'";
             LOGE("%s", msg.c_str());
-            m_error_msg += msg;
+            m_error_msg += '\n' + msg;
             failure = true;
           }
       }
@@ -441,7 +452,7 @@ private:
     if (!failure)
       {
         // Attach shaders to program
-        LOGD("Prog::setup attach shaders");
+        LOGD("Prog '%s' setup: attach shaders", name().c_str());
         for (auto &it: m_shaders)
           {
             glCheck(glAttachShader(m_handle, it.gpuID()));
@@ -449,7 +460,7 @@ private:
           }
 
         // Compile the program
-        LOGD("Prog::setup compile prog");
+        LOGD("Prog '%s' setup: compile prog", name().c_str());
         glCheck(glLinkProgram(m_handle));
         m_compiled = checkLinkageStatus(m_handle);
         if (m_compiled)
@@ -470,14 +481,15 @@ private:
   //------------------------------------------------------------------
   virtual void activate() override
   {
+    LOGD("Prog '%s' activate", name().c_str());
+
     if (unlikely(!compiled()))
       return ;
     if (unlikely(!binded()))
       return ;
 
-    LOGD("Prog::activate");
-    m_vao->begin();
     glCheck(glUseProgram(m_handle));
+    m_vao->begin();
     for (auto& it: m_attributes)
       {
         m_vao->m_vbos[it.first]->begin();
@@ -504,7 +516,7 @@ private:
   //------------------------------------------------------------------
   virtual void deactivate() override
   {
-    LOGD("Prog::deactivate");
+    LOGD("Prog '%s' deactivate", name().c_str());
     glCheck(glUseProgram(0U));
 
     for (auto& it: m_attributes)
@@ -526,7 +538,7 @@ private:
   //------------------------------------------------------------------
   virtual void release() override
   {
-    LOGD("Prog::release");
+    LOGD("Prog '%s' release", name().c_str());
     detachAllShaders();
     glCheck(glDeleteProgram(m_handle));
   }
@@ -740,7 +752,7 @@ private:
         glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
-        m_error_msg += &log[0U];
+        m_error_msg += '\n' + &log[0U];
         LOGES("%s", m_error_msg.c_str());
       }
     else
