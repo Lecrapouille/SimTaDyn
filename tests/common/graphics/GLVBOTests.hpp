@@ -15,11 +15,11 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GLBUFFERTESTS_HPP_
-#  define GLBUFFERTESTS_HPP_
+#ifndef GLVBOTESTS_HPP_
+#  define GLVBOTESTS_HPP_
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestResult.h>
@@ -27,35 +27,22 @@
 
 #define protected public
 #define private public
-#include "GLCollection.tpp"
+#include "OpenGL.hpp"
 #undef protected
 #undef private
 
-class GLBufferTests : public CppUnit::TestFixture
+class GLVBOTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(GLBufferTests);
-  CPPUNIT_TEST(createOpenGLContext);
-  CPPUNIT_TEST(testDummy);
-  CPPUNIT_TEST(testPendingData);
-  CPPUNIT_TEST(testInsert);
-  CPPUNIT_TEST(testSuppress);
-  CPPUNIT_TEST(testSwap);
-  CPPUNIT_TEST(deleteOpenGLContext);
+  CPPUNIT_TEST_SUITE(GLVBOTests);
+  CPPUNIT_TEST(tests);
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void createOpenGLContext();
   void setUp();
   void tearDown();
 
-  void testDummy();
-  void testPendingData();
-  void testInsert();
-  void testSuppress();
-  void testSwap();
-  void deleteOpenGLContext();
+  void tests();
 };
 
-
-#endif /* GLBUFFERTESTS_HPP_ */
+#endif /* GLVBOTESTS_HPP_ */

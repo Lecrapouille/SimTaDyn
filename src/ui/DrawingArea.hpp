@@ -39,82 +39,129 @@ class GLDrawingArea
 {
 public:
 
-  enum Direction { Forward, Backward, Up, Down, Right, Left, DirectionIterEnd = Left, DirectionIterBegin = Forward };
+  enum Direction { Forward, Backward, Up, Down, Right, Left,
+                   DirectionIterEnd = Left, DirectionIterBegin = Forward };
 
-  //! \brief Constructor.
-  GLDrawingArea(const unsigned int timeout = 10)
-    : Gtk::GLArea(),
-      GLRenderer()
-  {
-    // OpenGL context
-    setContext();
+  //------------------------------------------------------------------
+  //! \brief Constructor. Connect GTK+ io signals
+  //------------------------------------------------------------------
+  GLDrawingArea();
 
-    //
-    add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK |
-               Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
+  //------------------------------------------------------------------
+  //! \brief Destructor.
+  //------------------------------------------------------------------
+  ~GLDrawingArea();
 
-    // Reset keyboard states every 10 ms
-    Glib::signal_timeout().connect(sigc::mem_fun(*this, &GLDrawingArea::keyboard),
-                                   timeout);
-
-    // Use the mouse scroll event
-    signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
-
-  }
-
-  virtual ~GLDrawingArea()
-  {
-  }
-
+  //------------------------------------------------------------------
+  //! \brief Return the current OpenGL screen width.
+  //------------------------------------------------------------------
   inline uint32_t screenWidth() const override
   {
     return static_cast<uint32_t>(Gtk::GLArea::get_width());
   }
 
+  //------------------------------------------------------------------
+  //! \brief Return the current OpenGL screen height.
+  //------------------------------------------------------------------
   inline uint32_t screenHeight() const override
   {
     return static_cast<uint32_t>(Gtk::GLArea::get_height());
   }
 
-  //FIXME protected:
+  //------------------------------------------------------------------
+  //! \brief Callback when the GTK+ window is creating.
+  //! Create OpenGL context. Call the renderer setup.
+  //------------------------------------------------------------------
+  void onCreate();
 
-  // Desired OpenGL context version 3.3
-  inline void setContext() override
+  //------------------------------------------------------------------
+  //! \brief Callback when the GTK+ window is destroying.
+  //! Clean up OpenGL context.
+  //------------------------------------------------------------------
+  void onRelease();
+
+  //------------------------------------------------------------------
+  //! \brief Draw the scene.
+  //! \return true if no problem occured
+  //------------------------------------------------------------------
+  bool onRender();
+
+  //------------------------------------------------------------------
+  //! \brief Callback when the mouse button has been pressed on the
+  //! OpenGL window. Dispatch the action to the Map Editor.
+  //------------------------------------------------------------------
+  virtual bool on_button_press_event(GdkEventButton* event) override;
+
+  //------------------------------------------------------------------
+
+  //! \brief Asynchronous callback when a keyboard key has been
+  //! pressed. We memorize the pressed key. A GTK+ timer will trig
+  //! onRefreshKeyboard() which will actions associated to all pressed
+  //! keys thanks to .
+
+  //------------------------------------------------------------------
+  inline void keyPressed(Direction d)
+  {
+    m_direction[d] = true;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Asynchronous callback when a keyboard key has been released.
+  //------------------------------------------------------------------
+  inline void keyReleased(Direction d)
+  {
+    m_direction[d] = false;
+  }
+
+private:
+
+  //------------------------------------------------------------------
+  //! \brief Start OpenGL context.
+  //------------------------------------------------------------------
+  void createOpenGLContext();
+
+  //------------------------------------------------------------------
+  //! \brief Time-triggered callback. Manage pressed keys.
+  //------------------------------------------------------------------
+  bool onRefreshKeyboard();
+
+  //------------------------------------------------------------------
+  //! \brief Mouse scrolling event.
+  //------------------------------------------------------------------
+  bool onScrollEvent(GdkEventScroll *event);
+
+  //------------------------------------------------------------------
+  //! \brief Desired OpenGL context version: 3.3.
+  //! \warning GLArea only supports Core profile.
+  //------------------------------------------------------------------
+  inline void setCoreVersion() override
   {
     set_required_version(3, 3);
   }
 
+  //------------------------------------------------------------------
+  //! \brief Activate OpenGL GL_BLEND
+  //------------------------------------------------------------------
   inline void activateTransparency() override
   {
     set_has_alpha(true);
   }
 
+  //------------------------------------------------------------------
+  //! \brief Activate OpenGL GL_DEPTH_TEST
+  //------------------------------------------------------------------
   inline void activateDepthBuffer() override
   {
     set_has_depth_buffer();
   }
 
-  //! \brief
-  inline void keyPressed(Direction d) { m_direction[d] = true; }
-  //! \brief
-  inline void keyReleased(Direction d) { m_direction[d] = false; }
-  //! \brief
-  virtual bool on_button_press_event(GdkEventButton* event) override;
-  //! \brief
-  bool keyboard();
-  //! \brief
-  bool onScrollEvent(GdkEventScroll *event);
-  //! \brief Draw the scene
-  bool onRender();
-  //! \brief
-  void onRealize();
-  //! \brief Clean up
-  void onUnrealize();
-
 private:
 
-  bool m_success_init = false;
+  //! \brief Keyboard pressed keys.
   bool m_direction[DirectionIterEnd + 1] = {0};
+
+  //! \brief Keyboard refresh rate
+  const unsigned int m_timeout_ms = 10;
 };
 
 #endif /* DRAWINGAREA_HPP_ */

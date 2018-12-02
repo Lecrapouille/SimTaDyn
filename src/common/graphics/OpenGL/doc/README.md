@@ -37,7 +37,7 @@ C++ no pretty print of shader compilation error
 VAO.hpp
 =======
 
-C++ does not have a VBO
+C++ has a VBO populated by GLProgram.
 
 VBO.hpp
 =======

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "OpenGL.hpp"
@@ -37,32 +37,6 @@ namespace opengl
   {
     static bool s_context_started = false;
     return s_context_started;
-  }
-
-  //! \warning GLArea only supports Core profile.
-  void createContext()
-  {
-    LOGI("Starting OpenGL context");
-
-    try
-      {
-        glewExperimental = true;
-        GLenum err = glewInit();
-        if (err != GLEW_OK)
-          {
-            const GLubyte* msg = glewGetErrorString(err);
-            const char *m = reinterpret_cast<const char*>(msg);
-            throw Gdk::GLError(Gdk::GLError::NOT_AVAILABLE, Glib::ustring(m));
-          }
-        hasCreatedContext() = true;
-        LOGI("OpenGL context created with success");
-      }
-    catch (const Gdk::GLError& gle)
-      {
-        LOGES("An error occured during the creation of OpenGL context:");
-        std::cerr << gle.domain() << "-" << static_cast<int>(gle.code())
-                  << "-" << gle.what() << std::endl;
-      }
   }
 
   //! \param ....

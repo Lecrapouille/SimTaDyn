@@ -31,15 +31,15 @@ using namespace Yes;
 // *************************************************************************************************
 
 #  include "SimTaDynMap.hpp"
-#  include "GLTextures.hpp"
+//#  include "GLTextures.hpp"
 
 // *************************************************************************************************
 //! Define the list of resource that will be used by the ResourceManager and LoaderManagers.
 // *************************************************************************************************
 
-typedef TYPELIST_3(SimTaDynMap,
-                   SimTaDynSheet,
-                   GLTexture2D) ResourceList;
+typedef TYPELIST_2(SimTaDynMap,
+                   SimTaDynSheet) ResourceList;
+//FIXME GLTexture2D) ResourceList;
 
 // *************************************************************************************************
 //!
@@ -48,7 +48,7 @@ typedef TYPELIST_3(SimTaDynMap,
 #  include "ResourceManager.tpp"
 #  include "ShapeFileLoader.hpp"
 #  include "SimTaDynFileLoader.hpp"
-#  include "TextureFileLoader.hpp"
+// #  include "TextureFileLoader.hpp"
 #  include "LoaderManager.tpp"
 
 #endif

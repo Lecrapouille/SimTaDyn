@@ -1,3 +1,29 @@
+//=====================================================================
+// SimTaDyn: A GIS in a spreadsheet.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of SimTaDyn.
+//
+// SimTaDyn is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+//
+// This file is a derivated work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
+//=====================================================================
+
 #ifndef GLPROGRAM_HPP_
 #  define GLPROGRAM_HPP_
 
@@ -6,7 +32,7 @@
 
 #  include "NonCppStd.hpp"
 #  include "GLShaders.hpp"
-#  include "GLLocation.hpp"
+#  include "GLLocation.tpp"
 #  include <map>
 
 // TODO: verifier les GLVariables non init dans le GPU
@@ -67,6 +93,7 @@ public:
   }
 
   // TODO: verifier si VAO est compatible au prog
+  // TODO: compiler le prog s'il ne l'est pas
   inline bool bind(GLVAO& vao)
   {
     LOGD("Gonna bind Prog '%s' with VAO named '%s'", name().c_str(), vao.name().c_str());
@@ -182,7 +209,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Return the list of unifom names
   //------------------------------------------------------------------
-  std::vector<std::string> getAttributeNames()
+  std::vector<std::string> attributeNames()
   {
     std::vector<std::string> list;
 
@@ -199,7 +226,16 @@ public:
   //------------------------------------------------------------------
   inline bool hasUniform(const char *name) const
   {
+    if (unlikely(nullptr == name)) return false;
     return m_uniforms.end() != m_uniforms.find(name);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Check program has uniforms.
+  //------------------------------------------------------------------
+  inline bool hasUniforms() const
+  {
+    return 0_z != m_uniforms.size();
   }
 
   //------------------------------------------------------------------
@@ -225,7 +261,16 @@ public:
   //------------------------------------------------------------------
   inline bool hasAttribute(const char *name) const
   {
+    if (unlikely(nullptr == name)) return false;
     return m_attributes.end() != m_attributes.find(name);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Check if program has attributes.
+  //------------------------------------------------------------------
+  inline bool hasAttributes() const
+  {
+    return 0_z != m_attributes.size();
   }
 
   //------------------------------------------------------------------
@@ -456,7 +501,7 @@ private:
         for (auto &it: m_shaders)
           {
             glCheck(glAttachShader(m_handle, it.gpuID()));
-            it.attached(m_handle);
+            it.attachProg(m_handle);
           }
 
         // Compile the program
@@ -585,6 +630,7 @@ private:
   //------------------------------------------------------------------
   void addNewAttribute(GLenum type, const char *name)
   {
+    assert(nullptr != name);
     GLenum EGL_FLOAT = static_cast<GLenum>(GL_FLOAT);
 
     switch (type)
@@ -614,6 +660,7 @@ private:
   //------------------------------------------------------------------
   void addNewUniform(GLenum type, const char *name)
   {
+    assert(nullptr != name);
     switch (type)
       {
       case GL_FLOAT:
@@ -689,8 +736,7 @@ private:
         throw std::invalid_argument("nullptr passed to getUniform");
       }
 
-    auto ptr = m_uniforms[name].get();
-    if (unlikely(nullptr == ptr))
+    if (unlikely(false == hasUniform(name)))
       {
         // TODO: create the variable: call addNewUniform
         // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
@@ -698,11 +744,12 @@ private:
                                 "' does not exist");
       }
 
+    auto ptr = m_uniforms[name].get();
     IGLUniform<T> *uniform_ptr = dynamic_cast<IGLUniform<T>*>(ptr);
     if (unlikely(nullptr == uniform_ptr))
       {
-        throw std::out_of_range("GLUniform '" + std::string(name) +
-                                "' exists but has wrong template type");
+        throw std::invalid_argument("GLUniform '" + std::string(name) +
+                                    "' exists but has wrong template type");
       }
     return *uniform_ptr;
   }
@@ -733,7 +780,7 @@ private:
         if (m_handle == it.attached())
           {
             glCheck(glDetachShader(m_handle, it.gpuID()));
-            it.attached(0);
+            it.attachProg(0);
           }
       }
   }
@@ -752,7 +799,8 @@ private:
         glCheck(glGetProgramiv(obj, GL_INFO_LOG_LENGTH, &length));
         std::vector<char> log(static_cast<size_t>(length));
         glCheck(glGetProgramInfoLog(obj, length, &length, &log[0U]));
-        m_error_msg += '\n' + &log[0U];
+        m_error_msg += '\n';
+        m_error_msg += &log[0U];
         LOGES("%s", m_error_msg.c_str());
       }
     else

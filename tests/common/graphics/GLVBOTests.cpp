@@ -15,34 +15,28 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef OPENGLTESTS_HPP_
-#  define OPENGLTESTS_HPP_
+#include "GLVBOTests.hpp"
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/TestResult.h>
-#include <cppunit/extensions/HelperMacros.h>
-
-#define protected public
-#define private public
-#include "GLAttrib.hpp"
-#include "GLVertexArray.hpp"
-#undef protected
-#undef private
-
-class OpenGLTests : public CppUnit::TestFixture
+//--------------------------------------------------------------------------
+void GLVBOTests::setUp()
 {
-  // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(OpenGLTests);
-  CPPUNIT_TEST(testOpenGL);
-  CPPUNIT_TEST_SUITE_END();
+}
 
-public:
-  void setUp();
-  void tearDown();
-  void testOpenGL();
-};
+//--------------------------------------------------------------------------
+void GLVBOTests::tearDown()
+{
+}
 
-#endif
+//--------------------------------------------------------------------------
+void GLVBOTests::tests()
+{
+  //
+  GLVertexBuffer<int> vbo("vbo");
+  CPPUNIT_ASSERT_EQUAL(true, vbo.name() == "vbo");
+  CPPUNIT_ASSERT(GL_ARRAY_BUFFER == vbo.target());
+  CPPUNIT_ASSERT(GL_DYNAMIC_DRAW == vbo.usage());
+  CPPUNIT_ASSERT_EQUAL(false, vbo.needUpdate());
+}

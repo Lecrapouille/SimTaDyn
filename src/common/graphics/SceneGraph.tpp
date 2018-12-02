@@ -24,7 +24,8 @@
 
 // inspired from https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
 
-#  include "Mesh.hpp"
+#  include "Logger.hpp"
+#  include "Movable.tpp"
 #  include <memory>
 #  include <vector>
 
@@ -93,6 +94,7 @@ public:
   //! \brief Destructor. Free all 3D entites.
   virtual ~SceneNode()
   {
+    LOGI("SceneGraph delete node '%s'", m_name.c_str());
     size_t i = m_children.size();
     while (i--)
       {
@@ -169,24 +171,10 @@ public:
     return m_local_scaling;
   }
 
-  //! \brief Draw the 3D entity if present.
-  //! \note: this methods, contrary to ::update is not recursive but
-  //! only drawn a single entity. It will be the Renderer job to draw
-  //! recursively all the scene graph. Indeed the renderer has access
-  //! to shaders and other stuffs for drawing.
-  virtual void drawnBy()//FIXME: void drawnBy(GLRenderer& renderer)
-  {
-    if (nullptr != m_mesh)
-      {
-        m_mesh->draw(GL_TRIANGLES);
-      }
-  }
-
   inline std::vector<SceneNode<Mesh, Type, dim>*> const &children() const
   {
     return m_children;
   }
-
 
   //! \brief Give a name to the node.
   std::string                        m_name;

@@ -37,14 +37,14 @@ protected:
   bool onExitClicked(GdkEventAny* event);
 
   //! \brief Initialize the OpenGL context
-  inline void onRealize()
+  inline void onCreate()
   {
-    m_drawing_area.onRealize();
+    m_drawing_area.onCreate();
   }
   //! \brief Clean up
-  inline void onUnrealize()
+  inline void onRelease()
   {
-    m_drawing_area.onUnrealize();
+    m_drawing_area.onRelease();
   }
   //! \brief Draw the scene
   inline bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)

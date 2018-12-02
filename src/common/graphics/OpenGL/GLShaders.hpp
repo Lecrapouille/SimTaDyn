@@ -17,11 +17,17 @@
 // You should have received a copy of the GNU General Public License
 // along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
+//
+// This file is a derivated work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
+//=====================================================================
 
 #ifndef GLSHADER_HPP_
 #  define GLSHADER_HPP_
 
-#  include "IGLObject.hpp"
+#  include "IGLObject.tpp"
 #  include "File.hpp"
 #  include <vector>
 
@@ -86,7 +92,7 @@ public:
     name() = File::fileName(filename);
 
     bool loaded = File::readAllFile(filename, m_shader_code);
-    LOGI("FromFile: Shader: '" + m_shader_code + "'");
+    LOGI("FromFile: Shader: '%s'", m_shader_code.c_str());
     if (false == loaded)
       {
         std::string msg = "Failed loading shader code '"
@@ -136,7 +142,7 @@ public:
   //------------------------------------------------------------------
   //! \brief (Information) Attached by a prog. Pass 0 for detached
   //------------------------------------------------------------------
-  inline void attached(GLenum prog)
+  inline void attachProg(GLenum prog)
   {
     m_attached = prog;
   }

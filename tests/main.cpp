@@ -44,8 +44,12 @@
 
 // --- OpenGL ---------------------------------------------------------
 #include "ColorTests.hpp"
-#include "GLBufferTests.hpp"
-#include "OpenGLTests.hpp"
+#include "GLVAOTests.hpp"
+#include "GLObjectTests.hpp"
+#include "GLVAOTests.hpp"
+#include "GLVBOTests.hpp"
+#include "GLShadersTests.hpp"
+#include "GLProgramTests.hpp"
 
 // --- Loader ---------------------------------------------------------
 //#include "ResourcesTests.hpp"
@@ -154,7 +158,7 @@ static void testContainer(CppUnit::TextUi::TestRunner& runner)
 }
 
 //--------------------------------------------------------------------------
-static void testGraph(CppUnit::TextUi::TestRunner& runner)
+static void testGraph(CppUnit::TextUi::TestRunner& /*runner*/)
 {
   /*CppUnit::TestSuite* suite;
 
@@ -190,18 +194,24 @@ static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
   suite->addTest(new CppUnit::TestCaller<ColorTests>("testOperations", &ColorTests::testOperations));
   runner.addTest(suite);
 
-  suite = new CppUnit::TestSuite("GLBufferTests");
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("createOpenGLContext", &GLBufferTests::createOpenGLContext));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferDummy", &GLBufferTests::testDummy));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferPendingData", &GLBufferTests::testPendingData));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferInsert", &GLBufferTests::testInsert));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSuppress", &GLBufferTests::testSuppress));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSwap", &GLBufferTests::testSwap));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("deleteOpenGLContext", &GLBufferTests::deleteOpenGLContext));
+  suite = new CppUnit::TestSuite("GLObjectTests");
+  suite->addTest(new CppUnit::TestCaller<GLObjectTests>("tests", &GLObjectTests::tests));
   runner.addTest(suite);
 
-  suite = new CppUnit::TestSuite("OpenGLTests");
-  suite->addTest(new CppUnit::TestCaller<OpenGLTests>("GLObject", &OpenGLTests::testOpenGL));
+  suite = new CppUnit::TestSuite("GLVAOTests");
+  suite->addTest(new CppUnit::TestCaller<GLVAOTests>("tests", &GLVAOTests::tests));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("GLVBOTests");
+  suite->addTest(new CppUnit::TestCaller<GLVBOTests>("tests", &GLVBOTests::tests));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("GLShadersTests");
+  suite->addTest(new CppUnit::TestCaller<GLShadersTests>("tests", &GLShadersTests::tests));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("GLProgramTests");
+  suite->addTest(new CppUnit::TestCaller<GLProgramTests>("tests", &GLProgramTests::tests));
   runner.addTest(suite);
 }
 

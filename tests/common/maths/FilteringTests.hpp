@@ -27,6 +27,7 @@
 
 #  define protected public
 #  define private public
+#  include "Polynom.hpp"
 #  include "Filtering.hpp"
 #  include "Polyfit.hpp"
 #  undef protected

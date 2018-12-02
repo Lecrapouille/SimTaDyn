@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "GLWindow.hpp"
@@ -30,18 +30,18 @@ static void on_error(int /*errorCode*/, const char* msg)
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
   IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
-  if (width < 0)
-    {
-      width = 1;
-    }
-  if (height < 0)
-    {
-      height = 1;
-    }
-  obj->onWindowSizeChanged(static_cast<float>(width), static_cast<float>(height));
+
+  if (nullptr == obj) return ;
+  if (width < 0) { width = 1; }
+  if (height < 0) { height = 1; }
+
+  obj->setWindowSize(width, height);
 }
 
-IGLWindow::IGLWindow()
+IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *title)
+  : m_width(width),
+    m_height(height),
+    m_title(title)
 {
   opengl::hasCreatedContext() = false;
 }

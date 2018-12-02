@@ -18,7 +18,31 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "GLException.hpp"
+#ifndef GLPROGRAMTESTS_HPP_
+#  define GLPROGRAMTESTS_HPP_
 
-//! This macro will generate code for members.
-IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
+#include <cppunit/TestFixture.h>
+#include <cppunit/TestResult.h>
+#include <cppunit/extensions/HelperMacros.h>
+
+#define protected public
+#define private public
+#include "OpenGL.hpp"
+#undef protected
+#undef private
+
+class GLProgramTests : public CppUnit::TestFixture
+{
+  // CppUnit macros for setting up the test suite
+  CPPUNIT_TEST_SUITE(GLProgramTests);
+  CPPUNIT_TEST(tests);
+  CPPUNIT_TEST_SUITE_END();
+
+public:
+  void setUp();
+  void tearDown();
+
+  void tests();
+};
+
+#endif /* GLPROGRAMTESTS_HPP_ */

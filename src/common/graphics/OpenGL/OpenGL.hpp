@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef OPENGL_HPP
@@ -29,7 +29,6 @@ namespace opengl
 {
   //! \brief Create an OpenGL context. Call it before drawing
   //! primitives.
-  void  createContext();
 
   //! \brief Return if the OpenGL has been created or has not been
   //! created or has failed creating.
@@ -50,9 +49,9 @@ namespace opengl
 
 #  include "GLException.hpp"
 #  include "GLVAO.hpp"
-#  include "GLVBO.hpp"
+#  include "GLVBO.tpp"
 #  include "GLTextures.hpp"
-#  include "GLLocation.hpp"
+#  include "GLLocation.tpp"
 #  include "GLShaders.hpp"
 #  include "GLProgram.hpp"
 #  include "GLImGUI.hpp"

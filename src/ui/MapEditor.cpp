@@ -355,7 +355,7 @@ bool MapEditor::load(std::string const& filename, SimTaDynMapPtr map)
 bool MapEditor::exec() // FIXME: Exec(typeCell, nodeID)
 {
   SimForth &forth = SimForth::instance();
-  SimTaDynSheet *sheet = map()->sheet();
+  SimTaDynSheet *sheet = map().sheet();
 
   if (nullptr == sheet)
   {

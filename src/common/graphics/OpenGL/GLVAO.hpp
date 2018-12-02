@@ -15,13 +15,19 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+//
+// This file is a derivated work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
 //=====================================================================
 
 #ifndef GL_VERTEX_ARRAY_HPP_
 #  define GL_VERTEX_ARRAY_HPP_
 
-#  include "GLVBO.hpp"
+#  include "GLVBO.tpp"
 #  include <map>
 #  include <vector>
 
@@ -71,11 +77,23 @@ public:
 
   //FIXME: private + friend GLProg
   //FIXME: ajouter nombre de vertex pour reserver taille
+  //FIXME: gerer duplicata de noms ?
   template<typename T>
-  void createVBO(const char *name)
+  bool createVBO(const char *name)
   {
+    if (unlikely(hasVBO(name)))
+      {
+        LOGE("Try to create a VBO with name '%s' already used", name);
+        return false;
+      }
     m_vbos[name] = std::make_unique<GLVertexBuffer<T>>(name);
     LOGD("allocate new VBO '%s' %p", name, m_vbos[name].get());
+    return true;
+  }
+
+  inline bool hasVBOs() const
+  {
+    return 0_z != m_vbos.size();
   }
 
   inline bool hasVBO(const char *name) const
@@ -101,8 +119,8 @@ public:
     GLVertexBuffer<T> *vbo = dynamic_cast<GLVertexBuffer<T>*>(ptr);
     if (unlikely(nullptr == vbo))
       {
-        throw std::out_of_range("GLVertexBuffer '" + std::string(name) +
-                                "' exists but has wrong template type");
+        throw std::invalid_argument("GLVertexBuffer '" + std::string(name) +
+                                    "' exists but has wrong template type");
       }
 
     LOGD("VAO::GetVBO '%s' %p", name, vbo);

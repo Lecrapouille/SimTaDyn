@@ -130,9 +130,15 @@ public:
   }
 
   //! \brief Return the current map
-  inline SimTaDynMapPtr map()
+  inline SimTaDynMap& map()
   {
-    return m_current_map.get();
+    SimTaDynMapPtr map = m_current_map.get();
+    if (nullptr == map)
+      {
+        newMap();
+        map = m_current_map.get();
+      }
+    return *map;
   }
 
   inline SimTaDynMapPtr map(std::string const& name)

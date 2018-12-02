@@ -1,3 +1,4 @@
+// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
 // Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
@@ -15,13 +16,19 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+//
+// This file is a derivated work of https://github.com/glumpy/glumpy
+//
+// Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
+// Distributed under the (new) BSD License.
 //=====================================================================
 
 #ifndef GLVERTEX_BUFFER_HPP_
 #  define GLVERTEX_BUFFER_HPP_
 
-#  include "IGLObject.hpp"
+#  include "IGLObject.tpp"
 #  include "PendingContainer.tpp"
 
 // **************************************************************
@@ -56,6 +63,11 @@ public:
   virtual ~GLBuffer() override
   {
     destroy();
+  }
+
+  inline GLenum usage() const
+  {
+    return m_usage;
   }
 
 private:

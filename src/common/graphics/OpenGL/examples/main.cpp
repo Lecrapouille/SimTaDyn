@@ -1,11 +1,48 @@
 #include "Example01.hpp"
+#include "Example02.hpp"
 
-int main(/*int argc, char *argv[]*/)
+#define MAX_EXAMPLES 2
+
+static void usage(char *argv[])
 {
-  GLExample01 window;
+  std::cout << "Usage: " << std::endl
+            << "  " << argv[0] << " <integer>" << std::endl;
+  std::cout << "Where: <integer> is the example id (1 .. " << MAX_EXAMPLES << "): " << std::endl;
+  std::cout << "  1: Display a 3d scene with differents objects" << std::endl;
+  std::cout << "  2: Display a 3d scene graph with imgui debug" << std::endl;
+  exit(1);
+}
 
-LOGI("QQ");
-  window.start();
+int main(int argc, char *argv[])
+{
+  if (argc <= 1)
+    {
+      std::cout << "Missing example id !" << std::endl;
+      usage(argv);
+    }
+  long int example = strtol(argv[1], nullptr, 10);
+  if ((0L == example) || (example > MAX_EXAMPLES))
+    {
+      usage(argv);
+    }
+
+  std::unique_ptr<IGLWindow> win;
+
+  switch (example)
+    {
+    case 1:
+      win = std::make_unique<GLExample01>();
+      win->start();
+      break;
+    case 2:
+      win = std::make_unique<GLExample02>();
+      win->start();
+      break;
+    default:
+      std::cout << "Incorrect example id !" << std::endl;
+      usage(argv);
+      return -1;
+    }
 
   return 0;
 }

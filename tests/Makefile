@@ -47,10 +47,9 @@ OBJ_MANAGERS       =
 #OBJ_MANAGERS_UT    = ResourcesTests.o
 OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
 #OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
-OBJ_OPENGL         = Color.o Camera2D.o OpenGLException.o OpenGL.o GLObject.o GLShader.o GLVertexArray.o
-OBJ_OPENGL        += GLVertexBuffer.o GLAttrib.o GLTextures.o GLWindow.o
+OBJ_OPENGL         = Color.o Camera2D.o GLException.o OpenGL.o
 # Renderer.o
-OBJ_OPENGL_UT      = ColorTests.o GLBufferTests.o OpenGLTests.o
+OBJ_OPENGL_UT      = ColorTests.o GLObjectTests.o GLVAOTests.o GLVBOTests.o GLShadersTests.o GLProgramTests.o 
 OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_CORE           = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
 OBJ_CORE_UT        = ClassicSpreadSheet.o ClassicSpreadSheetTests.o
@@ -74,9 +73,11 @@ CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourcev
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 
 ###################################################
-#
+# Inform Makefile where to find header files
 INCLUDES += -Icommon/containers -Icommon/graphics -Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils -Icore/loaders -Icore/spreadsheet -I../src/core/standalone/ClassicSpreadSheet
 
+###################################################
+# Inform Makefile where to find *.cpp and *.o files
 VPATH += common/containers:\
 common/graphics:\
 common/graph-theory:\
@@ -151,6 +152,7 @@ LDFLAGS += --coverage
 #endif
 
 ###################################################
+# Compile SimTaDyn unit tests
 all: $(TARGET)
 
 ###################################################
@@ -160,7 +162,7 @@ $(TARGET): $(OBJ)
 	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
 
 ###################################################
-# Compile sources
+# Compile unit tests
 %.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
 	@$(call print-from,"Compiling C++","$(TARGET)","$<")
 	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
