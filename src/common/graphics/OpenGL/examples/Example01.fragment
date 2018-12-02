@@ -1,9 +1,0 @@
-#version 150
-
-out vec4 finalColor;
-in vec3 fragmentColor;
-
-void main()
-{
-    finalColor = vec4(fragmentColor, 1.0);
-}

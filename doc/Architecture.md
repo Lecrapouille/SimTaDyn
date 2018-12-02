@@ -168,3 +168,15 @@ loader manager manages a collection of loaders indexed by the file
 extension. A loader creates a new resource from a file (loading) and
 saves a resource in file. For example the texture loader creates
 OpenGL objects from jpeg, png, bmp files.
+
+## Renderer
+
+### OpenGL Wrapper
+
+Wraps OpenGL 3.3 API into a C++ class. More informations are given in [this page](https://github.com/Lecrapouille/SimTaDyn/blob/dev-new-opengl/doc/OpenGL.md)
+
+### Renderer
+
+Use an OpenGL Wrapper.
+SimTaDyn maps are stored withing a [SceneGraph](https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf)
+and displayed with the OpenGL wrapper.

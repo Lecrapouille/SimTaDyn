@@ -52,9 +52,9 @@ void Inspector::showEmpty()
 
 void Inspector::showCell(const Key nodeID)
 {
-  SimTaDynMapPtr map = MapEditor::instance().map();
-  if (nullptr == map)
-    return ;
+  //SimTaDynMapPtr map = MapEditor::instance().map();
+  //if (nullptr == map)
+  //  return ;
 
   // FIXME: parcours du SceneGraph
   //SimTaDynSheet *sheet = map->sheet();

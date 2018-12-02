@@ -25,8 +25,7 @@
 #  include "SimTaDynCell.hpp"
 //#  include "GraphAlgorithm.hpp"
 #  include "BoundingBox.tpp"
-#  include "Vertex.hpp"
-#  include "GLCollection.tpp"
+#  include "OpenGL.hpp"
 
 //FIXME
 #include "algorithm/SimTaDynBFS.hpp"

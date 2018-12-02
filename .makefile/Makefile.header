@@ -95,7 +95,7 @@ INCLUDES = -I$(BUILD) -I$(P)/external/backward-cpp -I$(P)/external	\
 -I$(P)/src/common/managers -I$(P)/src/common/utils			\
 -I$(P)/src/common/maths -I$(P)/src/common/containers			\
 -I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
--I$(P)/src/common/graphics/OpenGL/geometry				\
+-I$(P)/src/common/graphics/OpenGL/      				\
 -I$(P)/src/common/graphics/RTree -I$(P)/src/common/graphics		\
 -I$(P)/src/core -I$(P)/src/core/loaders -I$(P)/src/forth		\
 -I$(P)/src/ui
@@ -116,7 +116,6 @@ $(P)/src/common/containers:\
 $(P)/src/common/graph-theory:\
 $(P)/src/common/graphics:\
 $(P)/src/common/graphics/OpenGL:\
-$(P)/src/common/graphics/OpenGL/geometry:\
 $(P)/src/common/graphics/RTree:\
 $(P)/src/core:\
 $(P)/src/core/loaders:\

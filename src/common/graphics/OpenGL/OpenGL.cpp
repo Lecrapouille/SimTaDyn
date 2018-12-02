@@ -19,59 +19,34 @@
 //=====================================================================
 
 #include "OpenGL.hpp"
-#include "Logger.hpp"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wredundant-decls"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <gtkmm/glarea.h>
+#include <GL/glew.h>
 #pragma GCC diagnostic pop
 
-namespace SimTaDyn
+namespace opengl
 {
-  static bool _context_started = false;
-
-  //! \brief GLArea only support Core profile.
-  void glStartContext()
+  //! \return true if the OpenGL context has been created
+  //! else return false (not yet created or failed during
+  //! its creation).
+  bool& hasCreatedContext()
   {
-    LOGI("Starting OpenGL context");
-
-    try
-      {
-        glewExperimental = true;
-        GLenum err = glewInit();
-        if (err != GLEW_OK)
-          {
-            const GLubyte* msg = glewGetErrorString(err);
-            const char *m = reinterpret_cast<const char*>(msg);
-            throw Gdk::GLError(Gdk::GLError::NOT_AVAILABLE, Glib::ustring(m));
-          }
-        _context_started = true;
-        LOGI("OpenGL context created with success");
-      }
-    catch (const Gdk::GLError& gle)
-      {
-        LOGES("An error occured during the creation of OpenGL context:");
-        std::cerr << gle.domain() << "-" << static_cast<int>(gle.code())
-                  << "-" << gle.what() << std::endl;
-      }
+    static bool s_context_started = false;
+    return s_context_started;
   }
 
-  bool glIsFunctional()
-  {
-    return _context_started;
-  }
-
-  void glCheckError(const char *file, uint32_t line, const char* expression)
+  //! \param ....
+  void checkError(const char *filename, uint32_t line, const char* expression)
   {
     GLenum id;
+    const char* error;
 
     while ((id = glGetError()) != GL_NO_ERROR)
       {
-        const char* error;
-        std::string fileString = file;
-
         switch (id)
           {
           case GL_INVALID_OPERATION:
@@ -94,7 +69,12 @@ namespace SimTaDyn
             break;
           }
 
-        LOGES("Failed executing '%s'. Reason is %s", expression, error);
+        // Do not use directly LOG macros because it will catch this
+        // filename and its line instead of the faulty file/line which
+        // produced the OpenGL error.
+        Logger::instance().log(&std::cerr, logger::Error,
+                               "[%s::%d] Failed executing '%s'. Reason is '%s'\n",
+                               filename, line, expression, error);
       }
   }
 } // namespace

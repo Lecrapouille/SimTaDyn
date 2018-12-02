@@ -22,7 +22,7 @@
 #  define PENDINGDATA_HPP_
 
 #  include "Maths.hpp"
-
+#  include "Logger.hpp"
 // **************************************************************
 //! \brief Define an interface class keeping track of the smallest
 //! contiguous area that have been changed and needs to be
@@ -40,6 +40,12 @@ public:
   PendingData()
   {
     clearPending();
+  }
+
+  //! \brief Constructor: number of elements of the container.
+  PendingData(size_t nb_elt)
+  {
+    clearPending(nb_elt);
   }
 
   //! \brief Pure virtual destructor, but with a definition. The class
@@ -66,8 +72,23 @@ public:
     }
     else
     {
-      pos_start = 0;
-      pos_end = 0;
+      pos_start = 0_z;
+      pos_end = 0_z;
+    }
+  }
+
+  //! \brief Return the smallest contiguous area that needs to be
+  //! uploaded. If there is no pending data, pos_start will be set to
+  //! -1. You can call hasPendingData() before this method.
+  std::pair<size_t, size_t> getPendingData() const
+  {
+    if (hasPendingData())
+    {
+      return std::make_pair(m_pending_start, m_pending_end);
+    }
+    else
+    {
+      return std::make_pair(0_z, 0_z);
     }
   }
 
@@ -76,6 +97,20 @@ public:
   {
     m_pending_start = c_initial_position;
     m_pending_end = c_initial_position;
+  }
+
+  void clearPending(size_t nb_elt)
+  {
+    if (0_z == nb_elt)
+    {
+      m_pending_start = c_initial_position;
+      m_pending_end = c_initial_position;
+    }
+    else
+    {
+      m_pending_start = 0_z;
+      m_pending_end = nb_elt - 1_z;
+    }
   }
 
   //! \brief Update the range indexes of changed elements with a new range.

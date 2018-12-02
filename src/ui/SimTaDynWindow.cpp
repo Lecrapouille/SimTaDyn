@@ -50,8 +50,8 @@ SimTaDynWindow::SimTaDynWindow()
     m_drawing_area.set_auto_render(true);
 
     // Connect drawing area signals
-    m_drawing_area.signal_realize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRealize));
-    m_drawing_area.signal_unrealize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onUnrealize), false);
+    m_drawing_area.signal_realize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onCreate));
+    m_drawing_area.signal_unrealize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRelease), false);
     m_drawing_area.signal_render().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRender));
   }
 

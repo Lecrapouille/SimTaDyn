@@ -22,9 +22,139 @@
 #include "MapEditor.hpp"
 #include <exception>
 
-// *************************************************************************************************
-//
-// *************************************************************************************************
+//------------------------------------------------------------------
+GLDrawingArea::GLDrawingArea()
+  : Gtk::GLArea(),
+    GLRenderer()
+{
+  // OpenGL core is mandatory
+  setCoreVersion();
+
+  // Filter GTK+ events
+  add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK |
+             Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
+
+  // Reset keyboard states every 10 ms
+  Glib::signal_timeout().connect(
+      sigc::mem_fun(*this, &GLDrawingArea::onRefreshKeyboard), m_timeout_ms);
+
+  // Use the mouse scroll event
+  signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
+}
+
+//------------------------------------------------------------------
+GLDrawingArea::~GLDrawingArea()
+{
+}
+
+//------------------------------------------------------------------
+void GLDrawingArea::createOpenGLContext()
+{
+  LOGI("Starting OpenGL context");
+
+  glewExperimental = true;
+  GLenum err = glewInit();
+  if (err != GLEW_OK)
+    {
+      const GLubyte* msg = glewGetErrorString(err);
+      const char *m = reinterpret_cast<const char*>(msg);
+      throw Gdk::GLError(Gdk::GLError::NOT_AVAILABLE, Glib::ustring(m));
+    }
+  opengl::hasCreatedContext() = true;
+  LOGI("OpenGL context created with success");
+}
+
+//------------------------------------------------------------------
+void GLDrawingArea::onCreate()
+{
+  Gtk::GLArea::make_current();
+  try
+    {
+      createOpenGLContext();
+      Gtk::GLArea::throw_if_error();
+
+      if (false == GLRenderer::setupGraphics())
+        {
+          LOGES("During the setup of SimTaDyn graphic renderer");
+        }
+    }
+  catch (const Gdk::GLError& gle)
+    {
+      std::cerr << "An error occured making the context current during unrealize" << std::endl;
+      std::cerr << gle.domain() << "-" << static_cast<unsigned>(gle.code()) << "-" << gle.what() << std::endl;
+      opengl::hasCreatedContext() = false;
+    }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the realize callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+      opengl::hasCreatedContext() = false;
+    }
+}
+
+//------------------------------------------------------------------
+void GLDrawingArea::onRelease()
+{
+  if (false == opengl::hasCreatedContext())
+    return ;
+
+  Gtk::GLArea::make_current();
+  try
+    {
+      Gtk::GLArea::throw_if_error();
+    }
+  catch (const Gdk::GLError& gle)
+    {
+      std::cerr << "An error occured making the context current during unrealize" << std::endl;
+      std::cerr << gle.domain() << "-" << static_cast<unsigned>(gle.code()) << "-" << gle.what() << std::endl;
+    }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+    }
+}
+
+//------------------------------------------------------------------
+bool GLDrawingArea::onRender()
+{
+  if (false == opengl::hasCreatedContext())
+    {
+      LOGD("perdu");
+      return false;
+    }
+
+  try
+    {
+      Gtk::GLArea::throw_if_error();
+
+      GLRenderer::clearScreen();
+      if (GLRenderer::Mode2D == GLRenderer::renderMode())
+        {
+          GLRenderer::draw2D();
+        }
+      else
+        {
+          GLRenderer::draw3D();
+        }
+    }
+  catch (const Gdk::GLError& gle)
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << gle.domain() << "-" << static_cast<unsigned>(gle.code()) << "-" << gle.what() << std::endl;
+      return false;
+    }
+  catch (const OpenGLException& e)
+    {
+      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
+      std::cerr << e.what() << " - " << e.message() << std::endl;
+      return false;
+    }
+
+  return true;
+}
+
+//------------------------------------------------------------------
 bool GLDrawingArea::on_button_press_event(GdkEventButton* event)
 {
   if (event->type == GDK_BUTTON_PRESS)
@@ -49,8 +179,8 @@ bool GLDrawingArea::on_button_press_event(GdkEventButton* event)
   return true;
 }
 
-// FIXME: plutot MapEditor::keyboard() ?
-bool GLDrawingArea::keyboard()
+//------------------------------------------------------------------
+bool GLDrawingArea::onRefreshKeyboard()
 {
   /*Camera2D& camera = GLRenderer::camera2D();
 
@@ -84,88 +214,10 @@ bool GLDrawingArea::keyboard()
   return true;
 }
 
+//------------------------------------------------------------------
 bool GLDrawingArea::onScrollEvent(GdkEventScroll *event)
 {
   //GLRenderer::camera2D().zoomAt(event->x, event->y, event->delta_y);
   //GLRenderer::applyViewport();
-  return true;
-}
-
-void GLDrawingArea::onRealize()
-{
-#if ARCHI == OSX
-  // FIXME: sorry OpenGL quartz is not implemented by GTK team
-  m_success_init = false;
-  return ;
-#endif
-
-  Gtk::GLArea::make_current();
-  SimTaDyn::glStartContext();
-  Gtk::GLArea::throw_if_error();
-  try
-    {
-      m_success_init = GLRenderer::setupGraphics();
-    }
-  catch (const OpenGLException& e)
-    {
-      std::cerr << "An error occurred in the realize callback of the GLArea" << std::endl;
-      std::cerr << e.what() << " - " << e.message() << std::endl;
-      m_success_init = false;
-    }
-  if (false == m_success_init)
-    {
-      LOGES("During the setup of SimTaDyn graphic renderer");
-    }
-}
-
-void GLDrawingArea::onUnrealize()
-{
-  if (false == m_success_init)
-    return ;
-
-  Gtk::GLArea::make_current();
-  try
-    {
-      Gtk::GLArea::throw_if_error();
-    }
-  catch (const Gdk::GLError& gle)
-    {
-      std::cerr << "[FAILED] An error occured making the context current during unrealize" << std::endl;
-      std::cerr << gle.domain() << "-" << static_cast<unsigned>(gle.code()) << "-" << gle.what() << std::endl;
-    }
-  catch (const OpenGLException& e)
-    {
-      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
-      std::cerr << e.what() << " - " << e.message() << std::endl;
-    }
-}
-
-bool GLDrawingArea::onRender()
-{
-  if (false == m_success_init)
-    return false;
-
-  try
-    {
-      Gtk::GLArea::throw_if_error();
-
-      if (SimTaDyn::glIsFunctional() && m_success_init /*&& GLRenderer::needRefresh()*/)
-        {
-          GLRenderer::draw();
-        }
-    }
-  catch (const Gdk::GLError& gle)
-    {
-      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
-      std::cerr << gle.domain() << "-" << static_cast<unsigned>(gle.code()) << "-" << gle.what() << std::endl;
-      return false;
-    }
-  catch (const OpenGLException& e)
-    {
-      std::cerr << "An error occurred in the render callback of the GLArea" << std::endl;
-      std::cerr << e.what() << " - " << e.message() << std::endl;
-      return false;
-    }
-
   return true;
 }

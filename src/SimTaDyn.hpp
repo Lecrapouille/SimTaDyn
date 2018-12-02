@@ -60,6 +60,7 @@ public:
   ~SimTaDynContext()
   {
     LOGI("Leaving SimTaDynContext: releasing the memory");
+    m_window.reset();
     ForthEditor::destroy();
     MapEditor::destroy();
     SimForth::destroy();

@@ -43,17 +43,15 @@ OBJ_EXTERNAL   = backward.o
 else
 OBJ_EXTERNAL   =
 endif
-OBJ_UTILS    = Exception.o PendingData.o ILogger.o Logger.o
-OBJ_OPENGL   = OpenGLException.o OpenGL.o GLObject.o GLShader.o         \
-               GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o \
-               GLWindow.o GLImGUI.o
+OBJ_UTILS    = Exception.o File.o GLException.o PendingData.o ILogger.o Logger.o
+OBJ_OPENGL   = OpenGL.o GLWindow.o
 IMGUI        = imgui_draw.o imgui_widgets.o imgui.o imgui_impl_glfw.o imgui_impl_opengl3.o
 OBJ          = $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) $(IMGUI) \
-               Example01.o Example02.o Example03.o Example04.o Example05.o Example06.o main.o
+               Example01.o Example02.o main.o
 
 ###################################################
 # Compilation options.
-CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################

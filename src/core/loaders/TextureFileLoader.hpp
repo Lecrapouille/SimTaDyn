@@ -22,7 +22,7 @@
 #  define TEXTURE_FILE_LOADER_HPP_
 
 #  include "ILoader.tpp"
-#  include "GLTextures.hpp"
+#  include "OpenGL.hpp"
 #  include "ResourceManager.tpp"
 
 using GLTexture2DPtr = std::shared_ptr<GLTexture2D>;

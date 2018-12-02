@@ -28,7 +28,6 @@
 // *************************************************************************************************
 
 #  include "Vector.tpp"
-#  include "Polynom.hpp"
 
 namespace matrix
 {
@@ -649,8 +648,8 @@ inline std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m
   for (size_t i = 0_z; i < rows; ++i)
     {
       for (size_t j = 0_z; j < cols; ++j)
-        std::cout << m[i][j] << " ";
-      std::cout << std::endl;
+        os << m[i][j] << " ";
+      os << std::endl;
     }
   return os;
 }
