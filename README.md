@@ -12,23 +12,23 @@
 SimTaDyn is a proof of concept project for a geographic information
 system (GIS) allowing to draw geographic maps and manipulate them like
 a spreadsheet. The goal is to design dynamical geographic simulations.
-Please, read this [introduction](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.md)
+Please, read this [introduction](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/SimTaDyn.md)
 to understand better the idea of this project.
 
-![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.jpg)
+![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/SimTaDyn.jpg)
 *This screenshot comes from the legacy version of SimTaDyn*
 
 ##### Table of contents:
 
-* [Introduction to SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/SimTaDyn.md)
-* [Compile and install SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Install.md)
-* [SimTaDyn known bugs](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md)
-* [Report bugs](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Bugs.md)
-* [SimTaDyn GUI shortcuts](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Shortcuts.md)
-* [SimTaDyn Forth scripting](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/forth/doc/forth.md)
-* [Forth standalone](https://github.com/Lecrapouille/SimTaDyn/blob/master/src/forth/doc/standalone.md)
-* [SimTaDyn architecture for developpers](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Architecture.md)
-* [Credits](https://github.com/Lecrapouille/SimTaDyn/blob/master/doc/Credits.md)
+* [Introduction to SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/SimTaDyn.md)
+* [SimTaDyn code architecture](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/Architecture.md)
+* [Compile and install SimTaDyn](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/Install.md)
+* [SimTaDyn known bugs](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/Bugs.md)
+* [Report bugs](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/Bugs.md)
+* [SimTaDyn GUI shortcuts](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/Shortcuts.md)
+* [SimTaDyn Forth scripting](https://github.com/Lecrapouille/SimTaDyn/blob/development/src/forth/doc/forth.md)
+* [Forth standalone](https://github.com/Lecrapouille/SimTaDyn/blob/development/src/forth/doc/standalone.md)
+* [Credits](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/Credits.md)
 
 ##### Note concerning git branches
 

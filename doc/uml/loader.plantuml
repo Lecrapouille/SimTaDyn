@@ -1,7 +1,6 @@
 @startuml
 
-class "Resource<uniqueID>" as Resource
-class Resource {
+class Resource<uniqueID> {
 -friend: ResourceManager
 -id: uniqueID
 -owners: int
@@ -13,64 +12,59 @@ class Resource {
 }
 
 class ResourceManager {
--Resource[]
--add(resource: Resource)
--acquire(id: uniqueID) : Resource*
--dispose(id: uniqueID)
+-resources: Resource[]
++create_and_insert(insertion: Strategy): Resource
++acquire(id: uniqueID) : Resource
++dispose(id: uniqueID)
+-insert(resource: Resource)
 }
 
-ResourceManager --> "*" Resource
+ResourceManager --> "*" Resource: resources
 
-class "ILoader<Resource>" as ILoader
-class ILoader {
-+{abstract} loadFromFile(filename: String) : Resource
-+{abstract} saveToFile(filename: String, resource: Resource)
+class ILoader<Resource> {
++{abstract} loadFromFile(filename: String, resource: Resource)
++{abstract} saveToFile(resource: Resource, filename: String)
 }
 
-class "LoaderManager<Resource1, Resource2, ..., ResourceN>" as LoaderManager
-class LoaderManager {
--Loader<Resource1>[]
--Loader<Resource2>[]
--Loader<ResourceN>[]
+class LoaderManager<Resource1, Resource2, ..., ResourceN> {
+-map<fileExtension, ILoader<Resource1>>
+-map<fileExtension, ILoader<Resource2>>
+-map<fileExtension, ILoader<ResourceN>>
 +registerLoader(loader: ILoader<Resource>, fileExtension: String)
-+loadFromFile(filename: String) : Resource
-+saveToFile(filename: String, resource: Resource)
++loadFromFile(filename: String, resource: Resource)
++saveToFile(resource: Resource, filename: String)
 +hasLoader(fileExtension: String) : bool
 }
 
-class "ShapeFileLoader<Resource=SimTaDynGraph>" as ShapeFileLoader
-class ShapeFileLoader {
-+loadFromFile(filename: String) : ShapeFileLoader
-+saveToFile(filename: String, resource: ShapeFileLoader)
+class ShapeFileLoader<Resource1=SimTaDynSheet> {
++loadFromFile(resource: SimTaDynSheet, filename: String)
++saveToFile(filename: String, resource: SimTaDynSheet)
 }
 
-class "SimTaDynFileLoader<Resource=SimTaDynMap>" as SimTaDynFileLoader
-class SimTaDynFileLoader {
-+loadFromFile(filename: String) : SimTaDynFileLoader
-+saveToFile(filename: String, resource: SimTaDynFileLoader)
+class SimTaDynFileLoader<Resource2=SimTaDynMap> {
++loadFromFile(resource: SimTaDynMap, filename: String)
++saveToFile(filename: String, resource: SimTaDynMap)
 }
 
-class "TextureFileLoader<Resource=GLTexture>" as TextureFileLoader
-class TextureFileLoader {
-+loadFromFile(filename: String) : TextureFileLoader
-+saveToFile(filename: String, resource: TextureFileLoader)
+class TextureFileLoader<Resource3=GLTexture> {
++loadFromFile(resource: GLTexture, filename: String)
++saveToFile(filename: String, resource: GLTexture)
 }
 
-class "ForthFileLoader<Resource=ForthFile>" as ForthFileLoader
-class ForthFileLoader {
-+loadFromFile(filename: String) : ForthFileLoader
-+saveToFile(filename: String, resource: ForthFileLoader)
+class ForthFileLoader<Resource4=ForthFile> {
++loadFromFile(resource: ForthFile, filename: String)
++saveToFile(filename: String, resource: ForthFile)
 }
 
-LoaderManager --> "*" ILoader
-ILoader .> Resource
-ILoader <|-- ShapeFileLoader
+LoaderManager --> "*" ILoader: map
+ILoader .> Resource: load/save
 ILoader <|-- SimTaDynFileLoader
+ILoader <|-- ShapeFileLoader
 ILoader <|-- TextureFileLoader
 ILoader <|-- ForthFileLoader
 
-Resource <|-- SimTaDynGraph
 Resource <|-- SimTaDynMap
+Resource <|-- SimTaDynSheet
 Resource <|-- GLTexture
 Resource <|-- ForthFile
 
