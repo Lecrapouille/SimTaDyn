@@ -47,7 +47,7 @@ OBJ_UTILS    = Exception.o File.o GLException.o PendingData.o ILogger.o Logger.o
 OBJ_OPENGL   = OpenGL.o GLWindow.o
 IMGUI        = imgui_draw.o imgui_widgets.o imgui.o imgui_impl_glfw.o imgui_impl_opengl3.o
 OBJ          = $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) $(IMGUI) \
-               Example01.o Example02.o main.o
+               Example01.o Example02.o Example03.o main.o
 
 ###################################################
 # Compilation options.

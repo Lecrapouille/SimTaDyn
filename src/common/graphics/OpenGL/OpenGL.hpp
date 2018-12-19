@@ -21,8 +21,6 @@
 #ifndef OPENGL_HPP
 #  define OPENGL_HPP
 
-#  include <GL/glew.h>
-#  include <GLFW/glfw3.h>
 #  include <cstdint>
 
 namespace opengl
@@ -47,15 +45,10 @@ namespace opengl
 
 } // namespace opengl
 
-#  include "GLException.hpp"
-#  include "GLVAO.hpp"
-#  include "GLVBO.tpp"
-#  include "GLTextures.hpp"
-#  include "GLLocation.tpp"
-#  include "GLShaders.hpp"
-#  include "GLProgram.hpp"
 #  include "GLImGUI.hpp"
-#  include "GLWindow.hpp"
+#  include "GLVAO.hpp"
+#  include "GLTextures.hpp"
+#  include "GLProgram.hpp"
 
 template<class T>
 inline void glBegin(T& obj)

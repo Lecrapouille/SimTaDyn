@@ -30,7 +30,6 @@
 //! \brief This file contains the class managing OpenGL shaders :
 //! read, compile, load into the GPU.
 
-#  include "NonCppStd.hpp"
 #  include "GLShaders.hpp"
 #  include "GLLocation.tpp"
 #  include <map>
@@ -280,13 +279,13 @@ public:
   template<class T>
   inline PendingContainer<T>& attribute(const char *name)
   {
-    return getVBO<T>(name).m_container;
+    return getVBO<T>(name);
   }
 
   template<class T>
   inline const PendingContainer<T>& attribute(const char *name) const
   {
-    return getVBO<T>(name).m_container;
+    return getVBO<T>(name);
   }
 
   //------------------------------------------------------------------
@@ -395,9 +394,10 @@ public:
   //! \brief Render primitives from their indices
   //------------------------------------------------------------------
   template<class T>
-  void draw(GLenum mode, GLIndexBuffer<T> const& index) // FIXME: wrapper mode pour eviter des modes non desires
+  void draw(GLenum mode, GLIndexBuffer<T> /*const*/& index) // FIXME
   {
-    LOGD("Prog::drawIndex");
+    LOGD("Prog::drawIndex %d elements", index.size());
+
     throw_if_not_compiled();
     throw_if_not_vao_binded();
     throw_if_inconsitency_attrib_sizes();
@@ -422,6 +422,16 @@ public:
     }*/
 
   //------------------------------------------------------------------
+  //! \brief Choose if the usage of coming VBO created will be
+  //! GL_DYNAMIC_DRAW or GL_STATIC_DRAW or GL_STREAM_DRAW. If this
+  //! method is not called default usage will be GL_DYNAMIC_DRAW
+  //------------------------------------------------------------------
+  void setBufferUsage(BufferUsage const usage)
+  {
+    m_usage = usage;
+  }
+
+  //------------------------------------------------------------------
   //! \brief Create the VAO which will contain the list of VBOs. The
   //! list of VBOs is created in accordance of the list of attributes.
   //------------------------------------------------------------------
@@ -436,16 +446,16 @@ public:
         switch (it.second->dim())
           {
           case 1:
-            vao.createVBO<float>(name);
+            vao.createVBO<float>(name, m_usage);
             break;
           case 2:
-            vao.createVBO<Vector2f>(name);
+            vao.createVBO<Vector2f>(name, m_usage);
             break;
           case 3:
-            vao.createVBO<Vector3f>(name);
+            vao.createVBO<Vector3f>(name, m_usage);
             break;
           case 4:
-            vao.createVBO<Vector4f>(name);
+            vao.createVBO<Vector4f>(name, m_usage);
             break;
           }
       }
@@ -733,15 +743,15 @@ private:
 
     if (unlikely(nullptr == name))
       {
-        throw std::invalid_argument("nullptr passed to getUniform");
+        throw OpenGLException("nullptr passed to getUniform");
       }
 
     if (unlikely(false == hasUniform(name)))
       {
         // TODO: create the variable: call addNewUniform
         // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
-        throw std::out_of_range("GLUniform '" + std::string(name) +
-                                "' does not exist");
+        throw OpenGLException("GLUniform '" + std::string(name) +
+                              "' does not exist");
       }
 
     auto ptr = m_uniforms[name].get();
@@ -819,6 +829,7 @@ private:
   std::string            m_error_msg;
   uint32_t               m_textures_count = 0u;
   bool                   m_compiled = false;
+  BufferUsage            m_usage = BufferUsage::DYNAMIC_DRAW;
 };
 
 #endif /* GLPROGRAM_HPP_ */

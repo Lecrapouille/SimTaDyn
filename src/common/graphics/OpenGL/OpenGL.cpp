@@ -20,14 +20,6 @@
 
 #include "OpenGL.hpp"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#include <gtkmm/glarea.h>
-#include <GL/glew.h>
-#pragma GCC diagnostic pop
-
 namespace opengl
 {
   //! \return true if the OpenGL context has been created

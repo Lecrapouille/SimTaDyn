@@ -155,8 +155,8 @@ bool GLRenderer::setupGraphics()
     };
 
   // Texture
-  m_prog.uniform<GLTexture2D>("u_texture").interpolation(GL_LINEAR);
-  m_prog.uniform<GLTexture2D>("u_texture").wrapping(GL_CLAMP_TO_EDGE);
+  m_prog.uniform<GLTexture2D>("u_texture").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_prog.uniform<GLTexture2D>("u_texture").wrapping(TextureWrap::CLAMP_TO_EDGE);
   if (false == m_prog.uniform<GLTexture2D>("u_texture").load(PathManager::instance().expand("textures/wooden-crate.jpg")))
     return false;
 
