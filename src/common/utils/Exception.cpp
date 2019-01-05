@@ -14,14 +14,14 @@ Exception::Exception(int code)
   : m_pNested(0), m_code(code)
 {
   // FIXME: passer en param par default __LINE__ et __FILE__ pour logger d'ou vient l'exception
-  LOGE("Exception %u", code);
+  LOGX("Exception %u", code);
 }
 
 
 Exception::Exception(const std::string& msg, int code)
   : m_msg(msg), m_pNested(0), m_code(code)
 {
-  LOGE("Exception %u '%s'", code, msg.c_str());
+  LOGX("Exception %u '%s'", code, msg.c_str());
 }
 
 
@@ -33,7 +33,7 @@ Exception::Exception(const std::string& msg, const std::string& arg, int code)
       m_msg.append(": ");
       m_msg.append(arg);
     }
-  LOGE("Exception %u '%s'", code, m_msg.c_str());
+  LOGX("Exception %u '%s'", code, m_msg.c_str());
 }
 
 

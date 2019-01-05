@@ -23,13 +23,16 @@
 
 static const char *c_str_severity[logger::MaxLoggerSeverity + 1] =
   {
-    [logger::None] = "",
-    [logger::Info] = "[INFO]",
-    [logger::Debug] = "[DEBUG]",
-    [logger::Warning] = "[WARNING]",
-    [logger::Failed] = "[FAILURE]",
-    [logger::Error] = "[ERROR]",
-    [logger::Fatal] = "[FATAL]"
+    [logger::None]      = "",
+    [logger::Info]      = "[INFO]",
+    [logger::Debug]     = "[DEBUG]",
+    [logger::Warning]   = "[WARNING]",
+    [logger::Failed]    = "[FAILURE]",
+    [logger::Error]     = "[ERROR]",
+    [logger::Signal]    = "[SIGNAL]",
+    [logger::Exception] = "[THROW]",
+    [logger::Catch]     = "[CATCH]",
+    [logger::Fatal]     = "[FATAL]"
   };
 
 Logger::Logger(std::string const& filename)

@@ -31,7 +31,7 @@
 
 namespace logger
 {
-  enum LoggerSeverity { None, Info, Debug, Warning, Failed, Error, Fatal, MaxLoggerSeverity = Fatal };
+  enum LoggerSeverity { None, Info, Debug, Warning, Failed, Error, Signal, Exception, Catch, Fatal, MaxLoggerSeverity = Fatal };
 }
 
 // **************************************************************
