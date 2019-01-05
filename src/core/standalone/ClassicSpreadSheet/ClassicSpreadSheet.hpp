@@ -44,6 +44,12 @@ public:
     return m_name;
   }
 
+  inline virtual void reset() override
+   {
+     m_cellMatrix.clear();
+     resetCellIterator();
+   }
+
   virtual ASpreadSheetCell *isACell(std::string const& word) override;
   bool readInput(std::string const filename);
   void displayResult();

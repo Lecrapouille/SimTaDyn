@@ -20,9 +20,27 @@
 
 #include "ClassicSpreadSheet.hpp"
 #include "PathManager.hpp"
+#include <cstdlib>
 
-int main()
+static void usage(const char* prog_name)
 {
+  std::cout << prog_name << ": <sheet id>" << std::endl;
+  std::cout << "  with <sheet id> an integer >= 1 and <= 5" << std::endl;
+  exit(1);
+}
+
+int main(int argc, char* argv[])
+{
+  // Incorrect number of param
+  if (argc != 2)
+    usage(argv[0]);
+
+  // Incorrect sheet indentifier
+  std::string arg(argv[1]);
+  int test_id = atoi(argv[1]);
+  if ((test_id < 1) || (test_id > 5))
+    usage(argv[0]);
+
   // Call it before Logger constructor
   if (!File::mkdir(config::tmp_path))
     {
@@ -33,10 +51,12 @@ int main()
   PathManager::instance();
 
   SimForth& forth = SimForth::instance();
-  ClassicSpreadSheet sheet("Sheet1");
+  ClassicSpreadSheet sheet("Sheet" + arg);
 
   forth.boot();
-  if (!sheet.readInput("examples/input2.txt"))
+  std::string sheet_name("examples/input" + arg + ".txt");
+  std::cout << "Solving the sheet: " << sheet_name << std::endl;
+  if (!sheet.readInput(sheet_name))
     {
       std::cerr << "Abort" << std::endl;
     }

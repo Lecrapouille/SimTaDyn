@@ -33,7 +33,7 @@ namespace simtadyn
   enum GeneralMenuNames { HelpMenu, MaxGeneralMenuNames = HelpMenu };
   //! \brief Notebook tab names for the Forth editor (text editor):
   //! results of Forth script, history of old forth commands, Forth dictionary, Simtadyn errors.
-  enum ForthTabNames { ForthResTab, ForthHistoryTab, ForthDicoTab, ForthMsgTab, MaxForthTabNames = ForthMsgTab };
+  enum ForthTabNames { ForthResTab, ForthHistoryTab, ForthDicoTab, ForthStackTab, ForthMsgTab, Max_ };
 }
 
 #endif

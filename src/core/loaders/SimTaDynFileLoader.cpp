@@ -55,31 +55,23 @@ void SimTaDynFileLoader::unzip(std::string const &zip_file)
 }
 
 // TODO: si on met a jour une carte et que ca bug au chargement on a corrompu l'ancienne carte.
-void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMapPtr& current_project)
+void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap& map)
 {
-  //SimTaDynMapPtr current_project = SimTaDynMapManager::instance().acquire(filename);
-  bool dummy_project = (nullptr == current_project); // A supprimer: dans MapEditor on creer avant la carte
-
+  bool dummy_project = false; // FIXME
   LOGI("Loading the SimTaDynMap '%s' in an %s", filename.c_str(),
        (dummy_project ? "dummy map" : "already opened map"));
 
   unzip(filename);
-  if (dummy_project)
-    {
-      current_project = SimTaDynMapManager::instance().create(filename);
-      if (nullptr == current_project)
-        {
-          LoaderException e("nullptr");
-          throw e;
-        }
-    }
 
-  current_project->m_name = File::baseName(filename);
-  current_project->m_zip_path = filename;
-  current_project->m_full_path = config::tmp_path + current_project->m_name;
+  map.m_name = File::baseName(filename);
+  map.m_zip_path = filename;
+  map.m_full_path = config::tmp_path + map.m_name + '/';
 
+  // TODO
   SimForth &forth = SimForth::instance();
-  const auto& res = forth.interpreteFile(current_project->m_full_path + "/Index.fth");
+  forth.pushPath(map.m_full_path);
+  const auto& res = forth.interpreteFile(map.m_full_path + "/Index.fth");
+  forth.popPath();
   forth.ok(res);
   if (false == res.first)
     {
@@ -89,26 +81,26 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMapPt
 }
 
 // FIXME password
-bool SimTaDynFileLoader::zip(SimTaDynMapPtr const map, std::string const& filename)
+bool SimTaDynFileLoader::zip(SimTaDynMap const& map, std::string const& filename)
 {
-  if (filename == map->m_zip_path)
+  if (filename == map.m_zip_path)
     {
       // FIXME pas le plus safe si zipper.add echoue
       std::remove(filename.c_str());
     }
 
   zipper::Zipper zipper(filename);
-  bool ret = zipper.add(map->m_full_path);
+  bool ret = zipper.add(map.m_full_path);
     if (false == ret)
     {
       // FIXME: on a perdu filename
-      LOGE("Failed zipping the dir '%s'", map->m_full_path.c_str());
+      LOGE("Failed zipping the dir '%s'", map.m_full_path.c_str());
     }
 
   return ret;
 }
 
-void SimTaDynFileLoader::saveToFile(SimTaDynMapPtr const map, std::string const& filename)
+void SimTaDynFileLoader::saveToFile(SimTaDynMap const& map, std::string const& filename)
 {
   if (false == zip(map, filename))
     {

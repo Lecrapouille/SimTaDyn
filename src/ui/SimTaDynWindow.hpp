@@ -23,7 +23,7 @@
 
 #  include "ForthEditor.hpp"
 #  include "MapEditor.hpp"
-#  include "PackageExplorer.hpp"
+#  include "SimTaDynMapExplorer.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -51,6 +51,7 @@ protected:
   {
     return m_drawing_area.onRender();
   }
+
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
@@ -69,13 +70,19 @@ protected:
   Gtk::MenuItem                m_menuitem[simtadyn::MaxMapMenuNames +
                                           simtadyn::MaxForthMenuNames +
                                           simtadyn::MaxGeneralMenuNames + 1];
+
+  Gtk::ImageMenuItem           m_submenu[1];
+  Gtk::Image                   m_image[1];
+
   std::vector<Gtk::ToolButton> m_toolbuttons; // FIXME resize
+
+  Gtk::AboutDialog             m_about;
+  SimTaDynMapExplorer          m_map_explorer;
   GLDrawingArea                m_drawing_area;
   FindWindow                  *m_findwin = nullptr;
   ReplaceWindow               *m_replacewin = nullptr;
   GotoLineWindow              *m_gotolinewindow = nullptr; // FIXME nom:  ajouter des _
-  SceneGraphWindow            *m_scene_graph_window = nullptr;
-  PackageExplorer              m_package_explorer;
+  // SceneNodeEditor             *m_node_editor = nullptr;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

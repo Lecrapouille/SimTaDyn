@@ -49,15 +49,15 @@ OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
 OBJ_MANAGERS   =
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
-OBJ_OPENGL     = Color.o Camera2D.o GLException.o OpenGL.o Renderer.o
+OBJ_OPENGL     = Color.o Camera2D.o GLException.o OpenGL.o NodesRenderer.o Renderer.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
-OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
-OBJ_LOADERS    = LoaderException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDynFileLoader.o
+OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynForthPrimitives.o SimTaDynSheet.o SimTaDynMap.o
+OBJ_LOADERS    = ManagerException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDynFileLoader.o
 # TextureFileLoader.o
 # SimTaDynFile.o
-OBJ_GUI        = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
-OBJ_GUI       += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
+OBJ_GUI        = DialogException.o Redirection.o SimTaDynMapExplorer.o TextEditor.o ForthEditor.o
+OBJ_GUI       += ForthInspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_SIMTADYN   = SimTaDyn.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \

@@ -21,17 +21,16 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
-#  include "Color.hpp"
-#  include "OpenGL.hpp"
-//#  include "Camera2D.hpp"
-#  include "Movable.tpp"
-#  include "SimTaDynMap.hpp"
-
+#  include "SimTaDynSheet.hpp"
+#  include "NodesRenderer.hpp"
+//#  include "ArcsRenderer.hpp"
+//#  include "ZonesRenderer.hpp"
 
 // *************************************************************************************************
 //! \brief OpenGL renderer
 // *************************************************************************************************
 class GLRenderer
+  : public ISceneGraphRenderer<SimTaDynSheet, float, 3u>
 {
 public:
 
@@ -43,10 +42,8 @@ public:
   //! OpenGL can be not yet initialized.
   //------------------------------------------------------------------
   GLRenderer()
-    : m_vao("VAO"),
-      m_prog("prog"),
-      m_bg_color(0.0f, 0.0f, 0.4f, 1.0f),
-      m_mode(GLRenderer::Mode3D)
+    : m_bg_color(0.0f, 0.0f, 0.4f, 1.0f),
+      m_mode(GLRenderer::Mode2D)
   {
   }
 
@@ -104,7 +101,10 @@ public:
   //------------------------------------------------------------------
   virtual uint32_t screenHeight() const = 0;
 
-  void drawMap(SimTaDynMapPtr map);
+  //------------------------------------------------------------------
+  //! \brief Draw a SimTaDyn spreadsheet
+  //------------------------------------------------------------------
+  virtual void drawSceneNode(SimTaDynSheet& sheet, Matrix44f const& transformation) override;
 
 private:
 
@@ -139,8 +139,9 @@ protected:
   //! class triggered by the GTK event onRender().
   //! \throw OpenGLException if OpenGL Wrapper detects a failure.
   //------------------------------------------------------------------
-  void draw2D();
-  void draw3D();
+  void draw();
+  //void draw2D();
+  //void draw3D();
 
   //------------------------------------------------------------------
   //! \brief Set OpenGL core version needed by GTK+.
@@ -149,13 +150,11 @@ protected:
 
 private:
 
-  GLVertexShader     vs;
-  GLFragmentShader   fs;
-  GLVAO              m_vao;
-  GLProgram          m_prog;
-  Movable<float, 3U> m_movable;
   Color              m_bg_color;
   RenderMode         m_mode;
+  NodesRenderer       m_nodes_renderer;
+  //ArcsRenderer       m_arcs_renderer;
+  //ZonesRenderer       m_zones_renderer;
 };
 
 #endif /* RENDERER_HPP_ */

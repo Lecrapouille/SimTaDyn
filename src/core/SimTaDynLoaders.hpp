@@ -30,16 +30,15 @@ using namespace Yes;
 //! and saved in files.
 // *************************************************************************************************
 
-#  include "SimTaDynMap.hpp"
-//#  include "GLTextures.hpp"
+class SimTaDynMap;
+class SimTaDynSheet;
+class GLTexture2D;
 
 // *************************************************************************************************
 //! Define the list of resource that will be used by the ResourceManager and LoaderManagers.
 // *************************************************************************************************
 
-typedef TYPELIST_2(SimTaDynMap,
-                   SimTaDynSheet) ResourceList;
-//FIXME GLTexture2D) ResourceList;
+typedef TYPELIST_2(SimTaDynMap, SimTaDynSheet /* GLTexture2D */) ResourceList;
 
 // *************************************************************************************************
 //!

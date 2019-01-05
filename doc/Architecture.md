@@ -105,94 +105,54 @@ will be explained later in this document.
 
 ## Extended graph structure as a spreadsheet
 
-A classic graph, as explained in graph theory literature, contains
-nodes (aka vertices) and arcs (aka edges). It exists several
-structures for representing a graph and storing nodes and arcs with
-their relations: adjacency list, full matrix, sparse matrix ... All
-have advantages and drawbacks. In SimTaDyn, we have decided to define
-the graph structure with adjacency lists and relations "has borders"
-and "has neighbors" (the expression "has neighbors" is equivalent to
-"is a border of"). Here, a node knows a list of arcs as "neighbors"
-and a link has two nodes as "border". Explanations comes with the
-graph extension explained below.
-
-With a graph, we usually desired to traverse it. This is the aim of
-the class named GraphAlgorithm. This class is decomposed with virtual
-methods for visiting step by step a graph with standard algorithms
-like [depth-first
-search](https://en.wikipedia.org/wiki/Depth-first_search) or
-breadth-first search, and get visited nodes at each step. This will
-help us to visit cells of our spreadsheet like described in other part
-of this document.
-
-The following figure show classes used for implementing a graph and its traversal:
+A classic graph contains nodes (aka vertices) and arcs (aka edges).
+In the graph theory literature many structures are described for
+storing nodes and arcs (adjacency list, matrix, sparse matrix) but in
+SimTaDyn, we have decided to define the graph structure with relations
+"has borders" and "has neighbors" (the expression "has neighbors" is
+equivalent to "is a border of"). The following figure summarizes it:
 
 ![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/uml/graph.png)
 
-A SimTaDyn graph is a particular graph:
-* it extends a classic graph with an additional graph element: `2D
-  zones` (aka areas for GIS, or the rectangular pavement in
-  spreadsheets) which are polygons delimited by arcs. In this document
-  the 2D dimension will be implicit.
-* it extends relations between graph elements with "has borders" and
-  "has neighbors".
-
-Here are direct relations (directly implemented as "arrays"-like inside classes):
-* A node is a border of an arc.
-* An arc is a border of a zone.
-* A zone has N borders: N arcs. Said differently: A node knows arcs as neighbors.
-* A arc has two borders: two nodes. Said differently: An arc knows zones as neighbors.
-* A node has no border.
-* A zone has no neighbors.
-
-|      | Borders | Neighbors |
-|------|---------|-----------|
-| Node |    -    |    Arc    |
-| Arc  |   Node  |    Zone   |
-| Zone |   Arc   |     -     |
-
-The idea that "zones has no neighbors", seems weird (after contigous
-tiles have tiles as neighbors) but here the explanation: it is let
-empty for future extension. While not implemented in SimTaDyn, this
-idea of relationship can be extended to other dimensions :
-* A 2D zone is a border of 3D zone.
-* A 3D zone is a border of 4D zone ... etc, etc.
-* A 2D zone has a set of 3D zones as neigbors.
-
-With these basic relationships, we can construct other relations:
-* A node knows indirectly next nodes and zones as neighbors because of
-  arcs.
-* A zone can knows its nodes by iterations on borders of its
-  arcs.
-
-Here is the table for summarize (N if for neighbors and B for borders
-and . is the function composition):
-
-|      | Node | Arc | Zone |
-|:----:|:----:|:---:|:----:|
-| Node |  B.N |  N  |  N.N |
-|  Arc |   B  | N.B |   N  |
-| Zone |  B.B |  B  |  N.B |
-
-We finally get our zones-zones neighboring relation back while
-consuming a little more CPU for an O(n^2) algorithm but the result can
-easily be set in cache.
-
-We use inheritance to make a ForthNode a graph node to be used as a
-spreadsheet cell. We use inheritance to make a ForthArc an extended
-graph arc to be used as a spreadsheet cell while knowing zones as
-neighbors. A ForthZone is a directly made class (no inheritance from a
-classic graph element). We use inheritance of the GraphAlgorithm for
-iterating on cells of the spreadsheet when the Forth interpreter is
-solving a spreadsheet.
-
-We can see an additional class named GraphAlgorithm for traversing a
-graph. This class is decomposed with virtual methods for visiting step
-by step a graph with standard algorithms like [depth-first
+In this figure, we can see a class named GraphAlgorithm decomposed it
+with virtual methods to allow visiting step by step a graph with
+standard algorithms like [depth-first
 search](https://en.wikipedia.org/wiki/Depth-first_search) or
 breadth-first search, and get visited nodes at each step. This will
 help us to visit cells of our spreadsheet like described in other part
 of this document.
+
+![alt tag](https://github.com/Lecrapouille/SimTaDyn/blob/development/doc/uml/simgraph.png)
+
+A SimTaDyn graph is a particular graph: it extends a classic graph by
+storing polygons (aka areas, aka zones) delimited by the arcs. Zones
+can be see like geographic areas, or Excel cells or polygons of a
+2D/3D mesh. We also extend relations "has borders", "is a border of"
+and "has neighbors":
+
+* A node is a border of an arc.
+* An arc is a border of a zone.
+* A zone is a border of 3D zone.
+* A 3D zone is a border of 4D zone ... etc, etc.
+* A zone has N borders: N arcs. Said differently: A node knows arcs as neighbors.
+* A arc has two borders: two nodes. Said differently: An arc knows zones as neighbors.
+* A node has no border.
+
+There is indirect neighborship relations:
+* A node knows indirectly zones as neighbors because of arcs.
+* A zone can knows its vertices through iterating on borders of its
+  arcs.
+
+TODO: relations "has borders", "is a border of" and "has neighbors"
+should be defined by global index arrays instead to be private
+variable members. This can may be make access easier (like drawing).
+
+We use inheritance to make a ForthNode a graph node to be used as a
+spreadsheet cell.  We use inheritance to make a ForthArc a graph arc
+to be used as a spreadsheet cell. A ForthZone is directly a
+spreadsheet cell. We use inheritance of the GraphAlgorithm for
+iterating on cells of the spreadsheet when the Forth interpreter is
+solving a spreadsheet.
 
 ## SimTaDyn Forth Interpreter
 
@@ -281,54 +241,3 @@ spreadsheet comes from the idea that it could be interesting to place
 a set of geographic maps together (for example two maps with different
 position and scaling) can be superposed (georeferenced) without doing
 maths.
-
-## SimTaDyn Applications
-
-This part is currently under developpement.
-
-TODO: explain better type of relations between cells:
-* strong relation: made by the construction of the graph (nodes and arcs are strongly connected)
-* weak relation: made by spreadsheet formula (like `A1 = (5 + AZ42) * 2`)
-
-### Finite element computation, neural network computations
-
-Let suppose the basic SimTaDyn graph made of 4 nodes (N1 ... N4), 3 arcs (A2 ... A4) and no zones.
-
-```
-   N2    A2        N1       A3       N3
-   +----------------+----------------+
-                    |
-                    | A4
-                    |
-                    + N4
-```
-
-We can compute simple direct relation formulaes like:
-
-N1 = F(A2.N2 + A3.N3 + A4.N4 + b)
-
-Where F() and . and + are mathematical operators. These operators are
-coded in Forth. Here some examples of functions:
-* A2 ... A4, N1 ... N3 are numerical values.
-* b is optional and can come from a spreadsheet computation (weak relation).
-* F() can compute the mean or can compute the sigmoi function ...
-* . and + are multiplication and addition for linear algebra.
-* In Max-Plus algebra . is an addition and + is the max() function, F() is not used therefore
-N1 = A2.N2 + A3.N3 + A4.N4 + b will be: N1= max(A2+N2, A3+N3, A4+N4)
-* Just define Forth words for F, . and +
-
-This idea can be applied to zones:
-
-```
-   +----------------+----------------+
-   |  Z3            |                |
-   |                |                |
-   |           A3   |                |
-   +----------------+----------------+
-     \   Z1         |  Z2           /
-      \          A2 |             /
-       \            |           /
-        +-----------+ --------+
-```
-
-Z1 = F(A2.Z2 + A3.Z3)

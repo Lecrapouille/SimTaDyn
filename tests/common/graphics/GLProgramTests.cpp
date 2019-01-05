@@ -58,28 +58,28 @@ void GLProgramTests::tests()
   try {
     prog.throw_if_not_compiled();
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(...) { }
+  } catch(OpenGLException) { }
 
   prog.m_compiled = true;
   try {
     prog.throw_if_not_compiled();
-  } catch(...) { CPPUNIT_FAIL("Exception should have not occured"); }
+  } catch(OpenGLException) { CPPUNIT_FAIL("Exception should have not occured"); }
 
   // ---
   try {
     prog.uniform<int>("");
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(...) { }
+  } catch(OpenGLException) { }
 
   try {
     prog.uniform<int>("aaa");
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(std::out_of_range) { }
+  } catch(OpenGLException) { }
 
   try {
     prog.uniform<int>(nullptr);
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(std::invalid_argument) { }
+  } catch(OpenGLException) { }
 
   // TODO: try add name conflict wit different types
   prog.addNewUniform(GL_FLOAT, "u1");
@@ -109,7 +109,7 @@ void GLProgramTests::tests()
   try {
     prog.getVBO<int>("");
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(std::out_of_range) { }
+  } catch(OpenGLException) { }
 
   // TODO: try add name conflict wit different types
   CPPUNIT_ASSERT_EQUAL(0_z, prog.attributeNames().size());

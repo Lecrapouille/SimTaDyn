@@ -34,148 +34,9 @@ bool GLRenderer::setupGraphics()
   activateTransparency();
   activateDepthBuffer();
 
-  // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-  vs.fromFile(PathManager::instance().expand("shaders/Example01.vertex"));
-  fs.fromFile(PathManager::instance().expand("shaders/Example01.fragment"));
-
-  // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
-  if (!m_prog.attachShaders(vs, fs).compile())
-    {
-      std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_prog.error() << "'" << std::endl;
-      return false;
-    }
-
-  // Binding empty VAO to OpenGL program will make it be populated
-  // with all VBOs needed.
-  m_prog.bind(m_vao);
-
-  // Now we have to fill VBOs with data: here vertices. Because in
-  // vertex shader a_position is vect3 we have to cast to Vector3f.
-  m_prog.attribute<Vector3f>("a_position") =
-    {
-      // bottom
-      Vector3f(-1.0f,-1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f,-1.0f, 1.0f),
-
-      // top
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f( 1.0f, 1.0f,-1.0f),
-      Vector3f( 1.0f, 1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f( 1.0f, 1.0f, 1.0f),
-
-      // front
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f( 1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f( 1.0f,-1.0f, 1.0f),
-      Vector3f( 1.0f, 1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-
-      // back
-      Vector3f(-1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f( 1.0f, 1.0f,-1.0f),
-
-      // left
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f(-1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-
-      // right
-      Vector3f(1.0f,-1.0f, 1.0f),
-      Vector3f(1.0f,-1.0f,-1.0f),
-      Vector3f(1.0f, 1.0f,-1.0f),
-      Vector3f(1.0f,-1.0f, 1.0f),
-      Vector3f(1.0f, 1.0f,-1.0f),
-      Vector3f(1.0f, 1.0f, 1.0f)
-    };
-
-  m_prog.attribute<Vector2f>("a_texcoord") =
-    {
-      // bottom
-      Vector2f(0.0f, 0.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(0.0f, 1.0f),
-
-      // top
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-
-      // front
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-
-      // back
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-
-      // left
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-
-      // right
-      Vector2f(1.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f)
-    };
-
-  // Texture
-  m_prog.uniform<GLTexture2D>("u_texture").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.uniform<GLTexture2D>("u_texture").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.uniform<GLTexture2D>("u_texture").load(PathManager::instance().expand("textures/wooden-crate.jpg")))
-    return false;
-
-  // Uniforms
-  m_prog.uniform<float>("u_scale") = 1.0f;
-  m_prog.uniform<Vector4f>("u_color") = Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
-
   float ratio = static_cast<float>(screenWidth()) / static_cast<float>(screenHeight());
-  m_prog.uniform<Matrix44f>("u_projection") =
-    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
-  m_prog.uniform<Matrix44f>("u_model") = m_movable.transform();
-  m_prog.uniform<Matrix44f>("u_view") =
-    matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
-
-  // Signals
-  MapEditor::instance().loaded_success.connect(
-     sigc::mem_fun(*this, &GLRenderer::drawMap));
-  MapEditor::instance().m_current_map.signal_changed.connect(
-     sigc::mem_fun(*this, &GLRenderer::drawMap));
+  if (!m_nodes_renderer.setupGraphics(ratio))
+    return false;
 
   return true;
 }
@@ -189,22 +50,24 @@ void GLRenderer::clearScreen() const
 }
 
 //------------------------------------------------------------------
-void GLRenderer::drawMap(SimTaDynMapPtr /*map*/)
+// Called by
+void GLRenderer::drawSceneNode(SimTaDynSheet& sheet, Matrix44f const& transform)
 {
+  LOGD("GLRenderer::drawSceneNode");
+  if (GLRenderer::Mode2D == GLRenderer::renderMode())
+    {
+      m_nodes_renderer.draw2d(sheet.vaoNodes(), transform);
+      //m_arcs_renderer.drawArcs(sheet.vaoArcs(), transform);
+      //m_zones_renderer.drawZones(sheet.vaoZones(), transform);
+    }
+  else
+    {
+      LOGW("Draw Map in 3D not yet implemented");
+    }
 }
 
 //------------------------------------------------------------------
-void GLRenderer::draw2D()
+void GLRenderer::draw()
 {
-  LOGD("Draw2D");
-  m_prog.bind(m_vao);
-  m_prog.draw(GL_TRIANGLES, 0, 36);
-}
-
-//------------------------------------------------------------------
-void GLRenderer::draw3D()
-{
-  LOGD("Draw3D");
-  m_prog.bind(m_vao);
-  m_prog.draw(GL_TRIANGLES, 0, 36);
+  MapEditor::instance().drawCurrentMap(/* *this */);
 }

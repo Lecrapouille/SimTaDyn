@@ -49,6 +49,7 @@ public:
   std::pair<bool, std::string> evaluate(SimForth &forth); // FIXME: Forth et mauvais nom
   void parse(SimForth &forth);
   virtual const std::string& name() const = 0;
+  virtual void reset() = 0;
 
 protected:
 

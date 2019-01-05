@@ -22,24 +22,40 @@
 #ifndef LOADER_MANAGER_TPP_
 #  define LOADER_MANAGER_TPP_
 
-#  include "ILoader.tpp"
-#  include "PathManager.hpp"
-#  include "Logger.hpp"
-
+// ***********************************************************************************************
 // Inspired by: http://loulou.developpez.com/tutoriels/moteur3d/
 // document: "Part 4: Gestion des ressources" and its code "YesEngine"
 // but this current code is different from the original code.
+// ***********************************************************************************************
+
+#  include "Singleton.tpp"
+#  include "ILoader.tpp"
+#  include "PathManager.hpp"
+#  include <map>
+#  include <memory>
+
+template <class R>
+using LoaderContainer = std::map<std::string, std::unique_ptr<ILoader<R>>>;
+
+// ***********************************************************************************************
+//! \brief Class holding a std::map. This will be needed for multiple
+//! inheritance with the LoaderManager. Template I is for the resource
+//! identifier (int, enum, string) and R for the resource.
+// ***********************************************************************************************
+template <class R>
+struct LoaderHolder
+{
+  LoaderContainer<R> m_loaders;
+};
 
 // **************************************************************
-//! \brief Define a class managing a list of ILoader<R>. R for
-//! Resource class.
+//! \brief Define a class managing a set of ILoader<R> where R for
+//! a resource class. ILoader loads/save a resource to the
+//! ResourceManager class.
 //!
-//! ResourceList is a list of ILoader<R>. The exact content of this
-//! list is postponed and need to include Utilities/GenHierarchies.h
-//! from the YesEngine. This avoid writing long lines of inheritance
-//! for each loaders we want to include.
-//!
-//! LoaderHolder is just a class containing each class of ResourceList.
+//! To avoid adding a long list of inheritance we include
+//! Utilities/GenHierarchies.h from the YesEngine which will contain
+//! the list of resources.
 // **************************************************************
 class LoaderManager
   : public Singleton<LoaderManager>,
@@ -48,7 +64,7 @@ class LoaderManager
 private:
 
   //------------------------------------------------------------------
-  //! \brief Mandatory by design.
+  //! \brief Mandatory by the Signleton design.
   //------------------------------------------------------------------
   friend class Singleton<LoaderManager>;
 
@@ -73,19 +89,19 @@ public:
   //! \brief Register a loader and associate it to one or several file
   //! extensions (extensions in the list are separated by the ':' char).
   //------------------------------------------------------------------
-  template <class R>
-  void registerLoader(std::shared_ptr<ILoader<R>> loader, std::string const& extensions)
+  template <class L, class R>
+  void registerLoader(std::string const& extensions)
   {
     std::stringstream ss(extensions);
     std::string ext;
+
     while (std::getline(ss, ext, ':'))
       {
         // Ignore empty string as extension
         if (!ext.empty())
           {
-            LOGI("Register file '%s' extension to loader %p",
-                 ext.c_str(), loader.get());
-            LoaderHolder<R>::m_loaders[ext] = loader;
+            LOGI("Register file '%s' extension to loaderManager", ext.c_str());
+            LoaderHolder<R>::m_loaders[ext] = std::make_unique<L>();
           }
       }
   }
@@ -94,11 +110,11 @@ public:
   //! \brief Load a template R resource from a file.
   //!
   //! Look for a ILoader<R> according to file extension and load the
-  //! resource. Throw a LoaderException if the file does not exist or
+  //! resource. Throw a LoaderManagerException if the file does not exist or
   //! if an error occured during the loading of the resource.
   //------------------------------------------------------------------
   template <class R>
-  void loadFromFile(std::string const& filename, std::shared_ptr<R>& resource) const
+  void loadFromFile(std::string const& filename, R& resource) const
   {
     LOGI("Loading file '%s'", filename.c_str());
     std::pair<std::string, bool> full_path = PathManager::instance().find(filename);
@@ -110,22 +126,13 @@ public:
         std::string msg("The file '" + filename +
                         "' cannot be found in the given search path '" +
                         PathManager::instance().toString() + "'");
-        throw LoaderException(msg);
+        throw LoaderManagerException(msg);
       }
     try
       {
         ILoader<R>& loader = getLoader<R>(File::extension(full_path.first));
         loader.loadFromFile(full_path.first, resource);
-        if (nullptr == resource)
-          {
-            std::string msg("Get a nullptr resource after loading the file '"
-                            + filename + "'");
-            throw LoaderException(msg);
-          }
-        else
-          {
-            LOGI("Sucessfuly loaded the file '%s'", filename.c_str());
-          }
+        LOGI("Sucessfuly loaded the file '%s'", filename.c_str());
       }
     catch (LoaderException const &e)
       {
@@ -133,29 +140,49 @@ public:
              filename.c_str(), e.what());
         e.rethrow();
       }
+    catch (LoaderManagerException const &e)
+      {
+        LOGF("Failed loading the file '%s'. Reason is '%s'",
+             filename.c_str(), e.what());
+        throw LoaderException(e.message());
+      }
+    catch (...)
+      {
+        throw LoaderException("loadFromFile");
+      }
   }
 
   //------------------------------------------------------------------
   //! \brief Save a template R resource inside a file.
   //!
   //! Look for a ILoader<R> according to file extension and load the
-  //! resource. Throw a LoaderException if the file does not exist or
+  //! resource. Throw a LoaderManagerException if the file does not exist or
   //! if an error occured during the loading of the resource.
   //------------------------------------------------------------------
   template <class R>
-  void saveToFile(std::shared_ptr<R> const resource, std::string const& filename) const
+  void saveToFile(R const& resource, std::string const& filename) const
   {
     LOGI("Saving file '%s'", filename.c_str());
     try
       {
-        ILoader<R>& loader = getLoader<R>(File::extension(filename));
+        ILoader<R> const& loader = getLoader<R>(File::extension(filename));
         loader.saveToFile(resource, filename);
         LOGI("Sucessfuly saved the file '%s'", filename.c_str());
       }
     catch (LoaderException const &e)
       {
+        LOGF("Failed loading the file '%s'. Reason is '%s'",
+             filename.c_str(), e.what());
+        e.rethrow();
+      }
+    catch (LoaderManagerException const &e)
+      {
         LOGF("Failed saving the file '%s'", filename.c_str());
-        throw e;
+        throw LoaderException(e.what());
+      }
+    catch (...)
+      {
+        throw LoaderException("loadFromFile");
       }
   }
 
@@ -173,12 +200,12 @@ public:
   //! \brief Return the list of loaders.
   //------------------------------------------------------------------
   template <class R>
-  LoaderContainer<R> const &loaders() const
+  LoaderContainer<R> const& loaders() const
   {
     return LoaderHolder<R>::m_loaders;
   }
 
-protected:
+private:
 
   virtual void registerAllLoaders();
 
@@ -187,16 +214,17 @@ protected:
   //! return the associated ILoader<R>.
   //------------------------------------------------------------------
   template <class R>
-  inline ILoader<R>& getLoader(std::string const& extension) const
+  ILoader<R>& getLoader(std::string const& extension) const
   {
-    auto it = LoaderHolder<R>::m_loaders.find(extension);
-    if (!((it != LoaderHolder<R>::m_loaders.end()) && it->second))
+    auto const& it = LoaderHolder<R>::m_loaders.find(extension);
+    if ((it == LoaderHolder<R>::m_loaders.end()) || (nullptr == it->second))
       {
-        std::string msg("No loader found taking into account this extension file '."
-                        + extension + "'");
+        std::string msg("No loader found taking into account this "
+                        "extension file '" + extension + "'");
         LOGF("%s", msg.c_str());
-        throw LoaderException(msg);
+        throw LoaderManagerException(msg);
       }
+    LOGD("Found loader");
     return *(it->second);
   }
 };

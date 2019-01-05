@@ -18,46 +18,26 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef INSPECTOR_HPP_
-#  define INSPECTOR_HPP_
+#include "SimTaDynForthPrimitives.hpp"
+#include "SimTaDynForth.hpp"
+#include "MapEditor.hpp"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#  include <gtkmm.h>
-#pragma GCC diagnostic pop
-
-class Inspector
+void SimForth::execPrimitive(const Cell16 idPrimitive)
 {
-public:
-
-  Inspector();
-  void showCell(const Key nodeID);
-  void showEmpty();
-
-protected:
-
-  class ModelColumns : public Gtk::TreeModelColumnRecord
-  {
-  public:
-    ModelColumns()
+  switch (idPrimitive)
     {
-      add(m_word);
-      add(m_token);
+    case SIMFORTH_PRIMITIVE_SHEET:
+      {
+        std::string filename = path() + nextWord();
+        std::cout << "Pa: " << filename << std::endl;
+        MapEditor::instance().openSheet(filename);
+      }
+      break;
+    case SIMFORTH_PRIMITIVE_FORTH:
+      Forth::execPrimitive(FORTH_PRIMITIVE_INCLUDE); // FIXME path() +
+      break;
+    default:
+      Forth::execPrimitive(idPrimitive);
+      break;
     }
-
-    Gtk::TreeModelColumn<Glib::ustring> m_word;
-    Gtk::TreeModelColumn<Glib::ustring> m_token;
-  };
-
-  Glib::RefPtr<Gtk::ListStore> m_ref_tree_model;
-
-public:
-
-  Gtk::TreeView m_tree;
-  ModelColumns m_columns;
-  Gtk::ScrolledWindow    m_scrolledwindow;
-};
-
-#endif /* INSPECTOR_HPP_ */
+}

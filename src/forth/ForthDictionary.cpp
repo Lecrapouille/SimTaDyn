@@ -364,6 +364,7 @@ bool ForthDictionary::load(std::string const& filename, const bool replace)
             }
           catch (const OutOfBoundDictionary& e)
             {
+              LOGC("Caught Forth Exception '%s'", e.message().c_str());
               std::cerr << "Cannot load the dictionary from the file '"
                         << filename
                         << "'. Reason is the image is bigger than the dictionary size."

@@ -30,7 +30,7 @@ function exists
   test -e $1 || (echo "The file $1 does not exist" && exit 1)
 }
 
-# Clone and compile projects that SimTaDyn depends on.
+# Clone and compile 3thpart librairies that SimTaDyn depends on.
 make download-external-libs || exit 1
 make compile-external-libs || exit 1
 
@@ -62,6 +62,9 @@ exists $CI_DESTDIR/usr/bin/SimTaDyn-$VERSION
 # TODO: launch Forth unit tests when they will be done:
 # && ./build/SimForth -f ../core/system.fs -f../core/tester.fs
 (cd src/forth/standalone && make $JCORES) || exit 1
+
+# Build SpreadSheet standalone
+(cd src/core/standalone/ClassicSpreadSheet && make $JCORES) || exit 1
 
 # Build OpenGL examples
 (cd src/common/graphics/OpenGL/examples/ && make $JCORES) || exit 1

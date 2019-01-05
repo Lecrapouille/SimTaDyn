@@ -65,7 +65,7 @@ public:
     MapEditor::destroy();
     SimForth::destroy();
     LoaderManager::destroy();
-    //TODO ResourceManager::destroy();
+    SimTaDynMapManager::destroy();
     PathManager::destroy();
     Logger::destroy();
   };

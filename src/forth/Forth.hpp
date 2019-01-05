@@ -53,7 +53,7 @@ public:
   //! \brief Load all Forth primitives in the dictionary.
   virtual void boot();
   //! \brief interprete a new forth word extracted from a stream.
-  /*virtual*/ void interpreteWord(std::string const& word);
+  void interpreteWord(std::string const& word);
   //! \brief interprete a Forth script stored as a string.
   std::pair<bool, std::string> WARN_UNUSED
   interpreteString(std::string const& code_forth,

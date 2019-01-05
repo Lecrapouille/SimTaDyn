@@ -733,7 +733,7 @@ public:
     reset();
   }
 
-  inline void reset()
+  inline virtual void reset()
   {
     m_nodes.clear();
     m_neighbors.clear();

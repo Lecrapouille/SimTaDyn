@@ -26,7 +26,7 @@
 #  include "ResourceManager.tpp"
 
 using GLTexture2DPtr = std::shared_ptr<GLTexture2D>;
-using GLTexture2DManager = ResourceManager<GLTexture2D, std::string>;
+using GLTexture2DManager = ResourceManager<std::string, GLTexture2D>;
 
 // ***********************************************************************************************
 //! \brief

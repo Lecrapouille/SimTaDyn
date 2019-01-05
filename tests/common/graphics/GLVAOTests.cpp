@@ -95,7 +95,7 @@ void GLVAOTests::tests()
     std::cout << vboi.name() << std::endl;
     CPPUNIT_FAIL("Unknown VBO Exception not caught");
   }
-  catch (std::invalid_argument) { }
+  catch (OpenGLException) { }
 
   // Nullptr exception
   try
@@ -104,7 +104,7 @@ void GLVAOTests::tests()
       std::cout << vbo.name() << std::endl;
       CPPUNIT_FAIL("Nullptr Exception not caught");
     }
-  catch (std::invalid_argument) { }
+  catch (OpenGLException) { }
 
   // Unknown VBO
   try
@@ -113,7 +113,7 @@ void GLVAOTests::tests()
       std::cout << vbo.name() << std::endl;
       CPPUNIT_FAIL("Unknown VBO Exception not caught");
     }
-  catch (std::out_of_range) { }
+  catch (OpenGLException) { }
 
   // Bad cast VBO
   try
@@ -122,5 +122,5 @@ void GLVAOTests::tests()
       std::cout << vbo.name() << std::endl;
       CPPUNIT_FAIL("Bad casted VBO Exception not caught");
     }
-  catch (std::invalid_argument) { }
+  catch (OpenGLException) { }
 }

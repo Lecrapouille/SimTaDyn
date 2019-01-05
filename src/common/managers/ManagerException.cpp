@@ -18,14 +18,19 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef LOADEREXCEPTION_HPP_
-#  define LOADEREXCEPTION_HPP_
-
-#  include "Exception.hpp"
+#include "ManagerException.hpp"
 
 // ***********************************************************************************************
-//! \brief This macro will declare a class LoaderException derived from Exception.
+//! This macro will generate code for members.
 // ***********************************************************************************************
-DECLARE_EXCEPTION(LoaderException, Exception)
+IMPLEMENT_EXCEPTION(LoaderException, Exception, "File Loader Exception")
 
-#endif
+// ***********************************************************************************************
+//! This macro will generate code for members.
+// ***********************************************************************************************
+IMPLEMENT_EXCEPTION(ResourceManagerException, Exception, "Resource Manager Exception")
+
+// ***********************************************************************************************
+//! This macro will generate code for members.
+// ***********************************************************************************************
+IMPLEMENT_EXCEPTION(LoaderManagerException, Exception, "Loader Manager Exception")

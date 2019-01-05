@@ -18,7 +18,9 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "LoaderException.hpp"
+#ifndef SPREADSHEETPRIMITIVES_HPP
+#define SPREADSHEETPRIMITIVES_HPP
 
-//! This macro will generate code for members.
-IMPLEMENT_EXCEPTION(LoaderException, Exception, "File Loader Exception")
+#  include "SimTaDynForthPrimitives.hpp"
+
+#endif

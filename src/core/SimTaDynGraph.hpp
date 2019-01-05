@@ -354,6 +354,12 @@ public:
     return m_zones.used();
   }
 
+  inline virtual void reset() override
+  {
+    m_zones.clear();
+    Graph<Node, Arc>::reset();
+  }
+
 protected:
 
   //! \brief the list of zones constituing the graph.

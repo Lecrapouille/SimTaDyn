@@ -163,7 +163,7 @@ void ClassicSpreadSheet::displayResult()
     {
       for (size_t col = 0; col < m_col; ++col)
         {
-          std::cout << m_cellMatrix[row][col]->rawValue() << "  ";
+          std::cout << std::dec << m_cellMatrix[row][col]->rawValue() << "  ";
         }
       std::cout << std::endl;
     }

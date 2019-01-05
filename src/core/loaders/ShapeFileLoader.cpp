@@ -287,23 +287,12 @@ void ShapefileLoader::getAllRecords(SimTaDynSheet& sheet)
     }
 }
 
-void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynSheetPtr &current_sheet)
+void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynSheet& sheet)
 {
-  bool dummy_sheet = (nullptr == current_sheet);
+  const bool dummy_sheet = (0_z == sheet.howManyCells());
 
   LOGI("Loading the shapefile '%s' in an %s", filename.c_str(),
-       (dummy_sheet ? "dummy map" : "already opened map"));
-
-  // Create a map
-  /*FIXME if (dummy_sheet)
-    {
-      current_sheet = SimTaDynMapManager::instance().create(filename, false);
-      if (nullptr == current_sheet)
-        {
-          LoaderException e("Already existing");
-          throw e;
-        }
-        }*/
+       (dummy_sheet ? "already opened map" : "dummy map"));
 
   // Create a sheet or update
   try
@@ -320,33 +309,29 @@ void ShapefileLoader::loadFromFile(std::string const& filename, SimTaDynSheetPtr
       value32b = getShapeType();
       LOGI("Shapefile Type: %u: %s", value32b, shapeTypes(value32b).c_str());
 
-      std::string shortname = File::fileName(filename);
-      SimTaDynSheet *sheet = new SimTaDynSheet(shortname);
-
-      getBoundingBox(sheet->m_bbox);
-      // FIXME CPP_LOG(logger::Info) << "Map Bounding Box: " << sheet->m_bbox << std::endl;
-
-      getAllRecords(*sheet);
+      AABB3f bbox;
+      getBoundingBox(bbox);
+      getAllRecords(sheet);
       m_infile.close();
 
+      // Merge bounding boxes after parsing the file: in case of
+      // parsing error this will be easier to restaure the structure.
+      sheet.m_bbox = merge(sheet.m_bbox, bbox);
+
+      // Concat names to show that maps have been merged
       if (dummy_sheet)
         {
-          //FIXME current_sheet = sheet;
-        }
-      else
-        {
-          // Concat the old sheet with the new one: elements, name and bounding box
-          //FIXME current_sheet += *sheet;
-          current_sheet->m_bbox = merge(current_sheet->m_bbox, sheet->m_bbox); // TODO a mettre dans le code de +=
-
-          if (sheet->m_name != "") // TODO a mettre dans le code de += avec option
-            sheet->m_name += "_";
-          sheet->m_name += shortname;
+          if (!sheet.m_name.empty())
+            {
+              sheet.m_name += "_";
+            }
+          sheet.m_name += File::fileName(filename);
         }
     }
   catch (std::exception const &e)
     {
       m_infile.close();
+      // TODO: restaurer noeuds, arcs, zones
       throw e;
     }
 }

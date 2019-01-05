@@ -183,11 +183,11 @@ void GLObjectTests::tests()
   CPPUNIT_ASSERT_EQUAL(obj.m_need_setup, true);
   CPPUNIT_ASSERT_EQUAL(obj.m_need_create, true);
   CPPUNIT_ASSERT_EQUAL(obj.m_need_update, false);
-  CPPUNIT_ASSERT_EQUAL(obj.m_position, 9u);
+  CPPUNIT_ASSERT_EQUAL(obj.m_position, 7u);
   CPPUNIT_ASSERT_EQUAL(obj.m_create_position, 0u);
   CPPUNIT_ASSERT_EQUAL(obj.m_activate_position, 4u);
   CPPUNIT_ASSERT_EQUAL(obj.m_setup_position, 2u);
-  CPPUNIT_ASSERT_EQUAL(obj.m_deactivate_position, 7u);
+  CPPUNIT_ASSERT_EQUAL(obj.m_deactivate_position, 6u);
   CPPUNIT_ASSERT_EQUAL(obj.m_update_position, 5u);
-  CPPUNIT_ASSERT_EQUAL(obj.m_release_position, 8u);
+  CPPUNIT_ASSERT_EQUAL(obj.m_release_position, 0u);
 }

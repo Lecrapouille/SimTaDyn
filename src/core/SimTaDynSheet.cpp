@@ -19,6 +19,13 @@
 //=====================================================================
 
 #include "SimTaDynSheet.hpp"
+#include "Renderer.hpp"
+
+void SimTaDynSheet::update(float const dt)
+{
+  LOGI("SimTaDynSheet::update");
+  SceneGraph_t<std::string, SimTaDynSheet, float, 3u>::Node::update(dt);
+}
 
 ASpreadSheetCell *SimTaDynSheet::isACell(std::string const& word)
 {

@@ -465,7 +465,7 @@ void Forth::interpreteWordCaseInterprete(std::string const& word)
     }
   else
     {
-      UnknownForthWord e(word); throw e;
+      throw UnknownForthWord(word);
     }
 }
 
@@ -645,6 +645,7 @@ std::pair<bool, std::string> Forth::parseStream()
 
   catch (ForthException const& e)
     {
+      LOGC("Caught Forth Exception '%s'", e.message().c_str());
       if (0 == m_err_stream)
         {
           m_err_stream = m_opened_streams;

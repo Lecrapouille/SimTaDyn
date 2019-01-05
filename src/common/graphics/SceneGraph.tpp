@@ -293,7 +293,7 @@ public:
     //! List of Node as children. Pointers are never nullptr.
     std::vector<NodePtr>   m_children;
     //! Scale factors for the current 3D entity
-    Vector<T, D>           m_local_scaling = Vector<T, D>(1);
+    Vector<T, D>           m_local_scaling = {T(1)};
   };
 
 private:

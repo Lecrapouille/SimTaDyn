@@ -24,7 +24,7 @@ public:
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
     std::cout << "Ajoute1 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
-    MapEditor::instance().map().m_sheet.addNode("");
+    MapEditor::instance().sheet().addNode("");
   }
 
   virtual void exec2(const gdouble x, const gdouble y, const gdouble z = 0.0f) override

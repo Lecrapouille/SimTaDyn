@@ -49,11 +49,11 @@ OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
 #OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
 OBJ_OPENGL         = Color.o Camera2D.o GLException.o OpenGL.o
 # Renderer.o
-OBJ_OPENGL_UT      = ColorTests.o GLObjectTests.o GLVAOTests.o GLVBOTests.o GLShadersTests.o GLProgramTests.o 
+OBJ_OPENGL_UT      = ColorTests.o GLObjectTests.o GLVAOTests.o GLVBOTests.o GLShadersTests.o GLProgramTests.o
 OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_CORE           = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
-OBJ_CORE_UT        = ClassicSpreadSheet.o ClassicSpreadSheetTests.o
-OBJ_LOADERS        = LoaderException.o ShapeFileLoader.o SimTaDynFileLoader.o
+OBJ_CORE_UT        = SpreadSheetPrimitives.o ClassicSpreadSheet.o ClassicSpreadSheetTests.o
+OBJ_LOADERS        = ManagerException.o ShapeFileLoader.o SimTaDynFileLoader.o
 #ILoader.o
 #OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
 #OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
