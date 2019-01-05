@@ -184,6 +184,11 @@ public:
                  nbytes);
   }
 
+  Cell8 const* dictionary() const
+  {
+    return m_dictionary;
+  }
+
 protected:
   //! \brief Pretty print a Forth token in std::cout.
   virtual std::string displayToken(const Cell16 token) const;

@@ -75,7 +75,7 @@ VPATH += $(P)/src:
 
 ###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI) \
+DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 

@@ -5,6 +5,12 @@
 #  include <memory>
 
 // **************************************************************
+//! \brief Make gcc warms when return code of a function is not
+//! checked.
+// **************************************************************
+#define WARN_UNUSED __attribute__((warn_unused_result))
+
+// **************************************************************
 //! \brief Allows to create literal values of type std::size_t
 //! In the same way than U, LL or UL macros. Indeed size_t can
 //! be uint32_t or uint64_t depending on the architecture.

@@ -68,7 +68,7 @@ std::pair<std::string, bool> Path::find(std::string const& filename) const
   if (File::exist(filename))
     return std::make_pair(filename, true);
 
-  for (auto it: m_paths)
+  for (auto const& it: m_paths)
     {
       std::string file(it + filename);
       if (File::exist(file))
@@ -81,7 +81,7 @@ std::pair<std::string, bool> Path::find(std::string const& filename) const
 
 std::string Path::expand(std::string const& filename) const
 {
-  for (auto it: m_paths)
+  for (auto const& it: m_paths)
     {
       std::string file(it + filename);
       if (File::exist(file))
@@ -99,7 +99,7 @@ std::string const &Path::toString() const
 void Path::update()
 {
   m_path.clear();
-  for (auto it: m_paths)
+  for (auto const& it: m_paths)
     {
       m_path += it;
       m_path.pop_back(); // Remove the '/' char

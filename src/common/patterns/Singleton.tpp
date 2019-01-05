@@ -123,7 +123,7 @@ private:
 //! information during its destruction. If Logger is destroyed before
 //! Singleton1, a crash will occur when trying to write in the log.
 // *************************************************************************************************
-template <class T> class Singleton
+template <class T> class Singleton // unique_ptr: FIXME https://cppisland.com/?p=501
 {
 public:
 
