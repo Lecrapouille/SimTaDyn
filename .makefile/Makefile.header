@@ -124,7 +124,8 @@ $(P)/src/ui
 
 ###################################################
 # Common defines
-DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\" -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
+DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Path where to store the generated coverage docs
