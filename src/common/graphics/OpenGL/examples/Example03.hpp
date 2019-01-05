@@ -23,6 +23,7 @@
 
 #  include "OpenGL.hpp"
 #  include "Movable.tpp"
+#  include <iostream>
 
 class GLExample03: public IGLWindow
 {

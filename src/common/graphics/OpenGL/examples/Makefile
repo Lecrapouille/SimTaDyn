@@ -61,7 +61,7 @@ VPATH += $(P)/src:$(P)/external/imgui
 
 ###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
+DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
 DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW

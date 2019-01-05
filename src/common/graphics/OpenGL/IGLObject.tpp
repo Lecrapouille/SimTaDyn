@@ -190,13 +190,13 @@ public:
   //-------------------------------------------------------------
   void destroy()
   {
-    if (false == opengl::hasCreatedContext())
-      return ;
-
-    if (isValid())
+    if (opengl::hasCreatedContext())
       {
-        deactivate();
-        release();
+        if (isValid())
+          {
+            deactivate();
+            release();
+          }
       }
     init();
   }

@@ -360,9 +360,12 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! \brief Render primitives
+  //! \brief Render the binded VAO. Use as params the first and count
+  //! vertices (see glDrawArrays OpenGL official documentation).
+  //! \throw if the program has not been compiled or if the VAO has not
+  //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
-  void draw(GLenum mode, GLint first, GLsizei count) // FIXME pass VAO en param au lieu de bind()
+  void draw(DrawPrimitive const mode, GLint first, GLsizei count)
   {
     LOGD("Prog '%s' draw {", name().c_str());
     throw_if_not_compiled();
@@ -373,7 +376,7 @@ public:
     // il suffisait entre 16 et 35
     begin();
     //m_vao->begin();
-    glCheck(glDrawArrays(mode, first, count));
+    glCheck(glDrawArrays(static_cast<GLenum>(mode), first, count));
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     //m_vao->end();
     end();
@@ -381,20 +384,50 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! \brief Render all primitives
+  //! \brief Bind the VAO and render it. Use as params the first and
+  //! count vertices (see glDrawArrays OpenGL official documentation).
+  //! \throw if the program has not been compiled or if the VAO has not
+  //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
-  inline void draw(GLenum /*mode*/)
+  void draw(GLVAO& vao, DrawPrimitive const mode, GLint first, GLsizei count)
   {
-    //throw_if_not_compiled();
-    //throw_if_inconsitency_attrib_sizes();
-    //draw(mode, 0, m_attributes.begin()->second->size());
+    bind(vao);
+    draw(mode, first, count);
   }
 
   //------------------------------------------------------------------
-  //! \brief Render primitives from their indices
+  //! \brief Render the binded VAO. Use implicit first and count vertices
+  //! (see glDrawArrays OpenGL official documentation).
+  //! \throw if the program has not been compiled or if the VAO has not
+  //! been binded or if VBOs have not all the same sizes.
+  //------------------------------------------------------------------
+  inline void draw(DrawPrimitive const /*mode*/)
+  {
+    LOGES("Draw with implicit number of vertices is not yet implemented");
+    //throw_if_not_compiled();
+    //throw_if_inconsitency_attrib_sizes();
+    //draw(static_cast<GLenum>(mode), 0, m_attributes.begin()->second->size());
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Bind a VAO and render it with implicit first and count
+  //! vertices (see glDrawArrays OpenGL official documentation).
+  //! \throw if the program has not been compiled or if the VAO has not
+  //! been binded or if VBOs have not all the same sizes.
+  //------------------------------------------------------------------
+  inline void draw(GLVAO& vao, DrawPrimitive const mode)
+  {
+    bind(vao);
+    draw(mode);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Render a VAO with the help of an vertices index.
+  //! \throw if the program has not been compiled or if the VAO has not
+  //! been binded or if VBOs have not all the same sizes.
   //------------------------------------------------------------------
   template<class T>
-  void draw(GLenum mode, GLIndexBuffer<T> /*const*/& index) // FIXME
+  void draw(DrawPrimitive const mode, GLIndexBuffer<T>& index)
   {
     LOGD("Prog::drawIndex %d elements", index.size());
 
@@ -405,11 +438,23 @@ public:
     //m_vao->begin();
     begin();
     index.begin();
-    glCheck(glDrawElements(mode, index.size(), index.type(), 0));
+    glCheck(glDrawElements(static_cast<GLenum>(mode), index.size(), index.type(), 0));
     index.end();
     glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
     end();
     //m_vao->end();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief bind a VAO and render it with the help of an vertices index.
+  //! \throw if the program has not been compiled or if the VAO has not
+  //! been binded or if VBOs have not all the same sizes.
+  //------------------------------------------------------------------
+  template<class T>
+  void draw(GLVAO& vao, DrawPrimitive const mode, GLIndexBuffer<T>& index)
+  {
+    bind(vao);
+    draw(mode, index);
   }
 
   //------------------------------------------------------------------
@@ -574,17 +619,16 @@ private:
     LOGD("Prog '%s' deactivate", name().c_str());
     glCheck(glUseProgram(0U));
 
-    for (auto& it: m_attributes)
-      {
-        m_vao->m_vbos[it.first]->end();
-        //m_vao->VBO<float>(it.first.c_str()).end(); // FIXME
-        it.second->end();
-      }
     for (auto& it: m_uniforms)
       {
         it.second->end();
       }
-    m_vao->end();
+    for (auto& it: m_attributes)
+      {
+        it.second->end();
+      }
+
+    m_vao = nullptr;
   }
 
   //------------------------------------------------------------------
