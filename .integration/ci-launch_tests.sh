@@ -38,7 +38,9 @@ make compile-external-libs || exit 1
 # Travis-CI) does not manage export display so OpenGL
 # tests will failed just because its context failed to
 # be created.
-export CI=true
+# Edit: Now we can test OpenGL wrapper classes without
+# necessary creating OpenGL context.
+## export CI=true
 
 # Installation directory when CI
 CI_DESTDIR=/tmp

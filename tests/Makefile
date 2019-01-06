@@ -124,9 +124,9 @@ endif
 
 # if inside Docker with Travis-CI, OpenGL context cannot be created.
 # So disable some tests.
-ifeq ($(CI),true)
-TU_OPTIONS=-a
-endif
+#ifeq ($(CI),true)
+#TU_OPTIONS=-a
+#endif
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
