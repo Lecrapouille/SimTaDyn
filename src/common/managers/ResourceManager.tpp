@@ -123,11 +123,13 @@ public:
   //! strategy and return its reference.
   //------------------------------------------------------------------
   template<typename... Args>
-  inline std::shared_ptr<R> create(I const& id, resource::Strategy strategy, Args&... args)
+  inline std::shared_ptr<R> create(I const& id,
+                                   resource::Strategy const strategy,
+                                   Args const&... args)
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    return insert(id, strategy, args...);
+    return std::move(insert(id, strategy, args...));
   }
 
   //------------------------------------------------------------------
@@ -146,7 +148,7 @@ public:
   //! is still using it, the resource is not destroyed. If nobody uses
   //! it, the resource is destroyed.
   //------------------------------------------------------------------
-  void remove(I const& id)
+  void remove(I const& id, bool const force = true)
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -156,7 +158,6 @@ public:
         size_t owners = it->second.use_count();
         if (owners > 1_z)
           {
-            const bool force = true;
             CPP_LOG(logger::Warning)
               << "Trying to dispose of the resource #"
               << id << " currently used by " << (owners - 1)
@@ -222,37 +223,46 @@ public:
   //------------------------------------------------------------------
   //! \brief Rename the
   //------------------------------------------------------------------
-  std::shared_ptr<R> rename(I const& oldKey, I const& newKey, resource::Strategy strategy)
+  std::shared_ptr<R> rename(I const& oldKey, I const& newKey,
+                            resource::Strategy const strategy)
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
     auto old_it = m_resources.find(oldKey);
     if (old_it != m_resources.end())
       {
+        if (oldKey == newKey)
+          return old_it->second;
+
+        std::shared_ptr<R> r;
         auto new_it = m_resources.find(newKey);
         if (new_it == m_resources.end())
           {
-            std::swap(new_it->second, old_it->second);
+            std::shared_ptr<R> r = std::move(old_it->second);
+            m_resources[newKey] = r;
             m_resources.erase(old_it);
-            return new_it->second;
+            return r;
           }
         else
           {
+            LOGW("The newKey already stored in ResourceManager");
             switch (strategy)
               {
               case resource::Strategy::ThrowException:
                 LOGD("resource::Strategy::ThrowException");
-                throw ResourceManagerException("Failed to load resource, ID already stored in ResourceManager");
-              case resource::Strategy::Replace:
-                LOGD("resource::Strategy::Replace");
-                std::swap(new_it->second, old_it->second);
-                m_resources.erase(old_it);
-                return new_it->second;
+                throw ResourceManagerException("Failed to rename resource: the newKey already stored in ResourceManager");
               case resource::Strategy::UseOlder:
                 LOGD("resource::Strategy::UseOlder");
+                r = std::move(old_it->second);
+                new_it->second = r;
+                m_resources.erase(old_it);
+                return r;
+              case resource::Strategy::Replace:
+                LOGD("resource::Strategy::Replace");
                 m_resources.erase(old_it);
                 return new_it->second;
               case resource::Strategy::ReturnNull:
+              default:
                 return nullptr;
               }
           }
@@ -260,6 +270,10 @@ public:
     else
       {
         CPP_LOG(logger::Warning) << "Failed renaming '" << oldKey << "'. This resource does not exist\n";
+        if (resource::Strategy::ThrowException == strategy)
+          {
+            throw ResourceManagerException("Failed to rename an none existing resource");
+          }
         return nullptr;
       }
   }
@@ -267,7 +281,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Return the number of resources currently stored.
   //------------------------------------------------------------------
-  inline uint32_t size()
+  inline size_t size()
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -294,7 +308,9 @@ private:
   //! \brief Insert an allocated resource in the list of resources.
   //------------------------------------------------------------------
   template<typename... Args>
-  std::shared_ptr<R> insert(I const& id, resource::Strategy strategy, Args&... args)
+  std::shared_ptr<R> insert(I const& id,
+                            resource::Strategy const strategy,
+                            Args const&... args)
   {
     std::shared_ptr<R> resource = nullptr;
 
@@ -318,7 +334,7 @@ private:
             break;
           case resource::Strategy::Replace:
             LOGD("resource::Strategy::Replace");
-            resource = std::make_unique<R>();
+            resource = std::make_unique<R>(args...);
             it->second = resource;
             break;
           case resource::Strategy::UseOlder:
@@ -331,7 +347,7 @@ private:
             break;
           }
       }
-    return resource;
+    return std::move(resource);
   }
 
 private:

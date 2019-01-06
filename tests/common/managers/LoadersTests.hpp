@@ -18,35 +18,32 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNFILELOADER_HPP_
-#  define SIMTADYNFILELOADER_HPP_
+#ifndef LOADERS_TESTS_HPP
+#  define LOADERS_TESTS_HPP
 
-#  include "ILoader.tpp"
-#  include "SimTaDynMap.hpp"
-#  include "ResourceManager.tpp"
+#include <cppunit/TestFixture.h>
+#include <cppunit/TestResult.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-using SimTaDynMapManager = ResourceManager<std::string, SimTaDynMap>;
+#define protected public
+#define private public
+#include "ILoader.tpp"
+#undef protected
+#undef private
+#include "NonCppStd.hpp"
 
-// ***********************************************************************************************
-//! \brief
-// ***********************************************************************************************
-class SimTaDynFileLoader : public ILoader<SimTaDynMap>
+class LoadersTests : public CppUnit::TestFixture
 {
+  // CppUnit macros for setting up the test suite
+  CPPUNIT_TEST_SUITE(LoadersTests);
+  CPPUNIT_TEST(testsLoaderManager);
+  CPPUNIT_TEST_SUITE_END();
+
 public:
 
-  SimTaDynFileLoader()
-    : ILoader<SimTaDynMap>("SimTaDynMap")
-  {
-    LOGI("Creating a SimTaDynMap loader %p", this);
-  }
-  virtual void loadFromFile(std::string const& filename, SimTaDynMap& map) override;
-  virtual void saveToFile(SimTaDynMap const& map, std::string const& filename) const override;
-
-protected:
-
-  //! \brief
-  void unzip(std::string const &zip_file);
-  bool zip(SimTaDynMap const& map, std::string const& filename) const;
+  void setUp();
+  void tearDown();
+  void testsLoaderManager();
 };
 
 #endif

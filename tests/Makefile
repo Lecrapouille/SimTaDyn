@@ -44,7 +44,8 @@ OBJ_MATHS_UT      += BoundingBoxTests.o FilteringTests.o
 OBJ_CONTAINERS     = PendingData.o
 OBJ_CONTAINERS_UT  = SetTests.o CollectionTests.o
 OBJ_MANAGERS       =
-#OBJ_MANAGERS_UT    = ResourcesTests.o
+OBJ_MANAGERS_UT    = ResourcesTests.o
+#LoadersTests.o
 OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
 #OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
 OBJ_OPENGL         = Color.o Camera2D.o GLException.o OpenGL.o
@@ -54,8 +55,7 @@ OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrim
 OBJ_CORE           = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynSheet.o SimTaDynMap.o
 OBJ_CORE_UT        = SpreadSheetPrimitives.o ClassicSpreadSheet.o ClassicSpreadSheetTests.o
 OBJ_LOADERS        = ManagerException.o ShapeFileLoader.o SimTaDynFileLoader.o
-#ILoader.o
-#OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
+OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
 #OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 #OBJ_GUI           += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_UNIT_TEST      = main.o

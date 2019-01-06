@@ -53,6 +53,7 @@
 
 # SimTaDyn specifics
 build/*
+cov-int
 tests/build/*
 src/common/graphics/OpenGL/examples/build/*
 src/core/standalone/ClassicSpreadSheet/build/*

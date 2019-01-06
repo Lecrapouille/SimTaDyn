@@ -51,10 +51,11 @@
 #include "GLShadersTests.hpp"
 #include "GLProgramTests.hpp"
 
-// --- Loader ---------------------------------------------------------
-//#include "ResourcesTests.hpp"
+// --- Resource/Loader Managers --------------------------------------
+#include "ResourcesTests.hpp"
+//#include "LoadersTests.hpp"
 #include "SimTaDynFileLoaderTests.hpp"
-// --- Core ---------------------------------------------------------
+// --- Core ----------------------------------------------------------
 #include "ClassicSpreadSheetTests.hpp"
 
 // --- CPPUnit --------------------------------------------------------
@@ -216,19 +217,23 @@ static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
 }
 
 //--------------------------------------------------------------------------
-static void testLoader(CppUnit::TextUi::TestRunner& runner)
+static void testResource(CppUnit::TextUi::TestRunner& runner)
 {
-  /*CppUnit::TestSuite* suite;
+  CppUnit::TestSuite* suite;
 
   suite = new CppUnit::TestSuite("resourcesManagerTests");
-  suite->addTest(new CppUnit::TestCaller<ResourcesTests>("Resources", &ResourcesTests::testsResources));
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("RessourceManager", &ResourcesTests::testsResourceManager));
-  suite->addTest(new CppUnit::TestCaller<ResourcesTests>("LoaderManager", &ResourcesTests::testsLoaderManager));
+  //suite->addTest(new CppUnit::TestCaller<ResourcesTests>("LoaderManager", &ResourcesTests::testsLoaderManager));
   runner.addTest(suite);
 
-  suite = new CppUnit::TestSuite("LoaderTests");
-  suite->addTest(new CppUnit::TestCaller<LoaderTests>("Loader", &LoaderTests::testSimTaDyn));
-  runner.addTest(suite);*/
+  // FIXME le fichier ne compile pas tests/common/managers/LoadersTests.cpp
+  //suite = new CppUnit::TestSuite("LoadersTests");
+  //suite->addTest(new CppUnit::TestCaller<LoadersTests>("Loader", &LoadersTests::testsLoaderManager));
+  //runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("SimTaDynFileLoaderTests");
+  suite->addTest(new CppUnit::TestCaller<SimTaDynFileLoaderTests>("SimTaDynLoader", &SimTaDynFileLoaderTests::testSimTaDyn));
+  runner.addTest(suite);
 }
 
 //--------------------------------------------------------------------------
@@ -263,7 +268,7 @@ static bool run_tests(bool const has_xdisplay)
   testGraph(runner);
   // Travis-CI does not support export display
   if (has_xdisplay) testOpenGL(runner);
-  testLoader(runner);
+  testResource(runner);
   testCore(runner);
 
   return runner.run();

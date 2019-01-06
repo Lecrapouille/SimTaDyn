@@ -63,7 +63,7 @@ public:
   //! method and implement the 'exporting' algorithm.
   //! \throw LoaderException.
   //------------------------------------------------------------------
-  virtual void saveToFile(R const& /*resource*/, std::string const& filename)
+  virtual void saveToFile(R const& /*resource*/, std::string const& filename) const
   {
     std::string msg("Found no loader supporting this kind of file '" + filename);
     LOGF("%s", msg.c_str());

@@ -23,147 +23,272 @@
 #include <iostream>
 #include <fstream>
 
-// Register the test suite
-CPPUNIT_TEST_SUITE_REGISTRATION(ResourcesTests);
-
 static bool destroyedA = false;
 class ResourceA
-  : public IResource<uint32_t>,
-    private UniqueID<ResourceA>
 {
 public:
 
-  ResourceA()
-    : IResource(UniqueID<ResourceA>::getID())
+  ResourceA(uint32_t id, std::string const& str)
+    : m_id(id), m_str(str)
   {
-     LOGI("Created ResourceA %u", m_id);
+    std::cout << "Created ResourceA " << m_id
+              << " " << m_str << std::endl;
   }
 
   ~ResourceA()
   {
      destroyedA = true;
   }
+
+  uint32_t m_id;
+  std::string m_str;
 };
 
 static bool destroyedB = false;
 class ResourceB
-  : public IResource<std::string>,
-    private UniqueID<ResourceB>
+  : private UniqueID<ResourceB>
 {
 public:
 
   ResourceB()
-    : IResource("BB_" + std::to_string(UniqueID<ResourceB>::getID()))
+    : m_id("BB_" + std::to_string(UniqueID<ResourceB>::getID()))
   {
-     LOGI("Created ResourceB %s", m_id.c_str());
+    std::cout << "Created ResourceB " << m_id << std::endl;
   }
 
   ~ResourceB()
   {
      destroyedB = true;
   }
+
+  std::string m_id;
 };
+
+using RAPtr = std::shared_ptr<ResourceA>;
+using RBPtr = std::shared_ptr<ResourceB>;
+static ResourceManager<uint32_t, ResourceA>* RMA;
+static ResourceManager<uint32_t, ResourceB>* RMB;
+
+// Register the test suite
+CPPUNIT_TEST_SUITE_REGISTRATION(ResourcesTests);
 
 //--------------------------------------------------------------------------
 void ResourcesTests::setUp()
 {
+  RMA = new ResourceManager<uint32_t, ResourceA>;
+  RMB = new ResourceManager<uint32_t, ResourceB>;
 }
 
 //--------------------------------------------------------------------------
 void ResourcesTests::tearDown()
 {
-}
+  if (nullptr != RMA)
+    delete RMA;
+  RMA = nullptr;
 
-//--------------------------------------------------------------------------
-void ResourcesTests::testsResources()
-{
-  // -- Resource A
-
-  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
-  ResourceA *rA1 = new ResourceA();
-  CPPUNIT_ASSERT_EQUAL(0U, rA1->owners());
-  CPPUNIT_ASSERT_EQUAL(0U, rA1->id());
-  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
-
-  ResourceA *rA2 = new ResourceA();
-  CPPUNIT_ASSERT_EQUAL(0U, rA1->owners());
-  CPPUNIT_ASSERT_EQUAL(0U, rA2->owners());
-  CPPUNIT_ASSERT_EQUAL(1U, rA2->id());
-  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
-
-  rA1->acquire();
-  CPPUNIT_ASSERT_EQUAL(1U, rA1->owners());
-  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
-  rA1->dispose();
-  CPPUNIT_ASSERT_EQUAL(0U, rA1->owners());
-  rA1->dispose();
-  CPPUNIT_ASSERT_EQUAL(true, destroyedA);
-  destroyedA = false;
-  rA2->dispose();
-  CPPUNIT_ASSERT_EQUAL(true, destroyedA);
-
-  // -- Resource B
-
-  CPPUNIT_ASSERT_EQUAL(false, destroyedB);
-  ResourceB *rB1 = new ResourceB();
-  CPPUNIT_ASSERT_EQUAL(0U, rB1->owners());
-  CPPUNIT_ASSERT_EQUAL(0, rB1->id().compare("BB_0"));
-  CPPUNIT_ASSERT_EQUAL(false, destroyedB);
-
-  ResourceB *rB2 = new ResourceB();
-  CPPUNIT_ASSERT_EQUAL(0U, rB1->owners());
-  CPPUNIT_ASSERT_EQUAL(0U, rB2->owners());
-  CPPUNIT_ASSERT_EQUAL(0, rB2->id().compare("BB_1"));
-  CPPUNIT_ASSERT_EQUAL(false, destroyedB);
-
-  rB1->acquire();
-  CPPUNIT_ASSERT_EQUAL(1U, rB1->owners());
-  CPPUNIT_ASSERT_EQUAL(false, destroyedB);
-  rB1->dispose();
-  CPPUNIT_ASSERT_EQUAL(0U, rB1->owners());
-  rB1->dispose();
-  CPPUNIT_ASSERT_EQUAL(true, destroyedB);
-  destroyedB = false;
-  rB2->dispose();
-  CPPUNIT_ASSERT_EQUAL(true, destroyedB);
+  if (nullptr != RMB)
+    delete RMB;
+  RMB = nullptr;
 }
 
 //--------------------------------------------------------------------------
 void ResourcesTests::testsResourceManager()
 {
-  // Check empty resource manager
-  ResourceManager<uint32_t> rm;
-  CPPUNIT_ASSERT_EQUAL(0U, rm.size());
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(0U)); // Resource exists but not present in the manager
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(1U)); // Resource exists but not present in the manager
+  // -- Resources A
 
-  // Insert 2 resources in the resource manager. Check they are inserted.
-  rm.add(new ResourceA()); // --> id #2U
-  rm.add(new ResourceA()); // --> id #3U
-  CPPUNIT_ASSERT_EQUAL(2U, rm.size());
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.look(2U));
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.look(3U));
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.look(4U));
+  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
+  {
+    RAPtr rA1 = RMA->create(0U, resource::Strategy::ThrowException, 0U, "toto");
+    CPPUNIT_ASSERT_EQUAL(true, nullptr != rA1);
+    CPPUNIT_ASSERT_EQUAL(2l, rA1.use_count());
+    CPPUNIT_ASSERT_EQUAL(0U, rA1->m_id);
+    CPPUNIT_ASSERT_EQUAL(true, rA1->m_str == "toto");
+    CPPUNIT_ASSERT_EQUAL(false, destroyedA);
+    CPPUNIT_ASSERT_EQUAL(1_z, RMA->size());
+  }
 
-  // Insert 3th resource and acquire it. Check acquisition.
-  rm.add(new ResourceA());
-  uint32_t id = 4U;
-  CPPUNIT_ASSERT_EQUAL(3U, rm.size());
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.acquire(id));
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.acquire(id + 1U));
-  CPPUNIT_ASSERT_EQUAL(1U, ((ResourceA*) rm.look(id))->owners());
+  RAPtr rA2 = RMA->create(1U, resource::Strategy::ThrowException, 1U, "foo");
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rA2);
+  CPPUNIT_ASSERT_EQUAL(2l, rA2.use_count());
+  CPPUNIT_ASSERT_EQUAL(1U, rA2->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, rA2->m_str == "foo");
+  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
+  CPPUNIT_ASSERT_EQUAL(2_z, RMA->size());
 
-  // Check disposing of the resource already acquired.
-  rm.dispose(id);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rm.acquire(id));
-  CPPUNIT_ASSERT_EQUAL(1U, ((ResourceA*) rm.look(id))->owners());
-  rm.dispose(id);
-  CPPUNIT_ASSERT_EQUAL(0U, ((ResourceA*) rm.look(id))->owners());
+  RAPtr rA100 = RMA->create(100U, resource::Strategy::ThrowException, 100U, "100");
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rA100);
+  CPPUNIT_ASSERT_EQUAL(2l, rA100.use_count());
+  CPPUNIT_ASSERT_EQUAL(100U, rA100->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, rA100->m_str == "100");
+  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
+  CPPUNIT_ASSERT_EQUAL(3_z, RMA->size());
 
-  // Dispose the resource and check it's no longer exists.
-  rm.dispose(id);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rm.acquire(id));
-  CPPUNIT_ASSERT_EQUAL(2U, rm.size());
+  // -- Resources B
+
+  CPPUNIT_ASSERT_EQUAL(false, destroyedB);
+  RBPtr rB1 = RMB->create(0U, resource::Strategy::ThrowException);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rB1);
+  CPPUNIT_ASSERT_EQUAL(2l, rB1.use_count());
+  CPPUNIT_ASSERT_EQUAL(true, rB1->m_id == "BB_1");
+  CPPUNIT_ASSERT_EQUAL(false, destroyedB);
+  CPPUNIT_ASSERT_EQUAL(1_z, RMB->size());
+
+  RBPtr rB2 = RMB->create(1U, resource::Strategy::ThrowException);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rB2);
+  CPPUNIT_ASSERT_EQUAL(2l, rB2.use_count());
+  CPPUNIT_ASSERT_EQUAL(true, rB2->m_id == "BB_2");
+  CPPUNIT_ASSERT_EQUAL(false, destroyedB);
+  CPPUNIT_ASSERT_EQUAL(2_z, RMB->size());
+
+  // Search resources and check ptr user counter
+  {
+    RAPtr rA = RMA->acquire(0U);
+    CPPUNIT_ASSERT_EQUAL(true, nullptr != rA);
+    CPPUNIT_ASSERT_EQUAL(0U, rA->m_id);
+    CPPUNIT_ASSERT_EQUAL(2l, rA.use_count());
+  }
+
+  RAPtr rAA = RMA->acquire(1U);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rAA);
+  CPPUNIT_ASSERT_EQUAL(1U, rAA->m_id);
+  CPPUNIT_ASSERT_EQUAL(3l, rAA.use_count());
+
+  // Try adding double: check exception
+  try
+    {
+      RBPtr rB3 = RMB->create(0U, resource::Strategy::ThrowException);
+      CPPUNIT_FAIL("ResourceManagerException should have occured");
+    }
+  catch (ResourceManagerException const& e)
+    {
+    }
+
+  // Try adding double: check return nullptr
+  RBPtr rB4 = RMB->create(0U, resource::Strategy::ReturnNull);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rB4);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != RMB->acquire(0U));
+  CPPUNIT_ASSERT_EQUAL(true, RMB->acquire(0U)->m_id == "BB_1");
+
+  // Try adding double: check it has been replaced
+  RAPtr rA3 = RMA->create(0U, resource::Strategy::Replace, 42U, "bar");
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rA3);
+  CPPUNIT_ASSERT_EQUAL(2l, rA3.use_count());
+  CPPUNIT_ASSERT_EQUAL(42U, rA3->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, rA3->m_str == "bar");
+  CPPUNIT_ASSERT_EQUAL(true, destroyedA);
+  CPPUNIT_ASSERT_EQUAL(3_z, RMA->size());
+  destroyedA = false;
+
+  // Try adding double: check it the older is still used
+  RAPtr rA4 = RMA->create(1U, resource::Strategy::UseOlder, 42U, "bar");
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rA4);
+  CPPUNIT_ASSERT_EQUAL(4l, rA4.use_count());
+  CPPUNIT_ASSERT_EQUAL(1U, rA4->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, rA4->m_str == "foo");
+  CPPUNIT_ASSERT_EQUAL(false, destroyedA);
+  CPPUNIT_ASSERT_EQUAL(3_z, RMA->size());
+
+  // Try acquiring a non existant resource
+  RAPtr rA5 = RMA->acquire(55U);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rA5);
+
+  // Get a resource
+  ResourceA a = (*RMA)[1];
+  CPPUNIT_ASSERT_EQUAL(1U, a.m_id);
+  CPPUNIT_ASSERT_EQUAL(true, a.m_str == "foo");
+  CPPUNIT_ASSERT_EQUAL(3_z, RMA->size());
+
+  // Remove a non existing resource
+  RMA->remove(55U);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rA5);
+
+  // Remove-weak an existing resource
+  RMA->remove(1U, false);
+  RAPtr rA6 = RMA->acquire(1U);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != rA6);
+
+  // Remove-force an existing resource
+  RMA->remove(1U);
+  RAPtr rA7 = RMA->acquire(1U);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == rA7);
+
+  // Rename a resource that does not exists
+  try
+    {
+      RAPtr nA1 = RMA->rename(55U, 0U, resource::Strategy::ThrowException);
+      CPPUNIT_FAIL("ResourceManagerException should have occured");
+    }
+  catch (ResourceManagerException const& e)
+    {
+    }
+
+  // Rename a resource that does not exists
+  RAPtr nA2 = RMA->rename(55U, 0U, resource::Strategy::ReturnNull);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == nA2);
+
+  // Rename a resource with its own id
+  RAPtr nA3 = RMA->rename(0U, 0U, resource::Strategy::ReturnNull);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != nA3);
+  CPPUNIT_ASSERT_EQUAL(42U, nA3->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, nA3->m_str == "bar");
+
+  // Rename an existing resource
+  RAPtr nA4 = RMA->rename(0U, 66U, resource::Strategy::ReturnNull);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != nA4);
+  CPPUNIT_ASSERT_EQUAL(42U, nA4->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, nA4->m_str == "bar");
+
+  // Rename an acquired resource
+  RAPtr nA5 = RMA->acquire(66U);
+  CPPUNIT_ASSERT_EQUAL(42U, nA5->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, nA5->m_str == "bar");
+  RMA->rename(66U, 0U, resource::Strategy::ReturnNull);
+  RAPtr nA6 = RMA->acquire(0U);
+  CPPUNIT_ASSERT_EQUAL(42U, nA6->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, nA6->m_str == "bar");
+
+  // Rename an resource but the new key already exists
+  RAPtr nA7 = RMA->rename(0U, 100U, resource::Strategy::ReturnNull);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == nA7);
+
+  // Rename an resource but the new key already exists
+  try
+    {
+      RAPtr nA8 = RMA->rename(0U, 100U, resource::Strategy::ThrowException);
+      CPPUNIT_FAIL("ResourceManagerException should have occured");
+    }
+  catch (ResourceManagerException const& e)
+    {
+    }
+
+  // Rename an resource but the new key already exists
+  RMA->create(101U, resource::Strategy::ThrowException, 101U, "101");
+  RMA->create(102U, resource::Strategy::ThrowException, 102U, "102");
+  RMA->create(103U, resource::Strategy::ThrowException, 103U, "103");
+  RMA->create(104U, resource::Strategy::ThrowException, 104U, "104");
+
+  RAPtr nA8 = RMA->rename(101U, 102U, resource::Strategy::UseOlder);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != nA8);
+  CPPUNIT_ASSERT_EQUAL(101U, nA8->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, nA8->m_str == "101");
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == RMA->acquire(101U));
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != RMA->acquire(102U));
+
+  // Rename an resource but the new key already exists
+  RAPtr nA9 = RMA->rename(103U, 104U, resource::Strategy::Replace);
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != nA9);
+  CPPUNIT_ASSERT_EQUAL(104U, nA9->m_id);
+  CPPUNIT_ASSERT_EQUAL(true, nA9->m_str == "104");
+  CPPUNIT_ASSERT_EQUAL(true, nullptr == RMA->acquire(103U));
+  CPPUNIT_ASSERT_EQUAL(true, nullptr != RMA->acquire(104U));
+
+  // Destroy the manager while resource is used.
+  // Check the manager detects it.
+  RAPtr rA9 = RMA->acquire(0U);
+  {
+    delete RMA;
+  }
+  RMA = new ResourceManager<uint32_t, ResourceA>;
 }
 
 static bool loadedA = false;
@@ -171,60 +296,90 @@ static bool loadedB = false;
 static bool savedA = false;
 static bool savedB = false;
 
-class LoaderA: public ILoader<ResourceA>
+class Resource1
 {
 public:
-  LoaderA() : ILoader<ResourceA>("Loader ResourceA") {};
-  ~LoaderA() {};
-  virtual void loadFromFile(std::string const& /*filename*/, ResourceA* &object) override
+
+  Resource1() {}
+  ~Resource1() {}
+};
+
+class Resource2
+{
+public:
+
+  Resource2() {}
+  ~Resource2() {}
+};
+
+class LoaderA: public ILoader<Resource1>
+{
+public:
+
+  LoaderA()
+    : ILoader<Resource1>("Loader Resource1")
+  {}
+
+  ~LoaderA() {}
+
+  virtual void loadFromFile(std::string const& /*filename*/, Resource1& /*object*/) override
   {
     loadedA = true;
-    std::cout << "ResourceA* loadFromFile(std::string const& filename)" << std::endl;
-    object = new ResourceA();
+    std::cout << "loadFromFile Resource1" << std::endl;
   }
-  virtual void saveToFile(ResourceA const& /*object*/, std::string const& /*filename*/) override
+
+  virtual void saveToFile(Resource1 const& /*object*/, std::string const& /*filename*/) const override
   {
     savedA = true;
-    std::cout << "void saveToFile(ResourceA const& /*object*/, std::string const& filename)" << std::endl;
+    std::cout << "saveToFile Resource1" << std::endl;
   }
 };
 
-class LoaderB: public ILoader<ResourceB>
+class LoaderB: public ILoader<Resource2>
 {
 public:
-  LoaderB() : ILoader<ResourceB>("Loader ResourceB") {};
-  ~LoaderB() {};
-  virtual void loadFromFile(std::string const& /*filename*/, ResourceB* &object) override
+  LoaderB()
+    : ILoader<Resource2>("Loader Resource2")
+  {}
+
+  ~LoaderB() {}
+
+  virtual void loadFromFile(std::string const& /*filename*/, Resource2& /*object*/) override
   {
     loadedB = true;
-    std::cout << "ResourceB* loadFromFile(std::string const& filename)" << std::endl;
-    object = new ResourceB();
+    std::cout << "loadFromFile Resource2" << std::endl;
   }
-virtual void saveToFile(ResourceB const& /*object*/, std::string const& /*filename*/) override
+
+  virtual void saveToFile(Resource2 const& /*object*/, std::string const& /*filename*/) const override
   {
     savedB = true;
-    std::cout << "void saveToFile(ResourceB const& /*object*/, std::string const& filename)" << std::endl;
+    std::cout << "saveToFile Resource2" << std::endl;
   }
 };
 
-#  include "Utilities/GenHierarchies.h"
+#include "YesEngine/GenHierarchies.h"
+using namespace Yes;
 
-typedef TYPELIST_2(ResourceA, ResourceB) ResourceList;
+typedef TYPELIST_2(Resource1, Resource2) ResourceList;
 
-#  include "LoaderManager.tpp"
+#include "LoaderManager.tpp"
+
+void LoaderManager::registerAllLoaders()
+{
+}
 
 //--------------------------------------------------------------------------
 void ResourcesTests::testsLoaderManager()
 {
   LoaderManager &lm = LoaderManager::instance();
-  lm.registerLoader(new LoaderA(), "a:A:aa::AA");
-  lm.registerLoader(new LoaderB(), "bb");
-  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<ResourceA>("a"));
-  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<ResourceA>("A"));
-  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<ResourceA>("aa"));
-  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<ResourceA>("AA"));
-  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<ResourceB>("bb"));
-  CPPUNIT_ASSERT_EQUAL(false, lm.hasLoader<ResourceA>("cc"));
+  lm.registerLoader<LoaderA, Resource1>("a:A:aa::AA");
+  lm.registerLoader<LoaderB, Resource2>("bb");
+  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<Resource1>("a"));
+  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<Resource1>("A"));
+  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<Resource1>("aa"));
+  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<Resource1>("AA"));
+  CPPUNIT_ASSERT_EQUAL(true, lm.hasLoader<Resource2>("bb"));
+  CPPUNIT_ASSERT_EQUAL(false, lm.hasLoader<Resource1>("cc"));
 
   CPPUNIT_ASSERT_EQUAL(false, loadedA);
   CPPUNIT_ASSERT_EQUAL(false, loadedB);
@@ -232,40 +387,34 @@ void ResourcesTests::testsLoaderManager()
   CPPUNIT_ASSERT_EQUAL(false, savedB);
 
   std::cout << "1-----------------------------------------" << std::endl;
-  ResourceA rA;
+  Resource1 rA;
   lm.saveToFile(rA, "/home/toto.AA~");
   CPPUNIT_ASSERT_EQUAL(true, savedA);
 
   std::cout << "2-----------------------------------------" << std::endl;
-  ResourceA *rA1 = nullptr;
-  CPPUNIT_ASSERT_THROW(lm.loadFromFile("/home/tutu.a", rA1), LoaderException);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr == rA1); // the file does not exist
+  Resource1 rA1;
+  CPPUNIT_ASSERT_THROW(lm.loadFromFile("/home/tutu.a", rA1), LoaderManagerException);
   CPPUNIT_ASSERT_EQUAL(false, loadedA);
 
   std::cout << "3-----------------------------------------" << std::endl;
   { std::fstream fs; fs.open("/tmp/toto.a", std::ios::out); fs.close(); } // create a file
   lm.loadFromFile("/tmp/toto.a", rA1);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != rA1); // the file exists
   CPPUNIT_ASSERT_EQUAL(true, loadedA);
-  // FIXME: call ressourceManager.dispose();
-  delete rA1;
 
   std::cout << "4-----------------------------------------" << std::endl;
-  ResourceB rB;
+  Resource2 rB;
   lm.saveToFile(rB, "/home/toto.AA.bb");
   CPPUNIT_ASSERT_EQUAL(true, savedB);
-  ResourceB *rB1;
+  Resource2 rB1;
   { std::fstream fs; fs.open("/tmp/tutu.bb", std::ios::out); fs.close(); } // create a file
   lm.loadFromFile("/tmp/tutu.bb", rB1);
   CPPUNIT_ASSERT_EQUAL(true, loadedB);
-  // FIXME: call ressourceManager.dispose();
-  delete rB1;
 
   CPPUNIT_ASSERT_THROW(lm.saveToFile(rB, "/home/toto.cc"), LoaderException);
   CPPUNIT_ASSERT_THROW(lm.saveToFile(rB, "/home/toto"), LoaderException);
 
   // Use already existing extension
-  lm.registerLoader(new LoaderB(), "a");
+  lm.registerLoader<LoaderB, Resource2>("a"); //egisterLoader(new LoaderB(), "a");
   lm.saveToFile(rB, "/home/toto.a");
   lm.saveToFile(rB, "/home/toto.bb");
   lm.saveToFile(rA, "/home/toto.a");

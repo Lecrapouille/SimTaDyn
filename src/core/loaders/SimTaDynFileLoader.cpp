@@ -81,7 +81,7 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap& 
 }
 
 // FIXME password
-bool SimTaDynFileLoader::zip(SimTaDynMap const& map, std::string const& filename)
+bool SimTaDynFileLoader::zip(SimTaDynMap const& map, std::string const& filename) const
 {
   if (filename == map.m_zip_path)
     {
@@ -100,7 +100,7 @@ bool SimTaDynFileLoader::zip(SimTaDynMap const& map, std::string const& filename
   return ret;
 }
 
-void SimTaDynFileLoader::saveToFile(SimTaDynMap const& map, std::string const& filename)
+void SimTaDynFileLoader::saveToFile(SimTaDynMap const& map, std::string const& filename) const
 {
   if (false == zip(map, filename))
     {
