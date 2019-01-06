@@ -15,33 +15,33 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "Camera2D.hpp"
 
 const float* Camera2D::getTransform()
 {
-  float rotation_ = 0.0f;
-  float zoom_ = 1.0f;
+  float rotation = 0.0f;
+  float zoom = 1.0f;
   // Rotation components
-  float angle  = rotation_ * 3.141592654f / 180.f;
+  float angle  = rotation * 3.141592654f / 180.f;
   float cosine = static_cast<float>(std::cos(angle));
   float sine   = static_cast<float>(std::sin(angle));
-  float tx     = -look_at_x_ * cosine - look_at_y_ * sine + look_at_x_;
-  float ty     =  look_at_x_ * sine - look_at_y_ * cosine + look_at_y_;
+  float tx     = -m_look_at_x * cosine - m_look_at_y * sine + m_look_at_x;
+  float ty     =  m_look_at_x * sine - m_look_at_y * cosine + m_look_at_y;
 
   // Projection components
-  float a = 2.f / look_at_width_ * zoom_;
-  float b = -2.f / look_at_height_ * zoom_;
-  float c = -a * look_at_x_;
-  float d = -b * look_at_y_;
+  float a = 2.f / m_look_at_width * zoom;
+  float b = -2.f / m_look_at_height * zoom;
+  float c = -a * m_look_at_x;
+  float d = -b * m_look_at_y;
 
-  // Rebuild the projection matrix
-  matrix[0] = a * cosine; matrix[4] = a * sine;   matrix[8]  = 0.f;  matrix[12] = a * tx + c;
-  matrix[1] = -b * sine;  matrix[5] = b * cosine; matrix[9]  = 0.f;  matrix[13] = b * ty + d;
-  matrix[2] = 0.0f;       matrix[6] = 0.0f;       matrix[10] = 1.0f; matrix[14] = 0.0f;
-  matrix[3] = 0.0f;       matrix[7] = 0.0f;       matrix[11] = 0.0f; matrix[15] = 1.0f;
+  // Rebuild the projection m_matrix
+  m_matrix[0] = a * cosine; m_matrix[4] = a * sine;   m_matrix[8]  = 0.f;  m_matrix[12] = a * tx + c;
+  m_matrix[1] = -b * sine;  m_matrix[5] = b * cosine; m_matrix[9]  = 0.f;  m_matrix[13] = b * ty + d;
+  m_matrix[2] = 0.0f;       m_matrix[6] = 0.0f;       m_matrix[10] = 1.0f; m_matrix[14] = 0.0f;
+  m_matrix[3] = 0.0f;       m_matrix[7] = 0.0f;       m_matrix[11] = 0.0f; m_matrix[15] = 1.0f;
 
-  return matrix;
+  return m_matrix;
 }

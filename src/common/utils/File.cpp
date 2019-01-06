@@ -15,7 +15,49 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "File.hpp"
+#include "Logger.hpp"
+#include <fstream>
+
+//------------------------------------------------------------------
+//! \param filename the file path to read.
+//! \param the buffer receiving the content of the file.
+//! \return true if success, else false.
+//------------------------------------------------------------------
+bool File::readAllFile(std::string const& filename, std::string& buffer)
+{
+  std::ifstream infile;
+  bool res = false;
+
+  // Read the shader code from a file
+  infile.open(filename, std::ifstream::in);
+  if (infile.is_open())
+    {
+      infile.seekg(0, std::ios::end);
+      std::streampos pos = infile.tellg();
+      if (pos > 0)
+        {
+          buffer.resize(static_cast<size_t>(pos));
+          infile.seekg(0, std::ios::beg);
+          infile.read(&buffer[0U],
+                      static_cast<std::streamsize>(buffer.size()));
+          res = infile.good();
+          if (!res)
+            {
+              LOGE("Failed reading the whole file '%s'. Reason is '%s'",
+                   filename.c_str(), strerror(errno));
+            }
+        }
+      infile.close();
+    }
+  else
+    {
+      LOGE("Failed open file '%s'. Reason is '%s'",
+           filename.c_str(), strerror(errno));
+    }
+
+  return res;
+}

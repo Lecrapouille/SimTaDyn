@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef COLOR_HPP_
@@ -43,10 +43,10 @@ public:
   // Values: 0 .. 255
   /*explicit Color(const uint8_t red, const uint8_t green, const uint8_t blue, const uint8_t alpha = 255U)
   {
-    r = ((float) red) / 255.0f;
-    g = ((float) green) / 255.0f;
-    b = ((float) blue) / 255.0f;
-    a = ((float) alpha) / 255.0f;
+    r = static_cast<float>(red) / 255.0f;
+    g = static_cast<float>(green) / 255.0f;
+    b = static_cast<float>(blue) / 255.0f;
+    a = static_cast<float>(alpha) / 255.0f;
 
     constrain();
     }*/
@@ -54,10 +54,10 @@ public:
    // Values: 0 .. 255
   explicit Color(const uint32_t red, const uint32_t green, const uint32_t blue, const uint32_t alpha = 255U)
   {
-    r = ((float) red) / 255.0f;
-    g = ((float) green) / 255.0f;
-    b = ((float) blue) / 255.0f;
-    a = ((float) alpha) / 255.0f;
+    r = static_cast<float>(red) / 255.0f;
+    g = static_cast<float>(green) / 255.0f;
+    b = static_cast<float>(blue) / 255.0f;
+    a = static_cast<float>(alpha) / 255.0f;
 
     constrain();
   }
@@ -121,7 +121,7 @@ public:
 
   inline const Color operator+(const uint8_t scalar) const
   {
-    const float ns = ((float) scalar) / 255.0f;
+    const float ns = static_cast<float>(scalar) / 255.0f;
     return Color(r + ns, g + ns, b + ns, a + ns);
   }
 
@@ -137,7 +137,7 @@ public:
 
   inline const Color operator-(const uint8_t scalar) const
   {
-    const float ns = ((float) scalar) / 255.0f;
+    const float ns = static_cast<float>(scalar) / 255.0f;
     return Color(r - ns, g - ns, b - ns, a - ns);
   }
 
@@ -148,7 +148,7 @@ public:
 
   inline const Color operator*(const uint8_t scalar) const
   {
-    const float ns = ((float) scalar) / 255.0f;
+    const float ns = static_cast<float>(scalar) / 255.0f;
     return Color(r * ns, g * ns, b * ns, a * ns);
   }
 

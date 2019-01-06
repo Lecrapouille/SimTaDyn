@@ -16,55 +16,56 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef ILOADER_HPP_
 #  define ILOADER_HPP_
 
-#  include "LoaderException.hpp"
+#  include "ManagerException.hpp"
 #  include "Logger.hpp"
 #  include <memory>
 #  include <map>
 #  include <vector>
 
-// **************************************************************
-//! \brief Interface for loading and saving data from/to a file.
-//! Template R is for IResource but not necessary.
-// **************************************************************
+// *************************************************************************************************
+//! \brief Interface for loading/importing and saving/exporting data from/to a file on hard disk.
+//! Template R is for the resource.
+// *************************************************************************************************
 template <class R>
 class ILoader
 {
 public:
 
   //------------------------------------------------------------------
-  //! \brief Dummy virtual destructor for inheritance.
+  //! \brief Dummy virtual destructor for derived class.
   //------------------------------------------------------------------
   virtual ~ILoader() {}
 
   //------------------------------------------------------------------
-  //! \brief Interface for read datum from a file. The derived class
-  //! implementing this method shall return the address of the T-typed
-  //! class holding these datum. Calling this method will produce an
-  //! exception.
+  //! \brief Interface for reading data from a file on the hard
+  //! file. The default behavior of this method is to trig an 'not
+  //! implemented' exception. The derived class con override this
+  //! method and implement the 'importing' algorithm.
+  //! \throw LoaderException.
   //------------------------------------------------------------------
-  virtual void loadFromFile(std::string const& filename, std::shared_ptr<R> &/*resource*/)
+  virtual void loadFromFile(std::string const& filename, R& /*resource*/)
   {
-    std::string msg("Found no loader supporting this kind of file '"
-                    + filename);
+    std::string msg("Found no loader supporting this kind of file '" + filename);
     LOGF("%s", msg.c_str());
     throw LoaderException(msg);
   }
 
   //------------------------------------------------------------------
-  //! \brief Interface for storing datum in a file. The derived class
-  //! implementing this method shall pass the T-typed class holding
-  //! these datum. Calling this method will produce an exception.
+  //! \brief Interface for storing data in a file on the hard
+  //! file. The default behavior of this method is to trig an 'not
+  //! implemented' exception. The derived class can override this
+  //! method and implement the 'exporting' algorithm.
+  //! \throw LoaderException.
   //------------------------------------------------------------------
-  virtual void saveToFile(std::shared_ptr<R> const /*resource*/, std::string const& filename)
+  virtual void saveToFile(R const& /*resource*/, std::string const& filename) const
   {
-    std::string msg("Found no loader supporting this kind of file '"
-                    + filename);
+    std::string msg("Found no loader supporting this kind of file '" + filename);
     LOGF("%s", msg.c_str());
     throw LoaderException(msg);
   }
@@ -73,7 +74,7 @@ public:
   //! \brief Return the reference of the text describing the goal of
   //! the loader (for example needed by Gtk::FileFilter).
   //------------------------------------------------------------------
-  inline std::string const &description() const
+  inline std::string const& description() const
   {
     return m_description;
   }
@@ -81,34 +82,22 @@ public:
 protected:
 
   //------------------------------------------------------------------
-  //! \brief Made this class abstract (cannot be instanciated).
-  //! \param description Short text describing the goal of the loader.
+  //! \brief Make this class abstract (cannot be instanciated
+  //! directly).
+  //! \param description the short text describing the goal of the
+  //loader.
   //------------------------------------------------------------------
   ILoader(std::string const &description)
-  : m_description(description)
+    : m_description(description)
   {
   }
+
+private:
 
   //------------------------------------------------------------------
   //! \brief Short description of the goal of the loader.
   //------------------------------------------------------------------
   std::string m_description;
-};
-
-// **************************************************************
-//! \brief Same goal than 'typedef'.
-// **************************************************************
-template <class R>
-using LoaderContainer = std::map<std::string, std::shared_ptr<ILoader<R>>>;
-
-// **************************************************************
-//! \brief Hold loaders. Needed for meta-programming
-// **************************************************************
-template <class R>
-struct LoaderHolder
-{
-  //! \brief Hash table of loaders. Ordered by file extension.
-  LoaderContainer<R> m_loaders;
 };
 
 #endif

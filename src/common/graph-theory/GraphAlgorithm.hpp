@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef GRAPH_ALGORITHM_HPP_
@@ -73,8 +73,11 @@ public:
 
     // Empty the result and reserve the space for storing nodes
     m_result.clear();
-    int32_t reserving = m_graph->howManyNodes() - m_result.capacity();
-    m_result.reserve(std::max(0, reserving));
+    if (m_graph->howManyNodes() > m_result.capacity())
+      {
+        size_t reserving = m_graph->howManyNodes() - m_result.capacity();
+        m_result.reserve(std::max(0_z, reserving));
+      }
 
     // Empty the queue ...
     m_queue.clear();

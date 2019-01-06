@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef FILE_HPP_
@@ -88,6 +88,11 @@ public:
   {
     return 0 == access(path.c_str(), W_OK);
   }
+
+  //------------------------------------------------------------------
+  //! \brief Read the whole file and store its content as string.
+  //------------------------------------------------------------------
+  static bool readAllFile(std::string const& filename, std::string& buffer);
 
   //------------------------------------------------------------------
   //! \brief give the file name with its extension from a given path

@@ -15,10 +15,9 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-//#include "MapEditor.hpp"
 #include "SimTaDynForth.hpp"
 #include "PathManager.hpp"
 
@@ -30,7 +29,8 @@ void SimForth::boot()
   Forth::boot();
 
   // Add specialized words for SimTaDyn
-  m_dictionary.add(SIMFORTH_PRIMITIVE_TOTO, FORTH_DICO_ENTRY("TOTO"), 0);
+  m_dictionary.add(SIMFORTH_PRIMITIVE_SHEET, FORTH_DICO_ENTRY("SHEET"), 0);
+  //displayDictionary();
 
   // Initialize basic Forth system
   std::pair<bool, std::string> res
@@ -133,6 +133,7 @@ bool SimForth::parseCell(ASpreadSheetCell &cell)
     }
   catch (ForthException const& e)
     {
+      LOGC("parseCell caught Forth Exception '%s'", e.message().c_str());
       cell.reset();
       res = false;
     }

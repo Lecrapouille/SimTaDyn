@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SIMTADYNLOADERS_HPP_
@@ -30,16 +30,15 @@ using namespace Yes;
 //! and saved in files.
 // *************************************************************************************************
 
-#  include "SimTaDynMap.hpp"
-#  include "GLTextures.hpp"
+class SimTaDynMap;
+class SimTaDynSheet;
+class GLTexture2D;
 
 // *************************************************************************************************
 //! Define the list of resource that will be used by the ResourceManager and LoaderManagers.
 // *************************************************************************************************
 
-typedef TYPELIST_3(SimTaDynMap,
-                   SimTaDynSheet,
-                   GLTexture2D) ResourceList;
+typedef TYPELIST_2(SimTaDynMap, SimTaDynSheet /* GLTexture2D */) ResourceList;
 
 // *************************************************************************************************
 //!
@@ -48,7 +47,7 @@ typedef TYPELIST_3(SimTaDynMap,
 #  include "ResourceManager.tpp"
 #  include "ShapeFileLoader.hpp"
 #  include "SimTaDynFileLoader.hpp"
-#  include "TextureFileLoader.hpp"
+// #  include "TextureFileLoader.hpp"
 #  include "LoaderManager.tpp"
 
 #endif

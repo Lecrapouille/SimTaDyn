@@ -53,3 +53,12 @@ fi
 ### License: MIT
 print-clone zipper
 git clone --recursive https://github.com/Lecrapouille/zipper.git --branch fix_leaks --depth=1 > /dev/null 2> /dev/null
+
+### Library for creating GUI in OpenGL
+### License: MIT
+print-clone imgui
+git clone https://github.com/ocornut/imgui.git --depth=1 > /dev/null 2> /dev/null
+cp imgui/examples/imgui_impl_glfw.cpp imgui/imgui_impl_glfw.cpp
+cp imgui/examples/imgui_impl_glfw.h imgui/imgui_impl_glfw.h
+cp imgui/examples/imgui_impl_opengl3.cpp imgui/imgui_impl_opengl3.cpp
+cp imgui/examples/imgui_impl_opengl3.h imgui/imgui_impl_opengl3.h

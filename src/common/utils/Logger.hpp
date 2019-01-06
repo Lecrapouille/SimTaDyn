@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef LOGGER_HPP_
@@ -103,8 +103,20 @@ private:
 #  define LOGE(format, ...) \
   do { Logger::instance().log(nullptr, logger::Error, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
-//! \brief Fatal Log.
+//! \brief Throw signal Log.
+#  define LOGS(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Signal, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+//! \brief Throw exception Log.
 #  define LOGX(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Exception, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+//! \brief Catch exception Log.
+#  define LOGC(format, ...) \
+  do { Logger::instance().log(nullptr, logger::Catch, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+//! \brief Fatal Log.
+#  define LOGA(format, ...) \
   do { Logger::instance().log(nullptr, logger::Fatal, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #  define LOGIS(format, ...) \
@@ -123,6 +135,12 @@ private:
   do { Logger::instance().log(&std::cerr, logger::Error, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #  define LOGXS(format, ...) \
+  do { Logger::instance().log(&std::cerr, logger::Exception, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGCS(format, ...)                                            \
+  do { Logger::instance().log(&std::cerr, logger::Catch, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
+
+#  define LOGAS(format, ...) \
   do { Logger::instance().log(&std::cerr, logger::Fatal, "[%s::%d] " format, SHORT_FILENAME, __LINE__, ##__VA_ARGS__); } while (0)
 
 #endif /* LOGGER_HPP_ */

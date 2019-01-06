@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SIMTADYN_SPREADSHEET_HPP_
@@ -49,13 +49,14 @@ public:
   std::pair<bool, std::string> evaluate(SimForth &forth); // FIXME: Forth et mauvais nom
   void parse(SimForth &forth);
   virtual const std::string& name() const = 0;
+  virtual void reset() = 0;
 
 protected:
 
   virtual void resetCellIterator() = 0;
   virtual bool hasCell() const = 0;
   virtual ASpreadSheetCell* nextCell() /*const*/ = 0; // FIXME
-  virtual uint32_t howManyCells() const = 0;
+  virtual size_t howManyCells() const = 0;
 
 private:
 

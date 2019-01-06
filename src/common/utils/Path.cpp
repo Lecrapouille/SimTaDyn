@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "Path.hpp"
@@ -68,7 +68,7 @@ std::pair<std::string, bool> Path::find(std::string const& filename) const
   if (File::exist(filename))
     return std::make_pair(filename, true);
 
-  for (auto it: m_paths)
+  for (auto const& it: m_paths)
     {
       std::string file(it + filename);
       if (File::exist(file))
@@ -81,7 +81,7 @@ std::pair<std::string, bool> Path::find(std::string const& filename) const
 
 std::string Path::expand(std::string const& filename) const
 {
-  for (auto it: m_paths)
+  for (auto const& it: m_paths)
     {
       std::string file(it + filename);
       if (File::exist(file))
@@ -99,7 +99,7 @@ std::string const &Path::toString() const
 void Path::update()
 {
   m_path.clear();
-  for (auto it: m_paths)
+  for (auto const& it: m_paths)
     {
       m_path += it;
       m_path.pop_back(); // Remove the '/' char

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SIMTADYN_CONTEXT_HPP_
@@ -60,11 +60,12 @@ public:
   ~SimTaDynContext()
   {
     LOGI("Leaving SimTaDynContext: releasing the memory");
+    m_window.reset();
     ForthEditor::destroy();
     MapEditor::destroy();
     SimForth::destroy();
     LoaderManager::destroy();
-    //TODO ResourceManager::destroy();
+    SimTaDynMapManager::destroy();
     PathManager::destroy();
     Logger::destroy();
   };

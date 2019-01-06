@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef GLWINDOW_HPP_
@@ -23,13 +23,7 @@
 
 #  include <GL/glew.h>
 #  include <GLFW/glfw3.h>
-#  include "GLObject.hpp"
-
-// FIXME: move outside this code
-// Return the number of elements in an array
-#  ifndef ARRAY_SIZE
-#    define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
-#  endif
+#  include "GLException.hpp"
 
 // **************************************************************
 //! \brief
@@ -42,7 +36,8 @@ public:
   //! \brief Dummy constructor. Does not start the OpenGL context by
   //! security. To do it call start()
   //------------------------------------------------------------------
-  IGLWindow();
+  IGLWindow(uint32_t const width = 1024u, uint32_t const height = 768u,
+            const char *title = "");
 
   //------------------------------------------------------------------
   //! \brief Destructor. Release the OpenGL context. Call the virtual
@@ -63,6 +58,26 @@ public:
     return m_deltaTime;
   }
 
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline GLFWwindow *obj()
+  {
+    return m_window;
+  }
+
+  inline uint32_t width() const { return m_width; }
+  inline uint32_t height() const { return m_height; }
+  inline void setWindowSize(uint32_t const width, uint32_t const height)
+  {
+    m_width = width;
+    m_height = height;
+
+    // Calbback to be implemented by the derived class
+    onWindowSizeChanged(static_cast<float>(width),
+                        static_cast<float>(height));
+  }
+
 private:
 
   //------------------------------------------------------------------
@@ -71,13 +86,12 @@ private:
   //------------------------------------------------------------------
   void FPS();
 
-  double m_lastTime;
-  double m_lastFrameTime;
-  int m_nbFrames;
-  float m_deltaTime;
-  bool m_opengl_context = false;
-
-protected:
+  //------------------------------------------------------------------
+  //! \brief Callback when the window has its size changed
+  //! \param width is never <= 0
+  //! \param height is never <= 0
+  //------------------------------------------------------------------
+  virtual void onWindowSizeChanged(const float width, const float height) = 0;
 
   //------------------------------------------------------------------
   //! \brief Virtual method. Add here all stuffs concerning the init
@@ -105,9 +119,16 @@ protected:
   //------------------------------------------------------------------
   virtual void release();
 
-  const int m_width = 1024;
-  const int m_height = 768;
-  const char *m_title = "Example";
+private:
+
+  double m_lastTime;
+  double m_lastFrameTime;
+  int m_fps;
+  float m_deltaTime;
+
+  uint32_t m_width;
+  uint32_t m_height;
+  const char *m_title;
   GLFWwindow *m_window = nullptr;
 };
 

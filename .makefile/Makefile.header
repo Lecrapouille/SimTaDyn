@@ -16,7 +16,7 @@
 ## General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+## along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
 ###################################################
@@ -95,7 +95,7 @@ INCLUDES = -I$(BUILD) -I$(P)/external/backward-cpp -I$(P)/external	\
 -I$(P)/src/common/managers -I$(P)/src/common/utils			\
 -I$(P)/src/common/maths -I$(P)/src/common/containers			\
 -I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
--I$(P)/src/common/graphics/OpenGL/geometry				\
+-I$(P)/src/common/graphics/OpenGL/      				\
 -I$(P)/src/common/graphics/RTree -I$(P)/src/common/graphics		\
 -I$(P)/src/core -I$(P)/src/core/loaders -I$(P)/src/forth		\
 -I$(P)/src/ui
@@ -116,7 +116,6 @@ $(P)/src/common/containers:\
 $(P)/src/common/graph-theory:\
 $(P)/src/common/graphics:\
 $(P)/src/common/graphics/OpenGL:\
-$(P)/src/common/graphics/OpenGL/geometry:\
 $(P)/src/common/graphics/RTree:\
 $(P)/src/core:\
 $(P)/src/core/loaders:\
@@ -125,7 +124,8 @@ $(P)/src/ui
 
 ###################################################
 # Common defines
-DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\" -DPROJECT_DATA_PATH=\"$(PROJECT_DATA_PATH)\"
+DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
+DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Path where to store the generated coverage docs

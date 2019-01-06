@@ -17,9 +17,10 @@ class Arc {
 +to(): Node
 }
 
-Node "2" <-> "*" Arc
+Node "2" <- Arc: neighbors
+Node -> "*" Arc: borders
 
-class Graph {
+class Graph<Node, Arc> {
 -directed: bool
 -nodes: Node[]
 -arcs: Arc[]
@@ -38,8 +39,8 @@ class Graph {
 +unmarkArc(arc: UniqueID)
 }
 
-Graph --> "*" Arc
-Graph --> "*" Node
+Graph --> "*" Arc: arcs
+Graph --> "*" Node: nodes
 
 abstract class GraphAlgorithm {
 +{static} factory(name: String): GraphAlgorithm*
@@ -58,7 +59,7 @@ class BreadthFirstSearch {
 +update(): Node*
 }
 
-GraphAlgorithm .> Graph : computes
+GraphAlgorithm .> Graph : visites
 GraphAlgorithm <|-- DepthFirstSearch
 GraphAlgorithm <|-- BreadthFirstSearch
 

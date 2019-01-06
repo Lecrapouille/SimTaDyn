@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef RESOURCES_TESTS_HPP_
@@ -28,7 +28,7 @@
 #define protected public
 #define private public
 #include "ResourceManager.tpp"
-#include "ILoader.hpp"
+#include "ILoader.tpp"
 #undef protected
 #undef private
 
@@ -36,7 +36,6 @@ class ResourcesTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
   CPPUNIT_TEST_SUITE(ResourcesTests);
-  CPPUNIT_TEST(testsResources);
   CPPUNIT_TEST(testsResourceManager);
   CPPUNIT_TEST(testsLoaderManager);
   CPPUNIT_TEST_SUITE_END();
@@ -45,7 +44,6 @@ public:
 
   void setUp();
   void tearDown();
-  void testsResources();
   void testsResourceManager();
   void testsLoaderManager();
 };

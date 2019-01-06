@@ -1,5 +1,7 @@
 # SimTaDyn shortcuts #
 
+NOTE: THIS PAGE HAS TO BE UPDATED
+
 ## Forth Editor ##
 
 TAB: the tabulator key auto-complete the Forth word currently typing.

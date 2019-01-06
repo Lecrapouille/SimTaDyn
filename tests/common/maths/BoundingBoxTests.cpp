@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "BoundingBoxTests.hpp"
@@ -37,7 +37,7 @@ static AABB2i i2(a3 * 4.0f);
 static AABB2i i3(42);
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 static inline void CHECK_VECTOR(Vector<T, n> const& v, const T x, const T y, const T z)
 {
   CPPUNIT_ASSERT_EQUAL(x, v.x);
@@ -46,7 +46,7 @@ static inline void CHECK_VECTOR(Vector<T, n> const& v, const T x, const T y, con
 }
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 static inline void checkBox(AABB<T, n> const &aabb, Vector<T, n> const &v1,
                             Vector<T, n> const &v2)
 {
@@ -55,10 +55,10 @@ static inline void checkBox(AABB<T, n> const &aabb, Vector<T, n> const &v1,
 }
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t n>
-static inline void checkBoxDummy(AABB<T,n> const &aabb)
+template <typename T, size_t n>
+static inline void checkBoxDummy(AABB<T, n> const &aabb)
 {
-  for (uint32_t i = 0; i < n; ++i)
+  for (size_t i = 0_z; i < n; ++i)
     {
       CPPUNIT_ASSERT_EQUAL(true, std::isnan(aabb.m_bbmin[i]));
       CPPUNIT_ASSERT_EQUAL(true, std::isnan(aabb.m_bbmax[i]));
@@ -66,13 +66,13 @@ static inline void checkBoxDummy(AABB<T,n> const &aabb)
 }
 
 //--------------------------------------------------------------------------
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 static bool isWellFormed(AABB<T, n> const &aabb)
 {
   if (aabb.m_bbmin.size() != n)
     return false;
 
-  uint32_t i = n;
+  size_t i = n;
   while (i--)
     {
       if (aabb.m_bbmin[i] > aabb.m_bbmax[i])
@@ -96,9 +96,9 @@ void BoundingBoxTests::tearDown()
 //--------------------------------------------------------------------------
 void BoundingBoxTests::testCreator()
 {
-  CPPUNIT_ASSERT_EQUAL(6U * sizeof (float), sizeof (AABB3f));
-  CPPUNIT_ASSERT_EQUAL(6U * sizeof (int32_t), sizeof (AABB3i));
-  CPPUNIT_ASSERT_EQUAL(6U * sizeof (double), sizeof (AABB3g));
+  CPPUNIT_ASSERT_EQUAL(6_z * sizeof (float), sizeof (AABB3f));
+  CPPUNIT_ASSERT_EQUAL(6_z * sizeof (int32_t), sizeof (AABB3i));
+  CPPUNIT_ASSERT_EQUAL(6_z * sizeof (double), sizeof (AABB3g));
 
   // Display
   std::cout << "Displaying AABBs" << std::endl << a1 << a2 << a3
@@ -221,7 +221,7 @@ void BoundingBoxTests::testOperations()
   CPPUNIT_ASSERT_EQUAL(true, vector::eq(Vector3f(1.5f, 1.5f, 1.5f), a2.center()));
   CPPUNIT_ASSERT_EQUAL(true, vector::eq(Vector3f(0), a4.center()));
   Vector3f c(AABB3f::DUMMY.center());
-  for (uint32_t i = 0; i < 3U; ++i)
+  for (size_t i = 0_z; i < 3_z; ++i)
     {
       CPPUNIT_ASSERT_EQUAL(true, std::isnan(c[i]));
     }

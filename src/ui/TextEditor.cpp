@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "TextEditor.hpp"
@@ -646,7 +646,7 @@ TextDocument* TextEditor::document()
 // *************************************************************************************************
 TextDocument* TextEditor::document(const uint32_t i)
 {
-  Gtk::Widget *widget = m_notebook.get_nth_page(i);
+  Gtk::Widget *widget = m_notebook.get_nth_page(static_cast<int>(i));
   if (nullptr == widget)
     {
       return nullptr;
@@ -789,10 +789,13 @@ bool TextEditor::open()
 // *************************************************************************************************
 bool TextEditor::open(std::string const& filename)
 {
+  int pages = m_notebook.get_n_pages();
+  if (pages < 0) return false;
+
   // Already opened ? Switch the page
-  for (int k = 0; k < m_notebook.get_n_pages(); ++k)
+  for (int k = 0; k < pages; ++k)
     {
-      if (0 == document(k)->m_filename.compare(filename))
+      if (0 == document(static_cast<uint32_t>(k))->m_filename.compare(filename))
         {
           //std::cout << "'" << filename << "' already opened\n"; // TODO statusbar
           m_notebook.set_current_page(k);
@@ -837,7 +840,11 @@ void TextEditor::empty(std::string const& title)
 // *************************************************************************************************
 TextDocument *TextEditor::tab(std::string const& title)
 {
-  for (int k = 0; k < m_notebook.get_n_pages(); ++k)
+  int32_t tmp = m_notebook.get_n_pages();
+  if (tmp < 0) return nullptr;
+
+  uint32_t pages = static_cast<uint32_t>(tmp);
+  for (uint32_t k = 0; k < pages; ++k)
     {
       // TBD: compare title ou filename ou les deux ?
       if (0 == document(k)->title().compare(title))

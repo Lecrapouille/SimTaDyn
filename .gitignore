@@ -53,6 +53,7 @@
 
 # SimTaDyn specifics
 build/*
+cov-int
 tests/build/*
 src/common/graphics/OpenGL/examples/build/*
 src/core/standalone/ClassicSpreadSheet/build/*
@@ -61,6 +62,7 @@ external/zipper
 external/SOIL
 external/CmdParser
 external/backward-cpp
+external/imgui
 doc/html/*
 doc/coverage/*
 _*

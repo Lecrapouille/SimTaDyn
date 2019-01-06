@@ -16,7 +16,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef BOUNDINGBOX_TPP_
@@ -61,7 +61,7 @@ namespace aabb
 //! AABB are used for classifying spatial objects in the aim to coarse collision detection or object
 //! picking).
 // *************************************************************************************************
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 class AABB
 {
 public:
@@ -87,7 +87,7 @@ public:
   //! \brief Constructor by copy. The dimension of vectors can be not
   //! to be the same size: it's ok just the good part will be taken
   //! into account.
-  template <typename U, uint32_t m>
+  template <typename U, size_t m>
   explicit AABB(AABB<U, m> const& a)
     : m_bbmin(a.m_bbmin), m_bbmax(a.m_bbmax)
   {
@@ -135,7 +135,7 @@ public:
   }
 
   //! \brief Return the dimension of the box (2D, 3D ...).
-  inline uint32_t dim() const
+  inline size_t dim() const
   {
     return n;
   }
@@ -215,7 +215,7 @@ public:
   {
     T result = T(1);
     Vector<T, n> dim = size();
-    uint32_t i = n;
+    size_t i = n;
 
     while (i--)
       result *= dim[i];
@@ -268,7 +268,7 @@ public:
   //! \brief Clamp the box dimension to the limit given by the AABB.
   inline void constrain(Vector<T, n> const& vmin, Vector<T, n> const& vmax)
   {
-    uint32_t i = n;
+    size_t i = n;
 
     while (i--)
       {
@@ -280,7 +280,7 @@ public:
   //! \brief Check if the box corners contain the other box corners.
   inline bool contains(const Vector<T, n>& point) const
   {
-    uint32_t i = n;
+    size_t i = n;
     while (i--)
       {
         if (!((m_bbmin[i] <= point[i]) && (point[i] <= m_bbmax[i])))
@@ -292,7 +292,7 @@ public:
   //! \brief Check if the box corners contain the other box corners.
   inline bool contains(AABB<T, n> const &other) const
   {
-    uint32_t i = n;
+    size_t i = n;
     while (i--)
       {
         if (!((m_bbmin[i] <= other.m_bbmin[i]) && (other.m_bbmax[i] <= m_bbmax[i])))
@@ -304,7 +304,7 @@ public:
   //! \brief Check if the AABB overlapes another AABB (collision test).
   inline bool collides(AABB<T, n> const &other) const
   {
-    uint32_t i = n;
+    size_t i = n;
     while (i--)
       {
         if (!((m_bbmax[i] >= other.m_bbmin[i]) && (m_bbmin[i] <= other.m_bbmax[i])))
@@ -350,7 +350,7 @@ protected:
     char c = 'X';
     bool res = true;
 
-    for (uint32_t i = 0U; i < n; ++i)
+    for (size_t i = 0U; i < n; ++i)
       {
         msg << c << "-axis: (" << m_bbmin[i] << ", " << m_bbmax[i] << ")";
         if (m_bbmin[i] > m_bbmax[i])
@@ -380,25 +380,25 @@ public:
   };
 };
 
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 AABB<T, n> operator+(T const &scalar, AABB<T, n> const &aabb)
 {
   return AABB<T, n>(scalar + aabb.m_bbmin, scalar + aabb.m_bbmax);
 }
 
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 AABB<T, n> operator-(T const &scalar, AABB<T, n> const &aabb)
 {
   return AABB<T, n>(scalar - aabb.m_bbmax, scalar - aabb.m_bbmin);
 }
 
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 AABB<T, n> operator*(T const &scalar, AABB<T, n> const &aabb)
 {
   return AABB<T, n>(scalar * aabb.m_bbmin, scalar * aabb.m_bbmax);
 }
 
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 AABB<T, n> operator/(T const &scalar, AABB<T, n> const &aabb)
 {
   return AABB<T, n>(scalar / aabb.m_bbmax, scalar / aabb.m_bbmin);
@@ -408,25 +408,25 @@ AABB<T, n> operator/(T const &scalar, AABB<T, n> const &aabb)
 #  if 0
 #    define DEFINE_BINARY_OPERATORS(op)                                  \
   /* Scalar-AABB op */                                                   \
-   template <typename T, uint32_t n>                                     \
+   template <typename T, size_t n>                                     \
    AABB<T, n> operator op(T const &scalar, AABB<T, n> const &aabb)       \
    {                                                                     \
      return AABB<T, n>(scalar op aabb.m_bbmin, scalar op aabb.m_bbmax);  \
    }                                                                     \
    /* AABB-scalar op */                                                  \
-   template <typename T, uint32_t n>                                     \
+   template <typename T, size_t n>                                     \
    AABB<T, n> operator op(AABB<T, n> const &aabb, T const &scalar)       \
    {                                                                     \
      return AABB<T, n>(aabb.m_bbmin op scalar, aabb.m_bbmax op scalar);  \
    }                                                                     \
    /* Vector-AABB op */                                                  \
-   template <typename T, uint32_t n>                                     \
+   template <typename T, size_t n>                                     \
    AABB<T, n> operator op(Vector<T, n> const &vect, AABB<T, n> const &aabb) \
    {                                                                     \
      return AABB<T, n>(vect op aabb.m_bbmin, vect op aabb.m_bbmax);      \
    }                                                                     \
    /* AABB-Vector op */                                                  \
-   template <typename T, uint32_t n>                                     \
+   template <typename T, size_t n>                                     \
    AABB<T, n> operator op(AABB<T, n> const &aabb, Vector<T, n> const &vect) \
    {                                                                     \
      return AABB<T, n>(aabb.m_bbmin op vect, aabb.m_bbmax op vect);      \
@@ -445,10 +445,10 @@ DEFINE_BINARY_OPERATORS(/);
 #  endif
 
 #  define DEFINE_BOOL_OPERATOR(name, op)                        \
-  template <typename T, uint32_t n>                             \
+  template <typename T, size_t n>                             \
   bool name(AABB<T, n> const &a, AABB<T, n> const &b)           \
   {                                                             \
-    uint32_t i = n;                                             \
+    size_t i = n;                                             \
                                                                 \
     while (i--)                                                 \
       {                                                         \
@@ -474,7 +474,7 @@ DEFINE_BOOL_OPERATOR(lt, <)
 #  undef DEFINE_INPLACE_OPERATORS
 
 //! \brief Permutate two bounding boxes.
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 inline void swap(AABB<T, n> &a, AABB<T, n> &b)
 {
   if (&a != &b)
@@ -486,7 +486,7 @@ inline void swap(AABB<T, n> &a, AABB<T, n> &b)
 
 //! \brief Return the smallest box fitting the union of two boxes
 //! (boxes combinaison).
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 inline AABB<T, n> merge(AABB<T, n> const &a, AABB<T, n> const &b)
 {
   return AABB<T, n>(vector::min(a.m_bbmin, b.m_bbmin), vector::max(a.m_bbmax, b.m_bbmax));
@@ -494,7 +494,7 @@ inline AABB<T, n> merge(AABB<T, n> const &a, AABB<T, n> const &b)
 
 //! \brief Return the box of the intersection of two boxes. In the
 //! case of boxes do not collide. It return a dummy box.
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 inline AABB<T, n> intersection(AABB<T, n> const &a, AABB<T, n> const &b)
 {
   if (a.collides(b))
@@ -503,17 +503,17 @@ inline AABB<T, n> intersection(AABB<T, n> const &a, AABB<T, n> const &b)
 }
 
 //! \brief Constrain the box dimension to the limit given by the AABB.
-template <typename T, uint32_t n>
+template <typename T, size_t n>
 inline AABB<T, n> clamp(AABB<T, n> const &a, AABB<T, n> const &b)
 {
   return AABB<T, n>(::clamp(a.m_bbmin, b.m_bbmin), ::clamp(a.m_bbmax, b.m_bbmax));
 }
 
-template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::DUMMY(Vector<T, n>(NAN), Vector<T, n>(NAN));
-template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::ZERO(Vector<T, n>(0), Vector<T, n>(0));
-template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::UNIT_SCALE(Vector<T, n>(-0.5f), Vector<T, n>(0.5f));
-template <typename T, uint32_t n> const AABB<T, n> AABB<T, n>::INFINITE(Vector<T, n>((T) std::numeric_limits<T>::lowest()),
-                                                                        Vector<T, n>((T) std::numeric_limits<T>::max()));
+template <typename T, size_t n> const AABB<T, n> AABB<T, n>::DUMMY(Vector<T, n>(NAN), Vector<T, n>(NAN));
+template <typename T, size_t n> const AABB<T, n> AABB<T, n>::ZERO(Vector<T, n>(0), Vector<T, n>(0));
+template <typename T, size_t n> const AABB<T, n> AABB<T, n>::UNIT_SCALE(Vector<T, n>(-0.5f), Vector<T, n>(0.5f));
+template <typename T, size_t n> const AABB<T, n> AABB<T, n>::INFINITE(Vector<T, n>(static_cast<T>(std::numeric_limits<T>::lowest())),
+                                                                      Vector<T, n>(static_cast<T>(std::numeric_limits<T>::max())));
 
 typedef AABB<int32_t, 2U> AABB2i;
 typedef AABB<int32_t, 3U> AABB3i;

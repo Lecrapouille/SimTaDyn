@@ -43,8 +43,10 @@ OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
-OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o Forth.o
-OBJ_CORE       = SimTaDynForth.o ASpreadSheetCell.o ASpreadSheet.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o
+OBJ_FORTH     += ForthPrimitives.o ForthClibrary.o Forth.o
+OBJ_FORTH     += SimTaDynForth.o SpreadSheetPrimitives.o
+OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o
 OBJ_STANDALONE = ClassicSpreadSheet.o main.o
 OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_GRAPHS) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_STANDALONE)
@@ -55,8 +57,9 @@ PROJECT_MODE = debug
 
 ###################################################
 # Compilation options.
-CXXFLAGS = -W -Wall -Wextra -std=c++11
-LDFLAGS =
+# FIXME: replace Glib::Module by my own class to remove gtk dependencies
+CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0`
+LDFLAGS = `pkg-config --libs gtkmm-3.0`
 
 ###################################################
 # Also locate code source files localy
@@ -81,9 +84,9 @@ LIBS =
 ifeq ($(ARCHI),Darwin)
 LIBS += -L/usr/local/lib
 
-## Linux
+## Linux FIXME: replace Glib::Module by my own class to remove gtk dependencies
 else ifeq ($(ARCHI),Linux)
-LIBS += -ldl
+LIBS += -ldl -lglib-2.0
 
 ## Windows
 else
@@ -94,9 +97,11 @@ endif
 ###################################################
 # Backward allows tracing stack when segfault happens
 ifeq ($(PROJECT_MODE),debug)
+ifneq ($(ARCHI),Darwin)
 OPTIM_FLAGS = -O2 -g
 DEFINES += -DBACKWARD_HAS_DW=1
 LIBS += -ldw
+endif
 else
 OPTIM_FLAGS = -O3
 endif

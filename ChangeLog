@@ -1,7 +1,24 @@
+January 2019: version 0.4
+        * Rework OpenGL C++ wrapper.
+        * Better SceneGraph integration in the Renderer.
+        * Rework Resource/loader managers.
+        * Rework SimTaDynMap and SimTaDynSheets classes.
+        * Basic SimTaDynMap file loading.
+        * SimTaDynMap are still not displayed.
+        * Add Command pattern for GTK+ buttons clicks
+          for editing a SimTaDynMap.
+        * Upgrade GTK+ SimTaDynMap explorer: now visualize
+          the SceneGraph (SimTaDynMap) and edit nodes (SimTaDynSheets).
+        * Display Forth stack in GTK+.
+        * Partial Forth dictionary display in GTK+.
+        * Proper class for Forth console color.
+        * Add command line reader.
+        * Fix some compilation warnings.
+
 July 2018: version 0.3.1
         * Fix broken unit tests.
         * Add Map Editor buttons using sigc++ instead of listener.
-        * Forth can load shared libraries.
+        * Forth can load very basic shared libraries in C.
 
 January 2018: version 0.3
         * Basic spreadsheet functionalities.

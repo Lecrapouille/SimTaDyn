@@ -1,6 +1,13 @@
 #ifndef TOGGLEBUTTONS_HPP
 #define TOGGLEBUTTONS_HPP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#  include <gtkmm.h>
+#pragma GCC diagnostic pop
+
 // *************************************************************************************************
 //! \brief A set of buttons inserted in a toolbar passed as parameter. Lika Gtk::RadioButton only one
 //! button can be selected at once (pressed) other buttons are unpressed.

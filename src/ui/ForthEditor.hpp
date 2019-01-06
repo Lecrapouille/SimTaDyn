@@ -15,13 +15,14 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef FORTHEDITOR_HPP_
 #  define FORTHEDITOR_HPP_
 
 #  include "TextEditor.hpp"
+#  include "ForthInspector.hpp"
 #  include "SimTaDynForth.hpp" // FIXME Forth.hpp
 #  include "Redirection.hpp"
 #  include <chrono>
@@ -60,7 +61,9 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class ForthEditor: public TextEditor, public Singleton<ForthEditor>
+class ForthEditor
+  : public TextEditor,
+    public Singleton<ForthEditor>
 {
   friend class Singleton<ForthEditor>;
 
@@ -87,21 +90,20 @@ public:
                              const std::string &help);  // FIXME: Glib::ustring, const Cell16 Forthtoken);
 
   Gtk::Notebook          m_res_notebooks[2]; // FIXME: attention collision de noms TextEditor::m_notebook
-  Gtk::ScrolledWindow    m_scrolledwindow[4];
+  Gtk::ScrolledWindow    m_scrolledwindow[simtadyn::ForthTabNames::Max_];
   Gtk::ImageMenuItem     m_plugins_submenu[8];
   Gtk::Image             m_plugins_image[8];
   Gtk::SeparatorToolItem m_separator[2];
   Gtk::TextView          m_results;
   Gtk::TextView          m_history;
   Gtk::TextView          m_messages;
-  Gtk::TreeView          m_dico;
   Gtk::Statusbar         m_statusbar;
   Gtk::Toolbar           m_toolbar;
   Gtk::HPaned            m_hpaned;
   Gtk::VPaned            m_vpaned;
   Gtk::VBox              m_vbox[2];
 
-protected:
+private:
 
   bool exec_(std::string const& script, std::string const& filename);
 
@@ -109,21 +111,9 @@ protected:
   {
     return new ForthDocument(m_language);
   }
-  class ModelColumns : public Gtk::TreeModelColumnRecord
-  {
-  public:
-    ModelColumns()
-    {
-      add(m_word);
-      add(m_token);
-    }
 
-    Gtk::TreeModelColumn<Glib::ustring> m_word;
-    Gtk::TreeModelColumn<int> m_token;
-  };
-
-  ModelColumns m_columns;
-  Glib::RefPtr<Gtk::ListStore> m_ref_tree_model;
+  ForthDicoInspector m_dico_inspector;
+  ForthStackInspector m_stack_inspector;
   std::chrono::nanoseconds m_elapsed_time;
   streamgui m_cout; // std::cout redirected inside the GUI
   streamgui m_cerr; // std::cerr redirected inside the GUI

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SIMTADYNWINDOW_HPP_
@@ -23,7 +23,7 @@
 
 #  include "ForthEditor.hpp"
 #  include "MapEditor.hpp"
-#  include "PackageExplorer.hpp"
+#  include "SimTaDynMapExplorer.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -37,20 +37,21 @@ protected:
   bool onExitClicked(GdkEventAny* event);
 
   //! \brief Initialize the OpenGL context
-  inline void onRealize()
+  inline void onCreate()
   {
-    m_drawing_area.onRealize();
+    m_drawing_area.onCreate();
   }
   //! \brief Clean up
-  inline void onUnrealize()
+  inline void onRelease()
   {
-    m_drawing_area.onUnrealize();
+    m_drawing_area.onRelease();
   }
   //! \brief Draw the scene
   inline bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
   {
     return m_drawing_area.onRender();
   }
+
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
@@ -69,13 +70,19 @@ protected:
   Gtk::MenuItem                m_menuitem[simtadyn::MaxMapMenuNames +
                                           simtadyn::MaxForthMenuNames +
                                           simtadyn::MaxGeneralMenuNames + 1];
+
+  Gtk::ImageMenuItem           m_submenu[1];
+  Gtk::Image                   m_image[1];
+
   std::vector<Gtk::ToolButton> m_toolbuttons; // FIXME resize
+
+  Gtk::AboutDialog             m_about;
+  SimTaDynMapExplorer          m_map_explorer;
   GLDrawingArea                m_drawing_area;
   FindWindow                  *m_findwin = nullptr;
   ReplaceWindow               *m_replacewin = nullptr;
   GotoLineWindow              *m_gotolinewindow = nullptr; // FIXME nom:  ajouter des _
-  SceneGraphWindow            *m_scene_graph_window = nullptr;
-  PackageExplorer              m_package_explorer;
+  // SceneNodeEditor             *m_node_editor = nullptr;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "SimTaDynFileLoaderTests.hpp"
@@ -23,40 +23,39 @@
 #include <fstream>
 
 // Register the test suite
-CPPUNIT_TEST_SUITE_REGISTRATION(LoaderTests);
+CPPUNIT_TEST_SUITE_REGISTRATION(SimTaDynFileLoaderTests);
 
 //--------------------------------------------------------------------------
-void LoaderTests::setUp()
+void SimTaDynFileLoaderTests::setUp()
 {
 }
 
 //--------------------------------------------------------------------------
-void LoaderTests::tearDown()
+void SimTaDynFileLoaderTests::tearDown()
 {
 }
 
 //--------------------------------------------------------------------------
-void LoaderTests::testSimTaDyn()
+void SimTaDynFileLoaderTests::testSimTaDyn()
 {
   Path path(PROJECT_DATA_PATH);
   path.add("data/loaders"); // FIXME ko si uniquement Path path("data/loaders"); Pourquoi
   SimTaDynFileLoader loader;
-  SimTaDynMap *map = nullptr;
+  SimTaDynMap map;
 
   CPPUNIT_ASSERT_THROW(loader.unzip("thisfiledoesnotexist.zip"), LoaderException);
 
   //loader.m_base_dir = "foo";
   //std::string dir = loader.generateTempDirName();
-  loader.unzip(path.expand("maps/MaCarte.dyn"));
+  loader.unzip(path.expand("MaCarte.dyn"));
   //  CPPUNIT_ASSERT_EQUAL(0, dir.compare(loader.m_base_dir));
 
   SimForth::instance().boot();
   //dir = loader.generateTempDirName();
-  loader.loadFromFile(path.expand("maps/MaCarte.dyn"), map);
-  CPPUNIT_ASSERT_EQUAL(true, nullptr != map);
-  //CPPUNIT_ASSERT_EQUAL(0, map->m_base_dir.compare(dir));
-  CPPUNIT_ASSERT_EQUAL(0, map->m_name.compare("MaCarte"));
-  std::cout << map->m_full_path << std::endl;
+  loader.loadFromFile(path.expand("MaCarte.dyn"), map);
+  //CPPUNIT_ASSERT_EQUAL(0, map.m_base_dir.compare(dir));
+  CPPUNIT_ASSERT_EQUAL(0, map.m_name.compare("MaCarte"));
+  std::cout << map.m_full_path << std::endl;
 
   /*std::ofstream outfile(loader.m_full_path + "/test.txt");
   outfile << "my text here!" << std::endl;

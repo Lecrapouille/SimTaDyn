@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 // --- Utils ----------------------------------------------------------
@@ -44,13 +44,18 @@
 
 // --- OpenGL ---------------------------------------------------------
 #include "ColorTests.hpp"
-#include "GLBufferTests.hpp"
-#include "OpenGLTests.hpp"
+#include "GLVAOTests.hpp"
+#include "GLObjectTests.hpp"
+#include "GLVAOTests.hpp"
+#include "GLVBOTests.hpp"
+#include "GLShadersTests.hpp"
+#include "GLProgramTests.hpp"
 
-// --- Loader ---------------------------------------------------------
-//#include "ResourcesTests.hpp"
+// --- Resource/Loader Managers --------------------------------------
+#include "ResourcesTests.hpp"
+//#include "LoadersTests.hpp"
 #include "SimTaDynFileLoaderTests.hpp"
-// --- Core ---------------------------------------------------------
+// --- Core ----------------------------------------------------------
 #include "ClassicSpreadSheetTests.hpp"
 
 // --- CPPUnit --------------------------------------------------------
@@ -154,7 +159,7 @@ static void testContainer(CppUnit::TextUi::TestRunner& runner)
 }
 
 //--------------------------------------------------------------------------
-static void testGraph(CppUnit::TextUi::TestRunner& runner)
+static void testGraph(CppUnit::TextUi::TestRunner& /*runner*/)
 {
   /*CppUnit::TestSuite* suite;
 
@@ -190,35 +195,45 @@ static void testOpenGL(CppUnit::TextUi::TestRunner& runner)
   suite->addTest(new CppUnit::TestCaller<ColorTests>("testOperations", &ColorTests::testOperations));
   runner.addTest(suite);
 
-  suite = new CppUnit::TestSuite("GLBufferTests");
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("createOpenGLContext", &GLBufferTests::createOpenGLContext));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferDummy", &GLBufferTests::testDummy));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferPendingData", &GLBufferTests::testPendingData));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferInsert", &GLBufferTests::testInsert));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSuppress", &GLBufferTests::testSuppress));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("GLBufferSwap", &GLBufferTests::testSwap));
-  suite->addTest(new CppUnit::TestCaller<GLBufferTests>("deleteOpenGLContext", &GLBufferTests::deleteOpenGLContext));
+  suite = new CppUnit::TestSuite("GLObjectTests");
+  suite->addTest(new CppUnit::TestCaller<GLObjectTests>("tests", &GLObjectTests::tests));
   runner.addTest(suite);
 
-  suite = new CppUnit::TestSuite("OpenGLTests");
-  suite->addTest(new CppUnit::TestCaller<OpenGLTests>("GLObject", &OpenGLTests::testOpenGL));
+  suite = new CppUnit::TestSuite("GLVAOTests");
+  suite->addTest(new CppUnit::TestCaller<GLVAOTests>("tests", &GLVAOTests::tests));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("GLVBOTests");
+  suite->addTest(new CppUnit::TestCaller<GLVBOTests>("tests", &GLVBOTests::tests));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("GLShadersTests");
+  suite->addTest(new CppUnit::TestCaller<GLShadersTests>("tests", &GLShadersTests::tests));
+  runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("GLProgramTests");
+  suite->addTest(new CppUnit::TestCaller<GLProgramTests>("tests", &GLProgramTests::tests));
   runner.addTest(suite);
 }
 
 //--------------------------------------------------------------------------
-static void testLoader(CppUnit::TextUi::TestRunner& runner)
+static void testResource(CppUnit::TextUi::TestRunner& runner)
 {
-  /*CppUnit::TestSuite* suite;
+  CppUnit::TestSuite* suite;
 
   suite = new CppUnit::TestSuite("resourcesManagerTests");
-  suite->addTest(new CppUnit::TestCaller<ResourcesTests>("Resources", &ResourcesTests::testsResources));
   suite->addTest(new CppUnit::TestCaller<ResourcesTests>("RessourceManager", &ResourcesTests::testsResourceManager));
-  suite->addTest(new CppUnit::TestCaller<ResourcesTests>("LoaderManager", &ResourcesTests::testsLoaderManager));
+  //suite->addTest(new CppUnit::TestCaller<ResourcesTests>("LoaderManager", &ResourcesTests::testsLoaderManager));
   runner.addTest(suite);
 
-  suite = new CppUnit::TestSuite("LoaderTests");
-  suite->addTest(new CppUnit::TestCaller<LoaderTests>("Loader", &LoaderTests::testSimTaDyn));
-  runner.addTest(suite);*/
+  // FIXME le fichier ne compile pas tests/common/managers/LoadersTests.cpp
+  //suite = new CppUnit::TestSuite("LoadersTests");
+  //suite->addTest(new CppUnit::TestCaller<LoadersTests>("Loader", &LoadersTests::testsLoaderManager));
+  //runner.addTest(suite);
+
+  suite = new CppUnit::TestSuite("SimTaDynFileLoaderTests");
+  suite->addTest(new CppUnit::TestCaller<SimTaDynFileLoaderTests>("SimTaDynLoader", &SimTaDynFileLoaderTests::testSimTaDyn));
+  runner.addTest(suite);
 }
 
 //--------------------------------------------------------------------------
@@ -253,7 +268,7 @@ static bool run_tests(bool const has_xdisplay)
   testGraph(runner);
   // Travis-CI does not support export display
   if (has_xdisplay) testOpenGL(runner);
-  testLoader(runner);
+  testResource(runner);
   testCore(runner);
 
   return runner.run();

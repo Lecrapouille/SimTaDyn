@@ -11,6 +11,7 @@ typedef void (*forth_c_function)(Cell32**);
 // A siplifier std::string
 struct CFuncHolder
 {
+  ~CFuncHolder() {}
   std::string func_forth_name; // inutile
   std::string func_c_name;
   std::string code;// inutile

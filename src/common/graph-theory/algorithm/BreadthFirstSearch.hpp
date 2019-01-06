@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef GRAPHALGORITHM_BFS_HPP_
@@ -61,7 +61,7 @@ public:
     m_graph->markNode(node->id());
 
     // Put all its neighbours in the current queue
-    for (uint32_t i = 0; i < node->degree(); ++i)
+    for (size_t i = 0_z; i < node->degree(); ++i)
       {
         Node const& toNode = static_cast<const Arc*>(node->neighbor(i))->to();
         if (!m_graph->markedNode(toNode.id()))

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef ILOGGER_HPP_
@@ -31,7 +31,7 @@
 
 namespace logger
 {
-  enum LoggerSeverity { None, Info, Debug, Warning, Failed, Error, Fatal, MaxLoggerSeverity = Fatal };
+  enum LoggerSeverity { None, Info, Debug, Warning, Failed, Error, Signal, Exception, Catch, Fatal, MaxLoggerSeverity = Fatal };
 }
 
 // **************************************************************

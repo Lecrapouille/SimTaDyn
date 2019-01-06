@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SIMFORTHPRIMITIVES_HPP_
@@ -25,7 +25,8 @@
 
 enum SimForthPrimitives
   {
-    SIMFORTH_PRIMITIVE_TOTO = FORTH_MAX_PRIMITIVES,
+    SIMFORTH_PRIMITIVE_SHEET = FORTH_MAX_PRIMITIVES,
+    SIMFORTH_PRIMITIVE_FORTH,
     SIMFORTH_MAX_PRIMITIVES
   };
 

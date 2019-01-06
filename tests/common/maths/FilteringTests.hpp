@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef FILTERINGTESTS_HPP_
@@ -27,6 +27,7 @@
 
 #  define protected public
 #  define private public
+#  include "Polynom.hpp"
 #  include "Filtering.hpp"
 #  include "Polyfit.hpp"
 #  undef protected

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "Forth.hpp"
@@ -127,10 +127,12 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
     case FORTH_PRIMITIVE_TRACE_ON:
+      LOGI("Forth trace: ON");
       m_trace = true;
       break;
 
     case FORTH_PRIMITIVE_TRACE_OFF:
+      LOGI("Forth trace: OFF");
       m_trace = false;
       break;
 

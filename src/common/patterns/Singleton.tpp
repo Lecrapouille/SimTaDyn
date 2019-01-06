@@ -16,7 +16,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SINGLETON_TPP_
@@ -123,7 +123,7 @@ private:
 //! information during its destruction. If Logger is destroyed before
 //! Singleton1, a crash will occur when trying to write in the log.
 // *************************************************************************************************
-template <class T> class Singleton
+template <class T> class Singleton // unique_ptr: FIXME https://cppisland.com/?p=501
 {
 public:
 

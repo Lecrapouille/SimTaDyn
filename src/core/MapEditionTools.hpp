@@ -1,8 +1,6 @@
 #ifndef MAPEDITIONTOOLS_HPP
 #  define MAPEDITIONTOOLS_HPP
 
-#  include "Logger.hpp"
-
 // ***********************************************************************************************
 //! \brief Command Pattern for map edition (insertion, move ...)
 //! http://gameprogrammingpatterns.com/command.html
@@ -25,17 +23,18 @@ public:
 
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
-    LOGI("Ajoute1 une cellule a la position %f/%f/%f", x, y, z);
+    std::cout << "Ajoute1 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
+    MapEditor::instance().sheet().addNode("");
   }
 
   virtual void exec2(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
-    LOGI("Ajoute2 une cellule a la position %f/%f/%f", x, y, z);
+    std::cout << "Ajoute2 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
   }
 
   virtual void exec3(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
-    LOGI("Ajoute3 une cellule a la position %f/%f/%f", x, y, z);
+    std::cout << "Ajoute3 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
   }
 };
 

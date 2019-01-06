@@ -15,12 +15,13 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef POLYNOM_HPP_
 #  define POLYNOM_HPP_
 
+#  include "NonCppStd.hpp"
 #  include <vector>
 #  include <iostream>
 
@@ -45,15 +46,15 @@ public:
   }
 
   //! \brief Return the container size of the polynom.
-  inline uint32_t size() const
+  inline size_t size() const
   {
     return m_coefs.size();
   }
 
   //! \brief Return the degree of the polynom.
-  inline uint32_t degree() const
+  inline size_t degree() const
   {
-    uint32_t deg = m_coefs.size();
+    size_t deg = m_coefs.size();
 
     while ((0.0 != m_coefs[deg]) && deg)
       --deg;
@@ -66,11 +67,11 @@ public:
   //! than the current degree.
   inline double& operator[](size_t nth)
   {
-    const uint32_t s = m_coefs.size(); // FIXME capacity
+    const size_t s = m_coefs.size(); // FIXME capacity
     if (nth >= s)
       {
         // Insert zeros
-        uint32_t i = nth - s + 1U;
+        size_t i = nth - s + 1U;
         m_coefs.reserve(i);
         while (i--)
           {
@@ -100,7 +101,7 @@ inline std::ostream& operator<<(std::ostream& os, Polynom const& p)
   os << "Degree: " << p.degree() << std::endl;
   for (size_t i = 0; i < p.size(); ++i)
     {
-       std::cout << "  P[" << i << "]: " << p[i] << std::endl;
+       os << "  P[" << i << "]: " << p[i] << std::endl;
     }
   return os;
 }

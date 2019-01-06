@@ -15,24 +15,43 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "GLWindow.hpp"
+#include "OpenGL.hpp"
+#include <stdexcept>
+#include <iostream>
+#include <sstream>
 
-static void onError(int /*errorCode*/, const char* msg)
+static void on_error(int /*errorCode*/, const char* msg)
 {
   throw std::runtime_error(msg);
 }
 
-IGLWindow::IGLWindow()
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
+
+  if (nullptr == obj) return ;
+  if (width < 0) { width = 1; }
+  if (height < 0) { height = 1; }
+
+  obj->setWindowSize(width, height);
+}
+
+IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *title)
+  : m_width(width),
+    m_height(height),
+    m_title(title)
+{
+  opengl::hasCreatedContext() = false;
 }
 
 /* Close OpenGL window and terminate GLFW */
 IGLWindow::~IGLWindow()
 {
-  if (m_opengl_context)
+  if (opengl::hasCreatedContext())
     {
       release();
       glfwTerminate();
@@ -46,26 +65,28 @@ void IGLWindow::release()
 
 void IGLWindow::FPS()
 {
+  static int nbFrames = 0;
   double currentTime = glfwGetTime();
   m_deltaTime = static_cast<float>(currentTime - m_lastFrameTime);
   m_lastFrameTime = currentTime;
-  ++m_nbFrames;
+  ++nbFrames;
 
   if (currentTime - m_lastTime >= 1.0)
     {
       // If last prinf() was more than 1sec ago printf and reset
       std::ostringstream oss;
-      int fps = static_cast<int>(1000.0 / static_cast<double>(m_nbFrames));
-      oss << '[' << fps << " FPS] " << m_title;
+      m_fps = nbFrames;
+      int ms_by_frame = static_cast<int>(1000.0 / static_cast<double>(m_fps));
+      oss << '[' << m_fps << " FPS, " << ms_by_frame << " ms] " << m_title;
       glfwSetWindowTitle(m_window, oss.str().c_str());
-      m_nbFrames = 0;
+      nbFrames = 0;
       m_lastTime += 1.0;
     }
 }
 
 bool IGLWindow::start()
 {
-  if (m_opengl_context)
+  if (opengl::hasCreatedContext())
     {
       std::cerr << "Warning you called twice start(). "
                 << "OpenGL context already created"
@@ -76,7 +97,7 @@ bool IGLWindow::start()
   int res;
 
   // Initialise GLFW
-  glfwSetErrorCallback(onError);
+  glfwSetErrorCallback(on_error);
   if (!glfwInit())
     {
       std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -97,6 +118,7 @@ bool IGLWindow::start()
       return false;
     }
   glfwMakeContextCurrent(m_window);
+  glfwSwapInterval(1); // Enable vsync
 
   // Initialize GLEW
   glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
@@ -107,13 +129,13 @@ bool IGLWindow::start()
       return false;
     }
 
-  // print out some info about the graphics drivers
+  // Print out some info about the graphics drivers
   std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
   std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
   std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
   std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
-  // make sure OpenGL version 3.2 API is available
+  // Make sure OpenGL version 3.2 API is available
   if (!GLEW_VERSION_3_2)
     {
       std::cerr << "OpenGL 3.2 API is not available." << std::endl;
@@ -121,15 +143,26 @@ bool IGLWindow::start()
       return false;
     }
 
-  // Ensure we can capture the escape key being pressed below
+  // Save the class address to "cast" function callback into a method
+  // callback
+  glfwSetWindowUserPointer(m_window, this);
+  glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
+  //glfwSetCursorPosCallback(m_window, mouse_callback);
+  //glfwSetScrollCallback(m_window, scroll_callback);
+
+  // Ensure we can capture keyboard being pressed below
   glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
   try
     {
+      // This is an awful hack but this is to be sure to flush OpenGL
+      // errors before using this function on real OpenGL routines else a
+      // fake error is returned on the first OpenGL routines while valid.
+      glGetError();
       res = setup();
     }
   catch (const OpenGLException& e)
     {
-      LOGIS("%s", e.message().c_str());
+      std::cerr << e.message() << std::endl;
       res = false;
     }
 
@@ -143,9 +176,9 @@ bool IGLWindow::start()
   // init FPS
   m_lastTime = glfwGetTime();
   m_lastFrameTime = m_lastTime;
-  m_nbFrames = 0;
+  m_fps = 0;
 
-  m_opengl_context = true;
+  opengl::hasCreatedContext() = true;
 
 l_update:
   update();
@@ -174,6 +207,6 @@ void IGLWindow::update()
     }
   catch (const OpenGLException& e)
     {
-      LOGIS("%s", e.message().c_str());
+      std::cerr << e.message() << std::endl;
     }
 }

@@ -16,7 +16,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 // **************************************************************
@@ -143,5 +143,5 @@ protected:
   Collection<T, N, Block>* m_container;
 
   //! \brief the iterator.
-  uint32_t m_itr;
+  size_t m_itr;
 };

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "ASpreadSheet.hpp"
@@ -79,7 +79,7 @@ ASpreadSheet::evaluate(SimForth &forth)
 
   // Evaluate cells which does not contain references on
   // other cells.
-  uint32_t unsolvedCells = howManyCells();
+  size_t unsolvedCells = howManyCells();
   //std::cout << std::endl << "2nd step -------------" << std::endl;
   //std::cout << "  unsolved cells " << unsolvedCells << std::endl;
   try

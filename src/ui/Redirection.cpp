@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "Redirection.hpp"
@@ -28,7 +28,7 @@ streamgui::streamgui(std::ostream &stream,
     m_buffer_size(buffer_size)
 {
   // Alloc buffer and set its boundaries
-  m_buffer = (char*) malloc(sizeof (char) * buffer_size);
+  m_buffer = static_cast<char*>(malloc(sizeof (char) * buffer_size));
   setp(m_buffer, m_buffer + buffer_size);
 
   // Save the old buffer stream and redirect the old stream

@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "ForthEditor.hpp"
@@ -118,7 +118,7 @@ void ForthDocument::skipBackwardWord(Gtk::TextBuffer::iterator& iter)
       if (!iter.backward_char())
         return ;
 
-      if (isspace(iter.get_char()))
+      if (g_unichar_isspace(iter.get_char()))
         {
           iter.forward_char();
           return ;
@@ -136,7 +136,7 @@ void ForthDocument::skipBackwardSpaces(Gtk::TextBuffer::iterator& iter)
       if (!iter.backward_char())
         return ;
 
-      if (!isspace(iter.get_char()))
+      if (!g_unichar_isspace(iter.get_char()))
         {
           iter.forward_char();
           return ;
@@ -305,24 +305,6 @@ ForthEditor::ForthEditor()
     m_statusbar.push("Welcome to SimTaDyn !");
   }
 
-  // Forth dictionary display
-  {
-    m_ref_tree_model = Gtk::ListStore::create(m_columns);
-    m_dico.set_model(m_ref_tree_model);
-
-    m_dico.append_column("Word", m_columns.m_word);
-    m_dico.append_column("Token", m_columns.m_token);
-
-    // Test
-    Gtk::TreeModel::Row row = *(m_ref_tree_model->append());
-    row[m_columns.m_word] = "Billy";
-    row[m_columns.m_token] = 42;
-
-    row = *(m_ref_tree_model->append());
-    row[m_columns.m_word] = "Foo";
-    row[m_columns.m_token] = 43;
-  }
-
   // Forth text view for storing results, debug, historic
   {
     // FIXME: mettre les text view en read-only
@@ -330,8 +312,10 @@ ForthEditor::ForthEditor()
     m_scrolledwindow[simtadyn::ForthResTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     m_scrolledwindow[simtadyn::ForthHistoryTab].add(m_history);
     m_scrolledwindow[simtadyn::ForthHistoryTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    m_scrolledwindow[simtadyn::ForthDicoTab].add(m_dico);
-    m_scrolledwindow[simtadyn::ForthDicoTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[simtadyn::ForthDicoTab].add(m_dico_inspector.widget());
+    m_scrolledwindow[simtadyn::ForthHistoryTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledwindow[simtadyn::ForthStackTab].add(m_stack_inspector.widget());
+    m_scrolledwindow[simtadyn::ForthHistoryTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     m_scrolledwindow[simtadyn::ForthMsgTab].add(m_messages);
     m_scrolledwindow[simtadyn::ForthMsgTab].set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   }
@@ -346,6 +330,8 @@ ForthEditor::ForthEditor()
     m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[simtadyn::ForthHistoryTab], true);
     m_res_notebooks[0].append_page(m_scrolledwindow[simtadyn::ForthDicoTab], "_Dico", true);
     m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[simtadyn::ForthDicoTab], true);
+    m_res_notebooks[0].append_page(m_scrolledwindow[simtadyn::ForthStackTab], "Data _Stack", true);
+    m_res_notebooks[0].set_tab_detachable(m_scrolledwindow[simtadyn::ForthStackTab], true);
 
     m_hpaned.pack2(m_res_notebooks[1]);
     m_res_notebooks[1].set_group_name("forth_res_notebooks");
@@ -626,7 +612,7 @@ void ForthEditor::execButton(Gtk::ToolButton* button)
 
   if (ForthEditor::exec_(button->get_label().raw(), name))
     {
-      TextDocument *doc = TextEditor::addTab(name);
+      doc = TextEditor::addTab(name);
       doc->clear();
       doc->appendText(button->get_label());
       doc->modified(false);

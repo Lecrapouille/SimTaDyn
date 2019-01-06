@@ -1,248 +1,142 @@
 #include "Example03.hpp"
+#include <math.h>
 
-//! \file Example03.hpp
-//! Draw a textured cube and display it with perspective.
+//! \file this example paints two cubes (same model) placed on a floor
+//! (second model). The fisrt cube is turning while the second is
+//! fixed. Models are textured and we applied different color on
+//! textures.
 
-//FIXME: use index.
-
-// Vertices for drawing a cube
-static GLfloat vertexData[] = {
-  //  X     Y     Z
-  // bottom
-  -1.0f,-1.0f,-1.0f,
-  1.0f,-1.0f,-1.0f,
-  -1.0f,-1.0f, 1.0f,
-  1.0f,-1.0f,-1.0f,
-  1.0f,-1.0f, 1.0f,
-  -1.0f,-1.0f, 1.0f,
-
-  // top
-  -1.0f, 1.0f,-1.0f,
-  -1.0f, 1.0f, 1.0f,
-  1.0f, 1.0f,-1.0f,
-  1.0f, 1.0f,-1.0f,
-  -1.0f, 1.0f, 1.0f,
-  1.0f, 1.0f, 1.0f,
-
-  // front
-  -1.0f,-1.0f, 1.0f,
-  1.0f,-1.0f, 1.0f,
-  -1.0f, 1.0f, 1.0f,
-  1.0f,-1.0f, 1.0f,
-  1.0f, 1.0f, 1.0f,
-  -1.0f, 1.0f, 1.0f,
-
-  // back
-  -1.0f,-1.0f,-1.0f,
-  -1.0f, 1.0f,-1.0f,
-  1.0f,-1.0f,-1.0f,
-  1.0f,-1.0f,-1.0f,
-  -1.0f, 1.0f,-1.0f,
-  1.0f, 1.0f,-1.0f,
-
-  // left
-  -1.0f,-1.0f, 1.0f,
-  -1.0f, 1.0f,-1.0f,
-  -1.0f,-1.0f,-1.0f,
-  -1.0f,-1.0f, 1.0f,
-  -1.0f, 1.0f, 1.0f,
-  -1.0f, 1.0f,-1.0f,
-
-  // right
-  1.0f,-1.0f, 1.0f,
-  1.0f,-1.0f,-1.0f,
-  1.0f, 1.0f,-1.0f,
-  1.0f,-1.0f, 1.0f,
-  1.0f, 1.0f,-1.0f,
-  1.0f, 1.0f, 1.0f,
-};
-
-// Teaxture position on each vertices
-static GLfloat textureData[] = {
-  //  U     V
-  // bottom
-  0.0f, 0.0f,
-  1.0f, 0.0f,
-  0.0f, 1.0f,
-  1.0f, 0.0f,
-  1.0f, 1.0f,
-  0.0f, 1.0f,
-
-  // top
-  0.0f, 0.0f,
-  0.0f, 1.0f,
-  1.0f, 0.0f,
-  1.0f, 0.0f,
-  0.0f, 1.0f,
-  1.0f, 1.0f,
-
-  // front
-  1.0f, 0.0f,
-  0.0f, 0.0f,
-  1.0f, 1.0f,
-  0.0f, 0.0f,
-  0.0f, 1.0f,
-  1.0f, 1.0f,
-
-  // back
-  0.0f, 0.0f,
-  0.0f, 1.0f,
-  1.0f, 0.0f,
-  1.0f, 0.0f,
-  0.0f, 1.0f,
-  1.0f, 1.0f,
-
-  // left
-  0.0f, 1.0f,
-  1.0f, 0.0f,
-  0.0f, 0.0f,
-  0.0f, 1.0f,
-  1.0f, 1.0f,
-  1.0f, 0.0f,
-
-  // right
-  1.0f, 1.0f,
-  1.0f, 0.0f,
-  0.0f, 0.0f,
-  1.0f, 1.0f,
-  0.0f, 0.0f,
-  0.0f, 1.0f
-};
-
-// FIXME: m_shader::setUniform
-void GLExample03::setUniform(const char *name, Matrix44f const &mat)
+//------------------------------------------------------------------
+//! \brief Callback when the window changed its size.
+//------------------------------------------------------------------
+void GLExample03::onWindowSizeChanged(const float width, const float height)
 {
-  GLint id = glCheck(glGetUniformLocation(m_shader, name));
-  glCheck(glUniformMatrix4fv(id, 1, GL_FALSE, &mat[0U][0U]));
+  // Note: height is never zero !
+  float ratio = width / height;
+
+  m_prog.uniform<Matrix44f>("projection") =
+    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
+void GLExample03::createSphere()
+{
+  constexpr float radius = 2.0f;
+  constexpr int NbPointsLon = 50;
+  constexpr int NbPointsLat = 100;
+  constexpr float stepLon = 360.0f / static_cast<float>(NbPointsLon);
+  constexpr float stepLat = 180.0f / static_cast<float>(NbPointsLat);
+  constexpr float PI = 3.141592653589793238462643383279502884197169399375105820f;
+
+  float latitude = -90.0f;
+  float longitude = -180.0f;
+
+  auto& positions = m_prog.attribute<Vector3f>("position");
+  positions.reserve(NbPointsLon * NbPointsLat);
+  m_indices.reserve(NbPointsLon * NbPointsLat);
+
+  for (int i = 0; i < NbPointsLon; ++i)
+    {
+      for (int j = 0; j < NbPointsLat; ++j)
+        {
+          float lat = (PI / 180.0f) * latitude;
+          float lon = (PI / 180.0f) * longitude;
+          float lat_sin = sin(lat);
+          float lon_sin = sin(lon);
+          float lat_cos = cos(lat);
+          float lon_cos = cos(lon);
+
+          positions.append(Vector3f(lon_sin * lat_cos * radius,
+                                    lat_sin * radius,
+                                    lat_cos * lon_cos * radius));
+
+          longitude += stepLon;
+        }
+      latitude += stepLat;
+    }
+
+ for (int i = 0; i < NbPointsLon * NbPointsLat; ++i)
+    {
+      m_indices.append(i);
+    }
+}
+
+//------------------------------------------------------------------
+//! \brief Init your scene.
+//------------------------------------------------------------------
 bool GLExample03::setup()
 {
-  LOGI("GLExample03::setup()");
+  LOGD("Setup");
 
-  // Enable the depth buffer
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // Enable some OpenGL states
+  glCheck(glEnable(GL_DEPTH_TEST));
+  glCheck(glDepthFunc(GL_LESS));
+  glCheck(glDisable(GL_BLEND));
+  glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-  // Copy arrays inside the VBO class
-  m_pos.add(vertexData, ARRAY_SIZE(vertexData));
-  m_tex.add(textureData, ARRAY_SIZE(textureData));
+  // Load from ASCII file the vertex sahder (vs) as well the fragment shader
+  vs.fromFile("shaders/Example03.vertex");
+  fs.fromFile("shaders/Example03.fragment");
 
-  // Compile a shader program
-  if (0U == m_shader.load("Example03.vertex", "Example03.fragment"))
-    return false;
-
-  // Configure the texture
-  m_texture.interpolation(GL_LINEAR);
-  m_texture.wrapping(GL_CLAMP_TO_EDGE);
-  if (false == m_texture.load("wooden-crate.jpg"))
-    return false;
-
-  // Tell to OpenGL how to manage VBO values. This fixes the size
-  // of the VBO container to its current capacity (ie. now the VBO
-  // size no longer be larger): the GPU have allocated static memory.
-  m_pos.setup(m_shader, 3, GL_FLOAT);
-  m_tex.setup(m_shader, 2, GL_FLOAT);
-
-  // Bind VBOs to the VAO. It's now enough for drawing primitives.
-  m_shader.start();
-  {
-    m_vao.start();
+  // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
+  if (!m_prog.attachShaders(vs, fs).compile())
     {
-      m_pos.start();
-      m_tex.start();
+      std::cerr << "failed compiling OpenGL program. Reason was '"
+                << m_prog.error() << "'" << std::endl;
+      return false;
     }
-    m_vao.stop();
-  }
-  m_shader.stop();
+
+  // --- Create a sphere
+
+  // Binding empty VAO to OpenGL program will make it be populated
+  // with all VBOs needed.
+  m_prog.bind(m_vao);
+
+  // Now we have to fill VBOs with data: here vertices. Because in
+  // vertex shader position is vect3 we have to cast to Vector3f.
+  createSphere();
+
+  // --- Init OpenGL shader uniforms
+  float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
+  m_prog.uniform<Matrix44f>("projection") =
+    matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
+
+  m_prog.uniform<Matrix44f>("model") = m_movable.transform();
+  m_prog.uniform<Matrix44f>("view") =
+    matrix::lookAt(Vector3f(3,3,3), Vector3f(1,1,1), Vector3f(0,1,0));
+
+  // -- Perform some debug
+  LOGD("Instropection:");
+  std::vector<std::string> vbos = m_vao.VBONames();
+  for (auto& it: vbos)
+    {
+      std::cout << "VAO has VBO named '" << it << "'" << std::endl;
+    }
+
+  // TODO Check if everything is ok (attrib/uniform are set, prog compiled ...)
+
+  // We have terminated creating our 3D scene, we can now paint it.
+  LOGD("GLExample03::draw");
   return true;
 }
 
-// Allow the user to displace and rotate the cube
-// withUP/DOWN/LEFT/RIGHT key of the keyboard.
-// New vertices positions are automaticly updated
-// to the GPU with the ::start() method.
-void GLExample03::moveMe()
-{
-  const float deltaTime = dt();
-  // Sign of translation, rotation
-  int r = 0;
-  int t = 0;
-
-  // t for translation
-  if (glfwGetKey(m_window, GLFW_KEY_RIGHT))
-    {
-      t = 1;
-    }
-  else if (glfwGetKey(m_window, GLFW_KEY_LEFT))
-    {
-      t = -1;
-    }
-
-  if (t != 0)
-    {
-      const GLfloat offset = deltaTime * ((float) t) / 1.0f;
-      m_movable.move(Vector3f(offset));
-    }
-
-  // r for rotation
-  if (glfwGetKey(m_window, GLFW_KEY_UP))
-    {
-      r = 1;
-    }
-  else if (glfwGetKey(m_window, GLFW_KEY_DOWN))
-    {
-      r = -1;
-    }
-
-  if (r != 0)
-    {
-      const GLfloat degreesPerSecond = 80.0f;
-      m_degreesRotated += r * deltaTime * degreesPerSecond;
-      m_degreesRotated = maths::wrapTo180(m_degreesRotated);
-      m_movable.rotate(maths::radians(m_degreesRotated), Vector3f(0, 1, 0));
-    }
-}
-
-// Draw the cube
+//------------------------------------------------------------------
+//! \brief Paint our scene.
+//------------------------------------------------------------------
 bool GLExample03::draw()
 {
-  LOGI("GLExample03::draw()");
-
-  // clear everything
+  // Clear OpenGL color and depth buffers.
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
   glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  m_shader.start();
-  m_vao.start();
+  // --- Draw the turning cube and apply to it a "pinkished" coloration.
 
-  // Model matrix transformation
-  setUniform("model", m_movable.transform());
+  // Important: bind the VAO to the OpenGL shader to let it know to
+  // OpenGL which one to paint. Contrary to bind() in setup(), his
+  // time, VBOs are not populated !
+  m_prog.bind(m_vao);
 
-  // Projection matrix transformation
-  float ratio = ((float) m_width) / ((float) m_height);
-  Matrix44f projection = matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
-  setUniform("projection", projection);
-
-  // View matrix transformation
-  Matrix44f camera = matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
-  setUniform("camera", camera);
-
-  //set to 0 because the texture is bound to GL_TEXTURE0
-  GLint TextureID = glCheck(glGetUniformLocation(m_shader, "tex"));
-  glCheck(glUniform1i(TextureID, 0));
-  glCheck(glActiveTexture(GL_TEXTURE0));
-  m_texture.start();
-
-  moveMe();
-
-  glCheck(glDrawArrays(GL_TRIANGLES, 0, 6*2*3));
-
-  m_texture.stop();
-  m_vao.stop();
-  m_shader.stop();
+  // Paint the 36 verties (aka nodes) constituing a cube
+  m_prog.draw(DrawPrimitive::POINTS, m_indices);
 
   return true;
 }

@@ -1,6 +1,33 @@
 # SimTaDyn Compilation Guide
 
-Table of contents:
+## Compiling SimTaDyn (short version)
+
+This document explains the different steps for getting, compiling the SimTaDyn code source take from the git
+[master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master) or the [development branch](https://github.com/Lecrapouille/SimTaDyn/).
+and how to install it. For other SimTaDyn branches, specially for the [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004),
+please read the INSTALL file associated to this branch.
+
+The following code (to type in your Linux console) allows to download the code source,
+download third part libraries, compile the whole source, install it (if desired) and
+to launch it.
+
+```sh
+git clone https://github.com/Lecrapouille/SimTaDyn.git --depth=1
+cd SimTaDyn/
+make download-external-libs
+make compile-external-libs
+make -j4
+./build/SimTaDyn
+# optional:
+sudo make install
+SimTaDyn
+```
+
+## Steps for compiling SimTaDyn (long explanations)
+
+Reading the next of this document is not necessary. It just gives more informations about
+the previous commands. Table of contents:
+
 - [Steps for compiling SimTaDyn](#steps-for-compiling-simtadyn)
 - [Installing packages that SimTaDyn depends on](#installing-packages-that-simtadyn-depends-on)
   - [Ubuntu](#ubuntu)
@@ -14,14 +41,6 @@ Table of contents:
   - [Create RPM and Debian packages](#create-rpm-and-debian-packages)
   - [Compiling SimTaDyn unit tests](#compiling-simtadyn-unit-tests)
   - [Makefile options](#makefile-options)
-
-## Steps for compiling SimTaDyn
-
-This document explains the different steps for getting, compiling the SimTaDyn code source take from the git
-[master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master) and install it.
-
-For other SimTaDyn branches, specially for the [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004),
-please read the INSTALL file associated to this branch.
 
 ##### Step 1: Install packages that SimTaDyn depends on:
 
@@ -45,6 +64,9 @@ Step 2.1: download the SimTaDyn code source from github <img src="http://i.imgur
 git clone https://github.com/Lecrapouille/SimTaDyn.git
 ```
 A `SimTaDyn/` folder should have been created and will be refered as the root directory of your project.
+
+The `--depth=1` is optional: it allows to reduce the download duration by avoiding downloading the full history of commits.
+This is useful if you just want to compile to source whithout contributing to source code development.
 
 Because not all libraries can be installed from disribution packages as explained in step 1,
 you will have to download and compile them from github. For some reasons which will not be explained here,
@@ -70,6 +92,8 @@ cd SimTaDyn/external/
 ```sh
 sudo make install
 ```
+
+Note: for the moment, you cannot download and compile with multiple jobs from makefile for the moment because it just calls a bash script.
 
 ##### Step 3: Compile the SimTaDyn code source:
 

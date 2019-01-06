@@ -15,18 +15,17 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef CLASSIC_SPREADSHEET_HPP_
 #  define CLASSIC_SPREADSHEET_HPP_
 
-#  include "Resource.hpp"
 #  include "SimTaDynCell.hpp"
 //#  include "GraphAlgorithm.hpp"
 #  include "BoundingBox.tpp"
-#  include "Vertex.hpp"
-#  include "GLCollection.tpp"
+#  include "SceneGraph.tpp"
+#  include "OpenGL.hpp"
 
 //FIXME
 #include "algorithm/SimTaDynBFS.hpp"
@@ -37,10 +36,10 @@ using namespace graphtheory;
 //
 // **************************************************************
 class SimTaDynSheet
-  : public ASpreadSheet,
-    public SimTaDynGraph<CellNode, CellArc, CellZone>,
-    public Resource,
-    private UniqueID<SimTaDynSheet>
+  : private UniqueID<SimTaDynSheet>,
+    public SceneGraph_t<std::string, SimTaDynSheet, float, 3u>::Node, // FIXME: types
+    public ASpreadSheet,
+    public SimTaDynGraph<CellNode, CellArc, CellZone>
 {
 public:
 
@@ -49,7 +48,10 @@ public:
   SimTaDynSheet(const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      m_name("No name")
+      m_name("NewSheet_" + std::to_string(getID())),
+      m_vao_nodes(std::string("VAO::nodes::" + m_name).c_str()),
+      m_vao_arcs(std::string("VAO::arcs::" + m_name).c_str()),
+      m_vao_zones(std::string("VAO::zones::" + m_name).c_str())
   {
     LOGI("New SimTaDynSheet with generic name '%s' and ID #%u\n",
          this->name().c_str(), getID());
@@ -58,7 +60,10 @@ public:
   SimTaDynSheet(std::string const& name, const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      m_name(name)
+      m_name(name),
+      m_vao_nodes(std::string("VAO::nodes::" + m_name).c_str()),
+      m_vao_arcs(std::string("VAO::arcs::" + m_name).c_str()),
+      m_vao_zones(std::string("VAO::zones::" + m_name).c_str())
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
          this->name().c_str(), getID());
@@ -67,42 +72,54 @@ public:
   SimTaDynSheet(const char* name, const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(directed),
-      m_name(name)
+      m_name(name),
+      m_vao_nodes(std::string("VAO::nodes::" + m_name).c_str()),
+      m_vao_arcs(std::string("VAO::arcs::" + m_name).c_str()),
+      m_vao_zones(std::string("VAO::zones::" + m_name).c_str())
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
          this->name().c_str(), getID());
   }
 
-  SimTaDynSheet(const uint32_t noNodes,
-                const uint32_t noArcs,
+  SimTaDynSheet(const size_t noNodes,
+                const size_t noArcs,
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      m_name("No name")
+      m_name("SheetNoName"),
+      m_vao_nodes(std::string("VAO::nodes::" + m_name).c_str()),
+      m_vao_arcs(std::string("VAO::arcs::" + m_name).c_str()),
+      m_vao_zones(std::string("VAO::zones::" + m_name).c_str())
   {
     LOGI("New SimTaDynSheet with generic name '%s' and ID #%u\n",
          this->name().c_str(), getID());
   }
 
   SimTaDynSheet(std::string const& name,
-                const uint32_t noNodes,
-                const uint32_t noArcs,
+                const size_t noNodes,
+                const size_t noArcs,
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      m_name(name)
+      m_name(name),
+      m_vao_nodes(std::string("VAO::nodes::" + m_name).c_str()),
+      m_vao_arcs(std::string("VAO::arcs::" + m_name).c_str()),
+      m_vao_zones(std::string("VAO::zones::" + m_name).c_str())
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
          this->name().c_str(), getID());
   }
 
   SimTaDynSheet(const char *name,
-                const uint32_t noNodes,
-                const uint32_t noArcs,
+                const size_t noNodes,
+                const size_t noArcs,
                 const bool directed = true)
     : ASpreadSheet(),
       SimTaDynGraph<CellNode, CellArc, CellZone>(noNodes, noArcs, directed),
-      m_name(name)
+      m_name(name),
+      m_vao_nodes(std::string("VAO::nodes::" + m_name).c_str()),
+      m_vao_arcs(std::string("VAO::arcs::" + m_name).c_str()),
+      m_vao_zones(std::string("VAO::zones::" + m_name).c_str())
   {
     LOGI("Creating SimTaDynSheet named '%s' with ID #%u\n",
          this->name().c_str(), getID());
@@ -115,9 +132,19 @@ public:
          this->name().c_str(), getID());
   }
 
+  virtual void reset() override
+  {
+    SimTaDynGraph<CellNode, CellArc, CellZone>::reset();
+  }
+
   virtual const std::string& name() const override
   {
     return m_name;
+  }
+
+  inline void name(std::string const& name)
+  {
+    m_name = name;
   }
 
   virtual const std::string& path() const
@@ -125,10 +152,10 @@ public:
     return m_file_path;
   }
 
-  //! \brief Return the unique identifier.
-  operator int()
+  virtual size_t howManyCells() const override
   {
-    return getID();
+    LOGI("howManyCell(): %u", howManyNodes() + howManyArcs() + howManyZones());
+    return howManyNodes() + howManyArcs() + howManyZones();
   }
 
   inline MapProjection mapProjectionType() const
@@ -136,33 +163,26 @@ public:
     return m_projection_type;
   }
 
-  void draw(GLuint const /*type*/)
-  {
-    /*LOGI("SimTaDynMap.drawnBy 0x%x", this);
-    LOGI("SimTaDynMap #%u %s drawnBy renderer",  getID(), m_name.c_str());
-
-    if (pos.blocks() != col.blocks())
-      {
-        LOGI("Incompatible number of elements in VBO");
-        return ;
-      }
-
-    // Draw nodes
-    uint32_t i = pos.blocks();
-    while (i--)
-      {
-        col.block(i)->begin();
-        renderer.m_colAttrib.begin();
-
-        pos.block(i)->begin();
-        renderer.m_posAttrib.begin();
-        pos.block(i)->draw(GL_POINTS, renderer.m_posAttrib);
-      }*/
-  }
+  virtual void update(float const dt) override;
 
   std::string m_name;
   std::string m_file_path = "FIXME";
   MapProjection m_projection_type = MapProjection::NoMapProjection;
+
+  GLVAO& vaoNodes()
+  {
+    return m_vao_nodes;
+  }
+
+  GLVAO& vaoArcs()
+  {
+    return m_vao_arcs;
+  }
+
+  GLVAO& vaoZones()
+  {
+    return m_vao_zones;
+  }
 
 protected:
 
@@ -203,12 +223,6 @@ protected:
     return cell;
   }
 
-  virtual uint32_t howManyCells() const override
-  {
-    LOGI("howManyCell(): %u", howManyNodes() + howManyArcs() + howManyZones());
-    return howManyNodes() + howManyArcs() + howManyZones();
-  }
-
   virtual ASpreadSheetCell *isACell(std::string const& word) override;
 
   /*ASpreadSheetCell& addCell(std::string const& formulae)
@@ -239,8 +253,9 @@ private:
   //FIXME std::shared_ptr<GraphAlgorithm> m_graphAlgorithm = nullptr;
   GraphAlgorithmSimTaDynBFS m_graphAlgorithm;
   std::vector<ASpreadSheetCell*> m_cells;
+  GLVAO m_vao_nodes;
+  GLVAO m_vao_arcs;
+  GLVAO m_vao_zones;
 };
-
-using SimTaDynSheetPtr = std::shared_ptr<SimTaDynSheet>;
 
 #endif

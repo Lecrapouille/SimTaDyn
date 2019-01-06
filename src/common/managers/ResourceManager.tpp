@@ -16,65 +16,65 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef RESOURCE_MANAGER_TPP_
 #  define RESOURCE_MANAGER_TPP_
 
+#  include "NonCppStd.hpp"
 #  include "Singleton.tpp"
-#  include "Resource.hpp"
+#  include "ManagerException.hpp"
 #  include "Logger.hpp"
 #  include <map>
 #  include <mutex>
+#  include <memory>
+#  include <atomic>
+#  include <utility>
 
-// **************************************************************
-//! \brief Hold resources. Needed for meta-programming
-// **************************************************************
-template <class T>
-class ResourceHolder
+// ***********************************************************************************************
+//! \brief insertion strategy for the ResourceManager. When inserting
+//! a new resource in the ResourceManager container, the slot is
+//! supposed to be empty (meaning the id is not already used). If this
+//! is not the case we have to decide of the behavior.
+// ***********************************************************************************************
+namespace resource
 {
-public:
+  enum class Strategy
+    {
+      //! \brief An exception will occur.
+      ThrowException,
 
-  ResourceHolder() {}
-  virtual ~ResourceHolder()
-  {
-    if (m_resources.empty())
-      return ;
+      //! \brief The older resource will not be smashed by the new
+      //! one. Therefore the new one is not inserted.
+      UseOlder,
 
-    for (auto& it: m_resources)
-      {
-        // Note: -1 because shared_ptr has 1 reference made by its
-        // own container.
-        auto n = it.second.use_count() - 1;
-        if (n > 0u)
-        {
-          CPP_LOG(logger::Warning)
-            << "Destroying the ResourceManager but its resource #"
-            << it.first << " is still used by " << n << " owners\n";
-        }
-      }
-  }
+      //! \brief The older resource will be smashed by the new
+      //! one.
+      Replace,
 
-public:
+      //! \brief Do nothing just return nullptr
+      ReturnNull
+    };
+}
 
-  std::map<T, ResourcePtr> m_resources;
-};
-
-// **************************************************************
-//! \brief
-// **************************************************************
-template <class R, class T>
+// ***********************************************************************************************
+//! \brief A class that is responsible of the life management of
+//! resources like images, fonts or music ... This class stores
+//! resources internally and let clients to access them. Resources are
+//! automaticaly release when no longer used. This class is thrread
+//! safe.
+// ***********************************************************************************************
+template <class I, class R>
 class ResourceManager
-  : public Singleton<ResourceManager<R, T>>,
-    public ResourceHolder<T>
+  : public Singleton<ResourceManager<I, R>>
 {
 private:
 
   //------------------------------------------------------------------
-  //! \brief Mandatory by design.
+  //! \brief Mandatory by the Singleton design.
   //------------------------------------------------------------------
-  friend class Singleton<ResourceManager<R, T>>;
+  friend class Singleton<ResourceManager<I, R>>;
 
 public:
 
@@ -87,98 +87,76 @@ public:
   //! \brief Private because of Singleton. Check if resources is still
   //! acquired which show a bug in the management of resources.
   //------------------------------------------------------------------
-  ~ResourceManager() { }
+  ~ResourceManager()
+  {
+    for (auto& it: m_resources)
+      {
+        // Note: -1 because shared_ptr has 1 reference made by its
+        // own container.
+        auto n = it.second.use_count() - 1;
+        if (n > 0u)
+          {
+            CPP_LOG(logger::Warning)
+              << "Destroying the ResourceManager but its resource #"
+              << it.first << " is still used by " << n << " owners\n";
+          }
+      }
+  }
 
 public:
 
-  std::shared_ptr<R>
-  create(const T& id, const bool force = true)
+  //------------------------------------------------------------------
+  //! \brief insertion strategy:
+  //------------------------------------------------------------------
+  inline void strategy(resource::Strategy strategy)
   {
-    ResourcePtr r = Resource::create<R>();
-    if (true == add(id, r, force))
-      {
-        return std::static_pointer_cast<R>(r);
-      }
-    return nullptr;
+    m_strategy = strategy;
+  }
+
+  inline resource::Strategy strategy() const
+  {
+    return m_strategy;
   }
 
   //------------------------------------------------------------------
-  //! \brief Insert an allocated resource in the list of resources.
+  //! \brief Create a resource, store it internaly with a given
+  //! strategy and return its reference.
   //------------------------------------------------------------------
-  bool add(const T& id, ResourcePtr& resource, const bool force = true)
-  {
-    CPP_LOG(logger::Info) << "Adding the resource #" << id << "\n";
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    const auto& it = ResourceHolder<T>::m_resources.find(id);
-    if (it != ResourceHolder<T>::m_resources.end())
-      {
-        CPP_LOG(logger::Info) << "Replacing the resource #" << id
-                              << " owned by " << (it->second.use_count() - 1)
-                              << "\n";
-        if (!force)
-          return false;
-      }
-
-    ResourceHolder<T>::m_resources[id] = resource;
-    return true;
-  }
-
-  //------------------------------------------------------------------
-  //! Get the resource address in read only access.
-  //------------------------------------------------------------------
-  inline bool exist(const T& id) const
+  template<typename... Args>
+  inline std::shared_ptr<R> create(I const& id,
+                                   resource::Strategy const strategy,
+                                   Args const&... args)
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    const auto& it = ResourceHolder<T>::m_resources.find(id);
-    if (it != ResourceHolder<T>::m_resources.end())
-      {
-        return true;
-      }
-    return false;
+    return std::move(insert(id, strategy, args...));
   }
 
   //------------------------------------------------------------------
-  //! \brief Call it when the resources is needed.
-  //! \param id the unique identifier of the resource.
-  //! \return the adress of the resource if it exists, else return
-  //! nullptr.
+  //! \brief Create a resource, store it internaly with the current
+  //! defined strategy and return its reference.
   //------------------------------------------------------------------
-  inline std::shared_ptr<R> acquire(const T& id)
+  /*template<typename... Args>
+  inline std::shared_ptr<R> create(I const& id, Args&... args)
   {
-    CPP_LOG(logger::Info) << "Acquiring the resource #" << id << "\n";
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    const auto& it = ResourceHolder<T>::m_resources.find(id);
-    if (it != ResourceHolder<T>::m_resources.end())
-      {
-        return std::static_pointer_cast<R>(it->second);
-      }
-    else
-      {
-        CPP_LOG(logger::Warning)
-          << "Trying to acquire a non-existent resource "
-          << id << ". This current action is ignored !\n";
-        return nullptr;
-      }
-  }
+    LOGI("Strategy %d", (int) strategy());
+    return create(id, strategy(), std::forward<Args>(args)...);
+    }*/
 
   //------------------------------------------------------------------
   //! \brief Call it when the resources is no longer needed. If someone
   //! is still using it, the resource is not destroyed. If nobody uses
   //! it, the resource is destroyed.
   //------------------------------------------------------------------
-  void remove(const T& id, const bool force = true)
+  void remove(I const& id, bool const force = true)
   {
-    CPP_LOG(logger::Info) << "Disposing of the resource #" << id << "\n";
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    const auto& it = ResourceHolder<T>::m_resources.find(id);
-    if (it != ResourceHolder<T>::m_resources.end())
+    auto it = m_resources.find(id);
+    if (it != m_resources.end())
       {
-        uint32_t owners = it->second.use_count();
-        if (owners > 1u)
+        size_t owners = it->second.use_count();
+        if (owners > 1_z)
           {
             CPP_LOG(logger::Warning)
               << "Trying to dispose of the resource #"
@@ -190,41 +168,192 @@ public:
               return ;
           }
 
-        ResourceHolder<T>::m_resources.erase(it);
+        m_resources.erase(it);
       }
     else
       {
         CPP_LOG(logger::Warning)
-          << "Trying to dispose a non-existent resource #"
-          << id << ". This current action is ignored !\n";
-        return ;
+          << "Failed to release resource '" << id
+          << "' not currently stored in ResourceManager\n";
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Call it when the resources is needed.
+  //! \param id the unique identifier of the resource.
+  //! \return the resource if it exists else return and indefined data.
+  //! \note this method does not trig exception. the resource id shall
+  //! exist. If you want securized method call instead acquire().
+  //------------------------------------------------------------------
+  R& operator[](I const& id)
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    auto it = m_resources.find(id);
+    return *(it->second);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Call it when the resources is needed.
+  //! \param id the unique identifier of the resource.
+  //! \return the resource if it exists, else throw an exception.
+  //------------------------------------------------------------------
+  /*  R& acquireRef(I const& id)
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    auto it = m_resources.find(id);
+    if (it == m_resources.end())
+      throw ResourceManager("Failed to access resource, ID not currently stored in ResourceManager");
+
+    return *(it->second);
+    }*/
+
+  std::shared_ptr<R> acquire(I const& id)
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    auto it = m_resources.find(id);
+    if (it == m_resources.end())
+      return nullptr;
+
+    return it->second;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Rename the
+  //------------------------------------------------------------------
+  std::shared_ptr<R> rename(I const& oldKey, I const& newKey,
+                            resource::Strategy const strategy)
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    auto old_it = m_resources.find(oldKey);
+    if (old_it != m_resources.end())
+      {
+        if (oldKey == newKey)
+          return old_it->second;
+
+        std::shared_ptr<R> r;
+        auto new_it = m_resources.find(newKey);
+        if (new_it == m_resources.end())
+          {
+            std::shared_ptr<R> r = std::move(old_it->second);
+            m_resources[newKey] = r;
+            m_resources.erase(old_it);
+            return r;
+          }
+        else
+          {
+            LOGW("The newKey already stored in ResourceManager");
+            switch (strategy)
+              {
+              case resource::Strategy::ThrowException:
+                LOGD("resource::Strategy::ThrowException");
+                throw ResourceManagerException("Failed to rename resource: the newKey already stored in ResourceManager");
+              case resource::Strategy::UseOlder:
+                LOGD("resource::Strategy::UseOlder");
+                r = std::move(old_it->second);
+                new_it->second = r;
+                m_resources.erase(old_it);
+                return r;
+              case resource::Strategy::Replace:
+                LOGD("resource::Strategy::Replace");
+                m_resources.erase(old_it);
+                return new_it->second;
+              case resource::Strategy::ReturnNull:
+              default:
+                return nullptr;
+              }
+          }
+      }
+    else
+      {
+        CPP_LOG(logger::Warning) << "Failed renaming '" << oldKey << "'. This resource does not exist\n";
+        if (resource::Strategy::ThrowException == strategy)
+          {
+            throw ResourceManagerException("Failed to rename an none existing resource");
+          }
+        return nullptr;
       }
   }
 
   //------------------------------------------------------------------
   //! \brief Return the number of resources currently stored.
   //------------------------------------------------------------------
-  inline uint32_t size()
+  inline size_t size()
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    return ResourceHolder<T>::m_resources.size();
-  }
-
-  void debug() const
-  {
-    std::cout << "ResourceManager::debug():" << std::endl;
-    for (const auto& it: ResourceHolder<T>::m_resources)
-      {
-        std::cout << it.first << ": shared by "
-          << (it.second.use_count() - 1)
-          << " owners" << std::endl;
-      }
+    return m_resources.size();
   }
 
   //------------------------------------------------------------------
-  //! \brief Allow several threads to access to the manager.
-  //-----------------------------------------------------------------
+  //! \brief Pretty print the content of the class.
+  //------------------------------------------------------------------
+  void debug() const
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    std::cout << "ResourceManager::debug():" << std::endl;
+    for (const auto& it: m_resources)
+      {
+        std::cout << it.first << std::endl;
+      }
+  }
+
+private:
+
+  //------------------------------------------------------------------
+  //! \brief Insert an allocated resource in the list of resources.
+  //------------------------------------------------------------------
+  template<typename... Args>
+  std::shared_ptr<R> insert(I const& id,
+                            resource::Strategy const strategy,
+                            Args const&... args)
+  {
+    std::shared_ptr<R> resource = nullptr;
+
+    auto it = m_resources.find(id);
+    if (it == m_resources.end())
+      {
+        LOGD("New resource created");
+        resource = std::make_unique<R>(args...);
+        m_resources[id] = resource;
+      }
+    else
+      {
+        CPP_LOG(logger::Info)
+          << "The resource '" << id << "' is already stored in ResourceManager\n";
+
+        switch (strategy)
+          {
+          case resource::Strategy::ThrowException:
+            LOGD("resource::Strategy::ThrowException");
+            throw ResourceManagerException("Failed to load resource, ID already stored in ResourceManager");
+            break;
+          case resource::Strategy::Replace:
+            LOGD("resource::Strategy::Replace");
+            resource = std::make_unique<R>(args...);
+            it->second = resource;
+            break;
+          case resource::Strategy::UseOlder:
+            LOGD("resource::Strategy::UseOlder");
+            resource = it->second;
+            break;
+          case resource::Strategy::ReturnNull:
+            LOGD("resource::Strategy::ReturnNull");
+            resource = nullptr;
+            break;
+          }
+      }
+    return std::move(resource);
+  }
+
+private:
+
+  std::atomic<resource::Strategy> m_strategy{resource::Strategy::ThrowException};
+  std::map<I, std::shared_ptr<R>> m_resources;
   mutable std::mutex m_mutex;
 };
 

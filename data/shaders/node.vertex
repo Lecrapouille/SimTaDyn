@@ -1,17 +1,14 @@
-#version 150
+#version 330 core
 
-uniform mat4 projection;
-uniform mat4 camera;
 uniform mat4 model;
+uniform mat4 camera;
+uniform mat4 projection;
 
-in vec3 vert;
-in vec2 vertTexCoord;
+attribute vec3  position;
+attribute float scale;
 
-out vec2 fragTexCoord;
-
-void main() {
-    // Pass the tex coord straight through to the fragment shader
-    fragTexCoord = vertTexCoord;
-
-    gl_Position = projection * camera * model * vec4(vert, 1);
+void main()
+{
+    gl_Position = projection * camera * model * vec4(position, 1);
+    gl_PointSize = scale;
 }

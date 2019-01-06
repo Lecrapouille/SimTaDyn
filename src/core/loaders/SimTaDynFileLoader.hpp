@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SIMTADYNFILELOADER_HPP_
@@ -25,7 +25,7 @@
 #  include "SimTaDynMap.hpp"
 #  include "ResourceManager.tpp"
 
-using SimTaDynMapManager = ResourceManager<SimTaDynMap, std::string>;
+using SimTaDynMapManager = ResourceManager<std::string, SimTaDynMap>;
 
 // ***********************************************************************************************
 //! \brief
@@ -39,14 +39,14 @@ public:
   {
     LOGI("Creating a SimTaDynMap loader %p", this);
   }
-  virtual void loadFromFile(std::string const& filename, SimTaDynMapPtr &map) override;
-  virtual void saveToFile(SimTaDynMapPtr const map, std::string const& filename) override;
+  virtual void loadFromFile(std::string const& filename, SimTaDynMap& map) override;
+  virtual void saveToFile(SimTaDynMap const& map, std::string const& filename) const override;
 
 protected:
 
   //! \brief
   void unzip(std::string const &zip_file);
-  bool zip(SimTaDynMapPtr const map, std::string const& filename);
+  bool zip(SimTaDynMap const& map, std::string const& filename) const;
 };
 
 #endif

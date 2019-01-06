@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "Logger.hpp"
@@ -23,13 +23,16 @@
 
 static const char *c_str_severity[logger::MaxLoggerSeverity + 1] =
   {
-    [logger::None] = "",
-    [logger::Info] = "[INFO]",
-    [logger::Debug] = "[DEBUG]",
-    [logger::Warning] = "[WARNING]",
-    [logger::Failed] = "[FAILURE]",
-    [logger::Error] = "[ERROR]",
-    [logger::Fatal] = "[FATAL]"
+    [logger::None]      = "",
+    [logger::Info]      = "[INFO]",
+    [logger::Debug]     = "[DEBUG]",
+    [logger::Warning]   = "[WARNING]",
+    [logger::Failed]    = "[FAILURE]",
+    [logger::Error]     = "[ERROR]",
+    [logger::Signal]    = "[SIGNAL]",
+    [logger::Exception] = "[THROW]",
+    [logger::Catch]     = "[CATCH]",
+    [logger::Fatal]     = "[FATAL]"
   };
 
 Logger::Logger(std::string const& filename)
@@ -55,8 +58,6 @@ bool Logger::changeLog(std::string const& logfile)
 
 bool Logger::open(std::string const& logfile)
 {
-  std::cerr << "ICI " << config::tmp_path << std::endl;
-
   // Distinguish behavior between simple file and absolute path.
   std::string dir = File::dirName(logfile);
   std::string file(logfile);

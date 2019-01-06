@@ -1,21 +1,38 @@
-#ifndef EXAMPLE_03_HPP_
-#  define EXAMPLE_03_HPP_
+//=====================================================================
+// OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of OpenGLCppWrapper.
+//
+// OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
 
-#  include "GLWindow.hpp"
-#  include "GLVertexArray.hpp"
-#  include "GLVertexBuffer.hpp"
-#  include "GLTextures.hpp"
+#ifndef EXAMPLE_03_HPP
+#  define EXAMPLE_03_HPP
+
+#  include "OpenGL.hpp"
 #  include "Movable.tpp"
+#  include <iostream>
 
 class GLExample03: public IGLWindow
 {
 public:
 
   GLExample03()
-    : m_shader("Shader03"),
-      m_vao("VAO"),
-      m_pos("vert"),
-      m_tex("vertTexCoord")
+    : m_vao("VAO"),
+      m_prog("prog"),
+      m_indices("indices")
   {
   }
 
@@ -24,18 +41,21 @@ public:
     std::cout << "Bye" << std::endl;
   }
 
+private:
+
+  void createSphere();
+  virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
-  void setUniform(const char *name, Matrix44f const &mat);
-  void moveMe();
 
-  GLShader m_shader;
-  GLVertexArray m_vao;
-  GLVertexBuffer<float> m_pos;
-  GLVertexBuffer<float> m_tex;
-  GLTexture2D m_texture;
-  float m_degreesRotated = 0.0f;
+private:
+
+  GLVertexShader     vs;
+  GLFragmentShader   fs;
+  GLVAO              m_vao;
+  GLProgram          m_prog;
   Movable<float, 3U> m_movable;
+  GLIndexBuffer<uint32_t> m_indices;
 };
 
-#  endif /* EXAMPLE_03_HPP_ */
+#endif // EXAMPLE_03_HPP

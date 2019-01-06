@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SIMFORTH_HPP_
@@ -24,11 +24,14 @@
 #  include "ASpreadSheet.hpp"
 #  include "Forth.hpp"
 #  include "SimTaDynForthPrimitives.hpp"
-//#  include "Names.hpp"
+#  include <sigc++/sigc++.h>
 
 class ASpreadSheetCell;
 class ASpreadSheet;
 
+// *************************************************************************************************
+//! \brief
+// *************************************************************************************************
 class SimForthDictionary : public ForthDictionary
 {
 public:
@@ -40,13 +43,24 @@ public:
   }
 };
 
-class SimForth : public Forth, public Singleton<SimForth>
+// *************************************************************************************************
+//! \brief SimTaDynForth a classic Forth modified for GIS and spreadsheet
+// *************************************************************************************************
+class SimForth
+  : public Forth,
+    public Singleton<SimForth>
 {
   friend class Singleton<SimForth>;
 
 public:
 
   ASpreadSheet *m_spreadsheet = nullptr;
+
+  virtual void ok(std::pair<bool, std::string> const& res) override
+  {
+    Forth::ok(res);
+    emitForthInterpreteDone();
+  }
 
   virtual void boot() override;
   void compileCell(ASpreadSheetCell &cell);
@@ -55,30 +69,45 @@ public:
   interpreteCell(ASpreadSheetCell &cell);
   bool parseCell(ASpreadSheetCell &cell);
 
-protected:
-
-  ASpreadSheetCell *isACell(std::string const& word);
-  virtual void interpreteWordCaseInterprete(std::string const& word) override;
-  virtual void interpreteWordCaseCompile(std::string const& word) override;
-  bool isACell(std::string const& word, Cell32& number);
+  // Save temporary pathes of unziped SimTaDynMap files.
+  // Like this PathManager does not have to get them this
+  // avoids conflict with 2 resources with the same name
+  // in two unziped locations.
+  void pushPath(std::string const& path)
+  {
+    m_pathes.push_back(path);
+  }
+  void popPath()
+  {
+    if (!m_pathes.empty())
+      {
+        m_pathes.pop_back();
+      }
+  }
+  std::string const& path()
+  {
+    return m_pathes.back();
+  }
 
   virtual inline uint32_t maxPrimitives() const override
   {
     return SIMFORTH_MAX_PRIMITIVES;
   }
 
-  virtual void execPrimitive(const Cell16 idPrimitive) override
+
+protected:
+
+  void emitForthInterpreteDone()
   {
-    switch (idPrimitive)
-      {
-      case SIMFORTH_PRIMITIVE_TOTO:
-        std::cout << "TOTOTOTOTO\n";
-        break;
-      default:
-        Forth::execPrimitive(idPrimitive);
-        break;
-      }
+    LOGS("emit signal Forth interprete done");
+    signal_forth_interprete_done.emit(/**this*/);
   }
+
+  ASpreadSheetCell *isACell(std::string const& word);
+  virtual void interpreteWordCaseInterprete(std::string const& word) override;
+  virtual void interpreteWordCaseCompile(std::string const& word) override;
+  bool isACell(std::string const& word, Cell32& number);
+  virtual void execPrimitive(const Cell16 idPrimitive) override;
 
 private:
 
@@ -93,9 +122,14 @@ private:
     LOGI("Destroying SimForth");
   }
 
-protected:
+private:
 
   SimForthDictionary m_dictionaries;
+  std::vector<std::string> m_pathes;
+
+public:
+
+  sigc::signal<void/*, SimForth&*/> signal_forth_interprete_done;
 };
 
 #endif /* SIMFORTH_HPP_ */

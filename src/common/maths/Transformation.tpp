@@ -16,7 +16,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef TRANSFORMATION_TPP_
@@ -31,9 +31,9 @@
 namespace matrix
 {
   template<typename T>
-  Matrix<T, 4U, 4U> translate(Matrix<T, 4U, 4U> const &m, Vector<T, 3U> const &v)
+  Matrix<T, 4_z, 4_z> translate(Matrix<T, 4_z, 4_z> const &m, Vector<T, 3_z> const &v)
   {
-    Matrix<T, 4U, 4U> M(m);
+    Matrix<T, 4_z, 4_z> M(m);
 
     M[3] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3];
 
@@ -41,9 +41,9 @@ namespace matrix
   }
 
   template<typename T>
-  Matrix<T, 4U, 4U> scale(Matrix<T, 4U, 4U> const &m, Vector<T, 3U> const &v)
+  Matrix<T, 4_z, 4_z> scale(Matrix<T, 4_z, 4_z> const &m, Vector<T, 3_z> const &v)
   {
-    Matrix<T, 4U, 4U> M;
+    Matrix<T, 4_z, 4_z> M;
 
     M[0] = m[0] * v[0];
     M[1] = m[1] * v[1];
@@ -54,15 +54,15 @@ namespace matrix
   }
 
   template<typename T>
-  Matrix<T, 4U, 4U> rotate(Matrix<T, 4U, 4U> const &m, T const angle, Vector<T, 3U> const &v)
+  Matrix<T, 4_z, 4_z> rotate(Matrix<T, 4_z, 4_z> const &m, T const angle, Vector<T, 3_z> const &v)
   {
     T const a = angle;
     T const c = std::cos(a);
     T const s = std::sin(a);
 
-    Vector<T, 3U> axis(vector::normalize(v));
-    Vector<T, 3U> temp((T(1) - c) * axis);
-    Matrix<T, 4U, 4U> rotate;
+    Vector<T, 3_z> axis(vector::normalize(v));
+    Vector<T, 3_z> temp((T(1) - c) * axis);
+    Matrix<T, 4_z, 4_z> rotate;
 
     rotate[0][0] = c + temp[0] * axis[0];
     rotate[0][1] = temp[0] * axis[1] + s * axis[2];
@@ -76,7 +76,7 @@ namespace matrix
     rotate[2][1] = temp[2] * axis[1] - s * axis[0];
     rotate[2][2] = c + temp[2] * axis[2];
 
-    Matrix<T, 4U, 4U> M;
+    Matrix<T, 4_z, 4_z> M;
     M[0] = m[0] * rotate[0][0] + m[1] * rotate[0][1] + m[2] * rotate[0][2];
     M[1] = m[0] * rotate[1][0] + m[1] * rotate[1][1] + m[2] * rotate[1][2];
     M[2] = m[0] * rotate[2][0] + m[1] * rotate[2][1] + m[2] * rotate[2][2];
@@ -86,9 +86,9 @@ namespace matrix
   }
 
   template<typename T>
-  Matrix<T, 4U, 4U> ortho(T const left, T const right, T const bottom, T const top)
+  Matrix<T, 4_z, 4_z> ortho(T const left, T const right, T const bottom, T const top)
   {
-    Matrix<T, 4U, 4U> M(matrix::Identity);
+    Matrix<T, 4_z, 4_z> M(matrix::Identity);
 
     M[0][0] = T(2) / (right - left);
     M[1][1] = T(2) / (top - bottom);
@@ -107,31 +107,31 @@ namespace matrix
   //! \param zFar     - The far clipping distance.
   // *************************************************************************************************
   template<typename T>
-  Matrix<T, 4U, 4U> perspective(T const fovy, T const aspect, T const zNear, T const zFar)
+  Matrix<T, 4_z, 4_z> perspective(T const fovy, T const aspect, T const zNear, T const zFar)
   {
     assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
 
     T const tanHalfFovy = std::tan(fovy / T(2));
-    Matrix<T, 4U, 4U> M(0);
+    Matrix<T, 4_z, 4_z> M(0);
 
     M[0][0] = T(1) / (aspect * tanHalfFovy);
     M[1][1] = T(1) / (tanHalfFovy);
     M[2][3] = T(-1);
-    M[2][2] = - (zFar + zNear) / (zFar - zNear);
-    M[3][2] = - (T(2) * zFar * zNear) / (zFar - zNear);
+    M[2][2] = -(zFar + zNear) / (zFar - zNear);
+    M[3][2] = -(T(2) * zFar * zNear) / (zFar - zNear);
 
     return M;
 }
 
   template<typename T>
-  Matrix<T, 4U, 4U> lookAt(Vector<T, 3U> const &eye,
-                           Vector<T, 3U> const &center,
-                           Vector<T, 3U> const &up)
+  Matrix<T, 4_z, 4_z> lookAt(Vector<T, 3_z> const &eye,
+                             Vector<T, 3_z> const &center,
+                             Vector<T, 3_z> const &up)
   {
-    Vector<T, 3U> const f(vector::normalize(center - eye));
-    Vector<T, 3U> const s(vector::normalize(vector::cross(f, up)));
-    Vector<T, 3U> const u(vector::cross(s, f));
-    Matrix<T, 4U, 4U> M(matrix::Identity);
+    Vector<T, 3_z> const f(vector::normalize(center - eye));
+    Vector<T, 3_z> const s(vector::normalize(vector::cross(f, up)));
+    Vector<T, 3_z> const u(vector::cross(s, f));
+    Matrix<T, 4_z, 4_z> M(matrix::Identity);
 
     M[0][0] = s.x;
     M[1][0] = s.y;

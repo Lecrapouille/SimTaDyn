@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "SimTaDynWindow.hpp"
@@ -50,8 +50,8 @@ SimTaDynWindow::SimTaDynWindow()
     m_drawing_area.set_auto_render(true);
 
     // Connect drawing area signals
-    m_drawing_area.signal_realize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRealize));
-    m_drawing_area.signal_unrealize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onUnrealize), false);
+    m_drawing_area.signal_realize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onCreate));
+    m_drawing_area.signal_unrealize().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRelease), false);
     m_drawing_area.signal_render().connect(sigc::mem_fun(*this, &SimTaDynWindow::onRender));
   }
 
@@ -71,13 +71,19 @@ SimTaDynWindow::SimTaDynWindow()
     m_menubar.append(ForthEditor::instance().m_menuitem[simtadyn::PlugginsMenu]);
     ForthEditor::instance().addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
-
     // Menu '_Help'
-    // TODO: submenus Tuto, Help, Example, About
+    // TODO: submenus Tuto, Help, Example
     m_menuitem[simtadyn::HelpMenu].set_label("_Help");
     m_menuitem[simtadyn::HelpMenu].set_use_underline(true);
     m_menubar.append(m_menuitem[simtadyn::HelpMenu]);
     m_menuitem[simtadyn::HelpMenu].set_submenu(m_menu[simtadyn::HelpMenu]);
+
+    // About
+    m_submenu[0].set_label("About");
+    m_image[0].set_from_icon_name("gtk-about", Gtk::ICON_SIZE_MENU);
+    m_submenu[0].set_image(m_image[0]);
+    m_submenu[0].signal_activate().connect([this](){ m_about.show(); });
+    m_menu[simtadyn::HelpMenu].append(m_submenu[0]);
   }
 
   // Split verticaly the main window:
@@ -92,12 +98,31 @@ SimTaDynWindow::SimTaDynWindow()
     m_box.pack_start(m_menubar, Gtk::PACK_SHRINK);
     m_box.pack_start(ForthEditor::instance().m_vpaned);
     m_hpaned.pack2(m_box);
-    m_box.pack_start(m_package_explorer.widget());
+    m_box.pack_start(m_map_explorer.widget());
 
     //
     add(m_hpaned);
     m_hpaned.set_position(800);
   }
+
+  // About window
+  m_about.set_program_name(config::project_name);
+  m_about.set_version(std::to_string(config::major_version) + '.' + std::to_string(config::minor_version));
+  m_about.set_copyright("Copyright ©2004, 2017-2019 Quentin Quadrat");
+  m_about.set_comments("A GIS in a spreadsheet");
+  m_about.set_license_type(Gtk::LICENSE_GPL_3_0);
+  m_about.set_wrap_license(false);
+  m_about.set_website("https://github.com/Lecrapouille/SimTaDyn");
+  m_about.set_website_label("Visit " + config::project_name + " github site");
+  m_about.set_authors({"Quentin Quadrat <lecrapouille@gmail.com>"});
+  try
+    {
+      m_about.set_logo(Gdk::Pixbuf::create_from_file(PathManager::instance().expand("icons/SimTaDyn-logo.jpg")));
+    }
+  catch (...)
+    {
+      LOGW("SimTaDyn logo not found");
+    }
 
   show_all_children();
 }

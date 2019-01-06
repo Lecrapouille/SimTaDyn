@@ -15,7 +15,7 @@
 ## General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+## along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
 ###################################################
@@ -43,28 +43,28 @@ OBJ_EXTERNAL   = backward.o
 else
 OBJ_EXTERNAL   =
 endif
-OBJ_UTILS    = Exception.o PendingData.o ILogger.o Logger.o
-OBJ_OPENGL   = OpenGLException.o OpenGL.o GLObject.o GLShader.o         \
-               GLVertexArray.o GLVertexBuffer.o GLAttrib.o GLTextures.o \
-               GLWindow.o
-OBJ          = $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) \
-               Example01.o Example02.o Example03.o Example04.o Example05.o main.o
+OBJ_UTILS    = Exception.o File.o GLException.o PendingData.o ILogger.o Logger.o
+OBJ_OPENGL   = OpenGL.o GLWindow.o
+IMGUI        = imgui_draw.o imgui_widgets.o imgui.o imgui_impl_glfw.o imgui_impl_opengl3.o
+OBJ          = $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) $(IMGUI) \
+               Example01.o Example02.o Example03.o main.o
 
 ###################################################
 # Compilation options.
-CXXFLAGS = -W -Wall -Wextra -O2 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS = -W -Wall -Wextra -O0 -g -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
 #
-INCLUDES += -I$(P)/src
-VPATH += $(P)/src:
+INCLUDES += -I$(P)/src -I$(P)/external/imgui
+VPATH += $(P)/src:$(P)/external/imgui
 
 ###################################################
 # Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
+DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 
 ###################################################
 # Set Libraries compiled in the external/ directory.

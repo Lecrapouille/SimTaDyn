@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef FORTH_INNER_HPP_
@@ -24,9 +24,9 @@
 //! \brief This file contains the root class for the Forth interpretor.
 //! containing other classes like dictionary and stream reader context.
 
-#  include "ForthStream.hpp"
 #  include "ForthDictionary.hpp"
 #  include "ForthClibrary.hpp"
+#  include "NonCppStd.hpp"
 #  include <ostream>
 
 // **************************************************************
@@ -49,18 +49,22 @@ public:
   //! \brief Constructor with the reference of a Forth dictionary for
   //! an easier inheritance management.
   Forth(ForthDictionary& dico);
+  ~Forth() { }
   //! \brief Load all Forth primitives in the dictionary.
   virtual void boot();
   //! \brief interprete a new forth word extracted from a stream.
-  virtual void interpreteWord(std::string const& word);
+  void interpreteWord(std::string const& word);
   //! \brief interprete a Forth script stored as a string.
-  std::pair<bool, std::string> interpreteString(std::string const& code_fort,
-                                                std::string const& name = "<string>");
+  std::pair<bool, std::string> WARN_UNUSED
+  interpreteString(std::string const& code_forth,
+                   std::string const& name = "<string>");
   //! \brief interprete a Forth script stored as a char*.
-  virtual std::pair<bool, std::string> interpreteString(const char* const code_forth,
-                                                std::string const& name = "<string>");
+  std::pair<bool, std::string> WARN_UNUSED
+  interpreteString(const char* const code_forth,
+                   std::string const& name = "<string>");
   //! \brief interprete a Forth script stored in an ascii file.
-  std::pair<bool, std::string> interpreteFile(std::string const& filename);
+  std::pair<bool, std::string> WARN_UNUSED
+  interpreteFile(std::string const& filename);
   //! \brief Display the result prompt after interpreting a script.
   virtual void ok(std::pair<bool, std::string> const& res);
   //! \brief Accessor. Return the reference of the dictionary as const.
@@ -119,7 +123,24 @@ protected:
   //! \brief Perform the action of a Forth token (byte code).
   virtual void execToken(const Cell16 token);
   //! \brief Return the depth of the return stack.
-public: // FIXME
+
+public:
+
+  inline const Cell32* stack(const forth::StackID id) const
+  {
+    switch (id)
+      {
+      case forth::DataStack:
+        return m_data_stack;
+      case forth::ReturnStack:
+        return m_return_stack;
+      case forth::AuxStack:
+        return m_alternative_stack;
+      default:
+        LOGES("Pretty print this stack %u is not yet implemented", id);
+        return nullptr;
+      }
+  }
   inline int32_t stackDepth(const forth::StackID id) const
   {
     switch (id)
@@ -135,11 +156,14 @@ public: // FIXME
         return 0;
       }
   }
-protected:
+
   virtual inline uint32_t maxPrimitives() const
   {
     return FORTH_MAX_PRIMITIVES;
   }
+
+protected:
+
   //! \brief Return the token is a Forth primitive (or a user defined word).
   virtual inline bool isPrimitive(const Cell16 token) const
   {

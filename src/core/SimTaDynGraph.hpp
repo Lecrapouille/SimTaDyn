@@ -59,7 +59,7 @@ public:
   inline virtual Key id() const { return m_id; }
 
   //! \brief Return the unique identifier.
-  operator int() { return m_id; }
+  operator size_t() { return m_id; }
 
   inline const std::string name() const
   {
@@ -67,7 +67,7 @@ public:
   }
 
   //! \brief Return the reference of the arc.
-  inline Arc *arc(const uint32_t nth) { return m_arcs.at(nth); }
+  inline Arc *arc(const size_t nth) { return m_arcs.at(nth); }
 
   //! \brief Compare the unique identifier of this node with the unique
   // identifier of another node.
@@ -184,12 +184,13 @@ public:
   //! index if incorrect no error is returned and nothing is
   //! done. Complexity is O(1).
   //! \param nth the nth element of the list of neighbor.
-  inline void removeNthNeighbor(const uint32_t nth)
+  inline void removeNthNeighbor(const size_t nth)
   {
     LOGIS("Arc ID %u: Remove its %u'nth zone ID neighbor\n", m_id, nth);
     if (nth < m_zones.size())
       {
-        remove(m_zones.begin() + nth);
+        //FIXME: enlever cast
+        remove(m_zones.begin() + static_cast<int>(nth));
       }
   }
 
@@ -198,7 +199,7 @@ public:
   //! \param nth the nth element of the list of neighbor.
   //! \return the address of the arc, else nullptr if the index is
   //! incorrect.
-  inline Zone *neighbor(const uint32_t nth)
+  inline Zone *neighbor(const size_t nth)
   {
     if (nth < m_zones.size())
       {
@@ -212,7 +213,7 @@ public:
   //! \param nth the nth element of the list of neighbor.
   //! \return the address of the arc, else nullptr if the index is
   //! incorrect.
-  inline const Zone *neighbor(const uint32_t nth) const
+  inline const Zone *neighbor(const size_t nth) const
   {
     if (nth < m_zones.size())
       {
@@ -221,12 +222,12 @@ public:
     return nullptr;
   }
 
-  inline const Zone &nthNeighbor(const uint32_t nth) const
+  inline const Zone &nthNeighbor(const size_t nth) const
   {
     return *(m_zones[nth]);
   }
 
-  inline Zone &nthNeighbor(const uint32_t nth)
+  inline Zone &nthNeighbor(const size_t nth)
   {
     return *(m_zones[nth]);
   }
@@ -238,7 +239,7 @@ public:
   }
 
   //! \brief Return the number of neighbors. Complexity is O(1).
-  inline uint32_t degree() const
+  inline size_t degree() const
   {
     return m_zones.size();
   }
@@ -294,8 +295,8 @@ public:
 
   //! \brief Constructor. Reserve memory for the given
   //! number of nodes and arcs.
-  SimTaDynGraph(const uint32_t noNodes,
-          const uint32_t noArcs,
+  SimTaDynGraph(const size_t noNodes,
+          const size_t noArcs,
           const bool directed = true)
     : Graph<Node, Arc>(noNodes, noArcs, directed)
   {
@@ -303,8 +304,8 @@ public:
   }
 
   SimTaDynGraph(std::string const& name,
-          const uint32_t noNodes,
-          const uint32_t noArcs,
+          const size_t noNodes,
+          const size_t noArcs,
           const bool directed = true)
     : Graph<Node, Arc>(name, noNodes, noArcs, directed)
   {
@@ -312,8 +313,8 @@ public:
   }
 
   SimTaDynGraph(const char* name,
-          const uint32_t noNodes,
-          const uint32_t noArcs,
+          const size_t noNodes,
+          const size_t noArcs,
           const bool directed = true)
     : Graph<Node, Arc>(name, noNodes, noArcs, directed)
   {
@@ -322,6 +323,7 @@ public:
 
   Node& addNode(const std::string formulae)
   {
+    std::cout << "SimTaDynGraph::addNode" << std::endl;
     Node& n = Graph<Node, Arc>::addNode();
     n.formulae(formulae);
     return n;
@@ -347,9 +349,15 @@ public:
 
   //! \brief Return the number of zones constituing the
   //! graph. Complexity is O(1).
-  inline uint32_t howManyZones() const
+  inline size_t howManyZones() const
   {
     return m_zones.used();
+  }
+
+  inline virtual void reset() override
+  {
+    m_zones.clear();
+    Graph<Node, Arc>::reset();
   }
 
 protected:

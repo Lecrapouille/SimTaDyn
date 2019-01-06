@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef MAPEDITOR_HPP_
@@ -23,12 +23,13 @@
 
 #  include "Names.hpp"
 #  include "SimTaDynLoaders.hpp"
-#  include "Inspector.hpp"
-#  include "DrawingArea.hpp"
 #  include "ToggleButtons.hpp"
-#  include "MapEditionTools.hpp"
+#  include "ForthInspector.hpp"
+#  include "DrawingArea.hpp"
 
 class LoaderManager;
+class MapEditionTools;
+class GLDrawingArea;
 
 // *************************************************************************************************
 //! \brief A class holding the currently edited by SimTaDynMap. When
@@ -39,18 +40,22 @@ class SimTaDynMapHolder
 {
 public:
 
-  SimTaDynMapHolder()
+  SimTaDynMapHolder() {}
+  ~SimTaDynMapHolder() {}
+
+  //------------------------------------------------------------------
+  //! \brief TODO: WIP suppressing singletons
+  //------------------------------------------------------------------
+  inline SimTaDynMapManager& resourceManager()
   {
+    return SimTaDynMapManager::instance();
   }
 
   void set(SimTaDynMapPtr p)
   {
     m_map = p;
-    if (nullptr != m_map)
-      {
-        m_map->signal_changed.emit(m_map);
-        // TODO: notify to SimForth to get the address of the scenegraph<SimTaDynSheet>
-      }
+    emitMapChanged();
+    // TODO: notify to SimForth to get the address of the scenegraph<SimTaDynSheet>
   }
 
   SimTaDynMapPtr get(std::string const& name)
@@ -60,7 +65,7 @@ public:
       return m_map;
 
     // Get the desired map
-    SimTaDynMapPtr new_map = SimTaDynMapManager::instance().acquire(name);
+    SimTaDynMapPtr new_map = resourceManager().acquire(name);
 
     // The desired map does not exist
     if (nullptr == new_map)
@@ -79,7 +84,7 @@ public:
     else // Found
       {
         m_map = new_map;
-        m_map->signal_changed.emit(m_map);
+        emitMapChanged();
       }
 
     return m_map;
@@ -90,20 +95,26 @@ public:
     return m_map;
   }
 
-public:
+  // Can emit a nullptr as map
+  inline void emitMapChanged()
+  {
+    LOGS("SimTaDynMapHolder emit signal_top_map_changed");
+    signal_top_map_changed.emit(m_map);
+  }
 
-  sigc::signal<void, SimTaDynMapPtr> signal_changed;
+  sigc::signal<void, SimTaDynMapPtr> signal_top_map_changed;
 
 protected:
 
-  SimTaDynMapPtr m_map;
+  SimTaDynMapPtr m_map = nullptr;
 };
 
 // *************************************************************************************************
 // This class implements a Controler pattern of the Model-View-Controler (MVC) design pattern.
 // *************************************************************************************************
 class MapEditor
-  : public Singleton<MapEditor>
+  : public Singleton<MapEditor>,
+    public sigc::trackable
 {
 public:
 
@@ -115,141 +126,341 @@ public:
 
 private:
 
+  //------------------------------------------------------------------
+  //! \brief Mandatory by the Singleton.
+  //------------------------------------------------------------------
   friend class Singleton<MapEditor>;
 
+  //------------------------------------------------------------------
   //! \brief Private because of Singleton.
+  //------------------------------------------------------------------
   MapEditor();
 
+  //------------------------------------------------------------------
   //! \brief Private because of Singleton.
+  //------------------------------------------------------------------
   virtual ~MapEditor();
 
 public:
 
+  //*******************************************************************
+  // Widgets and classes access
+  //*******************************************************************
+  //------------------------------------------------------------------
+  //! \brief Return the GTK+ widget to be inserted inside a GTK+ window.
+  //------------------------------------------------------------------
   inline Gtk::Widget &widget()
   {
     return m_hbox;
   }
 
-  //! \brief Return the current map
-  inline SimTaDynMapPtr map()
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline SimTaDynMapHolder& mapHolder()
   {
-    return m_current_map.get();
+    return m_current_map;
   }
 
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline SimTaDynMapManager& resourceManager()
+  {
+    return m_current_map.resourceManager();
+  }
+
+  //*******************************************************************
+  // Maps
+  //*******************************************************************
+
+  void drawCurrentMap(/*GLDrawingArea& renderer*/)
+  {
+    SimTaDynMapPtr map = m_current_map.get();
+    if ((nullptr != map) && (nullptr != m_drawing_area))
+      {
+        map->drawnBy(*m_drawing_area/*renderer*/);
+      }
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the current map
+  //------------------------------------------------------------------
+  SimTaDynMap& map()
+  {
+    SimTaDynMapPtr map = m_current_map.get();
+    if (nullptr == map)
+      {
+        newMap();
+        map = m_current_map.get();
+      }
+    return *map;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Return the map by its name or nullptr if it does
+  //! not exit.
+  //------------------------------------------------------------------
   inline SimTaDynMapPtr map(std::string const& name)
   {
     return m_current_map.get(name);
   }
 
+  //------------------------------------------------------------------
   //! \brief Load a new SimTaDyn map from a file through a dialog box.
-  inline bool open()
-  {
-    return dialogLoadMap(false, true);
-  }
-
-  //! \brief Load a new map from a file.
-  inline bool open(std::string const& filename)
-  {
-    return doOpen(filename, false, true);
-  }
-
-  //! \brief Load a new map from a file through a dialog box.
-  inline bool import()
+  //------------------------------------------------------------------
+  inline bool openMap()
   {
     return dialogLoadMap(true, false);
   }
 
-    //! \brief Load a new map from a file through a dialog box.
-  inline bool import(std::string const& filename)
+  //------------------------------------------------------------------
+  //! \brief Load a new map from the given file.
+  //------------------------------------------------------------------
+  inline bool openMap(std::string const& filename)
   {
-    return doOpen(filename, true, false);
+    return doOpenMap(filename, true, false);
   }
 
+  //------------------------------------------------------------------
+  //! \brief Load a new map from a file which is not to the SimTaDynMap
+  //! format through a dialog box.
+  //------------------------------------------------------------------
+  inline bool importMap()
+  {
+    return dialogLoadMap(true, false);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief Load a new map from a file which is not to the SimTaDynMap
+  //! format through a dialog box.
+  //------------------------------------------------------------------
+  inline bool importMap(std::string const& filename)
+  {
+    return doOpenMap(filename, true, false);
+  }
+
+  //------------------------------------------------------------------
   //! \brief Create a dummy map.
+  //------------------------------------------------------------------
   void newMap();
 
-  //! \brief Load a map from a file in the current map.
-  inline bool addMap()
+  //------------------------------------------------------------------
+  //! \brief Load a map from a file and merge it inside the current map.
+  //------------------------------------------------------------------
+  inline bool mergeMap()
   {
     return dialogLoadMap(false, false);
   }
 
-  //! \brief Load a map from a file in the current map.
-  inline bool addMap(std::string const& filename)
+  //------------------------------------------------------------------
+  //! \brief Load a map from a file and merge it inside the current map.
+  //------------------------------------------------------------------
+  inline bool mergeMap(std::string const& filename)
   {
-    return doOpen(filename, false, false);
+    return doOpenMap(filename, false, false);
   }
 
-  //! \brief Load a map and replace the current map.
-  inline bool replace()
+  //------------------------------------------------------------------
+  //! \brief Load a map and replace the current map. Load a map and replace the current map.
+  //------------------------------------------------------------------
+  inline bool replaceMap()
   {
     return dialogLoadMap(false, true);
   }
 
-  //! \brief Load a map and replace the current map.
-  inline bool replace(std::string const& filename)
+  //------------------------------------------------------------------
+  //! \brief Load a map and replace the current map. FIXME: ca semble etre inutile: il suffit de renommer les fichiers
+  //------------------------------------------------------------------
+  inline bool replaceMap(std::string const& filename)
   {
-    return doOpen(filename, false, true);
+    return doOpenMap(filename, false, true);
   }
 
-  //! \brief Reset the map (suppres everything)
-  inline void clear()
+  //------------------------------------------------------------------
+  //! \brief Reset the current map (suppress everything)
+  //------------------------------------------------------------------
+  inline void clearMap()
   {
     if (nullptr != m_current_map.get())
       {
-        m_current_map.get()->clear();
+        m_current_map.get()->resetSheets();
       }
   }
 
-  void button1PressEvent(const gdouble x, const gdouble y)
+  //------------------------------------------------------------------
+  //! \brief Close the current map and activate the previous one (if
+  //! present)
+  //------------------------------------------------------------------
+  void closeMap();
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void saveMap() { LOGF("saveMap not yet implemented"); } //TODO
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void saveAsMap();
+
+  //*******************************************************************
+  // Sheets
+  //*******************************************************************
+
+  inline void emitSheetChanged()
   {
-    LOGD("Bouton1 click %d %d", (int) x, (int) y);
-    m_edition_tools[actionType()]->exec1(x, y);
+    LOGS("sheet_changed.emit");
+    sheet_changed.emit(m_current_map.get());//, map().currentSheetPtr());
   }
 
-  void button2PressEvent(const gdouble x, const gdouble y)
+  //------------------------------------------------------------------
+  //! \brief Return the current sheet
+  //------------------------------------------------------------------
+  inline SimTaDynSheet& sheet()
   {
-    LOGD("Bouton2 click %d %d", (int) x, (int) y);
-    m_edition_tools[actionType()]->exec2(x, y);
+    return map().currentSheet();
   }
 
-  void button3PressEvent(const gdouble x, const gdouble y)
+  //------------------------------------------------------------------
+  //! \brief Return the current sheet by its name or nullptr if it
+  //! does not exit.
+  //------------------------------------------------------------------
+  inline SimTaDynSheetPtr sheet(std::string const& name)
   {
-    LOGD("Bouton3 click %d %d", (int) x, (int) y);
-    m_edition_tools[actionType()]->exec3(x, y);
+    return map().sheet(name);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline bool openSheet(std::string const& filename)
+  {
+    LOGE("addSheet");
+    return doOpenSheet(filename, true, false);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline bool openSheet()
+  {
+    LOGE("addSheet");
+    return dialogLoadSheet(true, false);
+  }
+
+  // Request form MapExplorer
+  // TODO addSisterdSheet(SceneNodePtr node) + signal sheet_added
+  // TODO addChildSheet(SceneNodePtr node) + signal sheet_added
+  // TODO removeSheet(SceneNodePtr node) + signal sheet_removed
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline SimTaDynSheetPtr newSheet(bool const directed = true)
+  {
+    LOGI("createSheet");
+    SimTaDynSheetPtr sheet = map().createSheet(directed);
+    emitSheetChanged();
+    return sheet;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline bool addSheet()
+  {
+    return dialogLoadSheet(true, false);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline bool replaceSheet()
+  {
+    return dialogLoadSheet(false, true);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline void clearSheet()
+  {
+    sheet().reset();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline void resetSheets()
+  {
+    map().resetSheets();
+    emitSheetChanged();
   }
 
   //! \brief Close the current map and activate the previous one (if
   //! present)
-  void close();
-  void save() {} //TODO
-  void saveAs();
-  bool exec();
+  void closeSheet()  { LOGF("closeSheet not yet implemented"); } //TODO
+  void saveSheet()   { LOGF("saveSheet not yet implemented"); } //TODO
+  void saveAsSheet() { LOGF("saveAsSheet not yet implemented"); } //TODO
+
+  //*******************************************************************
+  // Forth/Spreadsheet
+  //*******************************************************************
+
+  bool evalSheet();
+
+  //*******************************************************************
+  // OpenGL
+  //*******************************************************************
 
   //! \brief Attach a the MVC view to this MVC controller.
-  void attachView(GLDrawingArea& drawing_area)
-  {
-    m_drawing_area = &drawing_area;
-    //m_drawing_area->attachController(this);
-    m_vbox.pack_start(drawing_area);
-  }
+  void attachView(GLDrawingArea& drawing_area); // FIXME: m_drawing_area
 
+  //*******************************************************************
+  // GIS edition
+  //*******************************************************************
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void button1PressEvent(const gdouble x, const gdouble y);
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void button2PressEvent(const gdouble x, const gdouble y);
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void button3PressEvent(const gdouble x, const gdouble y);
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
   ActionType actionType() const
   {
     return static_cast<ActionType>(m_action_type.button());
   }
 
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
   ActionOn actionOn() const
   {
     return static_cast<ActionOn>(m_action_on.button());
   }
 
-protected:
+private:
 
-  virtual bool load(const std::string& filename, SimTaDynMapPtr oldmap);
-  bool doOpen(std::string const& filename, const bool new_map, const bool reset_map);
-  bool dialogLoadMap(const bool new_map, const bool reset_map);
-  bool dialogSaveAsMap(const bool closing);
+  bool doOpenMap(std::string const& filename, bool const new_map, bool const reset_map);
+  bool doOpenSheet(std::string const& filename, bool const new_map, bool const reset_map);
+  template <class L>
+  bool dialogLoad(std::string const& title, std::string& filename);
+  bool dialogLoadMap(bool const new_map, bool const reset_map);
+  bool dialogLoadSheet(bool const new_sheet, bool const reset_sheet);
+  bool dialogSaveAsMap(bool const closing);
   void onActionOnSelected_(const ActionOn id);
   void onActionTypeSelected_(const ActionType id);
   inline void onActionOnSelected(const uint32_t id)
@@ -260,18 +471,18 @@ protected:
   {
     onActionTypeSelected_(static_cast<ActionType>(id));
   }
-  void add(const Key name, SimTaDynMapPtr map);
-  void remove(const Key name);
+  void repaintMap(SimTaDynMapPtr map);
 
 public:
 
   //! \brief Current model of the MVC design pattern
   SimTaDynMapHolder     m_current_map;
   //! \brief View implementation of the MVC
-  GLDrawingArea         *m_drawing_area = nullptr;
+  GLDrawingArea        *m_drawing_area = nullptr;
   //!
-  Gtk::MenuItem          m_menuitem[simtadyn::MaxMapMenuNames + 1];
+  Gtk::MenuItem         m_menuitem[simtadyn::MaxMapMenuNames + 1];
 
+  sigc::signal<void, SimTaDynMapPtr/*, SceneNodePtr*/> sheet_changed;
   sigc::signal<void, SimTaDynMapPtr> loaded_success;
   sigc::signal<void, const std::string &, const std::string &> loaded_failure;
   sigc::signal<void, SimTaDynMapPtr> saved_success;
@@ -279,18 +490,19 @@ public:
 
 protected:
 
+  CellEditor             m_cell_editor;
   Gtk::Toolbar           m_toolbar;
   ToggleButtons          m_action_type;
   ToggleButtons          m_action_on;
   Gtk::Menu              m_menu[simtadyn::MaxMapMenuNames + 1];
-  Gtk::ImageMenuItem     m_submenu[8];
-  Gtk::Image             m_image[8];
+  Gtk::ImageMenuItem     m_submenu[32];
+  Gtk::Image             m_image[32];
   Gtk::SeparatorMenuItem m_menu_separator[2];
   Gtk::SeparatorToolItem m_toolbar_separator[2];
-  Inspector              m_inspector;
   Gtk::VBox              m_vbox;
   Gtk::HBox              m_hbox;
   MapEditionTools       *m_edition_tools[ActionType::LastAction + 1u];
+  size_t m_map_id = 0_z;
 };
 
 #endif /* MAPEDITOR_HPP_ */

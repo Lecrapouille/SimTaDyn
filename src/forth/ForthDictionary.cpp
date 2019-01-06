@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #include "ForthDictionary.hpp"
@@ -62,7 +62,7 @@ void ForthDictionary::add(const Cell16 token, char const* name, const bool immed
   add(token, name, strlen(name), immediate);
 }
 
-void ForthDictionary::add(const Cell16 token, char const* name, const uint32_t length, const bool immediate)
+void ForthDictionary::add(const Cell16 token, char const* name, const size_t length, const bool immediate)
 {
   // Forth words are max 31 bytes long
   if ((length > 31U) || (0U == length))
@@ -76,11 +76,12 @@ void ForthDictionary::add(const Cell16 token, char const* name, const uint32_t l
       NoSpaceDictionary e; throw e;
     }
 
-  Cell32 nfa = m_here - m_last;
+  assert(m_here >= m_last);
+  Cell32 nfa = static_cast<Cell32>(m_here - m_last);
   m_last = m_here;
 
   // Store the word header
-  appendCell8((1U << 7U) | (immediate << 6U) | length);
+  appendCell8((1U << 7U) | (immediate ? FLAG_IMMEDIATE : 0) | static_cast<uint8_t>(length));
 
   // Store the word name
   for (uint8_t i = 0; i < length; ++i)
@@ -363,6 +364,7 @@ bool ForthDictionary::load(std::string const& filename, const bool replace)
             }
           catch (const OutOfBoundDictionary& e)
             {
+              LOGC("Caught Forth Exception '%s'", e.message().c_str());
               std::cerr << "Cannot load the dictionary from the file '"
                         << filename
                         << "'. Reason is the image is bigger than the dictionary size."
@@ -680,7 +682,7 @@ void ForthDictionary::display(const int max_primitives) const
 //! \param nb_bytes positive or negative offset to adr.
 //! \throw OutOfBoundDictionary if overflows/underflows is detected.
 // **************************************************************
-void ForthDictionary::checkBounds(const uint32_t addr, const int32_t nb_bytes) const
+void ForthDictionary::checkBounds(const uint32_t addr, const uint32_t nb_bytes) const
 {
   // FIXME: proteger en ecriture les anciens mots definis
   // FIXME: autoriser en lecture toutes les addr du dico

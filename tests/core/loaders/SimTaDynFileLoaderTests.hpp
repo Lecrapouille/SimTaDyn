@@ -15,11 +15,11 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNFILELOADERTESTS_HPP_
-#  define SIMTADYNFILELOADERTESTS_HPP_
+#ifndef SIMTADYN_FILE_LOADER_TESTS_HPP
+#  define SIMTADYN_FILE_LOADER_TESTS_HPP
 
 #  include <cppunit/TestFixture.h>
 #  include <cppunit/TestResult.h>
@@ -31,10 +31,10 @@
 #  undef protected
 #  undef private
 
-class LoaderTests : public CppUnit::TestFixture
+class SimTaDynFileLoaderTests : public CppUnit::TestFixture
 {
   // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(LoaderTests);
+  CPPUNIT_TEST_SUITE(SimTaDynFileLoaderTests);
   CPPUNIT_TEST(testSimTaDyn);
   CPPUNIT_TEST_SUITE_END();
 
@@ -45,4 +45,4 @@ public:
   void testSimTaDyn();
 };
 
-#endif /* SIMTADYNFILELOADERTESTS_HPP_ */
+#endif /* SIMTADYN_FILE_LOADER_TESTS_HPP */

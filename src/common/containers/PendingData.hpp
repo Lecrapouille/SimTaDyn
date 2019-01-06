@@ -15,14 +15,14 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef PENDINGDATA_HPP_
 #  define PENDINGDATA_HPP_
 
 #  include "Maths.hpp"
-
+#  include "Logger.hpp"
 // **************************************************************
 //! \brief Define an interface class keeping track of the smallest
 //! contiguous area that have been changed and needs to be
@@ -30,12 +30,22 @@
 // **************************************************************
 class PendingData
 {
+private:
+
+  static constexpr size_t c_initial_position = static_cast<size_t>(-1);
+
 public:
 
   //! \brief Empty constructor: no pending data.
   PendingData()
   {
     clearPending();
+  }
+
+  //! \brief Constructor: number of elements of the container.
+  PendingData(size_t nb_elt)
+  {
+    clearPending(nb_elt);
   }
 
   //! \brief Pure virtual destructor, but with a definition. The class
@@ -47,38 +57,66 @@ public:
   //! has chnaged.
   inline bool hasPendingData() const
   {
-    bool res = ((uint32_t) -1 != m_pending_start);
-    return res;
+    return (c_initial_position != m_pending_start);
   }
 
   //! \brief Return the smallest contiguous area that needs to be
   //! uploaded. If there is no pending data, pos_start will be set to
   //! -1. You can call hasPendingData() before this method.
-  void getPendingData(uint32_t &pos_start, uint32_t &pos_end) const
+  void getPendingData(size_t &pos_start, size_t &pos_end) const
   {
-    if ((uint32_t) -1 != m_pending_start)
+    if (hasPendingData())
     {
       pos_start = m_pending_start;
       pos_end = m_pending_end;
     }
     else
     {
-      pos_start = 0;
-      pos_end = 0;
+      pos_start = 0_z;
+      pos_end = 0_z;
+    }
+  }
+
+  //! \brief Return the smallest contiguous area that needs to be
+  //! uploaded. If there is no pending data, pos_start will be set to
+  //! -1. You can call hasPendingData() before this method.
+  std::pair<size_t, size_t> getPendingData() const
+  {
+    if (hasPendingData())
+    {
+      return std::make_pair(m_pending_start, m_pending_end);
+    }
+    else
+    {
+      return std::make_pair(0_z, 0_z);
     }
   }
 
   //! \brief Call this function when changed elements have been uploaded.
   void clearPending()
   {
-    m_pending_start = (uint32_t) -1;
-    m_pending_end = (uint32_t) -1;
+    m_pending_start = c_initial_position;
+    m_pending_end = c_initial_position;
+  }
+
+  void clearPending(size_t nb_elt)
+  {
+    if (0_z == nb_elt)
+    {
+      m_pending_start = c_initial_position;
+      m_pending_end = c_initial_position;
+    }
+    else
+    {
+      m_pending_start = 0_z;
+      m_pending_end = nb_elt - 1_z;
+    }
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  void addPendingData(const uint32_t pos_start, const uint32_t pos_end)
+  void tagAsPending(const size_t pos_start, const size_t pos_end)
   {
-    if ((uint32_t) -1 == m_pending_start)
+    if (!hasPendingData())
       {
         m_pending_start = pos_start;
         m_pending_end = pos_end;
@@ -91,15 +129,15 @@ public:
   }
 
   //! \brief Update the range indexes of changed elements with a new range.
-  inline void addPendingData(const uint32_t pos_start)
+  inline void tagAsPending(const size_t pos_start)
   {
-    addPendingData(pos_start, pos_start);
+    tagAsPending(pos_start, pos_start);
   }
 
 protected:
 
   //! Indicate which elements have been changed.
-  uint32_t m_pending_start, m_pending_end;
+  size_t m_pending_start, m_pending_end;
 };
 
 #endif

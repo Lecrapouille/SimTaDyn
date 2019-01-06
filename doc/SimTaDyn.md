@@ -32,9 +32,9 @@ is more general and contains different kind of editable tiles (cells):
 * Polygonal cells (like a geographic area) extend the regular and
   rectangular pavement of classic Excel spreadsheets.
 
-* Edge cells (like roads) extend the pavement of classic spreadsheets
-  by allowing edges to be interactive as well polygonal cells (which
-  is not the case on Excel).
+* Edge cells (like roads or points of interest) extend the pavement of
+  classic spreadsheets by allowing edges to be interactive as well
+  polygonal cells (which is not the case on Excel).
 
 * Node cells (like road crossings) extend the pavement of classic
   spreadsheets by allowing corners to be interactive (which
@@ -128,14 +128,13 @@ application where the name is also a joke to the French word citadine
 (meaning city-dweller).
 
 For frenchmen, you can read the [french PDF
-manual](https://github.com/Lecrapouille/SimTaDyn/blob/Original-Version-EPITA-2004/doc/Simtadyn-Manuel.pdf)
+manual](https://github.com/Lecrapouille/SimTaDyn/blob/release-EPITA-2004/doc/Simtadyn-Manuel.pdf)
 written in 2004 as support for our teachers (badly written due to a
 miss of time).
 
-The initial code is available on the git branch [Original-Version-EPITA-2004](https://github.com/Lecrapouille/SimTaDyn/tree/Original-Version-EPITA-2004).
-
+The initial code is available on the git branch [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004).
 The project was not fully finalized but functional. To compile it, you
 will need to install libraries like MySQL, OpenGL (the legacy
 version), GTK+2, gtkglext (OpenGL for GTK+2), ncurses and worked for
 OSX with X11 and still working on actual Linux (but no longer on
-recent OSX versions because Opengl is no longer maintained).
+recent OSX versions because GTK+/Opengl is no longer maintained).

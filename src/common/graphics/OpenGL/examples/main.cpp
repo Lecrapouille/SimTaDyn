@@ -1,17 +1,18 @@
 #include "Example01.hpp"
 #include "Example02.hpp"
 #include "Example03.hpp"
-#include "Example04.hpp"
-#include "Example05.hpp"
-//#include "Example06.hpp"
-#include <memory>
+#include <iostream>
 
-#define MAX_EXAMPLES 6
+#define MAX_EXAMPLES 3
 
 static void usage(char *argv[])
 {
   std::cout << "Usage: " << std::endl
-            << argv[0] << " <example>       <example> is an integer meaning the nth example (1 .. " << MAX_EXAMPLES << ")" << std::endl;
+            << "  " << argv[0] << " <integer>" << std::endl;
+  std::cout << "Where: <integer> is the example id (1 .. " << MAX_EXAMPLES << "): " << std::endl;
+  std::cout << "  1: Display a 3d scene with differents objects" << std::endl;
+  std::cout << "  2: Display a 3d scene graph with imgui debug" << std::endl;
+  std::cout << "  3: Display a generated sphere" << std::endl;
   exit(1);
 }
 
@@ -19,7 +20,7 @@ int main(int argc, char *argv[])
 {
   if (argc <= 1)
     {
-      std::cout << "Incorrect argument(s)" << std::endl;
+      std::cout << "Missing example id !" << std::endl;
       usage(argv);
     }
   long int example = strtol(argv[1], nullptr, 10);
@@ -28,32 +29,27 @@ int main(int argc, char *argv[])
       usage(argv);
     }
 
-  IGLWindow *win;
+  std::unique_ptr<IGLWindow> win;
 
   switch (example)
     {
     case 1:
-      win = new GLExample01();
+      win = std::make_unique<GLExample01>();
+      win->start();
       break;
     case 2:
-      win = new GLExample02();
+      win = std::make_unique<GLExample02>();
+      win->start();
       break;
     case 3:
-      win = new GLExample03();
-      break;
-    case 4:
-      win = new GLExample04();
-      break;
-    case 5:
-      win = new GLExample05();
+      win = std::make_unique<GLExample03>();
+      win->start();
       break;
     default:
-      win = new GLExample05(); // FIXME new GLExample06();
-      break;
+      std::cout << "Incorrect example id !" << std::endl;
+      usage(argv);
+      return -1;
     }
-
-  std::shared_ptr<IGLWindow> window(win);
-  window->start();
 
   return 0;
 }

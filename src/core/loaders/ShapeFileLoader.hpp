@@ -15,7 +15,7 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef SHAPEFILELOADER_HPP_
@@ -37,17 +37,17 @@ public:
     LOGI("Creating a Shapefile loader %p", this);
   }
 
-  virtual void loadFromFile(std::string const& filename, SimTaDynSheetPtr &sheet) override;
+  virtual void loadFromFile(std::string const& filename, SimTaDynSheet& sheet) override;
 
 protected:
 
-  int32_t      readBigEndianInt();
-  int32_t      readLittleEndianInt();
+  uint32_t     readBigEndianInt();
+  uint32_t     readLittleEndianInt();
   double       readDouble();
   float        readDoubleCastedFloat();
   void         goToByte(const uint32_t offset);
   void         skypeNBytes(const uint32_t offset);
-  const std::string shapeTypes(const int id);
+  const std::string shapeTypes(const uint32_t id);
   void         checkFileSize();
   void         openShapeFile(const std::string& filename);
   uint32_t     getShapeVersion();
@@ -57,9 +57,9 @@ protected:
   uint32_t     getRecordAt(SimTaDynSheet& sheet, const uint32_t offset);
   void         getAllRecords(SimTaDynSheet& sheet);
 
-  std::ifstream m_infile;
-  std::string   m_filename;
-  uint32_t      m_file_length = 0U;
+  std::ifstream  m_infile;
+  std::string    m_filename;
+  std::streampos m_filelength = 0U;
 
 private:
 

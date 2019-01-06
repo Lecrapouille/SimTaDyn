@@ -15,18 +15,18 @@
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+// along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
 #ifndef TEXTURE_FILE_LOADER_HPP_
 #  define TEXTURE_FILE_LOADER_HPP_
 
 #  include "ILoader.tpp"
-#  include "GLTextures.hpp"
+#  include "OpenGL.hpp"
 #  include "ResourceManager.tpp"
 
 using GLTexture2DPtr = std::shared_ptr<GLTexture2D>;
-using GLTexture2DManager = ResourceManager<GLTexture2D, std::string>;
+using GLTexture2DManager = ResourceManager<std::string, GLTexture2D>;
 
 // ***********************************************************************************************
 //! \brief
