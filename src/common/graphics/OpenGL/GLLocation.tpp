@@ -72,10 +72,12 @@ class GLAttribute: public GLLocation
 {
 public:
 
+  // FIXME: shall m_data be init from this constructor ?
   GLAttribute(const char *name, GLint dim, GLenum gltype, GLuint prog)
     : GLLocation(name, dim, gltype, prog)
   {
     assert((dim >= 1) && (dim <= 4));
+    m_index = static_cast<GLuint>(m_handle);
     m_stride = 0;
     m_offset = 0;
   }

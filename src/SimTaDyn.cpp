@@ -31,8 +31,8 @@ void SimTaDynContext::init(cli::Parser& parser)
   SimForth& forth = SimForth::instance();
   forth.boot();
 
-  return ;
-
+  // FIXME TEMPORARY CODE
+#if 0
   // FIXME: simple example to move in unit tests
   SimTaDynSheet* sheet = new SimTaDynSheet("Sheet0"); // Ok leak but just for example
   assert(sheet->name().compare("Sheet0") == 0);
@@ -52,6 +52,7 @@ void SimTaDynContext::init(cli::Parser& parser)
       std::cout << n0.rawValue() << std::endl;
       std::cout << n1.rawValue() << std::endl;
     }
+#endif
 }
 
 static void configure_options(cli::Parser& parser)

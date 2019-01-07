@@ -86,17 +86,27 @@ bool SimTaDynFileLoader::zip(SimTaDynMap const& map, std::string const& filename
   if (filename == map.m_zip_path)
     {
       // FIXME pas le plus safe si zipper.add echoue
-      std::remove(filename.c_str());
+      if (0 == std::remove(filename.c_str()))
+        {
+          LOGD("Successfully remove file '%s'", filename.c_str());
+        }
+      else
+        {
+          LOGF("Failed removing file '%s'. Reason was '%s'",
+               filename.c_str(), strerror(errno));
+          // TODO: what to do next ?
+        }
     }
 
   zipper::Zipper zipper(filename);
   bool ret = zipper.add(map.m_full_path);
-    if (false == ret)
+  if (false == ret)
     {
       // FIXME: on a perdu filename
       LOGE("Failed zipping the dir '%s'", map.m_full_path.c_str());
     }
 
+  // TODO: Popup the GtkException dialog
   return ret;
 }
 

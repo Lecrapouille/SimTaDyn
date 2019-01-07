@@ -70,8 +70,8 @@ private:
   std::string m_libname;
   std::string m_sourcepath;
   std::string m_extlibs;
-  bool m_closed;
-  Glib::Module *m_module; // Yeah pointer else local will close file and lost func pointers
+  //bool m_closed;
+  Glib::Module *m_module = nullptr; // TODO: use unique_ptr Yeah pointer else local will close file and lost func pointers
 };
 
 #endif

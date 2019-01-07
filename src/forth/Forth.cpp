@@ -126,7 +126,7 @@ bool Forth::changeDisplayBase(const uint8_t base)
 // **************************************************************
 //! Used for trace and debug.
 // **************************************************************
-void Forth::displayStack(std::ostream& stream, const forth::StackID id) const
+void Forth::displayStack(std::ostream& os, const forth::StackID id) const
 {
   int32_t depth;
   Cell32 *ptr;
@@ -150,18 +150,16 @@ void Forth::displayStack(std::ostream& stream, const forth::StackID id) const
       return ;
     }
 
-  // save default formatting
-  std::ios init(NULL);
-  init.copyfmt(std::cout);
+  // Temporary change formatting
+  std::ostream stream(os.rdbuf());
 
+  // Display the stack
+  stream << std::setbase(m_base);
   for (int32_t s = 0; s < depth; ++s)
     {
-      stream << std::setbase(m_base) << ptr[s] << ' ';
+      stream << ptr[s] << ' ';
     }
   stream << std::endl;
-
-  // restore default formatting
-  std::cout.copyfmt(init);
 }
 
 // **************************************************************

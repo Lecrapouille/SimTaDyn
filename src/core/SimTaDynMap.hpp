@@ -77,18 +77,17 @@ public:
   {
     // Make smart pointers delete everything.
     m_sheets.reset();
-    // Force create a new map
-    createSheet();
+    m_current_sheet = nullptr;
   }
 
   //-----------------------------------------------------------------
   //! \brief Return the reference of the current sheet.
   //! \note a new sheet can be created.
   //-----------------------------------------------------------------
-  SimTaDynSheet& currentSheet()
+  SimTaDynSheet& currentSheet(bool const directed = false) // FIXME: is it a good stratgey ?
   {
     if (nullptr == m_current_sheet)
-      *createSheet();
+      createSheet(directed);
     return *m_current_sheet;
   }
 
@@ -120,7 +119,7 @@ public:
   //-----------------------------------------------------------------
   //! \brief Create a new sheet. Store it in the scene graph.
   //-----------------------------------------------------------------
-  SimTaDynSheetPtr createSheet(bool const directed = true)
+  SimTaDynSheetPtr createSheet(bool const directed)
   {
     m_current_sheet = std::make_shared<SimTaDynSheet>(directed);
     SceneNodePtr node = m_sheets.attach(m_current_sheet, m_current_sheet->name());

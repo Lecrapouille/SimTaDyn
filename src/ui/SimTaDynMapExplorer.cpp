@@ -481,7 +481,7 @@ void SimTaDynMapExplorer::on_sheet_changed(SimTaDynMapPtr map/*, SceneNodePtr sh
                   auto c = it->children().begin();
                   if (c != it->children().end())
                     {
-                      TreeIterator itt = m_tree_store->erase(c);
+                      /*TreeIterator itt =*/ m_tree_store->erase(c);
                       traverseSceneGraph(map->rootSceneGraph(), it);
                     }
                   else
