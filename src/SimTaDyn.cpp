@@ -89,20 +89,15 @@ int main(int argc, char** argv)
   parser.run_and_exit_if_error();
 
   LOGI("Init GTK");
-  const Gtk::Main kit(argc, argv);
+  auto app = Gtk::Application::create();
   Gsv::init();
 
   LOGI("Init SimTaDyn");
-  auto SimTaDyn = std::unique_ptr<SimTaDynContext>(new SimTaDynContext);
-  if (nullptr == SimTaDyn)
-    {
-      LOGE("Failed creating the SimTaDynContext GUI. Aborting");
-      exit(1);
-    }
+  auto SimTaDyn = std::make_unique<SimTaDynContext>();
   SimTaDyn->init(parser);
 
   LOGI("Start SimTaDyn main loop");
-  kit.run(SimTaDyn->window());
+  app->run(SimTaDyn->window());
 
   return 0;
 }

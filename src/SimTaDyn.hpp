@@ -45,12 +45,7 @@ public:
     ForthEditor::instance();
     MapEditor::instance();
 
-    m_window = std::unique_ptr<SimTaDynWindow>(new SimTaDynWindow);
-    if (nullptr == m_window)
-      {
-        LOGE("Failed creating the SimTaDyn main window for GUI. Aborting");
-        exit(1);
-      }
+    m_window = std::make_unique<SimTaDynWindow>();
   }
 
   //------------------------------------------------------------------
