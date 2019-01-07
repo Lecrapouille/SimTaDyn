@@ -67,13 +67,13 @@ void ForthDictionary::add(const Cell16 token, char const* name, const size_t len
   // Forth words are max 31 bytes long
   if ((length > 31U) || (0U == length))
     {
-      MalformedForthWord e(name); throw e;
+      throw MalformedForthWord(name);
     }
 
   // No more space in the m_dictionary ?
   if (length + 8U > DICTIONARY_SIZE) // 8U = padded(1: flags, 2: NFA, 2: token, 2: EXIT)
     {
-      NoSpaceDictionary e; throw e;
+      throw NoSpaceDictionary();
     }
 
   assert(m_here >= m_last);
@@ -688,7 +688,7 @@ void ForthDictionary::checkBounds(const uint32_t addr, const uint32_t nb_bytes) 
   // FIXME: autoriser en lecture toutes les addr du dico
   if (/*(addr < m_here_at_colon) &&*/ (addr + nb_bytes >= DICTIONARY_SIZE))
     {
-      OutOfBoundDictionary e(addr); throw e;
+      throw OutOfBoundDictionary(addr);
     }
 }
 

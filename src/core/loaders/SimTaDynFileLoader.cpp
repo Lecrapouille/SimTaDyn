@@ -49,8 +49,7 @@ void SimTaDynFileLoader::unzip(std::string const &zip_file)
 
   if (!msg.empty())
     {
-      LoaderException e(msg);
-      throw e;
+      throw LoaderException(msg);
     }
 }
 
@@ -75,8 +74,7 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap& 
   forth.ok(res);
   if (false == res.first)
     {
-      LoaderException e(res.second);
-      throw e;
+      throw LoaderException (res.second);
     }
 }
 
@@ -114,7 +112,6 @@ void SimTaDynFileLoader::saveToFile(SimTaDynMap const& map, std::string const& f
 {
   if (false == zip(map, filename))
     {
-      LoaderException e("Failed zipping file '" + filename + "'");
-      throw e;
+      throw LoaderException("Failed zipping file '" + filename + "'");
     }
 }

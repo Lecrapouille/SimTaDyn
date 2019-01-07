@@ -80,8 +80,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
         {
           m_dictionary.m_last = m_last_at_colon;
           m_dictionary.m_here = m_here_at_colon;
-          ModifiedStackDepth e(m_creating_word);
-          throw e;
+          throw ModifiedStackDepth(m_creating_word);
         }
       break;
 
@@ -184,7 +183,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
            }
          else
            {
-             UnknownForthWord e(word); throw e;
+             throw UnknownForthWord(word);
            }
        }
        break;
@@ -210,7 +209,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
           }
         else
           {
-            UnknownForthWord e(word); throw e;
+            throw UnknownForthWord(word);
           }
       }
       break;
@@ -736,7 +735,7 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       }
       break;
     default:
-      UnknownForthPrimitive e(idPrimitive, __PRETTY_FUNCTION__); throw e;
+      throw UnknownForthPrimitive(idPrimitive, __PRETTY_FUNCTION__);
       break;
     }
 }

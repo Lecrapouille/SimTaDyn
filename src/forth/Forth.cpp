@@ -83,8 +83,7 @@ void Forth::abort()
 // **************************************************************
 void Forth::abort(std::string const& msg)
 {
-  AbortForth e(msg);
-  throw e;
+  throw AbortForth(msg);
 }
 
 // **************************************************************
@@ -96,12 +95,12 @@ int32_t Forth::isStackUnderOverFlow(const forth::StackID id) const
   if (depth < -1)
     {
       // Underflow
-      OutOfBoundStack e(id, depth); throw e;
+      throw OutOfBoundStack(id, depth);
     }
   else if (depth >= (int32_t) (STACK_SIZE - STACK_UNDERFLOW_MARGIN))
     {
       // Overflow
-      OutOfBoundStack e(id, depth); throw e;
+      throw OutOfBoundStack(id, depth);
     }
   return depth;
 }
@@ -224,7 +223,7 @@ void Forth::execToken(const Cell16 tx)
           if (!res.first)
             {
               // FIXME: changer le message
-              ForthUnknownPrimitive e(token, __PRETTY_FUNCTION__); throw e;
+              throw ForthUnknownPrimitive(token, __PRETTY_FUNCTION__);
             } */
 
           if (m_trace) {
@@ -519,7 +518,7 @@ void Forth::interpreteWordCaseCompile(std::string const& word)
     }
   else
     {
-      UnknownForthWord e(word); throw e;
+      throw UnknownForthWord(word);
     }
 }
 
@@ -636,7 +635,7 @@ std::pair<bool, std::string> Forth::parseStream()
           // FIXME: the stream colum information is erroneous because
           // a ForthReader::refill() has been called before. But I like
           // this !
-          UnfinishedStream e(m_state); throw e;
+          throw UnfinishedStream(m_state);
         }
       return std::make_pair(true, "ok");
     }
@@ -688,7 +687,7 @@ void Forth::includeFile(std::string const& filename)
   // Reached maximum depth of include file including file including ... etc
   if (m_opened_streams >= MAX_OPENED_STREAMS - 1U)
     {
-      TooManyOpenedStreams e; throw e;
+      throw TooManyOpenedStreams();
     }
 
   // Save the current base in the stream before 'stack'ing it
@@ -729,7 +728,6 @@ void Forth::includeFile(std::string const& filename)
       --m_opened_streams;
 
       // Call exception that will be caugh by the parseStream()
-      ForthException e(msg);
-      throw e;
+      throw ForthException(msg);
     }
 }

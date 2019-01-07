@@ -109,8 +109,7 @@ protected:
   {
     if (!STREAM.hasMoreWords())
     {
-      UnfinishedStream e(m_state);
-      throw e;
+      throw UnfinishedStream(m_state);
     }
     return STREAM.nextWord();
   }

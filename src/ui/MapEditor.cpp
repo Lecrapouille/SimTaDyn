@@ -386,8 +386,7 @@ bool MapEditor::doOpenMap(std::string const& filename, bool const new_map, bool 
 
       if (nullptr == map)
         {
-          LoaderException e("map shall not be nullptr");
-          throw e;
+          throw LoaderException("map shall not be nullptr");
         }
 
       if (reset_map)
@@ -431,8 +430,7 @@ bool MapEditor::doOpenSheet(std::string const& filename, bool const new_sheet, b
 
       if (nullptr == sheet)
         {
-          LoaderException e("map shall not be nullptr");
-          throw e;
+          throw LoaderException("map shall not be nullptr");
         }
 
       if (reset_sheet)

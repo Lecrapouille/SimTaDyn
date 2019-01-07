@@ -170,8 +170,7 @@ l_err:
   msg += " bytes but detected ";
   msg += std::to_string(value32b);
   msg += " bytes";
-  LoaderException e(msg);
-  throw e;
+  throw LoaderException(msg);
 }
 
 void ShapefileLoader::openShapeFile(const std::string& filename)
@@ -185,8 +184,7 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   if (!m_infile)
     {
       LOGF("ShapefileLoaderOpenFailed");
-      LoaderException e("Failed opening the Shapefile '" + filename + "': " + strerror(errno));
-      throw e;
+      throw LoaderException("Failed opening the Shapefile '" + filename + "': " + strerror(errno));
     }
 
   checkFileSize();
@@ -196,8 +194,7 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   if (9994u != value32b)
     {
       LOGF("ShapefileLoaderBadId");
-      LoaderException e("Bad Shapefile ID: read " + std::to_string(value32b) + " instead of 9994");
-      throw e;
+      throw LoaderException("Bad Shapefile ID: read " + std::to_string(value32b) + " instead of 9994");
     }
 }
 
