@@ -84,7 +84,7 @@ public:
   //! \brief Draw the scene.
   //! \return true if no problem occured
   //------------------------------------------------------------------
-  bool onRender();
+  bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */);
 
   //------------------------------------------------------------------
   //! \brief Callback when the mouse button has been pressed on the

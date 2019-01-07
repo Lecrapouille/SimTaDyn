@@ -41,6 +41,11 @@ GLDrawingArea::GLDrawingArea()
 
   // Use the mouse scroll event
   signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
+
+  // Connect drawing area signals
+  signal_realize().connect(sigc::mem_fun(*this, &GLDrawingArea::onCreate));
+  signal_unrealize().connect(sigc::mem_fun(*this, &GLDrawingArea::onRelease), false);
+  signal_render().connect(sigc::mem_fun(*this, &GLDrawingArea::onRender));
 }
 
 //------------------------------------------------------------------
@@ -117,7 +122,7 @@ void GLDrawingArea::onRelease()
 }
 
 //------------------------------------------------------------------
-bool GLDrawingArea::onRender()
+bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
 {
   if (unlikely(false == opengl::hasCreatedContext()))
     {

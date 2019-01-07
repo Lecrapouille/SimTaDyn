@@ -35,23 +35,6 @@ public:
 protected:
 
   bool onExitClicked(GdkEventAny* event);
-
-  //! \brief Initialize the OpenGL context
-  inline void onCreate()
-  {
-    m_drawing_area.onCreate();
-  }
-  //! \brief Clean up
-  inline void onRelease()
-  {
-    m_drawing_area.onRelease();
-  }
-  //! \brief Draw the scene
-  inline bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
-  {
-    return m_drawing_area.onRender();
-  }
-
   void onKeyPressed(GdkEventKey* evenement);
   void onKeyReleased(GdkEventKey* evenement);
 
