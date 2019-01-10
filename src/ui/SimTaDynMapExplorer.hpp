@@ -23,7 +23,7 @@
 
 #  include "ILoader.tpp"
 #  include "SimTaDynMap.hpp"
-#  include "Types.hpp"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -221,6 +221,7 @@ public:
   //-----------------------------------------------------------------
   void onFailMapSaved(std::string const& filename, std::string const& message);
 
+  void on_sheet_changed(SimTaDynMapPtr map/*, SceneNodePtr sheet*/);
 private:
 
   //-----------------------------------------------------------------
@@ -235,7 +236,6 @@ private:
   //! \brief Add the SimTaDynMap in the GTK+ Treeview.
   //-----------------------------------------------------------------
   void addMap(SimTaDynMapPtr map);
-  void on_sheet_changed(SimTaDynMapPtr map/*, SceneNodePtr sheet*/);
 
   //-----------------------------------------------------------------
   //! \brief

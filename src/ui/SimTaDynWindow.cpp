@@ -24,8 +24,11 @@
 // *************************************************************************************************
 // SimTaDyn main window
 // *************************************************************************************************
-SimTaDynWindow::SimTaDynWindow()
-  : Gtk::Window()
+SimTaDynWindow::SimTaDynWindow(ForthEditor& forth_editor,
+                               MapEditor& map_editor)
+  : Gtk::Window(),
+    m_forth_editor(forth_editor),
+    m_map_editor(map_editor)
 {
   LOGI("Creating the SimTaDynWindow");
 
@@ -43,13 +46,6 @@ SimTaDynWindow::SimTaDynWindow()
     signal_delete_event().connect(sigc::mem_fun(this, &SimTaDynWindow::onExitClicked));
   }
 
-  // Drawing area
-  {
-    m_drawing_area.set_hexpand(true);
-    m_drawing_area.set_vexpand(true);
-    m_drawing_area.set_auto_render(true);
-  }
-
   // Menus:
   // * _Map: Import/export/save/load/... geographic maps.
   // * _Forth: Import/export/save/load/... Forth scripts
@@ -58,13 +54,13 @@ SimTaDynWindow::SimTaDynWindow()
   // * _Help: TBD: add About/help/interactive tutorials
   {
     // Menu '_Map'
-    m_menubar.append(MapEditor::instance().m_menuitem[simtadyn::MapMenu]);
+    m_menubar.append(m_map_editor.m_menuitem[simtadyn::MapMenu]);
 
     // Menu '_Forth'
-    m_menubar.append(ForthEditor::instance().m_menuitem[simtadyn::ForthMenu]);
-    m_menubar.append(ForthEditor::instance().m_menuitem[simtadyn::TextMenu]);
-    m_menubar.append(ForthEditor::instance().m_menuitem[simtadyn::PlugginsMenu]);
-    ForthEditor::instance().addPluggin("text-x-generic-template", "41 1 + . CR", "test");
+    m_menubar.append(m_forth_editor.m_menuitem[simtadyn::ForthMenu]);
+    m_menubar.append(m_forth_editor.m_menuitem[simtadyn::TextMenu]);
+    m_menubar.append(m_forth_editor.m_menuitem[simtadyn::PlugginsMenu]);
+    m_forth_editor.addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
     // Menu '_Help'
     // TODO: submenus Tuto, Help, Example
@@ -86,14 +82,13 @@ SimTaDynWindow::SimTaDynWindow()
   // -- On the right: the menubar and Forth editor
   {
     // Left:
-    MapEditor::instance().attachView(m_drawing_area);
-    m_hpaned.pack1(MapEditor::instance().widget());
+    m_hpaned.pack1(m_map_editor.widget());
 
     // Right:
     m_box.pack_start(m_menubar, Gtk::PACK_SHRINK);
-    m_box.pack_start(ForthEditor::instance().m_vpaned);
+    m_box.pack_start(m_forth_editor.m_vpaned);
     m_hpaned.pack2(m_box);
-    m_box.pack_start(m_map_explorer.widget());
+    m_box.pack_start(map_editor.m_map_explorer.widget());
 
     //
     add(m_hpaned);
@@ -129,7 +124,7 @@ SimTaDynWindow::SimTaDynWindow()
 bool SimTaDynWindow::onExitClicked(GdkEventAny*)
 {
   // FIXME: do the same for MapEditor
-  bool res = ForthEditor::instance().closeAll();
+  bool res = m_forth_editor.closeAll();
   return !res;
 }
 
@@ -166,27 +161,27 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
       }
       break;
     case GDK_KEY_Page_Up:
-      m_drawing_area.keyPressed(GLDrawingArea::Forward);
+      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      m_drawing_area.keyPressed(GLDrawingArea::Backward);
+      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      m_drawing_area.keyPressed(GLDrawingArea::Up);
+      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      m_drawing_area.keyPressed(GLDrawingArea::Down);
+      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      m_drawing_area.keyPressed(GLDrawingArea::Right);
+      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      m_drawing_area.keyPressed(GLDrawingArea::Left);
+      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Left);
       break;
     default:
       break;
     }
-  ForthEditor::instance().autoCompleteWord(evenement->keyval);
+  m_forth_editor.autoCompleteWord(evenement->keyval);
 }
 
 // *************************************************************************************************
@@ -197,22 +192,22 @@ void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)
   switch (evenement->keyval)
     {
     case GDK_KEY_Page_Up:
-      m_drawing_area.keyReleased(GLDrawingArea::Forward);
+      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      m_drawing_area.keyReleased(GLDrawingArea::Backward);
+      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      m_drawing_area.keyReleased(GLDrawingArea::Up);
+      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      m_drawing_area.keyReleased(GLDrawingArea::Down);
+      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      m_drawing_area.keyReleased(GLDrawingArea::Right);
+      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      m_drawing_area.keyReleased(GLDrawingArea::Left);
+      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Left);
       break;
     default:
       break;

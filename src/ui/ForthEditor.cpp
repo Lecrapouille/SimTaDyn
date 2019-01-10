@@ -23,8 +23,9 @@
 // *************************************************************************************************
 //
 // *************************************************************************************************
-ForthDocument::ForthDocument(Glib::RefPtr<Gsv::Language> language)
+ForthDocument::ForthDocument(SimForth& forth, Glib::RefPtr<Gsv::Language> language)
   : TextDocument(language),
+    m_forth(forth),
     m_tab_sm(ForthAutoCompletSMBegin)
 {
   LOGI("Creating ForthDocument");
@@ -85,8 +86,7 @@ void ForthDocument::autoCompleteWord(const int keyval)
           m_tab_sm = ForthAutoCompletSMEnd;
         }
 
-      SimForth& forth = SimForth::instance();
-      const char* completed_word = forth.completion(m_partial_word);
+      const char* completed_word = m_forth.completion(m_partial_word);
       if (NULL != completed_word)
         {
           // A Forth word has been found in the dictionary;
@@ -158,8 +158,6 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
 
   if (isspace(c[0])) // Pas bon !! il faut faire une boucle text_inserted peut etre un gros morceau de code
     {
-      SimForth& forth = SimForth::instance();
-
       Gtk::TextBuffer::iterator pos(pos1);
       skipBackwardSpaces(pos);
       Gtk::TextBuffer::iterator start(pos);
@@ -172,7 +170,7 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
         // Mark unknown word. FIXME underline IMMEDIATE words
         Cell16 token;
         bool immediate;
-        if (forth.dictionary().find(partial_word, token, immediate))
+        if (m_forth.dictionary().find(partial_word, token, immediate))
           {
             if (immediate)
               {
@@ -182,7 +180,7 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
         else
           {
             Cell32 val;
-            if (false == forth.toNumber(partial_word, val))
+            if (false == m_forth.toNumber(partial_word, val))
               {
                 // Check if not a definition
                 Gtk::TextBuffer::iterator p1(start);
@@ -205,8 +203,11 @@ void ForthDocument::onInsertText(const Gtk::TextBuffer::iterator& pos1,
 // *************************************************************************************************
 //
 // *************************************************************************************************
-ForthEditor::ForthEditor()
-  : m_cout(std::cout, m_results.get_buffer()),
+ForthEditor::ForthEditor(SimForth& forth)
+  : m_forth(forth),
+    m_dico_inspector(forth),
+    m_stack_inspector(forth),
+    m_cout(std::cout, m_results.get_buffer()),
     m_cerr(std::cerr, m_messages.get_buffer()),
     m_nb_plugins(0)
 {
@@ -442,8 +443,7 @@ void ForthEditor::dumpDictionary()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimForth& forth = SimForth::instance();
-      forth.dictionary().dump(dialog.get_filename());
+      m_forth.dictionary().dump(dialog.get_filename());
       // FIXME return not taken into account
     }
 }
@@ -478,8 +478,7 @@ void ForthEditor::loadDictionary()
   int result = dialog.run();
   if (Gtk::RESPONSE_OK == result)
     {
-      SimForth& forth = SimForth::instance();
-      forth.dictionary().load(dialog.get_filename());
+      m_forth.dictionary().load(dialog.get_filename());
       // FIXME return not taken into account
     }
 }
@@ -532,7 +531,6 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
   typedef std::chrono::nanoseconds ns;
   typedef std::chrono::high_resolution_clock Time;
   std::pair<bool, std::string> res;
-  SimForth& forth = SimForth::instance();
 
   // Clear the old text in the "Result" tab of the notebook
   Glib::RefPtr<Gtk::TextBuffer> buf = m_results.get_buffer();
@@ -540,7 +538,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
 
   // Exec the Forth script and  measure the execution time
   auto t0 = Time::now();
-  res = forth.interpreteString(script, filename);
+  res = m_forth.interpreteString(script, filename);
   auto t1 = Time::now();
 
   // Flush the std::cout in the textview
@@ -573,7 +571,7 @@ bool ForthEditor::exec_(std::string const& script, std::string const& filename)
       m_statusbar.push("FAILED");
 
       // Show res (redirect sdout to gui)
-      forth.ok(res);
+      m_forth.ok(res);
       return true;
     }
 }
@@ -655,7 +653,7 @@ void ForthEditor::exec()
   else
     {
       // Show the faulty document
-      TextEditor::open(SimForth::instance().nameStreamInFault());
+      TextEditor::open(m_forth.nameStreamInFault());
       // TODO: select in red the faulty word
 
       m_statusbar.push("Please, feed me with a Forth script !");

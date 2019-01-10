@@ -2,7 +2,7 @@
 // SimTaDyn: A GIS in a spreadsheet.
 // Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
-// This file is part of SimTaDynContext.
+// This file is part of SimTaDyn.
 //
 // SimTaDyn is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by
@@ -28,42 +28,30 @@
 // **************************************************************
 //! \brief
 // **************************************************************
-class SimTaDynContext
+class SimTaDyn
+  : public Singleton<SimTaDyn>
 {
-public:
+private:
+
+  friend class Singleton<SimTaDyn>;
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton.
   //------------------------------------------------------------------
-  SimTaDynContext()
-  {
-    LOGI("New SimTaDynContext");
-    PathManager::instance();
-    //TODO ResourceManager::instance();
-    LoaderManager::instance();
-    SimForth::instance();
-    ForthEditor::instance();
-    MapEditor::instance();
-
-    m_window = std::make_unique<SimTaDynWindow>();
-  }
+  SimTaDyn()
+    : m_forth_editor(m_forth),
+      m_map_editor(m_forth),
+      m_window(m_forth_editor, m_map_editor)
+  {}
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton. Check if resources is still
   //! acquired which show a bug in the management of resources.
   //------------------------------------------------------------------
-  ~SimTaDynContext()
-  {
-    LOGI("Leaving SimTaDynContext: releasing the memory");
-    m_window.reset();
-    ForthEditor::destroy();
-    MapEditor::destroy();
-    SimForth::destroy();
-    LoaderManager::destroy();
-    SimTaDynMapManager::destroy();
-    PathManager::destroy();
-    Logger::destroy();
-  };
+  ~SimTaDyn()
+  {}
+
+public:
 
   //------------------------------------------------------------------
   //! \brief
@@ -74,14 +62,37 @@ public:
   //------------------------------------------------------------------
   //! \brief Return the reference of the main UI window.
   //------------------------------------------------------------------
-  SimTaDynWindow& window()
+  inline SimTaDynWindow& mainWindow()
   {
-    return *m_window;
+    return m_window;
   }
 
-protected:
+  inline SimForth& forth()
+  {
+    return m_forth;
+  }
 
-  std::unique_ptr<SimTaDynWindow> m_window;
+  inline MapEditor& mapEditor()
+  {
+    return m_map_editor;
+  }
+
+  inline ForthEditor& forthEditor()
+  {
+    return m_forth_editor;
+  }
+
+  inline GLDrawingArea& drawingArea()
+  {
+    return m_map_editor.m_drawing_area;
+  }
+
+private:
+
+  SimForth            m_forth;
+  ForthEditor         m_forth_editor;
+  MapEditor           m_map_editor;
+  SimTaDynWindow      m_window;
 };
 
 #endif /* SIMTADYN_CONTEXT_HPP_ */

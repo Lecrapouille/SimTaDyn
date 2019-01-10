@@ -26,6 +26,7 @@
 #  include "ToggleButtons.hpp"
 #  include "ForthInspector.hpp"
 #  include "DrawingArea.hpp"
+#  include "SimTaDynMapExplorer.hpp"
 
 class LoaderManager;
 class MapEditionTools;
@@ -113,8 +114,7 @@ protected:
 // This class implements a Controler pattern of the Model-View-Controler (MVC) design pattern.
 // *************************************************************************************************
 class MapEditor
-  : public Singleton<MapEditor>,
-    public sigc::trackable
+  : public sigc::trackable
 {
 public:
 
@@ -124,22 +124,15 @@ public:
   //! \brief On what kind of cells action is performed.
   enum ActionOn { Node, Arc, Zone, FirstMode = Node, LastMode = Zone };
 
-private:
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  MapEditor(SimForth& forth);
 
   //------------------------------------------------------------------
-  //! \brief Mandatory by the Singleton.
+  //! \brief
   //------------------------------------------------------------------
-  friend class Singleton<MapEditor>;
-
-  //------------------------------------------------------------------
-  //! \brief Private because of Singleton.
-  //------------------------------------------------------------------
-  MapEditor();
-
-  //------------------------------------------------------------------
-  //! \brief Private because of Singleton.
-  //------------------------------------------------------------------
-  virtual ~MapEditor();
+  ~MapEditor();
 
 public:
 
@@ -177,9 +170,9 @@ public:
   void drawCurrentMap(/*GLDrawingArea& renderer*/)
   {
     SimTaDynMapPtr map = m_current_map.get();
-    if ((nullptr != map) && (nullptr != m_drawing_area))
+    if ((nullptr != map))
       {
-        map->drawnBy(*m_drawing_area/*renderer*/);
+        map->drawnBy(m_drawing_area/*renderer*/);
       }
   }
 
@@ -414,8 +407,6 @@ public:
   // OpenGL
   //*******************************************************************
 
-  //! \brief Attach a the MVC view to this MVC controller.
-  void attachView(GLDrawingArea& drawing_area); // FIXME: m_drawing_area
 
   //*******************************************************************
   // GIS edition
@@ -475,10 +466,16 @@ private:
 
 public:
 
-  //! \brief Current model of the MVC design pattern
-  SimTaDynMapHolder     m_current_map;
-  //! \brief View implementation of the MVC
-  GLDrawingArea        *m_drawing_area = nullptr;
+  SimForth&              m_forth;
+  //! \brief Model of the MVC design pattern
+  SimTaDynMapHolder      m_current_map;
+  //! \brief View of the MVC pattern
+  GLDrawingArea          m_drawing_area;
+  //! \brief View/Controler of the MVC pattern
+  SimTaDynMapExplorer    m_map_explorer;
+  //! \brief View/Controler of the MVC pattern
+  CellEditor             m_cell_editor;
+
   //!
   Gtk::MenuItem         m_menuitem[simtadyn::MaxMapMenuNames + 1];
 
@@ -490,7 +487,6 @@ public:
 
 protected:
 
-  CellEditor             m_cell_editor;
   Gtk::Toolbar           m_toolbar;
   ToggleButtons          m_action_type;
   ToggleButtons          m_action_on;
@@ -501,7 +497,7 @@ protected:
   Gtk::SeparatorToolItem m_toolbar_separator[2];
   Gtk::VBox              m_vbox;
   Gtk::HBox              m_hbox;
-  MapEditionTools       *m_edition_tools[ActionType::LastAction + 1u];
+  std::unique_ptr<MapEditionTools> m_edition_tools[ActionType::LastAction + 1u];
   size_t m_map_id = 0_z;
 };
 

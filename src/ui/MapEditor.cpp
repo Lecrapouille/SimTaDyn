@@ -20,23 +20,33 @@
 
 #include "MapEditor.hpp"
 #include "MapEditionTools.hpp"
-//#include "DrawingArea.hpp"
 #include <functional>
 
 // *************************************************************************************************
 //
 // *************************************************************************************************
-MapEditor::MapEditor()
-  : m_action_type(m_toolbar),
+MapEditor::MapEditor(SimForth& forth)
+  : m_forth(forth),
+    m_action_type(m_toolbar),
     m_action_on(m_toolbar)
 {
   LOGI("Creating MapEditor");
 
+  // Drawing area
+  {
+    m_vbox.pack_start(m_drawing_area);
+    m_drawing_area.set_hexpand(true);
+    m_drawing_area.set_vexpand(true);
+    m_drawing_area.set_auto_render(true);
+  }
+
   // Init map edition tool to dummy action
-  m_edition_tools[ActionType::Add] = new AddCellTool();
-  m_edition_tools[ActionType::Remove] = new RemoveCellTool();
-  m_edition_tools[ActionType::Select] = new SelectCellTool();
-  m_edition_tools[ActionType::Move] = new MoveCellTool();
+  {
+    m_edition_tools[ActionType::Add] = std::make_unique<AddCellTool>(*this);
+    m_edition_tools[ActionType::Remove] = std::make_unique<RemoveCellTool>(*this);
+    m_edition_tools[ActionType::Select] = std::make_unique<SelectCellTool>(*this);
+    m_edition_tools[ActionType::Move] = std::make_unique<MoveCellTool>(*this);
+  }
 
   // FIXME: spliter en 2 sous menus
   // Menu '_Map'
@@ -194,6 +204,13 @@ MapEditor::MapEditor()
     LOGC("signal_top_map_changed: repaintMap");
     MapEditor::repaintMap(map);
   });
+
+
+  loaded_success.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::onSuccessMapLoaded));
+  sheet_changed.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::on_sheet_changed));
+  loaded_failure.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::onFailMapLoaded));
+  saved_success.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::onSuccessMapSaved));
+  saved_failure.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::onFailMapSaved));
 }
 
 // *************************************************************************************************
@@ -202,22 +219,7 @@ MapEditor::MapEditor()
 MapEditor::~MapEditor()
 {
   LOGI("Destroying MapEditor");
-  delete m_edition_tools[ActionType::Add];
-  delete m_edition_tools[ActionType::Remove];
-  delete m_edition_tools[ActionType::Select];
-  delete m_edition_tools[ActionType::Move];
-
   // TODO: be sure no Forth script is running on the map before destroying mapq
-}
-
-// *************************************************************************************************
-//!
-// *************************************************************************************************
-void MapEditor::attachView(GLDrawingArea& drawing_area) // FIXME: MapEditor::GLDrawingArea m_drawing_area
-{
-  m_drawing_area = &drawing_area;
-  /*m_drawing_area->attachController(this);*/
-  m_vbox.pack_start(drawing_area);
 }
 
 // *************************************************************************************************
@@ -300,7 +302,7 @@ void MapEditor::newMap()
 void MapEditor::repaintMap(SimTaDynMapPtr map)
 {
   LOGI("Repainting map %s", map->name().c_str());
-  map->drawnBy(*m_drawing_area);
+  map->drawnBy(m_drawing_area);
 }
 
 // *************************************************************************************************
@@ -464,21 +466,20 @@ bool MapEditor::doOpenSheet(std::string const& filename, bool const new_sheet, b
 // *************************************************************************************************
 bool MapEditor::evalSheet() // FIXME: Exec(typeCell, nodeID)
 {
-  SimForth& forth = SimForth::instance();
   SimTaDynSheet& sheet = map().currentSheet();
 
   // FIXME: should be called outside each cell: optimisation
   // Disable compilation mode
-  forth.dictionary().smudge(":");
-  forth.dictionary().smudge("INCLUDE");
+  m_forth.dictionary().smudge(":");
+  m_forth.dictionary().smudge("INCLUDE");
 
-  sheet.parse(forth);
-  std::pair<bool, std::string> res = sheet.evaluate(forth);
-  forth.ok(res);
+  sheet.parse(m_forth);
+  std::pair<bool, std::string> res = sheet.evaluate(m_forth);
+  m_forth.ok(res);
 
   // Enable compilation mode
-  forth.dictionary().smudge("INCLUDE");
-  forth.dictionary().smudge(":");
+  m_forth.dictionary().smudge("INCLUDE");
+  m_forth.dictionary().smudge(":");
 
   return res.first;
 }

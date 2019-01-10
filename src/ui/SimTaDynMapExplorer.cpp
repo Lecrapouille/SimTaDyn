@@ -328,16 +328,6 @@ SimTaDynMapExplorer::SimTaDynMapExplorer()
      sigc::mem_fun(*this, &SimTaDynMapExplorer::on_param_tree_view_query_tooltip));
   m_tree_view.signal_button_press_event().connect(
      sigc::mem_fun(*this, &SimTaDynMapExplorer::on_mytreeview_button_press_event));
-  MapEditor::instance().loaded_success.connect(
-     sigc::mem_fun(*this, &SimTaDynMapExplorer::onSuccessMapLoaded));
-  MapEditor::instance().sheet_changed.connect(
-     sigc::mem_fun(*this, &SimTaDynMapExplorer::on_sheet_changed));
-  MapEditor::instance().loaded_failure.connect(
-     sigc::mem_fun(*this, &SimTaDynMapExplorer::onFailMapLoaded));
-  MapEditor::instance().saved_success.connect(
-     sigc::mem_fun(*this, &SimTaDynMapExplorer::onSuccessMapSaved));
-  MapEditor::instance().saved_failure.connect(
-     sigc::mem_fun(*this, &SimTaDynMapExplorer::onFailMapSaved));
 }
 
 //-----------------------------------------------------------------

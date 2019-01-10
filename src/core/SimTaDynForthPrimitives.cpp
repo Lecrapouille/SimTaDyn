@@ -20,7 +20,7 @@
 
 #include "SimTaDynForthPrimitives.hpp"
 #include "SimTaDynForth.hpp"
-#include "MapEditor.hpp"
+// #include "MapEditor.hpp"
 
 void SimForth::execPrimitive(const Cell16 idPrimitive)
 {
@@ -30,7 +30,7 @@ void SimForth::execPrimitive(const Cell16 idPrimitive)
       {
         std::string filename = path() + nextWord();
         std::cout << "Pa: " << filename << std::endl;
-        MapEditor::instance().openSheet(filename);
+        //FIXME MapEditor::instance().openSheet(filename);
       }
       break;
     case SIMFORTH_PRIMITIVE_FORTH:

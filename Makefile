@@ -239,7 +239,7 @@ uninstall:
 .PHONY: clean
 clean:
 	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr $(BUILD) 2> /dev/null
+	@rm -fr $(BUILD) cov-int 2> /dev/null
 
 ###################################################
 # Clean the whole project.

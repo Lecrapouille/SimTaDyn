@@ -33,10 +33,12 @@
 class ForthDocument: public TextDocument
 {
 public:
-  ForthDocument(Glib::RefPtr<Gsv::Language> language);
+  ForthDocument(SimForth& forth, Glib::RefPtr<Gsv::Language> language);
   ~ForthDocument();
 
 protected:
+
+  SimForth& m_forth;
   // FIXME changer le nom de cette fonction
   //! \brief Slot called when text has been inserted. Use it for checking unknown words
   void onInsertText(const Gtk::TextBuffer::iterator& pos, const Glib::ustring& text_inserted, int bytes);
@@ -62,14 +64,11 @@ protected:
 //
 // *************************************************************************************************
 class ForthEditor
-  : public TextEditor,
-    public Singleton<ForthEditor>
+  : public TextEditor
 {
-  friend class Singleton<ForthEditor>;
-
 public:
 
-  ForthEditor();
+  ForthEditor(SimForth& forth);
   virtual ~ForthEditor();
   void empty();
   void templated();
@@ -109,9 +108,10 @@ private:
 
   inline virtual TextDocument *create() override
   {
-    return new ForthDocument(m_language);
+    return new ForthDocument(m_forth, m_language);
   }
 
+  SimForth& m_forth;
   ForthDicoInspector m_dico_inspector;
   ForthStackInspector m_stack_inspector;
   std::chrono::nanoseconds m_elapsed_time;

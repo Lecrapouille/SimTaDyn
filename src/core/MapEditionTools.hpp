@@ -9,22 +9,32 @@ class MapEditionTools
 {
 public:
 
-  MapEditionTools() {}
+  MapEditionTools(MapEditor& map_editor)
+    : m_map_editor(map_editor)
+  {}
   virtual ~MapEditionTools() {}
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) = 0;
   virtual void exec2(const gdouble x, const gdouble y, const gdouble z = 0.0f) = 0;
   virtual void exec3(const gdouble x, const gdouble y, const gdouble z = 0.0f) = 0;
   virtual void undo() {};
+
+protected:
+
+  MapEditor& m_map_editor;
 };
 
 class AddCellTool: public MapEditionTools
 {
 public:
 
+  AddCellTool(MapEditor& map_editor)
+    : MapEditionTools(map_editor)
+  {}
+
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
     std::cout << "Ajoute1 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
-    MapEditor::instance().sheet().addNode("");
+    m_map_editor.sheet().addNode("");
   }
 
   virtual void exec2(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
@@ -41,6 +51,10 @@ public:
 class RemoveCellTool: public MapEditionTools
 {
 public:
+
+  RemoveCellTool(MapEditor& map_editor)
+    : MapEditionTools(map_editor)
+  {}
 
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
@@ -62,6 +76,10 @@ class SelectCellTool: public MapEditionTools
 {
 public:
 
+  SelectCellTool(MapEditor& map_editor)
+    : MapEditionTools(map_editor)
+  {}
+
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
     LOGI("Select1 une cellule a la position %f/%f/%f", x, y, z);
@@ -81,6 +99,10 @@ public:
 class MoveCellTool: public MapEditionTools
 {
 public:
+
+  MoveCellTool(MapEditor& map_editor)
+    : MapEditionTools(map_editor)
+  {}
 
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {

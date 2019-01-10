@@ -22,14 +22,13 @@
 #include "Config.hpp"
 
 // FIXME: this is a temporary example
-void SimTaDynContext::init(cli::Parser& parser)
+void SimTaDyn::init(cli::Parser& parser)
 {
   LOGI("Parsing project options");
   PathManager::instance().add(parser.get<std::string>("p"));
   LOGI("%s", PathManager::instance().toString().c_str());
 
-  SimForth& forth = SimForth::instance();
-  forth.boot();
+  m_forth.boot();
 
   // FIXME TEMPORARY CODE
 #if 0
@@ -93,11 +92,12 @@ int main(int argc, char** argv)
   Gsv::init();
 
   LOGI("Init SimTaDyn");
-  auto SimTaDyn = std::make_unique<SimTaDynContext>();
-  SimTaDyn->init(parser);
+  SimTaDyn& simtadyn = SimTaDyn::instance();
+  simtadyn.init(parser);
 
   LOGI("Start SimTaDyn main loop");
-  app->run(SimTaDyn->window());
+  app->run(simtadyn.mainWindow());
 
+  Logger::destroy();
   return 0;
 }

@@ -98,7 +98,8 @@ class ForthStackInspector : public Gtk::ScrolledWindow // FIXME: double Scrolled
 {
 public:
 
-  ForthStackInspector()
+  ForthStackInspector(SimForth& forth)
+    : m_forth(forth)
   {
     // Stack display
     m_stack_model = Gtk::ListStore::create(m_columns);
@@ -112,11 +113,11 @@ public:
     Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
     // Signal
-    SimForth::instance().signal_forth_interprete_done.connect([this](/*SimForth& forth*/)
+    m_forth.signal_forth_interprete_done.connect([this](/*SimForth& forth*/)
     {
       LOGC("signal_forth_interprete_done: inspect stack");
-      ForthStackInspector::inspect(SimForth::instance().stack(forth::DataStack),
-                                   SimForth::instance().stackDepth(forth::DataStack));
+      ForthStackInspector::inspect(m_forth.stack(forth::DataStack),
+                                   m_forth.stackDepth(forth::DataStack));
     });
   }
 
@@ -160,6 +161,7 @@ private:
 
   using ListStorePtr = Glib::RefPtr<Gtk::ListStore>;
 
+  SimForth&           m_forth;
   ListStorePtr        m_stack_model;
   Gtk::TreeView       m_stack_view;
   ModelColumns        m_columns;
@@ -172,7 +174,8 @@ class ForthDicoInspector : public Gtk::ScrolledWindow // FIXME: double ScrolledW
 {
 public:
 
-  ForthDicoInspector()
+  ForthDicoInspector(SimForth& forth)
+    : m_forth(forth)
   {
     // Dico display
     m_dico_model = Gtk::ListStore::create(m_columns);
@@ -190,10 +193,10 @@ public:
     Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
     // Signal
-    SimForth::instance().signal_forth_interprete_done.connect([this](/*SimForth& forth*/)
+    m_forth.signal_forth_interprete_done.connect([this](/*SimForth& forth*/)
     {
       LOGC("signal_forth_interprete_done: inspect dictionary");
-      ForthDicoInspector::inspect(SimForth::instance().dictionary(), SimForth::instance().maxPrimitives());
+      ForthDicoInspector::inspect(m_forth.dictionary(), m_forth.maxPrimitives());
     });
   }
 
@@ -266,6 +269,7 @@ private:
 
   using ListStorePtr = Glib::RefPtr<Gtk::ListStore>;
 
+  SimForth&      m_forth;
   ListStorePtr   m_dico_model;
   Gtk::TreeView  m_dico_view;
   ModelColumns   m_columns;

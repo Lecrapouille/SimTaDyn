@@ -67,7 +67,7 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap& 
   map.m_full_path = config::tmp_path + map.m_name + '/';
 
   // TODO
-  SimForth &forth = SimForth::instance();
+  /*SimForth &forth = SimForth::instance();
   forth.pushPath(map.m_full_path);
   const auto& res = forth.interpreteFile(map.m_full_path + "/Index.fth");
   forth.popPath();
@@ -75,7 +75,7 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap& 
   if (false == res.first)
     {
       throw LoaderException (res.second);
-    }
+      }*/
 }
 
 // FIXME password

@@ -69,5 +69,5 @@ void GLRenderer::drawSceneNode(SimTaDynSheet& sheet, Matrix44f const& transform)
 //------------------------------------------------------------------
 void GLRenderer::draw()
 {
-  MapEditor::instance().drawCurrentMap(/* *this */);
+  //FIXME MapEditor::instance().drawCurrentMap(/* *this */);
 }

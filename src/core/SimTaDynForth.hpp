@@ -47,14 +47,20 @@ public:
 //! \brief SimTaDynForth a classic Forth modified for GIS and spreadsheet
 // *************************************************************************************************
 class SimForth
-  : public Forth,
-    public Singleton<SimForth>
+  : public Forth
 {
-  friend class Singleton<SimForth>;
-
 public:
 
-  ASpreadSheet *m_spreadsheet = nullptr;
+  SimForth()
+    : Forth(m_dictionaries)
+  {
+    LOGI("Creating SimForth");
+  }
+
+  virtual ~SimForth()
+  {
+    LOGI("Destroying SimForth");
+  }
 
   virtual void ok(std::pair<bool, std::string> const& res) override
   {
@@ -111,24 +117,12 @@ protected:
 
 private:
 
-  SimForth()
-    : Forth(m_dictionaries)
-  {
-    LOGI("Creating SimForth");
-  }
-
-  virtual ~SimForth()
-  {
-    LOGI("Destroying SimForth");
-  }
-
-private:
-
   SimForthDictionary m_dictionaries;
   std::vector<std::string> m_pathes;
 
 public:
 
+  ASpreadSheet *m_spreadsheet = nullptr;
   sigc::signal<void/*, SimForth&*/> signal_forth_interprete_done;
 };
 

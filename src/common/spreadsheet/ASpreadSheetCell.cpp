@@ -20,16 +20,16 @@
 
 #include "ASpreadSheetCell.hpp"
 
-void ASpreadSheetCell::update()
+void ASpreadSheetCell::update(SimForth& forth)
 {
-  SimForth::instance().interpreteCell(*this);
+  forth.interpreteCell(*this);
 }
 
 //FIXME
-void ASpreadSheetCell::parse()
+void ASpreadSheetCell::parse(SimForth &forth)
 {
   m_references.clear();
-  SimForth::instance().parseCell(*this);
+  forth.parseCell(*this);
   m_unresolvedRefs = m_references.size();
 }
 

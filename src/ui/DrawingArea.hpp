@@ -157,6 +157,8 @@ private:
 
 private:
 
+  //std::unique_ptr<MapEditionTools> m_edition_tools[ActionType::LastAction + 1u];
+
   //! \brief Keyboard pressed keys.
   bool m_direction[DirectionIterEnd + 1] = {0};
 
