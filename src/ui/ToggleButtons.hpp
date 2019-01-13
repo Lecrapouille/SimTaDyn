@@ -1,12 +1,7 @@
 #ifndef TOGGLEBUTTONS_HPP
 #define TOGGLEBUTTONS_HPP
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#  include <gtkmm.h>
-#pragma GCC diagnostic pop
+#  include "gtkmm.hpp"
 
 // *************************************************************************************************
 //! \brief A set of buttons inserted in a toolbar passed as parameter. Lika Gtk::RadioButton only one
@@ -54,7 +49,7 @@ public:
               const Gtk::BuiltinStockID icon,
               const sigc::slot1<void, uint32_t>& toggle_slot)
   {
-    MyToggleToolButton* button = Gtk::manage(new MyToggleToolButton());
+    Button* button = Gtk::make_managed<Button>();
     button->nth_button = nth_button;
 
     // The first button will have the pressed look

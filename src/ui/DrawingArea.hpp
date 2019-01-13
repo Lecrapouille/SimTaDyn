@@ -22,13 +22,13 @@
 #  define DRAWINGAREA_HPP_
 
 #  include "Renderer.hpp"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#  include <gtkmm/glarea.h>
-#  include <glibmm.h>
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Wredundant-decls"
+#    include <gtkmm/glarea.h>
+#    include <glibmm.h>
+#  pragma GCC diagnostic pop
 
 // *************************************************************************************************
 //! \brief Class for OpenGL renderer area

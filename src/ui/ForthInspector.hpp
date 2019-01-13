@@ -21,14 +21,7 @@
 #ifndef FORTH_INSPECTOR_HPP_
 #  define FORTH_INSPECTOR_HPP_
 
-// FIXME: a mettre dans un header special
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#  include <gtkmm.h>
-#pragma GCC diagnostic pop
-
+#  include "gtkmm.hpp"
 #  include "SimTaDynForth.hpp" // FIXME Forth.hpp
 
 // *************************************************************************************************

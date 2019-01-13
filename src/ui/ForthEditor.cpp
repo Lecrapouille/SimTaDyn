@@ -292,7 +292,7 @@ ForthEditor::ForthEditor(SimForth& forth)
   // Forth toolbar (horizontal)
   {
     {
-      Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+      Gtk::ToolButton *button = Gtk::make_managed<Gtk::ToolButton>();
       button->set_label("Exec");
       button->set_stock_id(Gtk::Stock::EXECUTE);
       button->set_tooltip_text("Run Forth script");
@@ -670,7 +670,7 @@ Gtk::ToolButton *ForthEditor::addButton(const Gtk::BuiltinStockID icon,
                                         const std::string &script,
                                         const std::string &help)
 {
-  Gtk::ToolButton *button = Gtk::manage(new Gtk::ToolButton());
+  Gtk::ToolButton *button = Gtk::make_managed<Gtk::ToolButton>();
 
   if (nullptr != button)
     {

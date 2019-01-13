@@ -23,13 +23,7 @@
 
 #  include "ILoader.tpp"
 #  include "SimTaDynMap.hpp"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#  include <gtkmm.h>
-#pragma GCC diagnostic pop
+#  include "gtkmm.hpp"
 
 // *************************************************************************************************
 //! \brief Show and edit the content (transform matrix) of a SceneNode.
