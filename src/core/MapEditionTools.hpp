@@ -33,18 +33,18 @@ public:
 
   virtual void exec1(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
-    std::cout << "Ajoute1 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
+    std::cout << "Ajoute1 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << " " << static_cast<int>(z) << std::endl;
     m_map_editor.sheet().addNode("");
   }
 
   virtual void exec2(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
-    std::cout << "Ajoute2 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
+    std::cout << "Ajoute2 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << " " << static_cast<int>(z) << std::endl;
   }
 
   virtual void exec3(const gdouble x, const gdouble y, const gdouble z = 0.0f) override
   {
-    std::cout << "Ajoute3 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
+    std::cout << "Ajoute3 une cellule a la position " << static_cast<int>(x) << " " << static_cast<int>(y) << " " << static_cast<int>(z) << std::endl;
   }
 };
 

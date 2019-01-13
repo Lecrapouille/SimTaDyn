@@ -35,9 +35,6 @@ MapEditor::MapEditor(SimForth& forth)
   // Drawing area
   {
     m_vbox.pack_start(m_drawing_area);
-    m_drawing_area.set_hexpand(true);
-    m_drawing_area.set_vexpand(true);
-    m_drawing_area.set_auto_render(true);
   }
 
   // Init map edition tool to dummy action

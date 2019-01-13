@@ -28,6 +28,11 @@ GLDrawingArea::GLDrawingArea()
   : Gtk::GLArea(),
     GLRenderer()
 {
+  // Widget aspect
+  set_hexpand(true);
+  set_vexpand(true);
+  set_auto_render(true);
+
   // OpenGL core is mandatory
   setCoreVersion();
 
@@ -199,27 +204,27 @@ bool GLDrawingArea::onRefreshKeyboard()
 
   if (m_direction[GLDrawingArea::Forward])
     {
-      camera.zoomOffset(0.01f);
+      m_camera.zoomOffset(0.01f);
     }
   if (m_direction[GLDrawingArea::Backward])
     {
-      camera.zoomOffset(-0.01f);
+      m_camera.zoomOffset(-0.01f);
     }
   if (m_direction[GLDrawingArea::Up])
     {
-      camera.moveOffset(0.0f, -10.0f);
+      m_camera.moveOffset(0.0f, -10.0f);
     }
   if (m_direction[GLDrawingArea::Down])
     {
-      camera.moveOffset(0.0f, 10.0f);
+      m_camera.moveOffset(0.0f, 10.0f);
     }
   if (m_direction[GLDrawingArea::Right])
     {
-      camera.moveOffset(10.0f, 0.0f);
+      m_camera.moveOffset(10.0f, 0.0f);
     }
   if (m_direction[GLDrawingArea::Left])
     {
-      camera.moveOffset(-10.0f, 0.0f);
+      m_camera.moveOffset(-10.0f, 0.0f);
     }
 
   // std::cout << camera << std::endl;

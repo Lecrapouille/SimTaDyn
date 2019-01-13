@@ -87,18 +87,10 @@ public:
   bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */);
 
   //------------------------------------------------------------------
-  //! \brief Callback when the mouse button has been pressed on the
-  //! OpenGL window. Dispatch the action to the Map Editor.
-  //------------------------------------------------------------------
-  virtual bool on_button_press_event(GdkEventButton* event) override;
-
-  //------------------------------------------------------------------
-
   //! \brief Asynchronous callback when a keyboard key has been
   //! pressed. We memorize the pressed key. A GTK+ timer will trig
   //! onRefreshKeyboard() which will actions associated to all pressed
   //! keys thanks to .
-
   //------------------------------------------------------------------
   inline void keyPressed(Direction d)
   {
@@ -156,8 +148,6 @@ private:
   }
 
 private:
-
-  //std::unique_ptr<MapEditionTools> m_edition_tools[ActionType::LastAction + 1u];
 
   //! \brief Keyboard pressed keys.
   bool m_direction[DirectionIterEnd + 1] = {0};
