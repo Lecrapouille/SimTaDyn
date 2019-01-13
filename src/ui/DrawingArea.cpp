@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "DrawingArea.hpp"
-#include "MapEditor.hpp"
 #include "DialogException.hpp"
 #include <exception>
 
@@ -167,31 +166,6 @@ bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
                 e.what(), e.message().c_str());
         }
       return false;
-    }
-
-  return true;
-}
-
-//------------------------------------------------------------------
-bool GLDrawingArea::on_button_press_event(GdkEventButton* event)
-{
-  if (event->type == GDK_BUTTON_PRESS)
-    {
-      switch (event->button)
-        {
-        case 1:
-          std::cout << "GLDrawingArea::on_button_press_event button1" << std::endl;
-          //MapEditor::instance().button1PressEvent(event->x, event->y);
-          break;
-        case 2:
-          std::cout << "GLDrawingArea::on_button_press_event button2" << std::endl;
-          //MapEditor::instance().button2PressEvent(event->x, event->y);
-          break;
-        case 3:
-          std::cout << "GLDrawingArea::on_button_press_event button3" << std::endl;
-          //MapEditor::instance().button3PressEvent(event->x, event->y);
-          break;
-        }
     }
 
   return true;

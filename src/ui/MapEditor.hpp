@@ -32,6 +32,21 @@ class LoaderManager;
 class MapEditionTools;
 class GLDrawingArea;
 
+//#error "TODO"
+/* A faire:
+1/ Ajouter un vector<SimTaDynMap>
+2/ Les GLArea doivent avoir le SimTaDynMapHolder. Edite: enfait les vues ne doivent pas voir le model
+3/ MapEditor ne peut pas etre un Presenter. Au choix soit un Controller (Observer pattern)
+Soit MapEditor stock un ensemble de couple(View, Presenter) = std::pair<GLarea, Presenter>
+Dans ce cas MapEditor gere uniquement cet ensemble.
+4/ Deplacer tous les connections des signaux dans le Presenter. GLarea ne doit pas faire de
+connect. utiliser pour cela une classe Contract.
+5/ SimTaDynMapHolder doit memoriser l'ordre des Map pour afficher correctement la precedente
+quand on ferme une carte.
+Qu'est ce que fermer une carte ? Simplement fermer la vue ?
+6/ Appliquer ce principe pour ForthEditor
+*/
+
 // *************************************************************************************************
 //! \brief A class holding the currently edited by SimTaDynMap. When
 //! the user changes of map, this class will notifies to observers that
@@ -119,10 +134,10 @@ class MapEditor
 public:
 
   //! \brief Add, remove a mode (node, arc, zone).
-  enum ActionType { Add, Remove, Select, Move, FirstAction = Add, LastAction = Move };
+  enum ActionType { Add, Remove, Select, Move, MaxActionType_ };
 
   //! \brief On what kind of cells action is performed.
-  enum ActionOn { Node, Arc, Zone, FirstMode = Node, LastMode = Zone };
+  enum ActionOn { Node, Arc, Zone, MaxActionOn_ };
 
   //------------------------------------------------------------------
   //! \brief
@@ -403,36 +418,12 @@ public:
 
   bool evalSheet();
 
-  //*******************************************************************
-  // OpenGL
-  //*******************************************************************
-
-
-  //*******************************************************************
-  // GIS edition
-  //*******************************************************************
-
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
-  void button1PressEvent(const gdouble x, const gdouble y);
-
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
-  void button2PressEvent(const gdouble x, const gdouble y);
-
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
-  void button3PressEvent(const gdouble x, const gdouble y);
-
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
   ActionType actionType() const
   {
-    return static_cast<ActionType>(m_action_type.button());
+    return m_action_type.button();
   }
 
   //------------------------------------------------------------------
@@ -440,7 +431,7 @@ public:
   //------------------------------------------------------------------
   ActionOn actionOn() const
   {
-    return static_cast<ActionOn>(m_action_on.button());
+    return m_action_on.button();
   }
 
 private:
@@ -452,17 +443,10 @@ private:
   bool dialogLoadMap(bool const new_map, bool const reset_map);
   bool dialogLoadSheet(bool const new_sheet, bool const reset_sheet);
   bool dialogSaveAsMap(bool const closing);
-  void onActionOnSelected_(const ActionOn id);
-  void onActionTypeSelected_(const ActionType id);
-  inline void onActionOnSelected(const uint32_t id)
-  {
-    onActionOnSelected_(static_cast<ActionOn>(id));
-  }
-  inline void onActionTypeSelected(const uint32_t id)
-  {
-    onActionTypeSelected_(static_cast<ActionType>(id));
-  }
+  void onActionOnSelected(const ActionOn id);
+  void onActionTypeSelected(const ActionType id);
   void repaintMap(SimTaDynMapPtr map);
+  void onMousePressed(GdkEventButton* event);
 
 public:
 
@@ -487,17 +471,18 @@ public:
 
 protected:
 
-  Gtk::Toolbar           m_toolbar;
-  ToggleButtons          m_action_type;
-  ToggleButtons          m_action_on;
-  Gtk::Menu              m_menu[simtadyn::MaxMapMenuNames + 1];
-  Gtk::ImageMenuItem     m_submenu[32];
-  Gtk::Image             m_image[32];
-  Gtk::SeparatorMenuItem m_menu_separator[2];
-  Gtk::SeparatorToolItem m_toolbar_separator[2];
-  Gtk::VBox              m_vbox;
-  Gtk::HBox              m_hbox;
-  std::unique_ptr<MapEditionTools> m_edition_tools[ActionType::LastAction + 1u];
+  Gtk::Toolbar              m_toolbar;
+  ToggleButtons<ActionType> m_action_type;
+  ToggleButtons<ActionOn>   m_action_on;
+  Gtk::Menu                 m_menu[simtadyn::MaxMapMenuNames + 1];
+  Gtk::ImageMenuItem        m_submenu[32];
+  Gtk::Image                m_image[32];
+  Gtk::SeparatorMenuItem    m_menu_separator[2];
+  Gtk::SeparatorToolItem    m_toolbar_separator[2];
+  Gtk::VBox                 m_vbox;
+  Gtk::HBox                 m_hbox;
+  std::unique_ptr<MapEditionTools>
+                            m_edition_tools[ActionType::MaxActionType_];
   size_t m_map_id = 0_z;
 };
 

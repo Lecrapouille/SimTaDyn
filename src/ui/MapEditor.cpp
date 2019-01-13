@@ -35,6 +35,7 @@ MapEditor::MapEditor(SimForth& forth)
   // Drawing area
   {
     m_vbox.pack_start(m_drawing_area);
+    m_drawing_area.signal_button_press_event().connect_notify(sigc::mem_fun(*this, &MapEditor::onMousePressed));
   }
 
   // Init map edition tool to dummy action
@@ -202,7 +203,6 @@ MapEditor::MapEditor(SimForth& forth)
     MapEditor::repaintMap(map);
   });
 
-
   loaded_success.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::onSuccessMapLoaded));
   sheet_changed.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::on_sheet_changed));
   loaded_failure.connect(sigc::mem_fun(m_map_explorer, &SimTaDynMapExplorer::onFailMapLoaded));
@@ -222,7 +222,7 @@ MapEditor::~MapEditor()
 // *************************************************************************************************
 //!
 // *************************************************************************************************
-void MapEditor::onActionOnSelected_(const ActionOn id)
+void MapEditor::onActionOnSelected(const ActionOn id)
 {
   LOGI("ActionOnSelected %u", id);
   // TODO: afficher les id du type de cellule selectionnee
@@ -231,7 +231,7 @@ void MapEditor::onActionOnSelected_(const ActionOn id)
 // *************************************************************************************************
 //!
 // *************************************************************************************************
-void MapEditor::onActionTypeSelected_(const ActionType id)
+void MapEditor::onActionTypeSelected(const ActionType id)
 {
   LOGI("ActionTypeSelected %u", id);
 
@@ -562,30 +562,26 @@ bool MapEditor::dialogSaveAsMap(bool const closing)
 }
 
 //------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------
-void MapEditor::button1PressEvent(const gdouble x, const gdouble y)
+void MapEditor::onMousePressed(GdkEventButton* event)
 {
-  std::cout << "MapEditor::Bouton1 click " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
-  m_edition_tools[actionType()]->exec1(x, y);
-}
-
-//------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------
-void MapEditor::button2PressEvent(const gdouble x, const gdouble y)
-{
-  std::cout << "MapEditor::Bouton2 click " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
-  m_edition_tools[actionType()]->exec2(x, y);
-}
-
-//------------------------------------------------------------------
-//! \brief
-//------------------------------------------------------------------
-void MapEditor::button3PressEvent(const gdouble x, const gdouble y)
-{
-  std::cout << "MapEditor::Bouton3 click " << static_cast<int>(x) << " " << static_cast<int>(y) << std::endl;
-  m_edition_tools[actionType()]->exec3(x, y);
+  if (event->type == GDK_BUTTON_PRESS)
+    {
+      switch (event->button)
+        {
+        case 1:
+          std::cout << "GLDrawingArea::on_button_press_event button1" << std::endl;
+          m_edition_tools[actionType()]->exec1(event->x, event->y);
+          break;
+        case 2:
+          std::cout << "GLDrawingArea::on_button_press_event button2" << std::endl;
+          m_edition_tools[actionType()]->exec2(event->x, event->y);
+          break;
+        case 3:
+          std::cout << "GLDrawingArea::on_button_press_event button3" << std::endl;
+          m_edition_tools[actionType()]->exec3(event->x, event->y);
+          break;
+        }
+    }
 }
 
 // **************************************************************
