@@ -34,8 +34,11 @@ MapEditor::MapEditor(SimForth& forth)
 
   // Drawing area
   {
-    m_vbox.pack_start(m_drawing_area);
-    m_drawing_area.signal_button_press_event().connect_notify(sigc::mem_fun(*this, &MapEditor::onMousePressed));
+    // This box is mandatory for spliting views (see explainations of the functio splitWidget).
+    Gtk::Box* box = Gtk::make_managed<Gtk::Box>();
+    m_drawing_area = MapEditor::CreateView();
+    box->pack_start(*m_drawing_area);
+    m_vbox.pack_start(*box); // FIXME: really ?
   }
 
   // Init map edition tool to dummy action
@@ -196,6 +199,7 @@ MapEditor::MapEditor(SimForth& forth)
   }
 
   // Signals
+  Glib::signal_timeout().connect(sigc::mem_fun(*this, &MapEditor::onKeyPressed), m_timeout_ms);
   loaded_success.connect(sigc::mem_fun(*this, &MapEditor::repaintMap));
   m_current_map.signal_top_map_changed.connect([this](SimTaDynMapPtr map)
   {
@@ -217,6 +221,21 @@ MapEditor::~MapEditor()
 {
   LOGI("Destroying MapEditor");
   // TODO: be sure no Forth script is running on the map before destroying mapq
+}
+
+// *************************************************************************************************
+//!
+// *************************************************************************************************
+GLDrawingArea* MapEditor::CreateView()
+{
+  GLDrawingArea* glarea = Gtk::make_managed<GLDrawingArea>();
+  std::cout << "AREA " << glarea << std::endl;
+  glarea->signal_button_press_event().connect_notify(sigc::mem_fun(*this, &MapEditor::onMousePressed));
+  glarea->signal_enter_notify_event().connect_notify(sigc::bind<GLDrawingArea&>(
+       sigc::mem_fun(*this, &MapEditor::onEnterViewEvent), *glarea));
+  glarea->signal_leave_notify_event().connect_notify(sigc::bind<GLDrawingArea&>(
+       sigc::mem_fun(*this, &MapEditor::onLeaveViewEvent), *glarea));
+  return glarea;
 }
 
 // *************************************************************************************************
@@ -299,7 +318,7 @@ void MapEditor::newMap()
 void MapEditor::repaintMap(SimTaDynMapPtr map)
 {
   LOGI("Repainting map %s", map->name().c_str());
-  map->drawnBy(m_drawing_area);
+  map->drawnBy(currentView());
 }
 
 // *************************************************************************************************
@@ -582,6 +601,59 @@ void MapEditor::onMousePressed(GdkEventButton* event)
           break;
         }
     }
+}
+
+//------------------------------------------------------------------
+void MapEditor::onEnterViewEvent(GdkEventCrossing* /*crossing_event*/, GLDrawingArea& view)
+{
+  view.grab_focus();
+  view.backgroundColor(Color(0.0f, 0.0f, 0.4f, 1.0f));
+  m_drawing_area = &view;
+  std::cout << "ME:Entering "
+            << (int) view.id() << " "
+            << &view << std::endl;
+  // TODO restaurer les boutons associes a la vue
+}
+
+//------------------------------------------------------------------
+void MapEditor::onLeaveViewEvent(GdkEventCrossing* /*crossing_event*/, GLDrawingArea& view)
+{
+  view.backgroundColor(Color(0.0f, 0.0f, 0.2f, 1.0f));
+}
+
+//------------------------------------------------------------------
+bool MapEditor::onKeyPressed()
+{
+  /*Camera2D& camera = currentView()::camera2D();
+
+  if (m_direction[GLDrawingArea::Forward])
+    {
+      m_camera.zoomOffset(0.01f);
+    }
+  if (m_direction[GLDrawingArea::Backward])
+    {
+      m_camera.zoomOffset(-0.01f);
+    }
+  if (m_direction[GLDrawingArea::Up])
+    {
+      m_camera.moveOffset(0.0f, -10.0f);
+    }
+  if (m_direction[GLDrawingArea::Down])
+    {
+      m_camera.moveOffset(0.0f, 10.0f);
+    }
+  if (m_direction[GLDrawingArea::Right])
+    {
+      m_camera.moveOffset(10.0f, 0.0f);
+    }
+  if (m_direction[GLDrawingArea::Left])
+    {
+      m_camera.moveOffset(-10.0f, 0.0f);
+    }
+
+  // std::cout << camera << std::endl;
+  GLRenderer::applyViewport(camera);*/
+  return true;
 }
 
 // **************************************************************

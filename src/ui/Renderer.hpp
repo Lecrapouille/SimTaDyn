@@ -42,7 +42,7 @@ public:
   //! OpenGL can be not yet initialized.
   //------------------------------------------------------------------
   GLRenderer()
-    : m_bg_color(0.0f, 0.0f, 0.4f, 1.0f),
+    : m_bg_color(0.0f, 0.0f, 0.2f, 1.0f),
       m_mode(GLRenderer::Mode2D)
   {
   }

@@ -23,7 +23,7 @@
 
 #  include "ILoader.tpp"
 #  include "SimTaDynMap.hpp"
-#  include "gtkmm.hpp"
+#  include "Gtkmm.hpp"
 
 // *************************************************************************************************
 //! \brief Show and edit the content (transform matrix) of a SceneNode.

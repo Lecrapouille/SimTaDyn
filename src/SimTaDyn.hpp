@@ -84,7 +84,7 @@ public:
 
   inline GLDrawingArea& drawingArea()
   {
-    return m_map_editor.m_drawing_area;
+    return m_map_editor.currentView();
   }
 
 private:

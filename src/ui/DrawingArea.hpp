@@ -35,7 +35,8 @@
 // *************************************************************************************************
 class GLDrawingArea
   : public Gtk::GLArea,
-    public GLRenderer
+    public GLRenderer,
+    private UniqueID<GLDrawingArea>
 {
 public:
 
@@ -51,6 +52,8 @@ public:
   //! \brief Destructor.
   //------------------------------------------------------------------
   ~GLDrawingArea();
+
+  inline Key id() const { return m_id; }
 
   //------------------------------------------------------------------
   //! \brief Return the current OpenGL screen width.
@@ -151,9 +154,11 @@ private:
 
   //! \brief Keyboard pressed keys.
   bool m_direction[DirectionIterEnd + 1] = {0};
+  Key m_id;
 
-  //! \brief Keyboard refresh rate
-  const unsigned int m_timeout_ms = 10;
+  // TODO: memoriser les boutons de la carte:
+  // quand la souris passe sur une carte, les boutons sont remis
+  // dans le bon etat.
 };
 
 #endif /* DRAWINGAREA_HPP_ */

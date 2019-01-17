@@ -20,6 +20,7 @@
 
 #include "SimTaDynWindow.hpp"
 #include "PathManager.hpp"
+#include "Gtkmm.cpp" //FIXME
 
 // *************************************************************************************************
 // SimTaDyn main window
@@ -155,29 +156,37 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
     case GDK_KEY_Escape:
       break;
     case GDK_KEY_F1:
+      m_map_editor.splitView(Gtk::Orientation::ORIENTATION_HORIZONTAL);
+      break;
+    case GDK_KEY_F2:
+      m_map_editor.splitView(Gtk::Orientation::ORIENTATION_VERTICAL);
+      break;
+#if 0
+    case GDK_KEY_F11:
       {
         //SimTaDynContext& simtadyn = SimTaDynContext::getInstance();
-        //m_drawing_area.zoomFitPage(simtadyn.m_graph);
+        //zoomFitPage(simtadyn.m_graph);
       }
       break;
     case GDK_KEY_Page_Up:
-      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Forward);
+      m_map_editor.keyPressed(GLDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Backward);
+      m_map_editor.keyPressed(GLDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Up);
+      m_map_editor.keyPressed(GLDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Down);
+      m_map_editor.keyPressed(GLDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Right);
+      m_map_editor.keyPressed(GLDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      m_map_editor.m_drawing_area.keyPressed(GLDrawingArea::Left);
+      m_map_editor.keyPressed(GLDrawingArea::Left);
       break;
+#endif
     default:
       break;
     }
@@ -191,24 +200,26 @@ void SimTaDynWindow::onKeyReleased(GdkEventKey* evenement)
 {
   switch (evenement->keyval)
     {
+#if 0
     case GDK_KEY_Page_Up:
-      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Forward);
+      m_map_editor.keyReleased(GLDrawingArea::Forward);
       break;
     case GDK_KEY_Page_Down:
-      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Backward);
+      m_map_editor.keyReleased(GLDrawingArea::Backward);
       break;
     case GDK_KEY_Up:
-      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Up);
+      m_map_editor.keyReleased(GLDrawingArea::Up);
       break;
     case GDK_KEY_Down:
-      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Down);
+      m_map_editor.keyReleased(GLDrawingArea::Down);
       break;
     case GDK_KEY_Right:
-      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Right);
+      m_map_editor.keyReleased(GLDrawingArea::Right);
       break;
     case GDK_KEY_Left:
-      m_map_editor.m_drawing_area.keyReleased(GLDrawingArea::Left);
+      m_map_editor.keyReleased(GLDrawingArea::Left);
       break;
+#endif
     default:
       break;
     }

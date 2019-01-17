@@ -154,12 +154,35 @@ public:
   //*******************************************************************
   // Widgets and classes access
   //*******************************************************************
+
   //------------------------------------------------------------------
   //! \brief Return the GTK+ widget to be inserted inside a GTK+ window.
   //------------------------------------------------------------------
   inline Gtk::Widget &widget()
   {
     return m_hbox;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  GLDrawingArea* CreateView();
+
+  //------------------------------------------------------------------
+  //! \brief Split the current view into two views displaying the same
+  //! model.
+  //------------------------------------------------------------------
+  void splitView(Gtk::Orientation const orientation)
+  {
+    GLDrawingArea* view = CreateView();
+    findParent<Gtk::Window>(view);
+    splitWidget(currentView(), *view, orientation, Pack::First);
+  }
+
+  // FIXME: current Presenter
+  GLDrawingArea& currentView()
+  {
+    return *m_drawing_area;
   }
 
   //------------------------------------------------------------------
@@ -182,12 +205,13 @@ public:
   // Maps
   //*******************************************************************
 
+  // FIXME Presenter gere une seule vue mais peut avoir plusieurs models
   void drawCurrentMap(/*GLDrawingArea& renderer*/)
   {
     SimTaDynMapPtr map = m_current_map.get();
     if ((nullptr != map))
       {
-        map->drawnBy(m_drawing_area/*renderer*/);
+        map->drawnBy(currentView());//m_drawing_area/*renderer*/);
       }
   }
 
@@ -443,18 +467,31 @@ private:
   bool dialogLoadMap(bool const new_map, bool const reset_map);
   bool dialogLoadSheet(bool const new_sheet, bool const reset_sheet);
   bool dialogSaveAsMap(bool const closing);
-  void onActionOnSelected(const ActionOn id);
-  void onActionTypeSelected(const ActionType id);
   void repaintMap(SimTaDynMapPtr map);
+
+  //! \brief Callback when the user pressed its mouse
   void onMousePressed(GdkEventButton* event);
+  //! \brief Callback when the user pressed on the keyboard. This
+  //! callback is called every 10 ms.
+  bool onKeyPressed();
+  //! \brief Callback when the user pressed on a map edition button
+  //! (add, remove, move, ...).
+  void onActionOnSelected(const ActionOn id);
+  //! \brief Callback when the user pressed on a map cell type (nodes,
+  //! arcs, zones, ...).
+  void onActionTypeSelected(const ActionType id);
+  //! \brief Callback when the user deplaced its mouse cursor on a new
+  //! GLDrawingArea. Mark it as the current view.
+  void onEnterViewEvent(GdkEventCrossing* crossing_event, GLDrawingArea& view);
+  void onLeaveViewEvent(GdkEventCrossing* crossing_event, GLDrawingArea& view);
 
 public:
 
   SimForth&              m_forth;
   //! \brief Model of the MVC design pattern
   SimTaDynMapHolder      m_current_map;
-  //! \brief View of the MVC pattern
-  GLDrawingArea          m_drawing_area;
+  //! \brief View of the MVC pattern (The currently selected)
+  GLDrawingArea*         m_drawing_area;
   //! \brief View/Controler of the MVC pattern
   SimTaDynMapExplorer    m_map_explorer;
   //! \brief View/Controler of the MVC pattern
@@ -484,6 +521,9 @@ protected:
   std::unique_ptr<MapEditionTools>
                             m_edition_tools[ActionType::MaxActionType_];
   size_t m_map_id = 0_z;
+
+  //! \brief Keyboard refresh rate
+  const unsigned int m_timeout_ms = 10;
 };
 
 #endif /* MAPEDITOR_HPP_ */

@@ -25,27 +25,29 @@
 //------------------------------------------------------------------
 GLDrawingArea::GLDrawingArea()
   : Gtk::GLArea(),
-    GLRenderer()
+    GLRenderer(),
+    m_id(getID())
 {
+  std::cout << "New GLDrawingArea " << (int) getID() << std::endl;
+
   // Widget aspect
   set_hexpand(true);
   set_vexpand(true);
   set_auto_render(true);
+
+  // Detect when the mouse cursor enters the widget
+  set_can_focus(true);
 
   // OpenGL core is mandatory
   setCoreVersion();
 
   // Filter GTK+ events
   add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK |
-             Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
-
-  // Reset keyboard states every 10 ms
-  Glib::signal_timeout().connect(
-      sigc::mem_fun(*this, &GLDrawingArea::onRefreshKeyboard), m_timeout_ms);
+             Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK |
+             Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
 
   // Use the mouse scroll event
   signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
-
   // Connect drawing area signals
   signal_realize().connect(sigc::mem_fun(*this, &GLDrawingArea::onCreate));
   signal_unrealize().connect(sigc::mem_fun(*this, &GLDrawingArea::onRelease), false);
@@ -168,41 +170,6 @@ bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
       return false;
     }
 
-  return true;
-}
-
-//------------------------------------------------------------------
-bool GLDrawingArea::onRefreshKeyboard()
-{
-  /*Camera2D& camera = GLRenderer::camera2D();
-
-  if (m_direction[GLDrawingArea::Forward])
-    {
-      m_camera.zoomOffset(0.01f);
-    }
-  if (m_direction[GLDrawingArea::Backward])
-    {
-      m_camera.zoomOffset(-0.01f);
-    }
-  if (m_direction[GLDrawingArea::Up])
-    {
-      m_camera.moveOffset(0.0f, -10.0f);
-    }
-  if (m_direction[GLDrawingArea::Down])
-    {
-      m_camera.moveOffset(0.0f, 10.0f);
-    }
-  if (m_direction[GLDrawingArea::Right])
-    {
-      m_camera.moveOffset(10.0f, 0.0f);
-    }
-  if (m_direction[GLDrawingArea::Left])
-    {
-      m_camera.moveOffset(-10.0f, 0.0f);
-    }
-
-  // std::cout << camera << std::endl;
-  GLRenderer::applyViewport(camera);*/
   return true;
 }
 
