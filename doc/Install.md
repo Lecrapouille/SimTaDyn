@@ -1,15 +1,15 @@
 # SimTaDyn Compilation Guide
 
-## Compiling SimTaDyn (short version)
+## <a name="shortversion"></a> Compiling SimTaDyn (short version)
 
 This document explains the different steps for getting, compiling the SimTaDyn code source take from the git
 [master branch](https://github.com/Lecrapouille/SimTaDyn/tree/master) or the [development branch](https://github.com/Lecrapouille/SimTaDyn/).
 and how to install it. For other SimTaDyn branches, specially for the [release-EPITA-2004 branch](https://github.com/Lecrapouille/SimTaDyn/tree/release-EPITA-2004),
 please read the INSTALL file associated to this branch.
 
-The following code (to type in your Linux console) allows to download the code source,
-download third part libraries, compile the whole source, install it (if desired) and
-to launch it.
+Type the following code in your Linux console. This will download the SimTaDyn code source,
+download needed third part libraries, compile the whole code source, install the executable
+(if desired) and launch it.
 
 ```sh
 git clone https://github.com/Lecrapouille/SimTaDyn.git --depth=1
@@ -191,14 +191,30 @@ This section is for people having an Ubuntu < 17.04 or preferring to test SimTaD
 
 If you have a 32-bits (which is my case, I have to use a computer not owned by me, so I cannot help a lot on docker subject), unfortunately Docker does not support 32-bits architecture and you have to find another way for compling SimTaDyn.
 
+Note: I'm a beginner with Docker so if you find that something I wrote is not good, please tell me.
+
 ##### Step 1: Install docker image:
 
-If you have not a docker installed, you can [follow these steps](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04).
+If you have not a docker installed, you can [follow these steps for Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) or [follow these steps for Debian](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-debian-9).
 
-Then download an official image of Ubuntu 17.04:
+Then download an official image of Ubuntu 18.10:
 ```sh
-docker pull ubuntu:17.04
+docker pull ubuntu:18.10
 ```
+
+If you type:
+```sh
+docker images
+```
+
+You shall see something like this:
+```sh
+REPOSITORY TAG      IMAGE ID        CREATED        SIZE
+ubuntu     18.10    d4452947e3fa    3 weeks ago    73.7MB
+```
+
+`d4452947e3fa` is the unique ID referring to your current image.
+Your value should differ from this document.
 
 ##### Step 2: Clone SimTaDyn:
 
@@ -210,57 +226,106 @@ cd SimTaDyn
 
 ##### Step 3: Launch the docker:
 
-Launch the docker with an interactive bash where the root of the docker will contain the root of the SimTaDyn project:
+From the SimTaDyn directory, launch the following docker command which will
+launch an interactive bash where the root of the docker will contain the SimTaDyn
+project next to Ubuntu system directories:
 
 ```sh
-docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -u $USER` -it ubuntu:17.04 /bin/bash
+docker run --rm -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -u $USER` -it ubuntu:18.10 /bin/bash
 ```
 
 You should see something like:
 ```sh
-root@524a5c276943:/#
+root@8c7c0dd54f88:/#
 ```
 
-Note that you are a root user located at the / directory (root) in your docker. 7471cd1db3fa is the unique ID referring to your current image. Your value shall differ from this example. You can get unique ID of all your images with the following command:
+Note that you are a root user located at the / directory (root) in your docker. `8c7c0dd54f88` is the container id. You have to know that Docker creates a dropable copy of the image (here Ubuntu 18.10), so your current image will be destroyed when leaving the docker (command exit). You can get unique ID of all your images with the following command (to type in a second console) :
 ```sh
 docker ps -a
 ```
 
+You'll see at least two lines (two different container id): 
+* The cloned container currently used.
+* The original container.
+
+If you quit the docker with the `exit` bash command. You will see that the `8c7c0dd54f88` container has been removed.
+
 ##### Step 4: Installing packages:
 
-Now that you are inside the docker, if you type the ls command, you'll see the SimTaDyn directory. Go inside it. Now, still inside the docker, follow:
-- [these steps](#ubuntu) for installing libraries for SimTaDyn. Note that do not have to type the sudo command because you are already the root user.
-- Compile and run SimTaDyn like described in previous sections.
-- [Read this article](https://linuxmeerkat.wordpress.com/2014/10/17/running-a-gui-application-in-a-docker-container/) for getting the graphic display. Here its summary:
-- Install the Xvfb package and configure it:
+Enter back to your docker:
 ```sh
-apt-get install xvfb
-Xvfb :1 -screen 0 1024x768x16 -nolisten tcp &
-export DISPLAY=":1.0"
+docker run --rm -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -u $USER` -it ubuntu:18.10 /bin/bash
 ```
-- do not yet exit the docker but read the next step !
 
-Note: An alternative to Xvfb (not working well in my case)
-```sh
-docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY -e LOCAL_USER_ID=`id -u $USER` -it ubuntu:17.04 /bin/bash
-```
+If you type the `ls` command, you'll see the SimTaDyn directory. Go inside it. Now, still inside the docker, follow:
+- [these steps](#ubuntu) for installing libraries for SimTaDyn. Note that do not have to type the sudo command because you are already the root user.
+- Compile SimTaDyn like described in [short version section](#shortversion).
 
 ##### Step 5: Save your docker image:
 
-You have to know that Docker creates a dropable copy of the image (here Ubuntu 17.04), so your current image will be destroyed when leaving the docker (command exit). If you did that you will have to install all packages that SimTaDyn depends on.
+You have to know that Docker creates a dropable copy of the image, so your current image will be destroyed when leaving the docker (command exit). If you did that you will have to install all packages that SimTaDyn depends on.
 
-To avoid that, save your docker image (around 1 Go).
+To avoid that, save your docker image (around 700 MB). In a second console type
 ```sh
-docker commit 524a5c276943 test/simtadyn:0.2
+docker commit 8c7c0dd54f88 simtadyn/setup:0.1
 ```
 
-Where 524a5c276943 shall be your image unique ID and where test/simtadyn:0.2 is an example of name (give a better name in your case).
+Where 8c7c0dd54f88 shall be your image unique ID and where simtadyn/setup:0.1 is an example of name (give a better name in your case). Check your images have been saved:
 
-##### Step 6: Call your SimTaDyn image:
-
-You can exit your docker image and run up the container but this time with your new image.
 ```sh
-docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -u $USER` -it test/simtadyn:0.2 /bin/bash
+docker images
+```
+
+Will make appear the new image:
+```
+REPOSITORY      TAG      IMAGE ID        CREATED        SIZE
+simtadyn/setup  0.1      cd9d0d272db6    2 minutes ago  732MB
+ubuntu          18.10    d4452947e3fa    3 weeks ago    73.7MB
+```
+
+You can now exit your docker image and run up the container but this time with your new image name instead of the ubuntu name.
+```sh
+docker run --rm -e DISPLAY=$DISPLAY -v "$(pwd):/SimTaDyn" -e LOCAL_USER_ID=`id -u $USER` -it simtadyn/setup:0.1 /bin/bash
+```
+
+##### Step 6: Running the application:
+
+Note: it seems that GTK+/OpenGL is buggy and displays black window. I tried two solutions but no success. This bug looks like bug with GTK+2/OpenGL on MacOS X.
+
+##### 1st solution
+
+Before entering in docker, get the xauth cooky with the following line:
+```sh
+xauth list
+```
+Copy the output (looks like something like `username/unix:0  MIT-MAGIC-COOKIE-1  9c8b471`).
+
+Now enter the docker with:
+```sh
+docker run --rm --net=host -e DISPLAY -v "$(pwd):/SimTaDyn" -v /tmp/.X11-unix -e LOCAL_USER_ID=`id -u $USER` -it simtadyn/setup:0.1 /bin/bash
+```
+
+Install the xauth package and configure it:
+```sh
+apt-get install xauth
+xauth add <YOUR COOKY>
+```
+Where `<YOUR COOKY>` has to be replaced by the cooky you have copied before entering the docker.
+
+You can launch SimTaDyn:
+```sh
+./SimTaDyn/build/SimTaDyn
+```
+
+Save your docker image if this is working for you.
+
+##### 2nd solution
+
+- Install https://github.com/mviereck/x11docker
+- Launch x11docker with:
+
+```sh
+x11docker --sharedir /path/to/SimTaDyn simtadyn/setup:0.1 ./SimTaDyn/build/SimTaDyn
 ```
 
 ## Developers
