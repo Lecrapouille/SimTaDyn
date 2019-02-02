@@ -37,26 +37,26 @@ void PathTests::testEmptyConstructor()
 {
   Path path;
 
-  CPPUNIT_ASSERT(0 == path.m_paths.size());
+  CPPUNIT_ASSERT(0 == path.m_search_paths.size());
   CPPUNIT_ASSERT_EQUAL(':', path.m_delimiter);
-  CPPUNIT_ASSERT_EQUAL(true, path.m_path == "");
+  CPPUNIT_ASSERT_EQUAL(true, path.m_string_path == "");
 }
 
 void PathTests::testSplitConstructor()
 {
   Path path("/a/b:c/d");
 
-  CPPUNIT_ASSERT(2 == path.m_paths.size());
-  CPPUNIT_ASSERT_EQUAL(true, path.toString() == "/a/b:c/d:");
+  CPPUNIT_ASSERT(2 == path.m_search_paths.size());
+  CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:/a/b:c/d:");
   path.clear();
-  CPPUNIT_ASSERT(0 == path.m_paths.size());
+  CPPUNIT_ASSERT(0 == path.m_search_paths.size());
   CPPUNIT_ASSERT_EQUAL(true, path.toString() == "");
   path.add("g/g");
-  CPPUNIT_ASSERT(1 == path.m_paths.size());
-  CPPUNIT_ASSERT_EQUAL(true, path.toString() == "g/g:");
+  CPPUNIT_ASSERT(1 == path.m_search_paths.size());
+  CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:g/g:");
   path.init("a/b");
-  CPPUNIT_ASSERT(1 == path.m_paths.size());
-  CPPUNIT_ASSERT_EQUAL(true, path.toString() == "a/b:");
+  CPPUNIT_ASSERT(1 == path.m_search_paths.size());
+  CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:a/b:");
   std::cout << path.toString() << std::endl;
 }
 
@@ -64,24 +64,24 @@ void PathTests::testSplitDir()
 {
   Path path;
   path.split("/a//b\\d/:e\\d:");
-  CPPUNIT_ASSERT_EQUAL(true, path.toString() == "/a//b\\d:e\\d:");
-  CPPUNIT_ASSERT(2 == path.m_paths.size());
+  CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:/a//b\\d:e\\d:");
+  CPPUNIT_ASSERT(2 == path.m_search_paths.size());
   path.remove("incorrect/path");
-  CPPUNIT_ASSERT(2 == path.m_paths.size());
+  CPPUNIT_ASSERT(2 == path.m_search_paths.size());
   path.remove("/a//b\\d");
-  CPPUNIT_ASSERT(2 == path.m_paths.size()); // FIXME should be1
+  CPPUNIT_ASSERT(2 == path.m_search_paths.size()); // FIXME should be1
   path.remove("/a//b\\d/");
-  CPPUNIT_ASSERT(1 == path.m_paths.size());
-  CPPUNIT_ASSERT_EQUAL(true, path.toString() == "e\\d:");
+  CPPUNIT_ASSERT(1 == path.m_search_paths.size());
+  CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:e\\d:");
   path.remove("e\\d/");
-  CPPUNIT_ASSERT(0 == path.m_paths.size());
+  CPPUNIT_ASSERT(0 == path.m_search_paths.size());
   path.remove("");
-  CPPUNIT_ASSERT(0 == path.m_paths.size());
+  CPPUNIT_ASSERT(0 == path.m_search_paths.size());
   path.remove("incorrect/path");
-  CPPUNIT_ASSERT(0 == path.m_paths.size());
+  CPPUNIT_ASSERT(0 == path.m_search_paths.size());
   path.add("g/g");
-  CPPUNIT_ASSERT(1 == path.m_paths.size());
-  CPPUNIT_ASSERT_EQUAL(true, path.toString() == "g/g:");
+  CPPUNIT_ASSERT(1 == path.m_search_paths.size());
+  CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:g/g:");
 }
 
 void PathTests::testFindAndExpand()
@@ -89,6 +89,7 @@ void PathTests::testFindAndExpand()
   Path path("/bin:/usr/bin:/usr/local/bin");
   CPPUNIT_ASSERT_EQUAL(true, path.expand("ls") != "ls");
   auto res1 = path.find("ls");
+
   CPPUNIT_ASSERT_EQUAL(true, res1.second);
   CPPUNIT_ASSERT_EQUAL(true, res1.first != "ls");
   CPPUNIT_ASSERT_EQUAL(true, res1.first != "");

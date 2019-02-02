@@ -46,20 +46,20 @@ void Path::add(std::string const& path)
 void Path::init(std::string const& path)
 {
   LOGI("Path::clear()");
-  m_paths.clear();
+  m_search_paths.clear();
   split(path);
 }
 
 void Path::clear()
 {
-  m_paths.clear();
-  m_path.clear();
+  m_search_paths.clear();
+  m_string_path.clear();
 }
 
 void Path::remove(std::string const& path)
 {
   LOGI("Path::remove '%s'", path.c_str());
-  m_paths.remove(path);
+  m_search_paths.remove(path);
   update();
 }
 
@@ -68,7 +68,16 @@ std::pair<std::string, bool> Path::find(std::string const& filename) const
   if (File::exist(filename))
     return std::make_pair(filename, true);
 
-  for (auto const& it: m_paths)
+  if (!m_stack_path.empty())
+    {
+      std::string temporary_file;
+      temporary_file = top();
+      temporary_file += filename;
+      if (File::exist(temporary_file))
+        return std::make_pair(temporary_file, true);
+    }
+
+  for (auto const& it: m_search_paths)
     {
       std::string file(it + filename);
       if (File::exist(file))
@@ -81,7 +90,7 @@ std::pair<std::string, bool> Path::find(std::string const& filename) const
 
 std::string Path::expand(std::string const& filename) const
 {
-  for (auto const& it: m_paths)
+  for (auto const& it: m_search_paths)
     {
       std::string file(it + filename);
       if (File::exist(file))
@@ -93,17 +102,24 @@ std::string Path::expand(std::string const& filename) const
 
 std::string const &Path::toString() const
 {
-  return m_path;
+  return m_string_path;
 }
 
 void Path::update()
 {
-  m_path.clear();
-  for (auto const& it: m_paths)
+  m_string_path.clear();
+  m_string_path += ".";
+  m_string_path += m_delimiter;
+  if (!m_stack_path.empty())
     {
-      m_path += it;
-      m_path.pop_back(); // Remove the '/' char
-      m_path += m_delimiter;
+      m_string_path += top();
+      m_string_path += m_delimiter;
+    }
+  for (auto const& it: m_search_paths)
+    {
+      m_string_path += it;
+      m_string_path.pop_back(); // Remove the '/' char
+      m_string_path += m_delimiter;
     }
 }
 
@@ -118,9 +134,9 @@ void Path::split(std::string const& path)
         continue ;
 
       if ((*directory.rbegin() == '\\') || (*directory.rbegin() == '/'))
-        m_paths.push_back(directory);
+        m_search_paths.push_back(directory);
       else
-        m_paths.push_back(directory + "/");
+        m_search_paths.push_back(directory + "/");
     }
   update();
 }

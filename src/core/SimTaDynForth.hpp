@@ -69,26 +69,6 @@ public:
   interpreteCell(ASpreadSheetCell &cell);
   bool parseCell(ASpreadSheetCell &cell);
 
-  // Save temporary pathes of unziped SimTaDynMap files.
-  // Like this PathManager does not have to get them this
-  // avoids conflict with 2 resources with the same name
-  // in two unziped locations.
-  void pushPath(std::string const& path)
-  {
-    m_pathes.push_back(path);
-  }
-  void popPath()
-  {
-    if (!m_pathes.empty())
-      {
-        m_pathes.pop_back();
-      }
-  }
-  std::string const& path()
-  {
-    return m_pathes.back();
-  }
-
   virtual inline uint32_t maxPrimitives() const override
   {
     return SIMFORTH_MAX_PRIMITIVES;
@@ -125,7 +105,6 @@ private:
 private:
 
   SimForthDictionary m_dictionaries;
-  std::vector<std::string> m_pathes;
 
 public:
 

@@ -23,6 +23,7 @@
 
 #  include <list>
 #  include <string>
+#  include <vector>
 
 class Path
 {
@@ -42,7 +43,7 @@ public:
   //! separated by ':'. Example: "/foo/bar:/usr/lib/".
   void add(std::string const& path);
 
-  //! \brief Replace the path. Directories are
+  //! \brief Reset the path state. Directories are
   //! separated by ':'. Example: "/foo/bar:/usr/lib/".
   void init(std::string const& path);
 
@@ -52,7 +53,33 @@ public:
   //! \brief Erase the given directory from the path.
   void remove(std::string const& path);
 
-  //! \brief Find if a file exists in the path.
+  //! \brief Save temporary the path of currently loading SimTaDynMap
+  //! file. The goal of the stack is to avoid to SimForth to have path
+  //! conflict with two loaded SimTaDynMap files.
+  void push(std::string const& path)
+  {
+    m_stack_path.push_back(path);
+  }
+
+  //! \brief once loaded the path is no longer needed.
+  void pop()
+  {
+    if (!m_stack_path.empty())
+      {
+        m_stack_path.pop_back();
+      }
+  }
+
+  //! \brief Get the top of the stack
+  std::string top() const
+  {
+    return m_stack_path.back();
+  }
+
+  //! \brief Find if a file exists in the search path. Note that you
+  //! have to check again the existence of this file when opening it
+  //! (with functions such as iofstream, fopen, open ...). Indeed the
+  //! file may have been suppress since this method have bee called.
   //! \return the full path (if found) and the existence of this path.
   std::pair<std::string, bool> find(std::string const& filename) const;
 
@@ -61,7 +88,7 @@ public:
   std::string expand(std::string const& filename) const;
 
   //! \brief Return the path as string.
-  std::string const &toString() const;
+  std::string const& toString() const;
 
 protected:
 
@@ -69,9 +96,22 @@ protected:
 
   void split(std::string const& path);
 
+protected:
+
+  //! \brief Path separator when several pathes are given as a single
+  //! string.
   const char m_delimiter = ':';
-  std::list<std::string> m_paths;
-  std::string m_path;
+  //! \brief the list of pathes.
+  std::list<std::string> m_search_paths;
+  //! \brief the list of pathes converted as a string. Pathes are
+  //! separated by the m_delimiter char.
+  std::string m_string_path;
+  //! \brief Stack of temporary pathes. A temporary path is pushed
+  //! when loading a SimTaDyn file: this allows to traverse its
+  //! resources (a SimTaDyn file is a zip file containing directories
+  //! and files). A stack is usefull when loading a SimTaDyn file that
+  //! loads another SimTaDyn file.)
+  std::vector<std::string> m_stack_path;
 };
 
 #endif
