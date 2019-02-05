@@ -23,6 +23,7 @@
 
 #  include "ForthEditor.hpp"
 #  include "MapEditor.hpp"
+#  include "About.hpp"
 
 class SimTaDynWindow: public Gtk::Window
 {
@@ -58,7 +59,7 @@ protected:
   Gtk::ImageMenuItem           m_submenu[1];
   Gtk::Image                   m_image[1];
   std::vector<Gtk::ToolButton> m_toolbuttons; // FIXME resize
-  Gtk::AboutDialog             m_about;
+  About                        m_about;
 };
 
 #endif /* SIMTADYNWINDOW_HPP_ */

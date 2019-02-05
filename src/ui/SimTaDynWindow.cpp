@@ -94,26 +94,9 @@ SimTaDynWindow::SimTaDynWindow(ForthEditor& forth_editor,
     //
     add(m_hpaned);
     m_hpaned.set_position(800);
-  }
 
-  // About window
-  m_about.set_program_name(config::project_name);
-  m_about.set_version(std::to_string(config::major_version) + '.' + std::to_string(config::minor_version));
-  m_about.set_copyright("Copyright ©2004, 2017-2019 Quentin Quadrat");
-  m_about.set_comments("A GIS in a spreadsheet");
-  m_about.set_license_type(Gtk::LICENSE_GPL_3_0);
-  m_about.set_wrap_license(false);
-  m_about.set_website("https://github.com/Lecrapouille/SimTaDyn");
-  m_about.set_website_label("Visit " + config::project_name + " github site");
-  m_about.set_authors({"Quentin Quadrat <lecrapouille@gmail.com>"});
-  try
-    {
-      m_about.set_logo(Gdk::Pixbuf::create_from_file(PathManager::instance().expand("icons/SimTaDyn-logo.jpg")));
-    }
-  catch (...)
-    {
-      LOGW("SimTaDyn logo not found");
-    }
+    m_about.set_transient_for(*this);
+  }
 
   show_all_children();
 }
