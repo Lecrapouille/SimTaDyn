@@ -1,3 +1,4 @@
+// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
 // Copyright 2019 Quentin Quadrat <lecrapouille@gmail.com>
@@ -18,8 +19,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYN_GTKMM_HPP
-#  define SIMTADYN_GTKMM_HPP
+#ifndef SIMTADYN_GTKMM_TPP
+#  define SIMTADYN_GTKMM_TPP
 
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -79,5 +80,7 @@ std::vector<W*> getChildren(Gtk::Widget* widget, bool const recursive);
 //------------------------------------------------------------------
 template<class W>
 void splitWidget(W& older, W& newly, Gtk::Orientation const orientation, Pack const side);
+
+#include "Gtkmm.ipp"
 
 #endif

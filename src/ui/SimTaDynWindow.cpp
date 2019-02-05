@@ -20,7 +20,7 @@
 
 #include "SimTaDynWindow.hpp"
 #include "PathManager.hpp"
-#include "Gtkmm.cpp" //FIXME
+#include "Gtkmm.tpp"
 
 // *************************************************************************************************
 // SimTaDyn main window

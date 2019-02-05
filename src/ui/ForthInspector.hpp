@@ -21,7 +21,7 @@
 #ifndef FORTH_INSPECTOR_HPP_
 #  define FORTH_INSPECTOR_HPP_
 
-#  include "Gtkmm.hpp"
+#  include "Gtkmm.tpp"
 #  include "SimTaDynForth.hpp" // FIXME Forth.hpp
 
 // *************************************************************************************************

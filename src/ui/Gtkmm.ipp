@@ -1,3 +1,4 @@
+// -*- c++ -*- Coloration Syntaxique pour Emacs
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
 // Copyright 2019 Quentin Quadrat <lecrapouille@gmail.com>
@@ -18,7 +19,6 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "Gtkmm.hpp"
 #include <cassert>
 
 //------------------------------------------------------------------

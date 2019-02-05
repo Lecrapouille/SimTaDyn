@@ -24,7 +24,7 @@
 #  include "Names.hpp"
 #  include "Logger.hpp"
 #  include <gtksourceviewmm.h>
-#  include "Gtkmm.hpp"
+#  include "Gtkmm.tpp"
 
 class TextDocument;
 class FindWindow;

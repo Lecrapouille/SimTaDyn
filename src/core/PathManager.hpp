@@ -2,6 +2,7 @@
 #define PATHMANAGER_HPP
 
 #  include "Path.hpp"
+#  include "Singleton.tpp"
 
 // **************************************************************
 //! \brief
