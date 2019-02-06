@@ -92,6 +92,9 @@ int main(int argc, char** argv)
   Gsv::init();
 
   LOGI("Init SimTaDyn");
+  MapEditorWindow win;
+  return app->run(win);
+
   SimTaDyn& simtadyn = SimTaDyn::instance();
   simtadyn.init(parser);
 
