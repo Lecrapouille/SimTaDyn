@@ -23,13 +23,30 @@
 #include "Gtkmm.tpp"
 
 //------------------------------------------------------------------
-static void setTitleIcon(Gtk::Window& win, std::string const &icon_name)
+ISimTaDynWindow::ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application)
+  : m_application(application)
+{
+  LOGI("Creating the SimTaDyn");
+  set_default_size(1400, 800);
+  set_position(Gtk::WIN_POS_CENTER);
+  setTitleIcon("icons/SimTaDyn.png");
+  populateHeaderBar();
+}
+
+//------------------------------------------------------------------
+void ISimTaDynWindow::setTitle(const Glib::ustring& title)
+{
+  m_header_bar.set_subtitle(title);
+}
+
+//------------------------------------------------------------------
+void ISimTaDynWindow::setTitleIcon(std::string const &icon_name)
 {
   std::pair<std::string, bool> res = PathManager::instance().find(icon_name);
 
   if (res.second)
     {
-      win.set_icon_from_file(res.first);
+      set_icon_from_file(res.first);
     }
   else
     {
@@ -37,15 +54,7 @@ static void setTitleIcon(Gtk::Window& win, std::string const &icon_name)
     }
 }
 
-ISimTaDynWindow::ISimTaDynWindow()
-{
-  LOGI("Creating the SimTaDyn");
-  set_default_size(1400, 800);
-  set_position(Gtk::WIN_POS_CENTER);
-  setTitleIcon(*this, "icons/SimTaDyn.png");
-  populateHeaderBar();
-}
-
+//------------------------------------------------------------------
 void ISimTaDynWindow::populateHeaderBar()
 {
   m_header_bar.set_show_close_button(true);
@@ -62,13 +71,13 @@ void ISimTaDynWindow::populateHeaderBar()
   m_saveas_file_button.set_image_from_icon_name("document-save-as-symbolic", Gtk::ICON_SIZE_BUTTON, true);
   m_menu_button.set_image_from_icon_name("open-menu-symbolic", Gtk::ICON_SIZE_BUTTON, true);
 
+  m_header_bar.pack_start(m_menu_button);
   m_header_bar.pack_start(m_open_file_button);
   m_header_bar.pack_start(m_recent_files_button);
   m_header_bar.pack_start(m_horizontal_split_button);
   m_header_bar.pack_start(m_vertical_split_button);
   m_header_bar.pack_start(m_undo_button);
   m_header_bar.pack_start(m_redo_button);
-  m_header_bar.pack_end(m_menu_button);
   m_header_bar.pack_end(m_saveas_file_button);
   m_header_bar.pack_end(m_save_file_button);
 
@@ -83,127 +92,7 @@ void ISimTaDynWindow::populateHeaderBar()
 }
 
 
-MapEditorWindow::MapEditorWindow()
-  : ISimTaDynWindow(),
-    m_action_type(m_toolbar),
-    m_action_on(m_toolbar)
-{
-  populatePopovMenu();
-  populateToolBar();
 
-  m_toolbar.set_property("orientation", Gtk::ORIENTATION_VERTICAL);
-  m_toolbar.set_property("toolbar-style", Gtk::TOOLBAR_ICONS);
-  m_hbox.pack_start(m_vbox);
-  m_hbox.pack_start(m_toolbar, Gtk::PACK_SHRINK);
-
-  //
-  Gtk::Box* box = Gtk::make_managed<Gtk::Box>();
-  m_drawing_area = createView();
-  box->pack_start(*m_drawing_area);
-  m_vbox.pack_start(*box); // FIXME: really ?
-
-  add(m_hbox);
-  show_all();
-}
-
-void MapEditorWindow::populateToolBar()
-{
-  // Cells
-  m_action_on.append(ActionOn::Node, "Switch to Node mode", Gtk::Stock::YES,
-                     sigc::mem_fun(*this, &MapEditorWindow::onActionOnSelected));
-  m_action_on.append(ActionOn::Arc, "Switch to Arc mode", Gtk::Stock::NO,
-                     sigc::mem_fun(*this, &MapEditorWindow::onActionOnSelected));
-  m_action_on.append(ActionOn::Zone, "Switch to Zone mode", Gtk::Stock::HOME,
-                     sigc::mem_fun(*this, &MapEditorWindow::onActionOnSelected));
-  m_action_on.append(m_toolbar_separator[0]);
-}
-
-void MapEditorWindow::populatePopovMenu()
-{
-  Glib::RefPtr<Gio::Menu> menu = Gio::Menu::create();
-  Glib::RefPtr<Gio::Menu> submenu = Gio::Menu::create();
-  submenu->append("Save As...", "app.saveAs");
-  menu->append_submenu("View", submenu);
-
-  m_menu_button.set_popover(m_menu_popov);
-  m_menu_button.set_menu_model(menu);
-  m_menu_popov.set_size_request(-1, -1);
-}
-
-// FIXME: current Presenter
-GLDrawingArea& MapEditorWindow::currentView()
-{
-  return *m_drawing_area;
-}
-
-// FIXME: non complet
-GLDrawingArea* MapEditorWindow::createView()
-{
-  return Gtk::make_managed<GLDrawingArea>();
-}
-
-// FIXME: a placer dans ISimTaDynWindow
-void MapEditorWindow::splitView(Gtk::Orientation const orientation)
-{
-  GLDrawingArea* view = createView();
-  findParent<Gtk::Window>(view);
-  splitWidget(currentView(), *view, orientation, Pack::First);
-}
-
-void MapEditorWindow::onOpenFileClicked()
-{
-}
-
-void MapEditorWindow::onRecentFilesClicked()
-{
-}
-
-void MapEditorWindow::onHorizontalSplitClicked()
-{
-  splitView(Gtk::Orientation::ORIENTATION_HORIZONTAL);
-}
-
-void MapEditorWindow::onVerticalSplitClicked()
-{
-  splitView(Gtk::Orientation::ORIENTATION_VERTICAL);
-}
-
-void MapEditorWindow::onUndoClicked()
-{
-}
-
-void MapEditorWindow::onRedoClicked()
-{
-}
-
-void MapEditorWindow::onSaveFileClicked()
-{
-}
-
-void MapEditorWindow::onSaveAsFileClicked()
-{
-}
-
-void MapEditorWindow::onActionOnSelected(const ActionOn id)
-{
-}
-
-void MapEditorWindow::onActionTypeSelected(const ActionType id)
-{
-  //LOGI("ActionTypeSelected %u", id);
-
-  // http://transit.iut2.upmf-grenoble.fr/doc/gtkmm-3.0/reference/html/group__gdkmmEnums.html
-  // Change the mouse cursor
-  static Gdk::CursorType cursors[] =
-    {
-      [ActionType::Add] = Gdk::PLUS,
-      [ActionType::Remove] = Gdk::PIRATE,
-      [ActionType::Select] = Gdk::HAND1,
-      [ActionType::Move] = Gdk::HAND2,
-    };
-
-  get_window()->set_cursor(Gdk::Cursor::create(cursors[id]));
-}
 
 // *************************************************************************************************
 // SimTaDyn main window
@@ -221,7 +110,7 @@ SimTaDynWindow::SimTaDynWindow(ForthEditor& forth_editor,
     set_title(config::project_name);
     set_default_size(1400, 800);
     set_position(Gtk::WIN_POS_CENTER);
-    setTitleIcon(*this, "icons/SimTaDyn.png");
+    //setTitleIcon("icons/SimTaDyn.png");
 
     // Connect signals
     add_events(Gdk::KEY_RELEASE_MASK);

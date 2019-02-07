@@ -20,6 +20,8 @@
 
 #include "SimTaDyn.hpp"
 #include "Config.hpp"
+#include "MapEditorWindow.hpp"
+#include "ForthEditorWindow.hpp"
 
 // FIXME: this is a temporary example
 void SimTaDyn::init(cli::Parser& parser)
@@ -88,11 +90,13 @@ int main(int argc, char** argv)
   parser.run_and_exit_if_error();
 
   LOGI("Init GTK");
-  auto app = Gtk::Application::create();
+  Glib::RefPtr<Gtk::Application> app = Gtk::Application::create();
   Gsv::init();
 
   LOGI("Init SimTaDyn");
-  MapEditorWindow win;
+  MapEditorWindow win(app);
+  MapEditorWindow win2(app);
+  app->add_window(win2);
   return app->run(win);
 
   SimTaDyn& simtadyn = SimTaDyn::instance();

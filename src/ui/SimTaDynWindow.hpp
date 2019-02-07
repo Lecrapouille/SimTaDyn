@@ -26,17 +26,19 @@
 #  include "About.hpp"
 #  include "ToggleButtons.hpp"
 
-class ISimTaDynWindow: public Gtk::Window
+class ISimTaDynWindow: public Gtk::ApplicationWindow
 {
 public:
 
-  ISimTaDynWindow();
+  ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application);
+  void setTitle(const Glib::ustring& title);
 
 private:
 
   // Ajouter ici splitView mettre les methodes virtuels dans la class derivee
 
   void populateHeaderBar();
+  void setTitleIcon(std::string const &icon_name);
   virtual void onOpenFileClicked() = 0;
   virtual void onRecentFilesClicked() = 0;
   virtual void onHorizontalSplitClicked() = 0;
@@ -49,6 +51,7 @@ private:
 protected:
 
   Gtk::MenuButton m_menu_button;
+  Glib::RefPtr<Gtk::Application> m_application;
 
 private:
 
@@ -63,51 +66,6 @@ private:
   Gtk::Button    m_saveas_file_button;
 };
 
-class MapEditorWindow: public ISimTaDynWindow
-{
-  //! \brief Add, remove a mode (node, arc, zone).
-  enum ActionType { Add, Remove, Select, Move, MaxActionType_ };
-
-  //! \brief On what kind of cells action is performed.
-  enum ActionOn { Node, Arc, Zone, MaxActionOn_ };
-
-public:
-
-  MapEditorWindow();
-
-private:
-
-  void populatePopovMenu();
-  void populateToolBar();
-  void splitView(Gtk::Orientation const orientation);
-  GLDrawingArea* createView();
-  GLDrawingArea& currentView();
-  virtual void onOpenFileClicked() override;
-  virtual void onRecentFilesClicked() override;
-  virtual void onHorizontalSplitClicked() override;
-  virtual void onVerticalSplitClicked() override;
-  virtual void onUndoClicked() override;
-  virtual void onRedoClicked() override;
-  virtual void onSaveFileClicked() override;
-  virtual void onSaveAsFileClicked() override;
-  void onActionOnSelected(const ActionOn id);
-  void onActionTypeSelected(const ActionType id);
-
-private:
-
-  Gtk::Popover              m_menu_popov;
-  Gtk::VBox                 m_vbox;
-  Gtk::HBox                 m_hbox;
-  GLDrawingArea*            m_drawing_area;
-  Gtk::Toolbar              m_toolbar;
-  ToggleButtons<ActionType> m_action_type;
-  ToggleButtons<ActionOn>   m_action_on;
-  Gtk::SeparatorToolItem    m_toolbar_separator[2];
-};
-
-class ForthEditorWindow: public ISimTaDynWindow
-{
-};
 
 
 
