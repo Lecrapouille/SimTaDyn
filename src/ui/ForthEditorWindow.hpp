@@ -28,7 +28,41 @@ class ForthEditorWindow: public ISimTaDynWindow
 public:
 
   ForthEditorWindow(Glib::RefPtr<Gtk::Application> application);
+  Gtk::ToolButton& addForthButton(const Gtk::BuiltinStockID icon,
+                                  const std::string &script,
+                                  const std::string &help);
 
+private:
+
+  void populatePopovMenu();
+  void populateToolBar();
+  //void splitView(Gtk::Orientation const orientation);
+  //GLDrawingArea* createView();
+  //GLDrawingArea& currentView();
+
+  virtual void onOpenFileClicked() override;
+  virtual void onRecentFilesClicked() override;
+  virtual void onHorizontalSplitClicked() override;
+  virtual void onVerticalSplitClicked() override;
+  virtual void onUndoClicked() override;
+  virtual void onRedoClicked() override;
+  virtual void onSaveFileClicked() override;
+  virtual void onSaveAsFileClicked() override;
+
+  void execForthScript();
+  void onForthButtonClicked(Gtk::ToolButton* button);
+
+private:
+
+  Gtk::HBox              m_hbox;
+  Gtk::VBox              m_vbox;
+  Gtk::Notebook          m_notebooks[2];
+  Gtk::Toolbar           m_toolbars[2];
+  Gtk::Statusbar         m_statusbar;
+  Gtk::SeparatorToolItem m_separator[2];
+  //Gtk::TextView          m_results;
+  //Gtk::TextView          m_history;
+  //Gtk::TextView          m_messages;
 };
 
 

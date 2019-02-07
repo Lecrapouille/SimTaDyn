@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 
   LOGI("Init SimTaDyn");
   MapEditorWindow win(app);
-  MapEditorWindow win2(app);
+  ForthEditorWindow win2(app);
   app->add_window(win2);
   return app->run(win);
 
