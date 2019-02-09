@@ -210,6 +210,13 @@ void MapEditorWindow::onSaveAsFileClicked()
 void MapEditorWindow::onActionOnSelected(const ActionOn id)
 {
 }
+//------------------------------------------------------------------
+bool MapEditorWindow::onExit(GdkEventAny* /*event*/)
+{
+  //bool res = closeAll();
+  //return !res;
+  return false;
+}
 
 //------------------------------------------------------------------
 void MapEditorWindow::onActionTypeSelected(const ActionType id)

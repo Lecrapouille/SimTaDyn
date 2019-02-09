@@ -97,6 +97,9 @@ void ForthEditorWindow::populatePopovMenu()
   m_submenu_forth_plugins = Gio::Menu::create();
   menu->append_submenu("Forth Plugins", m_submenu_forth_plugins);
 
+  menu->append("About", "win.about");
+  add_action("about", sigc::mem_fun(m_about, &About::show));
+
   addForthActionMenu("a", "jjhj", "broken", "help");
 
   m_menu_button.set_popover(m_menu_popov);
@@ -150,6 +153,13 @@ void ForthEditorWindow::onSaveAsFileClicked()
 }
 
 //------------------------------------------------------------------
+bool ForthEditorWindow::onExit(GdkEventAny* /*event*/)
+{
+  bool res = m_forth_editor.closeAll();
+  return !res;
+}
+
+//------------------------------------------------------------------
 void ForthEditorWindow::onForthActionMenuClicked(std::string const& script_code,
                                                  std::string const& script_name)
 {
@@ -161,5 +171,4 @@ void ForthEditorWindow::onForthActionMenuClicked(std::string const& script_code,
       doc->clear();
       doc->appendText(script_code);
     }
-
 }

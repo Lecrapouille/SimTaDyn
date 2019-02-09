@@ -23,6 +23,7 @@
 
 #  include "SimTaDynWindow.hpp"
 #  include "ForthEditor.hpp"
+#  include "About.hpp"
 
 class ForthEditorWindow : public ISimTaDynWindow
 {
@@ -53,6 +54,7 @@ private:
   virtual void onRedoClicked() override;
   virtual void onSaveFileClicked() override;
   virtual void onSaveAsFileClicked() override;
+  virtual bool onExit(GdkEventAny* event) override;
   void onForthActionMenuClicked(std::string const& script_code,
                                 std::string const& script_name);
 
@@ -61,6 +63,7 @@ private:
   ForthEditor  m_forth_editor;
   Gtk::Popover m_menu_popov;
   Glib::RefPtr<Gio::Menu> m_submenu_forth_plugins;
+  /* FIXME static */ About   m_about;
 };
 
 

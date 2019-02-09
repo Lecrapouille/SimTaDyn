@@ -31,6 +31,8 @@ ISimTaDynWindow::ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application)
   set_position(Gtk::WIN_POS_CENTER);
   setTitleIcon("icons/SimTaDyn.png");
   populateHeaderBar();
+
+  signal_delete_event().connect(sigc::mem_fun(this, &ISimTaDynWindow::onExit));
 }
 
 //------------------------------------------------------------------

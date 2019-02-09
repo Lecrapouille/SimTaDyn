@@ -47,6 +47,7 @@ private:
   virtual void onRedoClicked() = 0;
   virtual void onSaveFileClicked() = 0;
   virtual void onSaveAsFileClicked() = 0;
+  virtual bool onExit(GdkEventAny* event) = 0;
 
 protected:
 

@@ -51,6 +51,7 @@ private:
   virtual void onRedoClicked() override;
   virtual void onSaveFileClicked() override;
   virtual void onSaveAsFileClicked() override;
+  virtual bool onExit(GdkEventAny* event) override;
 
   void onActionOnSelected(const ActionOn id);
   void onActionTypeSelected(const ActionType id);
