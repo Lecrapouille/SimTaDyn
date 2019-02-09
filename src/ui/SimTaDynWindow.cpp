@@ -104,7 +104,7 @@ SimTaDynWindow::SimTaDynWindow(ForthEditor& forth_editor,
     m_map_editor(map_editor)
 {
 
-
+#if 0
   // Main window
   {
     set_title(config::project_name);
@@ -133,7 +133,7 @@ SimTaDynWindow::SimTaDynWindow(ForthEditor& forth_editor,
     m_menubar.append(m_forth_editor.m_menuitem[simtadyn::ForthMenu]);
     m_menubar.append(m_forth_editor.m_menuitem[simtadyn::TextMenu]);
     m_menubar.append(m_forth_editor.m_menuitem[simtadyn::PlugginsMenu]);
-    m_forth_editor.addPluggin("text-x-generic-template", "41 1 + . CR", "test");
+    //m_forth_editor.addPluggin("text-x-generic-template", "41 1 + . CR", "test");
 
     // Menu '_Help'
     // TODO: submenus Tuto, Help, Example
@@ -169,7 +169,7 @@ SimTaDynWindow::SimTaDynWindow(ForthEditor& forth_editor,
 
     m_about.set_transient_for(*this);
   }
-
+#endif
   show_all_children();
 }
 
@@ -230,7 +230,7 @@ void SimTaDynWindow::onKeyPressed(GdkEventKey* evenement)
     default:
       break;
     }
-  m_forth_editor.autoCompleteWord(evenement->keyval);
+  m_forth_editor.completeForthName(GDK_KEY_Tab == evenement->keyval);
 }
 
 // *************************************************************************************************

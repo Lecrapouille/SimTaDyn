@@ -198,9 +198,6 @@ public:
   void cursorAt(const uint32_t line, const uint32_t index);
   bool close();
 
-  virtual void autoCompleteWord(__attribute__((unused)) int keyval)
-  {
-  }
   inline Glib::RefPtr<Gsv::Buffer> buffer()
   {
     return m_buffer;
@@ -256,7 +253,7 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class TextEditor
+class TextEditor : public Gtk::Notebook
 {
   friend class CloseLabel;
 
@@ -281,7 +278,6 @@ public:
   TextDocument *addTab();
   TextDocument *tab(std::string const& title);
 
-  Gtk::Notebook m_notebook;
   FindWindow m_findwindow;
   ReplaceWindow m_replacewindow;
   GotoLineWindow m_gotolinewindow;

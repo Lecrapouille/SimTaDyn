@@ -22,15 +22,20 @@
 #  define FORTHEDITORWINDOW_HPP
 
 #  include "SimTaDynWindow.hpp"
+#  include "ForthEditor.hpp"
 
-class ForthEditorWindow: public ISimTaDynWindow
+class ForthEditorWindow : public ISimTaDynWindow
 {
 public:
 
-  ForthEditorWindow(Glib::RefPtr<Gtk::Application> application);
-  Gtk::ToolButton& addForthButton(const Gtk::BuiltinStockID icon,
-                                  const std::string &script,
-                                  const std::string &help);
+  ForthEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application);
+  Gtk::ToolButton& addForthButton(Gtk::BuiltinStockID const icon,
+                                  std::string const& script,
+                                  std::string const& help);
+  void addForthActionMenu(Glib::ustring const& icon_name,
+                          std::string const& script_name,
+                          std::string const& script_code,
+                          std::string const& help);
 
 private:
 
@@ -48,21 +53,14 @@ private:
   virtual void onRedoClicked() override;
   virtual void onSaveFileClicked() override;
   virtual void onSaveAsFileClicked() override;
-
-  void execForthScript();
-  void onForthButtonClicked(Gtk::ToolButton* button);
+  void onForthActionMenuClicked(std::string const& script_code,
+                                std::string const& script_name);
 
 private:
 
-  Gtk::HBox              m_hbox;
-  Gtk::VBox              m_vbox;
-  Gtk::Notebook          m_notebooks[2];
-  Gtk::Toolbar           m_toolbars[2];
-  Gtk::Statusbar         m_statusbar;
-  Gtk::SeparatorToolItem m_separator[2];
-  //Gtk::TextView          m_results;
-  //Gtk::TextView          m_history;
-  //Gtk::TextView          m_messages;
+  ForthEditor  m_forth_editor;
+  Gtk::Popover m_menu_popov;
+  Glib::RefPtr<Gio::Menu> m_submenu_forth_plugins;
 };
 
 

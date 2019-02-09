@@ -20,28 +20,15 @@
 
 #include "ForthEditorWindow.hpp"
 
-// FIXME: temporary
-#define FORTH_NOTEBOOK_CODE 0
-#define FORTH_NOTEBOOK_RES 1
-#define FORTH_TOOLBAR_PLUGINS 0
-#define FORTH_TOOLBAR_CMDS 1
-
-ForthEditorWindow::ForthEditorWindow(Glib::RefPtr<Gtk::Application> application)
-  : ISimTaDynWindow(application)
+ForthEditorWindow::ForthEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application)
+  : ISimTaDynWindow(application),
+    m_forth_editor(forth)
 {
   populatePopovMenu();
   populateToolBar();
 
-  m_statusbar.push("Welcome to SimTaDyn !");
-
-  add(m_hbox);
-  m_hbox.pack_start(m_toolbars[FORTH_TOOLBAR_PLUGINS], Gtk::PACK_SHRINK);
-  m_hbox.pack_start(m_vbox);
-  m_vbox.pack_start(m_notebooks[FORTH_NOTEBOOK_CODE], Gtk::PACK_EXPAND_WIDGET);
-  m_vbox.pack_start(m_toolbars[FORTH_TOOLBAR_CMDS], Gtk::PACK_SHRINK);
-  m_vbox.pack_start(m_statusbar, Gtk::PACK_SHRINK);
-  m_vbox.pack_start(m_notebooks[FORTH_NOTEBOOK_RES], Gtk::PACK_EXPAND_WIDGET);
-
+  m_forth_editor.statusBarSays("Welcome to SimTaDyn !");
+  add(m_forth_editor.widget());
   show_all();
 }
 
@@ -49,6 +36,8 @@ ForthEditorWindow::ForthEditorWindow(Glib::RefPtr<Gtk::Application> application)
 // Forth toolbar (horizontal)
 void ForthEditorWindow::populateToolBar()
 {
+  //FIXME
+#if 0
   // Horizontal toolbar: Forth commands
   {
     Gtk::Toolbar& toolbar = m_toolbars[FORTH_TOOLBAR_CMDS];
@@ -77,54 +66,48 @@ void ForthEditorWindow::populateToolBar()
       addForthButton(Gtk::Stock::EXECUTE, "42 42 + .", "Plugin example");
     }
   }
-}
-
-// **************************************************************
-// FIXME const Cell16 ForthToken)
-// **************************************************************
-// FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
-// FIXME: ajouter le postip avec la definiton du mot "WORD ( n1 n2 -- n3 n4 )"
-// FIXME ne pas autoriser a compiler
-// **************************************************************
-
-Gtk::ToolButton& ForthEditorWindow::addForthButton(const Gtk::BuiltinStockID icon,
-                                                   const std::string &script,
-                                                   const std::string &help)
-{
-  Gtk::ToolButton *button = Gtk::make_managed<Gtk::ToolButton>();
-
-  if (nullptr != button)
-    {
-      Gtk::Toolbar& toolbar = m_toolbars[FORTH_TOOLBAR_PLUGINS];
-
-      button->set_label(script);
-      button->set_stock_id(icon);
-      button->set_tooltip_text(help);
-      toolbar.append(*button, sigc::bind<Gtk::ToolButton*>
-        (sigc::mem_fun(*this, &ForthEditorWindow::onForthButtonClicked), button));
-      toolbar.show_all_children();
-    }
-  else
-    {
-      //FIXME Gtk::MessageDialog dialog(*this, "Failed creating a Forth button");
-      //dialog.run();
-    }
-  return *button;
+#endif
 }
 
 //------------------------------------------------------------------
-void ForthEditorWindow::onForthButtonClicked(Gtk::ToolButton* button)
+void ForthEditorWindow::addForthActionMenu(Glib::ustring const& /*icon_name*/,
+                                           std::string const& script_name,
+                                           std::string const& script_code,
+                                           std::string const& /*help*/)
 {
+  //FIXME: how to insert help as tooltip ?
+  m_submenu_forth_plugins->append(script_name, "win.script-" + script_name);
+  add_action("script-" + script_name, sigc::bind<std::string const&, std::string const&>
+             (sigc::mem_fun(*this, &ForthEditorWindow::onForthActionMenuClicked),
+              script_code, script_name));
+}
+
+//------------------------------------------------------------------
+Gtk::ToolButton& ForthEditorWindow::addForthButton(Gtk::BuiltinStockID const icon,
+                                                   std::string const& script,
+                                                   std::string const& help)
+{
+  return m_forth_editor.addForthButton(icon, script, help);
 }
 
 //------------------------------------------------------------------
 void ForthEditorWindow::populatePopovMenu()
 {
+  Glib::RefPtr<Gio::Menu> menu = m_forth_editor.populatePopovMenu(*this);
+  m_submenu_forth_plugins = Gio::Menu::create();
+  menu->append_submenu("Forth Plugins", m_submenu_forth_plugins);
+
+  addForthActionMenu("a", "jjhj", "broken", "help");
+
+  m_menu_button.set_popover(m_menu_popov);
+  m_menu_button.set_menu_model(menu);
+  m_menu_popov.set_size_request(-1, -1);
 }
 
 //------------------------------------------------------------------
 void ForthEditorWindow::onOpenFileClicked()
 {
+  m_forth_editor.open();
 }
 
 //------------------------------------------------------------------
@@ -157,14 +140,26 @@ void ForthEditorWindow::onRedoClicked()
 //------------------------------------------------------------------
 void ForthEditorWindow::onSaveFileClicked()
 {
+  m_forth_editor.save();
 }
 
 //------------------------------------------------------------------
 void ForthEditorWindow::onSaveAsFileClicked()
 {
+  m_forth_editor.saveAs();
 }
 
 //------------------------------------------------------------------
-void ForthEditorWindow::execForthScript()
+void ForthEditorWindow::onForthActionMenuClicked(std::string const& script_code,
+                                                 std::string const& script_name)
 {
+  if (m_forth_editor.interpreteScript(script_code, script_name))
+    {
+      // In case of failure open the code source
+      // FIXME: quand on sauvegarde ne pas stocker dans un fichier mais dans le menu
+      TextDocument *doc = m_forth_editor.addTab(script_name);
+      doc->clear();
+      doc->appendText(script_code);
+    }
+
 }

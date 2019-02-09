@@ -94,8 +94,9 @@ int main(int argc, char** argv)
   Gsv::init();
 
   LOGI("Init SimTaDyn");
+SimForth forth;
   MapEditorWindow win(app);
-  ForthEditorWindow win2(app);
+  ForthEditorWindow win2(forth, app);
   app->add_window(win2);
   return app->run(win);
 
