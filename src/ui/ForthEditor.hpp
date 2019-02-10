@@ -69,6 +69,10 @@ private:
 class ForthEditor
   : public TextEditor
 {
+  //! \brief Notebook tab names for the Forth editor (text editor):
+  //! results of Forth script, history of old forth commands, Forth dictionary, Simtadyn errors.
+  enum ForthTabNames { ForthResTab, ForthHistoryTab, ForthDicoTab, ForthStackTab, ForthMsgTab, Max_ };
+
 public:
 
   ForthEditor(SimForth& forth);
@@ -117,7 +121,7 @@ private:
   Gtk::TextView          m_results;
   Gtk::TextView          m_history;
   Gtk::TextView          m_messages;
-  Gtk::ScrolledWindow    m_scrolled[simtadyn::ForthTabNames::Max_];
+  Gtk::ScrolledWindow    m_scrolled[ForthTabNames::Max_];
   ForthDicoInspector     m_dico_inspector;
   ForthStackInspector    m_stack_inspector;
   std::chrono::nanoseconds m_elapsed_time;

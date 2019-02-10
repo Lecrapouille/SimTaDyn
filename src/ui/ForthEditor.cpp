@@ -221,11 +221,11 @@ ForthEditor::ForthEditor(SimForth& forth)
   m_vbox.pack_start(m_statusbar, Gtk::PACK_SHRINK);
   m_vbox.pack_start(m_notebook, Gtk::PACK_EXPAND_WIDGET);
 
-  addNoteBookPage(simtadyn::ForthResTab, m_results, "_Result");
-  addNoteBookPage(simtadyn::ForthHistoryTab, m_history, "H_istory");
-  addNoteBookPage(simtadyn::ForthMsgTab, m_messages, "_Messages");
-  addNoteBookPage(simtadyn::ForthDicoTab, m_dico_inspector.widget(), "_Dico");
-  addNoteBookPage(simtadyn::ForthStackTab, m_stack_inspector.widget(), "Data _Stack");
+  addNoteBookPage(ForthResTab, m_results, "_Result");
+  addNoteBookPage(ForthHistoryTab, m_history, "H_istory");
+  addNoteBookPage(ForthMsgTab, m_messages, "_Messages");
+  addNoteBookPage(ForthDicoTab, m_dico_inspector.widget(), "_Dico");
+  addNoteBookPage(ForthStackTab, m_stack_inspector.widget(), "Data _Stack");
 
   populateToolBars();
 }

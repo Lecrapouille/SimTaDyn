@@ -22,6 +22,7 @@
 #  define SIMTADYN_CONTEXT_HPP_
 
 #  include "Path.hpp"
+#  include "SimTaDynForth.hpp"
 #  include "SimTaDynWindow.hpp"
 #  include "CmdParser/cmdparser.hpp"
 
@@ -39,9 +40,6 @@ private:
   //! \brief Private because of Singleton.
   //------------------------------------------------------------------
   SimTaDyn()
-    : m_forth_editor(m_forth),
-      m_map_editor(m_forth),
-      m_window(m_forth_editor, m_map_editor)
   {}
 
   //------------------------------------------------------------------
@@ -59,40 +57,38 @@ public:
   //------------------------------------------------------------------
   void init(cli::Parser& parser);
 
-  //------------------------------------------------------------------
-  //! \brief Return the reference of the main UI window.
-  //------------------------------------------------------------------
-  inline SimTaDynWindow& mainWindow()
-  {
-    return m_window;
-  }
-
   inline SimForth& forth()
   {
     return m_forth;
   }
 
-  inline MapEditor& mapEditor()
-  {
-    return m_map_editor;
-  }
+  //------------------------------------------------------------------
+  //! \brief Return the reference of the main UI window.
+  //------------------------------------------------------------------
+  //inline MapEditor& mapEditor()
+  //{
+  //  return m_map_editor;
+  //}
 
-  inline ForthEditor& forthEditor()
-  {
-    return m_forth_editor;
-  }
+  //------------------------------------------------------------------
+  //! \brief Return the reference of the main UI window.
+  //------------------------------------------------------------------
+  //inline ForthEditor& forthEditor()
+  //{
+  //  return m_forth_editor;
+  //}
 
-  inline GLDrawingArea& drawingArea()
-  {
-    return m_map_editor.currentView();
-  }
+  //inline GLDrawingArea& drawingArea()
+  //{
+  //  return m_map_editor.currentView();
+  //}
 
 private:
 
   SimForth            m_forth;
-  ForthEditor         m_forth_editor;
-  MapEditor           m_map_editor;
-  SimTaDynWindow      m_window;
+  //ForthEditor         m_forth_editor;
+  //MapEditor           m_map_editor;
+  //SimTaDynWindow      m_window;
 };
 
 #endif /* SIMTADYN_CONTEXT_HPP_ */

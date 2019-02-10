@@ -18,12 +18,11 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FORTHEDITORWINDOW_HPP
-#  define FORTHEDITORWINDOW_HPP
+#ifndef FORTH_EDITOR_WINDOW_HPP
+#  define FORTH_EDITOR_WINDOW_HPP
 
 #  include "SimTaDynWindow.hpp"
 #  include "ForthEditor.hpp"
-#  include "About.hpp"
 
 class ForthEditorWindow : public ISimTaDynWindow
 {
@@ -67,4 +66,4 @@ private:
 };
 
 
-#endif
+#endif // FORTH_EDITOR_WINDOW_HPP

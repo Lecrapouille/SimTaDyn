@@ -21,7 +21,7 @@
 #ifndef TEXTEDITOR_HPP_
 #  define TEXTEDITOR_HPP_
 
-#  include "Names.hpp"
+//#  include "Names.hpp"
 #  include "Logger.hpp"
 #  include <gtksourceviewmm.h>
 #  include "Gtkmm.tpp"
@@ -282,11 +282,14 @@ public:
   ReplaceWindow m_replacewindow;
   GotoLineWindow m_gotolinewindow;
 
+#if 0
+  // TODO A remplacer par populatePopoverMenu()
   Gtk::MenuItem          m_menuitem[simtadyn::MaxForthMenuNames + 1];
   Gtk::Menu              m_menu[simtadyn::MaxForthMenuNames + 1];
   Gtk::ImageMenuItem     m_submenu[16];
   Gtk::Image             m_image[16];
   Gtk::SeparatorMenuItem m_menuseparator[4];
+#endif
 
 protected:
 

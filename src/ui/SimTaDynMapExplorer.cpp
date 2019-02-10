@@ -19,7 +19,8 @@
 //=====================================================================
 
 #include "SimTaDynMapExplorer.hpp"
-#include "MapEditor.hpp"
+#include "PathManager.hpp"
+//#include "MapEditor.hpp"
 
 //-----------------------------------------------------------------
 SceneNodeEditor::SceneNodeEditor()
@@ -313,7 +314,7 @@ SimTaDynMapExplorer::SimTaDynMapExplorer()
 
   // Create the popup menu appearing when right click button on the treeview
   m_menuitem[0].set_label("Delete Sheet");
-  m_menuitem[0].signal_activate().connect([this](){ /* TODO Select sheet + delete it: MapEditor::instance.removeSheet(row[m_columns.sheet]) */ });
+  m_menuitem[0].signal_activate().connect([this](){ /* TODO Select sheet + delete it: removeSheet(row[m_columns.sheet]) */ });
   m_popup_menu.append(m_menuitem[0]);
   m_menuitem[1].set_label("Add child Sheet");
   m_menuitem[1].signal_activate().connect([this](){ /* TODO Select sheet + add SG child */ });
@@ -328,6 +329,9 @@ SimTaDynMapExplorer::SimTaDynMapExplorer()
      sigc::mem_fun(*this, &SimTaDynMapExplorer::on_param_tree_view_query_tooltip));
   m_tree_view.signal_button_press_event().connect(
      sigc::mem_fun(*this, &SimTaDynMapExplorer::on_mytreeview_button_press_event));
+
+  // TODO:
+  //  ResourceMapManager.signal_created(sigc::mem_fun(*this, &SimTaDynMapExplorer::addMap));
 }
 
 //-----------------------------------------------------------------

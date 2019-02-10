@@ -21,6 +21,7 @@
 #ifndef DRAWINGAREA_HPP_
 #  define DRAWINGAREA_HPP_
 
+#  include "DialogException.hpp"
 #  include "Renderer.hpp"
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -36,6 +37,7 @@
 class GLDrawingArea
   : public Gtk::GLArea,
     public GLRenderer,
+    public PopupException,
     private UniqueID<GLDrawingArea>
 {
 public:
@@ -89,26 +91,15 @@ public:
   //------------------------------------------------------------------
   bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */);
 
-  //------------------------------------------------------------------
-  //! \brief Asynchronous callback when a keyboard key has been
-  //! pressed. We memorize the pressed key. A GTK+ timer will trig
-  //! onRefreshKeyboard() which will actions associated to all pressed
-  //! keys thanks to .
-  //------------------------------------------------------------------
-  inline void keyPressed(Direction d)
-  {
-    m_direction[d] = true;
-  }
-
-  //------------------------------------------------------------------
-  //! \brief Asynchronous callback when a keyboard key has been released.
-  //------------------------------------------------------------------
-  inline void keyReleased(Direction d)
-  {
-    m_direction[d] = false;
-  }
-
 private:
+
+  //------------------------------------------------------------------
+  //! \brief Return the Gtk window containing this widget
+  //------------------------------------------------------------------
+  virtual Gtk::Window& getRootWindow() override
+  {
+    return (Gtk::Window&) *get_toplevel();
+  }
 
   //------------------------------------------------------------------
   //! \brief Start OpenGL context.
@@ -123,7 +114,7 @@ private:
   //------------------------------------------------------------------
   //! \brief Mouse scrolling event.
   //------------------------------------------------------------------
-  bool onScrollEvent(GdkEventScroll *event);
+  //bool onScrollEvent(GdkEventScroll *event);
 
   //------------------------------------------------------------------
   //! \brief Desired OpenGL context version: 3.3.
@@ -152,8 +143,6 @@ private:
 
 private:
 
-  //! \brief Keyboard pressed keys.
-  bool m_direction[DirectionIterEnd + 1] = {0};
   Key m_id;
 
   // TODO: memoriser les boutons de la carte:

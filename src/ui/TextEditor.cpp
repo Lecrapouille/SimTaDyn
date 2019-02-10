@@ -515,6 +515,9 @@ TextEditor::TextEditor()
 {
   LOGI("Creating TextEditor");
 
+#if 0
+  // TODO A remplacer par populatePopoverMenu()
+
   // Menus '_Documents'
   {
     m_menuitem[simtadyn::TextMenu].set_label("Text _Editor");
@@ -542,6 +545,7 @@ TextEditor::TextEditor()
     m_submenu[8].signal_activate().connect(sigc::mem_fun(*this, &TextEditor::gotoLine));
     m_menu[simtadyn::TextMenu].append(m_submenu[8]);
   }
+#endif
 
   set_scrollable();
   signal_switch_page().connect(sigc::mem_fun(*this, &TextEditor::onPageSwitched));

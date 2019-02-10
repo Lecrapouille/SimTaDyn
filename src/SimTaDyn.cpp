@@ -20,6 +20,7 @@
 
 #include "SimTaDyn.hpp"
 #include "Config.hpp"
+#include "PathManager.hpp"
 #include "MapEditorWindow.hpp"
 #include "ForthEditorWindow.hpp"
 
@@ -98,14 +99,17 @@ SimForth forth;
   MapEditorWindow win(app);
   ForthEditorWindow win2(forth, app);
   app->add_window(win2);
-  return app->run(win);
 
-  SimTaDyn& simtadyn = SimTaDyn::instance();
-  simtadyn.init(parser);
-
-  LOGI("Start SimTaDyn main loop");
-  app->run(simtadyn.mainWindow());
-
+  auto res = app->run(win);
   Logger::destroy();
-  return 0;
+  return res;
+
+  //SimTaDyn& simtadyn = SimTaDyn::instance();
+  //simtadyn.init(parser);
+
+  //LOGI("Start SimTaDyn main loop");
+  //app->run(simtadyn.mainWindow());
+
+  //Logger::destroy();
+  //return 0;
 }

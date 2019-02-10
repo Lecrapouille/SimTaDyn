@@ -22,6 +22,26 @@
 #include "DialogException.hpp"
 #include <exception>
 
+#if 0
+//------------------------------------------------------------------
+void GLDrawingArea::onEnterViewEvent(GdkEventCrossing* /*crossing_event*/, GLDrawingArea& view)
+{
+  view.grab_focus();
+  view.backgroundColor(Color(0.0f, 0.0f, 0.4f, 1.0f));
+  m_drawing_area = &view;
+  std::cout << "ME:Entering "
+            << (int) view.id() << " "
+            << &view << std::endl;
+  // TODO restaurer les boutons associes a la vue
+}
+
+//------------------------------------------------------------------
+void GLDrawingArea::onLeaveViewEvent(GdkEventCrossing* /*crossing_event*/, GLDrawingArea& view)
+{
+  view.backgroundColor(Color(0.0f, 0.0f, 0.2f, 1.0f));
+}
+#endif
+
 //------------------------------------------------------------------
 GLDrawingArea::GLDrawingArea()
   : Gtk::GLArea(),
@@ -42,12 +62,11 @@ GLDrawingArea::GLDrawingArea()
   setCoreVersion();
 
   // Filter GTK+ events
-  add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK |
-             Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK |
-             Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+  add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK |
+             Gdk::POINTER_MOTION_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
 
   // Use the mouse scroll event
-  signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
+  //signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
   // Connect drawing area signals
   signal_realize().connect(sigc::mem_fun(*this, &GLDrawingArea::onCreate));
   signal_unrealize().connect(sigc::mem_fun(*this, &GLDrawingArea::onRelease), false);
@@ -99,12 +118,12 @@ void GLDrawingArea::onCreate()
     }
   catch (const Gdk::GLError& gle)
     {
-      PopupException((Gtk::Window&) *get_toplevel(), "An error occured making the OpenGL context during GLArea creation", gle.what(), "");
+      popupException("An error occured making the OpenGL context during GLArea creation", gle.what(), "");
       opengl::hasCreatedContext() = false;
     }
   catch (const OpenGLException& e)
     {
-      PopupException((Gtk::Window&) *get_toplevel(), e, "An OpenGL error occurred during the setupGraphics()");
+      popupException(e, "An OpenGL error occurred during the setupGraphics()");
       opengl::hasCreatedContext() = false;
     }
 }
@@ -159,7 +178,7 @@ bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
       static bool singleton = true;
       if (singleton)
         {
-          PopupException((Gtk::Window&) *get_toplevel(), e, "");
+          popupException(e, "");
           singleton = false;
         }
       else
@@ -174,9 +193,11 @@ bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
 }
 
 //------------------------------------------------------------------
+#if 0
 bool GLDrawingArea::onScrollEvent(GdkEventScroll *event)
 {
   //GLRenderer::camera2D().zoomAt(event->x, event->y, event->delta_y);
   //GLRenderer::applyViewport();
   return true;
 }
+#endif

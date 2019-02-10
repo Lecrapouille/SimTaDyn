@@ -18,16 +18,4 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef ABOUT_HPP
-#  define ABOUT_HPP
-
-#include "Gtkmm.tpp"
-
-class About: public Gtk::AboutDialog
-{
-public:
-
-  About();
-};
-
-#endif
+#include "MVP.hpp"

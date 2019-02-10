@@ -18,15 +18,28 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYNWINDOW_HPP_
-#  define SIMTADYNWINDOW_HPP_
+#ifndef ISIMTADYN_WINDOW_HPP
+#  define ISIMTADYN_WINDOW_HPP
 
-#  include "ForthEditor.hpp"
-#  include "MapEditor.hpp"
-#  include "About.hpp"
-#  include "ToggleButtons.hpp"
+//#  include "ForthEditor.hpp"
+//#  include "MapEditor.hpp"
+//#  include "About.hpp"
+//#  include "ToggleButtons.hpp"
 
-class ISimTaDynWindow: public Gtk::ApplicationWindow
+#  include "DialogException.hpp"
+#  include "Config.hpp"
+#  include "Logger.hpp"
+
+class About: public Gtk::AboutDialog
+{
+public:
+
+  About();
+};
+
+class ISimTaDynWindow :
+  public Gtk::ApplicationWindow,
+  public PopupException
 {
 public:
 
@@ -35,7 +48,7 @@ public:
 
 private:
 
-  // Ajouter ici splitView mettre les methodes virtuels dans la class derivee
+  // TODO Ajouter ici splitView mettre les methodes virtuels dans la class derivee
 
   void populateHeaderBar();
   void setTitleIcon(std::string const &icon_name);
@@ -48,6 +61,7 @@ private:
   virtual void onSaveFileClicked() = 0;
   virtual void onSaveAsFileClicked() = 0;
   virtual bool onExit(GdkEventAny* event) = 0;
+  virtual Gtk::Window& getRootWindow() override { return *this; }
 
 protected:
 
@@ -67,44 +81,4 @@ private:
   Gtk::Button    m_saveas_file_button;
 };
 
-
-
-
-class SimTaDynWindow: public Gtk::Window
-{
-public:
-
-  //! \brief Constructor.
-  SimTaDynWindow(ForthEditor& forth_editor,
-                 MapEditor& map_editor);
-
-protected:
-
-  bool onExitClicked(GdkEventAny* event);
-  void onKeyPressed(GdkEventKey* evenement);
-  void onKeyReleased(GdkEventKey* evenement);
-
-private:
-
-  //void setTitleIcon(std::string const &icon_name);
-
-protected:
-
-  ForthEditor&                 m_forth_editor;
-  MapEditor&                   m_map_editor;
-  Gtk::HPaned                  m_hpaned;
-  Gtk::VBox                    m_box;
-  Gtk::MenuBar                 m_menubar;
-  Gtk::Menu                    m_menu[simtadyn::MaxMapMenuNames +
-                                      simtadyn::MaxForthMenuNames +
-                                      simtadyn::MaxGeneralMenuNames + 1];
-  Gtk::MenuItem                m_menuitem[simtadyn::MaxMapMenuNames +
-                                          simtadyn::MaxForthMenuNames +
-                                          simtadyn::MaxGeneralMenuNames + 1];
-  Gtk::ImageMenuItem           m_submenu[1];
-  Gtk::Image                   m_image[1];
-  std::vector<Gtk::ToolButton> m_toolbuttons; // FIXME resize
-  About                        m_about;
-};
-
-#endif /* SIMTADYNWINDOW_HPP_ */
+#endif // ISIMTADYN_WINDOW_HPP

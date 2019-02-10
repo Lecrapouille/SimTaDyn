@@ -19,7 +19,7 @@
 //=====================================================================
 
 #include "Renderer.hpp"
-#include "MapEditor.hpp"
+//#include "MapEditor.hpp"
 
 //------------------------------------------------------------------
 bool GLRenderer::setupGraphics()
