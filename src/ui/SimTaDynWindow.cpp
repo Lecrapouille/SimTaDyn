@@ -20,7 +20,6 @@
 
 #include "SimTaDynWindow.hpp"
 #include "PathManager.hpp"
-#include "Gtkmm.tpp"
 
 About::About()
 {

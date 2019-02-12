@@ -21,12 +21,7 @@
 #ifndef ISIMTADYN_WINDOW_HPP
 #  define ISIMTADYN_WINDOW_HPP
 
-//#  include "ForthEditor.hpp"
-//#  include "MapEditor.hpp"
-//#  include "About.hpp"
-//#  include "ToggleButtons.hpp"
-
-#  include "DialogException.hpp"
+#  include "Dialogs.hpp"
 #  include "Config.hpp"
 #  include "Logger.hpp"
 

@@ -1,4 +1,4 @@
-#include "DialogException.hpp"
+#include "Dialogs.hpp"
 #include "Logger.hpp"
 
 void PopupException::popupException(Exception const& e, std::string const& reason)

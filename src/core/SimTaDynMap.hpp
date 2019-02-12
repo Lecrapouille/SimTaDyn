@@ -24,7 +24,6 @@
 #  include "SimTaDynSheet.hpp"
 #  include "SceneGraph.tpp"
 #  include "Types.hpp"
-#  include <sigc++/sigc++.h>
 
 // *************************************************************************************************
 //! \brief This class defines a SimTaDyn geographic map. It contains, nodes, arcs, Forth scripts,

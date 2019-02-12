@@ -45,6 +45,14 @@ public:
     displayAt(0.0f, 0.0f, 1.0f, 1.0f);
   }
 
+  Camera2D(Camera2D const& other)
+  {
+    m_look_at_x = other.m_look_at_x;
+    m_look_at_y = other.m_look_at_y;
+    m_look_at_width = other.m_look_at_width;
+    m_look_at_height = other.m_look_at_height;
+  }
+
   Camera2D()
   {
     // World observation

@@ -20,7 +20,6 @@
 
 #include "NodesRenderer.hpp"
 #include "PathManager.hpp"
-#include "Matrix.tpp"
 
 NodesRenderer::NodesRenderer()
   : m_prog("NodesRenderer")

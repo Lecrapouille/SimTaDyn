@@ -19,7 +19,6 @@
 //=====================================================================
 
 #include "DrawingArea.hpp"
-#include "DialogException.hpp"
 #include <exception>
 
 #if 0

@@ -21,7 +21,7 @@
 #ifndef DRAWINGAREA_HPP_
 #  define DRAWINGAREA_HPP_
 
-#  include "DialogException.hpp"
+#  include "Dialogs.hpp"
 #  include "Renderer.hpp"
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wold-style-cast"

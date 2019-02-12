@@ -21,10 +21,13 @@
 #ifndef RENDERER_HPP_
 #  define RENDERER_HPP_
 
+#  include "Camera2D.hpp"
 #  include "SimTaDynSheet.hpp"
 #  include "NodesRenderer.hpp"
 //#  include "ArcsRenderer.hpp"
 //#  include "ZonesRenderer.hpp"
+
+enum class CameraDirection { Up, Down, Left, Right, Forward, Backward };
 
 // *************************************************************************************************
 //! \brief OpenGL renderer
@@ -41,11 +44,7 @@ public:
   //! \brief Empty constructor. It does not setup graphics because the
   //! OpenGL can be not yet initialized.
   //------------------------------------------------------------------
-  GLRenderer()
-    : m_bg_color(0.0f, 0.0f, 0.2f, 1.0f),
-      m_mode(GLRenderer::Mode2D)
-  {
-  }
+  GLRenderer();
 
   //------------------------------------------------------------------
   //! \brief Destructor. OpenGL objects are automaticaly released from
@@ -106,6 +105,38 @@ public:
   //------------------------------------------------------------------
   virtual void drawSceneNode(SimTaDynSheet& sheet, Matrix44f const& transformation) override;
 
+  //------------------------------------------------------------------
+  //! \brief When camera states change, apply these changement to the
+  //! screen.
+  //------------------------------------------------------------------
+  void applyViewport(Camera2D& camera);
+
+  //------------------------------------------------------------------
+  //! \brief Apply the viewport for the current camera.
+  //------------------------------------------------------------------
+  void applyViewport();
+
+  //------------------------------------------------------------------
+  //! \brief When several cameras are available, select the one to be
+  //! the current one.
+  //------------------------------------------------------------------
+  void selectCamera2D(Camera2D const& camera);
+
+  //------------------------------------------------------------------
+  //! \brief Accessor. Return the current camera
+  //------------------------------------------------------------------
+  Camera2D& getCamera2D();
+
+  //------------------------------------------------------------------
+  //! \brief Backup settings to the current camera
+  //------------------------------------------------------------------
+  void restoreCamera2D();
+
+  //------------------------------------------------------------------
+  //! \brief Move the camera from keyboard commands
+  //------------------------------------------------------------------
+  void moveCameraCommand(CameraDirection const direction);
+
 private:
 
   //------------------------------------------------------------------
@@ -150,11 +181,13 @@ protected:
 
 private:
 
-  Color              m_bg_color;
-  RenderMode         m_mode;
-  NodesRenderer       m_nodes_renderer;
-  //ArcsRenderer       m_arcs_renderer;
-  //ZonesRenderer       m_zones_renderer;
+  Color           m_bg_color;
+  RenderMode      m_mode;
+  NodesRenderer   m_nodes_renderer;
+  //ArcsRenderer  m_arcs_renderer;
+  //ZonesRenderer m_zones_renderer;
+  Camera2D        m_initial_camera;
+  Camera2D        m_current_camera;
 };
 
 #endif /* RENDERER_HPP_ */
