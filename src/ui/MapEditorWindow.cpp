@@ -21,8 +21,9 @@
 #include "MapEditorWindow.hpp"
 
 //------------------------------------------------------------------
-MapEditorWindow::MapEditorWindow(Glib::RefPtr<Gtk::Application> application)
+MapEditorWindow::MapEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application)
   : ISimTaDynWindow(application),
+    MapEditor(forth),
     KeyBoardHandler(*this, 10u) // FIXME 10u is mandatory
 {
   populatePopovMenu();
@@ -141,13 +142,13 @@ bool MapEditorWindow::onRefreshKeyboard()
 //------------------------------------------------------------------
 void MapEditorWindow::actionReplaceCurrentMap()
 {
-  /*return*/ dialogLoadMap(false, true);
+  /*return*/ dialogLoadMap(getRootWindow(), false, true);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::actionMergeMap()
 {
-  /*return*/ dialogLoadMap(false, false);
+  /*return*/ dialogLoadMap(getRootWindow(), false, false);
 }
 
 //------------------------------------------------------------------
@@ -169,13 +170,13 @@ void MapEditorWindow::actionNewUndirectSheet()
 //------------------------------------------------------------------
 void MapEditorWindow::actionImportSheet()
 {
-  /*return*/ dialogLoadSheet(true, false);
+  /*return*/ dialogLoadSheet(getRootWindow(), true, false);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::actionReplaceSheet()
 {
-  /*return*/ dialogLoadSheet(false, true);
+  /*return*/ dialogLoadSheet(getRootWindow(), false, true);
 }
 
 //------------------------------------------------------------------
@@ -195,7 +196,7 @@ void MapEditorWindow::splitView(Gtk::Orientation const orientation)
 //------------------------------------------------------------------
 void MapEditorWindow::onOpenFileClicked()
 {
-  /*return*/ dialogLoadMap(true, false);
+  /*return*/ dialogLoadMap(getRootWindow(), true, false);
 }
 
 //------------------------------------------------------------------

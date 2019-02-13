@@ -41,6 +41,10 @@ public:
   ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application);
   void setTitle(const Glib::ustring& title);
 
+protected:
+
+  virtual Gtk::Window& getRootWindow() override { return *this; }
+
 private:
 
   // TODO Ajouter ici splitView mettre les methodes virtuels dans la class derivee
@@ -56,7 +60,6 @@ private:
   virtual void onSaveFileClicked() = 0;
   virtual void onSaveAsFileClicked() = 0;
   virtual bool onExit(GdkEventAny* event) = 0;
-  virtual Gtk::Window& getRootWindow() override { return *this; }
 
 protected:
 

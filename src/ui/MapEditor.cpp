@@ -19,35 +19,24 @@
 //=====================================================================
 
 #include "MapEditor.hpp"
+#include "Config.hpp"
+#include "SimTaDynLoaders.hpp"
 
-MapEditor::MapEditor()
+MapEditor::MapEditor(SimForth& forth)
   : m_action_type(m_toolbar),
-    m_action_on(m_toolbar)
+    m_action_on(m_toolbar),
+    m_forth(forth)
 {
   addPresenter(new MapPresenter(/*FIXME *this, createDummyMap()*/));
 }
 
-bool MapEditor::evalSheet() // FIXME: Exec(typeCell, nodeID)
+bool MapEditor::evalSheet()
 {
-#if 0
-  SimTaDynSheet& sheet = activeModel().map().currentSheet();
-
-  // FIXME: should be called outside each cell: optimisation
-  // Disable compilation mode
-  m_forth.dictionary().smudge(":");
-  m_forth.dictionary().smudge("INCLUDE");
-
-  sheet.parse(m_forth);
-  std::pair<bool, std::string> res = sheet.evaluate(m_forth);
+  SimTaDynSheet& sheet = activeSheet();
+  std::pair<bool, std::string> res = m_forth.evaluate(sheet);
   m_forth.ok(res);
-
-  // Enable compilation mode
-  m_forth.dictionary().smudge("INCLUDE");
-  m_forth.dictionary().smudge(":");
-
+  // if (!res.first) popupexception(res.second)
   return res.first;
-#endif
-  return false;
 }
 
 void MapEditor::closePresenter()
@@ -63,22 +52,59 @@ void MapEditor::closePresenter()
     }
 }
 
-bool MapEditor::dialogLoadMap(bool const new_map, bool const reset_map)
+template <class L>
+bool MapEditor::dialogLoad(Gtk::Window& win, std::string const& title, std::string& filename)
+{
+  Gtk::FileChooserDialog dialog(title, Gtk::FILE_CHOOSER_ACTION_OPEN);
+  dialog.set_transient_for(win);
+  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+  // Open the dialog window and set the SimTaDyn path as current
+  // folder instead of using the "smart-current-folder" strategy
+  // thiugh by GTK+ developpers.
+  dialog.set_current_folder(config::data_path);
+
+  // Fill filters for selecting type of file. Use the loader manager
+  // for filling these filters because its knows all loaders which
+  // know file extensions they can load.
+  for (auto const& it: LoaderManager::instance().loaders<L>())
+    {
+      auto filter = Gtk::FileFilter::create();
+      // loaders() return a map <<file extension>, <loader>>
+      std::string extension("*." + it.first);
+      filter->add_pattern(extension);
+      filter->set_name(it.second->description() + " (" + extension + ')');
+      dialog.add_filter(filter);
+    }
+
+  auto filter_any = Gtk::FileFilter::create();
+  filter_any->set_name("Any files");
+  filter_any->add_pattern("*");
+  dialog.add_filter(filter_any);
+
+  bool res = (Gtk::RESPONSE_OK == dialog.run());
+  filename = dialog.get_filename();
+
+  return res;
+}
+
+bool MapEditor::dialogLoadMap(Gtk::Window& win, bool const new_map, bool const reset_map)
 {
   std::string filename;
 
-  if (dialogLoad<SimTaDynMap>("Load a SimTaDyn map", filename))
+  if (dialogLoad<SimTaDynMap>(win, "Load a SimTaDyn map", filename))
     {
       return doOpenMap(filename, new_map, reset_map);
     }
   return false;
 }
 
-bool MapEditor::dialogLoadSheet(bool const new_sheet, bool const reset_sheet)//SimTaDynSheet& sheet)
+bool MapEditor::dialogLoadSheet(Gtk::Window& win, bool const new_sheet, bool const reset_sheet)//SimTaDynSheet& sheet)
 {
   std::string filename;
 
-  if (dialogLoad<SimTaDynSheet>("Load a SimTaDyn sheet", filename))
+  if (dialogLoad<SimTaDynSheet>(win, "Load a SimTaDyn sheet", filename))
     {
       return doOpenSheet(filename, new_sheet, reset_sheet);
     }

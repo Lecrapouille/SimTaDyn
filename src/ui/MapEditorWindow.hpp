@@ -42,7 +42,7 @@ class MapEditorWindow :
 
 public:
 
-  MapEditorWindow(Glib::RefPtr<Gtk::Application> application);
+  MapEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application);
 
 private:
 
@@ -73,6 +73,9 @@ private:
   void actionImportSheet();
   void actionReplaceSheet();
   void actionClearSheet();
+
+  template <class L>
+  bool dialogLoad(std::string const& title, std::string& filename);
 
 protected:
 

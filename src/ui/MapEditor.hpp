@@ -21,6 +21,7 @@
 #ifndef MAPEDITOR_HPP_
 #  define MAPEDITOR_HPP_
 
+#  include "SimTaDynForth.hpp"
 #  include "ToggleButtons.hpp"
 #  include "MVP.hpp"
 
@@ -42,7 +43,7 @@ public:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  MapEditor();
+  MapEditor(SimForth& forth);
 
   //------------------------------------------------------------------
   //! \brief
@@ -63,6 +64,14 @@ public:
   inline MapPresenter& activePresenter()
   {
     return *m_active_presenter;
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline SimTaDynSheet& activeSheet()
+  {
+    return activeModel().currentSheet();
   }
 
   //------------------------------------------------------------------
@@ -119,10 +128,17 @@ public:
     return m_action_on.button();
   }
 
-  bool dialogLoadMap(bool const new_map, bool const reset_map);
-  bool dialogLoadSheet(bool const new_sheet, bool const reset_sheet);//TODO ,SimTaDynSheet& sheet)
+  //------------------------------------------------------------------
+
+  bool dialogLoadMap(Gtk::Window& win, bool const new_map, bool const reset_map);
+  bool dialogLoadSheet(Gtk::Window& win, bool const new_sheet, bool const reset_sheet);//TODO ,SimTaDynSheet& sheet)
   bool doOpenMap(std::string const& filename, bool const new_map, bool const reset_map);
   bool doOpenSheet(std::string const& filename, bool const new_sheet, bool const reset_sheet);
+
+private:
+
+  template <class L>
+  bool dialogLoad(Gtk::Window& win, std::string const& title, std::string& filename);
 
 protected:
 
@@ -133,6 +149,7 @@ protected:
 
 private:
 
+  SimForth&                  m_forth;
   std::vector<MapPresenter*> m_presenters;
   MapPresenter*              m_active_presenter = nullptr;
 };

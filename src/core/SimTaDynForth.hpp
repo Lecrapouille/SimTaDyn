@@ -70,9 +70,8 @@ public:
 
   virtual void boot() override;
   void compileCell(ASpreadSheetCell &cell);
-  void evaluate(ASpreadSheet& spreadsheet);
-  std::pair<bool, std::string>
-  interpreteCell(ASpreadSheetCell &cell);
+  std::pair<bool, std::string> evaluate(ASpreadSheet& spreadsheet);
+  std::pair<bool, std::string> interpreteCell(ASpreadSheetCell &cell);
   bool parseCell(ASpreadSheetCell &cell);
 
   // Save temporary pathes of unziped SimTaDynMap files.
