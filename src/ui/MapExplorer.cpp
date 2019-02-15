@@ -18,7 +18,7 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimTaDynMapExplorer.hpp"
+#include "MapExplorer.hpp"
 #include "PathManager.hpp"
 //#include "MapEditor.hpp"
 
@@ -326,12 +326,9 @@ SimTaDynMapExplorer::SimTaDynMapExplorer()
 
   // Signals
   m_tree_view.signal_query_tooltip().connect(
-     sigc::mem_fun(*this, &SimTaDynMapExplorer::on_param_tree_view_query_tooltip));
+     sigc::mem_fun(*this, &SimTaDynMapExplorer::onQueryTooltip));
   m_tree_view.signal_button_press_event().connect(
-     sigc::mem_fun(*this, &SimTaDynMapExplorer::on_mytreeview_button_press_event));
-
-  // TODO:
-  //  ResourceMapManager.signal_created(sigc::mem_fun(*this, &SimTaDynMapExplorer::addMap));
+     sigc::mem_fun(*this, &SimTaDynMapExplorer::onButtonPressEvent));
 }
 
 //-----------------------------------------------------------------
@@ -448,10 +445,9 @@ void SimTaDynMapExplorer::addMap(SimTaDynMapPtr map)
 }
 
 //-----------------------------------------------------------------
-// https://stackoverflow.com/questions/39833800/how-to-remove-all-child-nodes-from-parent-treeiter-from-gtk-treestore
-void SimTaDynMapExplorer::on_sheet_changed(SimTaDynMapPtr map/*, SceneNodePtr sheet*/)
+void SimTaDynMapExplorer::removeMap(SimTaDynMapPtr map)
 {
-  std::cout << "on_sheet_added map " << map->name() << std::endl;
+  std::cout << "Remove map " << map->name() << std::endl;
 
   // Search for the map name
   Gtk::TreeModel::Children const& children = m_tree_store->children();
@@ -461,7 +457,29 @@ void SimTaDynMapExplorer::on_sheet_changed(SimTaDynMapPtr map/*, SceneNodePtr sh
       if ((Category::Maps == row.get_value(m_columns.category)) &&
           (map->name() == row.get_value(m_columns.filename)))
         {
-          std::cout << "Found map " << map->name() << std::endl;
+          std::cout << "Found map to be removed " << map->name() << std::endl;
+          m_tree_store->erase(iter);
+          m_tree_view.expand_all();
+          return ;
+        }
+    }
+}
+
+//-----------------------------------------------------------------
+// https://stackoverflow.com/questions/39833800/how-to-remove-all-child-nodes-from-parent-treeiter-from-gtk-treestore
+void SimTaDynMapExplorer::updateMap(SimTaDynMapPtr map/*, SceneNodePtr sheet*/)
+{
+  std::cout << "Update map " << map->name() << std::endl;
+
+  // Search for the map name
+  Gtk::TreeModel::Children const& children = m_tree_store->children();
+  for (auto iter = children.begin(); iter != children.end(); ++iter)
+    {
+      Gtk::TreeModel::Row row = *iter;
+      if ((Category::Maps == row.get_value(m_columns.category)) &&
+          (map->name() == row.get_value(m_columns.filename)))
+        {
+          std::cout << "Found map to be updated " << map->name() << std::endl;
 
           // Search for the folder Sheets/
           Gtk::TreeModel::Children const& child = row.children();
@@ -541,9 +559,9 @@ void SimTaDynMapExplorer::traverseSceneGraph(SceneNodePtr sceneNode, TreeIterato
 //-----------------------------------------------------------------
 // https://www.kksou.com/php-gtk2/sample-codes/display-tooltips-in-GtkTreeView-Part-1.php
 // http://gtk.10911.n7.nabble.com/Gtk-Tooltip-and-Gtk-TreeView-td43664.html
-bool SimTaDynMapExplorer::on_param_tree_view_query_tooltip(int x, int y,
-                                                           bool /*keyboard_tooltip*/,
-                                                           const Glib::RefPtr<Gtk::Tooltip>& tooltip)
+bool SimTaDynMapExplorer::onQueryTooltip(int x, int y,
+                                         bool /*keyboard_tooltip*/,
+                                         const Glib::RefPtr<Gtk::Tooltip>& tooltip)
 {
   Gtk::TreeModel::Path path;
   Gtk::TreeViewColumn *column;
@@ -569,7 +587,7 @@ bool SimTaDynMapExplorer::on_param_tree_view_query_tooltip(int x, int y,
 }
 
 //-----------------------------------------------------------------
-bool SimTaDynMapExplorer::on_mytreeview_button_press_event(GdkEventButton *ev)
+bool SimTaDynMapExplorer::onButtonPressEvent(GdkEventButton *ev)
 {
   if (ev->button == 1)
     {
@@ -594,42 +612,4 @@ bool SimTaDynMapExplorer::on_mytreeview_button_press_event(GdkEventButton *ev)
     }
 
   return false;
-}
-
-//-----------------------------------------------------------------
-void SimTaDynMapExplorer::onSuccessMapLoaded(SimTaDynMapPtr map)
-{
-  if (nullptr == map)
-    {
-      LOGC("Should not received a succesfully loaded map with nullptr");
-      return ;
-    }
-
-  LOGC("SimTaDynMapExplorer::onSuccessMapLoaded '%s'", map->m_name.c_str());
-  addMap(map);
-}
-
-//-----------------------------------------------------------------
-void SimTaDynMapExplorer::onFailMapLoaded(const std::string &filename, const std::string &message)
-{
-  LOGC("SimTaDynMapExplorer::onFailMapLoaded '%s': '%s' ", filename.c_str(), message.c_str());
-  //clear(); // FIXME: non: on perd les ancinnes informations
-  //addDocument(Category::Sheets, filename, Icon::Ko, message);
-}
-
-//-----------------------------------------------------------------
-void SimTaDynMapExplorer::onSuccessMapSaved(SimTaDynMapPtr map)
-{
-  LOGC("SimTaDynMapExplorer::onSuccessMapSaved '%s'", map->m_name.c_str());
-  // TODO: remove the not saved "*" symbol
-  // row[m_columns.need_save] = false;
-}
-
-//-----------------------------------------------------------------
-void SimTaDynMapExplorer::onFailMapSaved(const std::string &filename, const std::string &message)
-{
-  LOGC("SimTaDynMapExplorer::onFailMapSaved '%s': '%s' ", filename.c_str(), message.c_str());
-  //addDocument(Category::Sheets, filename, Icon::Ko, message);
-  // TODO: store error in tooltips and change to red the color
-  // row[m_columns.tooltip] = message;
 }

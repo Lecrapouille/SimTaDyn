@@ -37,7 +37,6 @@
 class GLDrawingArea
   : public Gtk::GLArea,
     public GLRenderer,
-    public PopupException,
     private UniqueID<GLDrawingArea>
 {
 public:
@@ -48,7 +47,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Constructor. Connect GTK+ io signals
   //------------------------------------------------------------------
-  GLDrawingArea();
+  GLDrawingArea(PopupException& popup_exception);
 
   //------------------------------------------------------------------
   //! \brief Destructor.
@@ -94,14 +93,6 @@ public:
 private:
 
   //------------------------------------------------------------------
-  //! \brief Return the Gtk window containing this widget
-  //------------------------------------------------------------------
-  virtual Gtk::Window& getRootWindow() override
-  {
-    return (Gtk::Window&) *get_toplevel();
-  }
-
-  //------------------------------------------------------------------
   //! \brief Start OpenGL context.
   //------------------------------------------------------------------
   void createOpenGLContext();
@@ -143,6 +134,7 @@ private:
 
 private:
 
+  PopupException& m_popup_exception;
   Key m_id;
 
   // TODO: memoriser les boutons de la carte:

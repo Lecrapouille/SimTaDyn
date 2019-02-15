@@ -9,7 +9,7 @@ void PopupException::popupException(Exception const& e, std::string const& reaso
 
   LOGC("%s - %s", e.what(), msg.c_str());
 
-  Gtk::MessageDialog dialog(getRootWindow(), e.what(), false, Gtk::MESSAGE_WARNING);
+  Gtk::MessageDialog dialog(m_win, e.what(), false, Gtk::MESSAGE_WARNING);
   dialog.set_secondary_text(msg);
   dialog.run();
 }
@@ -24,7 +24,7 @@ void PopupException::popupException(std::string const& what,
 
   LOGC("%s - %s", what.c_str(), msg.c_str());
 
-  Gtk::MessageDialog dialog(getRootWindow(), what, false, Gtk::MESSAGE_WARNING);
+  Gtk::MessageDialog dialog(m_win, what, false, Gtk::MESSAGE_WARNING);
   dialog.set_secondary_text(msg);
   dialog.run();
 }

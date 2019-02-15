@@ -25,6 +25,9 @@
 #  include "Config.hpp"
 #  include "Logger.hpp"
 
+// **************************************************************
+//! \brief Facade for Gtk::AboutDialog.
+// **************************************************************
 class About: public Gtk::AboutDialog
 {
 public:
@@ -32,22 +35,22 @@ public:
   About();
 };
 
+// **************************************************************
+//! \brief
+// **************************************************************
 class ISimTaDynWindow :
-  public Gtk::ApplicationWindow,
-  public PopupException
+  public Gtk::ApplicationWindow
 {
 public:
 
   ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application);
   void setTitle(const Glib::ustring& title);
-
-protected:
-
-  virtual Gtk::Window& getRootWindow() override { return *this; }
+  void setSubtitle(const Glib::ustring& subtitle);
 
 private:
 
-  // TODO Ajouter ici splitView mettre les methodes virtuels dans la class derivee
+  // TODO Ajouter ici splitView mettre les methodes virtuels dans la
+  // class derivee
 
   void populateHeaderBar();
   void setTitleIcon(std::string const &icon_name);
@@ -63,8 +66,9 @@ private:
 
 protected:
 
-  Gtk::MenuButton m_menu_button;
   Glib::RefPtr<Gtk::Application> m_application;
+  PopupException                 m_popup_exception;
+  Gtk::MenuButton                m_menu_button;
 
 private:
 

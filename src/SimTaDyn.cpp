@@ -21,50 +21,9 @@
 #include "SimTaDyn.hpp"
 #include "Config.hpp"
 #include "PathManager.hpp"
-#include "MapEditorWindow.hpp"
-#include "ForthEditorWindow.hpp"
 
-// FIXME: this is a temporary example
-void SimTaDyn::init(cli::Parser& parser)
-{
-  LOGI("Parsing project options");
-  PathManager::instance().add(parser.get<std::string>("p"));
-  LOGI("%s", PathManager::instance().toString().c_str());
-
-  m_forth.boot();
-
-  // FIXME TEMPORARY CODE
-#if 0
-  // FIXME: simple example to move in unit tests
-  SimTaDynSheet* sheet = new SimTaDynSheet("Sheet0"); // Ok leak but just for example
-  assert(sheet->name().compare("Sheet0") == 0);
-
-  CellNode& n0 = sheet->addNode("1 1 +");
-  LOGI("CellNode: %p %s %u", &n0, n0.name().c_str(), n0.id());
-  CellNode& n1 = sheet->addNode("2 N0 +");
-  LOGI("CellNode: %p %s %u", &n1, n1.name().c_str(), n1.id());
-  n0.addNeighbor(n1);
-
-  sheet->parse(forth);
-  std::pair<bool, std::string> res = sheet->evaluate(forth);
-  forth.ok(res);
-  if (res.first)
-    {
-      //sheet->displayResult();
-      std::cout << n0.rawValue() << std::endl;
-      std::cout << n1.rawValue() << std::endl;
-    }
-#endif
-}
-
-static void configure_options(cli::Parser& parser)
-{
-  parser.set_optional<std::string>("p", "path", "", "Add pathes for searching datum. Use ':' for separate pathes");
-}
-
-// Init Gtkmm and SimTaDyn contexts. Be careful not to create a GTK+
-// button before the context creation of GTK libraries.
-int main(int argc, char** argv)
+SimTaDyn::SimTaDyn(int argc, char** argv)
+  : m_parser(argc, argv)
 {
   termcolor::enable();
   std::cout << "Welcome to SimTaDyn version "
@@ -86,30 +45,46 @@ int main(int argc, char** argv)
     }
 
   LOGI("Init option parser");
-  cli::Parser parser(argc, argv);
-  configure_options(parser);
-  parser.run_and_exit_if_error();
+  configureOptions();
+  m_parser.run_and_exit_if_error();
 
   LOGI("Init GTK");
-  Glib::RefPtr<Gtk::Application> app = Gtk::Application::create();
+  m_application = Gtk::Application::create();
   Gsv::init();
 
-  LOGI("Init SimTaDyn");
-SimForth forth;
-  MapEditorWindow win(forth, app);
-  ForthEditorWindow win2(forth, app);
-  app->add_window(win2);
+  createMainWindow<ForthEditorWindow>();
+  m_application->signal_startup().connect([&]{
+      createMapEditorWindow();
+      init();
+    });
+}
 
-  auto res = app->run(win);
+SimTaDyn::~SimTaDyn()
+{
   Logger::destroy();
-  return res;
+}
 
-  //SimTaDyn& simtadyn = SimTaDyn::instance();
-  //simtadyn.init(parser);
+int SimTaDyn::run()
+{
+  return m_application->run(*(m_main_window.get()));
+}
 
-  //LOGI("Start SimTaDyn main loop");
-  //app->run(simtadyn.mainWindow());
+void SimTaDyn::configureOptions()
+{
+  m_parser.set_optional<std::string>("p", "path", "", "Add pathes for searching datum. Use ':' for separate pathes");
+}
 
-  //Logger::destroy();
-  //return 0;
+void SimTaDyn::init()
+{
+  LOGI("Parsing project options");
+  PathManager::instance().add(m_parser.get<std::string>("p"));
+  LOGI("%s", PathManager::instance().toString().c_str());
+
+  m_forth.boot();
+}
+
+int main(int argc, char** argv)
+{
+  SimTaDyn simtadyn(argc, argv);
+  return simtadyn.run();
 }

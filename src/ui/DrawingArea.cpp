@@ -25,6 +25,8 @@
 //------------------------------------------------------------------
 void GLDrawingArea::onEnterViewEvent(GdkEventCrossing* /*crossing_event*/, GLDrawingArea& view)
 {
+  //TODO mapeditor.currentView() = *this;
+
   view.grab_focus();
   view.backgroundColor(Color(0.0f, 0.0f, 0.4f, 1.0f));
   m_drawing_area = &view;
@@ -42,9 +44,10 @@ void GLDrawingArea::onLeaveViewEvent(GdkEventCrossing* /*crossing_event*/, GLDra
 #endif
 
 //------------------------------------------------------------------
-GLDrawingArea::GLDrawingArea()
+GLDrawingArea::GLDrawingArea(/* MapEditor& */ PopupException& popup_exception)
   : Gtk::GLArea(),
     GLRenderer(),
+    m_popup_exception(popup_exception),
     m_id(getID())
 {
   std::cout << "New GLDrawingArea " << (int) getID() << std::endl;
@@ -61,8 +64,11 @@ GLDrawingArea::GLDrawingArea()
   setCoreVersion();
 
   // Filter GTK+ events
-  add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK |
-             Gdk::POINTER_MOTION_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+  add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+  //signal_enter_notify_event().connect_notify(sigc::bind<GLDrawingArea&>(
+  //  sigc::mem_fun(window, &MapEditorWindow::onEnterViewEvent), *glarea));
+  //signal_leave_notify_event().connect_notify(sigc::bind<GLDrawingArea&>(
+  //  sigc::mem_fun(window, &MapEditorWindow::onLeaveViewEvent), *glarea));
 
   // Use the mouse scroll event
   //signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
@@ -117,12 +123,12 @@ void GLDrawingArea::onCreate()
     }
   catch (const Gdk::GLError& gle)
     {
-      popupException("An error occured making the OpenGL context during GLArea creation", gle.what(), "");
+      m_popup_exception.popupException("An error occured making the OpenGL context during GLArea creation", gle.what(), "");
       opengl::hasCreatedContext() = false;
     }
   catch (const OpenGLException& e)
     {
-      popupException(e, "An OpenGL error occurred during the setupGraphics()");
+      m_popup_exception.popupException(e, "An OpenGL error occurred during the setupGraphics()");
       opengl::hasCreatedContext() = false;
     }
 }
@@ -177,7 +183,7 @@ bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
       static bool singleton = true;
       if (singleton)
         {
-          popupException(e, "");
+          m_popup_exception.popupException(e, "");
           singleton = false;
         }
       else

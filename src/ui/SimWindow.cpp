@@ -18,9 +18,10 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimTaDynWindow.hpp"
+#include "SimWindow.hpp"
 #include "PathManager.hpp"
 
+//------------------------------------------------------------------
 About::About()
 {
   // About window
@@ -48,9 +49,11 @@ About::About()
 
 //------------------------------------------------------------------
 ISimTaDynWindow::ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application)
-  : m_application(application)
+  : m_application(application),
+    m_popup_exception(*this)
 {
   LOGI("Creating the SimTaDyn");
+
   set_default_size(1400, 800);
   set_position(Gtk::WIN_POS_CENTER);
   setTitleIcon("icons/SimTaDyn.png");
@@ -62,7 +65,13 @@ ISimTaDynWindow::ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application)
 //------------------------------------------------------------------
 void ISimTaDynWindow::setTitle(const Glib::ustring& title)
 {
-  m_header_bar.set_subtitle(title);
+  m_header_bar.set_title(title);
+}
+
+//------------------------------------------------------------------
+void ISimTaDynWindow::setSubtitle(const Glib::ustring& subtitle)
+{
+  m_header_bar.set_subtitle(subtitle);
 }
 
 //------------------------------------------------------------------
@@ -85,7 +94,7 @@ void ISimTaDynWindow::populateHeaderBar()
 {
   m_header_bar.set_show_close_button(true);
   m_header_bar.set_title (config::project_name);
-  this->set_titlebar(m_header_bar);
+  set_titlebar(m_header_bar);
 
   m_open_file_button.set_label("Open");
   m_recent_files_button.set_image_from_icon_name("pan-down-symbolic", Gtk::ICON_SIZE_BUTTON, true);

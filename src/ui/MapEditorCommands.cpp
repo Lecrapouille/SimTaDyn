@@ -1,15 +1,15 @@
 #include "MapEditorCommands.hpp"
 
 //------------------------------------------------------------------
-void MoveCameraCommand::execute(MapEditorWindow& editor)
+void MoveCameraCommand::execute(MapEditorWindow& win)
 {
   std::cout << "Move Camera" << std::endl;
-  editor.moveCamera(m_direction);
+  win.mapEditor().moveCamera(m_direction);
 }
 
 //------------------------------------------------------------------
-void SplitScreenCommand::execute(MapEditorWindow& editor)
+void SplitScreenCommand::execute(MapEditorWindow& win)
 {
   std::cout << "Split View" << std::endl;
-  editor.splitView(m_oritentation);
+  win.splitView(m_oritentation);
 }

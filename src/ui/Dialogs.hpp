@@ -11,7 +11,10 @@ class PopupException
 {
 public:
 
-  PopupException() {}
+  PopupException(Gtk::Window& win)
+    : m_win(win)
+  {}
+
   virtual ~PopupException() {}
 
   void popupException(Exception const& e, std::string const& reason);
@@ -19,7 +22,7 @@ public:
 
 private:
 
-  virtual Gtk::Window& getRootWindow() = 0;
+  Gtk::Window& m_win;
 };
 
 #endif

@@ -22,73 +22,87 @@
 #  define SIMTADYN_CONTEXT_HPP_
 
 #  include "Path.hpp"
-#  include "SimTaDynForth.hpp"
-#  include "SimTaDynWindow.hpp"
+#  include "SimWindowMapEditor.hpp"
+#  include "SimWindowForthEditor.hpp"
 #  include "CmdParser/cmdparser.hpp"
 
 // **************************************************************
 //! \brief
 // **************************************************************
 class SimTaDyn
-  : public Singleton<SimTaDyn>
 {
-private:
-
-  friend class Singleton<SimTaDyn>;
+public:
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton.
   //------------------------------------------------------------------
-  SimTaDyn()
-  {}
+  SimTaDyn(int argc, char** argv);
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton. Check if resources is still
   //! acquired which show a bug in the management of resources.
   //------------------------------------------------------------------
-  ~SimTaDyn()
-  {}
+  ~SimTaDyn();
 
-public:
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  int run();
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline void createMapEditorWindow()
+  {
+    createWindow<MapEditorWindow>();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline void createForthEditorWindow()
+  {
+    createWindow<ForthEditorWindow>();
+  }
+
+private:
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  template<class W> void createMainWindow()
+  {
+    m_main_window = std::make_unique<W>(m_forth, m_application);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  template<class W> void createWindow()
+  {
+    std::unique_ptr<W> win = std::make_unique<W>(m_forth, m_application);
+    m_application->add_window(*(win.get()));
+    m_windows.push_back(std::move(win));
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void configureOptions();
 
   //------------------------------------------------------------------
   //! \brief
   //! \param parser A command line parser (same job than getoption)
   //------------------------------------------------------------------
-  void init(cli::Parser& parser);
-
-  inline SimForth& forth()
-  {
-    return m_forth;
-  }
-
-  //------------------------------------------------------------------
-  //! \brief Return the reference of the main UI window.
-  //------------------------------------------------------------------
-  //inline MapEditor& mapEditor()
-  //{
-  //  return m_map_editor;
-  //}
-
-  //------------------------------------------------------------------
-  //! \brief Return the reference of the main UI window.
-  //------------------------------------------------------------------
-  //inline ForthEditor& forthEditor()
-  //{
-  //  return m_forth_editor;
-  //}
-
-  //inline GLDrawingArea& drawingArea()
-  //{
-  //  return m_map_editor.currentView();
-  //}
+  void init();
 
 private:
 
-  SimForth            m_forth;
-  //ForthEditor         m_forth_editor;
-  //MapEditor           m_map_editor;
-  //SimTaDynWindow      m_window;
+  cli::Parser                                   m_parser;
+  SimForth                                      m_forth;
+  Glib::RefPtr<Gtk::Application>                m_application;
+  std::vector<std::unique_ptr<ISimTaDynWindow>> m_windows;
+  std::unique_ptr<ISimTaDynWindow>              m_main_window;
 };
 
 #endif /* SIMTADYN_CONTEXT_HPP_ */

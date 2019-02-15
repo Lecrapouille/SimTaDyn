@@ -24,31 +24,43 @@
 #  include "SimTaDynForth.hpp"
 #  include "ToggleButtons.hpp"
 #  include "MVP.hpp"
+#  include "SimTaDynLoaders.hpp"
+
+using SimTaDynMapManager = ResourceManager<std::string, SimTaDynMap>;
+
+//! \brief Add, remove a mode (node, arc, zone).
+enum ActionType { Add, Remove, Select, Move, MaxActionType_ };
+
+//! \brief On what kind of cells action is performed.
+enum ActionOn { Node, Arc, Zone, MaxActionOn_ };
 
 // *************************************************************************************************
 //! \brief
 // *************************************************************************************************
 class MapEditor
 {
-protected:
-
-  //! \brief Add, remove a mode (node, arc, zone).
-  enum ActionType { Add, Remove, Select, Move, MaxActionType_ };
-
-  //! \brief On what kind of cells action is performed.
-  enum ActionOn { Node, Arc, Zone, MaxActionOn_ };
 
 public:
 
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  MapEditor(SimForth& forth);
+  MapEditor(PopupException& popup_exception, SimForth& forth);
 
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
   bool evalSheet();
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline void setActionOn(const ActionOn action_on)
+  {
+    m_action_on = action_on;
+  }
+
+  inline ActionOn actionOn() const { return m_action_on; }
 
   //------------------------------------------------------------------
   //! \brief
@@ -85,6 +97,14 @@ public:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
+  inline void changeActiveModel(SimTaDynMapPtr map)
+  {
+    return m_active_presenter->model(map);
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
   inline SimTaDynMapPtr activeModelPtr()
   {
     return m_active_presenter->modelPtr();
@@ -96,6 +116,14 @@ public:
   inline GLDrawingArea& activeView()
   {
     return m_active_presenter->view();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline SimTaDynMapManager& resourcesManager()
+  {
+    return m_resources;
   }
 
   //------------------------------------------------------------------
@@ -113,22 +141,6 @@ public:
   }
 
   //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
-  inline ActionType actionType() const
-  {
-    return m_action_type.button();
-  }
-
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
-  inline ActionOn actionOn() const
-  {
-    return m_action_on.button();
-  }
-
-  //------------------------------------------------------------------
 
   bool dialogLoadMap(Gtk::Window& win, bool const new_map, bool const reset_map);
   bool dialogLoadSheet(Gtk::Window& win, bool const new_sheet, bool const reset_sheet);//TODO ,SimTaDynSheet& sheet)
@@ -140,18 +152,22 @@ private:
   template <class L>
   bool dialogLoad(Gtk::Window& win, std::string const& title, std::string& filename);
 
-protected:
+public:
 
-  // FIXME: a qui appartient m_toolbar ? MapEditor ou MapEditorWindow ? populateToolBar() ? onRefreshKeyboard()
-  Gtk::Toolbar              m_toolbar;
-  ToggleButtons<ActionType>  m_action_type;
-  ToggleButtons<ActionOn>    m_action_on;
+  //sigc::signal<void, SimTaDynMapPtr/*, SceneNodePtr*/> sheet_changed;
+  sigc::signal<void, SimTaDynMapPtr> loaded_success;
+  sigc::signal<void, const std::string &, const std::string &> loaded_failure;
+  //sigc::signal<void, SimTaDynMapPtr> saved_success;
+  //sigc::signal<void, const std::string &, const std::string &> saved_failure;
 
 private:
 
+  SimTaDynMapManager         m_resources;
+  PopupException             m_popup_exception;
   SimForth&                  m_forth;
   std::vector<MapPresenter*> m_presenters;
   MapPresenter*              m_active_presenter = nullptr;
+  ActionOn                   m_action_on;
 };
 
 #endif /* MAPEDITOR_HPP_ */

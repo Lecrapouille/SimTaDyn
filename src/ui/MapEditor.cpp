@@ -22,12 +22,11 @@
 #include "Config.hpp"
 #include "SimTaDynLoaders.hpp"
 
-MapEditor::MapEditor(SimForth& forth)
-  : m_action_type(m_toolbar),
-    m_action_on(m_toolbar),
+MapEditor::MapEditor(PopupException& popup_exception, SimForth& forth)
+  : m_popup_exception(popup_exception),
     m_forth(forth)
 {
-  addPresenter(new MapPresenter(/*FIXME *this, createDummyMap()*/));
+  addPresenter(new MapPresenter(popup_exception /*FIXME *this, createDummyMap()*/));
 }
 
 bool MapEditor::evalSheet()
@@ -113,17 +112,18 @@ bool MapEditor::dialogLoadSheet(Gtk::Window& win, bool const new_sheet, bool con
 
 bool MapEditor::doOpenMap(std::string const& filename, bool const new_map, bool const reset_map)
 {
-#if 0
-   try
+  try
     {
       LOGI("doOpenMap r:%u n:%u", reset_map, new_map);
 
       std::string name = (new_map) ? File::baseName(filename) : filename;
-      SimTaDynMapPtr map = (new_map) ? SimTaDynMapManager::instance().create(name, resource::Strategy::ReturnNull, name) : m_current_map.get();
+      SimTaDynMapPtr map = (new_map) ? SimTaDynMapManager::instance().create(name, resource::Strategy::ReturnNull, name)
+                                     : activeModelPtr();
 
       if (nullptr == map)
         {
-          throw LoaderException("map shall not be nullptr");
+          //throw LoaderException("map shall not be nullptr");
+          return false; // Map already loaded
         }
 
       if (reset_map)
@@ -133,7 +133,7 @@ bool MapEditor::doOpenMap(std::string const& filename, bool const new_map, bool 
 
       LoaderManager::instance().loadFromFile(filename, *map);
       loaded_success.emit(map);
-      m_current_map.set(map);
+      changeActiveModel(map);
 
       //FIXME: attraper ce signal par le renderer puis
       //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
@@ -143,15 +143,12 @@ bool MapEditor::doOpenMap(std::string const& filename, bool const new_map, bool 
     }
   catch (LoaderException const &e)
     {
-      loaded_failure.emit(filename, e.message());
-      Gtk::MessageDialog dialog((Gtk::Window&) *(m_vbox.get_toplevel()),
-                                e.what(), false, Gtk::MESSAGE_WARNING);
-      dialog.set_secondary_text("Could not load '" + filename + "' as a SimTaDyn map. Reason: "
-                                + e.message());
-      dialog.run();
+      //loaded_failure.emit(filename, e.message());
+
+      m_popup_exception.popupException(e, "Could not load '" + filename + "' as a SimTaDyn map");
       return false;
     }
-#endif
+
   return false;
 }
 

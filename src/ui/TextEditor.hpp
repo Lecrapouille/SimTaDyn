@@ -58,11 +58,11 @@ public:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class Find : public Gtk::Window
+class FindBase : public Gtk::Window
 {
 public:
-  Find(Gsv::View* document);
-  ~Find() {}
+  FindBase(Gsv::View* document);
+  ~FindBase() {}
   void document(Gsv::View* document);
   void findNext();
   void findFirst();
@@ -79,7 +79,7 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class FindWindow : public Find
+class FindWindow : public FindBase
 {
 public:
   FindWindow(Gsv::View* document);
@@ -99,7 +99,7 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class ReplaceWindow : public Find
+class ReplaceWindow : public FindBase
 {
 public:
   ReplaceWindow(Gsv::View* document);

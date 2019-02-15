@@ -18,7 +18,7 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ForthEditorWindow.hpp"
+#include "SimWindowForthEditor.hpp"
 
 ForthEditorWindow::ForthEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application)
   : ISimTaDynWindow(application),

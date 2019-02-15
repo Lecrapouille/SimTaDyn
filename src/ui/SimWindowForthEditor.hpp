@@ -21,7 +21,7 @@
 #ifndef FORTH_EDITOR_WINDOW_HPP
 #  define FORTH_EDITOR_WINDOW_HPP
 
-#  include "SimTaDynWindow.hpp"
+#  include "SimWindow.hpp"
 #  include "ForthEditor.hpp"
 
 class ForthEditorWindow : public ISimTaDynWindow

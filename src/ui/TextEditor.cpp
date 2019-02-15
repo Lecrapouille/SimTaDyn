@@ -73,7 +73,7 @@ void GotoLineWindow::document(Gsv::View* document)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-Find::Find(Gsv::View* document)
+FindBase::FindBase(Gsv::View* document)
   : m_document(document),
     m_found(false)
 {
@@ -83,7 +83,7 @@ Find::Find(Gsv::View* document)
 // When switching a notebook page, and if the search dialog is present, change the reference of the
 // document to search in.
 // *************************************************************************************************
-void Find::document(Gsv::View* document)
+void FindBase::document(Gsv::View* document)
 {
   m_document = document;
   m_found = false;
@@ -92,7 +92,7 @@ void Find::document(Gsv::View* document)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void Find::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
+void FindBase::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
 {
   Glib::RefPtr<Gtk::TextBuffer::Mark> mark;
 
@@ -113,12 +113,12 @@ void Find::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
 // *************************************************************************************************
 // Search the word occurence
 // *************************************************************************************************
-void Find::findFirst()
+void FindBase::findFirst()
 {
   if (nullptr != m_document)
     {
       m_start = m_document->get_buffer()->begin();
-      Find::find(m_entry.get_text(), m_start);
+      FindBase::find(m_entry.get_text(), m_start);
     }
   else
     {
@@ -130,7 +130,7 @@ void Find::findFirst()
 // *************************************************************************************************
 // Search the next occurence
 // *************************************************************************************************
-void Find::findNext()
+void FindBase::findNext()
 {
   if (nullptr != m_document)
     {
@@ -144,7 +144,7 @@ void Find::findNext()
           return ;
         }
       iter = m_document->get_buffer()->get_iter_at_mark(last_pos);
-      Find::find(m_entry.get_text(), iter);
+      FindBase::find(m_entry.get_text(), iter);
     }
   else
     {
@@ -157,7 +157,7 @@ void Find::findNext()
 // Create a kind of dialog window for searching a string inside a text document.
 // *************************************************************************************************
 FindWindow::FindWindow(Gsv::View* document)
-  : Find(document),
+  : FindBase(document),
     m_label("Find"),
     m_next("Next")
 {
@@ -168,7 +168,7 @@ FindWindow::FindWindow(Gsv::View* document)
   m_vbox.pack_start(m_status);
   add(m_vbox);
 
-  m_next.signal_clicked().connect(sigc::mem_fun(*this, &Find::findNext));
+  m_next.signal_clicked().connect(sigc::mem_fun(*this, &FindBase::findNext));
 
   show_all_children();
 }
@@ -177,7 +177,7 @@ FindWindow::FindWindow(Gsv::View* document)
 //
 // *************************************************************************************************
 ReplaceWindow::ReplaceWindow(Gsv::View* document)
-  : Find(document),
+  : FindBase(document),
     m_label("Replace"),
     m_label2("by"),
     m_search("Find"),
@@ -207,10 +207,10 @@ ReplaceWindow::ReplaceWindow(Gsv::View* document)
 // *************************************************************************************************
 void ReplaceWindow::find()
 {
-  Find::findNext();
+  FindBase::findNext();
   if (!m_found)
     {
-      Find::findFirst();
+      FindBase::findFirst();
     }
 }
 
@@ -228,7 +228,7 @@ void ReplaceWindow::replace()
       Gtk::TextBuffer::iterator i;
       i = m_document->get_buffer()->erase(m_start, m_end);
       m_document->get_buffer()->insert(i, m_entry2.get_text());
-      Find::findNext();
+      FindBase::findNext();
     }
 }
 

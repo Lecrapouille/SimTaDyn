@@ -25,11 +25,12 @@
 #  include "SimTaDynMap.hpp"
 #  include "Gtkmm.tpp"
 
-// *************************************************************************************************
-//! \brief Show and edit the content (transform matrix) of a SceneNode.
-//! This window is displayed when the user clicks on a scene node
-//! (= SimTaDynSheet) of a SimTaDynMap (= SceneGraph) in the SimTaDynMapExplorer.
-// *************************************************************************************************
+// **************************************************************
+//! \brief Show and edit the content (transform matrix) of a
+//! SceneNode.  This window is displayed when the user clicks on a
+//! scene node (= SimTaDynSheet) of a SimTaDynMap (= SceneGraph) in
+//! the SimTaDynMapExplorer.
+// **************************************************************
 class SceneNodeEditor : public Gtk::Window // FIXME https://github.com/fra-zz-mer/RenderMasterEditor
 {
 private:
@@ -188,34 +189,17 @@ public:
   }
 
   //-----------------------------------------------------------------
-  //! \brief Signal when a new SimTaDyn map resource has been
-  //! succesfully loaded by the LoaderManager. This methods update the
-  //! GTK+ TreeView by adding to it the new map.
+  //! \brief Add the SimTaDynMap in the GTK+ Treeview.
   //-----------------------------------------------------------------
-  void onSuccessMapLoaded(SimTaDynMapPtr map);
+  void addMap(SimTaDynMapPtr map);
 
   //-----------------------------------------------------------------
-  //! \brief Signal when a new SimTaDyn map resource has failed loaded
-  //! by the LoaderManager. This methods update the GTK+ TreeView by
-  //! adding the map name with a KO icon in the GTK+ TreeView.
+  //! \brief Refresh Gtk::TreeView associated to map
   //-----------------------------------------------------------------
-  void onFailMapLoaded(std::string const& filename, std::string const& message);
+  void updateMap(SimTaDynMapPtr map/*, SceneNodePtr sheet*/);
 
-  //-----------------------------------------------------------------
-  //! \brief Signal when a new SimTaDyn map resource has been
-  //! successfully saved. This methods update the GTK+ TreeView by
-  //! clearing the flag 'document need to be saved'.
-  //-----------------------------------------------------------------
-  void onSuccessMapSaved(SimTaDynMapPtr map);
+  void removeMap(SimTaDynMapPtr map);
 
-  //-----------------------------------------------------------------
-  //! \brief Signal when a new SimTaDyn map resource has failed
-  //! saving. This methods update the GTK+ TreeView by adding an
-  //! warning icon.
-  //-----------------------------------------------------------------
-  void onFailMapSaved(std::string const& filename, std::string const& message);
-
-  void on_sheet_changed(SimTaDynMapPtr map/*, SceneNodePtr sheet*/);
 private:
 
   //-----------------------------------------------------------------
@@ -227,24 +211,14 @@ private:
   void traverseSceneGraph(SceneNodePtr const sceneNode, TreeIterator& gtkNode);
 
   //-----------------------------------------------------------------
-  //! \brief Add the SimTaDynMap in the GTK+ Treeview.
-  //-----------------------------------------------------------------
-  void addMap(SimTaDynMapPtr map);
-
-  //-----------------------------------------------------------------
   //! \brief
-  //-----------------------------------------------------------------
-  void addFolder(Category const type, Glib::ustring const &name);
-
-  //-----------------------------------------------------------------
-  //! \brief
-  //! FIXME: Create an IconManager instead
+  //! TODO: Create an IconManager instead
   //-----------------------------------------------------------------
   bool loadAllIcons();
 
   //-----------------------------------------------------------------
   //! \brief
-  //! FIXME: Create an IconManager instead
+  //! TODO: Create an IconManager instead
   //-----------------------------------------------------------------
   bool loadIcon(Icon const icon, std::string const& icon_name);
 
@@ -254,16 +228,15 @@ private:
   //! tree usually an error message (Forth script ko, OpenGL shader
   //! compilation error, map loading error ...)
   //-----------------------------------------------------------------
-  bool on_param_tree_view_query_tooltip(int x, int y,
-                                        bool /*keyboard_tooltip*/,
-                                        const Glib::RefPtr<Gtk::Tooltip>& tooltip);
+  bool onQueryTooltip(int x, int y, bool /*keyboard_tooltip*/,
+                      const Glib::RefPtr<Gtk::Tooltip>& tooltip);
 
   //-----------------------------------------------------------------
   //! \brief Signal when the user clicked on a GTK+ treeview node.
   //! Depending on the mouse button either open the SceneNodeEditor
   //! (for editing a SceneNode) or a popup menu for modifing the SceneGraph.
   //-----------------------------------------------------------------
-  bool on_mytreeview_button_press_event(GdkEventButton *ev);
+  bool onButtonPressEvent(GdkEventButton *ev);
 
 private:
 

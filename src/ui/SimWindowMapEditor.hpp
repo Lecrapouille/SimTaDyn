@@ -21,28 +21,32 @@
 #ifndef MAP_EDITOR_WINDOW_HPP
 #  define MAP_EDITOR_WINDOW_HPP
 
-#  include "SimTaDynWindow.hpp"
+#  include "SimWindow.hpp"
 #  include "MapEditor.hpp"
-#  include "KeyBoardHandler.hpp"
+#  include "InputsHandler.hpp"
 #  include "MapEditorCommands.hpp"
+#  include "MapEditionTools.hpp"
+#  include "SimWindowMapExplorer.hpp"
 #  include <unordered_map>
 
 class IMapEditorCommand;
 
-// *************************************************************************************************
+// **************************************************************
 //! \brief
-// *************************************************************************************************
+// **************************************************************
 class MapEditorWindow :
-  public MapEditor,
   public ISimTaDynWindow,
+  public MouseHandler,
   public KeyBoardHandler
 {
   friend class SplitScreenCommand;
-  using CommandContainer = std::unordered_map<int, std::unique_ptr<IMapEditorCommand>>;
 
 public:
 
   MapEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application);
+  inline MapEditor& mapEditor() { return m_editor; }
+  inline ActionType actionType() const { return m_action_type.button(); }
+  inline ActionOn actionOn() const { return m_action_on.button(); }
 
 private:
 
@@ -50,6 +54,8 @@ private:
   void populateToolBar();
   void splitView(Gtk::Orientation const orientation);
   void bindKeyBoardCommands();
+  void bindToolbarCommands();
+  void bindMapExplorerSignals();
 
   virtual void onOpenFileClicked() override;
   virtual void onRecentFilesClicked() override;
@@ -61,6 +67,7 @@ private:
   virtual void onSaveAsFileClicked() override;
   virtual bool onExit(GdkEventAny* event) override;
   virtual bool onRefreshKeyboard() override;
+  virtual bool onMousePressed(GdkEventButton* event) override;
 
   void onActionOnSelected(const ActionOn id);
   void onActionTypeSelected(const ActionType id);
@@ -79,15 +86,23 @@ private:
 
 protected:
 
-  std::vector<int> m_allowed_keys;
-  CommandContainer m_commands;
+  using KeyBoardCommandContainer = std::unordered_map<int, std::unique_ptr<IMapEditorCommand>>;
+  using ToolCommandContainer = std::unordered_map<ActionType, std::unique_ptr<MapEditionTools>>;
+
+  std::vector<int>           m_allowed_keys;
+  KeyBoardCommandContainer   m_keyboard_commands;
+  ToolCommandContainer       m_mouse_commands;
 
 private:
 
-  Gtk::Popover              m_menu_popov;
-  Gtk::VBox                 m_vbox;
-  Gtk::HBox                 m_hbox;
-  Gtk::SeparatorToolItem    m_toolbar_separator[2];
+  MapEditor                  m_editor;
+  MapExplorerWindow          m_explorer;
+  Gtk::Popover               m_menu_popov;
+  Gtk::HBox                  m_hbox;
+  Gtk::SeparatorToolItem     m_toolbar_separator[2];
+  Gtk::Toolbar               m_toolbar;
+  ToggleButtons<ActionType>  m_action_type;
+  ToggleButtons<ActionOn>    m_action_on;
 };
 
 #endif // MAP_EDITOR_WINDOW_HPP

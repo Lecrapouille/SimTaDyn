@@ -26,6 +26,21 @@
 #  include "Types.hpp"
 
 // *************************************************************************************************
+//! \brief
+// *************************************************************************************************
+class IMapEvents
+{
+public:
+
+  IMapEvents() {}
+  virtual ~IMapEvents() {}
+
+  virtual void onMapCreated(SimTaDynMapPtr map) = 0;
+  virtual void onMapUpdated(SimTaDynMapPtr map) = 0;
+  virtual void onMapClosed(SimTaDynMapPtr map) = 0;
+};
+
+// *************************************************************************************************
 //! \brief This class defines a SimTaDyn geographic map. It contains, nodes, arcs, Forth scripts,
 //! OpenGL datum for the display. It implements the observable (aka listenable) design pattern:
 //! When the map changes, it notifies to all observers which have subscribed to this map (for example

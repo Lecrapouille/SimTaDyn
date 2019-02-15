@@ -1,22 +1,50 @@
-#ifndef KEYBOARD_HANDLER_HPP
-#define KEYBOARD_HANDLER_HPP
+#ifndef INPUTS_HANDLER_HPP
+#define INPUTS_HANDLER_HPP
 
 #include "Gtkmm.tpp"
+#include "NonCopyable.hpp"
 
-class KeyBoardHandler
+class MouseHandler: private NonCopyable
+{
+
+public:
+
+  MouseHandler() {}
+  virtual ~MouseHandler() {}
+
+  void initMouseHandler(Gtk::ApplicationWindow& window)
+  {
+    window.add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK |
+                      Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
+
+    window.signal_button_press_event().connect
+      (sigc::mem_fun(*this, &MouseHandler::onMousePressed));
+  }
+
+
+private:
+
+  virtual bool onMousePressed(GdkEventButton* event) = 0;
+
+};
+
+class KeyBoardHandler: private NonCopyable
 {
   static constexpr int MAX_KEYS = 0x10000;
 
 public:
 
-  KeyBoardHandler(Gtk::ApplicationWindow& widget, uint32_t const refresh_period_ms = 10u)
+  KeyBoardHandler() {}
+  virtual ~KeyBoardHandler() {}
+
+  void initKeyBoardHandler(Gtk::ApplicationWindow& window, uint32_t const refresh_period_ms = 10u)
   {
     std::cout << "KeyBoardHandler" << std::endl;
-    widget.add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+    window.add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 
-    widget.signal_key_press_event().connect_notify
+    window.signal_key_press_event().connect_notify
       (sigc::mem_fun(*this, &KeyBoardHandler::onKeyPressed));
-    widget.signal_key_release_event().connect_notify
+    window.signal_key_release_event().connect_notify
       (sigc::mem_fun(*this, &KeyBoardHandler::onKeyReleased));
 
     if (refresh_period_ms > 0)
@@ -87,4 +115,4 @@ private:
   int  m_last = -1;
 };
 
-#endif // KEYBOARD_HANDLER_HPP
+#endif // INPUTS_HANDLER_HPP

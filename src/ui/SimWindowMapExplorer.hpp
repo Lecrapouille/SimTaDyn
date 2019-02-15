@@ -18,58 +18,31 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef MVP_HPP
-#define MVP_HPP
+#ifndef SIMWINDOW_MAP_EXPLORER_HPP
+#  define SIMWINDOW_MAP_EXPLORER_HPP
 
-#include "DrawingArea.hpp"
+#include "MapExplorer.hpp"
 #include "SimTaDynMap.hpp"
 
-class MapPresenter
+class MapExplorerWindow :
+  public Gtk::ApplicationWindow
+//protected IMapEvents
 {
 public:
 
-  MapPresenter(PopupException& popup_exception, SimTaDynMapPtr map = nullptr)
-    : m_glarea(popup_exception),
-      m_map(map)
-  {}
+  MapExplorerWindow(Glib::RefPtr<Gtk::Application> application);
 
-  void model(SimTaDynMapPtr map)
-  {
-    m_map = map;
-  }
+  //protected:
 
-  inline GLDrawingArea& view()
-  {
-    return m_glarea;
-  }
+  void onMapCreated(SimTaDynMapPtr map);
+  /*virtual void onMapFailure(SimTaDynMapPtr map) override;
+  virtual void onMapUpdated(SimTaDynMapPtr map) override;
+  virtual void onMapClosed(SimTaDynMapPtr map) override;*/
 
-  inline SimTaDynMapPtr modelPtr()
-  {
-    return m_map;
-  }
+protected:
 
-  inline SimTaDynMap& model()
-  {
-    return *m_map;
-  }
-
-private:
-
-  // Thread safe si glarea a ses propres donnees a dessiner
-  // (genre un gros VBO (2 pour faire un swap VBO)
-  // independant du model (on a parcouru le scenegraph et on a
-  // appliquer le prod matricielle, le resultat est sauve dans un VBO)
-  // on le fait uniquement quand le scene graph a change.
-  void drawMap()
-  {
-    //LOGI("Repainting map '%s'", m_map.name().c_str());
-    //map.drawnBy(m_glarea);
-  }
-
-private:
-
-  GLDrawingArea  m_glarea;
-  SimTaDynMapPtr m_map;
+  Glib::RefPtr<Gtk::Application> m_application;
+  SimTaDynMapExplorer m_explorer;
 };
 
-#endif
+#endif // SIMWINDOW_MAP_EXPLORER_HPP

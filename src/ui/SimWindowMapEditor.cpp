@@ -18,29 +18,35 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "MapEditorWindow.hpp"
+#include "SimWindowMapEditor.hpp"
 
 //------------------------------------------------------------------
 MapEditorWindow::MapEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application)
   : ISimTaDynWindow(application),
-    MapEditor(forth),
-    KeyBoardHandler(*this, 10u) // FIXME 10u is mandatory
+    m_editor(m_popup_exception, forth),
+    m_explorer(application),
+    m_action_type(m_toolbar),
+    m_action_on(m_toolbar)
 {
+  m_application->signal_startup().connect([&] {
+      m_application->add_window(m_explorer);
+    });
+
+  initMouseHandler(*this);
+  initKeyBoardHandler(*this);
   populatePopovMenu();
   populateToolBar();
   bindKeyBoardCommands();
+  bindToolbarCommands();
+  bindMapExplorerSignals();
 
-  m_hbox.pack_start(m_vbox);
-  m_hbox.pack_start(m_toolbar, Gtk::PACK_SHRINK);
-
-  //
+  MapPresenter* presenter = new MapPresenter(m_popup_exception/*FIXME *this, createDummy*/);
+  m_editor.addPresenter(presenter);
   Gtk::Box* box = Gtk::make_managed<Gtk::Box>();
-
-  MapPresenter* presenter = new MapPresenter(/*FIXME *this, createDummy*/);
-  addPresenter(presenter);
   box->pack_start(presenter->view());
-  m_vbox.pack_start(*box); // FIXME: m_vbox really needed ?
 
+  m_hbox.pack_start(*box);
+  m_hbox.pack_start(m_toolbar, Gtk::PACK_SHRINK);
   add(m_hbox);
   show_all();
 }
@@ -113,14 +119,59 @@ void MapEditorWindow::bindKeyBoardCommands()
                      GDK_KEY_Page_Up, GDK_KEY_Page_Down, GDK_KEY_Left,
                      GDK_KEY_Right };
 
-  m_commands[GDK_KEY_F1] = std::make_unique<SplitScreenCommand>(Gtk::Orientation::ORIENTATION_HORIZONTAL);
-  m_commands[GDK_KEY_F2] = std::make_unique<SplitScreenCommand>(Gtk::Orientation::ORIENTATION_VERTICAL);
-  m_commands[GDK_KEY_Page_Up] = std::make_unique<MoveCameraCommand>(CameraDirection::Up);
-  m_commands[GDK_KEY_Page_Down] = std::make_unique<MoveCameraCommand>(CameraDirection::Down);
-  m_commands[GDK_KEY_Left] = std::make_unique<MoveCameraCommand>(CameraDirection::Left);
-  m_commands[GDK_KEY_Right] = std::make_unique<MoveCameraCommand>(CameraDirection::Right);
-  m_commands[GDK_KEY_F3] = std::make_unique<MoveCameraCommand>(CameraDirection::Forward);
-  m_commands[GDK_KEY_F4] = std::make_unique<MoveCameraCommand>(CameraDirection::Backward);
+  m_keyboard_commands[GDK_KEY_F1] = std::make_unique<SplitScreenCommand>(Gtk::Orientation::ORIENTATION_HORIZONTAL);
+  m_keyboard_commands[GDK_KEY_F2] = std::make_unique<SplitScreenCommand>(Gtk::Orientation::ORIENTATION_VERTICAL);
+  m_keyboard_commands[GDK_KEY_Page_Up] = std::make_unique<MoveCameraCommand>(CameraDirection::Up);
+  m_keyboard_commands[GDK_KEY_Page_Down] = std::make_unique<MoveCameraCommand>(CameraDirection::Down);
+  m_keyboard_commands[GDK_KEY_Left] = std::make_unique<MoveCameraCommand>(CameraDirection::Left);
+  m_keyboard_commands[GDK_KEY_Right] = std::make_unique<MoveCameraCommand>(CameraDirection::Right);
+  m_keyboard_commands[GDK_KEY_F3] = std::make_unique<MoveCameraCommand>(CameraDirection::Forward);
+  m_keyboard_commands[GDK_KEY_F4] = std::make_unique<MoveCameraCommand>(CameraDirection::Backward);
+}
+
+//------------------------------------------------------------------
+void MapEditorWindow::bindToolbarCommands()
+{
+  std::cout << "bindToolbarCommands" << std::endl;
+  m_mouse_commands[ActionType::Add] = std::make_unique<AddCellTool>(m_editor);
+  m_mouse_commands[ActionType::Remove] = std::make_unique<RemoveCellTool>(m_editor);
+  m_mouse_commands[ActionType::Select] = std::make_unique<SelectCellTool>(m_editor);
+  m_mouse_commands[ActionType::Move] = std::make_unique<MoveCellTool>(m_editor);
+}
+
+//------------------------------------------------------------------
+void MapEditorWindow::bindMapExplorerSignals()
+{
+  m_editor.loaded_success.connect(
+     sigc::mem_fun(m_explorer, &MapExplorerWindow::onMapCreated));
+  //m_editor.loaded_failure.connect(
+  //   sigc::mem_fun(m_explorer, &MapExplorerWindow::onMapFailure));
+}
+
+//------------------------------------------------------------------
+bool MapEditorWindow::onMousePressed(GdkEventButton* event)
+{
+  std::cout << "MapEditorWindow::onMousePressed" << std::endl;
+  if (event->type == GDK_BUTTON_PRESS)
+    {
+      switch (event->button)
+        {
+        case 1:
+          std::cout << "GLDrawingArea::on_button_press_event button1" << std::endl;
+          m_mouse_commands[actionType()]->button1PressEvent(event->x, event->y); // TODO position relative a la fenetre courante
+          break;
+        case 2:
+          std::cout << "GLDrawingArea::on_button_press_event button2" << std::endl;
+          m_mouse_commands[actionType()]->button2PressEvent(event->x, event->y);
+          break;
+        case 3:
+          std::cout << "GLDrawingArea::on_button_press_event button3" << std::endl;
+          m_mouse_commands[actionType()]->button3PressEvent(event->x, event->y);
+          break;
+        }
+    }
+
+  return false;
 }
 
 //------------------------------------------------------------------
@@ -133,7 +184,7 @@ bool MapEditorWindow::onRefreshKeyboard()
       // the function associated to it.
       if (isKeyPressed(key))
         {
-          m_commands[key]->execute(*this);
+          m_keyboard_commands[key]->execute(*this);
         }
     }
   return true;
@@ -142,19 +193,19 @@ bool MapEditorWindow::onRefreshKeyboard()
 //------------------------------------------------------------------
 void MapEditorWindow::actionReplaceCurrentMap()
 {
-  /*return*/ dialogLoadMap(getRootWindow(), false, true);
+  /*return*/ m_editor.dialogLoadMap(*this, false, true);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::actionMergeMap()
 {
-  /*return*/ dialogLoadMap(getRootWindow(), false, false);
+  /*return*/ m_editor.dialogLoadMap(*this, false, false);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::actionClearMap()
 {
-  activeModel().resetSheets();
+  m_editor.activeModel().resetSheets();
 }
 
 //------------------------------------------------------------------
@@ -170,40 +221,40 @@ void MapEditorWindow::actionNewUndirectSheet()
 //------------------------------------------------------------------
 void MapEditorWindow::actionImportSheet()
 {
-  /*return*/ dialogLoadSheet(getRootWindow(), true, false);
+  /*return*/ m_editor.dialogLoadSheet(*this, true, false);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::actionReplaceSheet()
 {
-  /*return*/ dialogLoadSheet(getRootWindow(), false, true);
+  /*return*/ m_editor.dialogLoadSheet(*this, false, true);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::actionClearSheet()
 {
-  //activeModel().sheet().reset();
+  m_editor.activeSheet().reset();
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::splitView(Gtk::Orientation const orientation)
 {
-  MapPresenter* presenter = new MapPresenter(/*FIXME *this,*/ activeModelPtr());
-  splitWidget(activeView(), presenter->view(), orientation, Pack::First);
-  addPresenter(presenter);
+  MapPresenter* presenter = new MapPresenter(m_popup_exception, m_editor.activeModelPtr());
+  splitWidget(m_editor.activeView(), presenter->view(), orientation, Pack::First);
+  m_editor.addPresenter(presenter);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::onOpenFileClicked()
 {
-  /*return*/ dialogLoadMap(getRootWindow(), true, false);
+  /*return*/ m_editor.dialogLoadMap(*this, true, false);
 }
 
 //------------------------------------------------------------------
 void MapEditorWindow::onRecentFilesClicked()
 {
   std::string filename = "NOT_YET_IMPLEMENTED";
-  /*return*/ doOpenSheet(filename, true, false);
+  /*return*/ m_editor.doOpenSheet(filename, true, false);
 }
 
 //------------------------------------------------------------------
@@ -315,6 +366,7 @@ bool MapEditorWindow::onExit(GdkEventAny* /*event*/)
 //------------------------------------------------------------------
 void MapEditorWindow::onActionOnSelected(const ActionOn id)
 {
+  m_editor.setActionOn(id);
 }
 
 //------------------------------------------------------------------
