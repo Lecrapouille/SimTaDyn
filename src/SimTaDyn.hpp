@@ -22,6 +22,7 @@
 #  define SIMTADYN_CONTEXT_HPP_
 
 #  include "Path.hpp"
+#  include "NonCopyable.hpp"
 #  include "SimWindowMapEditor.hpp"
 #  include "SimWindowForthEditor.hpp"
 #  include "CmdParser/cmdparser.hpp"
@@ -29,7 +30,7 @@
 // **************************************************************
 //! \brief
 // **************************************************************
-class SimTaDyn
+class SimTaDyn : private NonCopyable
 {
 public:
 
@@ -52,7 +53,7 @@ public:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  inline void createMapEditorWindow()
+  inline static void createMapEditorWindow()
   {
     createWindow<MapEditorWindow>();
   }
@@ -60,9 +61,19 @@ public:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  inline void createForthEditorWindow()
+  inline static void createForthEditorWindow()
   {
     createWindow<ForthEditorWindow>();
+  }
+
+  inline static SimForth& forth()
+  {
+    return m_forth;
+  }
+
+  inline static Glib::RefPtr<Gtk::Application>& application()
+  {
+    return m_application;
   }
 
 private:
@@ -72,15 +83,15 @@ private:
   //------------------------------------------------------------------
   template<class W> void createMainWindow()
   {
-    m_main_window = std::make_unique<W>(m_forth, m_application);
+    m_main_window = std::make_unique<W>();
   }
 
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  template<class W> void createWindow()
+  template<class W> static void createWindow()
   {
-    std::unique_ptr<W> win = std::make_unique<W>(m_forth, m_application);
+    std::unique_ptr<W> win = std::make_unique<W>();
     m_application->add_window(*(win.get()));
     m_windows.push_back(std::move(win));
   }
@@ -98,11 +109,11 @@ private:
 
 private:
 
-  cli::Parser                                   m_parser;
-  SimForth                                      m_forth;
-  Glib::RefPtr<Gtk::Application>                m_application;
-  std::vector<std::unique_ptr<ISimTaDynWindow>> m_windows;
-  std::unique_ptr<ISimTaDynWindow>              m_main_window;
+  cli::Parser                                          m_parser;
+  static SimForth                                      m_forth;
+  static Glib::RefPtr<Gtk::Application>                m_application;
+  static std::vector<std::unique_ptr<ISimTaDynWindow>> m_windows;
+  static std::unique_ptr<ISimTaDynWindow>              m_main_window;
 };
 
 #endif /* SIMTADYN_CONTEXT_HPP_ */

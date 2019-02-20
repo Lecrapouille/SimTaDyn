@@ -19,12 +19,13 @@
 //=====================================================================
 
 #include "SimWindowMapEditor.hpp"
+#include "SimTaDyn.hpp"
 
 //------------------------------------------------------------------
-MapEditorWindow::MapEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application)
-  : ISimTaDynWindow(application),
-    m_editor(m_popup_exception, forth),
-    m_explorer(application),
+MapEditorWindow::MapEditorWindow()
+  : ISimTaDynWindow(SimTaDyn::application()),
+    m_editor(m_popup_exception, SimTaDyn::forth()),
+    m_explorer(SimTaDyn::application()),
     m_action_type(m_toolbar),
     m_action_on(m_toolbar)
 {

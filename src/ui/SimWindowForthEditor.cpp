@@ -19,10 +19,11 @@
 //=====================================================================
 
 #include "SimWindowForthEditor.hpp"
+#include "SimTaDyn.hpp"
 
-ForthEditorWindow::ForthEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application)
-  : ISimTaDynWindow(application),
-    m_forth_editor(forth)
+ForthEditorWindow::ForthEditorWindow()
+  : ISimTaDynWindow(SimTaDyn::application()),
+    m_forth_editor(SimTaDyn::forth())
 {
   populatePopovMenu();
   populateToolBar();
@@ -116,6 +117,8 @@ void ForthEditorWindow::onOpenFileClicked()
 //------------------------------------------------------------------
 void ForthEditorWindow::onRecentFilesClicked()
 {
+  // FIXME: temporary: this is not the good button
+  SimTaDyn::createForthEditorWindow();
 }
 
 //------------------------------------------------------------------

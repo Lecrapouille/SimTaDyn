@@ -43,7 +43,7 @@ class MapEditorWindow :
 
 public:
 
-  MapEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application);
+  MapEditorWindow();
   inline MapEditor& mapEditor() { return m_editor; }
   inline ActionType actionType() const { return m_action_type.button(); }
   inline ActionOn actionOn() const { return m_action_on.button(); }

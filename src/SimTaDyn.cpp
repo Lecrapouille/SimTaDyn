@@ -22,6 +22,11 @@
 #include "Config.hpp"
 #include "PathManager.hpp"
 
+SimForth                                      SimTaDyn::m_forth;
+Glib::RefPtr<Gtk::Application>                SimTaDyn::m_application;
+std::vector<std::unique_ptr<ISimTaDynWindow>> SimTaDyn::m_windows;
+std::unique_ptr<ISimTaDynWindow>              SimTaDyn::m_main_window;
+
 SimTaDyn::SimTaDyn(int argc, char** argv)
   : m_parser(argc, argv)
 {

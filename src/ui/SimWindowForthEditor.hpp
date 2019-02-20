@@ -28,7 +28,7 @@ class ForthEditorWindow : public ISimTaDynWindow
 {
 public:
 
-  ForthEditorWindow(SimForth& forth, Glib::RefPtr<Gtk::Application> application);
+  ForthEditorWindow();
   Gtk::ToolButton& addForthButton(Gtk::BuiltinStockID const icon,
                                   std::string const& script,
                                   std::string const& help);
