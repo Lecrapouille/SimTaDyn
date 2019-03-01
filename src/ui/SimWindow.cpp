@@ -59,7 +59,32 @@ ISimTaDynWindow::ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application)
   setTitleIcon("icons/SimTaDyn.png");
   populateHeaderBar();
 
+  // Group buttons together
+  group(0, m_open_file_button, m_recent_files_button);
+  group(1, m_save_file_button, m_saveas_file_button);
+  group(2, m_undo_button, m_redo_button);
+  group(3, m_horizontal_split_button, m_vertical_split_button);
+
+  //
   signal_delete_event().connect(sigc::mem_fun(this, &ISimTaDynWindow::onExit));
+}
+
+//------------------------------------------------------------------
+void ISimTaDynWindow::group(uint8_t const id, Gtk::Button& left_button, Gtk::Button& right_button)
+{
+  Glib::RefPtr<Gtk::StyleContext> stylecontext;
+  m_boxes[id].pack_start(left_button);
+  m_boxes[id].pack_start(right_button);
+  stylecontext = m_boxes[id].get_style_context();
+  stylecontext->add_class("linked");
+}
+
+//------------------------------------------------------------------
+static void setPersonalIcon(Gtk::Button& button, const Glib::ustring& icon_name)
+{
+  Gtk::Image* image = Gtk::manage(new Gtk::Image(PathManager::instance().expand("icons/" + icon_name + ".png")));
+  image->property_use_fallback() = true;
+  button.set_image(*image);
 }
 
 //------------------------------------------------------------------
@@ -98,8 +123,8 @@ void ISimTaDynWindow::populateHeaderBar()
 
   m_open_file_button.set_label("Open");
   m_recent_files_button.set_image_from_icon_name("pan-down-symbolic", Gtk::ICON_SIZE_BUTTON, true);
-  m_horizontal_split_button.set_image_from_icon_name("go-last-symbolic", Gtk::ICON_SIZE_BUTTON, true);
-  m_vertical_split_button.set_image_from_icon_name("go-bottom-symbolic", Gtk::ICON_SIZE_BUTTON, true);
+  setPersonalIcon(m_horizontal_split_button, "split-horizontal");
+  setPersonalIcon(m_vertical_split_button, "split-vertical");
   m_undo_button.set_image_from_icon_name("edit-undo-symbolic", Gtk::ICON_SIZE_BUTTON, true);
   m_redo_button.set_image_from_icon_name("edit-redo-symbolic", Gtk::ICON_SIZE_BUTTON, true);
   m_save_file_button.set_label("Save");
@@ -107,14 +132,10 @@ void ISimTaDynWindow::populateHeaderBar()
   m_menu_button.set_image_from_icon_name("open-menu-symbolic", Gtk::ICON_SIZE_BUTTON, true);
 
   m_header_bar.pack_start(m_menu_button);
-  m_header_bar.pack_start(m_open_file_button);
-  m_header_bar.pack_start(m_recent_files_button);
-  m_header_bar.pack_start(m_horizontal_split_button);
-  m_header_bar.pack_start(m_vertical_split_button);
-  m_header_bar.pack_start(m_undo_button);
-  m_header_bar.pack_start(m_redo_button);
-  m_header_bar.pack_end(m_saveas_file_button);
-  m_header_bar.pack_end(m_save_file_button);
+  m_header_bar.pack_start(m_boxes[0]);
+  m_header_bar.pack_start(m_boxes[3]);
+  m_header_bar.pack_end(m_boxes[1]);
+  m_header_bar.pack_end(m_boxes[2]);
 
   m_open_file_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onOpenFileClicked));
   m_recent_files_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onRecentFilesClicked));

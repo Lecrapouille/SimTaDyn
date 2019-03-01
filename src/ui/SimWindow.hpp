@@ -63,6 +63,7 @@ private:
   virtual void onSaveFileClicked() = 0;
   virtual void onSaveAsFileClicked() = 0;
   virtual bool onExit(GdkEventAny* event) = 0;
+  void group(uint8_t const id, Gtk::Button& left, Gtk::Button& right);
 
 protected:
 
@@ -72,15 +73,16 @@ protected:
 
 private:
 
-  Gtk::HeaderBar m_header_bar;
-  Gtk::Button    m_open_file_button;
-  Gtk::Button    m_recent_files_button;
-  Gtk::Button    m_horizontal_split_button;
-  Gtk::Button    m_vertical_split_button;
-  Gtk::Button    m_undo_button;
-  Gtk::Button    m_redo_button;
-  Gtk::Button    m_save_file_button;
-  Gtk::Button    m_saveas_file_button;
+  Gtk::HeaderBar  m_header_bar;
+  Gtk::Button     m_open_file_button;
+  Gtk::MenuButton m_recent_files_button;
+  Gtk::Button     m_horizontal_split_button;
+  Gtk::Button     m_vertical_split_button;
+  Gtk::Button     m_undo_button;
+  Gtk::Button     m_redo_button;
+  Gtk::Button     m_save_file_button;
+  Gtk::Button     m_saveas_file_button;
+  Gtk::HBox       m_boxes[4];
 };
 
 #endif // ISIMTADYN_WINDOW_HPP
