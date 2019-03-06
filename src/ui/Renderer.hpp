@@ -179,6 +179,10 @@ protected:
   //------------------------------------------------------------------
   virtual void setCoreVersion() = 0;
 
+public:
+
+  sigc::signal<void> m_signal_draw; // FIXME: to be private
+
 private:
 
   Color           m_bg_color;

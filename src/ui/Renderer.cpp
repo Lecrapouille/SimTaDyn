@@ -50,6 +50,10 @@ bool GLRenderer::setupGraphics()
   float ratio = static_cast<float>(screenWidth()) / static_cast<float>(screenHeight());
   if (!m_nodes_renderer.setupGraphics(ratio))
     return false;
+  //if (!m_arcs_renderer.setupGraphics(ratio))
+  //   return false;
+  //if (!m_zones_renderer.setupGraphics(ratio))
+  //  return false;
 
   return true;
 }
@@ -151,5 +155,5 @@ void GLRenderer::moveCameraCommand(CameraDirection const direction)
 //------------------------------------------------------------------
 void GLRenderer::draw()
 {
-  //FIXME MapEditor::instance().drawCurrentMap(/* *this */);
+  m_signal_draw.emit();
 }

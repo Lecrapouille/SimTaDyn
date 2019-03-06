@@ -31,7 +31,11 @@ public:
   MapPresenter(PopupException& popup_exception, SimTaDynMapPtr map = nullptr)
     : m_glarea(popup_exception),
       m_map(map)
-  {}
+  {
+    view().m_signal_draw.connect(sigc::bind<GLDrawingArea&>(
+      sigc::mem_fun(*this, &MapPresenter::drawCurrentMap),
+      view()));
+  }
 
   void model(SimTaDynMapPtr map)
   {
@@ -53,17 +57,13 @@ public:
     return *m_map;
   }
 
-private:
-
-  // Thread safe si glarea a ses propres donnees a dessiner
-  // (genre un gros VBO (2 pour faire un swap VBO)
-  // independant du model (on a parcouru le scenegraph et on a
-  // appliquer le prod matricielle, le resultat est sauve dans un VBO)
-  // on le fait uniquement quand le scene graph a change.
-  void drawMap()
+  void drawCurrentMap(GLDrawingArea& view)
   {
-    //LOGI("Repainting map '%s'", m_map.name().c_str());
-    //map.drawnBy(m_glarea);
+    if (nullptr != modelPtr())
+      {
+        std::cout << "draw map" << std::endl;
+        modelPtr()->drawnBy(view);
+      }
   }
 
 private:
