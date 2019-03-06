@@ -66,7 +66,6 @@ SimTaDyn::SimTaDyn(int argc, char** argv)
 
 SimTaDyn::~SimTaDyn()
 {
-  Logger::destroy();
 }
 
 int SimTaDyn::run()

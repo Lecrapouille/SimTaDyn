@@ -122,7 +122,7 @@ bool MapEditor::doOpenMap(std::string const& filename, bool const new_map, bool 
 
       if (nullptr == map)
         {
-          //throw LoaderException("map shall not be nullptr");
+          //FIXME throw LoaderException("map shall not be nullptr");
           return false; // Map already loaded
         }
 
