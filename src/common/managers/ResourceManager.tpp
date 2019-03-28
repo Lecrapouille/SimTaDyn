@@ -94,7 +94,7 @@ public:
         // Note: -1 because shared_ptr has 1 reference made by its
         // own container.
         auto n = it.second.use_count() - 1;
-        if (n > 0u)
+        if (n > 0)
           {
             CPP_LOG(logger::Warning)
               << "Destroying the ResourceManager but its resource #"
