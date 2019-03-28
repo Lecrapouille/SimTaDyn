@@ -12,7 +12,7 @@ download needed third part libraries, compile the whole code source, install the
 (if desired) and launch it.
 
 ```sh
-git clone https://github.com/Lecrapouille/SimTaDyn.git --depth=1
+git clone --recurse-submodules https://github.com/Lecrapouille/SimTaDyn.git --depth=1
 cd SimTaDyn/
 make download-external-libs
 make compile-external-libs
@@ -61,7 +61,7 @@ Click on the link matching your operating system, for knowing how to install the
 Step 2.1: download the SimTaDyn code source from github <img src="http://i.imgur.com/Cj4rMrS.gif" height="40" alt="Swimming Octocat" title="Games on GitHub">:
 
 ```sh
-git clone https://github.com/Lecrapouille/SimTaDyn.git
+git clone --recurse-submodules https://github.com/Lecrapouille/SimTaDyn.git
 ```
 A `SimTaDyn/` folder should have been created and will be refered as the root directory of your project.
 
@@ -220,7 +220,7 @@ Your value should differ from this document.
 
 And go inside SimTaDyn folder, this will be the entry point for your docker:
 ```sh
-git clone https://github.com/Lecrapouille/SimTaDyn.git
+git clone --recurse-submodules https://github.com/Lecrapouille/SimTaDyn.git
 cd SimTaDyn
 ```
 

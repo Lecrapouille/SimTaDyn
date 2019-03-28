@@ -37,7 +37,7 @@ out-print "Getting" "SimTaDyn" "/tmp/simtadyn-obs"
 rm -fr /tmp/simtadyn-obs 2> /dev/null
 mkdir -p /tmp/simtadyn-obs
 cd /tmp/simtadyn-obs
-git clone https://github.com/Lecrapouille/SimTaDyn.git --depth=1 > /dev/null 2> /dev/null
+git clone --recurse-submodules https://github.com/Lecrapouille/SimTaDyn.git --depth=1 > /dev/null 2> /dev/null
 cd SimTaDyn
 
 ### Clone and compile external projects

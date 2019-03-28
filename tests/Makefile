@@ -24,6 +24,10 @@ PROJECT = SimTaDyn
 TARGET = $(PROJECT)-UnitTest
 
 ###################################################
+# Debug mode or Release mode
+PROJECT_MODE = debug
+
+###################################################
 # Location from the project root directory.
 P=..
 ABSP=$(abspath $(P))
@@ -68,16 +72,37 @@ OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	   \
 
 ###################################################
 # Compilation options.
-OPTIM_FLAGS = -O2 -g
 CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES += -Icommon/containers -Icommon/graphics -Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils -Icore/loaders -Icore/spreadsheet -I../src/core/standalone/ClassicSpreadSheet
+INCLUDES += -I$(P)/external -I$(P)/external/SOIL			\
+-I$(P)/external/YesEngine -I$(P)/external/zipper			\
+-I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns		\
+-I$(P)/src/common/managers -I$(P)/src/common/utils			\
+-I$(P)/src/common/maths -I$(P)/src/common/containers			\
+-I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
+-I$(P)/src/common/graphics/OpenGL/ -I$(P)/src/common/graphics/RTree	\
+-I$(P)/src/common/graphics -I$(P)/src/core -I$(P)/src/core/loaders	\
+-I$(P)/src/forth -I$(P)/src/ui
+
+INCLUDES += -Icommon/containers -Icommon/graphics			\
+-Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils	\
+-Icore/loaders -Icore/spreadsheet					\
+-I../src/core/standalone/ClassicSpreadSheet
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
+VPATH += $(P)/external/YesEngine:\
+$(P)/external/SOIL:$(P)/src/common/spreadsheet:\
+$(P)/src/common/patterns:$(P)/src/common/managers:\
+$(P)/src/common/utils:$(P)/src/common/maths:\
+$(P)/src/common/containers:$(P)/src/common/graph-theory:\
+$(P)/src/common/graphics:$(P)/src/common/graphics/OpenGL:\
+$(P)/src/common/graphics/RTree:$(P)/src/core:$(P)/src/core/loaders:\
+$(P)/src/forth:$(P)/src/ui
+
 VPATH += common/containers:\
 common/graphics:\
 common/graph-theory:\
@@ -93,40 +118,32 @@ core/spreadsheet:\
 DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+#
+DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
+DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS = $(abspath $(P)/external/SOIL/libSOIL.a) \
-       $(abspath $(P)/external/zipper/build/libZipper-static.a)
+EXTERNAL_LIBS = \
+	$(abspath $(P)/external/SOIL/libSOIL.a) \
+	$(abspath $(P)/external/zipper/build/libZipper-static.a)
 
 ###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the external/README.md file.
 
-## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
-
-## Linux
+EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
 else ifeq ($(ARCHI),Linux)
-LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
--lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0		\
+EXTERNAL_LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0		\
+-latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0	\
 -lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
 -lglfw -ldl -ldw -lz
-
-## Windows
 else
-
-#$(error Unknown architecture)
+$(error Unknown architecture)
 endif
-
-# if inside Docker with Travis-CI, OpenGL context cannot be created.
-# So disable some tests.
-#ifeq ($(CI),true)
-#TU_OPTIONS=-a
-#endif
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
@@ -135,38 +152,8 @@ CXXFLAGS += --coverage
 LDFLAGS += --coverage
 
 ###################################################
-# Address sanitizer. Comment these lines if asan is
-# not desired.
-
-# FIXME: clang on Travis-CI bugs during linking (infinite loop).
-# FIXME: g++ on Tracis-CI I have a segfault and trace are not human
-# readable. Temporary disable asan with Travis
-
-# ifeq ($(CXX),g++)
-#ifneq ($(CI),true)
-#OPTIM_FLAGS = -O1 -g
-#CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-#LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-#LIBS += -static-libstdc++ -static-libasan
-#SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
-#endif
-
-###################################################
 # Compile SimTaDyn unit tests
 all: $(TARGET)
-
-###################################################
-# Link sources
-$(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
-
-###################################################
-# Compile unit tests
-%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
-	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
-	@$(POSTCOMPILE)
 
 ###################################################
 # Run unit tests.
@@ -183,4 +170,4 @@ clean:
 
 ###################################################
 # Sharable informations between all Makefiles
--include $(M)/Makefile.footer
+include $(M)/Makefile.footer

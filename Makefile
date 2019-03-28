@@ -24,25 +24,20 @@ PROJECT = SimTaDyn
 TARGET = $(PROJECT)
 
 ###################################################
+# Debug mode or Release mode
+PROJECT_MODE = debug
+
+###################################################
 # Location from the project root directory.
 P=.
 
 ###################################################
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
--include $(M)/Makefile.header
+include $(M)/Makefile.header
 
 ###################################################
-# Debug mode or Release mode
-PROJECT_MODE = debug
-
-###################################################
-# List of files to compile. Splited by directories
-ifeq ($(PROJECT_MODE),debug)
-OBJ_EXTERNAL   = backward.o
-else
-OBJ_EXTERNAL   =
-endif
+# Make the list of compiled files
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_PATTERNS   =
 OBJ_MATHS      = Maths.o
@@ -69,144 +64,70 @@ CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourcev
 LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 
 ###################################################
-#
-INCLUDES += -I$(P)/src
-VPATH += $(P)/src:
+# Inform Makefile where to find header files
+INCLUDES += -I$(P)/external -I$(P)/external/SOIL			\
+-I$(P)/external/YesEngine -I$(P)/external/zipper			\
+-I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns		\
+-I$(P)/src/common/managers -I$(P)/src/common/utils			\
+-I$(P)/src/common/maths -I$(P)/src/common/containers			\
+-I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
+-I$(P)/src/common/graphics/OpenGL/ -I$(P)/src/common/graphics/RTree	\
+-I$(P)/src/common/graphics -I$(P)/src/core -I$(P)/src/core/loaders	\
+-I$(P)/src/forth -I$(P)/src/ui -I$(P)/src
+
+###################################################
+# Inform Makefile where to find *.cpp and *.o files
+VPATH += $(P)/external/YesEngine:\
+$(P)/external/SOIL:$(P)/src/common/spreadsheet:\
+$(P)/src/common/patterns:$(P)/src/common/managers:\
+$(P)/src/common/utils:$(P)/src/common/maths:\
+$(P)/src/common/containers:$(P)/src/common/graph-theory:\
+$(P)/src/common/graphics:$(P)/src/common/graphics/OpenGL:\
+$(P)/src/common/graphics/RTree:$(P)/src/core:$(P)/src/core/loaders:\
+$(P)/src/forth:$(P)/src/ui:$(P)/src
 
 ###################################################
 # Project defines
 DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+#
+DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
+DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS = $(abspath $(P)/external/SOIL/libSOIL.a) \
-       $(abspath $(P)/external/zipper/build/libZipper-static.a)
+EXTERNAL_LIBS = \
+	$(abspath $(P)/external/SOIL/libSOIL.a) \
+	$(abspath $(P)/external/zipper/build/libZipper-static.a)
 
 ###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the external/README.md file.
 
-## OS X
 ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
-
-## Linux
+EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
 else ifeq ($(ARCHI),Linux)
-LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0 -latk-1.0		\
--lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0		\
+EXTERNAL_LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0		\
+-latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0	\
 -lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
 -ldl -lz -lstdc++
-
-## Windows
 else
-
-#$(error Unknown architecture)
+$(error Unknown architecture)
 endif
 
 ###################################################
-# Address sanitizer. Uncomment these lines if asan
-# is desired.
-##OPTIM = -O1 -g
-##CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-##LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-##LIBS += -static-libstdc++ -static-libasan
-##SANITIZER := ASAN_OPTIONS=symbolize=1 ASAN_SYMBOLIZER_PATH=$(shell which llvm-symbolizer)
-
-###################################################
-# Backward allows tracing stack when segfault happens
-ifeq ($(PROJECT_MODE),debug)
-ifneq ($(ARCHI),Darwin)
-OPTIM_FLAGS = -O2 -g
-DEFINES += -DBACKWARD_HAS_DW=1
-LIBS += -ldw
-endif
-else
-OPTIM_FLAGS = -O3
-endif
-
-###################################################
-#
+# Compile SimTaDyn project
 all: $(TARGET)
 
 ###################################################
-# Link sources
-$(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
-
-###################################################
-# Compile sources
-%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
-	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
-	@$(POSTCOMPILE)
-
-###################################################
-# Download external projects that SimTaDyn needs.
-.PHONY: download-external-libs
-download-external-libs:
-	@cd external && ./download-external-libs.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
-
-###################################################
-# Compile external projects that SimTaDyn needs.
-.PHONY: compile-external-libs
-compile-external-libs:
-	@cd external && ./compile-external-libs.sh $(ARCHI); cd .. > /dev/null 2> /dev/null
-
-###################################################
-# https://scan.coverity.com/
-# Coverity Scan: static analysis of code (web service)
-# For working, this service needs you download a runnable
-# and to compile your code with it. Once done, you have to
-# create a tarball of generated files and to upload the
-# tarball to the website.
-#
-# Compile again the project for Coverity Scan. An uploadable tarball is created.
-.PHONY: coverity-scan
-coverity-scan: clean
-	@rm -fr SimTaDyn.tgz cov-int 2> /dev/null
-	@cov-build --dir cov-int make -j8 && tar czvf SimTaDyn.tgz cov-int
-
-###################################################
-# Compile and launch unit tests. Then generate the html code coverage.
+# Compile and launch unit tests and generate the code coverage html report.
 .PHONY: unit-tests
 unit-tests:
 	@$(call print-simple,"Compiling unit tests")
 	@make -C tests coverage
-
-###################################################
-# Launch the executable with address sanitizer (if enabled).
-.PHONY: run
-run: $(TARGET)
-	$(SANITIZER) ./build/$(TARGET) 2>&1 | ./external/asan_symbolize.py
-
-###################################################
-# Generate the code source documentation with doxygen.
-.PHONY: doc
-doc:
-	@doxygen Doxyfile
-	@xdg-open doc/html/index.html >/dev/null
-
-###################################################
-# Compress SimTaDyn sources without its .git, build
-# folders and doc generated files. If a tarball
-# already exists, the older will stay intact and a
-# new one is created. Tarball confict names is managed.
-#
-# Compress the code source into a unique tarball for backup.
-.PHONY: targz
-targz:
-	@./.makefile/targz.sh $(PWD)
-
-###################################################
-# Create an uploadable tarball for the OpenSuse Build Service (OBS).
-.PHONY: obs
-obs:
-	@./.integration/opensuse-build-service.sh
 
 ###################################################
 # Install project. You need to be root user.
@@ -255,5 +176,4 @@ veryclean: clean
 
 ###################################################
 # Sharable informations between all Makefiles
-include $(M)/Makefile.help
 include $(M)/Makefile.footer
