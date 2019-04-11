@@ -24,127 +24,30 @@ PROJECT = SimTaDyn
 TARGET = SimForth
 
 ###################################################
+# Debug mode or Release mode
+PROJECT_MODE = debug
+
+###################################################
 # Location from the project root directory.
 P=../../..
 
 ###################################################
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
--include $(M)/Makefile.header
+include $(M)/Makefile.header
+include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile. Splited by directories
-ifeq ($(PROJECT_MODE),debug)
-OBJ_EXTERNAL   = backward.o
-else
-OBJ_EXTERNAL   =
-endif
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_STANDALONE = main.o
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
+OBJ           += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
 ###################################################
-# Debug mode or Release mode
-PROJECT_MODE = debug
-
-###################################################
-# Compilation options.
-CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0`
-
-###################################################
-#
-INCLUDES += -I$(P)/src
-VPATH += $(P)/src:
-
-###################################################
-# Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
-# Disable ugly gtkmm compilation warnings
-DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
-
-###################################################
-# Set Libraries compiled in the external/ directory.
-# For knowing which libraries is needed please read
-# the doc/Install.md file.
-LIBS =
-
-###################################################
-# Set Libraries. For knowing which libraries
-# is needed please read the external/README.md file.
-
-## OS X
-ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib
-
-## Linux
-else ifeq ($(ARCHI),Linux)
-LIBS += -ldl
-
-## Windows
-else
-
-#$(error Unknown architecture)
-endif
-
-###################################################
-# Backward allows tracing stack when segfault happens
-ifeq ($(PROJECT_MODE),debug)
-ifneq ($(ARCHI),Darwin)
-OPTIM_FLAGS = -O2 -g
-DEFINES += -DBACKWARD_HAS_DW=1
-LIBS += -ldw
-endif
-else
-OPTIM_FLAGS = -O3
-endif
-
-###################################################
-# Code coverage. Uncomment if desired
-# CXXFLAGS += --coverage
-# LDFLAGS += --coverage
-
-###################################################
+# Compile Standalone forth project
 all: $(TARGET)
 
 ###################################################
-# Link sources
-$(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","$(VERSION)")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
-
-###################################################
-# Compile sources
-%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
-	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(OPTIM_FLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
-	@$(POSTCOMPILE)
-
-###################################################
-# Install project. You need to be root user.
-.PHONY: install
-install: $(TARGET)
-	@$(call print-to,"Installing","data","$(PROJECT_DATA_PATH)","")
-	@rm -fr $(PROJECT_DATA_PATH)
-	@mkdir -p $(PROJECT_DATA_PATH)/forth
-	@cp -r ../core/system.fs $(PROJECT_DATA_PATH)/forth
-	@cp -r ../core/LibC $(PROJECT_DATA_PATH)/forth
-	@$(call print-to,"Installing","doc","$(PROJECT_DOC_PATH)","")
-	@mkdir -p $(PROJECT_DOC_PATH)
-	@cp -r ../doc/* $(PROJECT_DATA_ROOT)/doc
-#	@cp AUTHORS LICENSE README.md ChangeLog $(PROJECT_DATA_ROOT)
-	@$(call print-to,"Installing","$(BUILD)/$(TARGET)","$(PROJECT_EXE)","")
-	@mkdir -p $(BINDIR)
-	@cp $(BUILD)/$(TARGET) $(PROJECT_EXE)
-
-###################################################
-.PHONY: clean
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr *~ ../*~ $(BUILD) 2> /dev/null
-
-###################################################
 # Sharable informations between all Makefiles
-include $(M)/Makefile.help
 include $(M)/Makefile.footer

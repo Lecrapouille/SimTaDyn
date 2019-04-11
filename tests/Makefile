@@ -30,16 +30,16 @@ PROJECT_MODE = debug
 ###################################################
 # Location from the project root directory.
 P=..
-ABSP=$(abspath $(P))
 
 ###################################################
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
 include $(M)/Makefile.header
+include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
-#OBJ_EXTERNAL       = backward.o
+OBJ_EXTERNAL      +=
 OBJ_UTILS          = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_UTILS_UT      += StrongTypeTests.o FileTests.o PathTests.o LoggerTests.o TerminalColorTests.o
 OBJ_MATHS          = Maths.o
@@ -63,46 +63,33 @@ OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
 #OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 #OBJ_GUI           += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_UNIT_TEST      = main.o
-OBJ = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	   \
-      $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)	   \
-      $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)		   \
-      $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH) \
-      $(OBJ_CORE) $(OBJ_CORE_UT) $(OBJ_LOADERS) $(OBJ_LOADERS_UT)  \
-      $(OBJ_GUI) $(OBJ_UNIT_TEST)
+OBJ += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	\
+       $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)		\
+       $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)			\
+       $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH)	\
+       $(OBJ_CORE) $(OBJ_CORE_UT) $(OBJ_LOADERS) $(OBJ_LOADERS_UT)	\
+       $(OBJ_GUI) $(OBJ_UNIT_TEST)
 
 ###################################################
 # Compilation options.
-CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0` -lcppunit
+CXXFLAGS +=
+LDFLAGS += -lcppunit
+
+###################################################
+# Code coverage. Comment these lines if coveraging
+# is not desired.
+CXXFLAGS += --coverage
+LDFLAGS += --coverage
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES += -I$(P)/external -I$(P)/external/SOIL			\
--I$(P)/external/YesEngine -I$(P)/external/zipper			\
--I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns		\
--I$(P)/src/common/managers -I$(P)/src/common/utils			\
--I$(P)/src/common/maths -I$(P)/src/common/containers			\
--I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
--I$(P)/src/common/graphics/OpenGL/ -I$(P)/src/common/graphics/RTree	\
--I$(P)/src/common/graphics -I$(P)/src/core -I$(P)/src/core/loaders	\
--I$(P)/src/forth -I$(P)/src/ui
-
 INCLUDES += -Icommon/containers -Icommon/graphics			\
 -Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils	\
 -Icore/loaders -Icore/spreadsheet					\
--I../src/core/standalone/ClassicSpreadSheet
+-I$(P)/src/core/standalone/ClassicSpreadSheet
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
-VPATH += $(P)/external/YesEngine:\
-$(P)/external/SOIL:$(P)/src/common/spreadsheet:\
-$(P)/src/common/patterns:$(P)/src/common/managers:\
-$(P)/src/common/utils:$(P)/src/common/maths:\
-$(P)/src/common/containers:$(P)/src/common/graph-theory:\
-$(P)/src/common/graphics:$(P)/src/common/graphics/OpenGL:\
-$(P)/src/common/graphics/RTree:$(P)/src/core:$(P)/src/core/loaders:\
-$(P)/src/forth:$(P)/src/ui
-
 VPATH += common/containers:\
 common/graphics:\
 common/graph-theory:\
@@ -114,42 +101,12 @@ core/spreadsheet:\
 ../src/core/standalone/ClassicSpreadSheet
 
 ###################################################
-# Project defines
-DEFINES += -DCHECK_OPENGL -DARCHI=$(ARCHI)
-# Disable ugly gtkmm compilation warnings
-DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
-#
-DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
-DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
-
-###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS = \
+EXTERNAL_LIBS += \
 	$(abspath $(P)/external/SOIL/libSOIL.a) \
 	$(abspath $(P)/external/zipper/build/libZipper-static.a)
-
-###################################################
-# Set Libraries. For knowing which libraries
-# is needed please read the external/README.md file.
-
-ifeq ($(ARCHI),Darwin)
-EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
-else ifeq ($(ARCHI),Linux)
-EXTERNAL_LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0		\
--latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0	\
--lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
--lglfw -ldl -ldw -lz
-else
-$(error Unknown architecture)
-endif
-
-###################################################
-# Code coverage. Comment these lines if coveraging
-# is not desired.
-CXXFLAGS += --coverage
-LDFLAGS += --coverage
 
 ###################################################
 # Compile SimTaDyn unit tests
@@ -160,13 +117,7 @@ all: $(TARGET)
 .PHONY: unit-tests
 unit-tests: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
-	$(SANITIZER) ./build/$(TARGET) $(TU_OPTIONS) || (cat SimTaDyn.log; return 1)
-
-###################################################
-.PHONY: clean
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr $(BUILD) $(DOC) 2> /dev/null
+	$(SANITIZER) ./$(BUILD)/$(TARGET) $(TU_OPTIONS) || (cat $(TARGET).log; return 1)
 
 ###################################################
 # Sharable informations between all Makefiles

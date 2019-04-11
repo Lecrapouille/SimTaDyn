@@ -24,21 +24,21 @@ PROJECT = SimTaDyn
 TARGET = MyExcel
 
 ###################################################
+# Debug mode or Release mode
+PROJECT_MODE = debug
+
+###################################################
 # Location from the project root directory.
 P=../../../..
 
 ###################################################
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
--include $(M)/Makefile.header
+include $(M)/Makefile.header
+include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile. Splited by directories
-ifeq ($(PROJECT_MODE),debug)
-OBJ_EXTERNAL   = backward.o
-else
-OBJ_EXTERNAL   =
-endif
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS = PendingData.o
@@ -48,91 +48,18 @@ OBJ_FORTH     += ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_FORTH     += SimTaDynForth.o SpreadSheetPrimitives.o
 OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o
 OBJ_STANDALONE = ClassicSpreadSheet.o main.o
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+OBJ           += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_GRAPHS) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_STANDALONE)
-
-###################################################
-# Debug mode or Release mode
-PROJECT_MODE = debug
-
-###################################################
-# Compilation options.
-# FIXME: replace Glib::Module by my own class to remove gtk dependencies
-CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0`
-
-###################################################
-# Also locate code source files localy
-INCLUDES += -I.
-VPATH += .:
-
-###################################################
-# Common defines
-DEFINES += -DCHECK_OPENGL
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-LIBS =
-
-###################################################
-# Set Libraries. For knowing which libraries
-# is needed please read the external/README.md file.
-
-## OS X
-ifeq ($(ARCHI),Darwin)
-LIBS += -L/usr/local/lib
-
-## Linux FIXME: replace Glib::Module by my own class to remove gtk dependencies
-else ifeq ($(ARCHI),Linux)
-LIBS += -ldl -lglib-2.0
-
-## Windows
-else
-
-#$(error Unknown architecture)
-endif
-
-###################################################
-# Backward allows tracing stack when segfault happens
-ifeq ($(PROJECT_MODE),debug)
-ifneq ($(ARCHI),Darwin)
-OPTIM_FLAGS = -O2 -g
-DEFINES += -DBACKWARD_HAS_DW=1
-LIBS += -ldw
-endif
-else
-OPTIM_FLAGS = -O3
-endif
-
-###################################################
-# Code coverage. Uncomment if desired
-# CXXFLAGS += --coverage
-# LDFLAGS += --coverage
+EXTERNAL_LIBS +=
 
 ###################################################
 all: $(TARGET)
 
 ###################################################
-# Link sources
-$(TARGET): $(OBJ)
-	@$(call print-to,"Linking","$(TARGET)","$(BUILD)/$@","")
-	@cd $(BUILD) && $(CXX) $(OBJ) -o $(TARGET) $(LIBS) $(LDFLAGS)
-
-###################################################
-# Compile sources
-%.o: %.cpp $(BUILD)/%.d Makefile $(M)/Makefile.header $(M)/Makefile.footer version.h
-	@$(call print-from,"Compiling C++","$(TARGET)","$<")
-	@$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(DEFINES) $(OPTIM_FLAGS) $(INCLUDES) -c $(abspath $<) -o $(abspath $(BUILD)/$@)
-	@$(POSTCOMPILE)
-
-###################################################
-.PHONY: clean
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr *~ $(BUILD) 2> /dev/null
-
-###################################################
 # Sharable informations between all Makefiles
--include $(M)/Makefile.footer
+include $(M)/Makefile.footer

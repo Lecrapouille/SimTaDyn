@@ -35,6 +35,7 @@ P=.
 # Sharable informations between all Makefiles
 M=$(P)/.makefile
 include $(M)/Makefile.header
+include $(P)/Makefile.common
 
 ###################################################
 # Make the list of compiled files
@@ -54,69 +55,17 @@ OBJ_LOADERS    = ManagerException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDyn
 OBJ_GUI        = DialogException.o Redirection.o SimTaDynMapExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += ForthInspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_SIMTADYN   = SimTaDyn.o
-OBJ            = $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+OBJ           += $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)
-
-###################################################
-# Compilation options.
-CXXFLAGS = -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS = `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-
-###################################################
-# Inform Makefile where to find header files
-INCLUDES += -I$(P)/external -I$(P)/external/SOIL			\
--I$(P)/external/YesEngine -I$(P)/external/zipper			\
--I$(P)/src/common/spreadsheet -I$(P)/src/common/patterns		\
--I$(P)/src/common/managers -I$(P)/src/common/utils			\
--I$(P)/src/common/maths -I$(P)/src/common/containers			\
--I$(P)/src/common/graph-theory -I$(P)/src/common/graphics/OpenGL	\
--I$(P)/src/common/graphics/OpenGL/ -I$(P)/src/common/graphics/RTree	\
--I$(P)/src/common/graphics -I$(P)/src/core -I$(P)/src/core/loaders	\
--I$(P)/src/forth -I$(P)/src/ui -I$(P)/src
-
-###################################################
-# Inform Makefile where to find *.cpp and *.o files
-VPATH += $(P)/external/YesEngine:\
-$(P)/external/SOIL:$(P)/src/common/spreadsheet:\
-$(P)/src/common/patterns:$(P)/src/common/managers:\
-$(P)/src/common/utils:$(P)/src/common/maths:\
-$(P)/src/common/containers:$(P)/src/common/graph-theory:\
-$(P)/src/common/graphics:$(P)/src/common/graphics/OpenGL:\
-$(P)/src/common/graphics/RTree:$(P)/src/core:$(P)/src/core/loaders:\
-$(P)/src/forth:$(P)/src/ui:$(P)/src
-
-###################################################
-# Project defines
-DEFINES += -DCHECK_OPENGL
-# Disable ugly gtkmm compilation warnings
-DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
-#
-DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
-DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS = \
+EXTERNAL_LIBS += \
 	$(abspath $(P)/external/SOIL/libSOIL.a) \
 	$(abspath $(P)/external/zipper/build/libZipper-static.a)
-
-###################################################
-# Set Libraries. For knowing which libraries
-# is needed please read the external/README.md file.
-
-ifeq ($(ARCHI),Darwin)
-EXTERNAL_LIBS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
-else ifeq ($(ARCHI),Linux)
-EXTERNAL_LIBS += -lGL -lglut -lm -lglib-2.0 -lpangocairo-1.0		\
--latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0	\
--lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
--ldl -lz -lstdc++
-else
-$(error Unknown architecture)
-endif
 
 ###################################################
 # Compile SimTaDyn project
@@ -154,13 +103,6 @@ uninstall:
 	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
 	@rm $(PROJECT_EXE)
 	@rm -r $(PROJECT_DATA_ROOT)
-
-###################################################
-# Clean the build/ directory.
-.PHONY: clean
-clean:
-	@$(call print-simple,"Cleaning","$(PWD)")
-	@rm -fr $(BUILD) 2> /dev/null
 
 ###################################################
 # Clean the whole project.

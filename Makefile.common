@@ -1,0 +1,91 @@
+# -*- mode: makefile -*-
+##=====================================================================
+## SimTaDyn: A GIS in a spreadsheet.
+## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+##
+## This file is part of SimTaDyn.
+##
+## SimTaDyn is free software: you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+##=====================================================================
+
+###################################################
+# Modify this file will force compiling whole project
+MY_MAKEFILE_FILES += $(P)/Makefile.common
+
+###################################################
+# Compilation options.
+CXXFLAGS += -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
+LDFLAGS += `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+
+###################################################
+# Project defines
+DEFINES += -DCHECK_OPENGL
+# Disable ugly gtkmm compilation warnings
+DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
+# Dear ImGui defines: use Glew
+DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
+# SimTaDyn defines
+DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
+DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
+
+###################################################
+# Set Libraries. For knowing which libraries
+# is needed please read the external/README.md file.
+
+ifeq ($(ARCHI),Darwin)
+LDFLAGS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
+else ifeq ($(ARCHI),Linux)
+LDFLAGS += -lGL -lglut -lglfw -lm -lglib-2.0 -lpangocairo-1.0	\
+-latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0	\
+-lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
+-ldl -lz -lstdc++
+else
+$(error Unknown architecture)
+endif
+
+###################################################
+# Inform Makefile where to find header files
+INCLUDES += -I$(P)/external -I$(P)/external/backward-cpp		\
+-I$(P)/external/imgui -I$(P)/external/SOIL -I$(P)/external/YesEngine	\
+-I$(P)/external/zipper -I$(P)/src/common/spreadsheet			\
+-I$(P)/src/common/patterns -I$(P)/src/common/managers			\
+-I$(P)/src/common/utils -I$(P)/src/common/maths				\
+-I$(P)/src/common/containers -I$(P)/src/common/graph-theory		\
+-I$(P)/src/common/graphics/OpenGL -I$(P)/src/common/graphics/OpenGL/	\
+-I$(P)/src/common/graphics/RTree -I$(P)/src/common/graphics		\
+-I$(P)/src/core -I$(P)/src/core/loaders -I$(P)/src/forth		\
+-I$(P)/src/ui -I$(P)/src
+
+###################################################
+# Inform Makefile where to find *.cpp and *.o files
+VPATH += $(P)/external:\
+$(P)/external/backward-cpp:\
+$(P)/external/YesEngine:\
+$(P)/external/imgui:\
+$(P)/external/SOIL:\
+$(P)/src/common/spreadsheet:\
+$(P)/src/common/patterns:\
+$(P)/src/common/managers:\
+$(P)/src/common/utils:\
+$(P)/src/common/maths:\
+$(P)/src/common/containers:\
+$(P)/src/common/graph-theory:\
+$(P)/src/common/graphics:\
+$(P)/src/common/graphics/OpenGL:\
+$(P)/src/common/graphics/RTree:\
+$(P)/src/core:\
+$(P)/src/core/loaders:\
+$(P)/src/forth:\
+$(P)/src/ui:\
+$(P)/src
