@@ -25,7 +25,7 @@
 //#  include "GraphAlgorithm.hpp"
 #  include "BoundingBox.tpp"
 #  include "SceneGraph.tpp"
-#  include "OpenGL.hpp"
+#  include "OpenGLCppWrapper.hpp"
 
 //FIXME
 #include "algorithm/SimTaDynBFS.hpp"

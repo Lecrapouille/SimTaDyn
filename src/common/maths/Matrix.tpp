@@ -19,8 +19,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef MATRIX_TPP_
-#  define MATRIX_TPP_
+#ifndef MATRIX_TPP
+#  define MATRIX_TPP
 
 // *************************************************************************************************
 // Inspired by https://github.com/Reedbeta/reed-util and its
@@ -661,4 +661,4 @@ inline std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m
 #  undef DEFINE_INPLACE_OPERATORS
 #  undef DEFINE_RELATIONAL_OPERATORS
 
-#endif
+#endif // MATRIX_TPP

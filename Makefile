@@ -42,10 +42,10 @@ include $(P)/Makefile.common
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_PATTERNS   =
 OBJ_MATHS      = Maths.o
-OBJ_CONTAINERS = PendingData.o
+OBJ_CONTAINERS =
 OBJ_MANAGERS   =
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
-OBJ_OPENGL     = Color.o Camera2D.o GLException.o OpenGL.o NodesRenderer.o Renderer.o
+OBJ_OPENGL     = Color.o Camera2D.o OpenGL.o NodesRenderer.o Renderer.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynForthPrimitives.o SimTaDynSheet.o SimTaDynMap.o

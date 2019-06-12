@@ -18,7 +18,13 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "GLException.hpp"
+#ifndef OPENGLCPPWRAPPER_HPP
+#  define OPENGLCPPWRAPPER_HPP
 
-//! This macro will generate code for members.
-IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
+#  include "GLProgram.hpp"
+#  include "GLFrameBuffers.hpp"
+#  include "GLImGUI.hpp"
+#  include "SceneGraph.tpp"
+#  include "Primitives.hpp"
+
+#endif // OPENGLCPPWRAPPER_HPP

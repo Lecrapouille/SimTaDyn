@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -18,12 +18,10 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE02_HPP
-#  define EXAMPLE02_HPP
+#ifndef EXAMPLE_09_SCENEGRAPH_HPP
+#  define EXAMPLE_09_SCENEGRAPH_HPP
 
-#  include "GLImGUI.hpp"
-#  include "OpenGL.hpp"
-#  include "SceneGraph.tpp"
+#  include "OpenGLCppWrapper.hpp"
 #  include <iostream>
 
 //------------------------------------------------------------------
@@ -84,7 +82,7 @@ public:
   CubicRobot(VAOPtr cube, const char *name);
   ~CubicRobot()
   {
-    LOGD("---------------- destroy CubicRobot -----------------");
+    LOGD("%s", "---------------- destroy CubicRobot -----------------");
   }
 
   virtual void update(float const dt) override;
@@ -105,14 +103,18 @@ private:
 //! are nodes of the scere graph. Each element of robots is also a
 //! part of the scene graph.
 // *****************************************************************
-class GLExample02
+class GLExample09
   : public IGLWindow,
     public ISceneGraphRenderer<GLVAO, float, 3u>
 {
 public:
 
-  GLExample02();
-  ~GLExample02();
+  GLExample09()
+    : m_prog("GLProgram")
+  {}
+
+  ~GLExample09()
+  {}
 
 private:
 
@@ -120,17 +122,17 @@ private:
                                    float const height) override;
   virtual bool setup() override;
   virtual bool draw() override;
-  void CreateCube();
+  bool CreateCube();
   virtual void drawSceneNode(GLVAO& vao, Matrix44f const& transformation) override;
 
 private:
 
-  GLVertexShader    vs;
-  GLFragmentShader  fs;
+  GLVertexShader    m_vertex_shader;
+  GLFragmentShader  m_fragment_shader;
   VAOPtr            m_cube;
   GLProgram         m_prog;
   SceneGraph        m_scenegraph;
-  GLImGUI           m_gui;
+  GLImGUI           m_imgui;
 };
 
-#endif // EXAMPLE_02_HPP
+#endif // EXAMPLE_09_SCENEGRAPH_HPP

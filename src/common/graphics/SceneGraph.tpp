@@ -26,12 +26,11 @@
 // New Castle University, Tutorial 6: Scene Graphs
 // https://research.ncl.ac.uk/game/mastersdegree/graphicsforgames/scenegraphs/Tutorial%206%20-%20Scene%20Graphs.pdf
 
-#  include "Logger.hpp"
 #  include "Movable.tpp"
 #  include <memory>
 #  include <vector>
 
-template <typename R, typename T, uint32_t D>
+template <typename R, typename T, size_t D>
 class ISceneGraphRenderer
 {
 public:
@@ -56,7 +55,7 @@ public:
 //! R = renderable class( VAO, Mesh ...)
 //! T, D = transformation matrix of type T and D its dimension (ie a 4x4 matrix of floats).
 // *************************************************************************************************
-template <typename I, typename R, typename T, uint32_t D>
+template <typename I, typename R, typename T, size_t D>
 class SceneGraph_t
 {
   using ObjPtr = std::shared_ptr<R>;
@@ -81,9 +80,9 @@ public:
     //-----------------------------------------------------------------
     Node(ObjPtr renderable, I const& id)
     {
-      CPP_LOG(logger::Info) << "SceneGraph create node '" << id << "'\n";
       m_renderable = renderable;
       m_id = id;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -94,6 +93,7 @@ public:
     Node(ObjPtr renderable = nullptr)
     {
       m_renderable = renderable;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -103,6 +103,7 @@ public:
     Node(I const& id)
     {
       m_id = id;
+      m_local_scaling = Vector<T, D>(1);
     }
 
     //-----------------------------------------------------------------
@@ -110,7 +111,6 @@ public:
     //-----------------------------------------------------------------
     virtual ~Node()
     {
-      CPP_LOG(logger::Info) << "SceneGraph delete node '" << m_id << "'\n";
       m_children.clear();
     }
 
@@ -194,7 +194,6 @@ public:
     //-----------------------------------------------------------------
     virtual void update(float const dt)
     {
-      CPP_LOG(logger::Info) << "ScenGraph::updating '" << m_id << "'\n";
       if (nullptr != m_parent)
         {
           // This  node  has a parent
@@ -220,7 +219,6 @@ public:
     //-----------------------------------------------------------------
     virtual void draw(ISceneGraphRenderer<R, T, D>& renderer) //const
     {
-      CPP_LOG(logger::Info) << "ScenGraph::draw '" << m_id << "'\n";
       // Sheets are optional, so do not forget to check against nullptr
       if (nullptr != m_renderable)
         {
@@ -293,7 +291,7 @@ public:
     //! List of Node as children. Pointers are never nullptr.
     std::vector<NodePtr>   m_children;
     //! Scale factors for the current 3D entity
-    Vector<T, D>           m_local_scaling = {T(1)};
+    Vector<T, D>           m_local_scaling;
   };
 
 private:
@@ -307,7 +305,6 @@ public:
   //-----------------------------------------------------------------
   ~SceneGraph_t()
   {
-    std::cout << "Destroy SceneGraph" << std::endl;
     reset();
   }
 
@@ -316,10 +313,8 @@ public:
   //-----------------------------------------------------------------
   void drawnBy(ISceneGraphRenderer<R, T, D>& renderer) // const
   {
-    LOGI("SceneGraph::drawnBy {");
     if (nullptr != m_root)
       m_root->draw(renderer);
-    LOGI("} SceneGraph::drawnBy");
   }
 
   //-----------------------------------------------------------------
@@ -441,26 +436,22 @@ private:
     // This case is suppose to never happen
     if (nullptr == res)
       {
-        std::cout << "nullptr error" << std::endl;
+        LOGE("%s", "nullptr error");
         return nullptr;
       }
 
-    std::cout << "Compare " << res->m_id << " " << id << std::endl;
     if (res->m_id == id)
       {
-        std::cout << "Found " << res->m_id << std::endl;
         return res;
       }
 
     for (auto i: res->m_children)
       {
-        std::cout << "Finding child" << std::endl;
         NodePtr n = findNode(id, i);
         if (nullptr != n)
           return n;
       }
 
-    std::cout << "Finding nothing" << std::endl;
     return nullptr;
   }
 
@@ -470,4 +461,4 @@ private:
   NodePtr m_root = nullptr;
 };
 
-#endif /* SCENEGRAPH_TPP_ */
+#endif // OPENGLCPPWRAPPER_SCENEGRAPH_HPP

@@ -20,53 +20,43 @@
 
 #include "OpenGL.hpp"
 
-namespace opengl
+//! This macro will generate code for members.
+IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
+
+void checkGLError(const char* filename, const uint32_t line, const char* expression)
 {
-  //! \return true if the OpenGL context has been created
-  //! else return false (not yet created or failed during
-  //! its creation).
-  bool& hasCreatedContext()
-  {
-    static bool s_context_started = false;
-    return s_context_started;
-  }
+  GLenum id;
+  const char* error;
 
-  //! \param ....
-  void checkError(const char *filename, uint32_t line, const char* expression)
-  {
-    GLenum id;
-    const char* error;
+  while ((id = glGetError()) != GL_NO_ERROR)
+    {
+      switch (id)
+        {
+        case GL_INVALID_OPERATION:
+          error = "GL_INVALID_OPERATION";
+          break;
+        case GL_INVALID_ENUM:
+          error = "GL_INVALID_ENUM";
+          break;
+        case GL_INVALID_VALUE:
+          error = "GL_INVALID_VALUE";
+          break;
+        case GL_OUT_OF_MEMORY:
+          error = "GL_OUT_OF_MEMORY";
+          break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+          error = "GL_INVALID_FRAMEBUFFER_OPERATION";
+          break;
+        default:
+          error = "UNKNOWN";
+          break;
+        }
 
-    while ((id = glGetError()) != GL_NO_ERROR)
-      {
-        switch (id)
-          {
-          case GL_INVALID_OPERATION:
-            error = "GL_INVALID_OPERATION";
-            break;
-          case GL_INVALID_ENUM:
-            error = "GL_INVALID_ENUM";
-            break;
-          case GL_INVALID_VALUE:
-            error = "GL_INVALID_VALUE";
-            break;
-          case GL_OUT_OF_MEMORY:
-            error = "GL_OUT_OF_MEMORY";
-            break;
-          case GL_INVALID_FRAMEBUFFER_OPERATION:
-            error = "GL_INVALID_FRAMEBUFFER_OPERATION";
-            break;
-          default:
-            error = "UNKNOWN";
-            break;
-          }
-
-        // Do not use directly LOG macros because it will catch this
-        // filename and its line instead of the faulty file/line which
-        // produced the OpenGL error.
-        Logger::instance().log(&std::cerr, logger::Error,
-                               "[%s::%d] Failed executing '%s'. Reason is '%s'\n",
-                               filename, line, expression, error);
-      }
-  }
-} // namespace
+      // Do not use directly LOG macros because it will catch this
+      // filename and its line instead of the faulty file/line which
+      // produced the OpenGL error.
+      Logger::instance().log(&std::cerr, logger::Error,
+                             "[%s::%d] Failed executing '%s'. Reason is '%s'\n",
+                             filename, line, expression, error);
+    }
+}

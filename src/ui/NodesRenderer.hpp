@@ -22,7 +22,7 @@
 #define NODES_RENDERER_HPP
 
 #  include "Color.hpp"
-#  include "OpenGL.hpp"
+#  include "OpenGLCppWrapper.hpp"
 #  include "Movable.tpp"
 
 class NodesRenderer

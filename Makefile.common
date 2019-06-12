@@ -33,8 +33,6 @@ LDFLAGS += `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
 DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
-# Dear ImGui defines: use Glew
-DEFINES += -DIMGUI_IMPL_OPENGL_LOADER_GLEW
 # SimTaDyn defines
 DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
 DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"

@@ -21,45 +21,57 @@
 #ifndef OPENGL_HPP
 #  define OPENGL_HPP
 
-#  include <cstdint>
+// *****************************************************************************
+//! \file OpenGL.hpp OpenGL routines.
+// *****************************************************************************
+
+#  include "Logger.hpp"
+#  include "GLEnum.hpp"
+#  include "NonCopyable.hpp"
+#  include "NonCppStd.hpp"
+#  include "Exception.hpp"
+
+// ***********************************************************************************************
+//! \brief This macro will declare a class OpenGLException derived from Exception.
+// ***********************************************************************************************
+DECLARE_EXCEPTION(OpenGLException, Exception)
 
 namespace opengl
 {
-  //! \brief Create an OpenGL context. Call it before drawing
-  //! primitives.
+//----------------------------------------------------------------------------
+//! \brief Return if the OpenGL has been created or has not been
+//! created or has failed creating.
+//!
+//! \return true if the OpenGL context has been created
+//! else return false (not yet created or failed during
+//! its creation).
+//----------------------------------------------------------------------------
+inline static bool& hasCreatedContext()
+{
+  static bool s_context_started = false;
+  return s_context_started;
+}
+} // namespace opengl
 
-  //! \brief Return if the OpenGL has been created or has not been
-  //! created or has failed creating.
-  bool& hasCreatedContext();
+//----------------------------------------------------------------------------
+//! \brief Allow to detect if the last OpenGL command succeeded or failed.
+//! In the case of failure an error is displayed on console and/or logged.
+//!
+//! \note do not use this function directly but use the macro glCheck.
+//!
+//! \param filename the file path where the OpenGL routine was called.
+//! \param line the line where the OpenGL routine was called.
+//! \param expression the line content where the OpenGL routine was called.
+//----------------------------------------------------------------------------
+void checkGLError(const char* filename, const uint32_t line, const char* expression);
 
-  //! \brief Allow to detect if the last OpenGL command succeeded or
-  //! not. In the case of failure an error is displayed and logged.
-  void  checkError(const char* file, uint32_t line, const char* expression);
-
-  //! Macro encapsuling the OpenGL command and the fault checker.
+//----------------------------------------------------------------------------
+//! Macro encapsuling the OpenGL command and the fault checker.
+//----------------------------------------------------------------------------
 #  ifdef CHECK_OPENGL
-#    define glCheck(expr) expr; opengl::checkError(SHORT_FILENAME, __LINE__, #expr);
+#    define glCheck(expr) expr; checkGLError(__FILE__, __LINE__, #expr);
 #  else
 #    define glCheck(expr) expr;
 #  endif
 
-} // namespace opengl
-
-#  include "GLImGUI.hpp"
-#  include "GLVAO.hpp"
-#  include "GLTextures.hpp"
-#  include "GLProgram.hpp"
-
-template<class T>
-inline void glBegin(T& obj)
-{
-  obj.begin();
-}
-
-template<class T>
-inline void glEnd(T& obj)
-{
-  obj.end();
-}
-
-#endif
+#endif // OPENGL_HPP

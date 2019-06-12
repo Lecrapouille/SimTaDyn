@@ -1,4 +1,25 @@
-#include "Example02.hpp"
+//=====================================================================
+// OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
+//
+// This file is part of OpenGLCppWrapper.
+//
+// OpenGLCppWrapper is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
+//=====================================================================
+
+#include "09_SceneGraph.hpp"
+#include "Maths.hpp"
 #include <sstream>
 
 //------------------------------------------------------------------
@@ -10,7 +31,7 @@
 CubicRobot::CubicRobot(VAOPtr cube, const char *name)
   : SceneNode(nullptr, name)
 {
-  LOGI("Cstr CubicRobot");
+  LOGD("%s", "Cstr CubicRobot");
 
   // Body
   m_body = attach(cube, "Body");
@@ -48,7 +69,7 @@ CubicRobot::CubicRobot(VAOPtr cube, const char *name)
 //------------------------------------------------------------------
 void CubicRobot::update(float const dt)
 {
-  LOGI("Robot::update");
+  LOGD("%s", "Robot::update");
 
   const GLfloat degreesPerSecond = 1.0f;
   degreesRotated += dt * degreesPerSecond;
@@ -67,6 +88,7 @@ void CubicRobot::update(float const dt)
 void GLImGUI::observeNode(SceneNode const& node) const
 {
   std::string nodename("Node '" + node.id() + "'");
+  ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::TreeNode(nodename.c_str()))
     {
       VAOPtr const& mesh = node.renderable();
@@ -87,6 +109,7 @@ void GLImGUI::observeNode(SceneNode const& node) const
 
       ss.str("");
       ss << "Has child " << node.nbChildren() << " Nodes:";
+      ImGui::SetNextTreeNodeOpen(true);
       if (ImGui::TreeNode(ss.str().c_str()))
         {
           for (auto const& i: node.children())
@@ -104,6 +127,7 @@ void GLImGUI::observeNode(SceneNode const& node) const
 //------------------------------------------------------------------
 bool GLImGUI::render()
 {
+  ImGui::SetNextTreeNodeOpen(true);
   ImGui::Begin("Hello, world!");
 
   if (ImGui::TreeNode("Scene graph"))
@@ -127,30 +151,22 @@ bool GLImGUI::render()
 //------------------------------------------------------------------
 //! \brief Callback when the window changed its size.
 //------------------------------------------------------------------
-void GLExample02::onWindowSizeChanged(float const width, float const height)
+void GLExample09::onWindowSizeChanged(float const width, float const height)
 {
   // Note: height is never zero !
   const float ratio = width / height;
 
-  m_prog.uniform<Matrix44f>("u_projection") =
+  // Make sure the viewport matches the new window dimensions.
+  glCheck(glViewport(0, 0, static_cast<int>(width), static_cast<int>(height)));
+
+  m_prog.matrix44f("u_projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
 }
 
 //------------------------------------------------------------------
-//! \brief Create three robots and add them in the graph scene.
+//! \brief Create a cube constituing parts of robots.
 //------------------------------------------------------------------
-GLExample02::GLExample02()
-  : m_prog("GLProgram")
-{
-}
-
-GLExample02::~GLExample02()
-{
-  LOGD("---------------- quit -----------------");
-  std::cout << "Bye" << std::endl;
-}
-
-void GLExample02::CreateCube()
+bool GLExample09::CreateCube()
 {
   m_cube = std::make_shared<GLVAO>("VAO_cube");
 
@@ -159,130 +175,36 @@ void GLExample02::CreateCube()
   m_prog.bind(*m_cube);
 
   // Fill the VBO for vertices
-  m_prog.attribute<Vector3f>("position") =
+  m_cube->vector3f("position") =
     {
-      //  X     Y     Z
-
-      // bottom
-      Vector3f(-1.0f,-1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f,-1.0f, 1.0f),
-
-      // top
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f( 1.0f, 1.0f,-1.0f),
-      Vector3f( 1.0f, 1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f( 1.0f, 1.0f, 1.0f),
-
-      // front
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f( 1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f( 1.0f,-1.0f, 1.0f),
-      Vector3f( 1.0f, 1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-
-      // back
-      Vector3f(-1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f( 1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f( 1.0f, 1.0f,-1.0f),
-
-      // left
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-      Vector3f(-1.0f,-1.0f,-1.0f),
-      Vector3f(-1.0f,-1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f, 1.0f),
-      Vector3f(-1.0f, 1.0f,-1.0f),
-
-      // right
-      Vector3f(1.0f,-1.0f, 1.0f),
-      Vector3f(1.0f,-1.0f,-1.0f),
-      Vector3f(1.0f, 1.0f,-1.0f),
-      Vector3f(1.0f,-1.0f, 1.0f),
-      Vector3f(1.0f, 1.0f,-1.0f),
-      Vector3f(1.0f, 1.0f, 1.0f)
+      #include "geometry/cube_position.txt"
     };
 
-  // Contrary to Example01, when I made the
-  // first version of the SceneGraph example
-  // the cube was not centered. So let see
-  // how to translate it.
-  m_prog.attribute<Vector3f>("position")
-    += Vector3f(0.0f, 1.0f, 0.0f);
+  // We do not want a cube centered to (0,0,0).
+  m_cube->vector3f("position") += Vector3f(0.0f, 1.0f, 0.0f);
 
   // Fill the VBO for texture coordiantes
-  m_prog.attribute<Vector2f>("UV") =
+  m_cube->vector2f("UV") =
     {
-      //  U     V
-
-      // bottom
-      Vector2f(0.0f, 0.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(0.0f, 1.0f),
-
-      // top
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-
-      // front
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-
-      // back
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-
-      // left
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-
-      // right
-      Vector2f(1.0f, 1.0f),
-      Vector2f(1.0f, 0.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(1.0f, 1.0f),
-      Vector2f(0.0f, 0.0f),
-      Vector2f(0.0f, 1.0f)
+      #include "geometry/cube_texture.txt"
     };
+
+  // Create the texture
+  m_cube->texture2D("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
+  m_cube->texture2D("texID").wrap(TextureWrap::CLAMP_TO_EDGE);
+  if (false == m_cube->texture2D("texID").load("textures/wooden-crate.jpg"))
+    return false;
+
+  return true;
 }
 
 //------------------------------------------------------------------
 //! Create the cene graph: 3 robots
 //------------------------------------------------------------------
-bool GLExample02::setup()
+bool GLExample09::setup()
 {
-  LOGI("GLExample02::setup()");
-
   // Init the context of the DearIMgui library
-  if (false == m_gui.setup(*this))
+  if (false == m_imgui.setup(*this))
     return false;
 
   // Enable some OpenGL states
@@ -292,39 +214,32 @@ bool GLExample02::setup()
   glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
   // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-  vs.fromFile("shaders/Example01.vertex");
-  fs.fromFile("shaders/Example01.fragment");
+  m_vertex_shader.fromFile("shaders/09_SceneGraph.vs");
+  m_fragment_shader.fromFile("shaders/09_SceneGraph.fs");
 
   // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
-  if (!m_prog.attachShaders(vs, fs).compile())
+  if (!m_prog.attachShaders(m_vertex_shader, m_fragment_shader).compile())
     {
       std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_prog.error() << "'" << std::endl;
+                << m_prog.getError() << "'" << std::endl;
       return false;
     }
 
-  // Create the texture
-  m_prog.uniform<GLTexture2D>("texID").interpolation(TextureMinFilter::LINEAR, TextureMagFilter::LINEAR);
-  m_prog.uniform<GLTexture2D>("texID").wrapping(TextureWrap::CLAMP_TO_EDGE);
-  if (false == m_prog.uniform<GLTexture2D>("texID").load("wooden-crate.jpg"))
-    return false;
-
-  // Projection matrices
+  // Init shader uniforms
+  m_prog.scalarf("scale") = 1.0f;
+  m_prog.vector4f("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
   float ratio = static_cast<float>(width()) / (static_cast<float>(height()) + 0.1f);
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10000.0f);
-  m_prog.uniform<Matrix44f>("view") =
+  m_prog.matrix44f("view") =
     matrix::lookAt(Vector3f(0.0f, 10.0f, 100.0f), Vector3f(30), Vector3f(0,1,0));
 
-  // Uniforms from the Example01
-  m_prog.uniform<float>("scale") = 1.0f;
-  m_prog.uniform<Vector4f>("color") = Vector4f(0.2f, 0.2f, 0.2f, 0.2f);
-
   // Attach 3 robots in the scene graph. Each robot is a scene node.
-  LOGD("Create graph scene");
+  LOGD("%s", "Create graph scene");
 
   // Init VAO and its VBOs.
-  CreateCube();
+  if (!CreateCube())
+    return false;
 
   // Create 3 robots
   SceneNodePtr root = std::make_shared<SceneNode>(nullptr, "root");
@@ -344,7 +259,7 @@ bool GLExample02::setup()
 
   // Show the scene graph in the GUI. Note: this method is not safe
   // against tree reorganisation. This is just for the example !
-  m_gui.observeGraph(m_scenegraph);
+  m_imgui.observeGraph(m_scenegraph);
 
   // This is an example for searching a node.
   // Be careful: this is not a robust method: this function does not
@@ -367,9 +282,9 @@ bool GLExample02::setup()
 //------------------------------------------------------------------
 //! Draw the scene graph (made of robots)
 //------------------------------------------------------------------
-bool GLExample02::draw()
+bool GLExample09::draw()
 {
-  LOGI("GLExample02::draw()");
+  LOGD("%s", "GLExample09::draw()");
 
   // clear everything
   glCheck(glClearColor(0.0f, 0.0f, 0.4f, 0.0f));
@@ -383,7 +298,7 @@ bool GLExample02::draw()
   m_scenegraph.drawnBy(*this);
 
   // Paint the GUI
-  if (false == m_gui.draw())
+  if (false == m_imgui.draw())
     return false;
 
   return true;
@@ -392,10 +307,10 @@ bool GLExample02::draw()
 //------------------------------------------------------------------
 //! Draw the current Scene node (= draw a part of robots)
 //------------------------------------------------------------------
-void GLExample02::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
+void GLExample09::drawSceneNode(GLVAO& vao, Matrix44f const& transform)
 {
-  m_prog.uniform<Matrix44f>("model") = transform;
+  m_prog.matrix44f("model") = transform;
 
   // Draw the 3D model
-  m_prog.draw(vao, DrawPrimitive::TRIANGLES, 0, 36); // FIXME: use implicit vertices count
+  m_prog.draw(vao, Mode::TRIANGLES, 0, 36);
 }

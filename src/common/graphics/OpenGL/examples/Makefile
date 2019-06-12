@@ -25,7 +25,7 @@ TARGET = $(PROJECT)
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -38,12 +38,30 @@ include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
-# List of files to compile. Splited by directories
-OBJ_UTILS    = Exception.o File.o GLException.o PendingData.o ILogger.o Logger.o
-OBJ_OPENGL   = OpenGL.o GLWindow.o
-IMGUI        = imgui_draw.o imgui_widgets.o imgui.o imgui_impl_glfw.o imgui_impl_opengl3.o
-OBJ         += $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) $(IMGUI) \
-               Example01.o Example02.o Example03.o main.o
+# List of files to compile.
+OBJ_UTILS    = Exception.o File.o ILogger.o Logger.o
+OBJ_OPENGL   = OpenGL.o GLWindow.o GLImGUI.o
+OBJ_EXAMPLES = \
+  00_EmptyWindowWithIOEvents.o \
+  01_EmptyWindowWithImgui.o \
+  02_DynamicTriangle.o \
+  03_MultiTexturedTriangle.o \
+  05_VAOvsVBO.o \
+  06_SphereEBO.o \
+  07_SkyBoxTextureCube.o \
+  08_TerrainTexture3D.o \
+  09_SceneGraph.o \
+  10_SimpleFrameBuffer.o \
+  11_PostProdFrameBuffer.o \
+  12_ComplexShader.o \
+  13_Lighting.o
+
+OBJ += $(OBJ_UTILS) $(OBJ_OPENGL) $(OBJ_EXAMPLES) main.o
+
+###################################################
+# Get the name of one of the resource to be download.
+# This allows to check if the resources have been downloaded
+RESOURCES := textures/README.md
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
@@ -52,8 +70,17 @@ OBJ         += $(OBJ_EXTERNAL) $(OBJ_TOOL) $(OBJ_UTILS) $(OBJ_OPENGL) $(IMGUI) \
 EXTERNAL_LIBS += $(abspath $(P)/external/SOIL/libSOIL.a)
 
 ###################################################
-# Compile OpenGL examples
-all: $(TARGET)
+# Compile tutorials
+all: $(TARGET) $(RESOURCES)
+
+###################################################
+# Download resources before compiling sources
+$(OBJS): | $(RESOURCES)
+$(RESOURCES): | $(BUILD)
+	@$(call print-from,"Downloading","$(PROJECT)","textures")
+	@-rm -fr textures 2> /dev/null
+	@git clone https://github.com/Lecrapouille/OpenGLCppWrapper-data.git --depth=1 textures > /dev/null
+	@cd $(BUILD) && touch resources.done
 
 ###################################################
 # Sharable informations between all Makefiles

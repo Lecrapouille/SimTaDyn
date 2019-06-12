@@ -8,7 +8,7 @@
 //! \brief Make gcc warms when return code of a function is not
 //! checked.
 // **************************************************************
-#define WARN_UNUSED __attribute__((warn_unused_result))
+#  define WARN_UNUSED __attribute__((warn_unused_result))
 
 // **************************************************************
 //! \brief Allows to create literal values of type std::size_t
@@ -16,26 +16,35 @@
 //! be uint32_t or uint64_t depending on the architecture.
 //! Example: size_t i = 42_z;
 // **************************************************************
-constexpr std::size_t operator "" _z (unsigned long long n) { return n; }
+constexpr std::size_t operator "" _z (unsigned long long const n)
+{
+  return static_cast<std::size_t>(n);
+}
 
 // **************************************************************
-//! https://stackoverflow.com/questions/17902405/how-to-implement-make-unique-function-in-c11
+// Enable for C++11 and Visual Studio
 // **************************************************************
+#  if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
 namespace std
 {
+  //! \brief std::make_unique is for C++14 enable it for C++11
   template<typename T, typename... Args>
     std::unique_ptr<T> make_unique(Args&&... args)
   {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
   }
 }
+#  endif
 
 // **************************************************************
-//! \brief Return the number of elements in an array
+//! \brief Return the number of elements in an array.
+//! S for size and T for the type.
 // **************************************************************
-#  ifndef ARRAY_SIZE
-#    define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
-#  endif
+template<size_t S, typename T>
+inline size_t ARRAY_SIZE(T (&)[S])
+{
+  return S;
+}
 
 // **************************************************************
 //! \brief One of the most used optimization used in Linux kernel. When
@@ -50,4 +59,12 @@ namespace std
 #    define unlikely(x)     __builtin_expect(!!(x),0)
 # endif
 
-#endif
+#  ifndef NORETURN
+#    if __GNUC__ > 2 || defined(__INTEL_COMPILER)
+#      define NORETURN __attribute__((__noreturn__))
+#    else
+#      define NORETURN
+#    endif
+#  endif
+
+#endif // NONCPPSTD_HPP

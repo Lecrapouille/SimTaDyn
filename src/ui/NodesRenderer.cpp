@@ -40,7 +40,7 @@ bool NodesRenderer::setupGraphics(float const ratio)
   if (!m_prog.attachShaders(vs, fs).compile())
     {
       std::cerr << "failed compiling OpenGL program. Reason was '"
-                << m_prog.error() << "'" << std::endl;
+                << m_prog.getError() << "'" << std::endl;
       return false;
     }
 
@@ -48,10 +48,10 @@ bool NodesRenderer::setupGraphics(float const ratio)
   // m_prog.uniform<float>("scale") = 1.0f;
   //m_prog.uniform<Vector3f>("color") = Vector3f(1.0f, 1.0f, 1.0f);
 
-  m_prog.uniform<Matrix44f>("projection") =
+  m_prog.matrix44f("projection") =
     matrix::perspective(maths::radians(50.0f), ratio, 0.1f, 10.0f);
-  m_prog.uniform<Matrix44f>("model") = m_movable.transform();
-  m_prog.uniform<Matrix44f>("camera") =
+  m_prog.matrix44f("model") = m_movable.transform();
+  m_prog.matrix44f("camera") =
     matrix::lookAt(Vector3f(3,3,3), Vector3f(0,0,0), Vector3f(0,1,0));
 
   return true;
@@ -63,6 +63,6 @@ bool NodesRenderer::setupGraphics(float const ratio)
 void NodesRenderer::draw2d(GLVAO& vao, Matrix44f const& transform)
 {
   LOGD("NodesRenderer::draw");
-  m_prog.uniform<Matrix44f>("model") = transform;
-  m_prog.draw(vao, DrawPrimitive::POINTS);
+  m_prog.matrix44f("model") = transform;
+  m_prog.draw(vao, Mode::POINTS);
 }

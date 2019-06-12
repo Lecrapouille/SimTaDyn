@@ -1,6 +1,6 @@
 //=====================================================================
 // OpenGLCppWrapper: A C++11 OpenGL 'Core' wrapper.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2018-2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of OpenGLCppWrapper.
 //
@@ -9,7 +9,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but
+// OpenGLCppWrapper is distributedin the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
@@ -18,47 +18,40 @@
 // along with OpenGLCppWrapper.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef EXAMPLE_01_HPP
-#  define EXAMPLE_01_HPP
+#ifndef EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP
+#  define EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP
 
-#  include "OpenGL.hpp"
-#  include "Movable.tpp"
+#  include "OpenGLCppWrapper.hpp"
 #  include <iostream>
 
-class GLExample01: public IGLWindow
+// *****************************************************************
+//! \brief
+// *****************************************************************
+class GLExample03: public IGLWindow
 {
 public:
 
-  GLExample01()
-    : m_vao_quad("VAO_quad"),
-      m_vao_floor("VAO_floor"),
-      m_indices("indices"),
-      m_prog("prog")
-  {
-  }
+  GLExample03()
+    : m_triangle("VAO_triangle"),
+      m_prog("Prog")
+  {}
 
-  ~GLExample01()
-  {
-    std::cout << "Bye" << std::endl;
-  }
+  ~GLExample03()
+  {}
 
-private:
+protected:
 
+  void debug();
   virtual void onWindowSizeChanged(const float width, const float height) override;
   virtual bool setup() override;
   virtual bool draw() override;
 
 private:
 
-  GLVertexShader     vs;
-  GLFragmentShader   fs;
-  GLVAO              m_vao_quad;
-  GLVAO              m_vao_floor;
-  GLIndexBuffer<uint8_t> m_indices;
+  GLVertexShader     m_vertex_shader;
+  GLFragmentShader   m_fragment_shader;
+  GLVAO              m_triangle;
   GLProgram          m_prog;
-  Movable<float, 3U> m_movable1;
-  Movable<float, 3U> m_movable2;
-  Movable<float, 3U> m_movable3;
 };
 
-#endif // EXAMPLE_01_HPP
+#endif // EXAMPLE_03_MULTI_TEXTURED_TRIANGLE_HPP

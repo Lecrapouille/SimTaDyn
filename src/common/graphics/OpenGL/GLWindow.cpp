@@ -19,53 +19,99 @@
 //=====================================================================
 
 #include "GLWindow.hpp"
-#include "OpenGL.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <cassert>
 
-static void on_error(int /*errorCode*/, const char* msg)
+//------------------------------------------------------------------------------
+//! \brief Callback triggered when GLFW failed.
+//------------------------------------------------------------------------------
+__attribute__((__noreturn__))
+static void on_GLFW_error(int /*errorCode*/, const char* msg)
 {
-  throw std::runtime_error(msg);
+  throw OpenGLException(msg);
 }
 
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+//------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to a
+//! method pointer. This function is triggered when the mouse is
+//! moved.
+//------------------------------------------------------------------------------
+static void on_mouse_moved(GLFWwindow* window, double xpos, double ypos)
 {
-  IGLWindow* obj = (IGLWindow*) glfwGetWindowUserPointer(window);
-
-  if (nullptr == obj) return ;
-  if (width < 0) { width = 1; }
-  if (height < 0) { height = 1; }
-
-  obj->setWindowSize(width, height);
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  obj->onMouseMoved(xpos, ypos);
 }
 
+//------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to a
+//! method pointer. This function is triggered when the mouse button
+//! is scrolled.
+//------------------------------------------------------------------------------
+static void on_mouse_scrolled(GLFWwindow* window, double xoffset, double yoffset)
+{
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  obj->onMouseScrolled(xoffset, yoffset);
+}
+
+//------------------------------------------------------------------------------
+//! \brief Static function allowing to "cast" a function pointer to
+//! a method pointer. This function is triggered when the window
+//! has been resized.
+//------------------------------------------------------------------------------
+static void on_window_resized(GLFWwindow* window, int width, int height)
+{
+  assert(nullptr != window);
+  IGLWindow* obj = static_cast<IGLWindow*>(glfwGetWindowUserPointer(window));
+  if (unlikely(0 >= width)) { width = 1; }
+  if (unlikely(0 >= height)) { height = 1; }
+  obj->setWindowSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+}
+
+//------------------------------------------------------------------------------
 IGLWindow::IGLWindow(uint32_t const width, uint32_t const height, const char *title)
   : m_width(width),
     m_height(height),
     m_title(title)
 {
   opengl::hasCreatedContext() = false;
+
+  if (unlikely(nullptr == m_title)) { m_title = ""; }
+  if (unlikely(0u == m_width)) { m_width = 1u; }
+  if (unlikely(0u == m_height)) { m_height = 1u; }
 }
 
-/* Close OpenGL window and terminate GLFW */
+//------------------------------------------------------------------------------
 IGLWindow::~IGLWindow()
 {
-  if (opengl::hasCreatedContext())
+  if (nullptr != m_main_window)
     {
-      release();
-      glfwTerminate();
+      glfwDestroyWindow(m_main_window);
     }
+  glfwTerminate();
 }
 
-void IGLWindow::release()
+//------------------------------------------------------------------------------
+void IGLWindow::setWindowSize(uint32_t const width, uint32_t const height)
 {
-  /* By default no 3D resources has to released */
+  m_width = width;
+  m_height = height;
+
+  if (unlikely(0u == m_width)) { m_width = 1u; }
+  if (unlikely(0u == m_height)) { m_height = 1u; }
+
+  // Calbback to be implemented by the derived class
+  onWindowSizeChanged(static_cast<float>(width),
+                      static_cast<float>(height));
 }
 
-void IGLWindow::FPS()
+//------------------------------------------------------------------------------
+void IGLWindow::computeFPS()
 {
-  static int nbFrames = 0;
+  static uint32_t nbFrames = 0u;
   double currentTime = glfwGetTime();
   m_deltaTime = static_cast<float>(currentTime - m_lastFrameTime);
   m_lastFrameTime = currentTime;
@@ -78,29 +124,27 @@ void IGLWindow::FPS()
       m_fps = nbFrames;
       int ms_by_frame = static_cast<int>(1000.0 / static_cast<double>(m_fps));
       oss << '[' << m_fps << " FPS, " << ms_by_frame << " ms] " << m_title;
-      glfwSetWindowTitle(m_window, oss.str().c_str());
-      nbFrames = 0;
+      glfwSetWindowTitle(m_main_window, oss.str().c_str());
+      nbFrames = 0u;
       m_lastTime += 1.0;
     }
 }
 
+//------------------------------------------------------------------------------
 bool IGLWindow::start()
 {
   if (opengl::hasCreatedContext())
     {
-      std::cerr << "Warning you called twice start(). "
-                << "OpenGL context already created"
-                << std::endl;
-      goto l_update;
+      LOGE("Warning you called twice start(). "
+            "OpenGL context already created");
+      goto l_runtime;
     }
 
-  int res;
-
   // Initialise GLFW
-  glfwSetErrorCallback(on_error);
+  glfwSetErrorCallback(on_GLFW_error);
   if (!glfwInit())
     {
-      std::cerr << "Failed to initialize GLFW" << std::endl;
+      LOGE("Failed to initialize GLFW");
       return false;
     }
 
@@ -108,24 +152,25 @@ bool IGLWindow::start()
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  opengl::hasCreatedContext() = true;
 
   // Open a window and create its OpenGL context
-  m_window = glfwCreateWindow(m_width, m_height, m_title, nullptr, nullptr);
-  if (nullptr == m_window)
+  m_main_window = glfwCreateWindow(static_cast<int>(m_width),
+                                   static_cast<int>(m_height),
+                                   m_title, nullptr, nullptr);
+  if (nullptr == m_main_window)
     {
-      std::cerr << "Failed to open GLFW window" << std::endl;
-      glfwTerminate();
+      LOGE("Failed to open GLFW window");
       return false;
     }
-  glfwMakeContextCurrent(m_window);
+  glfwMakeContextCurrent(m_main_window);
   glfwSwapInterval(1); // Enable vsync
 
   // Initialize GLEW
-  glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
+  glewExperimental = GL_TRUE; // stops glew crashing on OSX :-/
   if (GLEW_OK != glewInit())
     {
-      std::cerr << "Failed to initialize GLFW" << std::endl;
-      glfwTerminate();
+      LOGE("Failed to initialize GLFW");
       return false;
     }
 
@@ -138,75 +183,77 @@ bool IGLWindow::start()
   // Make sure OpenGL version 3.2 API is available
   if (!GLEW_VERSION_3_2)
     {
-      std::cerr << "OpenGL 3.2 API is not available." << std::endl;
-      glfwTerminate();
+      LOGE("OpenGL 3.2 API is not available!");
       return false;
     }
 
   // Save the class address to "cast" function callback into a method
   // callback
-  glfwSetWindowUserPointer(m_window, this);
-  glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
-  //glfwSetCursorPosCallback(m_window, mouse_callback);
-  //glfwSetScrollCallback(m_window, scroll_callback);
+  glfwSetWindowUserPointer(m_main_window, this);
 
+  // I/O callbacks
+  glfwSetFramebufferSizeCallback(m_main_window, on_window_resized);
+  glfwSetCursorPosCallback(m_main_window, on_mouse_moved);
+  glfwSetScrollCallback(m_main_window, on_mouse_scrolled);
   // Ensure we can capture keyboard being pressed below
-  glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
+  glfwSetInputMode(m_main_window, GLFW_STICKY_KEYS, GL_TRUE);
+
+l_runtime:
+
+  // Flush OpenGL errors before using this function on real OpenGL
+  // routines else a fake error is returned on the first OpenGL
+  // routines while valid.
+  glCheck();
+
+  int res;
   try
     {
-      // This is an awful hack but this is to be sure to flush OpenGL
-      // errors before using this function on real OpenGL routines else a
-      // fake error is returned on the first OpenGL routines while valid.
-      glGetError();
+      // Init OpenGL states of the user application
       res = setup();
+      if (likely(res))
+        {
+          // init FPS
+          m_lastTime = glfwGetTime();
+          m_lastFrameTime = m_lastTime;
+          m_fps = 0;
+
+          // Draw OpenGL scene
+          res = loop();
+        }
+      else
+        {
+          LOGE("Failed setting-up graphics");
+        }
     }
   catch (const OpenGLException& e)
     {
-      std::cerr << e.message() << std::endl;
+      LOGE("Caught exception: '%s'", e.message().c_str());
       res = false;
     }
 
-  if (false == res)
-    {
-      std::cerr << "Failed setting-up graphics" << std::endl;
-      glfwTerminate();
-      return res;
-    }
+  // Release the memory
+  release();
 
-  // init FPS
-  m_lastTime = glfwGetTime();
-  m_lastFrameTime = m_lastTime;
-  m_fps = 0;
-
-  opengl::hasCreatedContext() = true;
-
-l_update:
-  update();
-  return true;
+  return res;
 }
 
-void IGLWindow::update()
+//------------------------------------------------------------------------------
+bool IGLWindow::loop()
 {
-  try
+  do
     {
-      do
+      LOGD("%s", "************* LOOP");
+      computeFPS();
+      if (likely(false == draw()))
         {
-          FPS();
-          if (false == draw())
-            {
-              std::cerr << "Aborting" << std::endl;
-              return ;
-            }
-          // Swap buffers
-          glfwSwapBuffers(m_window);
-          glfwPollEvents();
+          LOGE("Aborting");
+          return false;
         }
-      // Check if the ESC key was pressed or the window was closed
-      while ((GLFW_PRESS != glfwGetKey(m_window, GLFW_KEY_ESCAPE)) &&
-             (0 == glfwWindowShouldClose(m_window)));
+      // Swap buffers
+      glfwSwapBuffers(m_main_window);
+      glfwPollEvents();
     }
-  catch (const OpenGLException& e)
-    {
-      std::cerr << e.message() << std::endl;
-    }
+  // Check if the ESC key was pressed or the window was closed
+  while (!keyPressed(GLFW_KEY_ESCAPE) && (0 == glfwWindowShouldClose(m_main_window)));
+  return true;
 }

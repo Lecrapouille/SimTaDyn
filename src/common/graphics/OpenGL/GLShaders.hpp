@@ -24,124 +24,122 @@
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLSHADER_HPP_
-#  define GLSHADER_HPP_
+#ifndef GLSHADERS_HPP
+#  define GLSHADERS_HPP
+
+// *****************************************************************************
+//! \file GLShaders.hpp holds the GLSL shader code, offers some macros
+//! code for processing the code (like code inclusion) and allow to
+//! compile code source.
+// *****************************************************************************
 
 #  include "IGLObject.tpp"
-#  include "File.hpp"
 #  include <vector>
+#  include <fstream>
 
-// **************************************************************
-//! \class GLShader GLShader.hpp this class allows to load a
-//! shader (vertex, fragment, geometry) and compile it. This class
-//! is managed by GLProgram.
-// **************************************************************
+
+// *****************************************************************************
+//! \class GLShader GLShaders.hpp
+//!
+//! \brief holds the GLSL shader code, offers some macros
+//! code for processing the code (like code inclusion) and allow to
+//! compile code source.
+// *****************************************************************************
 class GLShader: public IGLObject<GLuint>
 {
 public:
 
-  //------------------------------------------------------------------
-  //! \brief Empty constructor. Do nothing.
-  //------------------------------------------------------------------
-  GLShader(const GLenum target) noexcept
-    : IGLObject()
-  {
-    m_target = target;
-  }
-
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Constructor. Do nothing.
-  //------------------------------------------------------------------
-  GLShader(std::string const& name, const GLenum target) noexcept
+  //----------------------------------------------------------------------------
+  GLShader(std::string const& name, const GLenum target)
     : IGLObject(name)
   {
     m_target = target;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Release GPU memory.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual ~GLShader() override
   {
     destroy();
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Copy the shader code given as string into the class
   //! member variable. Note: the shader code compilation is delayed.
-  //------------------------------------------------------------------
-  void fromString(std::string const& script)
+  //----------------------------------------------------------------------------
+  bool fromString(std::string const& script)
   {
     throw_if_already_compiled();
-    name() = "shader script"; // FIXME: "Vertex Shader" ou "Frag Shader" selon le type
     m_shader_code = script;
+    LOGD("From script '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
+    return true;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Read the whole shader code from the given ascii file.
   //! Note: the shader code compilation is delayed. The code is only
   //! store in the member variable.
-  //! \param the path of the shader code.
+  //! \param filename the path of the shader code.
   //! \return true if the whole file has been read, else return false.
-  //! An error message is set and can be read through error().
-  //------------------------------------------------------------------
+  //! An error message is set and can be read through getError().
+  //----------------------------------------------------------------------------
   bool fromFile(std::string const& filename)
   {
     throw_if_already_compiled();
-
-    name() = File::fileName(filename);
-
-    bool loaded = File::readAllFile(filename, m_shader_code);
-    LOGI("FromFile: Shader: '%s'", m_shader_code.c_str());
+    bool loaded = load(filename, m_shader_code);
+    LOGD("From file '%s' %s: '%s'", cname(), type(), m_shader_code.c_str());
     if (false == loaded)
       {
         std::string msg = "Failed loading shader code '"
           + filename + "'";
-        LOGES("%s", msg.c_str());
+        LOGE("%s", msg.c_str());
         m_error_msg += '\n' + msg;
       }
     return loaded;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Check if the shader has been compiled with success by
   //! OpenGL.
-  //------------------------------------------------------------------
-  inline bool compiled() const
+  //----------------------------------------------------------------------------
+  inline bool isCompiled() const
   {
     return m_compiled;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \return the shader code
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   inline std::string const& code() const
   {
     return m_shader_code;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Return the shader error message
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   inline bool hasErrored() const
   {
     return !m_error_msg.empty();
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Return the shader error message. member variable is then
   //! cleared.
-  //------------------------------------------------------------------
-  inline std::string error()
+  //----------------------------------------------------------------------------
+  inline std::string getError()
   {
     std::string tmp(m_error_msg);
     m_error_msg.clear();
     return tmp;
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief (Information) Attached by a prog. Pass 0 for detached
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   inline void attachProg(GLenum prog)
   {
     m_attached = prog;
@@ -154,55 +152,99 @@ public:
 
 private:
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //! \brief Remove the file name and store the path to this folder.
+  //! \param fullPath
+  //----------------------------------------------------------------------------
+  static std::string getFilePath(const std::string& fullPath)
+  {
+    size_t found = fullPath.find_last_of("/\\");
+    return fullPath.substr(0, found + 1);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Increase the buffer size of the size of the full file.
+  //! \param infile
+  //! \param buffer
+  //----------------------------------------------------------------------------
+  static bool resize(std::ifstream& infile, std::string& buffer)
+  {
+    infile.seekg(0, std::ios::end);
+    std::streampos pos = infile.tellg();
+    if (pos > 0)
+      {
+        buffer.resize(static_cast<size_t>(pos));
+        infile.seekg(0, std::ios::beg);
+        return true;
+      }
+
+    return false;
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Read the shader code from the given file
+  //! \param path the file path to read.
+  //! \param fullSourceCode the buffer receiving the content of the file.
+  //! \return true if success, else false.
+  //----------------------------------------------------------------------------
+  static bool load(std::string const& path, std::string& fullSourceCode)
+  {
+    std::ifstream infile;
+
+    infile.open(path, std::ifstream::in);
+    if (infile.fail())
+      {
+        //TODO m_error_msg += '\n' + msg;
+        LOGE("Failed open file '%s'. Reason is '%s'", path.c_str(), strerror(errno));
+        return false;
+      }
+
+    if (!GLShader::resize(infile, fullSourceCode))
+      {
+        LOGE("Failed reading file '%s'. Reason is 'cannot get the file size'", path.c_str());
+        return false;
+      }
+
+    if (!infile.read(&fullSourceCode[0U], static_cast<std::streamsize>(fullSourceCode.size())))
+      {
+        LOGE("Failed reading file '%s'. Reason is '%s'", path.c_str(), strerror(errno));
+        return false;
+      }
+
+    return true;
+  }
+
+  //----------------------------------------------------------------------------
   //! \brief The shader is created inside the GPU.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual bool create() override
   {
-    LOGD("Shader::create %s", name().c_str());
+    LOGD("  Shader '%s' create", cname());
     m_handle = glCheck(glCreateShader(m_target));
     return false;
   }
 
-  //------------------------------------------------------------------
-  //! \brief The shader is released from the GPU.
-  //------------------------------------------------------------------
-  virtual void release() override
-  {
-    LOGD("Shader '%s' release", name().c_str());
-    glCheck(glDeleteShader(m_handle));
-  }
-
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Dummy method.
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   virtual void activate() override
-  {
-  }
+  {}
 
-  //------------------------------------------------------------------
-  //! \brief Dummy method.
-  //------------------------------------------------------------------
-  virtual void deactivate() override
-  {
-  }
-
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \brief Compile the shader code in the GPU.
   //! \return true if the compilation succeeded. Else return false.
-  //! An error message is set and can be read through error().
-  //------------------------------------------------------------------
+  //! An error message is set and can be read through getError().
+  //----------------------------------------------------------------------------
   virtual bool setup() override
   {
-    LOGD("Shader::setup %s", name().c_str());
-    if (loaded() && !compiled())
+    LOGD("  Shader '%s' setup", cname());
+    if (loaded() && !isCompiled())
       {
         char const *source = m_shader_code.c_str();
         GLint length = static_cast<GLint>(m_shader_code.size());
         glCheck(glShaderSource(m_handle, 1, &source, &length));
         glCheck(glCompileShader(m_handle));
         m_compiled = checkCompilationStatus(m_handle);
-        LOGD("Shader::setup %d", m_compiled);
       }
     else
       {
@@ -210,8 +252,9 @@ private:
           "Cannot compile the shader %s. Reason is "
           "'already compiled or no shader code attached'";
         m_error_msg += '\n' + msg;
-        LOGW("%s", msg.c_str());
+        LOGE("%s", msg.c_str());
       }
+    LOGD("  Shader '%s' compiled? %d", cname(), m_compiled);
     return !m_compiled;
   }
 
@@ -220,16 +263,35 @@ private:
     return false;
   }
 
+  //----------------------------------------------------------------------------
+  //! \brief Dummy method.
+  //----------------------------------------------------------------------------
+  virtual void deactivate() override
+  {}
+
+  //----------------------------------------------------------------------------
+  //! \brief The shader is released from the GPU.
+  //----------------------------------------------------------------------------
+  virtual void release() override
+  {
+    LOGD("Shader '%s' release", cname());
+    glCheck(glDeleteShader(m_handle));
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief Check if a shader script has been loaded.
+  //! \return false if no shader script is present.
+  //----------------------------------------------------------------------------
   inline bool loaded() const
   {
     return !m_shader_code.empty();
   }
 
-  //------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //! \param obj the identifer of the loaded shader.
   //! \return true if case of success, else return false.
-  //! An error message is set and can be read through error().
-  //------------------------------------------------------------------
+  //! An error message is set and can be read through getError().
+  //----------------------------------------------------------------------------
   bool checkCompilationStatus(GLuint obj)
   {
     GLint status;
@@ -243,7 +305,7 @@ private:
         glCheck(glGetShaderInfoLog(obj, length, &length, &log[0U]));
         std::string msg = &log[0U];
         m_error_msg += '\n' + msg;
-        LOGES("%s", msg.c_str());
+        LOGE("%s", msg.c_str());
       }
     else
       {
@@ -268,6 +330,8 @@ private:
       }
   }
 
+  virtual const char* type() const = 0;
+
 private:
 
   std::string m_shader_code;
@@ -276,58 +340,64 @@ private:
   GLenum m_attached = 0;
 };
 
-// **************************************************************
+// *****************************************************************************
 //!
-// **************************************************************
+// *****************************************************************************
 class GLVertexShader: public GLShader
 {
 public:
 
-  GLVertexShader()
-    : GLShader(GL_VERTEX_SHADER)
-  {
-  }
-
-  GLVertexShader(std::string const& name)
+  GLVertexShader(std::string const& name = "VertexShader")
     : GLShader(name, GL_VERTEX_SHADER)
   {
   }
+
+private:
+
+  virtual const char* type() const override
+  {
+    return "Vertex Shader script";
+  }
 };
 
-// **************************************************************
+// *****************************************************************************
 //!
-// **************************************************************
+// *****************************************************************************
 class GLFragmentShader: public GLShader
 {
 public:
 
-  GLFragmentShader()
-    : GLShader(GL_FRAGMENT_SHADER)
-  {
-  }
-
-  GLFragmentShader(std::string const& name)
+  GLFragmentShader(std::string const& name = "FragmentShader")
     : GLShader(name, GL_FRAGMENT_SHADER)
   {
   }
+
+private:
+
+  virtual const char* type() const override
+  {
+    return "Fragment Shader script";
+  }
 };
 
-// **************************************************************
+// *****************************************************************************
 //!
-// **************************************************************
+// *****************************************************************************
 class GLGeometryShader: public GLShader
 {
 public:
 
-  GLGeometryShader()
-    : GLShader(GL_GEOMETRY_SHADER)
-  {
-  }
-
-  GLGeometryShader(std::string const& name)
+  GLGeometryShader(std::string const& name = "GeometryShader")
     : GLShader(name, GL_GEOMETRY_SHADER)
   {
   }
+
+private:
+
+  virtual const char* type() const override
+  {
+    return "Geometry Shader script";
+  }
 };
 
-#endif /* GLSHADER_HPP_ */
+#endif // GLSHADERS_HPP

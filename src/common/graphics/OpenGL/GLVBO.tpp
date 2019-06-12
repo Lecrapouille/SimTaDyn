@@ -19,17 +19,36 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 //
-// This file is a derivated work of https://github.com/glumpy/glumpy
+// This file is a derived work of https://github.com/glumpy/glumpy
 //
 // Copyright (c) 2009-2016 Nicolas P. Rougier. All rights reserved.
 // Distributed under the (new) BSD License.
 //=====================================================================
 
-#ifndef GLVERTEX_BUFFER_HPP_
-#  define GLVERTEX_BUFFER_HPP_
+#ifndef GLVERTEX_BUFFER_TPP
+#  define GLVERTEX_BUFFER_TPP
 
 #  include "IGLObject.tpp"
 #  include "PendingContainer.tpp"
+
+// **************************************************************
+//! \brief Intermediate class needed by GLVAO for checking VBOs
+//! size.
+//!
+//! Because GLBuffer is template, GLVAO cannot hold this class
+//! in a container. This class is an interface needed by GLVAO.
+// **************************************************************
+class IGLBuffer
+  : public IGLObject<GLenum>
+{
+public:
+
+  IGLBuffer(std::string const& name)
+    : IGLObject(name)
+  {}
+
+  virtual size_t size() const = 0;
+};
 
 // **************************************************************
 //! \brief Buffer objects are OpenGL objects that store an array of
@@ -39,24 +58,24 @@
 // **************************************************************
 template<typename T>
 class GLBuffer
-  : public IGLObject<GLenum>,
+  : public IGLBuffer,
     public PendingContainer<T>
 {
 public:
 
   //! \brief Constructor with the object name
-  GLBuffer(std::string const& name, const GLenum target,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-    : IGLObject(name)
+  GLBuffer(std::string const& name, const GLenum target, BufferUsage const usage)
+    : IGLBuffer(name)
   {
     IGLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
   }
 
-  //! \brief Constructor with the object name
-  GLBuffer(const char *name, const GLenum target,
-           BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-    : IGLObject(name)
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLBuffer(std::string const& name, const GLenum target, const size_t init_size, BufferUsage const usage)
+    : IGLBuffer(name),
+      PendingContainer<T>(init_size)
   {
     IGLObject::m_target = target;
     m_usage = static_cast<GLenum>(usage);
@@ -72,36 +91,29 @@ public:
     return m_usage;
   }
 
+  virtual size_t size() const override
+  {
+    return PendingContainer<T>::size();
+  }
+
 private:
 
   virtual bool create() override
   {
-    LOGD("VBO '%s' create", name().c_str());
+    LOGD("VBO '%s' create", this->cname());
     glCheck(glGenBuffers(1, &m_handle));
     return false;
   }
 
-  virtual void release() override
-  {
-    LOGD("VBO '%s' release", name().c_str());
-    glCheck(glDeleteBuffers(1, &m_handle));
-  }
-
   virtual void activate() override
   {
-    LOGD("VBO '%s' activate", name().c_str());
+    LOGD("VBO '%s' activate", this->cname());
     glCheck(glBindBuffer(m_target, m_handle));
-  }
-
-  virtual void deactivate() override
-  {
-    LOGD("VBO '%s' deactivate", name().c_str());
-    glCheck(glBindBuffer(m_target, 0));
   }
 
   virtual bool setup() override
   {
-    LOGD("VBO '%s' setup", name().c_str());
+    LOGD("VBO '%s' setup", this->cname());
     const GLsizeiptr bytes = static_cast<GLsizeiptr>
       (PendingContainer<T>::capacity() * sizeof (T));
     glCheck(glBufferData(m_target, bytes, NULL, m_usage));
@@ -119,8 +131,8 @@ private:
     size_t pos_start, pos_end;
     PendingContainer<T>::getPendingData(pos_start, pos_end);
     PendingContainer<T>::clearPending();
-    LOGD("VBO '%s' update %u -> %u",
-         name().c_str(), pos_start, pos_end);
+    LOGD("VBO '%s' update %zu -> %zu",
+         cname(), pos_start, pos_end);
 
     size_t offset = sizeof (T) * pos_start;
     size_t nbytes = sizeof (T) * (pos_end - pos_start + 1_z);
@@ -129,6 +141,18 @@ private:
                             static_cast<GLsizeiptr>(nbytes),
                             PendingContainer<T>::to_array()));
     return false;
+  }
+
+  virtual void deactivate() override
+  {
+    LOGD("VBO '%s' deactivate", this->cname());
+    glCheck(glBindBuffer(m_target, 0));
+  }
+
+  virtual void release() override
+  {
+    LOGD("VBO '%s' release", this->cname());
+    glCheck(glDeleteBuffers(1, &m_handle));
   }
 
 private:
@@ -151,11 +175,47 @@ public:
   {
   }
 
-  //! \brief Constructor with the object name
-  GLVertexBuffer(const char *name,
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLVertexBuffer(std::string const& name, const size_t init_size,
                  BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-    : GLBuffer<T>(name, GL_ARRAY_BUFFER, usage)
+    : GLBuffer<T>(name, GL_ARRAY_BUFFER, init_size, usage)
   {
+  }
+
+  // FIXME: why cannot be placed inside PendingContainer ????
+  inline GLVertexBuffer<T>& operator=(std::initializer_list<T> il)
+  {
+    LOGD("VBO '%s' operator=(initializer_list)", this->cname());
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = il.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = il;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+
+  inline GLVertexBuffer<T>& operator=(GLVertexBuffer<T> const& other)
+  {
+    LOGD("VBO '%s' copy from '%s'", this->cname(), other.cname());
+    return this->operator=(other.m_container);
+  }
+
+  inline GLVertexBuffer<T>& operator=(std::vector<T> const& other)
+  {
+    LOGD("VBO '%s' operator=(vector)", this->cname());
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = other.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = other;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
   }
 };
 
@@ -174,11 +234,47 @@ public:
   {
   }
 
-  //! \brief Constructor with the object name
-  GLIndexBuffer(const char *name,
+  //! \brief Constructor with the object name and reserved number of
+  //! elements.
+  GLIndexBuffer(std::string const& name, const size_t init_size,
                 BufferUsage const usage = BufferUsage::DYNAMIC_DRAW)
-    : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, usage)
+    : GLBuffer<T>(name, GL_ELEMENT_ARRAY_BUFFER, init_size, usage)
   {
+  }
+
+  // FIXME: why cannot be placed inside PendingContainer ????
+  inline GLIndexBuffer<T>& operator=(std::initializer_list<T> il)
+  {
+    LOGD("EBO '%s' operator=(initializer_list)", this->cname());
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = il.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = il;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
+  }
+
+  inline GLIndexBuffer<T>& operator=(GLIndexBuffer<T> const& other)
+  {
+    LOGD("EBO '%s' copy from '%s'", this->cname(), other.cname());
+    return this->operator=(other.m_container);
+  }
+
+  inline GLIndexBuffer<T>& operator=(std::vector<T> const& other)
+  {
+    LOGD("EBO '%s' operator=(vector)", this->cname());
+    const size_t my_size = this->m_container.size();
+    const size_t other_size = other.size();
+
+    if (other_size > my_size)
+      this->throw_if_cannot_expand();
+
+    this->m_container = other;
+    this->tagAsPending(0_z, other_size - 1_z);
+    return *this;
   }
 
   inline GLenum type() const;
@@ -193,4 +289,13 @@ inline GLenum GLIndexBuffer<uint16_t>::type() const { return GL_UNSIGNED_SHORT; 
 template<>
 inline GLenum GLIndexBuffer<uint8_t>::type() const { return GL_UNSIGNED_BYTE; }
 
-#endif /* GLVERTEX_BUFFER_HPP_ */
+//! \brief Human Friendly name (hide template misery)
+using GLIndexBuffer32 = GLIndexBuffer<uint32_t>;
+
+//! \brief Human Friendly name (hide template misery)
+using GLIndexBuffer16 = GLIndexBuffer<uint16_t>;
+
+//! \brief Human Friendly name (hide template misery)
+using GLIndexBuffer8 = GLIndexBuffer<uint8_t>;
+
+#endif // GLVERTEX_BUFFER_TPP

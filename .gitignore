@@ -65,6 +65,8 @@ external/backward-cpp
 external/imgui
 doc/html/*
 doc/coverage/*
+src/common/graphics/OpenGL/examples/textures
+foo
 _*
 
 # Debian packages

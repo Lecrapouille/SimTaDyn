@@ -21,10 +21,27 @@
 #ifndef GLIMGUI_HPP
 #  define GLIMGUI_HPP
 
+// *****************************************************************************
+//! \file GLImGUI.hpp wraps function calls of the ImGUI project.
+// *****************************************************************************
+
+#  define IMGUI_IMPL_OPENGL_LOADER_GLEW
+
 #  include "GLWindow.hpp"
-#  include "imgui/imgui.h"
-#  include "imgui/imgui_impl_glfw.h"
-#  include "imgui/imgui_impl_opengl3.h"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+#  pragma GCC diagnostic ignored "-Wstrict-overflow"
+#  pragma GCC diagnostic ignored "-Wswitch-default"
+#  pragma GCC diagnostic ignored "-Wcast-qual"
+#  pragma GCC diagnostic ignored "-Waggregate-return"
+#  pragma GCC diagnostic ignored "-Wsign-promo"
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Wconversion"
+#    include "imgui/imgui.h"
+#    include "imgui/imgui_impl_glfw.h"
+#    include "imgui/imgui_impl_opengl3.h"
+# pragma GCC diagnostic pop
 
 // **************************************************************
 //! \brief Class wrapper for the dear imgui library: an imediate
@@ -43,7 +60,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Release Dear imgui allocated resources.
   //------------------------------------------------------------------
-  ~IGLImGUI()
+  virtual ~IGLImGUI()
   {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -51,11 +68,12 @@ public:
 
   //------------------------------------------------------------------
   //! \brief Start Dear imgui context. Use glfw routines.
+  //! \param window the OpenGL window
   //------------------------------------------------------------------
   bool setup(IGLWindow &window)
   {
     ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(window.obj(), true);
+    ImGui_ImplGlfw_InitForOpenGL(window.window(), true);
     ImGui_ImplOpenGL3_Init(NULL);
     ImGui::StyleColorsDark();
 
@@ -84,7 +102,11 @@ protected:
 
   //------------------------------------------------------------------
   //! \brief Method for drawing the HMI. This has to be implemented by
-  //! the derived class.
+  //! the derived class. Derived class shall override this method for
+  //! drawing ImGUI objects.
+  //! \return false if the rendering encountered an problem. As effect
+  //! this will prevent IGLWindow calling draw() which can react to
+  //! this problem.
   //------------------------------------------------------------------
   virtual bool render() = 0;
 };
