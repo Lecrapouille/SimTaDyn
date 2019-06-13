@@ -2,7 +2,7 @@
 // SimTaDyn: A GIS in a spreadsheet.
 // Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
 //
-// This file is part of SimTaDynContext.
+// This file is part of SimTaDyn.
 //
 // SimTaDyn is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by
@@ -22,71 +22,98 @@
 #  define SIMTADYN_CONTEXT_HPP_
 
 #  include "Path.hpp"
-#  include "SimTaDynWindow.hpp"
+#  include "NonCopyable.hpp"
+#  include "SimWindowMapEditor.hpp"
+#  include "SimWindowForthEditor.hpp"
 #  include "CmdParser/cmdparser.hpp"
 
 // **************************************************************
 //! \brief
 // **************************************************************
-class SimTaDynContext
+class SimTaDyn : private NonCopyable
 {
 public:
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton.
   //------------------------------------------------------------------
-  SimTaDynContext()
-  {
-    LOGI("New SimTaDynContext");
-    PathManager::instance();
-    //TODO ResourceManager::instance();
-    LoaderManager::instance();
-    SimForth::instance();
-    ForthEditor::instance();
-    MapEditor::instance();
-
-    m_window = std::unique_ptr<SimTaDynWindow>(new SimTaDynWindow);
-    if (nullptr == m_window)
-      {
-        LOGE("Failed creating the SimTaDyn main window for GUI. Aborting");
-        exit(1);
-      }
-  }
+  SimTaDyn(int argc, char** argv);
 
   //------------------------------------------------------------------
   //! \brief Private because of Singleton. Check if resources is still
   //! acquired which show a bug in the management of resources.
   //------------------------------------------------------------------
-  ~SimTaDynContext()
+  ~SimTaDyn();
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  int run();
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline static void createMapEditorWindow()
   {
-    LOGI("Leaving SimTaDynContext: releasing the memory");
-    m_window.reset();
-    ForthEditor::destroy();
-    MapEditor::destroy();
-    SimForth::destroy();
-    LoaderManager::destroy();
-    SimTaDynMapManager::destroy();
-    PathManager::destroy();
-    Logger::destroy();
-  };
+    createWindow<MapEditorWindow>();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  inline static void createForthEditorWindow()
+  {
+    createWindow<ForthEditorWindow>();
+  }
+
+  inline static SimForth& forth()
+  {
+    return m_forth;
+  }
+
+  inline static Glib::RefPtr<Gtk::Application>& application()
+  {
+    return m_application;
+  }
+
+private:
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  template<class W> void createMainWindow()
+  {
+    m_main_window = std::make_unique<W>();
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  template<class W> static void createWindow()
+  {
+    std::unique_ptr<W> win = std::make_unique<W>();
+    m_application->add_window(*(win.get()));
+    m_windows.push_back(std::move(win));
+  }
+
+  //------------------------------------------------------------------
+  //! \brief
+  //------------------------------------------------------------------
+  void configureOptions();
 
   //------------------------------------------------------------------
   //! \brief
   //! \param parser A command line parser (same job than getoption)
   //------------------------------------------------------------------
-  void init(cli::Parser& parser);
+  void init();
 
-  //------------------------------------------------------------------
-  //! \brief Return the reference of the main UI window.
-  //------------------------------------------------------------------
-  SimTaDynWindow& window()
-  {
-    return *m_window;
-  }
+private:
 
-protected:
-
-  std::unique_ptr<SimTaDynWindow> m_window;
+  cli::Parser                                          m_parser;
+  static SimForth                                      m_forth;
+  static Glib::RefPtr<Gtk::Application>                m_application;
+  static std::vector<std::unique_ptr<ISimTaDynWindow>> m_windows;
+  static std::unique_ptr<ISimTaDynWindow>              m_main_window;
 };
 
 #endif /* SIMTADYN_CONTEXT_HPP_ */

@@ -24,7 +24,21 @@
 #  include "SimTaDynSheet.hpp"
 #  include "SceneGraph.tpp"
 #  include "Types.hpp"
-#  include <sigc++/sigc++.h>
+
+// *************************************************************************************************
+//! \brief
+// *************************************************************************************************
+class IMapEvents
+{
+public:
+
+  IMapEvents() {}
+  virtual ~IMapEvents() {}
+
+  virtual void onMapCreated(SimTaDynMapPtr map) = 0;
+  virtual void onMapUpdated(SimTaDynMapPtr map) = 0;
+  virtual void onMapClosed(SimTaDynMapPtr map) = 0;
+};
 
 // *************************************************************************************************
 //! \brief This class defines a SimTaDyn geographic map. It contains, nodes, arcs, Forth scripts,

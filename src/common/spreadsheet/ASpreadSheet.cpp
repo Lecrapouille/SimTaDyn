@@ -31,7 +31,7 @@ void ASpreadSheet::parse(SimForth &forth)
       ASpreadSheetCell* cell = nextCell();
       assert(cell != nullptr);
 
-      cell->parse();//FIXME forth);
+      cell->parse(forth);
     }
 
   //TODO m_parsed = true;

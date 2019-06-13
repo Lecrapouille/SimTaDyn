@@ -1,18 +1,13 @@
 #ifndef TOGGLEBUTTONS_HPP
 #define TOGGLEBUTTONS_HPP
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#  include <gtkmm.h>
-#pragma GCC diagnostic pop
+#  include "Gtkmm.tpp"
 
 // *************************************************************************************************
 //! \brief A set of buttons inserted in a toolbar passed as parameter. Lika Gtk::RadioButton only one
 //! button can be selected at once (pressed) other buttons are unpressed.
 // *************************************************************************************************
+template<class T>
 class ToggleButtons
 {
 private:
@@ -20,7 +15,7 @@ private:
   // *************************************************************************************************
   //! \brief Extended Gtk::ToggleToolButton just for storing informations
   // *************************************************************************************************
-  class MyToggleToolButton: public Gtk::ToggleToolButton
+  class Button: public Gtk::ToggleToolButton
   {
   public:
 
@@ -30,7 +25,7 @@ private:
     //! button position.
     void event(uint32_t);
     //! \brief Signal for send the pressed button position.
-    sigc::signal<void, uint32_t> signal;
+    sigc::signal<void, T> signal;
   };
 
 public:
@@ -43,19 +38,19 @@ public:
   //! \brief
   //! \param toolbar the Gtk::Toolbar already created which will
   //! contains buttons.
-  ToggleButtons(Gtk::Toolbar& toolbar, const uint32_t nb_buttons)
+  ToggleButtons(Gtk::Toolbar& toolbar, const uint32_t max_buttons)
     : m_toolbar(toolbar)
   {
-    m_buttons.resize(nb_buttons);
+    m_buttons.resize(max_buttons);
   }
 
   //! \brief add a button
   void append(const uint32_t nth_button,
               const Glib::ustring& tooltip,
               const Gtk::BuiltinStockID icon,
-              const sigc::slot1<void, uint32_t>& toggle_slot)
+              const sigc::slot1<void, T>& toggle_slot)
   {
-    MyToggleToolButton* button = Gtk::manage(new MyToggleToolButton());
+    Button* button = Gtk::make_managed<Button>();
     button->nth_button = nth_button;
 
     // The first button will have the pressed look
@@ -82,7 +77,10 @@ public:
   }
 
   //! \brief Return the position of the currently pressed button.
-  inline uint32_t button() const { return m_toogled_button; }
+  inline T button() const
+  {
+    return static_cast<T>(m_toogled_button);
+  }
 
   //! \brief Return the currently pressed button.
   inline Gtk::ToggleToolButton* button(const uint32_t nth_button)
@@ -99,7 +97,7 @@ private:
   //! \note: set_active() will preform another toggle()
   //! callback which craps everything. So we made a hack
   //! for breaking circular events.
-  void toggle(MyToggleToolButton& new_button)
+  void toggle(Button& new_button)
   {
     if (m_toggling == true)
       return ;
@@ -111,7 +109,7 @@ private:
     m_toogled_button = new_button.nth_button;
     m_buttons[m_toogled_button]->set_active(true);
     m_toggling = false;
-    new_button.signal.emit(m_toogled_button);
+    new_button.signal.emit(button());
   }
 
 private:
@@ -128,7 +126,7 @@ private:
   //! is no risk of loosing relative position of buttons
   //! in the case where the user has decidde to swap
   //! buttons inside the toolbar.
-  std::vector<MyToggleToolButton*> m_buttons;
+  std::vector<Button*> m_buttons;
 };
 
 #endif

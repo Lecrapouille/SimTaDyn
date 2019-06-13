@@ -56,18 +56,21 @@ void SimForth::compileCell(ASpreadSheetCell &/*cell*/)
   // forth.compile(cell.name(), cell.formulae());
 }
 
-void SimForth::evaluate(ASpreadSheet& spreadsheet)
+std::pair<bool, std::string>
+SimForth::evaluate(ASpreadSheet& spreadsheet)
 {
   // Disable compilation mode
-  //dictionary().smudge(":");
-  //dictionary().smudge("INCLUDE");
+  dictionary().smudge(":");
+  dictionary().smudge("INCLUDE");
 
   m_spreadsheet = &spreadsheet;
-  spreadsheet.evaluate(*this);
+  std::pair<bool, std::string> res = spreadsheet.evaluate(*this);
 
   // Enable compilation mode
-  //dictionary().smudge("INCLUDE");
-  //dictionary().smudge(":");
+  dictionary().smudge("INCLUDE");
+  dictionary().smudge(":");
+
+  return res;
 }
 
 std::pair<bool, std::string>

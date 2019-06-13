@@ -103,8 +103,6 @@ public:
       }
   }
 
-public:
-
   //------------------------------------------------------------------
   //! \brief insertion strategy:
   //------------------------------------------------------------------
@@ -148,7 +146,7 @@ public:
   //! is still using it, the resource is not destroyed. If nobody uses
   //! it, the resource is destroyed.
   //------------------------------------------------------------------
-  void remove(I const& id, bool const force = true)
+  bool remove(I const& id, bool const force = true)
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -165,16 +163,18 @@ public:
               << ".\n";
 
             if (!force)
-              return ;
+              return false;
           }
 
         m_resources.erase(it);
+        return true;
       }
     else
       {
         CPP_LOG(logger::Warning)
           << "Failed to release resource '" << id
           << "' not currently stored in ResourceManager\n";
+        return false;
       }
   }
 

@@ -25,8 +25,6 @@
 #  include "SimTaDynMap.hpp"
 #  include "ResourceManager.tpp"
 
-using SimTaDynMapManager = ResourceManager<std::string, SimTaDynMap>;
-
 // ***********************************************************************************************
 //! \brief
 // ***********************************************************************************************

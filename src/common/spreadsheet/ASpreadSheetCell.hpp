@@ -26,6 +26,8 @@
 #  include "ClassCounter.tpp"
 #  include <vector>
 
+class SimForth; // FIXME
+
 // **************************************************************
 //! \brief Define an Excel-like spreadsheet cell.
 // **************************************************************
@@ -60,7 +62,7 @@ public:
   {
     //m_modified = true;
     m_formulae = formulae;
-    parse();
+    //FIXME parse(forth);
   }
 
   void debugReferences() const
@@ -135,7 +137,7 @@ public:
   }
 
   //virtual void update(Observable o, Object arg) override
-  void update();
+  void update(SimForth& forth);
 
   //-------------------------------------------------------------
   //! \brief
@@ -148,8 +150,7 @@ public: // FIXME private:
   //-------------------------------------------------------------
   //! \brief
   //-------------------------------------------------------------
-  void parse();
-  //FIXME void parse(SimForth &forth);
+  void parse(SimForth& forth);
 
 private:
 

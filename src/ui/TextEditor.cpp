@@ -73,7 +73,7 @@ void GotoLineWindow::document(Gsv::View* document)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-Find::Find(Gsv::View* document)
+FindBase::FindBase(Gsv::View* document)
   : m_document(document),
     m_found(false)
 {
@@ -83,7 +83,7 @@ Find::Find(Gsv::View* document)
 // When switching a notebook page, and if the search dialog is present, change the reference of the
 // document to search in.
 // *************************************************************************************************
-void Find::document(Gsv::View* document)
+void FindBase::document(Gsv::View* document)
 {
   m_document = document;
   m_found = false;
@@ -92,7 +92,7 @@ void Find::document(Gsv::View* document)
 // *************************************************************************************************
 //
 // *************************************************************************************************
-void Find::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
+void FindBase::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
 {
   Glib::RefPtr<Gtk::TextBuffer::Mark> mark;
 
@@ -113,12 +113,12 @@ void Find::find(Glib::ustring const& text, Gtk::TextBuffer::iterator& iter)
 // *************************************************************************************************
 // Search the word occurence
 // *************************************************************************************************
-void Find::findFirst()
+void FindBase::findFirst()
 {
   if (nullptr != m_document)
     {
       m_start = m_document->get_buffer()->begin();
-      Find::find(m_entry.get_text(), m_start);
+      FindBase::find(m_entry.get_text(), m_start);
     }
   else
     {
@@ -130,7 +130,7 @@ void Find::findFirst()
 // *************************************************************************************************
 // Search the next occurence
 // *************************************************************************************************
-void Find::findNext()
+void FindBase::findNext()
 {
   if (nullptr != m_document)
     {
@@ -144,7 +144,7 @@ void Find::findNext()
           return ;
         }
       iter = m_document->get_buffer()->get_iter_at_mark(last_pos);
-      Find::find(m_entry.get_text(), iter);
+      FindBase::find(m_entry.get_text(), iter);
     }
   else
     {
@@ -157,7 +157,7 @@ void Find::findNext()
 // Create a kind of dialog window for searching a string inside a text document.
 // *************************************************************************************************
 FindWindow::FindWindow(Gsv::View* document)
-  : Find(document),
+  : FindBase(document),
     m_label("Find"),
     m_next("Next")
 {
@@ -168,7 +168,7 @@ FindWindow::FindWindow(Gsv::View* document)
   m_vbox.pack_start(m_status);
   add(m_vbox);
 
-  m_next.signal_clicked().connect(sigc::mem_fun(*this, &Find::findNext));
+  m_next.signal_clicked().connect(sigc::mem_fun(*this, &FindBase::findNext));
 
   show_all_children();
 }
@@ -177,7 +177,7 @@ FindWindow::FindWindow(Gsv::View* document)
 //
 // *************************************************************************************************
 ReplaceWindow::ReplaceWindow(Gsv::View* document)
-  : Find(document),
+  : FindBase(document),
     m_label("Replace"),
     m_label2("by"),
     m_search("Find"),
@@ -207,10 +207,10 @@ ReplaceWindow::ReplaceWindow(Gsv::View* document)
 // *************************************************************************************************
 void ReplaceWindow::find()
 {
-  Find::findNext();
+  FindBase::findNext();
   if (!m_found)
     {
-      Find::findFirst();
+      FindBase::findFirst();
     }
 }
 
@@ -228,7 +228,7 @@ void ReplaceWindow::replace()
       Gtk::TextBuffer::iterator i;
       i = m_document->get_buffer()->erase(m_start, m_end);
       m_document->get_buffer()->insert(i, m_entry2.get_text());
-      Find::findNext();
+      FindBase::findNext();
     }
 }
 
@@ -299,8 +299,8 @@ void CloseLabel::close()
 
   if (m_asterisk)
     {
-      int page = m_editor->m_notebook.page_num(*m_widget);
-      Gtk::Widget *widget = m_editor->m_notebook.get_nth_page(page);
+      int page = m_editor->page_num(*m_widget);
+      Gtk::Widget *widget = m_editor->get_nth_page(page);
       if (NULL != widget)
         {
           TextDocument* doc = dynamic_cast<TextDocument*>(widget);
@@ -310,7 +310,7 @@ void CloseLabel::close()
             return ;
         }
     }
-  m_editor->m_notebook.remove_page(*m_widget);
+  m_editor->remove_page(*m_widget);
 }
 
 // *************************************************************************************************
@@ -330,7 +330,7 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
   m_buffer->set_highlight_syntax(true);
   m_textview.set_source_buffer(m_buffer);
   // Fonts size
-  m_textview.override_font(Pango::FontDescription("mono 8"));
+  m_textview.override_font(Pango::FontDescription("mono 12"));
   // Behavior/Display of the text view
   gtk_source_view_set_background_pattern(m_textview.gobj(), GTK_SOURCE_BACKGROUND_PATTERN_TYPE_GRID);
   m_textview.set_show_line_numbers(true);
@@ -515,6 +515,9 @@ TextEditor::TextEditor()
 {
   LOGI("Creating TextEditor");
 
+#if 0
+  // TODO A remplacer par populatePopoverMenu()
+
   // Menus '_Documents'
   {
     m_menuitem[simtadyn::TextMenu].set_label("Text _Editor");
@@ -542,9 +545,10 @@ TextEditor::TextEditor()
     m_submenu[8].signal_activate().connect(sigc::mem_fun(*this, &TextEditor::gotoLine));
     m_menu[simtadyn::TextMenu].append(m_submenu[8]);
   }
+#endif
 
-  m_notebook.set_scrollable();
-  m_notebook.signal_switch_page().connect(sigc::mem_fun(*this, &TextEditor::onPageSwitched));
+  set_scrollable();
+  signal_switch_page().connect(sigc::mem_fun(*this, &TextEditor::onPageSwitched));
 
   // Default Syntax coloration is Forth
   m_language_manager = Gsv::LanguageManager::get_default();
@@ -561,7 +565,7 @@ TextEditor::TextEditor()
 #else
   provider->load_from_data(".notebook {-GtkNotebook-tab-overlap: 0px;} tab {border-radius: 5px 5px 0 0; padding: 4px 4px;}");
 #endif
-  m_notebook.get_style_context()->add_provider(provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  get_style_context()->add_provider(provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
 // *************************************************************************************************
@@ -580,9 +584,9 @@ bool TextEditor::saveAll()
 {
   bool all_saved = true;
 
-  for (int k = 0; k < m_notebook.get_n_pages(); ++k)
+  for (int k = 0; k < get_n_pages(); ++k)
     {
-      m_notebook.set_current_page(k);
+      set_current_page(k);
       TextDocument *doc = TextEditor::document();
       if ((nullptr != doc) && (doc->isModified()))
         {
@@ -615,9 +619,9 @@ bool TextEditor::closeAll()
 {
   bool all_closed = true;
 
-  for (int k = 0; k < m_notebook.get_n_pages(); ++k)
+  for (int k = 0; k < get_n_pages(); ++k)
     {
-      m_notebook.set_current_page(k);
+      set_current_page(k);
       TextDocument *doc = TextEditor::document();
       if ((nullptr != doc) && (doc->isModified()))
         {
@@ -632,8 +636,8 @@ bool TextEditor::closeAll()
 // *************************************************************************************************
 TextDocument* TextEditor::document()
 {
-  int page = m_notebook.get_current_page();
-  Gtk::Widget *widget = m_notebook.get_nth_page(page);
+  int page = get_current_page();
+  Gtk::Widget *widget = get_nth_page(page);
   if (NULL == widget)
     {
       return nullptr;
@@ -646,7 +650,7 @@ TextDocument* TextEditor::document()
 // *************************************************************************************************
 TextDocument* TextEditor::document(const uint32_t i)
 {
-  Gtk::Widget *widget = m_notebook.get_nth_page(static_cast<int>(i));
+  Gtk::Widget *widget = get_nth_page(static_cast<int>(i));
   if (nullptr == widget)
     {
       return nullptr;
@@ -662,7 +666,7 @@ TextDocument* TextEditor::document(const uint32_t i)
 bool TextEditor::dialogSave(TextDocument *doc, const bool closing)
 {
   // FIXME: faire apparaitre avant de tuer la fenetre principale sinon le dialog peut etre cache par d'autres fentres
-  Gtk::MessageDialog dialog((Gtk::Window&) (*m_notebook.get_toplevel()),
+  Gtk::MessageDialog dialog((Gtk::Window&) (*get_toplevel()),
                             "The document '" + doc->m_button.title() +
                             "' has been modified. Do you want to save it now ?",
                             false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO);
@@ -701,7 +705,7 @@ bool TextEditor::dialogSave(TextDocument *doc, const bool closing)
 bool TextEditor::saveAs(TextDocument *doc)
 {
   Gtk::FileChooserDialog dialog("Please choose a file to save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
-  dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
+  dialog.set_transient_for((Gtk::Window&) (*get_toplevel()));
 
   // Set to the SimTaDyn path while no longer the GTK team strategy.
   dialog.set_current_folder(config::data_path);
@@ -748,7 +752,7 @@ bool TextEditor::saveAs(TextDocument *doc)
 bool TextEditor::open()
 {
   Gtk::FileChooserDialog dialog("Please choose a file to open", Gtk::FILE_CHOOSER_ACTION_OPEN);
-  dialog.set_transient_for((Gtk::Window&) (*m_notebook.get_toplevel()));
+  dialog.set_transient_for((Gtk::Window&) (*get_toplevel()));
 
   // Set to the SimTaDyn path while no longer the GTK team strategy.
   dialog.set_current_folder(config::data_path);
@@ -789,7 +793,7 @@ bool TextEditor::open()
 // *************************************************************************************************
 bool TextEditor::open(std::string const& filename)
 {
-  int pages = m_notebook.get_n_pages();
+  int pages = get_n_pages();
   if (pages < 0) return false;
 
   // Already opened ? Switch the page
@@ -798,7 +802,7 @@ bool TextEditor::open(std::string const& filename)
       if (0 == document(static_cast<uint32_t>(k))->m_filename.compare(filename))
         {
           //std::cout << "'" << filename << "' already opened\n"; // TODO statusbar
-          m_notebook.set_current_page(k);
+          set_current_page(k);
           return true;
         }
     }
@@ -830,9 +834,9 @@ void TextEditor::empty(std::string const& title)
   doc->m_button.title(title + ' ' + std::to_string(m_nb_nonames));
   doc->m_button.link(this, doc);
 
-  m_notebook.append_page(*doc, doc->m_button);
-  m_notebook.show_all();
-  m_notebook.set_current_page(-1);
+  append_page(*doc, doc->m_button);
+  show_all();
+  set_current_page(-1);
 }
 
 // *************************************************************************************************
@@ -840,7 +844,7 @@ void TextEditor::empty(std::string const& title)
 // *************************************************************************************************
 TextDocument *TextEditor::tab(std::string const& title)
 {
-  int32_t tmp = m_notebook.get_n_pages();
+  int32_t tmp = get_n_pages();
   if (tmp < 0) return nullptr;
 
   uint32_t pages = static_cast<uint32_t>(tmp);
@@ -879,9 +883,9 @@ TextDocument *TextEditor::addTab(std::string const& title)
 TextDocument *TextEditor::addTab()
 {
   TextDocument *doc = create();
-  m_notebook.append_page(*doc, doc->m_button);
-  m_notebook.show_all();
-  m_notebook.set_current_page(-1);
+  append_page(*doc, doc->m_button);
+  show_all();
+  set_current_page(-1);
   doc->m_button.link(this, doc);
   return doc;
 }

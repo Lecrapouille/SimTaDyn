@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,34 +18,34 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ASpreadSheetCell.hpp"
+#include "SimWindowMapExplorer.hpp"
 
-void ASpreadSheetCell::update(SimForth& forth)
+MapExplorerWindow::MapExplorerWindow(Glib::RefPtr<Gtk::Application> application)
+  : m_application(application)
 {
-  forth.interpreteCell(*this);
+  add(m_explorer.widget());
+  set_default_size(180, 300);
+  set_position(Gtk::WIN_POS_CENTER);
+
+  // TODO:
+  //  ResourceMapManager.signal_created(sigc::mem_fun(*this, &SimTaDynMapExplorer::addMap));
+
+
+  show_all();
 }
 
-//FIXME
-void ASpreadSheetCell::parse(SimForth &forth)
+void MapExplorerWindow::onMapCreated(SimTaDynMapPtr map)
 {
-  m_references.clear();
-  forth.parseCell(*this);
-  m_unresolvedRefs = m_references.size();
+  m_explorer.addMap(map);
 }
 
 /*
-void ASpreadSheetCell::parse(SimForth &forth)
+void MapExplorerWindow::onMapUpdated(SimTaDynMapPtr map)
 {
-  //std::cout << "ASpreadSheetCell::parse()" << std::endl;
-  //if (m_evaluated)
-  //  return ;
-
-  m_references.clear();
-  forth.parseCell(*this);
-  m_unresolvedRefs = m_references.size();
+  m_explorer.updateMap(map);
 }
 
-void ASpreadSheetCell::parse()
+void MapExplorerWindow::onMapClosed(SimTaDynMapPtr map)
 {
-  parse(SimForth::instance());
-  }*/
+  m_explorer.removeMap(map);
+}*/

@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,34 +18,4 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ASpreadSheetCell.hpp"
-
-void ASpreadSheetCell::update(SimForth& forth)
-{
-  forth.interpreteCell(*this);
-}
-
-//FIXME
-void ASpreadSheetCell::parse(SimForth &forth)
-{
-  m_references.clear();
-  forth.parseCell(*this);
-  m_unresolvedRefs = m_references.size();
-}
-
-/*
-void ASpreadSheetCell::parse(SimForth &forth)
-{
-  //std::cout << "ASpreadSheetCell::parse()" << std::endl;
-  //if (m_evaluated)
-  //  return ;
-
-  m_references.clear();
-  forth.parseCell(*this);
-  m_unresolvedRefs = m_references.size();
-}
-
-void ASpreadSheetCell::parse()
-{
-  parse(SimForth::instance());
-  }*/
+#include "MVP.hpp"

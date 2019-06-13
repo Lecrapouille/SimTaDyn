@@ -20,8 +20,7 @@
 
 #include "SimTaDynForthPrimitives.hpp"
 #include "SimTaDynForth.hpp"
-#include "MapEditor.hpp"
-#include "PathManager.hpp"
+// #include "MapEditor.hpp"
 
 void SimForth::execPrimitive(const Cell16 idPrimitive)
 {
@@ -29,9 +28,9 @@ void SimForth::execPrimitive(const Cell16 idPrimitive)
     {
     case SIMFORTH_PRIMITIVE_SHEET:
       {
-        std::string filename = PathManager::instance().top() + nextWord();
-        LOGD("SIMFORTH_PRIMITIVE_SHEET: '%s'", filename.c_str());
-        MapEditor::instance().openSheet(filename);
+        std::string filename = path() + nextWord();
+        std::cout << "Pa: " << filename << std::endl;
+        //FIXME MapEditor::instance().openSheet(filename);
       }
       break;
     case SIMFORTH_PRIMITIVE_FORTH:

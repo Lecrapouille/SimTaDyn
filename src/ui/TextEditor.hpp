@@ -21,18 +21,10 @@
 #ifndef TEXTEDITOR_HPP_
 #  define TEXTEDITOR_HPP_
 
-#  include "Names.hpp"
+//#  include "Names.hpp"
 #  include "Logger.hpp"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#  include <gtkmm.h>
 #  include <gtksourceviewmm.h>
-#pragma GCC diagnostic pop
-#  include <cstdint>
+#  include "Gtkmm.tpp"
 
 class TextDocument;
 class FindWindow;
@@ -66,11 +58,11 @@ public:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class Find : public Gtk::Window
+class FindBase : public Gtk::Window
 {
 public:
-  Find(Gsv::View* document);
-  ~Find() {}
+  FindBase(Gsv::View* document);
+  ~FindBase() {}
   void document(Gsv::View* document);
   void findNext();
   void findFirst();
@@ -87,7 +79,7 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class FindWindow : public Find
+class FindWindow : public FindBase
 {
 public:
   FindWindow(Gsv::View* document);
@@ -107,7 +99,7 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class ReplaceWindow : public Find
+class ReplaceWindow : public FindBase
 {
 public:
   ReplaceWindow(Gsv::View* document);
@@ -206,9 +198,6 @@ public:
   void cursorAt(const uint32_t line, const uint32_t index);
   bool close();
 
-  virtual void autoCompleteWord(__attribute__((unused)) int keyval)
-  {
-  }
   inline Glib::RefPtr<Gsv::Buffer> buffer()
   {
     return m_buffer;
@@ -264,7 +253,7 @@ protected:
 // *************************************************************************************************
 //
 // *************************************************************************************************
-class TextEditor
+class TextEditor : public Gtk::Notebook
 {
   friend class CloseLabel;
 
@@ -289,16 +278,18 @@ public:
   TextDocument *addTab();
   TextDocument *tab(std::string const& title);
 
-  Gtk::Notebook m_notebook;
   FindWindow m_findwindow;
   ReplaceWindow m_replacewindow;
   GotoLineWindow m_gotolinewindow;
 
+#if 0
+  // TODO A remplacer par populatePopoverMenu()
   Gtk::MenuItem          m_menuitem[simtadyn::MaxForthMenuNames + 1];
   Gtk::Menu              m_menu[simtadyn::MaxForthMenuNames + 1];
   Gtk::ImageMenuItem     m_submenu[16];
   Gtk::Image             m_image[16];
   Gtk::SeparatorMenuItem m_menuseparator[4];
+#endif
 
 protected:
 

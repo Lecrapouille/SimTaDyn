@@ -19,28 +19,63 @@
 //=====================================================================
 
 #include "DrawingArea.hpp"
-#include "MapEditor.hpp"
-#include "DialogException.hpp"
 #include <exception>
 
+#if 0
 //------------------------------------------------------------------
-GLDrawingArea::GLDrawingArea()
-  : Gtk::GLArea(),
-    GLRenderer()
+void GLDrawingArea::onEnterViewEvent(GdkEventCrossing* /*crossing_event*/, GLDrawingArea& view)
 {
+  //TODO mapeditor.currentView() = *this;
+
+  view.grab_focus();
+  view.backgroundColor(Color(0.0f, 0.0f, 0.4f, 1.0f));
+  m_drawing_area = &view;
+  std::cout << "ME:Entering "
+            << (int) view.id() << " "
+            << &view << std::endl;
+  // TODO restaurer les boutons associes a la vue
+}
+
+//------------------------------------------------------------------
+void GLDrawingArea::onLeaveViewEvent(GdkEventCrossing* /*crossing_event*/, GLDrawingArea& view)
+{
+  view.backgroundColor(Color(0.0f, 0.0f, 0.2f, 1.0f));
+}
+#endif
+
+//------------------------------------------------------------------
+GLDrawingArea::GLDrawingArea(/* MapEditor& */ PopupException& popup_exception)
+  : Gtk::GLArea(),
+    GLRenderer(),
+    m_popup_exception(popup_exception),
+    m_id(getID())
+{
+  std::cout << "New GLDrawingArea " << (int) getID() << std::endl;
+
+  // Widget aspect
+  set_hexpand(true);
+  set_vexpand(true);
+  set_auto_render(true);
+
+  // Detect when the mouse cursor enters the widget
+  set_can_focus(true);
+
   // OpenGL core is mandatory
   setCoreVersion();
 
   // Filter GTK+ events
-  add_events(Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK |
-             Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK | Gdk::POINTER_MOTION_MASK);
-
-  // Reset keyboard states every 10 ms
-  Glib::signal_timeout().connect(
-      sigc::mem_fun(*this, &GLDrawingArea::onRefreshKeyboard), m_timeout_ms);
+  add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+  //signal_enter_notify_event().connect_notify(sigc::bind<GLDrawingArea&>(
+  //  sigc::mem_fun(window, &MapEditorWindow::onEnterViewEvent), *glarea));
+  //signal_leave_notify_event().connect_notify(sigc::bind<GLDrawingArea&>(
+  //  sigc::mem_fun(window, &MapEditorWindow::onLeaveViewEvent), *glarea));
 
   // Use the mouse scroll event
-  signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
+  //signal_scroll_event().connect(sigc::mem_fun(*this, &GLDrawingArea::onScrollEvent));
+  // Connect drawing area signals
+  signal_realize().connect(sigc::mem_fun(*this, &GLDrawingArea::onCreate));
+  signal_unrealize().connect(sigc::mem_fun(*this, &GLDrawingArea::onRelease), false);
+  signal_render().connect(sigc::mem_fun(*this, &GLDrawingArea::onRender));
 }
 
 //------------------------------------------------------------------
@@ -88,12 +123,12 @@ void GLDrawingArea::onCreate()
     }
   catch (const Gdk::GLError& gle)
     {
-      PopupException((Gtk::Window&) *get_toplevel(), "An error occured making the OpenGL context during GLArea creation", gle.what(), "");
+      m_popup_exception.popupException("An error occured making the OpenGL context during GLArea creation", gle.what(), "");
       opengl::hasCreatedContext() = false;
     }
   catch (const OpenGLException& e)
     {
-      PopupException((Gtk::Window&) *get_toplevel(), e, "An OpenGL error occurred during the setupGraphics()");
+      m_popup_exception.popupException(e, "An OpenGL error occurred during the setupGraphics()");
       opengl::hasCreatedContext() = false;
     }
 }
@@ -117,7 +152,7 @@ void GLDrawingArea::onRelease()
 }
 
 //------------------------------------------------------------------
-bool GLDrawingArea::onRender()
+bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
 {
   if (unlikely(false == opengl::hasCreatedContext()))
     {
@@ -148,7 +183,7 @@ bool GLDrawingArea::onRender()
       static bool singleton = true;
       if (singleton)
         {
-          PopupException((Gtk::Window&) *get_toplevel(), e, "");
+          m_popup_exception.popupException(e, "");
           singleton = false;
         }
       else
@@ -163,69 +198,11 @@ bool GLDrawingArea::onRender()
 }
 
 //------------------------------------------------------------------
-bool GLDrawingArea::on_button_press_event(GdkEventButton* event)
-{
-  if (event->type == GDK_BUTTON_PRESS)
-    {
-      switch (event->button)
-        {
-        case 1:
-          std::cout << "GLDrawingArea::on_button_press_event button1" << std::endl;
-          MapEditor::instance().button1PressEvent(event->x, event->y);
-          break;
-        case 2:
-          std::cout << "GLDrawingArea::on_button_press_event button2" << std::endl;
-          MapEditor::instance().button2PressEvent(event->x, event->y);
-          break;
-        case 3:
-          std::cout << "GLDrawingArea::on_button_press_event button3" << std::endl;
-          MapEditor::instance().button3PressEvent(event->x, event->y);
-          break;
-        }
-    }
-
-  return true;
-}
-
-//------------------------------------------------------------------
-bool GLDrawingArea::onRefreshKeyboard()
-{
-  /*Camera2D& camera = GLRenderer::camera2D();
-
-  if (m_direction[GLDrawingArea::Forward])
-    {
-      camera.zoomOffset(0.01f);
-    }
-  if (m_direction[GLDrawingArea::Backward])
-    {
-      camera.zoomOffset(-0.01f);
-    }
-  if (m_direction[GLDrawingArea::Up])
-    {
-      camera.moveOffset(0.0f, -10.0f);
-    }
-  if (m_direction[GLDrawingArea::Down])
-    {
-      camera.moveOffset(0.0f, 10.0f);
-    }
-  if (m_direction[GLDrawingArea::Right])
-    {
-      camera.moveOffset(10.0f, 0.0f);
-    }
-  if (m_direction[GLDrawingArea::Left])
-    {
-      camera.moveOffset(-10.0f, 0.0f);
-    }
-
-  // std::cout << camera << std::endl;
-  GLRenderer::applyViewport(camera);*/
-  return true;
-}
-
-//------------------------------------------------------------------
+#if 0
 bool GLDrawingArea::onScrollEvent(GdkEventScroll *event)
 {
   //GLRenderer::camera2D().zoomAt(event->x, event->y, event->delta_y);
   //GLRenderer::applyViewport();
   return true;
 }
+#endif

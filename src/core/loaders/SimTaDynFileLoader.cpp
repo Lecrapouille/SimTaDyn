@@ -20,7 +20,6 @@
 
 #include "SimTaDynFileLoader.hpp"
 #include "File.hpp"
-#include "PathManager.hpp"
 #include "SimTaDynForth.hpp"
 #include "zipper/unzipper.h"
 #include "zipper/zipper.h"
@@ -68,15 +67,15 @@ void SimTaDynFileLoader::loadFromFile(std::string const& filename, SimTaDynMap& 
   map.m_full_path = config::tmp_path + map.m_name + '/';
 
   // TODO
-  SimForth &forth = SimForth::instance();
-  PathManager::instance().push(map.m_full_path);
+  /*SimForth &forth = SimForth::instance();
+  forth.pushPath(map.m_full_path);
   const auto& res = forth.interpreteFile(map.m_full_path + "/Index.fth");
-  PathManager::instance().pop();
+  forth.popPath();
   forth.ok(res);
   if (false == res.first)
     {
       throw LoaderException (res.second);
-    }
+      }*/
 }
 
 // FIXME password

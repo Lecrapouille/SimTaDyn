@@ -1,6 +1,6 @@
 //=====================================================================
 // SimTaDyn: A GIS in a spreadsheet.
-// Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
+// Copyright 2019 Quentin Quadrat <lecrapouille@gmail.com>
 //
 // This file is part of SimTaDyn.
 //
@@ -18,34 +18,31 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "ASpreadSheetCell.hpp"
+#ifndef SIMWINDOW_MAP_EXPLORER_HPP
+#  define SIMWINDOW_MAP_EXPLORER_HPP
 
-void ASpreadSheetCell::update(SimForth& forth)
+#include "MapExplorer.hpp"
+#include "SimTaDynMap.hpp"
+
+class MapExplorerWindow :
+  public Gtk::ApplicationWindow
+//protected IMapEvents
 {
-  forth.interpreteCell(*this);
-}
+public:
 
-//FIXME
-void ASpreadSheetCell::parse(SimForth &forth)
-{
-  m_references.clear();
-  forth.parseCell(*this);
-  m_unresolvedRefs = m_references.size();
-}
+  MapExplorerWindow(Glib::RefPtr<Gtk::Application> application);
 
-/*
-void ASpreadSheetCell::parse(SimForth &forth)
-{
-  //std::cout << "ASpreadSheetCell::parse()" << std::endl;
-  //if (m_evaluated)
-  //  return ;
+  //protected:
 
-  m_references.clear();
-  forth.parseCell(*this);
-  m_unresolvedRefs = m_references.size();
-}
+  void onMapCreated(SimTaDynMapPtr map);
+  /*virtual void onMapFailure(SimTaDynMapPtr map) override;
+  virtual void onMapUpdated(SimTaDynMapPtr map) override;
+  virtual void onMapClosed(SimTaDynMapPtr map) override;*/
 
-void ASpreadSheetCell::parse()
-{
-  parse(SimForth::instance());
-  }*/
+protected:
+
+  Glib::RefPtr<Gtk::Application> m_application;
+  SimTaDynMapExplorer m_explorer;
+};
+
+#endif // SIMWINDOW_MAP_EXPLORER_HPP

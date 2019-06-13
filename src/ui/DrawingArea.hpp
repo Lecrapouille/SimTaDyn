@@ -21,22 +21,23 @@
 #ifndef DRAWINGAREA_HPP_
 #  define DRAWINGAREA_HPP_
 
+#  include "Dialogs.hpp"
 #  include "Renderer.hpp"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#  include <gtkmm/glarea.h>
-#  include <glibmm.h>
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Wredundant-decls"
+#    include <gtkmm/glarea.h>
+#    include <glibmm.h>
+#  pragma GCC diagnostic pop
 
 // *************************************************************************************************
 //! \brief Class for OpenGL renderer area
 // *************************************************************************************************
 class GLDrawingArea
   : public Gtk::GLArea,
-    public GLRenderer
+    public GLRenderer,
+    private UniqueID<GLDrawingArea>
 {
 public:
 
@@ -46,12 +47,14 @@ public:
   //------------------------------------------------------------------
   //! \brief Constructor. Connect GTK+ io signals
   //------------------------------------------------------------------
-  GLDrawingArea();
+  GLDrawingArea(PopupException& popup_exception);
 
   //------------------------------------------------------------------
   //! \brief Destructor.
   //------------------------------------------------------------------
   ~GLDrawingArea();
+
+  inline Key id() const { return m_id; }
 
   //------------------------------------------------------------------
   //! \brief Return the current OpenGL screen width.
@@ -85,34 +88,7 @@ public:
   //! \brief Draw the scene.
   //! \return true if no problem occured
   //------------------------------------------------------------------
-  bool onRender();
-
-  //------------------------------------------------------------------
-  //! \brief Callback when the mouse button has been pressed on the
-  //! OpenGL window. Dispatch the action to the Map Editor.
-  //------------------------------------------------------------------
-  virtual bool on_button_press_event(GdkEventButton* event) override;
-
-  //------------------------------------------------------------------
-
-  //! \brief Asynchronous callback when a keyboard key has been
-  //! pressed. We memorize the pressed key. A GTK+ timer will trig
-  //! onRefreshKeyboard() which will actions associated to all pressed
-  //! keys thanks to .
-
-  //------------------------------------------------------------------
-  inline void keyPressed(Direction d)
-  {
-    m_direction[d] = true;
-  }
-
-  //------------------------------------------------------------------
-  //! \brief Asynchronous callback when a keyboard key has been released.
-  //------------------------------------------------------------------
-  inline void keyReleased(Direction d)
-  {
-    m_direction[d] = false;
-  }
+  bool onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */);
 
 private:
 
@@ -129,7 +105,7 @@ private:
   //------------------------------------------------------------------
   //! \brief Mouse scrolling event.
   //------------------------------------------------------------------
-  bool onScrollEvent(GdkEventScroll *event);
+  //bool onScrollEvent(GdkEventScroll *event);
 
   //------------------------------------------------------------------
   //! \brief Desired OpenGL context version: 3.3.
@@ -158,11 +134,12 @@ private:
 
 private:
 
-  //! \brief Keyboard pressed keys.
-  bool m_direction[DirectionIterEnd + 1] = {0};
+  PopupException& m_popup_exception;
+  Key m_id;
 
-  //! \brief Keyboard refresh rate
-  const unsigned int m_timeout_ms = 10;
+  // TODO: memoriser les boutons de la carte:
+  // quand la souris passe sur une carte, les boutons sont remis
+  // dans le bon etat.
 };
 
 #endif /* DRAWINGAREA_HPP_ */

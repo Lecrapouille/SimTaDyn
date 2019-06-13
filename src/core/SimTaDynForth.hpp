@@ -47,14 +47,20 @@ public:
 //! \brief SimTaDynForth a classic Forth modified for GIS and spreadsheet
 // *************************************************************************************************
 class SimForth
-  : public Forth,
-    public Singleton<SimForth>
+  : public Forth
 {
-  friend class Singleton<SimForth>;
-
 public:
 
-  ASpreadSheet *m_spreadsheet = nullptr;
+  SimForth()
+    : Forth(m_dictionaries)
+  {
+    LOGI("Creating SimForth");
+  }
+
+  virtual ~SimForth()
+  {
+    LOGI("Destroying SimForth");
+  }
 
   virtual void ok(std::pair<bool, std::string> const& res) override
   {
@@ -64,10 +70,29 @@ public:
 
   virtual void boot() override;
   void compileCell(ASpreadSheetCell &cell);
-  void evaluate(ASpreadSheet& spreadsheet);
-  std::pair<bool, std::string>
-  interpreteCell(ASpreadSheetCell &cell);
+  std::pair<bool, std::string> evaluate(ASpreadSheet& spreadsheet);
+  std::pair<bool, std::string> interpreteCell(ASpreadSheetCell &cell);
   bool parseCell(ASpreadSheetCell &cell);
+
+  // Save temporary pathes of unziped SimTaDynMap files.
+  // Like this PathManager does not have to get them this
+  // avoids conflict with 2 resources with the same name
+  // in two unziped locations.
+  void pushPath(std::string const& path)
+  {
+    m_pathes.push_back(path);
+  }
+  void popPath()
+  {
+    if (!m_pathes.empty())
+      {
+        m_pathes.pop_back();
+      }
+  }
+  std::string const& path()
+  {
+    return m_pathes.back();
+  }
 
   virtual inline uint32_t maxPrimitives() const override
   {
@@ -91,23 +116,12 @@ protected:
 
 private:
 
-  SimForth()
-    : Forth(m_dictionaries)
-  {
-    LOGI("Creating SimForth");
-  }
-
-  virtual ~SimForth()
-  {
-    LOGI("Destroying SimForth");
-  }
-
-private:
-
   SimForthDictionary m_dictionaries;
+  std::vector<std::string> m_pathes;
 
 public:
 
+  ASpreadSheet *m_spreadsheet = nullptr;
   sigc::signal<void/*, SimForth&*/> signal_forth_interprete_done;
 };
 
