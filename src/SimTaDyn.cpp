@@ -21,11 +21,11 @@
 #include "SimTaDyn.hpp"
 #include "Config.hpp"
 #include "PathManager.hpp"
+#include <cstdlib>
 
-SimForth                                      SimTaDyn::m_forth;
-Glib::RefPtr<Gtk::Application>                SimTaDyn::m_application;
+SimForth                                 SimTaDyn::m_forth;
+Glib::RefPtr<Gtk::Application>           SimTaDyn::m_application;
 std::vector<std::unique_ptr<MainWindow>> SimTaDyn::m_windows;
-std::unique_ptr<MainWindow>              SimTaDyn::m_main_window;
 
 SimTaDyn::SimTaDyn(int argc, char** argv)
   : m_parser(argc, argv)
@@ -58,7 +58,7 @@ SimTaDyn::SimTaDyn(int argc, char** argv)
   Gsv::init();
 
   // On startup create all main windows
-  createMainWindow<ForthEditorWindow>();
+  createForthEditorWindow();
   m_application->signal_startup().connect([&]{
       createMapEditorWindow();
       init();
@@ -71,7 +71,9 @@ SimTaDyn::~SimTaDyn()
 
 int SimTaDyn::run()
 {
-  return m_application->run(*(m_main_window.get()));
+  return (0_z != m_windows.size())
+    ? m_application->run(*(m_windows[0].get()))
+    : EXIT_FAILURE;
 }
 
 void SimTaDyn::configureOptions()

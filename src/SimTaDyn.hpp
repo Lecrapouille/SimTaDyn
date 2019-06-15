@@ -81,18 +81,13 @@ private:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  template<class W> void createMainWindow()
-  {
-    m_main_window = std::make_unique<W>();
-  }
-
-  //------------------------------------------------------------------
-  //! \brief
-  //------------------------------------------------------------------
   template<class W> static void createWindow()
   {
     std::unique_ptr<W> win = std::make_unique<W>();
-    m_application->add_window(*(win.get()));
+    if (0_z != m_windows.size())
+      {
+        m_application->add_window(*(win.get()));
+      }
     m_windows.push_back(std::move(win));
   }
 
@@ -109,11 +104,10 @@ private:
 
 private:
 
-  cli::Parser                                          m_parser;
-  static SimForth                                      m_forth;
-  static Glib::RefPtr<Gtk::Application>                m_application;
+  cli::Parser                                     m_parser;
+  static SimForth                                 m_forth;
+  static Glib::RefPtr<Gtk::Application>           m_application;
   static std::vector<std::unique_ptr<MainWindow>> m_windows;
-  static std::unique_ptr<MainWindow>              m_main_window;
 };
 
 #endif // SIMTADYN_CONTEXT_HPP
