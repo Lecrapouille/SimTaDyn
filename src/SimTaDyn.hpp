@@ -34,6 +34,8 @@ class SimTaDyn : private NonCopyable
 {
 public:
 
+  using WindowContainer = std::vector<std::unique_ptr<MainWindow>>;
+
   //------------------------------------------------------------------
   //! \brief Private because of Singleton.
   //------------------------------------------------------------------
@@ -68,12 +70,22 @@ public:
 
   inline static SimForth& forth()
   {
-    return m_forth;
+    static SimForth forth;
+    return forth;
   }
 
+  //! \brief gtk application managing gtk windows
   inline static Glib::RefPtr<Gtk::Application>& application()
   {
-    return m_application;
+    static Glib::RefPtr<Gtk::Application> application;
+    return application;
+  }
+
+  //! \brief Hold gtk windows such as map or forth editors
+  inline static WindowContainer& windows()
+  {
+    static WindowContainer windows;
+    return windows;
   }
 
 private:
@@ -84,11 +96,11 @@ private:
   template<class W> static void createWindow()
   {
     std::unique_ptr<W> win = std::make_unique<W>();
-    if (0_z != m_windows.size())
+    if (0_z != windows().size())
       {
-        m_application->add_window(*(win.get()));
+        application()->add_window(*(win.get()));
       }
-    m_windows.push_back(std::move(win));
+    windows().push_back(std::move(win));
   }
 
   //------------------------------------------------------------------
@@ -104,10 +116,8 @@ private:
 
 private:
 
-  cli::Parser                                     m_parser;
-  static SimForth                                 m_forth;
-  static Glib::RefPtr<Gtk::Application>           m_application;
-  static std::vector<std::unique_ptr<MainWindow>> m_windows;
+  //! \brief Command line interpretor
+  cli::Parser m_parser;
 };
 
 #endif // SIMTADYN_CONTEXT_HPP

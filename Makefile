@@ -55,7 +55,7 @@ OBJ_LOADERS    = ManagerException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDyn
 OBJ_GUI        = Redirection.o Windows.o MapExplorer.o TextEditor.o ForthEditor.o
 OBJ_GUI       += ForthInspector.o DrawingArea.o
 OBJ_GUI       += MVP.o ForthEditorWindow.o MapEditorCommands.o MapEditor.o MapEditorWindow.o MapExplorerWindow.o
-OBJ_SIMTADYN   = SimTaDyn.o
+OBJ_SIMTADYN   = SimTaDyn.o main.o
 OBJ           += $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
                  $(OBJ_GUI) $(OBJ_SIMTADYN)

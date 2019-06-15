@@ -23,10 +23,6 @@
 #include "PathManager.hpp"
 #include <cstdlib>
 
-SimForth                                 SimTaDyn::m_forth;
-Glib::RefPtr<Gtk::Application>           SimTaDyn::m_application;
-std::vector<std::unique_ptr<MainWindow>> SimTaDyn::m_windows;
-
 SimTaDyn::SimTaDyn(int argc, char** argv)
   : m_parser(argc, argv)
 {
@@ -54,12 +50,12 @@ SimTaDyn::SimTaDyn(int argc, char** argv)
   m_parser.run_and_exit_if_error();
 
   LOGI("Init GTK");
-  m_application = Gtk::Application::create();
+  application() = Gtk::Application::create();
   Gsv::init();
 
   // On startup create all main windows
   createForthEditorWindow();
-  m_application->signal_startup().connect([&]{
+  application()->signal_startup().connect([&]{
       createMapEditorWindow();
       init();
     });
@@ -71,8 +67,9 @@ SimTaDyn::~SimTaDyn()
 
 int SimTaDyn::run()
 {
-  return (0_z != m_windows.size())
-    ? m_application->run(*(m_windows[0].get()))
+  WindowContainer& win = windows();
+  return (0_z != win.size())
+    ? application()->run(*(win[0].get()))
     : EXIT_FAILURE;
 }
 
@@ -87,11 +84,5 @@ void SimTaDyn::init()
   PathManager::instance().add(m_parser.get<std::string>("p"));
   LOGI("%s", PathManager::instance().toString().c_str());
 
-  m_forth.boot();
-}
-
-int main(int argc, char** argv)
-{
-  SimTaDyn simtadyn(argc, argv);
-  return simtadyn.run();
+  forth().boot();
 }
