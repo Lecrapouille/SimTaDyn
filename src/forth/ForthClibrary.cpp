@@ -166,7 +166,7 @@ ForthCLib::end()
   m_file.close();
 
   // Compile generated code into a dynamic library.
-  std::string makefile = PathManager::instance().expand("forth/LibC/Makefile");
+  std::string makefile = PathManager::expand("forth/LibC/Makefile");
   std::string command = "make -f " + makefile
     + " BUILD=" + config::tmp_path
     + " SRCS=" + m_libname + ".c"

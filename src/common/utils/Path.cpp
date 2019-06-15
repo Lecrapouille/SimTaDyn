@@ -38,12 +38,19 @@ Path::~Path()
 //! \brief add a directory in the path
 void Path::add(std::string const& path)
 {
-  LOGI("Path::add '%s'", path.c_str());
-  split(path);
+  if (!path.empty())
+    {
+      LOGI("Path::add '%s'", path.c_str());
+      split(path);
+    }
+  else
+    {
+      LOGI("Ignoring Path::add '%s'", path.c_str());
+    }
 }
 
 //! \brief add a directory in the path
-void Path::init(std::string const& path)
+void Path::reset(std::string const& path)
 {
   LOGI("Path::clear()");
   m_search_paths.clear();

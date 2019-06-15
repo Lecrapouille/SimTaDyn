@@ -32,8 +32,8 @@ bool NodesRenderer::setupGraphics(float const ratio)
   GLFragmentShader   fs;
 
   // Load from ASCII file the vertex sahder (vs) as well the fragment shader
-  vs.fromFile(PathManager::instance().expand("shaders/node.vertex"));
-  fs.fromFile(PathManager::instance().expand("shaders/node.fragment"));
+  vs.fromFile(PathManager::expand("shaders/node.vertex"));
+  fs.fromFile(PathManager::expand("shaders/node.fragment"));
 
   // Compile shader as OpenGL program. This one will instanciate all OpenGL objects for you.
   if (!m_prog.attachShaders(vs, fs).compile())

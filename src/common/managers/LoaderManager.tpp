@@ -117,7 +117,7 @@ public:
   void loadFromFile(std::string const& filename, R& resource) const
   {
     LOGI("Loading file '%s'", filename.c_str());
-    std::pair<std::string, bool> full_path = PathManager::instance().find(filename);
+    std::pair<std::string, bool> full_path = PathManager::find(filename);
     if (!full_path.second)
       {
         // Note: probably useless because if the file does not exist
@@ -125,7 +125,7 @@ public:
         // a different message.
         std::string msg("The file '" + filename +
                         "' cannot be found in the given search path '" +
-                        PathManager::instance().toString() + "'");
+                        PathManager::toString() + "'");
         throw LoaderManagerException(msg);
       }
     try

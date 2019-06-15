@@ -34,7 +34,7 @@ void SimForth::boot()
 
   // Initialize basic Forth system
   std::pair<bool, std::string> res
-    = Forth::interpreteFile(PathManager::instance().expand("forth/system.fs"));
+    = Forth::interpreteFile(PathManager::expand("forth/system.fs"));
   ok(res);
 
   if (res.first)

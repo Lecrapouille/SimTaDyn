@@ -48,7 +48,7 @@ public:
 
     try
       {
-        set_logo(Gdk::Pixbuf::create_from_file(PathManager::instance().expand("icons/SimTaDyn-logo.jpg")));
+        set_logo(Gdk::Pixbuf::create_from_file(PathManager::expand("icons/SimTaDyn-logo.jpg")));
       }
     catch (...)
       {

@@ -48,8 +48,6 @@ int main(int argc, char* argv[])
                 << config::tmp_path << "'" << std::endl;
     }
 
-  PathManager::instance();
-
   SimForth& forth = SimForth::instance();
   ClassicSpreadSheet sheet("Sheet" + arg);
 

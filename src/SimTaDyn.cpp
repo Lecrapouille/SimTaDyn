@@ -81,8 +81,8 @@ void SimTaDyn::configureOptions()
 void SimTaDyn::init()
 {
   LOGI("Parsing project options");
-  PathManager::instance().add(m_parser.get<std::string>("p"));
-  LOGI("%s", PathManager::instance().toString().c_str());
+  PathManager::add(m_parser.get<std::string>("p"));
+  LOGI("%s", PathManager::toString().c_str());
 
   forth().boot();
 }

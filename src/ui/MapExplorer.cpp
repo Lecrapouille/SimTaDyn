@@ -340,7 +340,7 @@ bool SimTaDynMapExplorer::loadIcon(Icon const icon, std::string const& icon_name
     {
       // FIXME Resource Manager
       m_icons[icon] = Gdk::Pixbuf::create_from_file(
-        PathManager::instance().expand("icons/" + icon_name),
+        PathManager::expand("icons/" + icon_name),
         16, 16);
       res = true;
     }

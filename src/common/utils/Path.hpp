@@ -45,7 +45,7 @@ public:
 
   //! \brief Reset the path state. Directories are
   //! separated by ':'. Example: "/foo/bar:/usr/lib/".
-  void init(std::string const& path);
+  void reset(std::string const& path);
 
   //! \brief Erase the path.
   void clear();

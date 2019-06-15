@@ -56,7 +56,7 @@ void MainWindow::group(uint8_t const id, Gtk::Button& left_button, Gtk::Button& 
 //------------------------------------------------------------------
 static void setPersonalIcon(Gtk::Button& button, const Glib::ustring& icon_name)
 {
-  Gtk::Image* image = Gtk::manage(new Gtk::Image(PathManager::instance().expand("icons/" + icon_name + ".png")));
+  Gtk::Image* image = Gtk::manage(new Gtk::Image(PathManager::expand("icons/" + icon_name + ".png")));
   image->property_use_fallback() = true;
   button.set_image(*image);
 }
@@ -76,7 +76,7 @@ void MainWindow::setSubtitle(const Glib::ustring& subtitle)
 //------------------------------------------------------------------
 void MainWindow::setTitleIcon(std::string const &icon_name)
 {
-  std::pair<std::string, bool> res = PathManager::instance().find(icon_name);
+  std::pair<std::string, bool> res = PathManager::find(icon_name);
 
   if (res.second)
     {
