@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef RED_HPP_
-#  define RED_HPP_
+#ifndef REDIRECTION_HPP
+#  define REDIRECTION_HPP
 
 #  include <cstdint>
 #pragma GCC diagnostic push
@@ -68,4 +68,4 @@ private:
   uint32_t m_buffer_size;
 };
 
-#endif
+#endif // REDIRECTION_HPP

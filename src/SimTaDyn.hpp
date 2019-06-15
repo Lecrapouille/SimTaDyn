@@ -18,13 +18,13 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMTADYN_CONTEXT_HPP_
-#  define SIMTADYN_CONTEXT_HPP_
+#ifndef SIMTADYN_CONTEXT_HPP
+#  define SIMTADYN_CONTEXT_HPP
 
 #  include "Path.hpp"
 #  include "NonCopyable.hpp"
-#  include "SimWindowMapEditor.hpp"
-#  include "SimWindowForthEditor.hpp"
+#  include "MapEditorWindow.hpp"
+#  include "ForthEditorWindow.hpp"
 #  include "CmdParser/cmdparser.hpp"
 
 // **************************************************************
@@ -112,8 +112,8 @@ private:
   cli::Parser                                          m_parser;
   static SimForth                                      m_forth;
   static Glib::RefPtr<Gtk::Application>                m_application;
-  static std::vector<std::unique_ptr<ISimTaDynWindow>> m_windows;
-  static std::unique_ptr<ISimTaDynWindow>              m_main_window;
+  static std::vector<std::unique_ptr<MainWindow>> m_windows;
+  static std::unique_ptr<MainWindow>              m_main_window;
 };
 
-#endif /* SIMTADYN_CONTEXT_HPP_ */
+#endif // SIMTADYN_CONTEXT_HPP

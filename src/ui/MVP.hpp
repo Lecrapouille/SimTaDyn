@@ -19,16 +19,16 @@
 //=====================================================================
 
 #ifndef MVP_HPP
-#define MVP_HPP
+#  define MVP_HPP
 
-#include "DrawingArea.hpp"
-#include "SimTaDynMap.hpp"
+#  include "DrawingArea.hpp"
+#  include "SimTaDynMap.hpp"
 
 class MapPresenter
 {
 public:
 
-  MapPresenter(PopupException& popup_exception, SimTaDynMapPtr map = nullptr)
+  MapPresenter(ExceptionDialog& popup_exception, SimTaDynMapPtr map = nullptr)
     : m_glarea(popup_exception),
       m_map(map)
   {
@@ -72,4 +72,4 @@ private:
   SimTaDynMapPtr m_map;
 };
 
-#endif
+#endif // MVP_HPP

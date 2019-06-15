@@ -18,13 +18,13 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimWindowMapEditor.hpp"
+#include "MapEditorWindow.hpp"
 #include "SimTaDyn.hpp"
 
 //------------------------------------------------------------------
 MapEditorWindow::MapEditorWindow()
-  : ISimTaDynWindow(SimTaDyn::application()),
-    m_editor(m_popup_exception, SimTaDyn::forth()),
+  : MainWindow(SimTaDyn::application()),
+    m_editor(m_exception_dialog, SimTaDyn::forth()),
     m_explorer(SimTaDyn::application()),
     m_action_type(m_toolbar),
     m_action_on(m_toolbar)
@@ -41,7 +41,7 @@ MapEditorWindow::MapEditorWindow()
   bindToolbarCommands();
   bindMapExplorerSignals();
 
-  MapPresenter* presenter = new MapPresenter(m_popup_exception/*FIXME *this, createDummy*/);
+  MapPresenter* presenter = new MapPresenter(m_exception_dialog/*FIXME *this, createDummy*/);
   m_editor.addPresenter(presenter);
   Gtk::Box* box = Gtk::make_managed<Gtk::Box>();
   box->pack_start(presenter->view());
@@ -240,7 +240,7 @@ void MapEditorWindow::actionClearSheet()
 //------------------------------------------------------------------
 void MapEditorWindow::splitView(Gtk::Orientation const orientation)
 {
-  MapPresenter* presenter = new MapPresenter(m_popup_exception, m_editor.activeModelPtr());
+  MapPresenter* presenter = new MapPresenter(m_exception_dialog, m_editor.activeModelPtr());
   splitWidget(m_editor.activeView(), presenter->view(), orientation, Pack::First);
   m_editor.addPresenter(presenter);
 }

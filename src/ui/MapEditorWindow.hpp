@@ -21,21 +21,22 @@
 #ifndef MAP_EDITOR_WINDOW_HPP
 #  define MAP_EDITOR_WINDOW_HPP
 
-#  include "SimWindow.hpp"
+#  include "Windows.hpp"
 #  include "MapEditor.hpp"
 #  include "InputsHandler.hpp"
 #  include "MapEditorCommands.hpp"
 #  include "MapEditionTools.hpp"
-#  include "SimWindowMapExplorer.hpp"
+#  include "MapExplorerWindow.hpp"
 #  include <unordered_map>
 
 class IMapEditorCommand;
+class MapEditionTools;
 
 // **************************************************************
 //! \brief
 // **************************************************************
 class MapEditorWindow :
-  public ISimTaDynWindow,
+  public MainWindow,
   public MouseHandler,
   public KeyBoardHandler
 {

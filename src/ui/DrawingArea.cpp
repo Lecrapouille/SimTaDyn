@@ -44,10 +44,10 @@ void GLDrawingArea::onLeaveViewEvent(GdkEventCrossing* /*crossing_event*/, GLDra
 #endif
 
 //------------------------------------------------------------------
-GLDrawingArea::GLDrawingArea(/* MapEditor& */ PopupException& popup_exception)
+GLDrawingArea::GLDrawingArea(/* MapEditor& */ ExceptionDialog& popup_exception)
   : Gtk::GLArea(),
     GLRenderer(),
-    m_popup_exception(popup_exception),
+    m_exception_dialog(popup_exception),
     m_id(getID())
 {
   std::cout << "New GLDrawingArea " << (int) getID() << std::endl;
@@ -123,12 +123,12 @@ void GLDrawingArea::onCreate()
     }
   catch (const Gdk::GLError& gle)
     {
-      m_popup_exception.popupException("An error occured making the OpenGL context during GLArea creation", gle.what(), "");
+      m_exception_dialog.show("An error occured making the OpenGL context during GLArea creation", gle.what(), "");
       opengl::hasCreatedContext() = false;
     }
   catch (const OpenGLException& e)
     {
-      m_popup_exception.popupException(e, "An OpenGL error occurred during the setupGraphics()");
+      m_exception_dialog.show(e, "An OpenGL error occurred during the setupGraphics()");
       opengl::hasCreatedContext() = false;
     }
 }
@@ -183,7 +183,7 @@ bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
       static bool singleton = true;
       if (singleton)
         {
-          m_popup_exception.popupException(e, "");
+          m_exception_dialog.show(e, "");
           singleton = false;
         }
       else

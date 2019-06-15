@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef PACKAGE_EXPLORER_HPP_
-#  define PACKAGE_EXPLORER_HPP_
+#ifndef MAP_EXPLORER_HPP
+#  define MAP_EXPLORER_HPP
 
 #  include "ILoader.tpp"
 #  include "SimTaDynMap.hpp"
@@ -261,4 +261,4 @@ private:
   // Search box: https://stackoverflow.com/questions/46176129/searching-in-treeview-and-highlight-select-the-row-that-contains-the-item-that-i
 };
 
-#endif
+#endif // MAP_EXPLORER_HPP

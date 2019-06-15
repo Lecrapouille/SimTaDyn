@@ -21,10 +21,10 @@
 #ifndef FORTH_EDITOR_WINDOW_HPP
 #  define FORTH_EDITOR_WINDOW_HPP
 
-#  include "SimWindow.hpp"
+#  include "Windows.hpp"
 #  include "ForthEditor.hpp"
 
-class ForthEditorWindow : public ISimTaDynWindow
+class ForthEditorWindow : public MainWindow
 {
 public:
 
@@ -59,10 +59,10 @@ private:
 
 private:
 
-  ForthEditor  m_forth_editor;
-  Gtk::Popover m_menu_popov;
+  ForthEditor             m_forth_editor;
+  Gtk::Popover            m_menu_popov;
   Glib::RefPtr<Gio::Menu> m_submenu_forth_plugins;
-  /* FIXME static */ About   m_about;
+  AboutDialog             m_about; // FIXME static ?
 };
 
 

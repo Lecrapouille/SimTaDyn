@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef RENDERER_HPP_
-#  define RENDERER_HPP_
+#ifndef RENDERER_HPP
+#  define RENDERER_HPP
 
 #  include "Camera2D.hpp"
 #  include "SimTaDynSheet.hpp"
@@ -194,4 +194,4 @@ private:
   Camera2D        m_current_camera;
 };
 
-#endif /* RENDERER_HPP_ */
+#endif // RENDERER_HPP

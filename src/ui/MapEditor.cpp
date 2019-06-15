@@ -22,8 +22,8 @@
 #include "Config.hpp"
 #include "SimTaDynLoaders.hpp"
 
-MapEditor::MapEditor(PopupException& popup_exception, SimForth& forth)
-  : m_popup_exception(popup_exception),
+MapEditor::MapEditor(ExceptionDialog& popup_exception, SimForth& forth)
+  : m_exception_dialog(popup_exception),
     m_forth(forth)
 {
   addPresenter(new MapPresenter(popup_exception /*FIXME *this, createDummyMap()*/));
@@ -145,7 +145,7 @@ bool MapEditor::doOpenMap(std::string const& filename, bool const new_map, bool 
     {
       //loaded_failure.emit(filename, e.message());
 
-      m_popup_exception.popupException(e, "Could not load '" + filename + "' as a SimTaDyn map");
+      m_exception_dialog.show(e, "Could not load '" + filename + "' as a SimTaDyn map");
       return false;
     }
 

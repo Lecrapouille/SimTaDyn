@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef MAPEDITOR_HPP_
-#  define MAPEDITOR_HPP_
+#ifndef MAPEDITOR_HPP
+#  define MAPEDITOR_HPP
 
 #  include "SimTaDynForth.hpp"
 #  include "ToggleButtons.hpp"
@@ -45,7 +45,7 @@ public:
   //------------------------------------------------------------------
   //! \brief
   //------------------------------------------------------------------
-  MapEditor(PopupException& popup_exception, SimForth& forth);
+  MapEditor(ExceptionDialog& popup_exception, SimForth& forth);
 
   //------------------------------------------------------------------
   //! \brief
@@ -163,11 +163,11 @@ public:
 private:
 
   SimTaDynMapManager         m_resources;
-  PopupException             m_popup_exception;
+  ExceptionDialog             m_exception_dialog;
   SimForth&                  m_forth;
   std::vector<MapPresenter*> m_presenters;
   MapPresenter*              m_active_presenter = nullptr;
   ActionOn                   m_action_on;
 };
 
-#endif /* MAPEDITOR_HPP_ */
+#endif // MAPEDITOR_HPP

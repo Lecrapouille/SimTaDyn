@@ -19,7 +19,7 @@
 //=====================================================================
 
 #ifndef NODES_RENDERER_HPP
-#define NODES_RENDERER_HPP
+#  define NODES_RENDERER_HPP
 
 #  include "Color.hpp"
 #  include "OpenGLCppWrapper.hpp"

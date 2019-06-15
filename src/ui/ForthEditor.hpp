@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FORTHEDITOR_HPP_
-#  define FORTHEDITOR_HPP_
+#ifndef FORTHEDITOR_HPP
+#  define FORTHEDITOR_HPP
 
 #  include "TextEditor.hpp"
 #  include "ForthInspector.hpp"
@@ -129,4 +129,4 @@ private:
   streamgui m_cerr; // std::cerr redirected inside the GUI
 };
 
-#endif /* FORTHEDITOR_HPP_ */
+#endif // FORTHEDITOR_HPP

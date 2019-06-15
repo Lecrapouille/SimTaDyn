@@ -18,7 +18,7 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "MapExplorer.hpp"
+#include "MapExplorerWindow.hpp"
 #include "PathManager.hpp"
 //#include "MapEditor.hpp"
 

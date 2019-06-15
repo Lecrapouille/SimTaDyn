@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef DRAWINGAREA_HPP_
-#  define DRAWINGAREA_HPP_
+#ifndef DRAWINGAREA_HPP
+#  define DRAWINGAREA_HPP
 
 #  include "Dialogs.hpp"
 #  include "Renderer.hpp"
@@ -47,7 +47,7 @@ public:
   //------------------------------------------------------------------
   //! \brief Constructor. Connect GTK+ io signals
   //------------------------------------------------------------------
-  GLDrawingArea(PopupException& popup_exception);
+  GLDrawingArea(ExceptionDialog& popup_exception);
 
   //------------------------------------------------------------------
   //! \brief Destructor.
@@ -134,7 +134,7 @@ private:
 
 private:
 
-  PopupException& m_popup_exception;
+  ExceptionDialog& m_exception_dialog;
   Key m_id;
 
   // TODO: memoriser les boutons de la carte:
@@ -142,4 +142,4 @@ private:
   // dans le bon etat.
 };
 
-#endif /* DRAWINGAREA_HPP_ */
+#endif // DRAWINGAREA_HPP

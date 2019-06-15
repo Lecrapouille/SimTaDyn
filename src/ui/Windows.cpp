@@ -18,39 +18,13 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimWindow.hpp"
+#include "Windows.hpp"
 #include "PathManager.hpp"
 
 //------------------------------------------------------------------
-About::About()
-{
-  // About window
-  set_program_name(config::project_name);
-  set_version(std::to_string(config::major_version) + '.' + std::to_string(config::minor_version));
-  set_copyright("Copyright ©2004, 2017-2019 Quentin Quadrat");
-  set_comments("A GIS in a spreadsheet");
-  set_license_type(Gtk::LICENSE_GPL_3_0);
-  set_wrap_license(false);
-  set_website("https://github.com/Lecrapouille/SimTaDyn");
-  set_website_label("Visit " + config::project_name + " github site");
-  set_authors({"Quentin Quadrat <lecrapouille@gmail.com>"});
-
-  try
-    {
-      set_logo(Gdk::Pixbuf::create_from_file(PathManager::instance().expand("icons/SimTaDyn-logo.jpg")));
-    }
-  catch (...)
-    {
-      LOGW("SimTaDyn logo not found");
-    }
-
-  signal_response().connect([&](const int&) { hide(); });
-}
-
-//------------------------------------------------------------------
-ISimTaDynWindow::ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application)
+MainWindow::MainWindow(Glib::RefPtr<Gtk::Application> application)
   : m_application(application),
-    m_popup_exception(*this)
+    m_exception_dialog(*this)
 {
   LOGI("Creating the SimTaDyn");
 
@@ -66,11 +40,11 @@ ISimTaDynWindow::ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application)
   group(3, m_horizontal_split_button, m_vertical_split_button);
 
   //
-  signal_delete_event().connect(sigc::mem_fun(this, &ISimTaDynWindow::onExit));
+  signal_delete_event().connect(sigc::mem_fun(this, &MainWindow::onExit));
 }
 
 //------------------------------------------------------------------
-void ISimTaDynWindow::group(uint8_t const id, Gtk::Button& left_button, Gtk::Button& right_button)
+void MainWindow::group(uint8_t const id, Gtk::Button& left_button, Gtk::Button& right_button)
 {
   Glib::RefPtr<Gtk::StyleContext> stylecontext;
   m_boxes[id].pack_start(left_button);
@@ -88,19 +62,19 @@ static void setPersonalIcon(Gtk::Button& button, const Glib::ustring& icon_name)
 }
 
 //------------------------------------------------------------------
-void ISimTaDynWindow::setTitle(const Glib::ustring& title)
+void MainWindow::setTitle(const Glib::ustring& title)
 {
   m_header_bar.set_title(title);
 }
 
 //------------------------------------------------------------------
-void ISimTaDynWindow::setSubtitle(const Glib::ustring& subtitle)
+void MainWindow::setSubtitle(const Glib::ustring& subtitle)
 {
   m_header_bar.set_subtitle(subtitle);
 }
 
 //------------------------------------------------------------------
-void ISimTaDynWindow::setTitleIcon(std::string const &icon_name)
+void MainWindow::setTitleIcon(std::string const &icon_name)
 {
   std::pair<std::string, bool> res = PathManager::instance().find(icon_name);
 
@@ -115,7 +89,7 @@ void ISimTaDynWindow::setTitleIcon(std::string const &icon_name)
 }
 
 //------------------------------------------------------------------
-void ISimTaDynWindow::populateHeaderBar()
+void MainWindow::populateHeaderBar()
 {
   m_header_bar.set_show_close_button(true);
   m_header_bar.set_title (config::project_name);
@@ -137,12 +111,12 @@ void ISimTaDynWindow::populateHeaderBar()
   m_header_bar.pack_end(m_boxes[1]);
   m_header_bar.pack_end(m_boxes[2]);
 
-  m_open_file_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onOpenFileClicked));
-  m_recent_files_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onRecentFilesClicked));
-  m_horizontal_split_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onHorizontalSplitClicked));
-  m_vertical_split_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onVerticalSplitClicked));
-  m_undo_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onUndoClicked));
-  m_redo_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onRedoClicked));
-  m_saveas_file_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onSaveAsFileClicked));
-  m_save_file_button.signal_clicked().connect(sigc::mem_fun(*this, &ISimTaDynWindow::onSaveFileClicked));
+  m_open_file_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onOpenFileClicked));
+  m_recent_files_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onRecentFilesClicked));
+  m_horizontal_split_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onHorizontalSplitClicked));
+  m_vertical_split_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onVerticalSplitClicked));
+  m_undo_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onUndoClicked));
+  m_redo_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onRedoClicked));
+  m_saveas_file_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onSaveAsFileClicked));
+  m_save_file_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onSaveFileClicked));
 }

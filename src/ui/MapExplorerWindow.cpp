@@ -18,7 +18,7 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimWindowMapExplorer.hpp"
+#include "MapExplorerWindow.hpp"
 
 MapExplorerWindow::MapExplorerWindow(Glib::RefPtr<Gtk::Application> application)
   : m_application(application)

@@ -21,7 +21,7 @@
 #ifndef MAP_EDITOR_COMMANDS_HPP
 #  define MAP_EDITOR_COMMANDS_HPP
 
-#  include "SimWindowMapEditor.hpp"
+#  include "MapEditorWindow.hpp"
 
 class MapEditorWindow;
 

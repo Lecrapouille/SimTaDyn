@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef FORTH_INSPECTOR_HPP_
-#  define FORTH_INSPECTOR_HPP_
+#ifndef FORTH_INSPECTOR_HPP
+#  define FORTH_INSPECTOR_HPP
 
 #  include "Gtkmm.tpp"
 #  include "SimTaDynForth.hpp" // FIXME Forth.hpp
@@ -268,4 +268,4 @@ private:
   ModelColumns   m_columns;
 };
 
-#endif /* FORTH_INSPECTOR_HPP_ */
+#endif // FORTH_INSPECTOR_HPP

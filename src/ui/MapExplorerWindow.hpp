@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef SIMWINDOW_MAP_EXPLORER_HPP
-#  define SIMWINDOW_MAP_EXPLORER_HPP
+#ifndef MAP_EXPLORER_WINDOW_HPP
+#  define MAP_EXPLORER_WINDOW_HPP
 
 #include "MapExplorer.hpp"
 #include "SimTaDynMap.hpp"
@@ -45,4 +45,4 @@ protected:
   SimTaDynMapExplorer m_explorer;
 };
 
-#endif // SIMWINDOW_MAP_EXPLORER_HPP
+#endif // MAP_EXPLORER_WINDOW_HPP

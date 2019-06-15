@@ -18,34 +18,25 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef ISIMTADYN_WINDOW_HPP
-#  define ISIMTADYN_WINDOW_HPP
+#ifndef WINDOWS_HPP
+#  define WINDOWS_HPP
 
 #  include "Dialogs.hpp"
 #  include "Config.hpp"
 #  include "Logger.hpp"
 
-// **************************************************************
-//! \brief Facade for Gtk::AboutDialog.
-// **************************************************************
-class About: public Gtk::AboutDialog
-{
-public:
-
-  About();
-};
-
-// **************************************************************
-//! \brief
-// **************************************************************
-class ISimTaDynWindow :
+// *************************************************************************************************
+//! \brief Facade class for creating windows with the same look
+//! (MapEditor, ForthEditor).
+// *************************************************************************************************
+class MainWindow :
   public Gtk::ApplicationWindow
 {
 public:
 
-  ISimTaDynWindow(Glib::RefPtr<Gtk::Application> application);
-  void setTitle(const Glib::ustring& title);
-  void setSubtitle(const Glib::ustring& subtitle);
+  MainWindow(Glib::RefPtr<Gtk::Application> application);
+  void setTitle(Glib::ustring const& title);
+  void setSubtitle(Glib::ustring const& subtitle);
 
 private:
 
@@ -53,7 +44,7 @@ private:
   // class derivee
 
   void populateHeaderBar();
-  void setTitleIcon(std::string const &icon_name);
+  void setTitleIcon(std::string const& icon_name);
   virtual void onOpenFileClicked() = 0;
   virtual void onRecentFilesClicked() = 0;
   virtual void onHorizontalSplitClicked() = 0;
@@ -68,7 +59,7 @@ private:
 protected:
 
   Glib::RefPtr<Gtk::Application> m_application;
-  PopupException                 m_popup_exception;
+  ExceptionDialog                m_exception_dialog;
   Gtk::MenuButton                m_menu_button;
 
 private:
@@ -85,4 +76,4 @@ private:
   Gtk::HBox       m_boxes[4];
 };
 
-#endif // ISIMTADYN_WINDOW_HPP
+#endif // WINDOWS_HPP

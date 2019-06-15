@@ -18,8 +18,8 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef TEXTEDITOR_HPP_
-#  define TEXTEDITOR_HPP_
+#ifndef TEXTEDITOR_HPP
+#  define TEXTEDITOR_HPP
 
 //#  include "Names.hpp"
 #  include "Logger.hpp"
@@ -309,4 +309,4 @@ protected:
   Glib::RefPtr<Gsv::Language> m_language;
 };
 
-#endif /* TEXTEDITOR_HPP_ */
+#endif // TEXTEDITOR_HPP

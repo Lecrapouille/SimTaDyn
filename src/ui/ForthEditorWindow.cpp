@@ -18,11 +18,11 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#include "SimWindowForthEditor.hpp"
+#include "ForthEditorWindow.hpp"
 #include "SimTaDyn.hpp"
 
 ForthEditorWindow::ForthEditorWindow()
-  : ISimTaDynWindow(SimTaDyn::application()),
+  : MainWindow(SimTaDyn::application()),
     m_forth_editor(SimTaDyn::forth())
 {
   populatePopovMenu();
@@ -99,7 +99,7 @@ void ForthEditorWindow::populatePopovMenu()
   menu->append_submenu("Forth Plugins", m_submenu_forth_plugins);
 
   menu->append("About", "win.about");
-  add_action("about", sigc::mem_fun(m_about, &About::show));
+  add_action("about", sigc::mem_fun(m_about, &AboutDialog::show));
 
   addForthActionMenu("a", "jjhj", "broken", "help");
 
