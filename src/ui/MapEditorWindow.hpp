@@ -96,7 +96,7 @@ protected:
 
 private:
 
-  MapEditor                  m_editor;
+  MapEditor                  m_editor; // FIXME: Non shared by all windows
   MapExplorerWindow          m_explorer;
   Gtk::Popover               m_menu_popov;
   Gtk::HBox                  m_hbox;

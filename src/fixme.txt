@@ -1,0 +1,232 @@
+./common/graphics/OpenGL/examples/08_TerrainTexture3D.cpp:193:  // FIXME: pass m_nbVertices when binding VAO ?
+./common/graphics/OpenGL/examples/main.cpp:52:  std::cout << "  4: TODO" << std::endl;
+./common/graphics/OpenGL/GLFrameBuffers.hpp:104:  //! \fixme Width/height should be checked against maximum size
+./common/graphics/OpenGL/GLFrameBuffers.hpp:110:    // FIXME: nothing is made because pending_attach is empty
+./common/graphics/OpenGL/GLFrameBuffers.hpp:357:                const uint8_t nb_colors = 1u, // FIXME: use enum to detect error at compile-time
+./common/graphics/OpenGL/GLFrameBuffers.hpp:510:    m_color_buffers.push_back(buf); // TODO: max 16 elements
+./common/graphics/OpenGL/GLFrameBuffers.hpp:518:  //! \fixme use smart pointers
+./common/graphics/OpenGL/GLProgram.hpp:1165:        // TODO: check if now isCompiled() == true
+./common/graphics/OpenGL/GLProgram.hpp:1175:        // TODO: create the variable: call addNewUniform
+./common/graphics/OpenGL/GLProgram.hpp:1176:        // TODO: http://www.cplusplus.com/forum/general/21246/#msg112085
+./common/graphics/OpenGL/GLProgram.hpp:690:  //! \fixme bind cannot replace this method ?
+./common/graphics/OpenGL/GLProgram.hpp:706:    // FIXME: A optimiser car ca prend 43 appels OpenGL alors qu'avant
+./common/graphics/OpenGL/GLProgram.hpp:827:            //FIXME vao.createTexture<GLTextureDepth2D>(name);
+./common/graphics/OpenGL/GLShaders.hpp:197:        //TODO m_error_msg += '\n' + msg;
+./common/graphics/OpenGL/GLTextures.hpp:216:  //! FIXME can we use template ?
+./common/graphics/OpenGL/GLTextures.hpp:271:    //TODO
+./common/graphics/OpenGL/GLTextures.hpp:373:    // TODO Forbid texture with 0x0 dimension ?
+./common/graphics/OpenGL/GLTextures.hpp:442:        //TODO 4 because RGBA
+./common/graphics/OpenGL/GLTextures.hpp:456:    //TBD ?
+./common/graphics/OpenGL/GLTextures.hpp:477:    return GLTexture2D::operator[]((u * m_width + v) * 4 + off); //TODO 4 because RGBA
+./common/graphics/OpenGL/GLTextures.hpp:530:    //TODO
+./common/graphics/OpenGL/GLTextures.hpp:539:    start = start / 4; //TODO 4 because RGBA
+./common/graphics/OpenGL/GLTextures.hpp:549:    // FIXME: not working if width and height are not the txture size
+./common/graphics/OpenGL/GLTextures.hpp:59:  PixelFormat cpuPixelFormat = PixelFormat::RGBA; // FIXME can be in conflict with SOIL_LOAD_xxx
+./common/graphics/OpenGL/GLTextures.hpp:652:    // FIXME: pour le moment on envoie toute la texture entiere
+./common/graphics/OpenGL/GLTextures.hpp:654:    // TODO pendingData --> x,width
+./common/graphics/OpenGL/GLTextures.hpp:83:      width = std::max(width, static_cast<uint32_t>(w)); // FIXME
+./common/graphics/OpenGL/GLTextures.hpp:89:      data.append(image, size); // FIXME: not working with preallocated size
+./common/graphics/OpenGL/GLTextures.hpp:943:  //! \todo To be implemeted FIXME
+./common/graphics/OpenGL/GLVAO.hpp:523:  // FIXME instead of hold IGLBuffer we should hold GLBuffer<T>
+./common/graphics/Primitives.hpp:122:  PendingContainer<uint32_t>   m_indices; // TODO uint8_t ?
+./common/graphics/Primitives.hpp:87:    // FIXME: use leazy method ? return positon();
+./common/graphics/RTree/RTreeIndex.cpp:92:  if (IS_A_RTREE_LEAF(level)) // FIXME: faire if (is_leaf())
+./common/graphics/RTree/RTreeNode.cpp:37:  level = 0; // FIXME -1
+./common/graph-theory/algorithm/SimTaDynBFS.hpp:57:  // FIXME: fonctionne (itere sur les voisins) mais pas sur l'ensemble des elemnts du graphe
+./common/graph-theory/GraphAlgorithm.hpp:135:      //FIXME else if (0 == name.compare("SimBFS"))
+./common/graph-theory/Graph.hpp:1070:    const size_t last = m_neighbors.last() + 1U;// FIXME degeux car Collection est non pas Set
+./common/graph-theory/Graph.hpp:1071:    m_neighbors.insert(A(last, fromNode, toNode)); // FIXME degeux: faire Set.append
+./common/graph-theory/Graph.hpp:1072:    Arc& arc = m_neighbors.get(last);// FIXME degeux
+./common/graph-theory/Graph.hpp:1077:        toNode.addNeighbor(arc); // FIXME: il faudrait inverser l'arc mais en n'ajoutant pas un nouveau arc.
+./common/graph-theory/Graph.hpp:1078:                                 // FIXME: car on perd le fait de savoir qui vaut to et qui vaut from
+./common/graph-theory/Graph.hpp:1079:                                 // FIXME: ducoup depthFirstSearch a efet de bord: les noeuds tentent de revenir vers eux memes
+./common/graph-theory/Graph.hpp:265:        // FIXME: enlever cast
+./common/graph-theory/Graph.hpp:356:        // FIXME: enlever cast
+./common/graph-theory/Graph.hpp:674:  typedef GraphContainer<Arc, config::graph_container_nb_elements, GraphBlock> blockarcs_t; // FIXME should be a Set not a Collection
+./common/maths/Maths.hpp:31:// TODO ajouter un fast_cos
+./common/maths/Polynom.hpp:70:    const size_t s = m_coefs.size(); // FIXME capacity
+./common/spreadsheet/ASpreadSheetCell.cpp:28://FIXME
+./common/spreadsheet/ASpreadSheetCell.hpp:148:public: // FIXME private:
+./common/spreadsheet/ASpreadSheetCell.hpp:167:  // TODO: for the moment we managed a single interger value
+./common/spreadsheet/ASpreadSheetCell.hpp:29:class SimForth; // FIXME
+./common/spreadsheet/ASpreadSheetCell.hpp:34:class ASpreadSheetCell // FIXME: public IObserver, public Observable
+./common/spreadsheet/ASpreadSheetCell.hpp:65:    //FIXME parse(forth);
+./common/spreadsheet/ASpreadSheet.cpp:120:          // FIXME: faudrait afficher le nom du spreadsheet dans le message d'erreur du forth
+./common/spreadsheet/ASpreadSheet.cpp:195:      --depCell.second->m_unresolvedRefs; // FIXME: utiliser methode
+./common/spreadsheet/ASpreadSheet.cpp:37:  //TODO m_parsed = true;
+./common/spreadsheet/ASpreadSheet.cpp:38:  //TODO effacer ce flag quand on modifie une cellule
+./common/spreadsheet/ASpreadSheet.cpp:45:  //TODO if (!m_parsed) { parse(); }
+./common/spreadsheet/ASpreadSheet.cpp:66:          addToDependenciesMap(*cell); // FIXME: pas mieux si cell->addDep(this); qui du coup est le tableau des Observers
+./common/spreadsheet/ASpreadSheet.hpp:49:  std::pair<bool, std::string> evaluate(SimForth &forth); // FIXME: Forth et mauvais nom
+./common/spreadsheet/ASpreadSheet.hpp:58:  virtual ASpreadSheetCell* nextCell() /*const*/ = 0; // FIXME
+./common/utils/Exception.cpp:16:  // FIXME: passer en param par default __LINE__ et __FILE__ pour logger d'ou vient l'exception
+./common/utils/Logger.hpp:42:  // FIXME: en double avec File::fileName
+./core/loaders/ShapeFileLoader.cpp:331:      // TODO: restaurer noeuds, arcs, zones
+./core/loaders/SimTaDynFileLoader.cpp:103:      // FIXME: on a perdu filename
+./core/loaders/SimTaDynFileLoader.cpp:107:  // TODO: Popup the GtkException dialog
+./core/loaders/SimTaDynFileLoader.cpp:29:// FIXME password
+./core/loaders/SimTaDynFileLoader.cpp:56:// TODO: si on met a jour une carte et que ca bug au chargement on a corrompu l'ancienne carte.
+./core/loaders/SimTaDynFileLoader.cpp:59:  bool dummy_project = false; // FIXME
+./core/loaders/SimTaDynFileLoader.cpp:69:  // TODO
+./core/loaders/SimTaDynFileLoader.cpp:81:// FIXME password
+./core/loaders/SimTaDynFileLoader.cpp:86:      // FIXME pas le plus safe si zipper.add echoue
+./core/loaders/SimTaDynFileLoader.cpp:95:          // TODO: what to do next ?
+./core/loaders/TextureFileLoader.cpp:30:  texture = GLTexture2DManager::instance().create(filename); //FIXME "vertTexCoord"
+./core/MapEditionTools.hpp:63:        m_map_editor.sheet().addNode(""); // FIXME: simplement m_map_editor.addNode(""); car m_map_editor appellera currentSheet()
+./core/SimTaDynForth.cpp:183:      // FIXME: temporaire car on ne va pas que gerer la fonction cout
+./core/SimTaDynForthPrimitives.cpp:33:        //FIXME MapEditor::instance().openSheet(filename);
+./core/SimTaDynForthPrimitives.cpp:37:      Forth::execPrimitive(FORTH_PRIMITIVE_INCLUDE); // FIXME path() +
+./core/SimTaDynGraph.hpp:12://FIXME: renomer neighbor par isborderof
+./core/SimTaDynGraph.hpp:192:        //FIXME: enlever cast
+./core/SimTaDynGraph.hpp:276:  typedef GraphContainer<Zone, config::graph_container_nb_elements, GraphBlock> blockzones_t; // FIXME should be a Set not a Collection
+./core/SimTaDynGraph.hpp:332:  // TODO ajouter addZone, removeZone, hasZone, markZone ...
+./core/SimTaDynGraph.hpp:8:// FIXME: faire qu'une cellule puisse etre aussi une carte (url, download)
+./core/SimTaDynMap.hpp:101:  SimTaDynSheet& currentSheet(bool const directed = false) // FIXME: is it a good stratgey ?
+./core/SimTaDynMap.hpp:141:    // TODO: ceci est un exemple
+./core/SimTaDynMap.hpp:156:    // TODO: ceci est un exemple
+./core/SimTaDynMap.hpp:164:  //! \brief Return if the map has been modified. FIXME: this is a
+./core/SimTaDynMap.hpp:181:    float dt = 0.0f; // TODO: for animation
+./core/SimTaDynMap.hpp:199:  //TODO SceneNode<SimTaDynSheet, float, 3U> m_current_node = nullptr;
+./core/SimTaDynMap.hpp:200:  //TODO m_current_sheet =  m_current_node->mesh()
+./core/SimTaDynMap.hpp:201:  //TODO m_current_node = gtkmm::TreeView::on_click()
+./core/SimTaDynMap.hpp:78:  //! \brief Return the name. The name cannot be changed (TODO this is
+./core/SimTaDynMap.hpp:88:  //! TODO prevent GTK to refresh map manager
+./core/SimTaDynSheet.cpp:59:          std::cerr << "Found Zone TODO " << id << std::endl;
+./core/SimTaDynSheet.cpp:61:          return nullptr; // &getZone(id); //FIXME a finir
+./core/SimTaDynSheet.hpp:169:  std::string m_file_path = "FIXME";
+./core/SimTaDynSheet.hpp:191:    /* FIXME if (nullptr == m_graphAlgorithm)
+./core/SimTaDynSheet.hpp:239:    // FIXME: a faire par la suite m_spatial_index.root.bbox()
+./core/SimTaDynSheet.hpp:248:  //! FIXME: TEMPORAIRE car sera donner par Rtree.bbox()
+./core/SimTaDynSheet.hpp:253:  //FIXME std::shared_ptr<GraphAlgorithm> m_graphAlgorithm = nullptr;
+./core/SimTaDynSheet.hpp:30://FIXME
+./core/SimTaDynSheet.hpp:40:    public SceneGraph_t<std::string, SimTaDynSheet, float, 3u>::Node, // FIXME: types
+./forth/ForthClibrary.cpp:154:  m_file << "typedef uint32_t Cell32;\n"; // FIXME: Adapt automaticaly the size Cell64 ..
+./forth/ForthClibrary.cpp:174:  system(command.c_str()); // FIXME: tester code de retour
+./forth/ForthClibrary.cpp:177:  // FIXME: ok extension .so/.dylib pas necessaire avec gtkmm::Module mais utile pour les log
+./forth/ForthClibrary.cpp:195:          msg += ("Failed finding symbol '" + it.func_c_name + "' in '" + libpath + ".so\n"); //FIXME .so
+./forth/ForthClibrary.cpp:38:#warning "FIXME: si on passe aucun param et aucun code de retour alors ca bug"
+./forth/ForthClibrary.hpp:74:  Glib::Module *m_module = nullptr; // TODO: use unique_ptr Yeah pointer else local will close file and lost func pointers
+./forth/Forth.cpp:225:              // FIXME: changer le message
+./forth/Forth.cpp:317:      // FIXME eviter de retester des mots deja vus en pasant en param
+./forth/Forth.cpp:584:// FIXME: convert char* --> string can be consumns lot of memory ?!
+./forth/Forth.cpp:619:      // FIXME: le stream peut ne pas etre termine: attendre
+./forth/Forth.cpp:620:      // FIXME: retourne ok si on lui donne une ligne vide dans un string
+./forth/Forth.cpp:626:      // TODO: checker les piles
+./forth/Forth.cpp:627:      #warning "TODO check if stack depth changed during include!"
+./forth/Forth.cpp:635:          // FIXME: the stream colum information is erroneous because
+./forth/Forth.cpp:672:      abort(); // FIXME bad location
+./forth/ForthDictionary.cpp:296:bool ForthDictionary::dump(std::string const& filename) // FIXME const
+./forth/ForthDictionary.cpp:305:      // TODO: ajouter un param ou commence la sauvegarde dans le dico (ex: skip primitives)
+./forth/ForthDictionary.cpp:586:                      // FIXME: ugly but how to fix that ?
+./forth/ForthDictionary.cpp:687:  // FIXME: proteger en ecriture les anciens mots definis
+./forth/ForthDictionary.cpp:688:  // FIXME: autoriser en lecture toutes les addr du dico
+./forth/ForthDictionary.cpp:700:// FIXME: au lieu de addr >= &m_dictionary[maxPrimitives()]
+./forth/ForthDictionary.cpp:769:  // FIXME Cell8 *const addr
+./forth/ForthDictionary.hpp:121:  bool dump(std::string const& filename);// FIXME const;
+./forth/ForthDictionary.hpp:213:  // FIXME std::string m_name;
+./forth/ForthHelper.hpp:59:// FIXME: Maybe we can divide / 2 addresses because they are aligned.
+./forth/ForthHelper.hpp:64:// FIXME: COMPIL_ASSERT_TIME((DICTIONARY_SIZE - 1U) <= CELL16_MAX_VALUE)
+./forth/Forth.hpp:172:  int32_t isStackUnderOverFlow(const forth::StackID id) const; // FIXME: a renommer en checkStack
+./forth/ForthPrimitives.cpp:370:      DPOP(m_tos1); // FIXME: optim: RPUSH(DPOP);
+./forth/ForthPrimitives.cpp:679:        std::pair<bool, std::string> res = m_dynamic_libs.end(/*nth*/); // FIXME
+./forth/ForthPrimitives.cpp:752:  // TODO: Les ranger par ordre lexico ?
+./forth/ForthPrimitives.cpp:753:  // FIXME: init m_last et m_here pour etre sur que le client ne
+./ui/DrawingArea.cpp:28:  //TODO mapeditor.currentView() = *this;
+./ui/DrawingArea.cpp:36:  // TODO restaurer les boutons associes a la vue
+./ui/DrawingArea.hpp:140:  // TODO: memoriser les boutons de la carte:
+./ui/ForthEditor.cpp:147:// Slot. FIXME: gerer les commentaires
+./ui/ForthEditor.cpp:153:  // FIXME: enlever les tags
+./ui/ForthEditor.cpp:167:      // TODO: not in a comment
+./ui/ForthEditor.cpp:169:        // Mark unknown word. FIXME underline IMMEDIATE words
+./ui/ForthEditor.cpp:199:  // FIXME: reset completion state
+./ui/ForthEditor.cpp:202:// FIXME: temporary
+./ui/ForthEditor.cpp:258:    // FIXME temporary plugin
+./ui/ForthEditor.cpp:276:  // TODO: be sure no script is running on the map before destroying
+./ui/ForthEditor.cpp:277:  // TODO: save the historic buffer
+./ui/ForthEditor.cpp:286:  //TODO menu->append_submenu("Text Editor", submenu_text_editor);
+./ui/ForthEditor.cpp:356:  // TODO: use factory pattern
+./ui/ForthEditor.cpp:391:      // FIXME return not taken into account
+./ui/ForthEditor.cpp:426:      // FIXME return not taken into account
+./ui/ForthEditor.cpp:484:      // FIXME: Clear the text editor if and only if we are in an interactive mode
+./ui/ForthEditor.cpp:525:      // TODO: inserer nouveau mot dans tree
+./ui/ForthEditor.cpp:537:      // TODO: select in red the faulty word
+./ui/ForthEditor.cpp:550:  // FIXME: ajouter le numero du bouton dans le nom pour eviter
+./ui/ForthEditor.cpp:573:          m_statusbar.push("Use ignored saving the Forth script button"); // FIXME: inutile car ecrase par le resultat de l'exec
+./ui/ForthEditor.cpp:584:  // FIXME: quand on sauvegarde ne pas stocker dans un fichier mais dans le bouton
+./ui/ForthEditor.cpp:588:// FIXME const Cell16 ForthToken)
+./ui/ForthEditor.cpp:590:// FIXME: si pile vide ou pas le bon nombre d'elements alors fenetre popup qui demande les param
+./ui/ForthEditor.cpp:591:// FIXME: ajouter le postip avec la definiton du mot "WORD ( n1 n2 -- n3 n4 )"
+./ui/ForthEditor.cpp:592:// FIXME ne pas autoriser a compiler
+./ui/ForthEditor.cpp:613:      //FIXME Gtk::MessageDialog dialog(*this, "Failed creating a Forth button");
+./ui/ForthEditor.hpp:26:#  include "SimTaDynForth.hpp" // FIXME Forth.hpp
+./ui/ForthEditor.hpp:45:  // FIXME changer le nom de cette fonction
+./ui/ForthEditor.hpp:86:  void openInteractiveScript() { createTemplateScript(); } // FIXME: not yet implemented
+./ui/ForthEditorWindow.cpp:120:  // FIXME: temporary: this is not the good button
+./ui/ForthEditorWindow.cpp:172:      // FIXME: quand on sauvegarde ne pas stocker dans un fichier mais dans le menu
+./ui/ForthEditorWindow.cpp:40:  //FIXME
+./ui/ForthEditorWindow.cpp:65:    // FIXME temporary plugin
+./ui/ForthEditorWindow.cpp:79:  //FIXME: how to insert help as tooltip ?
+./ui/ForthEditorWindow.hpp:65:  AboutDialog             m_about; // FIXME static ?
+./ui/ForthInspector.hpp:150:    Gtk::TreeModelColumn<int32_t> data; // FIXME: forth::cell
+./ui/ForthInspector.hpp:166:class ForthDicoInspector : public Gtk::ScrolledWindow // FIXME: double ScrolledWindow imbriquee
+./ui/ForthInspector.hpp:219:            row[m_columns.definition] = "todo";
+./ui/ForthInspector.hpp:257:    Gtk::TreeModelColumn<Cell32>        token; // FIXME: forth::token
+./ui/ForthInspector.hpp:258:    Gtk::TreeModelColumn<Glib::ustring> definition; // FIXME: std::vector<forth::token>
+./ui/ForthInspector.hpp:25:#  include "SimTaDynForth.hpp" // FIXME Forth.hpp
+./ui/ForthInspector.hpp:50:  // TODO
+./ui/ForthInspector.hpp:75:    Gtk::TreeModelColumn<Key> token; // FIXME: forth::token
+./ui/ForthInspector.hpp:90:class ForthStackInspector : public Gtk::ScrolledWindow // FIXME: double ScrolledWindow imbriquee
+./ui/MapEditor.cpp:125:          //FIXME throw LoaderException("map shall not be nullptr");
+./ui/MapEditor.cpp:138:      //FIXME: attraper ce signal par le renderer puis
+./ui/MapEditor.cpp:139:      //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
+./ui/MapEditor.cpp:140:      //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }
+./ui/MapEditor.cpp:181:      //FIXME: attraper ce signal par le renderer puis
+./ui/MapEditor.cpp:182:      //FIXME if (bool) { selectionner toutes la map pour permettre a l'utilisateur de la placer la ou il vaut }
+./ui/MapEditor.cpp:183:      //FIXME zoomer sur la fusion des deux bounding box de l'ancinne et nouvelle map }
+./ui/MapEditor.cpp:216:  // TODO save sheets then save map
+./ui/MapEditor.cpp:221:  // TODO get the previously used map
+./ui/MapEditor.cpp:226:// FIXME m_map_id = 0 peut ne pas etre bon si on a deja une carte#10 => commencer a 11
+./ui/MapEditor.cpp:29:  addPresenter(new MapPresenter(popup_exception /*FIXME *this, createDummyMap()*/));
+./ui/MapEditor.cpp:50:      // TODO kill the window
+./ui/MapEditor.hpp:146:  bool dialogLoadSheet(Gtk::Window& win, bool const new_sheet, bool const reset_sheet);//TODO ,SimTaDynSheet& sheet)
+./ui/MapEditorWindow.cpp:162:          m_mouse_commands[actionType()]->button1PressEvent(event->x, event->y); // TODO position relative a la fenetre courante
+./ui/MapEditorWindow.cpp:300:  filter_shapefile->set_name("Shape files"); // FIXME: should use LoaderManager informations to avoid double code
+./ui/MapEditorWindow.cpp:44:  MapPresenter* presenter = new MapPresenter(m_exception_dialog/*FIXME *this, createDummy*/);
+./ui/MapEditorWindow.hpp:99:  MapEditor                  m_editor; // FIXME: Non shared by all windows
+./ui/MapExplorer.cpp:289:  // Preload some icons. FIXME: create an IconManager
+./ui/MapExplorer.cpp:317:  m_menuitem[0].signal_activate().connect([this](){ /* TODO Select sheet + delete it: removeSheet(row[m_columns.sheet]) */ });
+./ui/MapExplorer.cpp:320:  m_menuitem[1].signal_activate().connect([this](){ /* TODO Select sheet + add SG child */ });
+./ui/MapExplorer.cpp:323:  m_menuitem[2].signal_activate().connect([this](){ /* TODO Select sheet + add SG brother */ });
+./ui/MapExplorer.cpp:341:      // FIXME Resource Manager
+./ui/MapExplorer.cpp:402:    //FIXME index[m_columns.ptr.file] = &(map->m_index_file);
+./ui/MapExplorer.cpp:429:        //FIXME row[m_columns.ptr.file] = &it;
+./ui/MapExplorer.cpp:441:    // TODO for (auto& it: map->m_resources)
+./ui/MapExplorer.hpp:102://! TODO limitation: affiche pour le moment une unique carte
+./ui/MapExplorer.hpp:116:  // FIXME: Creer un IconManager accessible par toutes les fenetres GTK+
+./ui/MapExplorer.hpp:128:      // TODO: ajouter: editable, visible, runnable, graph direct/indirect
+./ui/MapExplorer.hpp:131:      add(filename); // FIXME: ajouter fullpath (pour coller au ForthEditor)
+./ui/MapExplorer.hpp:152:    //! \brief FIXME: mettre un observateur a la place du bool
+./ui/MapExplorer.hpp:215:  //! TODO: Create an IconManager instead
+./ui/MapExplorer.hpp:221:  //! TODO: Create an IconManager instead
+./ui/MapExplorer.hpp:259:  // TODO evolution:
+./ui/MapExplorer.hpp:34:class SceneNodeEditor : public Gtk::Window // FIXME https://github.com/fra-zz-mer/RenderMasterEditor
+./ui/MapExplorerWindow.cpp:30:  // TODO:
+./ui/Redirection.hpp:34:// TODO: set_color() ?
+./ui/Renderer.hpp:184:  sigc::signal<void> m_signal_draw; // FIXME: to be private
+./ui/Renderer.hpp:40:  // FIXME: utiliser le pattern State pour empiler des GLRenderer
+./ui/TextEditor.cpp:321:    m_button(""), // FIXME a passer en param
+./ui/TextEditor.cpp:403:      // FIXME BUG si  m_filename == ""
+./ui/TextEditor.cpp:460:// of the file. Note: we do not popup a dialog to ask if needed saving (TBD: bool save_before_otrunc)
+./ui/TextEditor.cpp:519:  // TODO A remplacer par populatePopoverMenu()
+./ui/TextEditor.cpp:52:          // FIXME: display error
+./ui/TextEditor.cpp:572:// FIXME:: le seul endroit ou appeller les sauvegardes
+./ui/TextEditor.cpp:60:      // FIXME: highligth the line
+./ui/TextEditor.cpp:668:  // FIXME: faire apparaitre avant de tuer la fenetre principale sinon le dialog peut etre cache par d'autres fentres
+./ui/TextEditor.cpp:804:          //std::cout << "'" << filename << "' already opened\n"; // TODO statusbar
+./ui/TextEditor.cpp:853:      // TBD: compare title ou filename ou les deux ?
+./ui/TextEditor.cpp:900:  // FIXME: mettre en gris le fond si le document est en read-only
+./ui/TextEditor.cpp:913:      if (0 == doc->m_filename.compare("")) // FIXME || read-only(file)
+./ui/TextEditor.hpp:185:// TBD: undo/redo
+./ui/TextEditor.hpp:250:  // FIXME: mode interactif ==> ne pas sauvegarder
+./ui/TextEditor.hpp:286:  // TODO A remplacer par populatePopoverMenu()
+./ui/Windows.hpp:43:  // TODO Ajouter ici splitView mettre les methodes virtuels dans la
