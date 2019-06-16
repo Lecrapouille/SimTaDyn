@@ -48,7 +48,9 @@ int main(int argc, char* argv[])
                 << config::tmp_path << "'" << std::endl;
     }
 
-  SimForth& forth = SimForth::instance();
+#warning "FIXME SimForth::instance()"
+  //SimForth& forth = SimForth::instance();
+  SimForth forth;// = SimForth::instance();
   ClassicSpreadSheet sheet("Sheet" + arg);
 
   forth.boot();

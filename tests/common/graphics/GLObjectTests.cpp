@@ -24,7 +24,8 @@ class FakeObject : public IGLObject<GLint>
 {
 public:
 
-  FakeObject() : IGLObject<GLint>()
+  FakeObject()
+    : IGLObject<GLint>("FakeObject")
   {
     reset();
   }
@@ -93,6 +94,7 @@ public:
 //--------------------------------------------------------------------------
 void GLObjectTests::setUp()
 {
+  std::cout << "*** GLObjectTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------

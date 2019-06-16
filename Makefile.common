@@ -21,15 +21,18 @@
 
 ###################################################
 # Modify this file will force compiling whole project
-MY_MAKEFILE_FILES += $(P)/Makefile.common
+MYMAKEFILES += $(P)/Makefile.common
 
 ###################################################
 # Compilation options.
-CXXFLAGS += -W -Wall -Wextra -std=c++11 `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
-LDFLAGS += `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
+CXXFLAGS += -W -Wall -Wextra
 
 ###################################################
 # Project defines
+#
+# CHECK_OPENGL allows to check if bad parameters are
+#   passed to OpenGL routines. Produce an error message
+#   in the console but does not abort the program.
 DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
@@ -42,12 +45,12 @@ DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 # is needed please read the external/README.md file.
 
 ifeq ($(ARCHI),Darwin)
-LDFLAGS += -L/usr/local/lib -framework OpenGL -lGLEW -lglfw -lz
+LDFLAGS += -I/usr/local/include -I/opt/local/include -framework         \
+           OpenGL -framework Cocoa -framework IOKit -framework          \
+           CoreVideo -L/usr/local/lib -L/opt/local/lib
+PKG_LIBS += gtkmm-3.0 gtksourceviewmm-3.0 glew glfw3 zlib
 else ifeq ($(ARCHI),Linux)
-LDFLAGS += -lGL -lglut -lglfw -lm -lglib-2.0 -lpangocairo-1.0	\
--latk-1.0 -lgdk_pixbuf-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0	\
--lgthread-2.0 -lcairo -lXrandr -lXi -lXxf86vm -pthread -lX11 -lGLEW	\
--ldl -lz -lstdc++
+PKG_LIBS += gtkmm-3.0 gtksourceviewmm-3.0 glew glfw3 zlib
 else
 $(error Unknown architecture)
 endif

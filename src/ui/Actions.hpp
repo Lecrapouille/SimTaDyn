@@ -18,31 +18,13 @@
 // along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 //=====================================================================
 
-#ifndef GLVAOTESTS_HPP_
-#  define GLVAOTESTS_HPP_
+#ifndef ACTIONS_HPP
+#  define ACTIONS_HPP
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/TestResult.h>
-#include <cppunit/extensions/HelperMacros.h>
+//! \brief Add, remove a mode (node, arc, zone).
+enum class ActionType { Add, Remove, Select, Move, MaxActionType_ };
 
-#define protected public
-#define private public
-#include "OpenGLCppWrapper.hpp"
-#undef protected
-#undef private
+//! \brief On what kind of cells action is performed.
+enum class ActionOn { Node, Arc, Zone, MaxActionOn_ };
 
-class GLVAOTests : public CppUnit::TestFixture
-{
-  // CppUnit macros for setting up the test suite
-  CPPUNIT_TEST_SUITE(GLVAOTests);
-  CPPUNIT_TEST(tests);
-  CPPUNIT_TEST_SUITE_END();
-
-public:
-  void setUp();
-  void tearDown();
-
-  void tests();
-};
-
-#endif /* GLVAOTESTS_HPP_ */
+#endif // ACTIONS_HPP

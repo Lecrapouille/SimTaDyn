@@ -23,6 +23,7 @@
 //--------------------------------------------------------------------------
 void GLProgramTests::setUp()
 {
+  std::cout << "*** GLProgramTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------
@@ -35,24 +36,24 @@ void GLProgramTests::tests()
 {
   GLProgram prog("prog");
 
-  CPPUNIT_ASSERT_EQUAL(false, prog.compiled());
-  CPPUNIT_ASSERT_EQUAL(false, prog.binded());
+  CPPUNIT_ASSERT_EQUAL(false, prog.isCompiled());
+  CPPUNIT_ASSERT_EQUAL(false, prog.isBound());
   CPPUNIT_ASSERT_EQUAL(false, prog.hasErrored());
-  CPPUNIT_ASSERT( prog.error() == "");
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.shaderNames().size());
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.failedShaders().size());
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.attributeNames().size());
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.uniformNames().size());
+  CPPUNIT_ASSERT( prog.getError() == "");
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getShaderNames().size());
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getFailedShaders().size());
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getAttributeNames().size());
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getUniformNames().size());
 
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.uniformNames().size());
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getUniformNames().size());
   CPPUNIT_ASSERT_EQUAL(false, prog.hasUniforms());
   CPPUNIT_ASSERT_EQUAL(false, prog.hasAttributes());
   CPPUNIT_ASSERT_EQUAL(false, prog.hasUniform(""));
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.uniformNames().size());
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getUniformNames().size());
   CPPUNIT_ASSERT_EQUAL(false, prog.hasAttribute(""));
   CPPUNIT_ASSERT_EQUAL(false, prog.hasUniform(nullptr));
   CPPUNIT_ASSERT_EQUAL(false, prog.hasAttribute(nullptr));
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.uniformNames().size());
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getUniformNames().size());
 
   //---
   try {
@@ -86,38 +87,40 @@ void GLProgramTests::tests()
   prog.addNewUniform(GL_FLOAT_VEC2, "u2");
   prog.addNewUniform(GL_FLOAT_VEC3, "u3");
   prog.addNewUniform(GL_FLOAT_VEC4, "u4");
-  CPPUNIT_ASSERT_EQUAL(4_z, prog.uniformNames().size());
+  CPPUNIT_ASSERT_EQUAL(4_z, prog.getUniformNames().size());
   CPPUNIT_ASSERT(prog.hasUniform("u1"));
   CPPUNIT_ASSERT(prog.hasUniform("u2"));
   CPPUNIT_ASSERT(prog.hasUniform("u3"));
   CPPUNIT_ASSERT(prog.hasUniform("u4"));
 
-  try {
-    prog.getVBO<int>("");
-    CPPUNIT_FAIL("Exception should have occured");
-  } catch(OpenGLException) { }
+  //Old API
+  //try {
+  //  prog.getVBO<int>("");
+  //  CPPUNIT_FAIL("Exception should have occured");
+  //} catch(OpenGLException) { }
 
 
-  GLVAO vao;
+  GLVAO vao("VAO");
   CPPUNIT_ASSERT_EQUAL(0u, vao.prog);
   prog.m_handle = 42;
   CPPUNIT_ASSERT(prog.bind(vao));
-  CPPUNIT_ASSERT(prog.binded());
+  CPPUNIT_ASSERT(prog.isBound());
   CPPUNIT_ASSERT_EQUAL(42u, vao.prog);
   CPPUNIT_ASSERT(prog.m_vao == &vao);
 
-  try {
-    prog.getVBO<int>("");
-    CPPUNIT_FAIL("Exception should have occured");
-  } catch(OpenGLException) { }
+  //Old API
+  //try {
+  //  prog.getVBO<int>("");
+  //  CPPUNIT_FAIL("Exception should have occured");
+  //} catch(OpenGLException) { }
 
   // TODO: try add name conflict wit different types
-  CPPUNIT_ASSERT_EQUAL(0_z, prog.attributeNames().size());
+  CPPUNIT_ASSERT_EQUAL(0_z, prog.getAttributeNames().size());
   prog.addNewAttribute(GL_FLOAT, "a1");
   prog.addNewAttribute(GL_FLOAT_VEC2, "a2");
   prog.addNewAttribute(GL_FLOAT_VEC3, "a3");
   prog.addNewAttribute(GL_FLOAT_VEC4, "a4");
-  CPPUNIT_ASSERT_EQUAL(4_z, prog.attributeNames().size());
+  CPPUNIT_ASSERT_EQUAL(4_z, prog.getAttributeNames().size());
   CPPUNIT_ASSERT(prog.hasAttribute("a1"));
   CPPUNIT_ASSERT(prog.hasAttribute("a2"));
   CPPUNIT_ASSERT(prog.hasAttribute("a3"));
@@ -125,12 +128,12 @@ void GLProgramTests::tests()
 
   GLVertexShader shader("foo");
   prog.attachShader(shader);
-  auto shaderNames = prog.shaderNames();
-  CPPUNIT_ASSERT_EQUAL(1_z, shaderNames.size());
-  CPPUNIT_ASSERT(shaderNames.end() !=
-            std::find(shaderNames.begin(), shaderNames.end(), "foo"));
+  auto getShaderNames = prog.getShaderNames();
+  CPPUNIT_ASSERT_EQUAL(1_z, getShaderNames.size());
+  CPPUNIT_ASSERT(getShaderNames.end() !=
+            std::find(getShaderNames.begin(), getShaderNames.end(), "foo"));
 
-  GLVAO vao2;
+  GLVAO vao2("VAO2");
   CPPUNIT_ASSERT_EQUAL(0u, vao2.prog);
   prog.initVAO(vao2);
   CPPUNIT_ASSERT_EQUAL(42u, vao2.prog);

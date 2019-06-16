@@ -26,6 +26,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BasicGraphTests);
 //--------------------------------------------------------------------------
 void BasicGraphTests::setUp()
 {
+  std::cout << "*** BasicGraphTests ***************************************" << std::endl;
   BasicNode::resetID();
   BasicArc::resetID();
 }

@@ -56,7 +56,7 @@ OBJ_EXAMPLES = \
   12_ComplexShader.o \
   13_Lighting.o
 
-OBJ += $(OBJ_UTILS) $(OBJ_OPENGL) $(OBJ_EXAMPLES) main.o
+OBJS += $(OBJ_UTILS) $(OBJ_OPENGL) $(OBJ_EXAMPLES) main.o
 
 ###################################################
 # Get the name of one of the resource to be download.
@@ -67,7 +67,7 @@ RESOURCES := textures/README.md
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += $(abspath $(P)/external/SOIL/libSOIL.a)
+THIRDPART_LIBS += $(abspath $(P)/external/SOIL/libSOIL.a)
 
 ###################################################
 # Compile tutorials

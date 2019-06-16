@@ -26,6 +26,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(TerminalColorTests);
 //--------------------------------------------------------------------------
 void TerminalColorTests::setUp()
 {
+  std::cout << "*** TerminalColorTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------

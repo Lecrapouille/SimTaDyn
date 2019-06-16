@@ -379,11 +379,11 @@ void MapEditorWindow::onActionTypeSelected(const ActionType id)
   // Change the mouse cursor
   static Gdk::CursorType cursors[] =
     {
-      [ActionType::Add] = Gdk::PLUS,
-      [ActionType::Remove] = Gdk::PIRATE,
-      [ActionType::Select] = Gdk::HAND1,
-      [ActionType::Move] = Gdk::HAND2,
+      [static_cast<uint32_t>(ActionType::Add)] = Gdk::PLUS,
+      [static_cast<uint32_t>(ActionType::Remove)] = Gdk::PIRATE,
+      [static_cast<uint32_t>(ActionType::Select)] = Gdk::HAND1,
+      [static_cast<uint32_t>(ActionType::Move)] = Gdk::HAND2,
     };
 
-  get_window()->set_cursor(Gdk::Cursor::create(cursors[id]));
+  get_window()->set_cursor(Gdk::Cursor::create(cursors[static_cast<uint32_t>(id)]));
 }

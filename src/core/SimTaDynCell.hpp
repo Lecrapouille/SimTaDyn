@@ -84,9 +84,8 @@ public:
     init();
   }
 
-  CellArc(const Key id,
-              Node& fromNode, Node& toNode,
-              std::string const& formulae = "")
+  CellArc(const Key id, Node& fromNode, Node& toNode,
+          std::string const& formulae = "")
     : ExtArc(id, fromNode, toNode), ASpreadSheetCell(formulae)
   {
     init();

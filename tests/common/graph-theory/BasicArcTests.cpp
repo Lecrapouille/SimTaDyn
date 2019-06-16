@@ -28,6 +28,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BasicArcTests);
 //--------------------------------------------------------------------------
 void BasicArcTests::setUp()
 {
+  std::cout << "*** BasicArcTests ***************************************" << std::endl;
   // Reset node/arcs unique identifiers to 0
   Node::resetID();
   Arc::resetID();

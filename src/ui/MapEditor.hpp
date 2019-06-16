@@ -21,18 +21,13 @@
 #ifndef MAPEDITOR_HPP
 #  define MAPEDITOR_HPP
 
+#  include "Actions.hpp"
 #  include "SimTaDynForth.hpp"
 #  include "ToggleButtons.hpp"
 #  include "MVP.hpp"
 #  include "SimTaDynLoaders.hpp"
 
 using SimTaDynMapManager = ResourceManager<std::string, SimTaDynMap>;
-
-//! \brief Add, remove a mode (node, arc, zone).
-enum ActionType { Add, Remove, Select, Move, MaxActionType_ };
-
-//! \brief On what kind of cells action is performed.
-enum ActionOn { Node, Arc, Zone, MaxActionOn_ };
 
 // *************************************************************************************************
 //! \brief

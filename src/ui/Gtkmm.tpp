@@ -26,6 +26,7 @@
 #  pragma GCC diagnostic ignored "-Wold-style-cast"
 #  pragma GCC diagnostic ignored "-Wsign-conversion"
 #  pragma GCC diagnostic ignored "-Wredundant-decls"
+#  pragma GCC diagnostic ignored "-Wdeprecated"
 #    include <gtkmm.h>
 #  pragma GCC diagnostic pop
 

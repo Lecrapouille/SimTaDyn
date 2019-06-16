@@ -26,6 +26,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(PathTests);
 //--------------------------------------------------------------------------
 void PathTests::setUp()
 {
+  std::cout << "*** PathTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------
@@ -54,7 +55,7 @@ void PathTests::testSplitConstructor()
   path.add("g/g");
   CPPUNIT_ASSERT(1 == path.m_search_paths.size());
   CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:g/g:");
-  path.init("a/b");
+  path.reset("a/b");
   CPPUNIT_ASSERT(1 == path.m_search_paths.size());
   CPPUNIT_ASSERT_EQUAL(true, path.toString() == ".:a/b:");
   std::cout << path.toString() << std::endl;

@@ -65,16 +65,16 @@ public:
   }
 
   //! \brief add a button
-  void append(const uint32_t nth_button,
+  void append(const T nth_button,
               const Glib::ustring& tooltip,
               const Gtk::BuiltinStockID icon,
               const sigc::slot1<void, T>& toggle_slot)
   {
     Button* button = Gtk::make_managed<Button>();
-    button->nth_button = nth_button;
+    button->nth_button = static_cast<int32_t>(nth_button);
 
     // The first button will have the pressed look
-    if (m_toogled_button == nth_button)
+    if (m_toogled_button == button->nth_button)
       {
         button->set_active(true);
       }

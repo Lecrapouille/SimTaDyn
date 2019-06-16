@@ -75,6 +75,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ResourcesTests);
 //--------------------------------------------------------------------------
 void ResourcesTests::setUp()
 {
+  std::cout << "*** ResourcesTests ***************************************" << std::endl;
   RMA = new ResourceManager<uint32_t, ResourceA>;
   RMB = new ResourceManager<uint32_t, ResourceB>;
 }

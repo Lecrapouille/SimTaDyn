@@ -32,8 +32,9 @@ static Collection<int, 2_z, Block>::iterator it1;
 #define INITIAL_INDEX  static_cast<size_t>(-1)
 
 //--------------------------------------------------------------------------
-void CollectionTests::collectionUp()
+void CollectionTests::setUp()
 {
+  std::cout << "*** CollectionTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------

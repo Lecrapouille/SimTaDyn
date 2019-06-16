@@ -23,6 +23,7 @@
 //--------------------------------------------------------------------------
 void GLShadersTests::setUp()
 {
+  std::cout << "*** GLShadersTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------
@@ -33,6 +34,14 @@ void GLShadersTests::tearDown()
 //--------------------------------------------------------------------------
 void GLShadersTests::tests()
 {
+  GLVertexShader shaderNoName1;
+  CPPUNIT_ASSERT(shaderNoName1.name() == "VertexShader");
+  GLFragmentShader shaderNoName2;
+  CPPUNIT_ASSERT(shaderNoName2.name() == "FragmentShader");
+  GLGeometryShader shaderNoName3;
+  CPPUNIT_ASSERT(shaderNoName3.name() == "GeometryShader");
+
+
   GLVertexShader shader1("vert");
   CPPUNIT_ASSERT(shader1.name() == "vert");
   CPPUNIT_ASSERT(GL_VERTEX_SHADER == shader1.target());
@@ -42,7 +51,7 @@ void GLShadersTests::tests()
   CPPUNIT_ASSERT(GL_FRAGMENT_SHADER == shader2.target());
 
   GLGeometryShader shader3;
-  CPPUNIT_ASSERT(shader3.name() == "");
+  CPPUNIT_ASSERT(shader3.name() == "GeometryShader");
   CPPUNIT_ASSERT(GL_GEOMETRY_SHADER == shader3.target());
 
   //--- Check initial state
@@ -53,9 +62,9 @@ void GLShadersTests::tests()
 
   //--- Check initial state
   CPPUNIT_ASSERT(shader2.code() == "");
-  CPPUNIT_ASSERT(shader2.error() == "");
+  CPPUNIT_ASSERT(shader2.getError() == "");
   CPPUNIT_ASSERT(!shader2.hasErrored());
-  CPPUNIT_ASSERT(!shader2.compiled());
+  CPPUNIT_ASSERT(!shader2.isCompiled());
   CPPUNIT_ASSERT(0 == shader2.m_attached);
 
   //--- Load from string
@@ -63,7 +72,7 @@ void GLShadersTests::tests()
   CPPUNIT_ASSERT(!shader1.hasErrored());
   CPPUNIT_ASSERT(shader1.code() == "foobar");
   CPPUNIT_ASSERT(shader1.loaded());
-  CPPUNIT_ASSERT(!shader1.compiled());
+  CPPUNIT_ASSERT(!shader1.isCompiled());
   try {
     shader1.throw_if_not_loaded();
   } catch(...) { CPPUNIT_FAIL("Exception should have not occured"); }
@@ -77,16 +86,16 @@ void GLShadersTests::tests()
   CPPUNIT_ASSERT(!shader1.hasErrored());
   CPPUNIT_ASSERT(shader1.code() == "");
   CPPUNIT_ASSERT(!shader1.loaded());
-  CPPUNIT_ASSERT(!shader1.compiled());
+  CPPUNIT_ASSERT(!shader1.isCompiled());
 
   //--- Load from wrong file
   CPPUNIT_ASSERT(shader3.code() == "");
   CPPUNIT_ASSERT(!shader3.fromFile("this_file_does_not_exist"));
-  CPPUNIT_ASSERT(!shader3.compiled());
+  CPPUNIT_ASSERT(!shader3.isCompiled());
   CPPUNIT_ASSERT(shader3.hasErrored());
   CPPUNIT_ASSERT(shader3.code() == "");
-  CPPUNIT_ASSERT(!shader3.compiled());
-  CPPUNIT_ASSERT(shader3.error() != "");
+  CPPUNIT_ASSERT(!shader3.isCompiled());
+  CPPUNIT_ASSERT(shader3.getError() != "");
   CPPUNIT_ASSERT(!shader3.hasErrored());
   try {
     shader3.throw_if_not_loaded();
@@ -112,7 +121,7 @@ void GLShadersTests::tests()
   shader1.fromString(""); shader1.m_compiled = true;
   shader1.setup();
   CPPUNIT_ASSERT(shader1.hasErrored());
-  CPPUNIT_ASSERT(shader1.error() != "");
+  CPPUNIT_ASSERT(shader1.getError() != "");
   shader1.setup();
 
   //--- Try setup
@@ -120,7 +129,7 @@ void GLShadersTests::tests()
   shader1.fromString("ff"); shader1.m_compiled = true;
   shader1.setup();
   CPPUNIT_ASSERT(shader1.hasErrored());
-  CPPUNIT_ASSERT(shader1.error() != "");
+  CPPUNIT_ASSERT(shader1.getError() != "");
   shader1.setup();
 
 

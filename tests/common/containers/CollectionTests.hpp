@@ -43,7 +43,7 @@ class CollectionTests : public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void collectionUp();
+  void setUp();
   void tearDown();
 
   void testDummy();

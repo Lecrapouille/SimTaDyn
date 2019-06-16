@@ -15,7 +15,7 @@
 ## General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+## along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
 ###################################################
@@ -25,7 +25,7 @@ TARGET = SimForth
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -42,7 +42,7 @@ include $(P)/Makefile.common
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_STANDALONE = main.o
-OBJ           += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
+OBJS          += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_FORTH) $(OBJ_STANDALONE)
 
 ###################################################
 # Compile Standalone forth project

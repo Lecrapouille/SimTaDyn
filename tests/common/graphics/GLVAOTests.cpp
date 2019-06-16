@@ -23,6 +23,7 @@
 //--------------------------------------------------------------------------
 void GLVAOTests::setUp()
 {
+  std::cout << "*** GLVAOTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------
@@ -34,13 +35,9 @@ void GLVAOTests::tearDown()
 void GLVAOTests::tests()
 {
   // VAO with no name
-  GLVAO vao0;
+  GLVAO vao0("");
   CPPUNIT_ASSERT_EQUAL(true, vao0.name() == "");
   CPPUNIT_ASSERT(GL_ARRAY_BUFFER == vao0.target());
-
-  // Change the name
-  vao0.name() = "vao0";
-  CPPUNIT_ASSERT_EQUAL(true, vao0.name() == "vao0");
 
   // VAO with name
   GLVAO vao("vao");
@@ -54,7 +51,7 @@ void GLVAOTests::tests()
   CPPUNIT_ASSERT_EQUAL(false, vao.hasVBO(""));
 
   // Add the first VBO. Check it has been inserted.
-  CPPUNIT_ASSERT_EQUAL(true, vao.createVBO<float>("vbo1"));
+  CPPUNIT_ASSERT_EQUAL(true, vao.createVBO<float>("vbo1", 0_z, BufferUsage::DYNAMIC_DRAW));
   vbo_names = vao.VBONames();
   CPPUNIT_ASSERT_EQUAL(1_z, vbo_names.size());
   CPPUNIT_ASSERT_EQUAL(true, vbo_names[0] == "vbo1");
@@ -64,7 +61,7 @@ void GLVAOTests::tests()
   // FIXME: is it a wanted behavior ?
   // Add another VBO: same name but different type.
   // Check it has not been inserted.
-  CPPUNIT_ASSERT_EQUAL(false, vao.createVBO<int>("vbo1"));
+  CPPUNIT_ASSERT_EQUAL(false, vao.createVBO<int>("vbo1", 0_z, BufferUsage::DYNAMIC_DRAW));
   vbo_names = vao.VBONames();
   CPPUNIT_ASSERT_EQUAL(1_z, vbo_names.size());
   CPPUNIT_ASSERT_EQUAL(true, vbo_names[0] == "vbo1");
@@ -72,8 +69,9 @@ void GLVAOTests::tests()
   CPPUNIT_ASSERT_EQUAL(false, vao.hasVBO("vbo2"));
 
   // Add the second VBO. Check it has been inserted.
-  CPPUNIT_ASSERT_EQUAL(true, vao.createVBO<float>("vbo2"));
+  CPPUNIT_ASSERT_EQUAL(true, vao.createVBO<float>("vbo2", 0_z, BufferUsage::DYNAMIC_DRAW));
   vbo_names = vao.VBONames();
+  std::sort(vbo_names.begin(), vbo_names.end());
   CPPUNIT_ASSERT_EQUAL(2_z, vbo_names.size());
   CPPUNIT_ASSERT_EQUAL(true, vbo_names[0] == "vbo1");
   CPPUNIT_ASSERT_EQUAL(true, vbo_names[1] == "vbo2");

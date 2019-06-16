@@ -107,6 +107,17 @@ void LoaderManager::registerAllLoaders()
 CPPUNIT_TEST_SUITE_REGISTRATION(LoadersTests);
 
 //--------------------------------------------------------------------------
+void LoadersTests::setUp()
+{
+  std::cout << "*** LoadersTests ***************************************" << std::endl;
+}
+
+//--------------------------------------------------------------------------
+void LoadersTests::tearDown()
+{
+}
+
+//--------------------------------------------------------------------------
 void LoadersTests::testsLoaderManager()
 {
   LoaderManager &lm = LoaderManager::instance();

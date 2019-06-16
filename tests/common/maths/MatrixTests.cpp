@@ -215,6 +215,7 @@ static inline void checkAlmostVectorUlps(Vector3g const& v, const double x, cons
 //--------------------------------------------------------------------------
 void MatrixTests::setUp()
 {
+  std::cout << "*** MatrixTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 ## General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+## along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
 ###################################################
@@ -25,7 +25,7 @@ TARGET = MyExcel
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -38,24 +38,24 @@ include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
-# List of files to compile. Splited by directories
+# List of files to compile.
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_MATHS      = Maths.o
-OBJ_CONTAINERS = PendingData.o
+OBJ_CONTAINERS =
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o
 OBJ_FORTH     += ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_FORTH     += SimTaDynForth.o SpreadSheetPrimitives.o
 OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o
 OBJ_STANDALONE = ClassicSpreadSheet.o main.o
-OBJ           += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
+OBJS          += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
                  $(OBJ_GRAPHS) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_STANDALONE)
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS +=
+THIRDPART_LIBS +=
 
 ###################################################
 all: $(TARGET)

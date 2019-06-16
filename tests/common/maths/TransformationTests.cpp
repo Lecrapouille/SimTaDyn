@@ -70,6 +70,7 @@ static void compareMatrices(Matrix44f const &a, glm::mat4 const &b, const int li
 //--------------------------------------------------------------------------
 void TransformationTests::setUp()
 {
+  std::cout << "*** TransformationTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------

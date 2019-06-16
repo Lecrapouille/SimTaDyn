@@ -27,7 +27,7 @@
 #  include "MapEditorCommands.hpp"
 #  include "MapEditionTools.hpp"
 #  include "MapExplorerWindow.hpp"
-#  include <unordered_map>
+#  include <map>
 
 class IMapEditorCommand;
 class MapEditionTools;
@@ -87,8 +87,8 @@ private:
 
 protected:
 
-  using KeyBoardCommandContainer = std::unordered_map<int, std::unique_ptr<IMapEditorCommand>>;
-  using ToolCommandContainer = std::unordered_map<ActionType, std::unique_ptr<MapEditionTools>>;
+  using KeyBoardCommandContainer = std::map<int, std::unique_ptr<IMapEditorCommand>>;
+  using ToolCommandContainer = std::map<ActionType, std::unique_ptr<MapEditionTools>>;
 
   std::vector<int>           m_allowed_keys;
   KeyBoardCommandContainer   m_keyboard_commands;

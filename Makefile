@@ -22,10 +22,11 @@
 # Executable name
 PROJECT = SimTaDyn
 TARGET = $(PROJECT)
+DESCRIPTION = A GIS in a spreadsheet
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -47,24 +48,28 @@ OBJ_MANAGERS   =
 OBJ_GRAPHS     = Graph.o GraphAlgorithm.o
 OBJ_OPENGL     = Color.o Camera2D.o OpenGL.o NodesRenderer.o Renderer.o
 # OBJ_RTREE      = RTreeNode.o RTreeIndex.o RTreeSplit.o
-OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
-OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o SimTaDynForthPrimitives.o SimTaDynSheet.o SimTaDynMap.o
-OBJ_LOADERS    = ManagerException.o SimTaDynLoaders.o ShapeFileLoader.o SimTaDynFileLoader.o
-# TextureFileLoader.o
-# SimTaDynFile.o
-OBJ_GUI        = Redirection.o Windows.o MapExplorer.o TextEditor.o ForthEditor.o
-OBJ_GUI       += ForthInspector.o DrawingArea.o
-OBJ_GUI       += MVP.o ForthEditorWindow.o MapEditorCommands.o MapEditor.o MapEditorWindow.o MapExplorerWindow.o
+OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o      \
+                 ForthPrimitives.o ForthClibrary.o Forth.o
+OBJ_CORE       = ASpreadSheetCell.o ASpreadSheet.o SimTaDynForth.o      \
+                 SimTaDynForthPrimitives.o SimTaDynSheet.o SimTaDynMap.o
+OBJ_LOADERS    = ManagerException.o SimTaDynLoaders.o ShapeFileLoader.o \
+                 SimTaDynFileLoader.o
+# TextureFileLoader.o SimTaDynFile.o
+OBJ_GUI        = Redirection.o Windows.o MapExplorer.o TextEditor.o     \
+                 ForthEditor.o ForthInspector.o DrawingArea.o MVP.o     \
+                 ForthEditorWindow.o MapEditorCommands.o MapEditor.o    \
+                 MapEditorWindow.o MapExplorerWindow.o
 OBJ_SIMTADYN   = SimTaDyn.o main.o
-OBJ           += $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
-                 $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH) $(OBJ_CORE) $(OBJ_LOADERS) \
-                 $(OBJ_GUI) $(OBJ_SIMTADYN)
+
+OBJS += $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS)	\
+        $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH)	\
+        $(OBJ_CORE) $(OBJ_LOADERS) $(OBJ_GUI) $(OBJ_SIMTADYN)
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += \
+THIRDPART_LIBS += \
 	$(abspath $(P)/external/SOIL/libSOIL.a) \
 	$(abspath $(P)/external/zipper/build/libZipper-static.a)
 
@@ -80,7 +85,7 @@ unit-tests:
 	@make -C tests coverage
 
 ###################################################
-# Install project. You need to be root user.
+# Install project. You need to be root.
 .PHONY: install
 install: $(TARGET)
 	@$(call print-to,"Installing","data","$(PROJECT_DATA_PATH)","")
@@ -98,22 +103,22 @@ install: $(TARGET)
 	@cp $(BUILD)/$(TARGET) $(PROJECT_EXE)
 
 ###################################################
-# Uninstall the project. You need to be root.
-.PHONY: uninstall
-uninstall:
-	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
-	@rm $(PROJECT_EXE)
-	@rm -r $(PROJECT_DATA_ROOT)
+# Uninstall the project. You need to be root. FIXME: to be updated
+#.PHONY: uninstall
+#uninstall:
+#	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
+#	@rm $(PROJECT_EXE)
+#	@rm -r $(PROJECT_DATA_ROOT)
 
 ###################################################
 # Clean the whole project.
 .PHONY: veryclean
 veryclean: clean
-	@rm -fr cov-int SimTaDyn.tgz *.log foo 2> /dev/null
+	@rm -fr cov-int $(TARGET).tgz *.log foo 2> /dev/null
 	@cd tests && make -s clean; cd - > /dev/null
-	@cd src/common/graphics/OpenGL/examples/ && make -s clean; cd - > /dev/null
-	@cd src/forth/standalone && make -s clean; cd - > /dev/null
-	@cd src/core/standalone/ClassicSpreadSheet && make -s clean; cd - > /dev/null
+	@cd src/common/graphics/OpenGL/examples/ && $(MAKE) -s clean; cd - > /dev/null
+	@cd src/forth/standalone && v -s clean; cd - > /dev/null
+	@cd src/core/standalone/ClassicSpreadSheet && $(MAKE) -s clean; cd - > /dev/null
 	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
 	@cd doc/ && rm -fr html
 

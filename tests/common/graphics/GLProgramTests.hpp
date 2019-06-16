@@ -27,7 +27,7 @@
 
 #define protected public
 #define private public
-#include "OpenGL.hpp"
+#include "OpenGLCppWrapper.hpp"
 #undef protected
 #undef private
 

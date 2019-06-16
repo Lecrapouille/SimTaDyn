@@ -23,8 +23,11 @@
 
 //#  include "Names.hpp"
 #  include "Logger.hpp"
-#  include <gtksourceviewmm.h>
-#  include "Gtkmm.tpp"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated"
+#    include <gtksourceviewmm.h>
+#    include "Gtkmm.tpp"
+#  pragma GCC diagnostic pop
 
 class TextDocument;
 class FindWindow;

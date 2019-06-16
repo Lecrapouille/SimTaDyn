@@ -26,6 +26,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BasicNodeTests);
 //--------------------------------------------------------------------------
 void BasicNodeTests::setUp()
 {
+  std::cout << "*** BasicNodeTests ***************************************" << std::endl;
   BasicNode::resetID();
   BasicArc::resetID();
 }

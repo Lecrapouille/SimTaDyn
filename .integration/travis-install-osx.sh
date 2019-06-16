@@ -12,5 +12,7 @@ brew_install glm
 brew_install cppunit
 brew_install glfw
 brew_install glew
+brew_install libffi
+brew_install glibmm
 
-brew link --force gtkmm3 gtksourceviewmm3 glm cppunit glfw glew
+brew link --force gtkmm3 gtksourceviewmm3 glm cppunit glfw glew libffi glibmm

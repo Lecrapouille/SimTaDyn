@@ -15,7 +15,7 @@
 ## General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+## along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
 ###################################################
@@ -25,7 +25,7 @@ TARGET = $(PROJECT)-UnitTest
 
 ###################################################
 # Debug mode or Release mode
-PROJECT_MODE = debug
+BUILD_TYPE = debug
 
 ###################################################
 # Location from the project root directory.
@@ -45,14 +45,14 @@ OBJ_UTILS_UT      += StrongTypeTests.o FileTests.o PathTests.o LoggerTests.o Ter
 OBJ_MATHS          = Maths.o
 OBJ_MATHS_UT       = VectorTests.o MatrixTests.o TransformationTests.o
 OBJ_MATHS_UT      += BoundingBoxTests.o FilteringTests.o
-OBJ_CONTAINERS     = PendingData.o
+OBJ_CONTAINERS     =
 OBJ_CONTAINERS_UT  = SetTests.o CollectionTests.o
 OBJ_MANAGERS       =
 OBJ_MANAGERS_UT    = ResourcesTests.o
 #LoadersTests.o
 OBJ_GRAPHS         = Graph.o GraphAlgorithm.o
 #OBJ_GRAPHS_UT     += BasicArcTests.o BasicNodeTests.o BasicGraphTests.o GraphAlgoTests.o
-OBJ_OPENGL         = Color.o Camera2D.o GLException.o OpenGL.o
+OBJ_OPENGL         = Color.o Camera2D.o OpenGL.o
 # Renderer.o
 OBJ_OPENGL_UT      = ColorTests.o GLObjectTests.o GLVAOTests.o GLVBOTests.o GLShadersTests.o GLProgramTests.o
 OBJ_FORTH          = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
@@ -63,17 +63,17 @@ OBJ_LOADERS_UT     = SimTaDynFileLoaderTests.o
 #OBJ_GUI            = Redirection.o PackageExplorer.o TextEditor.o ForthEditor.o
 #OBJ_GUI           += Inspector.o MapEditor.o DrawingArea.o SimTaDynWindow.o
 OBJ_UNIT_TEST      = main.o
-OBJ += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	\
-       $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)		\
-       $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)			\
-       $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH)	\
-       $(OBJ_CORE) $(OBJ_CORE_UT) $(OBJ_LOADERS) $(OBJ_LOADERS_UT)	\
-       $(OBJ_GUI) $(OBJ_UNIT_TEST)
+OBJS += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	\
+        $(OBJ_MATHS_UT) $(OBJ_CONTAINERS) $(OBJ_CONTAINERS_UT)		\
+        $(OBJ_MANAGERS) $(OBJ_MANAGERS_UT) $(OBJ_GRAPHS)			\
+        $(OBJ_GRAPHS_UT) $(OBJ_OPENGL) $(OBJ_OPENGL_UT) $(OBJ_FORTH)	\
+        $(OBJ_CORE) $(OBJ_CORE_UT) $(OBJ_LOADERS) $(OBJ_LOADERS_UT)	\
+        $(OBJ_GUI) $(OBJ_UNIT_TEST)
 
 ###################################################
 # Compilation options.
 CXXFLAGS +=
-LDFLAGS += -lcppunit
+LDFLAGS += -lcppunit -pthread
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
@@ -104,7 +104,7 @@ core/spreadsheet:\
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-EXTERNAL_LIBS += \
+THIRDPART_LIBS += \
 	$(abspath $(P)/external/SOIL/libSOIL.a) \
 	$(abspath $(P)/external/zipper/build/libZipper-static.a)
 
@@ -115,7 +115,8 @@ all: $(TARGET)
 ###################################################
 # Run unit tests.
 .PHONY: unit-tests
-unit-tests: $(TARGET)
+.PHONY: check
+unit-tests check: $(TARGET)
 	@$(call print-to,"Running","$(TARGET)","$(RAPPORT)","")
 	$(SANITIZER) ./$(BUILD)/$(TARGET) $(TU_OPTIONS) || (cat $(TARGET).log; return 1)
 

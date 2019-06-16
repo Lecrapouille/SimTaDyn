@@ -41,6 +41,7 @@ static inline void checkColor(const Color& c, const float r, const float g, cons
 //--------------------------------------------------------------------------
 void ColorTests::setUp()
 {
+  std::cout << "*** ColorTests ***************************************" << std::endl;
 }
 
 //--------------------------------------------------------------------------
