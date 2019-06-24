@@ -49,6 +49,13 @@ namespace maths
     return static_cast<T>(U(from) + (U(to - from) * f));
   }
 
+  //! \brief Map a value into a given range.
+  template<class T>
+  inline T map(T const value, T const start1, T const stop1, T const start2, T const stop2)
+  {
+    return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
+  }
+
   //! \brief Absolute value
   template<typename T>
   inline T abs(T const val)
