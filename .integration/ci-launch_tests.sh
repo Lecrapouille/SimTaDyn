@@ -30,6 +30,9 @@ function exists
   test -e $1 || (echo "The file $1 does not exist" && exit 1)
 }
 
+# For OS X and homebrew >= 2.60
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig
+
 # Clone and compile 3thpart librairies that SimTaDyn depends on.
 make download-external-libs || exit 1
 make compile-external-libs || exit 1
