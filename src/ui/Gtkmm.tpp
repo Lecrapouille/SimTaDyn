@@ -39,6 +39,7 @@
 namespace Gtk
 {
 
+#if !GTK_CHECK_VERSION(3,24,0)
 //------------------------------------------------------------------
 //! \brief Wrapper for Gtk::manage. This function is included
 //! GTK+ version 3.24
@@ -48,6 +49,7 @@ W* make_managed(W_Args&&... args)
 {
   return manage(new W(std::forward<W_Args>(args)...));
 }
+#endif
 
 }
 
