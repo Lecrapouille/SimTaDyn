@@ -24,7 +24,7 @@ constexpr std::size_t operator "" _z (unsigned long long const n)
 // **************************************************************
 // Enable for C++11 and Visual Studio
 // **************************************************************
-#  if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
+#  if (defined(_MSC_VER) && _MSC_VER < 1800) || (!defined(_MSC_VER) && __cplusplus <= 201103L)
 namespace std
 {
   //! \brief std::make_unique is for C++14 enable it for C++11
