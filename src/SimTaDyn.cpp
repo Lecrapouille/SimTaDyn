@@ -45,11 +45,11 @@ SimTaDyn::SimTaDyn(int argc, char** argv)
                 << config::tmp_path << "'" << std::endl;
     }
 
-  LOGI("Init option parser");
+  LOGI("%s", "Init option parser");
   configureOptions();
   m_parser.run_and_exit_if_error();
 
-  LOGI("Init GTK");
+  LOGI("%s", "Init GTK");
   application() = Gtk::Application::create();
   Gsv::init();
 
@@ -80,7 +80,7 @@ void SimTaDyn::configureOptions()
 
 void SimTaDyn::init()
 {
-  LOGI("Parsing project options");
+  LOGI("%s", "Parsing project options");
   PathManager::add(m_parser.get<std::string>("p"));
   LOGI("%s", PathManager::toString().c_str());
 

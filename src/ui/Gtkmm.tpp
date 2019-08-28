@@ -23,6 +23,7 @@
 #  define SIMTADYN_GTKMM_TPP
 
 #  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-const-variable"
 #  pragma GCC diagnostic ignored "-Wold-style-cast"
 #  pragma GCC diagnostic ignored "-Wsign-conversion"
 #  pragma GCC diagnostic ignored "-Wredundant-decls"

@@ -31,7 +31,7 @@ Forth::Forth(ForthDictionary& dictionary)
   : m_state(forth::Interprete),
     m_dictionary(dictionary)
 {
-  LOGI("Creating Forth");
+  LOGI("%s", "Creating Forth");
   m_err_stream = 0;
   m_base = 10U;
   m_last_completion = m_dictionary.last();

@@ -166,7 +166,7 @@ public:
   //-----------------------------------------------------------------
   inline bool modified() const
   {
-    LOGE("SimTaDynMap::modified() not yet implemented");
+    LOGE("%s", "SimTaDynMap::modified() not yet implemented");
     return (m_nb_graphs_modified > 0U) || (m_nb_scripts_modified > 0U);
   }
 

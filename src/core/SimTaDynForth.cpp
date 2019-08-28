@@ -23,7 +23,7 @@
 
 void SimForth::boot()
 {
-  LOGI("Booting SimForth");
+  LOGI("%s", "Booting SimForth");
 
   // Start the Forth core
   Forth::boot();
@@ -116,7 +116,7 @@ bool SimForth::parseCell(ASpreadSheetCell &cell)
   //assert(nullptr != m_spreadsheet);
   if (nullptr == m_spreadsheet)
     {
-      LOGD("No spreadsheet attached to a Forth interpreter");
+      LOGD("%s", "No spreadsheet attached to a Forth interpreter");
       return false;
     }
 

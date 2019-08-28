@@ -89,11 +89,13 @@
   }                                                                     \
                                                                         \
   /*! \brief Return the dimension */                                    \
-  inline size_t size() const { return N; }                              \
+  size_t size() const { return N; }                                     \
                                                                         \
   /* Accessors */                                                       \
-  T& operator[](int i)             { return m_data[i]; }             \
-  const T& operator[](int i) const { return m_data[i]; }             \
+  T& operator[](size_t const i)          { return m_data[i]; }          \
+  const T& operator[](size_t const i) const { return m_data[i]; }       \
+  T& operator[](int const i)             { return m_data[i]; }          \
+  const T& operator[](int const i) const { return m_data[i]; }          \
                                                                         \
   /* C array conversions */                                             \
   typedef T(&array_t)[N];                                               \
@@ -115,7 +117,7 @@ class Vector
 {
 public:
 
-  VECTOR_DIM(n);
+  VECTOR_DIM(n)
 
 protected:
 
@@ -136,15 +138,19 @@ public:
     y = scalar_y;
   }
 
-  VECTOR_DIM(2_z);
+  VECTOR_DIM(2_z)
 
 public:
 
   union
   {
     T m_data[2_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; };
     struct { T u; T v; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 2_z> DUMMY;
@@ -189,15 +195,19 @@ public:
     z = scalar_z;
   }
 
-  VECTOR_DIM(3_z);
+  VECTOR_DIM(3_z)
 
 public:
 
   union
   {
     T m_data[3_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; T z; };
     struct { T r; T g; T b; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 3_z> DUMMY;
@@ -247,15 +257,19 @@ public:
     w = scalar_w;
   }
 
-  VECTOR_DIM(4_z);
+  VECTOR_DIM(4_z)
 
 public:
 
   union
   {
     T m_data[4_z];
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct { T x; T y; T z; T w; };
     struct { T r; T g; T b; T a; };
+#pragma GCC diagnostic pop
   };
 
   const static Vector<T, 4_z> DUMMY;
@@ -465,7 +479,7 @@ namespace vector
   //! function equivalent() which do not have the same behavior.
   //! \return true if all elements have the same value.
   template <typename T, size_t n>
-  inline typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
+  typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
   eq(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     if (&a != &b)
@@ -485,7 +499,7 @@ namespace vector
   //! function equivalent() which do not have the same behavior.
   //! \return true if all elements have the same value.
   template <typename T, size_t n>
-  inline typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+  typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
   eq(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     if (&a != &b)
@@ -501,7 +515,7 @@ namespace vector
   }
 
   template <typename T, size_t n>
-  inline bool ne(Vector<T, n> const &a, Vector<T, n> const &b)
+  bool ne(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     return !vector::eq(a, b);
   }
@@ -607,44 +621,44 @@ namespace vector
   }
 
   template <typename T, size_t n>
-  inline T squaredLength(Vector<T, n> const &a)
+  T squaredLength(Vector<T, n> const &a)
   {
     return dot(a, a);
   }
 
   template <typename T, size_t n>
-  inline T length(Vector<T, n> const &a)
+  T length(Vector<T, n> const &a)
   {
     return maths::sqrt(squaredLength(a));
   }
 
   template <typename T, size_t n>
-  inline T norm(Vector<T, n> const &a)
+  T norm(Vector<T, n> const &a)
   {
     return length(a);
   }
 
   template <typename T, size_t n>
-  inline T squaredDistance(Vector<T, n> const &a, Vector<T, n> const &b)
+  T squaredDistance(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     return squaredLength(a - b);
   }
 
   template <typename T, size_t n>
-  inline T distance(Vector<T, n> const &a, Vector<T, n> const &b)
+  T distance(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     return maths::sqrt(squaredDistance(a, b));
   }
 
   template <typename T, size_t n>
-  inline Vector<T, n> normalize(Vector<T, n> const &a)
+  Vector<T, n> normalize(Vector<T, n> const &a)
   {
     // FIXME: throw exception
     return a / length(a);
   }
 
   template <typename T, size_t n>
-  inline Vector<T, n> middle(Vector<T, n> const &a, Vector<T, n> const &b)
+  Vector<T, n> middle(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     Vector<T, n> result;
     size_t i = n;
@@ -655,7 +669,7 @@ namespace vector
   }
 
   template <typename T>
-  inline Vector<T, 3_z> cross(Vector<T, 3_z> const &a, Vector<T, 3> const &b)
+  Vector<T, 3_z> cross(Vector<T, 3_z> const &a, Vector<T, 3> const &b)
   {
     return
       {
@@ -667,13 +681,13 @@ namespace vector
 
   //! \brief Perpendicular
   template <typename T>
-  inline Vector<T, 2_z> orthogonal(Vector<T, 2_z> const &a)
+  Vector<T, 2_z> orthogonal(Vector<T, 2_z> const &a)
   {
     return { -a.y, a.x };
   }
 
   template <typename T>
-  inline Vector<T, 3_z> orthogonal(Vector<T, 3_z> const &a)
+  Vector<T, 3_z> orthogonal(Vector<T, 3_z> const &a)
   {
     // Implementation due to Sam Hocevar - see blog post:
     // http://lolengine.net/blog/2013/09/21/picking-orthogonal-Vector-combing-coconuts
@@ -684,21 +698,21 @@ namespace vector
   }
 
   template <typename T, size_t n>
-  inline typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
+  typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
   orthogonal(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     return T(0) == dot(a, b);
   }
 
   template <typename T, size_t n>
-  inline typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+  typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
   orthogonal(Vector<T, n> const &a, Vector<T, n> const &b)
   {
     return maths::almostZero(dot(a, b));
   }
 
   template <typename T, size_t n>
-  inline T angleBetween(Vector<T, n> const &org, Vector<T, n> const &dest)
+  T angleBetween(Vector<T, n> const &org, Vector<T, n> const &dest)
   {
     T lenProduct = norm(org) * norm(dest);
 
@@ -708,18 +722,18 @@ namespace vector
 
     T f = dot(org, dest) / lenProduct;
     f = std::min(std::max(f, T(-1)), T(1));
-    return std::acos(f) * 180.0 / 3.14159265;
+    return T(std::acos(f) * 180.0 / 3.14159265);
   }
 
   template <typename T, size_t n>
-  inline Vector<T, n> reflect(Vector<T, n> const &v, Vector<T, n> const &normal)
+  Vector<T, n> reflect(Vector<T, n> const &v, Vector<T, n> const &normal)
   {
     return v - (T(2) * dot(v, normal) * normal);
   }
 }
 
 template <typename T, size_t n>
-inline std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
+std::ostream& operator<<(std::ostream& os, Vector<T, n> const& v)
 {
   os << "Vector(" << v[0];
   for (size_t i = 1; i < n; ++i)

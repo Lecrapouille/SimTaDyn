@@ -321,7 +321,7 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
     m_button(""), // FIXME a passer en param
     m_filename("")
 {
-  LOGI("Creating TextDocument");
+  LOGI("%s", "Creating TextDocument");
 
   Gtk::ScrolledWindow::add(m_textview);
   Gtk::ScrolledWindow::set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -348,7 +348,7 @@ TextDocument::TextDocument(Glib::RefPtr<Gsv::Language> language)
 // *************************************************************************************************
 TextDocument::~TextDocument()
 {
-  LOGI("Destroying TextDocument");
+  LOGI("%s", "Destroying TextDocument");
 }
 
 // *******************************²******************************************************************
@@ -513,7 +513,7 @@ TextEditor::TextEditor()
     m_gotolinewindow(nullptr),
     m_nb_nonames(0)
 {
-  LOGI("Creating TextEditor");
+  LOGI("%s", "Creating TextEditor");
 
 #if 0
   // TODO A remplacer par populatePopoverMenu()
@@ -573,7 +573,7 @@ TextEditor::TextEditor()
 // *************************************************************************************************
 TextEditor::~TextEditor()
 {
-  LOGI("Destroying TextEditor");
+  LOGI("%s", "Destroying TextEditor");
   TextEditor::closeAll();
 }
 

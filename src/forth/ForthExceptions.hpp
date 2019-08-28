@@ -161,7 +161,7 @@ public:
     : ForthException(36)
   {
     m_msg = "Exception from SimTaDynForth: try to execute an unknown primitive "
-      + std::to_string((uint32_t) badToken) + " in " + funcName;
+      + std::to_string(static_cast<uint32_t>(badToken)) + " in " + funcName;
   }
 };
 

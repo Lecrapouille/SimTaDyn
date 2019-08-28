@@ -31,9 +31,11 @@
 
 namespace matrix
 {
+
   //! \brief Enum for constructing different kind of matrices.
   enum MatrixType { Identity };
-};
+
+} // namespace matrix
 
 
 template <typename T, size_t rows, size_t cols>
@@ -122,29 +124,53 @@ public:
   //! \brief Return the dimension of the matrix.
   //! \param r (OUT) get the number of rows.
   //! \param c (OUT) get the number of columns.
-  inline void size(size_t &r, size_t &c)
+  void size(size_t &r, size_t &c)
   {
     r = rows;
     c = cols;
   }
 
   //! \brief Access to the nth row in write mode.
-  inline Vector<T, cols>& operator[](int i)
+  Vector<T, cols>& operator[](size_t const i)
   {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wstrict-aliasing"
     return reinterpret_cast<Vector<T, cols> &>(m_data[i * cols]);
+#  pragma GCC diagnostic pop
   }
 
   //! \brief Acces to the nth row in read mode.
-  inline const Vector<T, cols>& operator[](int i) const
+  Vector<T, cols> const& operator[](size_t const i) const
   {
-    return reinterpret_cast<const Vector<T, cols> &>(m_data[i * cols]);
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wstrict-aliasing"
+    return reinterpret_cast<Vector<T, cols> const&>(m_data[i * cols]);
+#  pragma GCC diagnostic pop
+  }
+
+  //! \brief Access to the nth row in write mode.
+  Vector<T, cols>& operator[](int const i)
+  {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wstrict-aliasing"
+    return reinterpret_cast<Vector<T, cols> &>(m_data[size_t(i) * cols]);
+#  pragma GCC diagnostic pop
+  }
+
+  //! \brief Acces to the nth row in read mode.
+  Vector<T, cols> const& operator[](int const i) const
+  {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wstrict-aliasing"
+    return reinterpret_cast<Vector<T, cols> const&>(m_data[size_t(i) * cols]);
+#  pragma GCC diagnostic pop
   }
 
   // C array conversions
   typedef T (&array_t)[rows * cols];
-  inline operator array_t () { return m_data; }
+  operator array_t () { return m_data; }
   typedef const T (&const_array_t)[rows * cols];
-  inline operator const_array_t () const { return m_data; }
+  operator const_array_t () const { return m_data; }
 
 private:
 
@@ -177,7 +203,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
 // Overloaded math operators
 #  define DEFINE_UNARY_OPERATOR(op)                                     \
   template <typename T, size_t rows, size_t cols>                   \
-  inline Matrix<T, rows, cols> operator op (Matrix<T, rows, cols> const &a)    \
+  Matrix<T, rows, cols> operator op (Matrix<T, rows, cols> const &a)    \
   {                                                                     \
     Matrix<T, rows, cols> result;                                       \
     size_t i = rows * cols; while (i--)                               \
@@ -188,7 +214,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
 #  define DEFINE_BINARY_SCALAR_OPERATORS(op)                            \
   /* Scalar-matrix op */                                                \
   template <typename T, size_t rows, size_t cols>                   \
-  inline Matrix<T, rows, cols> operator op (T const a, Matrix<T, rows, cols> const &b) \
+  Matrix<T, rows, cols> operator op (T const a, Matrix<T, rows, cols> const &b) \
   {                                                                     \
     Matrix<T, rows, cols> result;                                       \
     size_t i = rows * cols; while (i--)                               \
@@ -197,7 +223,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
   }                                                                     \
   /* Matrix-scalar op */                                                \
   template <typename T, size_t rows, size_t cols>                   \
-  inline Matrix<T, rows, cols> operator op (Matrix<T, rows, cols> const &a, T const b) \
+  Matrix<T, rows, cols> operator op (Matrix<T, rows, cols> const &a, T const b) \
   {                                                                     \
     Matrix<T, rows, cols> result;                                       \
     size_t i = rows * cols; while (i--)                               \
@@ -208,7 +234,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
 #  define DEFINE_BINARY_OPERATORS(op)                                   \
   /* Matrix-matrix op */                                                \
   template <typename T, size_t rows, size_t cols>                   \
-  inline Matrix<T, rows, cols> operator op (Matrix<T, rows, cols> const &a, Matrix<T, rows, cols> const &b) \
+  Matrix<T, rows, cols> operator op (Matrix<T, rows, cols> const &a, Matrix<T, rows, cols> const &b) \
   {                                                                     \
     Matrix<T, rows, cols> result;                                       \
     size_t i = rows * cols; while (i--)                               \
@@ -220,7 +246,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
 #  define DEFINE_INPLACE_SCALAR_OPERATOR(op)                            \
   /* Matrix-scalar op */                                                \
   template <typename T, size_t rows, size_t cols>                   \
-  inline Matrix<T, rows, cols> & operator op (Matrix<T, rows, cols> &a, T const b)  \
+  Matrix<T, rows, cols> & operator op (Matrix<T, rows, cols> &a, T const b)  \
   {                                                                     \
     size_t i = rows * cols; while (i--)                               \
       a.m_data[i] op b;                                                 \
@@ -230,7 +256,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
 #  define DEFINE_INPLACE_OPERATORS(op)                                  \
   /* Matrix-matrix op */                                                \
   template <typename T, size_t rows, size_t cols>                   \
-  inline Matrix<T, rows, cols> & operator op (Matrix<T, rows, cols> &a, Matrix<T, rows, cols> const &b) \
+  Matrix<T, rows, cols> & operator op (Matrix<T, rows, cols> &a, Matrix<T, rows, cols> const &b) \
   {                                                                     \
     size_t i = rows * cols; while (i--)                               \
       a.m_data[i] op b.m_data[i];                                       \
@@ -241,7 +267,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
 #  define DEFINE_RELATIONAL_OPERATORS(op)                               \
   /* Matrix-matrix op */                                                \
   template <typename T, typename U, size_t rows, size_t cols>       \
-  inline Matrix<bool, rows, cols> operator op (Matrix<T, rows, cols> const &a, Matrix<U, rows, cols> const &b) \
+  Matrix<bool, rows, cols> operator op (Matrix<T, rows, cols> const &a, Matrix<U, rows, cols> const &b) \
   {                                                                     \
     Matrix<bool, rows, cols> result;                                    \
     size_t i = rows * cols; while (i--)                               \
@@ -250,7 +276,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
   }                                                                     \
   /* Scalar-matrix op */                                                \
   template <typename T, typename U, size_t rows, size_t cols>       \
-  inline Matrix<bool, rows, cols> operator op (T const a, Matrix<U, rows, cols> const &b) \
+  Matrix<bool, rows, cols> operator op (T const a, Matrix<U, rows, cols> const &b) \
   {                                                                     \
     Matrix<bool, rows, cols> result;                                    \
     size_t i = rows * cols; while (i--)                               \
@@ -259,7 +285,7 @@ typedef Matrix<float, 4_z, 4_z> Matrix44f;
   }                                                                     \
   /* Matrix-scalar op */                                                \
   template <typename T, typename U, size_t rows, size_t cols>       \
-  inline Matrix<bool, rows, cols> operator op (Matrix<T, rows, cols> const &a, U const b) \
+  Matrix<bool, rows, cols> operator op (Matrix<T, rows, cols> const &a, U const b) \
   {                                                                     \
     Matrix<bool, rows, cols> result;                                    \
     size_t i = rows * cols; while (i--)                               \
@@ -295,7 +321,7 @@ DEFINE_RELATIONAL_OPERATORS(>=)
 
 //! \brief Matrix-Matrix multiplication.
 template <typename T, size_t rows, size_t inner, size_t cols>
-inline Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner, cols> const &b)
+Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T, inner, cols> const &b)
 {
   Matrix<T, rows, cols> result(T(0));
   for (size_t i = 0_z; i < rows; ++i)
@@ -307,7 +333,7 @@ inline Matrix<T, rows, cols> operator*(Matrix<T, rows, inner> const &a, Matrix<T
 
 //! \brief Matrix-Vector multiplication.
 template <typename T, size_t rows, size_t cols>
-inline Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols> const &b)
+Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols> const &b)
 {
   Vector<T, rows> result(T(0));
   size_t i = rows;
@@ -322,7 +348,7 @@ inline Vector<T, rows> operator*(Matrix<T, rows, cols> const &a, Vector<T, cols>
 
 //! \brief Vector-Matrix multiplication.
 template <typename T, size_t rows, size_t cols>
-inline Vector<T, cols> operator*(Vector<T, rows> const &a, Matrix<T, rows, cols> const &b)
+Vector<T, cols> operator*(Vector<T, rows> const &a, Matrix<T, rows, cols> const &b)
 {
   Vector<T, cols> result (T(0));
   size_t i = rows;
@@ -338,7 +364,7 @@ inline Vector<T, cols> operator*(Vector<T, rows> const &a, Matrix<T, rows, cols>
 
 //! \brief vector = vector * Matrix
 template <typename T, size_t n>
-inline Vector<T, n>& operator*=(Vector<T, n> &a, Matrix<T, n, n> const &b)
+Vector<T, n>& operator*=(Vector<T, n> &a, Matrix<T, n, n> const &b)
 {
   a = a * b;
   return a;
@@ -346,7 +372,7 @@ inline Vector<T, n>& operator*=(Vector<T, n> &a, Matrix<T, n, n> const &b)
 
 //! \brief Hadamard product.
 template <typename T, size_t rows, size_t cols>
-inline Matrix<T, rows, cols>& operator*=(Matrix<T, rows, cols> &a, Matrix<T, cols, cols> const &b)
+Matrix<T, rows, cols>& operator*=(Matrix<T, rows, cols> &a, Matrix<T, cols, cols> const &b)
 {
   a = a * b;
   return a;
@@ -356,7 +382,7 @@ namespace matrix
 {
 
   template <typename T, size_t rows, size_t cols>
-  inline void identity(Matrix<T, rows, cols> &a)
+  void identity(Matrix<T, rows, cols> &a)
   {
     static_assert(rows == cols, "Can't construct identity for a non-square matrix");
     a *= T(0);
@@ -373,7 +399,7 @@ namespace matrix
   //! \return the boolean matrix containing the result of each element
   //! comparaison.
   template <typename T, size_t rows, size_t cols>
-  inline Matrix<bool, rows, cols> compare(Matrix<T, rows, cols> const &a, Matrix<T, rows, cols> const &b)
+  Matrix<bool, rows, cols> compare(Matrix<T, rows, cols> const &a, Matrix<T, rows, cols> const &b)
   {
     Matrix<bool, rows, cols> result;
     size_t i = rows * cols;
@@ -386,7 +412,7 @@ namespace matrix
   //! \brief Hadamard product (element by element multiplication).
   //! See https://en.wikipedia.org/wiki/Hadamard_product_(matrices)
   template <typename T, size_t rows, size_t cols>
-  inline Matrix<T, rows, cols> Hprod(Matrix<T, rows, cols> const &a, Matrix<T, rows, cols> const &b)
+  Matrix<T, rows, cols> Hprod(Matrix<T, rows, cols> const &a, Matrix<T, rows, cols> const &b)
   {
     Matrix<T, rows, cols> result;
     size_t i = rows;
@@ -401,7 +427,7 @@ namespace matrix
 
   //! \brief Transpose the matrix.
   template <typename T, size_t rows, size_t cols>
-  inline Matrix<T, cols, rows> transpose(Matrix<T, rows, cols> const &a)
+  Matrix<T, cols, rows> transpose(Matrix<T, rows, cols> const &a)
   {
     Matrix<T, cols, rows> result;
     size_t i = rows;
@@ -418,7 +444,7 @@ namespace matrix
 
   //! \brief Compute the matrix trace. The matrix shall be a squared matrix.
   template <typename T, size_t rows, size_t cols>
-  inline T trace(Matrix<T, rows, cols> const &a)
+  T trace(Matrix<T, rows, cols> const &a)
   {
     static_assert(rows == cols, "Can't compute the trace of a non-square matrix");
 
@@ -433,7 +459,7 @@ namespace matrix
 
   //! \brief Check if the matrix is diagonal. The matrix shall be a squared matrix.
   template <typename T, size_t rows, size_t cols>
-  inline bool isDiagonal(Matrix<T, rows, cols> const &a)
+  bool isDiagonal(Matrix<T, rows, cols> const &a)
   {
     static_assert(rows == cols, "Can't compute the diagonal of a non-square matrix");
 
@@ -456,7 +482,7 @@ namespace matrix
 
   //! \brief Check if the matrix is symetric. The matrix shall be a squared matrix.
   template <typename T, size_t rows, size_t cols>
-  inline bool isSymmetric(Matrix<T, rows, cols> const &a)
+  bool isSymmetric(Matrix<T, rows, cols> const &a)
   {
     static_assert(rows == cols, "Can't compute the diagonal of a non-square matrix");
 
@@ -479,7 +505,7 @@ namespace matrix
 
   //! \brief Check if the boolean matrix has all its elements true.
   template <size_t rows, size_t cols>
-  inline bool allTrue(Matrix<bool, rows, cols> const &a)
+  bool allTrue(Matrix<bool, rows, cols> const &a)
   {
     size_t i = rows * cols;
 
@@ -491,7 +517,7 @@ namespace matrix
 
   //! \brief Check if the boolean matrix has all its elements false.
   template <size_t rows, size_t cols>
-  inline bool allFalse(Matrix<bool, rows, cols> const &a)
+  bool allFalse(Matrix<bool, rows, cols> const &a)
   {
     size_t i = rows * cols;
 
@@ -502,7 +528,7 @@ namespace matrix
   }
 
   template <typename T, size_t rows, size_t cols>
-  inline bool swapRows(Matrix<T, rows, cols> &a, size_t const i, size_t const j)
+  bool swapRows(Matrix<T, rows, cols> &a, size_t const i, size_t const j)
   {
     if (i == j)
       return true;
@@ -555,7 +581,7 @@ namespace matrix
             matrix::swapRows(P, i, pivot);
           }
 
-        // WARNING:
+        // ERROR:
         // -- original code:  if (A[i][i] != 0.0)
         // -- new code which seems to give less good results: if (fabs(A[i][i]) > 0.00001)
         // we cannot use == with floats or double !!!!
@@ -617,8 +643,11 @@ namespace matrix
     // Solve for x by backward substitution
     size_t r = rows - 1u;
     solution[r] = y[r] / U[r][r];
-    for (int32_t i = r - 1; i >= 0; i--)
+
+    size_t i = r;
+    while (i--)
       {
+        assert(i >= 0);
         solution[i] = y[i] / U[i][i];
         for (size_t j = i + 1u; j < rows; j++)
           {
@@ -643,13 +672,13 @@ namespace matrix
 
 //! \brief Display the matrix.
 template <typename T, size_t rows, size_t cols>
-inline std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m)
+std::ostream& operator<<(std::ostream& os, Matrix<T, rows, cols> const& m)
 {
   for (size_t i = 0_z; i < rows; ++i)
     {
       for (size_t j = 0_z; j < cols; ++j)
         os << m[i][j] << " ";
-      os << std::endl;
+      os << '\n';
     }
   return os;
 }

@@ -52,7 +52,7 @@ void Path::add(std::string const& path)
 //! \brief add a directory in the path
 void Path::reset(std::string const& path)
 {
-  LOGI("Path::clear()");
+  LOGI("%s", "Path::clear()");
   m_search_paths.clear();
   split(path);
 }

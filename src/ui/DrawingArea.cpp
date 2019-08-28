@@ -86,7 +86,7 @@ GLDrawingArea::~GLDrawingArea()
 //------------------------------------------------------------------
 void GLDrawingArea::createOpenGLContext()
 {
-  LOGI("Starting OpenGL context");
+  LOGI("%s", "Starting OpenGL context");
 
 #if defined(__APPLE__)
   throw OpenGLException("Sorry OpenGL quartz is not implemented by GTK+ team");
@@ -99,12 +99,12 @@ void GLDrawingArea::createOpenGLContext()
     {
       const GLubyte* msg = glewGetErrorString(err);
       const char *m = reinterpret_cast<const char*>(msg);
-      LOGX("Throw Gdk::GLError exception");
+      LOGX("%s", "Throw Gdk::GLError exception");
       throw Gdk::GLError(Gdk::GLError::NOT_AVAILABLE, Glib::ustring(m));
     }
 
   opengl::hasCreatedContext() = true;
-  LOGI("OpenGL context created with success");
+  LOGI("%s", "OpenGL context created with success");
 }
 
 //------------------------------------------------------------------
@@ -118,7 +118,7 @@ void GLDrawingArea::onCreate()
 
       if (unlikely(false == GLRenderer::setupGraphics()))
         {
-          LOGES("During the setup of SimTaDyn graphic renderer");
+          LOGES("%s", "During the setup of SimTaDyn graphic renderer");
         }
     }
   catch (const Gdk::GLError& gle)
@@ -159,7 +159,7 @@ bool GLDrawingArea::onRender(const Glib::RefPtr<Gdk::GLContext>& /* context */)
       static bool singleton = true;
       if (singleton)
         {
-          LOGD("No OpenGL rendering will be made");
+          LOGD("%s", "No OpenGL rendering will be made");
           singleton = false;
         }
       return false;

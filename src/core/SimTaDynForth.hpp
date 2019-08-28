@@ -39,7 +39,7 @@ public:
   SimForthDictionary()
     : ForthDictionary()
   {
-    LOGI("Creating SimForthDictionary");
+    LOGI("%s", "Creating SimForthDictionary");
   }
 };
 
@@ -54,12 +54,12 @@ public:
   SimForth()
     : Forth(m_dictionaries)
   {
-    LOGI("Creating SimForth");
+    LOGI("%s", "Creating SimForth");
   }
 
   virtual ~SimForth()
   {
-    LOGI("Destroying SimForth");
+    LOGI("%s", "Destroying SimForth");
   }
 
   virtual void ok(std::pair<bool, std::string> const& res) override
@@ -104,7 +104,7 @@ protected:
 
   void emitForthInterpreteDone()
   {
-    LOGS("emit signal Forth interprete done");
+    LOGS("%s", "emit signal Forth interprete done");
     signal_forth_interprete_done.emit(/**this*/);
   }
 

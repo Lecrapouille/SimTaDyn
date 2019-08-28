@@ -194,14 +194,14 @@ protected:
         m_graphAlgorithm = GraphAlgorithm::factory("SimBFS");
       }
     */
-    LOGI("resetCellIterator()");
+    LOGI("%s", "resetCellIterator()");
     if (hasNode(0u))
       {
         m_graphAlgorithm.init(*this, getNode(0u), false);
       }
     else
       {
-        LOGE("PAS de NOEUD PAS DE CHOCOLAT");
+        LOGE("%s", "PAS de NOEUD PAS DE CHOCOLAT");
       }
   }
 

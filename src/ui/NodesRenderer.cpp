@@ -61,7 +61,7 @@ bool NodesRenderer::setupGraphics(float const ratio)
 //------------------------------------------------------------------
 void NodesRenderer::draw2d(GLVAO& vao, Matrix44f const& transform)
 {
-  LOGD("NodesRenderer::draw");
+  LOGD("%s", "NodesRenderer::draw");
   m_prog.matrix44f("model") = transform;
   m_prog.draw(vao, Mode::POINTS);
 }

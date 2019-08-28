@@ -289,7 +289,7 @@ SimTaDynMapExplorer::SimTaDynMapExplorer()
   // Preload some icons. FIXME: create an IconManager
   if (!loadAllIcons())
     {
-      LOGE("Some icons will be missing inside the GUI");
+      LOGE("%s", "Some icons will be missing inside the GUI");
     }
 
   // Create the Tree model
@@ -528,7 +528,7 @@ void SimTaDynMapExplorer::traverseSceneGraph(SceneNodePtr sceneNode, TreeIterato
 {
   if (nullptr == sceneNode)
     {
-      LOGI("SceneNode nullptr");
+      LOGI("%s", "SceneNode nullptr");
       return ;
     }
 

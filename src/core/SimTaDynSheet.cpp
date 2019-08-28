@@ -23,7 +23,7 @@
 
 void SimTaDynSheet::update(float const dt)
 {
-  LOGI("SimTaDynSheet::update");
+  LOGI("%s", "SimTaDynSheet::update");
   SceneGraph_t<std::string, SimTaDynSheet, float, 3u>::Node::update(dt);
 }
 

@@ -24,7 +24,9 @@
 //#  include "Names.hpp"
 #  include "Logger.hpp"
 #  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-const-variable"
 #  pragma GCC diagnostic ignored "-Wdeprecated"
+#  pragma GCC diagnostic ignored "-Wold-style-cast"
 #    include <gtksourceviewmm.h>
 #    include "Gtkmm.tpp"
 #  pragma GCC diagnostic pop

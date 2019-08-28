@@ -27,7 +27,7 @@
 // **************************************************************
 ForthDictionary::ForthDictionary()
 {
-  LOGI("Creating Forth dictionnary");
+  LOGI("%s", "Creating Forth dictionnary");
   m_here = 0U;
   m_last = 0U;
 
@@ -37,7 +37,7 @@ ForthDictionary::ForthDictionary()
 
 ForthDictionary::~ForthDictionary()
 {
-  LOGI("Destroying Forth dictionnary");
+  LOGI("%s", "Destroying Forth dictionnary");
 }
 
 // **************************************************************

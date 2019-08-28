@@ -52,7 +52,7 @@ public:
       }
     catch (...)
       {
-        LOGW("SimTaDyn logo not found");
+        LOGW("%s", "SimTaDyn logo not found");
       }
 
     signal_response().connect([&](const int&) { hide(); });

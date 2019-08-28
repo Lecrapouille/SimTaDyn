@@ -31,7 +31,7 @@ GLRenderer::GLRenderer()
 //------------------------------------------------------------------
 bool GLRenderer::setupGraphics()
 {
-  LOGD("GLRenderer::setupGraphics()");
+  LOGD("%s", "GLRenderer::setupGraphics()");
   // This is an awful hack but this is to be sure to flush OpenGL
   // errors before using this function on real OpenGL routines else a
   // fake error is returned on the first OpenGL routines while valid.
@@ -112,7 +112,7 @@ void GLRenderer::restoreCamera2D()
 // Called by
 void GLRenderer::drawSceneNode(SimTaDynSheet& sheet, Matrix44f const& transform)
 {
-  LOGD("GLRenderer::drawSceneNode");
+  LOGD("%s", "GLRenderer::drawSceneNode");
   if (GLRenderer::Mode2D == GLRenderer::renderMode())
     {
       m_nodes_renderer.draw2d(sheet.vaoNodes(), transform);
@@ -121,7 +121,7 @@ void GLRenderer::drawSceneNode(SimTaDynSheet& sheet, Matrix44f const& transform)
     }
   else
     {
-      LOGW("Draw Map in 3D not yet implemented");
+      LOGW("%s", "Draw Map in 3D not yet implemented");
     }
 }
 

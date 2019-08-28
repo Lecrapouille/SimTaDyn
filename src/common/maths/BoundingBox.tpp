@@ -372,11 +372,14 @@ public:
   union
   {
     Vector<T, n> bboxes[2U];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     struct
     {
       Vector<T, n> m_bbmin;
       Vector<T, n> m_bbmax;
     };
+#pragma GCC diagnostic pop
   };
 };
 

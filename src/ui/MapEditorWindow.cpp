@@ -283,7 +283,7 @@ void MapEditorWindow::onRedoClicked()
 //------------------------------------------------------------------
 void MapEditorWindow::onSaveFileClicked()
 {
-  LOGF("saveAsMap not yet implemented");
+  LOGF("%s", "saveAsMap not yet implemented");
   /*Gtk::FileChooserDialog dialog("Save a SimTaDyn map file",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.set_transient_for((Gtk::Window&) (*m_vbox.get_toplevel()));
@@ -321,7 +321,7 @@ void MapEditorWindow::onSaveFileClicked()
 //------------------------------------------------------------------
 void MapEditorWindow::onSaveAsFileClicked()
 {
-  LOGF("dialogSaveAsMap not yet implemented");
+  LOGF("%s", "dialogSaveAsMap not yet implemented");
   //return false;
   /*Gtk::MessageDialog dialog((Gtk::Window&) (*m_vbox.get_toplevel()),
                             "The document '" + map.m_name +
@@ -373,7 +373,7 @@ void MapEditorWindow::onActionOnSelected(const ActionOn id)
 //------------------------------------------------------------------
 void MapEditorWindow::onActionTypeSelected(const ActionType id)
 {
-  //LOGI("ActionTypeSelected %u", id);
+  //LOGI("%s", "ActionTypeSelected %u", id);
 
   // http://transit.iut2.upmf-grenoble.fr/doc/gtkmm-3.0/reference/html/group__gdkmmEnums.html
   // Change the mouse cursor

@@ -58,9 +58,9 @@ static void compareMatrices(Matrix44f const &a, glm::mat4 const &b, const int li
   std::cout << std::endl << "Test line " << line << ": Comparing Matrices:" << std::endl;
   display(a); std::cout << "with "; display(b);
 
-  for (uint32_t i = 0U; i < 4U; ++i)
+  for (size_t i = 0U; i < 4U; ++i)
     {
-      for (uint32_t j = 0U; j < 4U; ++j)
+      for (size_t j = 0U; j < 4U; ++j)
         {
           CPPUNIT_ASSERT_EQUAL(true, maths::abs(a[i][j] - b[i][j]) < 0.001f);
         }

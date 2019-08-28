@@ -63,7 +63,7 @@ void ShapefileLoader::goToByte(const uint32_t offset)
   m_infile.seekg(offset, std::ios::beg);
   if (!m_infile)
     {
-      LOGF("ShapefileLoaderException");
+      LOGF("%s", "ShapefileLoaderException");
       LoaderException e("Failed parsing the shapefile '" + m_filename
                         + "' at offset " + std::to_string(offset));
       throw e;
@@ -75,7 +75,7 @@ void ShapefileLoader::skypeNBytes(const uint32_t offset)
   m_infile.seekg(offset, std::ios::cur);
   if (!m_infile)
     {
-      LOGF("ShapefileLoaderException");
+      LOGF("%s", "ShapefileLoaderException");
       LoaderException e("Failed parsing the shapefile '" + m_filename
                         + "' at offset " + std::to_string(offset));
       throw e;
@@ -164,7 +164,7 @@ void ShapefileLoader::checkFileSize()
     }
 
 l_err:
-  LOGF("ShapefileLoaderBadLength");
+  LOGF("%s", "ShapefileLoaderBadLength");
   std::string msg("Incorrect Shapefile size. Expected ");
   msg += std::to_string(m_filelength);
   msg += " bytes but detected ";
@@ -183,7 +183,7 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   m_infile.open(filename, std::ios::binary | std::ios::in);
   if (!m_infile)
     {
-      LOGF("ShapefileLoaderOpenFailed");
+      LOGF("%s", "ShapefileLoaderOpenFailed");
       throw LoaderException("Failed opening the Shapefile '" + filename + "': " + strerror(errno));
     }
 
@@ -193,7 +193,7 @@ void ShapefileLoader::openShapeFile(const std::string& filename)
   value32b = readBigEndianInt();
   if (9994u != value32b)
     {
-      LOGF("ShapefileLoaderBadId");
+      LOGF("%s", "ShapefileLoaderBadId");
       throw LoaderException("Bad Shapefile ID: read " + std::to_string(value32b) + " instead of 9994");
     }
 }

@@ -61,16 +61,16 @@ public:
     // Compute [X^0 X^1 X^2 ... X^(2*order)]
     double X[2U * order];
     X[0U] = 1.0; X[1U] = dataX;
-    for (uint32_t i = 2U; i < 2U * order; ++i)
+    for (size_t i = 2U; i < 2U * order; ++i)
       {
         X[i] = X[i - 1U] * dataX;
       }
 
     // Compute m_Xsquared
     const double it = m_iteration;
-    for (uint32_t i = 0U; i < order; ++i)
+    for (size_t i = 0U; i < order; ++i)
     {
-      for (uint32_t j = 0U; j < order; ++j)
+      for (size_t j = 0U; j < order; ++j)
         {
           // The following code suffers of accurancy due to
           // implementation of float and doubles:
@@ -81,7 +81,7 @@ public:
     }
 
     // Compute m_b
-    for (uint32_t i = 0U; i < order; ++i)
+    for (size_t i = 0U; i < order; ++i)
     {
       // The following code suffers of accurancy:
       //   b->element[i] = b->element[i] + X[i] * DataY;
@@ -105,7 +105,7 @@ public:
     assert(X.size() + 1U >= P.degree());
 
     double res = P[0];
-    for (uint32_t i = 1U; i < P.degree(); ++i)
+    for (size_t i = 1U; i < P.degree(); ++i)
       {
         res += (P[i] * X[i - 1U]);
       }

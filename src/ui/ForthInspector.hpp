@@ -108,7 +108,7 @@ public:
     // Signal
     m_forth.signal_forth_interprete_done.connect([this](/*SimForth& forth*/)
     {
-      LOGC("signal_forth_interprete_done: inspect stack");
+      LOGC("%s", "signal_forth_interprete_done: inspect stack");
       ForthStackInspector::inspect(m_forth.stack(forth::DataStack),
                                    m_forth.stackDepth(forth::DataStack));
     });
@@ -188,7 +188,7 @@ public:
     // Signal
     m_forth.signal_forth_interprete_done.connect([this](/*SimForth& forth*/)
     {
-      LOGC("signal_forth_interprete_done: inspect dictionary");
+      LOGC("%s", "signal_forth_interprete_done: inspect dictionary");
       ForthDicoInspector::inspect(m_forth.dictionary(), m_forth.maxPrimitives());
     });
   }

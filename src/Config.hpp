@@ -24,6 +24,9 @@
 #  include "version.h"
 #  include "File.hpp"
 
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-const-variable"
+
 namespace config
 {
   //! \brief
@@ -58,5 +61,7 @@ namespace config
   //! used for storing nodes and arcs in a graph
   static const uint32_t graph_container_nb_elements(8U);
 }
+
+#  pragma GCC diagnostic pop
 
 #endif /* CONFIG_HPP_ */

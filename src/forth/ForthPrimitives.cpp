@@ -126,12 +126,12 @@ void Forth::execPrimitive(const Cell16 idPrimitive)
       break;
 
     case FORTH_PRIMITIVE_TRACE_ON:
-      LOGI("Forth trace: ON");
+      LOGI("%s", "Forth trace: ON");
       m_trace = true;
       break;
 
     case FORTH_PRIMITIVE_TRACE_OFF:
-      LOGI("Forth trace: OFF");
+      LOGI("%s", "Forth trace: OFF");
       m_trace = false;
       break;
 

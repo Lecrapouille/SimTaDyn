@@ -28,7 +28,7 @@ ForthDocument::ForthDocument(SimForth& forth, Glib::RefPtr<Gsv::Language> langua
     m_forth(forth),
     m_tab_sm(ForthAutoCompletSMBegin)
 {
-  LOGI("Creating ForthDocument");
+  LOGI("%s", "Creating ForthDocument");
 
   // Tag for Forth word not in dictionary
   m_tag_unknown_word = m_buffer->create_tag("error");
@@ -49,7 +49,7 @@ ForthDocument::ForthDocument(SimForth& forth, Glib::RefPtr<Gsv::Language> langua
 // *************************************************************************************************
 ForthDocument::~ForthDocument()
 {
-  LOGI("Destroying ForthDocument");
+  LOGI("%s", "Destroying ForthDocument");
 }
 
 // *************************************************************************************************
@@ -213,7 +213,7 @@ ForthEditor::ForthEditor(SimForth& forth)
     m_cout(std::cout, m_results.get_buffer()),
     m_cerr(std::cerr, m_messages.get_buffer())
 {
-  LOGI("Creating ForthEditor");
+  LOGI("%s", "Creating ForthEditor");
   m_hbox.pack_start(m_toolbars[FORTH_TOOLBAR_PLUGINS], Gtk::PACK_SHRINK);
   m_hbox.pack_start(m_vbox);
   m_vbox.pack_start(*this, Gtk::PACK_EXPAND_WIDGET);
@@ -272,7 +272,7 @@ Gtk::Widget& ForthEditor::widget()
 // *************************************************************************************************
 ForthEditor::~ForthEditor()
 {
-  LOGI("Destroying ForthEditor");
+  LOGI("%s", "Destroying ForthEditor");
   // TODO: be sure no script is running on the map before destroying
   // TODO: save the historic buffer
 }
@@ -329,7 +329,7 @@ void ForthEditor::completeForthName(const bool reset_state)
   ForthDocument* doc = dynamic_cast<ForthDocument*>(txt_doc);
   if (nullptr == txt_doc)
     {
-      LOGES("Cannot cast TextDocument to ForthDocument");
+      LOGES("%s", "Cannot cast TextDocument to ForthDocument");
       return ;
     }
   doc->completeForthName(reset_state);
