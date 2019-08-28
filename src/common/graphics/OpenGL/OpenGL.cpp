@@ -23,7 +23,7 @@
 //! This macro will generate code for members.
 IMPLEMENT_EXCEPTION(OpenGLException, Exception, "OpenGL Exception")
 
-void checkGLError(const char* filename, const uint32_t line, const char* expression)
+void checkError(const char* filename, const uint32_t line, const char* expression)
 {
   GLenum id;
   const char* error;

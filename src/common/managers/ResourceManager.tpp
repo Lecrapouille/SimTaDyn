@@ -245,20 +245,20 @@ public:
           }
         else
           {
-            LOGW("The newKey already stored in ResourceManager");
+            LOGW("%s", "The newKey already stored in ResourceManager");
             switch (strategy)
               {
               case resource::Strategy::ThrowException:
-                LOGD("resource::Strategy::ThrowException");
+                LOGD("%s", "resource::Strategy::ThrowException");
                 throw ResourceManagerException("Failed to rename resource: the newKey already stored in ResourceManager");
               case resource::Strategy::UseOlder:
-                LOGD("resource::Strategy::UseOlder");
+                LOGD("%s", "resource::Strategy::UseOlder");
                 r = std::move(old_it->second);
                 new_it->second = r;
                 m_resources.erase(old_it);
                 return r;
               case resource::Strategy::Replace:
-                LOGD("resource::Strategy::Replace");
+                LOGD("%s", "resource::Strategy::Replace");
                 m_resources.erase(old_it);
                 return new_it->second;
               case resource::Strategy::ReturnNull:
@@ -317,7 +317,7 @@ private:
     auto it = m_resources.find(id);
     if (it == m_resources.end())
       {
-        LOGD("New resource created");
+        LOGD("%s", "New resource created");
         resource = std::make_unique<R>(args...);
         m_resources[id] = resource;
       }
@@ -329,20 +329,20 @@ private:
         switch (strategy)
           {
           case resource::Strategy::ThrowException:
-            LOGD("resource::Strategy::ThrowException");
+            LOGD("%s", "resource::Strategy::ThrowException");
             throw ResourceManagerException("Failed to load resource, ID already stored in ResourceManager");
             break;
           case resource::Strategy::Replace:
-            LOGD("resource::Strategy::Replace");
+            LOGD("%s", "resource::Strategy::Replace");
             resource = std::make_unique<R>(args...);
             it->second = resource;
             break;
           case resource::Strategy::UseOlder:
-            LOGD("resource::Strategy::UseOlder");
+            LOGD("%s", "resource::Strategy::UseOlder");
             resource = it->second;
             break;
           case resource::Strategy::ReturnNull:
-            LOGD("resource::Strategy::ReturnNull");
+            LOGD("%s", "resource::Strategy::ReturnNull");
             resource = nullptr;
             break;
           }

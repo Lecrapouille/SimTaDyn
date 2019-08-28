@@ -59,28 +59,28 @@ void GLProgramTests::tests()
   try {
     prog.throw_if_not_compiled();
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(OpenGLException) { }
+  } catch(OpenGLException&) { }
 
   prog.m_compiled = true;
   try {
     prog.throw_if_not_compiled();
-  } catch(OpenGLException) { CPPUNIT_FAIL("Exception should have not occured"); }
+  } catch(OpenGLException&) { CPPUNIT_FAIL("Exception should have not occured"); }
 
   // ---
   try {
     prog.uniform<int>("");
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(OpenGLException) { }
+  } catch(OpenGLException&) { }
 
   try {
     prog.uniform<int>("aaa");
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(OpenGLException) { }
+  } catch(OpenGLException&) { }
 
   try {
     prog.uniform<int>(nullptr);
     CPPUNIT_FAIL("Exception should have occured");
-  } catch(OpenGLException) { }
+  } catch(OpenGLException&) { }
 
   // TODO: try add name conflict wit different types
   prog.addNewUniform(GL_FLOAT, "u1");
@@ -97,8 +97,7 @@ void GLProgramTests::tests()
   //try {
   //  prog.getVBO<int>("");
   //  CPPUNIT_FAIL("Exception should have occured");
-  //} catch(OpenGLException) { }
-
+  //} catch(OpenGLException&) { }
 
   GLVAO vao("VAO");
   CPPUNIT_ASSERT_EQUAL(0u, vao.prog);
@@ -112,7 +111,7 @@ void GLProgramTests::tests()
   //try {
   //  prog.getVBO<int>("");
   //  CPPUNIT_FAIL("Exception should have occured");
-  //} catch(OpenGLException) { }
+  //} catch(OpenGLException&) { }
 
   // TODO: try add name conflict wit different types
   CPPUNIT_ASSERT_EQUAL(0_z, prog.getAttributeNames().size());
@@ -147,4 +146,24 @@ void GLProgramTests::tests()
 
   // Restore uninitialized prog else OpenGL will segfault
   prog.m_handle = 0;
+
+  // Bind VAO to the wrong GLProg
+  GLProgram prog1("prog1");
+  prog1.m_handle = 42;
+  prog1.m_compiled = true;
+  GLProgram prog2("prog2");
+  prog2.m_handle = 43;
+  prog2.m_compiled = true;
+  GLVAO vao3("VAO3");
+  GLVAO vao4("VAO4");
+
+  CPPUNIT_ASSERT_EQUAL(0u, vao3.prog);
+  CPPUNIT_ASSERT_EQUAL(0u, vao4.prog);
+  CPPUNIT_ASSERT_EQUAL(true, prog1.bind(vao3));
+  CPPUNIT_ASSERT_EQUAL(true, prog2.bind(vao4));
+  CPPUNIT_ASSERT_EQUAL(42u, vao3.prog);
+  CPPUNIT_ASSERT_EQUAL(43u, vao4.prog);
+  // Try binding VAO to the wrong GLProg
+  CPPUNIT_ASSERT_EQUAL(false, prog1.bind(vao4));
+  CPPUNIT_ASSERT_EQUAL(false, prog2.bind(vao3));
 }

@@ -224,7 +224,7 @@ private:
         LOGF("%s", msg.c_str());
         throw LoaderManagerException(msg);
       }
-    LOGD("Found loader");
+    LOGD("%s", "Found loader");
     return *(it->second);
   }
 };

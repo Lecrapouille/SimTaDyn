@@ -63,13 +63,13 @@ inline static bool& hasCreatedContext()
 //! \param line the line where the OpenGL routine was called.
 //! \param expression the line content where the OpenGL routine was called.
 //----------------------------------------------------------------------------
-void checkGLError(const char* filename, const uint32_t line, const char* expression);
+void checkError(const char* filename, const uint32_t line, const char* expression);
 
 //----------------------------------------------------------------------------
 //! Macro encapsuling the OpenGL command and the fault checker.
 //----------------------------------------------------------------------------
 #  ifdef CHECK_OPENGL
-#    define glCheck(expr) expr; checkGLError(__FILE__, __LINE__, #expr);
+#    define glCheck(expr) expr; checkError(__FILE__, __LINE__, #expr);
 #  else
 #    define glCheck(expr) expr;
 #  endif
