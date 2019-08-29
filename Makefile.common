@@ -57,9 +57,9 @@ endif
 
 ###################################################
 # Inform Makefile where to find header files
-INCLUDES += -I$(P)/external -I$(P)/external/backward-cpp		\
--I$(P)/external/imgui -I$(P)/external/SOIL -I$(P)/external/YesEngine	\
--I$(P)/external/zipper -I$(P)/src/common/spreadsheet			\
+INCLUDES += -I$(THIRDPART) -I$(THIRDPART)/backward-cpp		\
+-I$(THIRDPART)/imgui -I$(THIRDPART)/SOIL -I$(THIRDPART)/YesEngine	\
+-I$(THIRDPART)/zipper -I$(P)/src/common/spreadsheet			\
 -I$(P)/src/common/patterns -I$(P)/src/common/managers			\
 -I$(P)/src/common/utils -I$(P)/src/common/maths				\
 -I$(P)/src/common/containers -I$(P)/src/common/graph-theory		\
@@ -70,11 +70,11 @@ INCLUDES += -I$(P)/external -I$(P)/external/backward-cpp		\
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
-VPATH += $(P)/external:\
-$(P)/external/backward-cpp:\
-$(P)/external/YesEngine:\
-$(P)/external/imgui:\
-$(P)/external/SOIL:\
+VPATH += $(THIRDPART):\
+$(THIRDPART)/backward-cpp:\
+$(THIRDPART)/YesEngine:\
+$(THIRDPART)/imgui:\
+$(THIRDPART)/SOIL:\
 $(P)/src/common/spreadsheet:\
 $(P)/src/common/patterns:\
 $(P)/src/common/managers:\

@@ -74,7 +74,7 @@ all: $(TARGET)
 ###################################################
 # Compile and launch unit tests and generate the code coverage html report.
 .PHONY: unit-tests
-unit-tests:
+unit-tests check:
 	@$(call print-simple,"Compiling unit tests")
 	@make -C tests coverage
 
