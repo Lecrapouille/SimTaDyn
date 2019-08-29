@@ -69,6 +69,9 @@ src/common/graphics/OpenGL/examples/textures
 foo
 _*
 
+# Emacs
+*_flymake.cpp
+
 # Debian packages
 doc-pak
 description-pak
