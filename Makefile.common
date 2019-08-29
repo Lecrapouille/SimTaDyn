@@ -19,13 +19,11 @@
 ## along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
-###################################################
-# Modify this file will force compiling whole project
-MYMAKEFILES += $(P)/Makefile.common
+PROJECT = SimTaDyn
+STANDARD = --std=c++11
+COMPIL_FLAGS = -W -Wall -Wextra
 
-###################################################
-# Compilation options.
-CXXFLAGS += -W -Wall -Wextra
+include $(M)/Makefile.header
 
 ###################################################
 # Project defines
@@ -45,9 +43,11 @@ DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 # is needed please read the external/README.md file.
 
 ifeq ($(ARCHI),Darwin)
-LDFLAGS += -I/usr/local/include -I/opt/local/include -framework         \
-           OpenGL -framework Cocoa -framework IOKit -framework          \
-           CoreVideo -L/usr/local/lib -L/opt/local/lib
+INCLUDES += -I/usr/local/include -I/opt/local/include
+LINKER_FLAGS += \
+  -framework OpenGL -framework Cocoa                                    \
+  -framework IOKit -framework CoreVideo                                 \
+  -L/usr/local/lib -L/opt/local/lib
 PKG_LIBS += gtkmm-3.0 gtksourceviewmm-3.0 glew glfw3 zlib
 else ifeq ($(ARCHI),Linux)
 PKG_LIBS += gtkmm-3.0 gtksourceviewmm-3.0 glew glfw3 zlib

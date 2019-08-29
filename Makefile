@@ -1,3 +1,4 @@
+# -*- mode: makefile -*-
 ##=====================================================================
 ## SimTaDyn: A GIS in a spreadsheet.
 ## Copyright 2018 Quentin Quadrat <lecrapouille@gmail.com>
@@ -19,23 +20,16 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = SimTaDyn
+# Location of the project directory and Makefiles
+P := .
+M := $(P)/.makefile
+
+###################################################
+# Project definition
 TARGET = $(PROJECT)
 DESCRIPTION = A GIS in a spreadsheet
-
-###################################################
-# Debug mode or Release mode
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=.
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
@@ -61,17 +55,17 @@ OBJ_GUI        = Redirection.o Windows.o MapExplorer.o TextEditor.o     \
                  MapEditorWindow.o MapExplorerWindow.o
 OBJ_SIMTADYN   = SimTaDyn.o main.o
 
-OBJS += $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS)	\
-        $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH)	\
+OBJS := $(OBJ_UTILS) $(OBJ_PATTERNS) $(OBJ_MATHS) $(OBJ_CONTAINERS)     \
+        $(OBJ_MANAGERS) $(OBJ_GRAPHS) $(OBJ_OPENGL) $(OBJ_FORTH)        \
         $(OBJ_CORE) $(OBJ_LOADERS) $(OBJ_GUI) $(OBJ_SIMTADYN)
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
-THIRDPART_LIBS += \
-	$(abspath $(P)/external/SOIL/libSOIL.a) \
-	$(abspath $(P)/external/zipper/build/libZipper-static.a)
+THIRDPART_LIBS := \
+        $(abspath $(THIRDPART)/SOIL/libSOIL.a) \
+        $(abspath $(THIRDPART)/zipper/build/libZipper-static.a)
 
 ###################################################
 # Compile SimTaDyn project
@@ -106,9 +100,9 @@ install: $(TARGET)
 # Uninstall the project. You need to be root. FIXME: to be updated
 #.PHONY: uninstall
 #uninstall:
-#	@$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
-#	@rm $(PROJECT_EXE)
-#	@rm -r $(PROJECT_DATA_ROOT)
+#       @$(call print-simple,"Uninstalling",$(PREFIX)/$(TARGET))
+#       @rm $(PROJECT_EXE)
+#       @rm -r $(PROJECT_DATA_ROOT)
 
 ###################################################
 # Clean the whole project.

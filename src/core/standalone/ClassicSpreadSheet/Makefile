@@ -19,22 +19,16 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = SimTaDyn
-TARGET = MyExcel
+# Location of the project directory and Makefiles
+P=../../../..
+M=$(P)/.makefile
 
 ###################################################
-# Debug mode or Release mode
+# Project definition
+TARGET = MyExcel
+DESCRIPTION = Simple spreadsheet solver
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=../../../..
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################

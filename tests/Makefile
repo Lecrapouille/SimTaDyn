@@ -19,22 +19,16 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = SimTaDyn
-TARGET = $(PROJECT)-UnitTest
+# Location of the project directory and Makefiles
+P=..
+M=$(P)/.makefile
 
 ###################################################
-# Debug mode or Release mode
+# Project definition
+TARGET = $(PROJECT)-UnitTest
+DESCRIPTION = Unit tests for $(PROJECT)
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=..
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
@@ -72,14 +66,13 @@ OBJS += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	\
 
 ###################################################
 # Compilation options.
-CXXFLAGS +=
-LDFLAGS += -lcppunit -pthread
+LINKER_FLAGS += -lcppunit -pthread
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
 # is not desired.
-CXXFLAGS += --coverage
-LDFLAGS += --coverage
+COMPIL_FLAGS += --coverage
+LINKER_FLAGS += --coverage
 
 ###################################################
 # Inform Makefile where to find header files
@@ -105,8 +98,8 @@ core/spreadsheet:\
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
 THIRDPART_LIBS += \
-	$(abspath $(P)/external/SOIL/libSOIL.a) \
-	$(abspath $(P)/external/zipper/build/libZipper-static.a)
+	$(abspath $(THIRDPART)/SOIL/libSOIL.a) \
+	$(abspath $(THIRDPART)/zipper/build/libZipper-static.a)
 
 ###################################################
 # Compile SimTaDyn unit tests

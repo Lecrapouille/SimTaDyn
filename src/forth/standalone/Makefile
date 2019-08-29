@@ -19,22 +19,16 @@
 ##=====================================================================
 
 ###################################################
-# Executable name
-PROJECT = SimTaDyn
-TARGET = SimForth
+# Location of the project directory and Makefiles
+P=../../..
+M=$(P)/.makefile
 
 ###################################################
-# Debug mode or Release mode
+# Executable name
+TARGET = SimForth
+DESCRIPTION = A standalone Forth interpreter
 BUILD_TYPE = debug
 
-###################################################
-# Location from the project root directory.
-P=../../..
-
-###################################################
-# Sharable informations between all Makefiles
-M=$(P)/.makefile
-include $(M)/Makefile.header
 include $(P)/Makefile.common
 
 ###################################################
