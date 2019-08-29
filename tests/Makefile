@@ -20,11 +20,13 @@
 
 ###################################################
 # Location of the project directory and Makefiles
+#
 P=..
 M=$(P)/.makefile
 
 ###################################################
 # Project definition
+#
 TARGET = $(PROJECT)-UnitTest
 DESCRIPTION = Unit tests for $(PROJECT)
 BUILD_TYPE = debug
@@ -33,6 +35,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
+#
 OBJ_EXTERNAL      +=
 OBJ_UTILS          = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_UTILS_UT      += StrongTypeTests.o FileTests.o PathTests.o LoggerTests.o TerminalColorTests.o
@@ -66,16 +69,19 @@ OBJS += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_UTILS_UT) $(OBJ_MATHS)	\
 
 ###################################################
 # Compilation options.
+#
 LINKER_FLAGS += -lcppunit -pthread
 
 ###################################################
 # Code coverage. Comment these lines if coveraging
 # is not desired.
+#
 COMPIL_FLAGS += --coverage
 LINKER_FLAGS += --coverage
 
 ###################################################
 # Inform Makefile where to find header files
+#
 INCLUDES += -Icommon/containers -Icommon/graphics			\
 -Icommon/graph-theory -Icommon/managers -Icommon/maths -Icommon/utils	\
 -Icore/loaders -Icore/spreadsheet					\
@@ -83,6 +89,7 @@ INCLUDES += -Icommon/containers -Icommon/graphics			\
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
+#
 VPATH += common/containers:\
 common/graphics:\
 common/graph-theory:\
@@ -97,6 +104,7 @@ core/spreadsheet:\
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
+#
 THIRDPART_LIBS += \
 	$(abspath $(THIRDPART)/SOIL/libSOIL.a) \
 	$(abspath $(THIRDPART)/zipper/build/libZipper-static.a)

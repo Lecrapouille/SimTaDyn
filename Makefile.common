@@ -31,6 +31,7 @@ include $(M)/Makefile.header
 # CHECK_OPENGL allows to check if bad parameters are
 #   passed to OpenGL routines. Produce an error message
 #   in the console but does not abort the program.
+#
 DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
@@ -41,7 +42,7 @@ DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
 ###################################################
 # Set Libraries. For knowing which libraries
 # is needed please read the external/README.md file.
-
+#
 ifeq ($(ARCHI),Darwin)
 INCLUDES += -I/usr/local/include -I/opt/local/include
 LINKER_FLAGS += \
@@ -57,6 +58,7 @@ endif
 
 ###################################################
 # Inform Makefile where to find header files
+#
 INCLUDES += -I$(THIRDPART) -I$(THIRDPART)/backward-cpp		\
 -I$(THIRDPART)/imgui -I$(THIRDPART)/SOIL -I$(THIRDPART)/YesEngine	\
 -I$(THIRDPART)/zipper -I$(P)/src/common/spreadsheet			\
@@ -70,6 +72,7 @@ INCLUDES += -I$(THIRDPART) -I$(THIRDPART)/backward-cpp		\
 
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
+#
 VPATH += $(THIRDPART):\
 $(THIRDPART)/backward-cpp:\
 $(THIRDPART)/YesEngine:\

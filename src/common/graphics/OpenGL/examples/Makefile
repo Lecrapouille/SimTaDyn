@@ -20,11 +20,13 @@
 
 ###################################################
 # Location of the project directory and Makefiles
+#
 P=../../../../..
 M=$(P)/.makefile
 
 ###################################################
 # Executable name
+#
 TARGET = OpenGLExamples
 DESCRIPTION = Examples made with OpenGL wrapper
 BUILD_TYPE = debug
@@ -33,6 +35,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
+#
 OBJ_UTILS    = Exception.o File.o ILogger.o Logger.o
 OBJ_OPENGL   = OpenGL.o GLWindow.o GLImGUI.o
 OBJ_EXAMPLES = \
@@ -55,12 +58,14 @@ OBJS += $(OBJ_UTILS) $(OBJ_OPENGL) $(OBJ_EXAMPLES) main.o
 ###################################################
 # Get the name of one of the resource to be download.
 # This allows to check if the resources have been downloaded
+#
 RESOURCES := textures/README.md
 
 ###################################################
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
+#
 THIRDPART_LIBS += $(abspath $(THIRDPART)/SOIL/libSOIL.a)
 
 ###################################################
@@ -69,6 +74,7 @@ all: $(TARGET) $(RESOURCES)
 
 ###################################################
 # Download resources before compiling sources
+#
 $(OBJS): | $(RESOURCES)
 $(RESOURCES): | $(BUILD)
 	@$(call print-from,"Downloading","$(PROJECT)","textures")

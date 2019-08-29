@@ -20,11 +20,13 @@
 
 ###################################################
 # Location of the project directory and Makefiles
+#
 P=../../..
 M=$(P)/.makefile
 
 ###################################################
 # Executable name
+#
 TARGET = SimForth
 DESCRIPTION = A standalone Forth interpreter
 BUILD_TYPE = debug
@@ -33,6 +35,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile. Splited by directories
+#
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_FORTH      = ForthExceptions.o ForthStream.o ForthDictionary.o ForthPrimitives.o ForthClibrary.o Forth.o
 OBJ_STANDALONE = main.o

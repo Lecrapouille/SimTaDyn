@@ -20,11 +20,13 @@
 
 ###################################################
 # Location of the project directory and Makefiles
+#
 P=../../../..
 M=$(P)/.makefile
 
 ###################################################
 # Project definition
+#
 TARGET = MyExcel
 DESCRIPTION = Simple spreadsheet solver
 BUILD_TYPE = debug
@@ -33,6 +35,7 @@ include $(P)/Makefile.common
 
 ###################################################
 # List of files to compile.
+#
 OBJ_UTILS      = Exception.o ILogger.o Logger.o File.o Path.o
 OBJ_MATHS      = Maths.o
 OBJ_CONTAINERS =
@@ -49,9 +52,11 @@ OBJS          += $(OBJ_EXTERNAL) $(OBJ_UTILS) $(OBJ_MATHS) $(OBJ_CONTAINERS) \
 # Set Libraries compiled in the external/ directory.
 # For knowing which libraries is needed please read
 # the doc/Install.md file.
+#
 THIRDPART_LIBS +=
 
 ###################################################
+# Compile the binary
 all: $(TARGET)
 
 ###################################################
