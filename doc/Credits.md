@@ -10,6 +10,15 @@ The project with the closest idea to my project but here used as rasterized map.
 * [Map Algebra](https://www.nrem.iastate.edu/files/w11-MapAlgebra_presentation5.pdf)
 The algebra used in rasterized maps.
 
+* [SimCity Game Engine](http://www.andrewwillmott.com/talks/inside-glassbox/GlassBox%20GDC%202012%20Slides.pdf)
+SimCity GlassBox Game Engine (pdf).
+
+* [SimCity Game Engine](http://www.andrewwillmott.com/talks/inside-glassbox)
+SimCity Insider's Look GlassBox Game Engine Introduction (videos).
+
+* [MultiAgentSimulation](https://github.com/federicodangelo/MultiAgentSimulation)
+Simple implementation of the technology behind SimCity 5 (GlassBox)
+
 ## Spreadsheet
 
 * https://github.com/rohitsinha54/Spreadsheet-Calculator
