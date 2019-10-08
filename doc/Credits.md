@@ -31,6 +31,10 @@ Explain how cells use the pattern observer for notifying other their value chang
 * https://github.com/tiluser/Creole-Forth-For-Excel
 A scripting language built on top of VBA for Excel based on the Forth language.
 
+## City Builders
+
+* [Urbanisme et jeux video : analyse et deconstruction des city builders](https://www.academia.edu/32989233/Urbanisme_et_jeux_vid%C3%A9o_analyse_et_d%C3%A9construction_des_city_builders)
+
 ## Forth
 
 * [pforth](https://github.com/philburk/pforth):
