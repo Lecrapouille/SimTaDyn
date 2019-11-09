@@ -19,9 +19,9 @@
 ## along with SimTaDyn.  If not, see <http://www.gnu.org/licenses/>.
 ##=====================================================================
 
-# This scripts allows to upload SimTaDyn to OpenSuse Build (OBS).
-# OBS is a compilation farm service, its allows to release binaries for
-# different kind of *nix architected.
+# This script allows to create a tarball of SimTaDyn for OpenSuse Build
+# (OBS) and upload it to OBS servers. OBS is a compilation farm service,
+# its allows to release binaries for different kind of *nix architectures.
 
 #set -x
 
@@ -30,17 +30,17 @@ function out-print
     echo -e "\033[35m*** $1:\033[00m \033[36m$2\033[00m => \033[33m$3\033[00m"
 }
 
-### Create a temporary dir for cloning the SimTaDyn project in the aim to:
-###   - to download to OBS a proper tarball
-###   - to modify files with no risk of wrong commit on github
+### Create a temporary folder holding the a git cloned version of SimTaDyn. The aim is to:
+###   - upload to OBS a proper tarball
+###   - avoid modifying/impacting files within the working space (possibly be a dirty work)
 out-print "Getting" "SimTaDyn" "/tmp/simtadyn-obs"
 rm -fr /tmp/simtadyn-obs 2> /dev/null
 mkdir -p /tmp/simtadyn-obs
-cd /tmp/simtadyn-obs
-git clone --recurse-submodules https://github.com/Lecrapouille/SimTaDyn.git --depth=1 > /dev/null 2> /dev/null
-cd SimTaDyn
+(cd /tmp/simtadyn-obs
+ git clone --recurse-submodules https://github.com/Lecrapouille/SimTaDyn.git --depth=1 > /dev/null 2> /dev/null
+)
 
-### Clone and compile external projects
+### Clone external projects
 make download-external-libs
 
 ### Replace the SimTaDyn version in the .spec file by the real one.
@@ -51,9 +51,8 @@ sed -i "$L" .integration/SimTaDyn.spec
 ### Create the tarball
 make targz
 
-### Upload the tarball in the OpenSUSE Build Service.
-### A password is requested. If needed, adapt these
-### lines of code to your own OBS account.
+### Upload the tarball in the OpenSUSE Build Service. A password is requested (not given here).
+### Note to developers: if needed, adapt theses lines of code to your own OBS account.
 out-print "Commiting" "SimTaDyn" "OpenSUSE Build Service"
 cd .. > /dev/null
 osc checkout home:Lecrapouille
