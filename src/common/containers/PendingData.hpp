@@ -22,7 +22,7 @@
 #  define PENDINGDATA_HPP
 
 #  include "Maths.hpp"
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 
 // ***************************************************************************
 //! \class PendingData PendingData.hpp

@@ -25,12 +25,12 @@
 //! Exceptions are derived from the project common ancestor SimTaDyn::Exception
 //! which is also derived from the POCO library execption.
 
-#  include "Exception.hpp"
+#  include "Exception/Exception.hpp"
 #  include "ForthHelper.hpp"
 
 //! This macro (from the library POCO) will declare a class
 //! ForthException derived from simtadyn::Exception.
-DECLARE_EXCEPTION(ForthException, Exception)
+DECLARE_EXCEPTION(ForthException, Exception);
 
 // **************************************************************
 //

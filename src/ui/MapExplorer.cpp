@@ -551,7 +551,7 @@ void SimTaDynMapExplorer::traverseSceneGraph(SceneNodePtr sceneNode, TreeIterato
 
   for (auto child: sceneNode->children())
     {
-      CPP_LOG(logger::Info) << "Child " << child->id() << "\n";
+      CPP_LOG(tool::log::Info) << "Child " << child->id() << "\n";
       traverseSceneGraph(child, root_child);
     }
 }

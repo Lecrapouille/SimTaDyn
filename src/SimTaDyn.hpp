@@ -21,7 +21,7 @@
 #ifndef SIMTADYN_CONTEXT_HPP
 #  define SIMTADYN_CONTEXT_HPP
 
-#  include "Path.hpp"
+#  include "MyLogger/Path.hpp"
 #  include "NonCopyable.hpp"
 #  include "MapEditorWindow.hpp"
 #  include "ForthEditorWindow.hpp"

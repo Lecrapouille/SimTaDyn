@@ -21,7 +21,7 @@
 #ifndef CLASSIC_GRAPH_HPP_
 #  define CLASSIC_GRAPH_HPP_
 
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  include "ClassCounter.tpp"
 #  include "GraphContainer.tpp"
 #  include <algorithm>

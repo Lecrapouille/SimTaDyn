@@ -22,7 +22,7 @@
 #ifndef OBSERVER_HPP_
 #  define OBSERVER_HPP_
 
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  include <vector>
 #  include <algorithm>
 #  include <string>

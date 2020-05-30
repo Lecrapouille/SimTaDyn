@@ -25,7 +25,7 @@
 #  include "NonCppStd.hpp"
 #  include "Singleton.tpp"
 #  include "ManagerException.hpp"
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  include <map>
 #  include <mutex>
 #  include <memory>
@@ -96,7 +96,7 @@ public:
         auto n = it.second.use_count() - 1;
         if (n > 0)
           {
-            CPP_LOG(logger::Warning)
+            CPP_LOG(tool::log::Warning)
               << "Destroying the ResourceManager but its resource #"
               << it.first << " is still used by " << n << " owners\n";
           }
@@ -156,7 +156,7 @@ public:
         size_t owners = it->second.use_count();
         if (owners > 1_z)
           {
-            CPP_LOG(logger::Warning)
+            CPP_LOG(tool::log::Warning)
               << "Trying to dispose of the resource #"
               << id << " currently used by " << (owners - 1)
               << " owners !" << (force ? "Force removing" : "Action ignored")
@@ -171,7 +171,7 @@ public:
       }
     else
       {
-        CPP_LOG(logger::Warning)
+        CPP_LOG(tool::log::Warning)
           << "Failed to release resource '" << id
           << "' not currently stored in ResourceManager\n";
         return false;
@@ -269,7 +269,7 @@ public:
       }
     else
       {
-        CPP_LOG(logger::Warning) << "Failed renaming '" << oldKey << "'. This resource does not exist\n";
+        CPP_LOG(tool::log::Warning) << "Failed renaming '" << oldKey << "'. This resource does not exist\n";
         if (resource::Strategy::ThrowException == strategy)
           {
             throw ResourceManagerException("Failed to rename an none existing resource");
@@ -323,7 +323,7 @@ private:
       }
     else
       {
-        CPP_LOG(logger::Info)
+        CPP_LOG(tool::log::Info)
           << "The resource '" << id << "' is already stored in ResourceManager\n";
 
         switch (strategy)

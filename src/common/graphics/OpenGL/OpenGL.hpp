@@ -25,16 +25,16 @@
 //! \file OpenGL.hpp OpenGL routines.
 // *****************************************************************************
 
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  include "GLEnum.hpp"
 #  include "NonCopyable.hpp"
 #  include "NonCppStd.hpp"
-#  include "Exception.hpp"
+#  include "Exception/Exception.hpp"
 
 // ***********************************************************************************************
 //! \brief This macro will declare a class OpenGLException derived from Exception.
 // ***********************************************************************************************
-DECLARE_EXCEPTION(OpenGLException, Exception)
+DECLARE_EXCEPTION(OpenGLException, Exception);
 
 namespace opengl
 {

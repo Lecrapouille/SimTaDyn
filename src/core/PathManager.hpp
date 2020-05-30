@@ -21,7 +21,7 @@
 #ifndef PATHMANAGER_HPP
 #  define PATHMANAGER_HPP
 
-#  include "Path.hpp"
+#  include "MyLogger/Path.hpp"
 
 // **************************************************************
 //! \brief PathManager wraps the class Path and acts like a singleton.

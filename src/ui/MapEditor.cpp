@@ -19,7 +19,7 @@
 //=====================================================================
 
 #include "MapEditor.hpp"
-#include "Config.hpp"
+#include "config.hpp"
 #include "SimTaDynLoaders.hpp"
 
 MapEditor::MapEditor(ExceptionDialog& popup_exception, SimForth& forth)

@@ -23,7 +23,7 @@
 #  define ILOADER_HPP_
 
 #  include "ManagerException.hpp"
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  include <memory>
 #  include <map>
 #  include <vector>

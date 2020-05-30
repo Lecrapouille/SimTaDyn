@@ -55,7 +55,7 @@ void checkError(const char* filename, const uint32_t line, const char* expressio
       // Do not use directly LOG macros because it will catch this
       // filename and its line instead of the faulty file/line which
       // produced the OpenGL error.
-      Logger::instance().log(&std::cerr, logger::Error,
+      tool::log::Logger::instance().log(&std::cerr, tool::log::Error,
                              "[%s::%d] Failed executing '%s'. Reason is '%s'\n",
                              filename, line, expression, error);
     }

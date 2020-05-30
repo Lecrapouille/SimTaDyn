@@ -203,7 +203,7 @@ void Forth::execToken(const Cell16 tx)
 
   if (m_trace) {
     LOGI("Execute Forth token %u", tx);
-    CPP_LOG(logger::Debug)
+    CPP_LOG(tool::log::Debug)
       << "================ Initial Stack ==================\n"
       << "DStack: " << ForthStackDiplayer(this, forth::DataStack)
       << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack)
@@ -227,7 +227,7 @@ void Forth::execToken(const Cell16 tx)
             } */
 
           if (m_trace) {
-            CPP_LOG(logger::Debug)
+            CPP_LOG(tool::log::Debug)
               << "Token " << m_dictionary.displayToken(token)
               << " is not a primitive " << "\n\n";//<< std::endl;
           }
@@ -236,7 +236,7 @@ void Forth::execToken(const Cell16 tx)
           Cell32 c = m_ip;
           RPUSH(c);
           if (m_trace) {
-            CPP_LOG(logger::Debug)
+            CPP_LOG(tool::log::Debug)
               << "PUSH "
               << m_dictionary.displayToken(m_ip)
               << "\n";//<< std::endl;
@@ -246,7 +246,7 @@ void Forth::execToken(const Cell16 tx)
           m_ip += 2U;
           token = m_dictionary.read16at(m_ip);
           if (m_trace) {
-            CPP_LOG(logger::Debug)
+            CPP_LOG(tool::log::Debug)
               << "Next token is "
               << m_dictionary.displayToken(token)
               << "\n\n";//<< std::endl << std::endl;
@@ -255,7 +255,7 @@ void Forth::execToken(const Cell16 tx)
 
       //
       if (m_trace) {
-        CPP_LOG(logger::Debug)
+        CPP_LOG(tool::log::Debug)
           << "Token " << m_dictionary.displayToken(token)
           <<" is a primitive. Consum it" << "\n";//<< std::endl;
       }
@@ -263,7 +263,7 @@ void Forth::execToken(const Cell16 tx)
 
       if (m_trace) {
         DPUSH(m_tos);
-        CPP_LOG(logger::Debug)
+        CPP_LOG(tool::log::Debug)
           << "DStack: " << ForthStackDiplayer(this, forth::DataStack)
           << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack)
           << "\n";//<< std::endl;
@@ -281,7 +281,7 @@ void Forth::execToken(const Cell16 tx)
           m_ip += 2U;
           token = m_dictionary.read16at(m_ip);
           if (m_trace) {
-            CPP_LOG(logger::Debug)
+            CPP_LOG(tool::log::Debug)
               << "Next token is "
               << m_dictionary.displayToken(token)
               << "\n";//<< std::endl;
@@ -291,7 +291,7 @@ void Forth::execToken(const Cell16 tx)
       // Return stack under/overflow ?
       depth = isStackUnderOverFlow(forth::ReturnStack);
       if (m_trace) {
-        CPP_LOG(logger::Debug) << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack);
+        CPP_LOG(tool::log::Debug) << "RStack: " << ForthStackDiplayer(this, forth::ReturnStack);
       }
     } while (depth > 0);
 
@@ -299,7 +299,7 @@ void Forth::execToken(const Cell16 tx)
   DPUSH(m_tos);
 
   if (m_trace) {
-    CPP_LOG(logger::Debug)
+    CPP_LOG(tool::log::Debug)
       << "================ Etat final ====================\n\n";
   }
 }
@@ -444,7 +444,7 @@ void Forth::interpreteWordCaseInterprete(std::string const& word)
   if (m_dictionary.find(word, token, immediate))
     {
       if (m_trace) {
-        CPP_LOG(logger::Debug)
+        CPP_LOG(tool::log::Debug)
           <<"\nExecute word '"
           << word << "'" << "\n"; //<< std::endl;
       }
@@ -453,7 +453,7 @@ void Forth::interpreteWordCaseInterprete(std::string const& word)
   else if (toNumber(word, number))
     {
       if (m_trace) {
-        CPP_LOG(logger::Debug)
+        CPP_LOG(tool::log::Debug)
           << "PUSH number " << word
           << "\n"; // << std::endl;
       }
@@ -480,7 +480,7 @@ void Forth::interpreteWordCaseCompile(std::string const& word)
       if (immediate)
         {
           if (m_trace) {
-            CPP_LOG(logger::Debug)
+            CPP_LOG(tool::log::Debug)
               << "\n" //<< std::endl
               << "Execute immediate word '"
               << word << "'" << "\n"; //<< std::endl;
@@ -490,7 +490,7 @@ void Forth::interpreteWordCaseCompile(std::string const& word)
       else
         {
           if (m_trace) {
-            CPP_LOG(logger::Debug)
+            CPP_LOG(tool::log::Debug)
               << "Append new word '" << word
               << "' in dictionary" << "\n"; //<< std::endl;
           }
@@ -500,7 +500,7 @@ void Forth::interpreteWordCaseCompile(std::string const& word)
   else if (toNumber(word, number))
     {
       if (m_trace) {
-        CPP_LOG(logger::Debug)
+        CPP_LOG(tool::log::Debug)
           << "Append literal " << number
           << "' in dictionary" << "\n"; //<< std::endl;
       }

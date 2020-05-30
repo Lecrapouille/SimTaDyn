@@ -21,10 +21,22 @@
 #ifndef CLASSIC_GRAPH_HPP_
 #  define CLASSIC_GRAPH_HPP_
 
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  include "ClassCounter.tpp"
 #  include "GraphContainer.tpp"
 #  include <algorithm>
+
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-const-variable"
+
+namespace config
+{
+  //! \brief Number of elements by pool in containers
+  //! used for storing nodes and arcs in a graph
+  static const uint32_t graph_container_nb_elements(8U);
+}
+
+#  pragma GCC diagnostic pop
 
 namespace graphtheory
 {

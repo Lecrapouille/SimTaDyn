@@ -117,9 +117,7 @@ install: $(TARGET)
 veryclean: clean
 	@rm -fr cov-int $(TARGET).tgz *.log foo 2> /dev/null
 	@cd tests && make -s clean; cd - > /dev/null
-	@cd src/common/graphics/OpenGL/examples/ && $(MAKE) -s clean; cd - > /dev/null
-	@cd src/forth/standalone && v -s clean; cd - > /dev/null
-	@cd src/core/standalone/ClassicSpreadSheet && $(MAKE) -s clean; cd - > /dev/null
+	@cd $(THIRDPART) && rm -fr SimForth backward-cpp zipper SOIL CmdParser 2> /dev/null
 	@$(call print-simple,"Cleaning","$(PWD)/doc/html")
 	@cd doc/ && rm -fr html
 

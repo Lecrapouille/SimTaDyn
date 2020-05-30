@@ -21,21 +21,21 @@
 #ifndef MANAGER_EXCEPTION_HPP_
 #  define MANAGER_EXCEPTION_HPP_
 
-#  include "Exception.hpp"
+#  include "Exception/Exception.hpp"
 
 // ***********************************************************************************************
 //! \brief This macro will declare a class LoaderException derived from Exception.
 // ***********************************************************************************************
-DECLARE_EXCEPTION(LoaderException, Exception)
+DECLARE_EXCEPTION(LoaderException, Exception);
 
 // ***********************************************************************************************
 //! \brief This macro will declare a class ResourceManagerException derived from Exception.
 // ***********************************************************************************************
-DECLARE_EXCEPTION(ResourceManagerException, Exception)
+DECLARE_EXCEPTION(ResourceManagerException, Exception);
 
 // ***********************************************************************************************
 //! \brief This macro will declare a class LoaderManagerException derived from Exception.
 // ***********************************************************************************************
-DECLARE_EXCEPTION(LoaderManagerException, Exception)
+DECLARE_EXCEPTION(LoaderManagerException, Exception);
 
 #endif // MANAGER_EXCEPTION_HPP_

@@ -19,11 +19,11 @@
 //=====================================================================
 
 #include "SimTaDynFileLoader.hpp"
-#include "File.hpp"
+#include "MyLogger/File.hpp"
 #include "SimTaDynForth.hpp"
 #include "zipper/unzipper.h"
 #include "zipper/zipper.h"
-#include "Config.hpp"
+#include "config.hpp"
 #include <cstdio>
 
 // FIXME password

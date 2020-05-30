@@ -23,14 +23,14 @@
 // ***********************************************************************************************
 //! This macro will generate code for members.
 // ***********************************************************************************************
-IMPLEMENT_EXCEPTION(LoaderException, Exception, "File Loader Exception")
+IMPLEMENT_EXCEPTION(LoaderException, Exception, "File Loader Exception");
 
 // ***********************************************************************************************
 //! This macro will generate code for members.
 // ***********************************************************************************************
-IMPLEMENT_EXCEPTION(ResourceManagerException, Exception, "Resource Manager Exception")
+IMPLEMENT_EXCEPTION(ResourceManagerException, Exception, "Resource Manager Exception");
 
 // ***********************************************************************************************
 //! This macro will generate code for members.
 // ***********************************************************************************************
-IMPLEMENT_EXCEPTION(LoaderManagerException, Exception, "Loader Manager Exception")
+IMPLEMENT_EXCEPTION(LoaderManagerException, Exception, "Loader Manager Exception");

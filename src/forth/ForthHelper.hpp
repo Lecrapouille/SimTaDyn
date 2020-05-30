@@ -21,8 +21,8 @@
 #ifndef FORTH_HELPER_HPP_
 #  define FORTH_HELPER_HPP_
 
-#  include "Logger.hpp"
-#  include "TerminalColor.hpp"
+#  include "MyLogger/Logger.hpp"
+#  include "TerminalColor/TerminalColor.hpp"
 #  include <cstdint>
 #  include <iomanip>
 

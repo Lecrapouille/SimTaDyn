@@ -19,7 +19,7 @@
 //=====================================================================
 
 #include "Forth.hpp"
-#include "Config.hpp"
+#include "config.hpp"
 #include <unistd.h>
 #include <memory>
 

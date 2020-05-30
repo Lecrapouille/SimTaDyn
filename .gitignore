@@ -52,20 +52,22 @@
 *.deb
 
 # SimTaDyn specifics
-build/*
 cov-int
+build/*
 tests/build/*
-src/common/graphics/OpenGL/examples/build/*
-src/core/standalone/ClassicSpreadSheet/build/*
-src/forth/standalone/build/*
 external/zipper
 external/SOIL
 external/CmdParser
 external/backward-cpp
 external/imgui
+external/SimForth
+external/Exception
+external/MyLogger
+external/OpenGLCppWrapper
+external/TerminalColor
+external/.downloaded
 doc/html/*
 doc/coverage/*
-src/common/graphics/OpenGL/examples/textures
 foo
 _*
 

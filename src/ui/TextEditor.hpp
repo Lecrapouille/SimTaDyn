@@ -22,7 +22,7 @@
 #  define TEXTEDITOR_HPP
 
 //#  include "Names.hpp"
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wunused-const-variable"
 #  pragma GCC diagnostic ignored "-Wdeprecated"

@@ -22,7 +22,7 @@
 #  define CONFIG_HPP_
 
 #  include "Singleton.tpp"
-#  include "Path.hpp"
+#  include "MyLogger/Path.hpp"
 #  include "File.hpp"
 #  include "version.h"
 

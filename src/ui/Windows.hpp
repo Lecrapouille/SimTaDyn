@@ -22,8 +22,8 @@
 #  define WINDOWS_HPP
 
 #  include "Dialogs.hpp"
-#  include "Config.hpp"
-#  include "Logger.hpp"
+#  include "config.hpp"
+#  include "MyLogger/Logger.hpp"
 
 // *************************************************************************************************
 //! \brief Facade class for creating windows with the same look

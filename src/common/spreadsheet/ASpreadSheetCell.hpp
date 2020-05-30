@@ -21,7 +21,7 @@
 #ifndef ASPREADSHEETCELL_HPP_
 #  define ASPREADSHEETCELL_HPP_
 
-#  include "Logger.hpp"
+#  include "MyLogger/Logger.hpp"
 #  include "SimTaDynForth.hpp"
 #  include "ClassCounter.tpp"
 #  include <vector>

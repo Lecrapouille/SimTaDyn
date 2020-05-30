@@ -35,9 +35,7 @@ include $(M)/Makefile.header
 DEFINES += -DCHECK_OPENGL
 # Disable ugly gtkmm compilation warnings
 DEFINES += -DGTK_SOURCE_H_INSIDE -DGTK_SOURCE_COMPILATION
-# SimTaDyn defines
-DEFINES += -DPROJECT_TEMP_DIR=\"/tmp/$(TARGET)/\"
-DEFINES += -DPROJECT_DATA_PATH=\"$(PWD)/data:$(PROJECT_DATA_PATH)\"
+DEFINES += -Wno-float-equal -Wno-pedantic -Wno-sign-conversion -Wno-switch-enum -Wno-conversion -Wno-old-style-cast -Wno-cast-qual
 
 ###################################################
 # Set Libraries. For knowing which libraries
@@ -61,7 +59,11 @@ endif
 #
 INCLUDES += -I$(THIRDPART) -I$(THIRDPART)/backward-cpp		\
 -I$(THIRDPART)/imgui -I$(THIRDPART)/SOIL -I$(THIRDPART)/YesEngine	\
--I$(THIRDPART)/zipper -I$(P)/src/common/spreadsheet			\
+-I$(THIRDPART)/zipper \
+-I$(THIRDPART)/SimForth/include -I$(THIRDPART)/SimForth/src \
+-I$(THIRDPART)/MyLogger/include -I$(THIRDPART)/MyLogger/src \
+-I$(THIRDPART)/Exception \
+-I$(P)/src/common/spreadsheet			\
 -I$(P)/src/common/patterns -I$(P)/src/common/managers			\
 -I$(P)/src/common/utils -I$(P)/src/common/maths				\
 -I$(P)/src/common/containers -I$(P)/src/common/graph-theory		\
@@ -73,23 +75,25 @@ INCLUDES += -I$(THIRDPART) -I$(THIRDPART)/backward-cpp		\
 ###################################################
 # Inform Makefile where to find *.cpp and *.o files
 #
-VPATH += $(THIRDPART):\
-$(THIRDPART)/backward-cpp:\
-$(THIRDPART)/YesEngine:\
-$(THIRDPART)/imgui:\
-$(THIRDPART)/SOIL:\
-$(P)/src/common/spreadsheet:\
-$(P)/src/common/patterns:\
-$(P)/src/common/managers:\
-$(P)/src/common/utils:\
-$(P)/src/common/maths:\
-$(P)/src/common/containers:\
-$(P)/src/common/graph-theory:\
-$(P)/src/common/graphics:\
-$(P)/src/common/graphics/OpenGL:\
-$(P)/src/common/graphics/RTree:\
-$(P)/src/core:\
-$(P)/src/core/loaders:\
-$(P)/src/forth:\
-$(P)/src/ui:\
+VPATH += $(THIRDPART) \
+$(THIRDPART)/backward-cpp \
+$(THIRDPART)/YesEngine \
+$(THIRDPART)/imgui \
+$(THIRDPART)/SOIL \
+$(THIRDPART)/MyLogger/src \
+$(THIRDPART)/Exception \
+$(P)/src/common/spreadsheet \
+$(P)/src/common/patterns \
+$(P)/src/common/managers \
+$(P)/src/common/utils \
+$(P)/src/common/maths \
+$(P)/src/common/containers \
+$(P)/src/common/graph-theory \
+$(P)/src/common/graphics \
+$(P)/src/common/graphics/OpenGL \
+$(P)/src/common/graphics/RTree \
+$(P)/src/core \
+$(P)/src/core/loaders \
+$(P)/src/forth \
+$(P)/src/ui \
 $(P)/src

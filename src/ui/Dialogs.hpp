@@ -22,9 +22,9 @@
 #  define DIALOGS_HPP
 
 #  include "Gtkmm.tpp"
-#  include "Logger.hpp"
-#  include "Exception.hpp"
-#  include "Config.hpp"
+#  include "MyLogger/Logger.hpp"
+#  include "Exception/Exception.hpp"
+#  include "config.hpp"
 #  include "PathManager.hpp"
 
 // **************************************************************
@@ -43,7 +43,7 @@ public:
     set_license_type(Gtk::LICENSE_GPL_3_0);
     set_wrap_license(false);
     set_website("https://github.com/Lecrapouille/SimTaDyn");
-    set_website_label("Visit " + config::project_name + " github site");
+    set_website_label(std::string("Visit ") + std::string(config::project_name) + std::string(" github site"));
     set_authors({"Quentin Quadrat <lecrapouille@gmail.com>"});
 
     try
