@@ -33,7 +33,7 @@
 #   include <OpenGL/glu.h>
 #else
 #   include <GL/glut.h> /* pour les autres systemes */
-#   include "mysql/mysql.h"
+#   include <mysql.h>
 #   include <GL/gl.h>
 #   include <GL/glu.h>
 #endif
